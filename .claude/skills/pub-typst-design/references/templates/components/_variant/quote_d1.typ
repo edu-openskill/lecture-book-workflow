@@ -3,8 +3,8 @@
 #show quote.where(block: true): it => {
   block(
     width: 100%,
-    above: quote-margin,
-    below: quote-margin,
+    above: quote-margin-top,
+    below: quote-margin-bottom,
     inset: (left: quote-inset-x, right: quote-inset-x, top: quote-inset-y, bottom: quote-inset-y),
     stroke: (left: quote-stroke-width + color-quote-border),
     fill: color-quote-bg,
@@ -20,8 +20,8 @@
 #let callout-box(label, body) = {
   block(
     width: 100%,
-    above: quote-margin,
-    below: quote-margin,
+    above: quote-margin-top,
+    below: quote-margin-bottom,
     inset: (left: quote-inset-x, right: quote-inset-x, top: quote-inset-y, bottom: quote-inset-y),
     stroke: (left: quote-stroke-width + color-quote-border),
     fill: color-quote-bg,

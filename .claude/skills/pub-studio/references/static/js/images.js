@@ -27,7 +27,7 @@ export function renderImageList() {
     const width = Math.round((img.override_width ?? img.default_width) * 100);
     const escapedPath = img.path.replace(/'/g, "\\'");
     return `<div class="img-individual-item${hasOverride ? ' overridden' : ''}">
-      <div class="img-thumb" title="${img.category}">${img.category.charAt(0).toUpperCase()}</div>
+      <div class="img-thumb" title="${img.category}"></div>
       <div class="img-info">
         <span class="img-name" title="${img.path}">${img.figure_label || img.rel_path.split('/').slice(-3).join('/')}</span>
         <span class="img-cat">${img.category} / ${img.default_style}</span>

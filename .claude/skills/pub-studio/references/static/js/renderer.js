@@ -168,8 +168,9 @@ export function render() {
   r.setProperty('--code-font', state.fonts.code);
   r.setProperty('--body-size', state.typo.size + 'pt');
   r.setProperty('--body-tracking', state.typo.tracking + 'pt');
-  r.setProperty('--body-leading', state.typo.leading);
-  r.setProperty('--paragraph-gap', state.typo.paragraphGap + 'px');
+  // CSS line-height = font-size + leading (Typst leading은 줄 사이 간격)
+  r.setProperty('--body-leading', (state.typo.size + state.typo.leading) + 'pt');
+  r.setProperty('--paragraph-gap', state.typo.paragraphGap + 'pt');
   r.setProperty('--page-margin-top', state.margins.top + 'mm');
   r.setProperty('--page-margin-bottom', state.margins.bottom + 'mm');
   r.setProperty('--page-margin-left', state.margins.left + 'mm');

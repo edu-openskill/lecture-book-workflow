@@ -935,6 +935,8 @@ class PreviewServer:
             presets[preset_id]["description"] = data["description"].strip()
         if "components" in data:
             presets[preset_id]["components"] = data["components"]
+        if "overrides" in data:
+            presets[preset_id]["overrides"] = data["overrides"]
 
         self._save_presets(presets)
         return {"ok": True, "id": preset_id}

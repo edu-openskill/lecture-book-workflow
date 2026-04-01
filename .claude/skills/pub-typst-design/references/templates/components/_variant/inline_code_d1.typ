@@ -5,6 +5,6 @@
     fill: inline-code-fill,
     inset: (x: 4pt, y: 2pt),
     radius: inline-code-radius,
-    text(size: inline-code-size, fill: inline-code-text-color, font: ("D2Coding", "RIDIBatang"))[#it]
+    text(fill: inline-code-text-color, font: ("D2Coding", "RIDIBatang"))[#it]
   )
 }

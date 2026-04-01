@@ -4,6 +4,8 @@
 
 // 행간: 줄과 줄 사이 간격
 #let body-leading = 1.0em
+// 문단 간격: 문단과 문단 사이 간격 (heading/code/table에는 영향 없음)
+#let paragraph-gap = 0pt
 // 자간: 글자와 글자 사이 간격 (0pt = 기본)
 #let body-tracking = 0pt
 // 제목-문단 간격: 제목 아래 본문까지의 여백
@@ -13,6 +15,9 @@
 #let code-inset-y = 14pt
 // 코드 블록: 구분선 두께
 #let code-rule-stroke = 1pt
+// 코드 블록: 위아래 여백 — componentStyles 오버라이드 대상
+#let code-margin-top = 8pt
+#let code-margin-bottom = 8pt
 
 // 제목 크기 — 에디터 오버라이드 대상
 #let h1-size = 26pt
@@ -73,6 +78,7 @@
 #let inline-code-fill = rgb("#f3f4f6")
 #let inline-code-radius = 3pt
 #let inline-code-text-color = color-code-text
+#let inline-code-weight = "bold"
 
 // 인용 스타일 변수
 #let quote-text-color = rgb("#4b5563")
@@ -81,6 +87,8 @@
 #let quote-inset-y = 10pt
 #let quote-radius = 4pt
 #let quote-margin = 10pt
+#let quote-margin-top = 10pt
+#let quote-margin-bottom = 10pt
 
 // 표 스타일 변수
 #let table-stroke-width = 0.5pt

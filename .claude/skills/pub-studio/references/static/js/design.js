@@ -440,9 +440,19 @@ export function applyPresetFromJSON(id) {
   state.preset = 'custom';
   state.components = { ...p.components };
   state.componentStyles = {};
+  const ov = p.overrides || {};
   syncToggleUI();
   import('./variants.js').then(m => {
+    // 1. variant _globals 먼저 적용 (기본값)
     m.applyAllGlobals();
+    // 2. preset overrides를 그 위에 적용 (우선순위 높음)
+    if (ov.typo) Object.assign(state.typo, ov.typo);
+    if (ov.typoSizes) Object.assign(state.typoSizes, ov.typoSizes);
+    if (ov.margins) Object.assign(state.margins, ov.margins);
+    if (ov.page) Object.assign(state.page, ov.page);
+    if (ov.componentStyles) state.componentStyles = JSON.parse(JSON.stringify(ov.componentStyles));
+    if (ov.tocDepth != null) state.tocDepth = ov.tocDepth;
+    if (ov.tocSpacing != null) state.tocSpacing = ov.tocSpacing;
     syncTypoSizesUI();
     m.renderAllPropertyEditors();
     render();
@@ -476,10 +486,21 @@ export async function updatePresetValues(id) {
   if (!p) return;
   if (!confirm('프리셋 ' + id + '번 \'' + (p.name || '') + '\'을 현재 설정으로 덮어쓰시겠습니까?')) return;
   try {
+    const overrides = {
+      page: { ...state.page },
+      margins: { ...state.margins },
+      typo: { ...state.typo },
+      typoSizes: { ...state.typoSizes },
+      tocDepth: state.tocDepth,
+      tocSpacing: state.tocSpacing,
+    };
+    if (Object.keys(state.componentStyles).length > 0) {
+      overrides.componentStyles = JSON.parse(JSON.stringify(state.componentStyles));
+    }
     const resp = await fetch('/api/presets/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, components: { ...state.components } }),
+      body: JSON.stringify({ id, components: { ...state.components }, overrides }),
     });
     const data = await resp.json();
     if (data.ok) { showToast('프리셋 ' + id + '번 설정 업데이트 완료'); fetchPresets(); }

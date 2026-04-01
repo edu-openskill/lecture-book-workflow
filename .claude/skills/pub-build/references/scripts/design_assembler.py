@@ -39,6 +39,11 @@ ASSEMBLY_ORDER = [
 VARIANT_KEYS = ["body", "chapter_opening", "heading", "code", "inline_code", "quote", "table", "toc"]
 
 OVERRIDE_MARKER = "// ──OVERRIDES──"
+
+# _shared 파일 → componentStyles 키 매핑 (변형 파일처럼 오버라이드 주입)
+SHARED_STYLE_MAP = {
+    "80-misc.typ": "figure",
+}
 PRE_TOC_MARKER = "// ── PRE_TOC_CONTENT ──"
 
 # variants.json 위치 (커스텀 변형 저장소)
@@ -76,15 +81,22 @@ COMPONENT_STYLE_MAP = {
     "code": {
         "background": "code-fill",
         "borderRadius": "code-radius",
+        "code_marginTop": "code-margin-top",
+        "code_marginBottom": "code-margin-bottom",
+        "code_paddingX": "code-inset-x",
+        "code_paddingY": "code-inset-y",
     },
     "inline_code": {
         "color": "inline-code-text-color",
+        "fontWeight": "inline-code-weight",
         "background": "inline-code-fill",
         "borderRadius": "inline-code-radius",
     },
     "quote": {
         "color": "quote-text-color",
         "background": "color-quote-bg",
+        "quote_marginTop": "quote-margin-top",
+        "quote_marginBottom": "quote-margin-bottom",
     },
     "table": {
         "th_color": "table-header-text-color",
@@ -92,6 +104,11 @@ COMPONENT_STYLE_MAP = {
         "oddTd_background": "table-odd-fill",
         "table_marginTop": "table-margin-top",
         "table_marginBottom": "table-margin-bottom",
+    },
+    "figure": {
+        "figure_marginTop": "figure-margin-top",
+        "figure_marginBottom": "figure-margin-bottom",
+        "figure_captionSize": "figure-caption-size",
     },
 }
 
@@ -273,19 +290,21 @@ def generate_overrides(design_state: dict) -> tuple[str, str, str]:
     # 타이포그래피 변수 (#let)
     typo = design_state.get("typo", {})
     if typo.get("leading") is not None:
-        var_lines.append(f'#let body-leading = {typo["leading"]}em')
+        var_lines.append(f'#let body-leading = {typo["leading"]}pt')
     if typo.get("tracking") is not None:
         var_lines.append(f'#let body-tracking = {typo["tracking"]}pt')
+    if typo.get("paragraphGap") is not None:
+        var_lines.append(f'#let paragraph-gap = {typo["paragraphGap"]}pt')
 
     # 본문 타이포 오버라이드 (Slot 2.5: body 직후 → 항상 우선)
     if typo.get("size"):
         size_lines.append(f'#set text(size: {typo["size"]}pt)')
     if typo.get("leading") is not None:
-        size_lines.append(f'#set par(leading: {typo["leading"]}em)')
+        size_lines.append(f'#set par(leading: {typo["leading"]}pt)')
     if typo.get("tracking") is not None:
         size_lines.append(f'#set text(tracking: {typo["tracking"]}pt)')
-    if typo.get("paragraphGap") is not None:
-        size_lines.append(f'#set par(spacing: {typo["paragraphGap"]}pt)')
+    # paragraphGap은 변수로 처리 (show par: set block(below:)에서 사용)
+    # #set par(spacing:)는 사용하지 않음 — 모든 블록에 영향을 주기 때문
 
     # 개별 요소 크기 (Slot 2.5: body 직후, heading/code 직전)
     typo_sizes = design_state.get("typoSizes", {})
@@ -416,12 +435,13 @@ def assemble_book_base(selection: dict[str, str],
                 )
 
         # 변형 파일에 componentStyles 오버라이드 주입 (마커 기반)
-        if key and component_styles.get(key):
-            comp_override = generate_component_override(key, component_styles[key])
+        style_key = key or SHARED_STYLE_MAP.get(filename)
+        if style_key and component_styles.get(style_key):
+            comp_override = generate_component_override(style_key, component_styles[style_key])
             if comp_override:
                 file_content = _inject_at_marker(
                     file_content,
-                    f"// ── componentStyles: {key} ──\n{comp_override}",
+                    f"// ── componentStyles: {style_key} ──\n{comp_override}",
                 )
 
         parts.append(file_content)

@@ -2,6 +2,8 @@
 // ──OVERRIDES──
 #show raw.where(block: true): it => {
   set text(size: code-size, weight: "bold", font: ("D2Coding", "RIDIBatang"))
+  let mt = if code-margin-top < 4pt { 4pt } else { code-margin-top }
+  let mb = if code-margin-bottom < 4pt { 4pt } else { code-margin-bottom }
   block(
     width: 100%,
     fill: code-fill,
@@ -9,8 +11,8 @@
     radius: code-radius,
     stroke: code-stroke-width + code-stroke-color,
     breakable: true,
-    above: 8pt,
-    below: 8pt,
+    above: mt,
+    below: mb,
     text(fill: color-text)[#it]
   )
 }

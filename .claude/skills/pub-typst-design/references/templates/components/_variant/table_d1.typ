@@ -10,7 +10,5 @@
 
 #show table: it => {
   set text(size: table-size)
-  v(table-margin-top)
-  block(breakable: true)[#it]
-  v(table-margin-bottom)
+  block(above: table-margin-top, below: table-margin-bottom, breakable: true)[#it]
 }

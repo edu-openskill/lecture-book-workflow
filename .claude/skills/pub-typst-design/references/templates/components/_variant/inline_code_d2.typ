@@ -4,5 +4,5 @@
 #let inline-code-text-color = rgb("#1e3a5f")
 // ──OVERRIDES──
 #show raw.where(block: false): it => {
-  text(size: inline-code-size, weight: "bold", fill: inline-code-text-color, font: ("D2Coding", "RIDIBatang"))[#it]
+  text(weight: inline-code-weight, fill: inline-code-text-color, font: ("D2Coding", "RIDIBatang"))[#it]
 }

@@ -1,7 +1,7 @@
-// ── 인용 블록: Design 2 (점선 박스) ──
+// ── 인용 블록: Design 3 (콜아웃 박스 — 회색 배경, 라벨 강조) ──
 #let quote-text-color = rgb("#333333")
-#let quote-stroke-width = 1pt
-#let quote-radius = 0pt
+#let quote-stroke-width = 0pt
+#let quote-radius = 4pt
 // ──OVERRIDES──
 #show quote.where(block: true): it => {
   block(
@@ -9,12 +9,9 @@
     above: quote-margin-top,
     below: quote-margin-bottom,
     inset: (x: quote-inset-x, y: quote-inset-y),
-    stroke: (
-      dash: "dashed",
-      paint: rgb("#aaaaaa"),
-      thickness: quote-stroke-width,
-    ),
+    fill: rgb("#f5f5f5"),
     radius: quote-radius,
+    stroke: none,
     {
       set par(justify: true, leading: 0.9em)
       text(size: quote-size, fill: quote-text-color)[#it.body]
@@ -22,7 +19,7 @@
   )
 }
 
-// ── callout-box (회색 박스 + 프라이머리 라벨) ──
+// ── callout-box (동일 스타일 + 프라이머리 라벨) ──
 #let callout-box(label, body) = {
   block(
     width: 100%,
@@ -30,7 +27,7 @@
     below: quote-margin-bottom,
     inset: (x: quote-inset-x, y: quote-inset-y),
     fill: rgb("#f5f5f5"),
-    radius: 4pt,
+    radius: quote-radius,
     stroke: none,
     {
       set par(justify: true, leading: 0.9em)

@@ -16,7 +16,5 @@
 #show table: it => {
   set text(size: table-size)
   set par(justify: false)
-  v(table-margin-top)
-  align(left, block(breakable: true)[#it])
-  v(table-margin-bottom)
+  align(left, block(above: table-margin-top, below: table-margin-bottom, breakable: true)[#it])
 }

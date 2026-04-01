@@ -86,7 +86,8 @@ export const BUILTIN_VARIANTS = {
       name: '카드',
       fontWeight: '700', color: 'var(--color-text)', background: 'white',
       padding: '14px 16px', borderRadius: '8px', border: '1px solid #d1d5db',
-      whiteSpace: 'pre', overflowX: 'auto', margin: '8px 0',
+      whiteSpace: 'pre', overflowX: 'auto',
+      code_marginTop: '8px', code_marginBottom: '8px',
       _globals: { 'typoSizes.code': 8 },
     },
     d2: {
@@ -94,7 +95,8 @@ export const BUILTIN_VARIANTS = {
       fontWeight: '700', color: 'var(--color-text)', background: 'white',
       padding: '6px 16px', borderRadius: '0', border: 'none',
       borderTop: '2px solid #999', borderBottom: '2px solid #999',
-      whiteSpace: 'pre', overflowX: 'auto', margin: '8px 0',
+      whiteSpace: 'pre', overflowX: 'auto',
+      code_marginTop: '8px', code_marginBottom: '8px',
       _globals: { 'typoSizes.code': 6 },
     },
   },
@@ -102,14 +104,12 @@ export const BUILTIN_VARIANTS = {
     d1: {
       name: '배경',
       color: 'var(--color-code-text)', background: '#f3f4f6',
-      padding: '2px 4px', borderRadius: '3px',
-      _globals: { 'typoSizes.inlineCode': 8.5 },
+      padding: '2px 4px', borderRadius: '3px', fontSize: 'inherit',
     },
     d2: {
       name: '굵게',
       fontWeight: '700', color: '#1e3a5f', background: 'none',
-      padding: '0', borderRadius: '0',
-      _globals: { 'typoSizes.inlineCode': 8 },
+      padding: '0', borderRadius: '0', fontSize: 'inherit',
     },
   },
   quote: {
@@ -125,6 +125,13 @@ export const BUILTIN_VARIANTS = {
       color: '#333', background: 'none',
       border: '1px dashed #aaa', borderRadius: '0',
       borderLeft: '1px dashed #aaa',
+      padding: '10px 14px', margin: '10px 0', lineHeight: '1.5',
+      _globals: { 'typoSizes.quote': 9 },
+    },
+    d3: {
+      name: '콜아웃',
+      color: '#333', background: '#f5f5f5',
+      border: 'none', borderLeft: 'none', borderRadius: '4px',
       padding: '10px 14px', margin: '10px 0', lineHeight: '1.5',
       _globals: { 'typoSizes.quote': 9 },
     },
@@ -152,18 +159,16 @@ export const BUILTIN_VARIANTS = {
   body: {
     d1: {
       name: '양쪽 정렬',
-      p_textIndent: '0', p_textAlign: 'justify', strong_fontWeight: '700',
-      strong_color: '#1e3a5f', emph_color: '#6b7280',
-    },
-    d2: {
-      name: '들여쓰기',
-      p_textIndent: '1em', p_textAlign: 'left', strong_fontWeight: '700',
+      p_textAlign: 'justify', strong_fontWeight: '700',
       strong_color: '#1e3a5f', emph_color: '#6b7280',
     },
   },
   toc: {
     d1: { name: '기본', _globals: { tocDepth: 2, tocSpacing: 4 } },
     d2: { name: '확장', _globals: { tocDepth: 3, tocSpacing: 4 } },
+  },
+  figure: {
+    d1: { name: '기본', figure_marginTop: '8px', figure_marginBottom: '4px', figure_captionSize: '8px' },
   },
 };
 
@@ -175,6 +180,7 @@ export const VARIANT_SELECTORS = {
   quote: { '': '.book-quote$D' },
   table: { th: '.book-table$D th', td: '.book-table$D td', oddTd: '.book-table$D tr:nth-child(odd) td' },
   body: { p: '.book-body$D p', strong: '.book-body$D strong' },
+  figure: { '': '.book-figure$D' },
 };
 
 // Component property schemas (for Phase 2 property editor)
@@ -182,13 +188,12 @@ export const VARIANT_SELECTORS = {
 // type: 'separator' — 시각적 구분선
 export const COMPONENT_SCHEMAS = {
   body: {
-    p_textIndent: { type: 'range', min: 0, max: 30, unit: 'px', label: '들여쓰기' },
     p_textAlign: { type: 'select', options: ['justify','left','center'], label: '정렬' },
     _sep_typo: { type: 'separator', label: '타이포그래피' },
     _bodySize: { type: 'range', min: 4, max: 20, step: 0.5, unit: 'pt', label: '글자 크기', global: { path: 'typo.size' } },
     _bodyTracking: { type: 'range', min: -1, max: 2, step: 0.1, unit: 'pt', label: '자간', global: { path: 'typo.tracking' } },
-    _bodyLeading: { type: 'range', min: 0.5, max: 3, step: 0.1, unit: 'em', label: '행간', global: { path: 'typo.leading' } },
-    _parGap: { type: 'range', min: 0, max: 40, step: 1, unit: 'pt', label: '문단 간격', global: { path: 'typo.paragraphGap' } },
+    _bodyLeading: { type: 'range', min: 4, max: 100, step: 1, unit: 'pt', label: '행간', global: { path: 'typo.leading' } },
+    _parGap: { type: 'range', min: 0, max: 100, step: 1, unit: 'pt', label: '문단 간격', global: { path: 'typo.paragraphGap' } },
     _sep_bold: { type: 'separator', label: '볼드' },
     strong_fontWeight: { type: 'select', options: [
       { value: '400', label: '400 (얇게)' },
@@ -236,21 +241,29 @@ export const COMPONENT_SCHEMAS = {
     padding: { type: 'text', label: '패딩' },
     borderRadius: { type: 'range', min: 0, max: 16, unit: 'px', label: '모서리' },
     border: { type: 'text', label: '테두리' },
+    _sep_margin: { type: 'separator', label: '여백' },
+    code_marginTop: { type: 'range', min: 4, max: 40, unit: 'px', label: '위 여백' },
+    code_marginBottom: { type: 'range', min: 4, max: 40, unit: 'px', label: '아래 여백' },
+    _sep_padding: { type: 'separator', label: '내부 패딩' },
+    code_paddingX: { type: 'range', min: 4, max: 30, unit: 'px', label: '좌우 패딩' },
+    code_paddingY: { type: 'range', min: 4, max: 20, unit: 'px', label: '상하 패딩' },
     _sep_size: { type: 'separator', label: '글자 크기' },
     _codeSize: { type: 'range', min: 4, max: 18, step: 0.5, unit: 'pt', label: '코드 크기', global: { path: 'typoSizes.code' } },
   },
   inline_code: {
     color: { type: 'color', label: '글자 색상' },
+    fontWeight: { type: 'select', options: ['400','500','600','700','800'], label: '굵기' },
     background: { type: 'color', label: '배경색' },
     borderRadius: { type: 'range', min: 0, max: 8, unit: 'px', label: '모서리' },
-    _sep_size: { type: 'separator', label: '글자 크기' },
-    _inlineCodeSize: { type: 'range', min: 4, max: 18, step: 0.5, unit: 'pt', label: '인라인코드 크기', global: { path: 'typoSizes.inlineCode' } },
   },
   quote: {
     color: { type: 'color', label: '글자 색상' },
     background: { type: 'color', label: '배경색' },
     borderLeft: { type: 'text', label: '좌측선' },
     padding: { type: 'text', label: '패딩' },
+    _sep_margin: { type: 'separator', label: '여백' },
+    quote_marginTop: { type: 'range', min: 4, max: 40, unit: 'px', label: '위 여백' },
+    quote_marginBottom: { type: 'range', min: 4, max: 40, unit: 'px', label: '아래 여백' },
     _sep_size: { type: 'separator', label: '글자 크기' },
     _quoteSize: { type: 'range', min: 4, max: 18, step: 0.5, unit: 'pt', label: '인용문 크기', global: { path: 'typoSizes.quote' } },
   },
@@ -271,6 +284,12 @@ export const COMPONENT_SCHEMAS = {
     ], global: { path: 'tableAlign' } },
     _sep_cols: { type: 'separator', label: '열 너비' },
     _tableFirstColRatio: { type: 'range', min: 0.3, max: 3.0, step: 0.1, unit: 'x', label: '첫 열 비율', global: { path: 'tableFirstColRatio' } },
+  },
+  figure: {
+    figure_marginTop: { type: 'range', min: 0, max: 30, unit: 'px', label: '위 여백' },
+    figure_marginBottom: { type: 'range', min: 0, max: 30, unit: 'px', label: '아래 여백' },
+    _sep_caption: { type: 'separator', label: '캡션' },
+    figure_captionSize: { type: 'range', min: 4, max: 14, step: 0.5, unit: 'px', label: '캡션 크기' },
   },
   toc: {
     _tocDepth: { type: 'select', label: '목차 깊이', options: [

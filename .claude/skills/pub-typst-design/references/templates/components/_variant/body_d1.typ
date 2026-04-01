@@ -8,7 +8,8 @@
 )
 
 #set par(
-  leading: 1.0em,
+  leading: if body-leading < 4pt { 4pt } else { body-leading },
+  spacing: 0pt,
   first-line-indent: 0pt,
   justify: true,
 )

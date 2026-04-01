@@ -68,21 +68,49 @@
       "toc": "d1"
     },
     "overrides": {
-      "page": { "format": "B5_4x6배판" },
-      "margins": { "top": 20, "bottom": 20, "left": 20, "right": 18 },
-      "typo": { "size": 10, "leading": 1.65, "paragraphGap": 8 },
+      "page": {
+        "format": "B5_4x6배판"
+      },
+      "margins": {
+        "top": 20,
+        "bottom": 20,
+        "left": 20,
+        "right": 18
+      },
+      "typo": {
+        "size": 10,
+        "leading": 10,
+        "paragraphGap": 10
+      },
       "typoSizes": {
-        "h1": 22, "h2": 15, "h3": 12, "h4": 10.5,
-        "code": 8, "quote": 9, "table": 8.5, "inlineCode": 10
+        "h1": 22,
+        "h2": 13,
+        "h3": 13,
+        "h4": 13,
+        "code": 8,
+        "quote": 9,
+        "table": 8.5,
+        "inlineCode": 10
       },
       "tocDepth": 2,
       "tocSpacing": 2,
       "componentStyles": {
         "heading": {
-          "h1_marginTop": "10pt", "h1_marginBottom": "10pt",
-          "h2_marginTop": "10pt", "h2_marginBottom": "10pt",
-          "h3_marginTop": "6pt", "h3_marginBottom": "8pt",
-          "h4_marginTop": "2pt", "h4_marginBottom": "8pt"
+          "h1_marginTop": "0pt",
+          "h1_marginBottom": "14pt",
+          "h1_fontWeight": "700",
+          "h2_marginTop": "20pt",
+          "h2_marginBottom": "10pt",
+          "h2_fontWeight": "700",
+          "h2_color": "#1e40af",
+          "h3_marginTop": "14pt",
+          "h3_marginBottom": "8pt",
+          "h3_fontWeight": "600",
+          "h3_color": "#374151",
+          "h4_marginTop": "10pt",
+          "h4_marginBottom": "6pt",
+          "h4_fontWeight": "500",
+          "h4_color": "#555555"
         }
       }
     }
@@ -101,21 +129,53 @@
       "toc": "d1"
     },
     "overrides": {
-      "page": { "format": "A4_국배판" },
-      "margins": { "top": 25, "bottom": 25, "left": 25, "right": 22 },
-      "typo": { "size": 12, "leading": 2.0, "paragraphGap": 10 },
-      "typoSizes": {
-        "h1": 24, "h2": 18, "h3": 15, "h4": 13,
-        "code": 10, "quote": 11, "table": 10, "inlineCode": 12
+      "page": {
+        "format": "A4_국배판",
+        "outputMode": "pod"
       },
-      "tocDepth": 2,
-      "tocSpacing": 3,
+      "margins": {
+        "top": 25,
+        "bottom": 25,
+        "left": 25,
+        "right": 22
+      },
+      "typo": {
+        "size": 12,
+        "tracking": 0,
+        "leading": 12,
+        "paragraphGap": 24
+      },
+      "typoSizes": {
+        "h1": 16,
+        "h2": 14,
+        "h3": 13,
+        "h4": 13,
+        "code": 8,
+        "quote": 9,
+        "table": 8,
+        "inlineCode": 12
+      },
+      "tocDepth": 3,
+      "tocSpacing": 4,
       "componentStyles": {
         "heading": {
-          "h1_marginTop": "12pt", "h1_marginBottom": "12pt",
-          "h2_marginTop": "12pt", "h2_marginBottom": "12pt",
-          "h3_marginTop": "6pt", "h3_marginBottom": "10pt",
-          "h4_marginTop": "2pt", "h4_marginBottom": "10pt"
+          "h1_marginTop": "0pt",
+          "h1_marginBottom": "16pt",
+          "h1_fontWeight": "700",
+          "h2_marginTop": "24pt",
+          "h2_marginBottom": "24",
+          "h2_fontWeight": "700",
+          "h2_borderLeft": "",
+          "h2_paddingLeft": "0",
+          "h3_marginTop": "16pt",
+          "h3_marginBottom": "10pt",
+          "h3_fontWeight": "600",
+          "h3_color": "#374151",
+          "h4_marginTop": "12pt",
+          "h4_marginBottom": "8pt",
+          "h4_fontWeight": "500",
+          "h4_color": "#555555",
+          "h2_color": "#3754e1"
         }
       }
     }
