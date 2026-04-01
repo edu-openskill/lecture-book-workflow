@@ -310,7 +310,8 @@ def build_integrated_md(front: list, chapters: list, back: list,
 # ══════════════════════════════════════
 
 def md_to_typst(md_path: Path, typ_path: Path) -> bool:
-    """Pandoc으로 마크다운 → Typst 변환"""
+    """Pandoc으로 마크다운 → Typst 변환 (paragraph-gap Lua 필터 포함)"""
+    lua_filter = Path(__file__).parent / 'paragraph-gap.lua'
     cmd = [
         'pandoc',
         str(md_path),
@@ -318,6 +319,7 @@ def md_to_typst(md_path: Path, typ_path: Path) -> bool:
         '-t', 'typst',
         '-o', str(typ_path),
         '--wrap=none',
+        '--lua-filter', str(lua_filter),
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -512,28 +514,10 @@ def fix_typst_content(text: str, image_border_preset: str = "plain", use_image_v
 
     text = re.sub(r'columns:\s*\(([\d.%,\s]+)\)', _equalize_table_columns, text)
 
-    # 8. 문단 간격: 연속된 텍스트 문단 사이 빈 줄을 #v(paragraph-gap)으로 교체
-    #    heading(=), Typst 명령(#), 주석(//), 수식($)으로 시작하는 줄은 제외
-    #    par(spacing: 0pt)와 함께 사용하여 문단 간격이 heading/코드/표에 영향 안 줌
-    _non_text = re.compile(r'^(\s*$|[=#/$]|```)')
-    lines = text.split('\n')
-    result = []
-    i = 0
-    while i < len(lines):
-        result.append(lines[i])
-        # 빈 줄을 발견하면: 앞뒤가 모두 일반 텍스트 줄인지 확인
-        if i + 2 < len(lines) and lines[i + 1].strip() == '':
-            prev_line = lines[i].strip()
-            next_line = lines[i + 2].strip()
-            if (prev_line and next_line
-                    and not _non_text.match(prev_line)
-                    and not _non_text.match(next_line)):
-                result.append('#v(paragraph-gap)')
-                i += 2  # 빈 줄 건너뛰기
-                continue
-        i += 1
+    # 8. 문단 간격: Pandoc Lua 필터(paragraph-gap.lua)에서 처리
+    #    Para→Para 사이에만 #v(paragraph-gap) 삽입 (표/코드/이미지에 영향 없음)
 
-    return '\n'.join(result)
+    return text
 
 
 def merge_template_and_content(template_path: Path, content: str,

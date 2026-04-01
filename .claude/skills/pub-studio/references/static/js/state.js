@@ -4,7 +4,7 @@ export const state = {
   preset: '1',
   components: { body:'d1', heading:'d1', code:'d1', inline_code:'d1', quote:'d1', table:'d1', toc:'d1' },
   fonts: { body: '"RIDIBatang", serif', code: '"D2Coding", monospace' },
-  typo: { size: 10, tracking: 0, leading: 1.5, paragraphGap: 25 },
+  typo: { size: 10, tracking: 0, leading: 10, paragraphGap: 8 },
   margins: { top: 20, bottom: 28, left: 22, right: 17 },
   images: {
     gemini:   { preset: 'bordered', width: 70 },
