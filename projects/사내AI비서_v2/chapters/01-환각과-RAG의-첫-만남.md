@@ -157,14 +157,13 @@ Style: metaphor-comparison
 -->
 ![오픈북 시험 비유](../assets/CH01/gemini/01_openbook-exam.png)
 
-*그림 1-3: 클로즈드북 vs 오픈북. RAG는 LLM에게 오픈북 시험을 치르게 하는 것이다.*
+*그림 1-3: 클로즈드북 vs 오픈북. RAG는 LLM에게 오픈북 시험을 치르게 하는 것입니다.*
 
 이것이 **RAG** — Retrieval-Augmented Generation, 검색 증강 생성입니다.
 흐름을 보면 이렇게 됩니다.
 
 ![LLM 단독 호출과 RAG의 차이](../assets/CH01/diagram/01_llm-vs-rag.png)
 
-*그림 1-4: LLM 단독 호출과 RAG의 차이. RAG는 질문마다 관련 문서를 찾아서 LLM에 건네준다.*
 *그림 1-4: LLM 단독 호출과 RAG의 차이. RAG는 질문마다 관련 문서를 찾아서 LLM에 건네줍니다.*
 
 1. 사내 문서들을 미리 **벡터 DB**에 조각으로 나눠 저장해 놓습니다 (오픈북 준비)
@@ -199,14 +198,14 @@ Style: metaphor-comparison
 | **rag-start** | 실습용 (빈 파일 — 챕터 따라 코드 작성) | `https://github.com/metacoding-18-ai-applied-v4/rag-start` |
 | **rag-end** | 완성 코드 (막히면 참고) | `https://github.com/metacoding-18-ai-applied-v4/rag-end` |
 
-아직 클론하지 않았다면 터미널에서 실행합니다.
+아직 클론하지 않았다면 터미널에서 아래 명령어를 실행해 보겠습니다.
 
 ```bash
 git clone https://github.com/metacoding-18-ai-applied-v4/rag-start.git
 cd rag-start/ex01
 ```
 
-이미 클론했다면 `ex01` 폴더로 이동합니다.
+이미 클론하셨다면 `ex01` 폴더로 이동해 보겠습니다.
 
 ```bash
 cd rag-start/ex01
@@ -221,13 +220,15 @@ ex01/
 └── step4_rag.py             [실습] 추론 심화 (Chain-of-Thought)
 ```
 
-`[실습]` 파일에는 import와 데이터가 미리 준비되어 있습니다. 챕터를 따라 하며 TODO 부분을 채워넣으세요. 막히면 rag-end의 완성 코드를 참고하세요.
+`[실습]` 파일에는 import와 데이터가 미리 준비되어 있습니다. 챕터를 따라 하며 TODO 부분을 하나씩 채워보겠습니다. 막히는 부분이 있다면 rag-end의 완성 코드를 참고해 주시기 바랍니다.
 
 ---
 
 ### 2.3 실습 환경 구축
 
-> 기본 환경(Python 3.12, Ollama)이 아직 없다면 **교육자료**를 먼저 확인하세요.
+> 기본 환경(Python 3.12, Docker)이 없다면 **교육자료**를 먼저 확인해 주시기 바랍니다.
+
+> **Apple Silicon(M1/M2/M3) 사용자**: psycopg2-binary 설치가 실패한다면 `brew install libpq`를 먼저 실행해 보시기 바랍니다.
 
 ```bash
 cd ex01
@@ -244,7 +245,7 @@ ollama pull nomic-embed-text
 ```
 
 > **팁: LLM 선택**
-> 기본값은 Ollama + `deepseek-r1:8b`입니다(16GB RAM 이상 권장). RAM이 부족하거나 응답이 너무 느리면 `.env`에서 `LLM_PROVIDER=openai`로 바꿔서 GPT-4o-mini를 쓸 수도 있습니다. 단, API 비용이 발생합니다. `.env` 파일에 `OPENAI_API_KEY=sk-xxxxxx` 형태로 키를 등록하세요. 상세 안내는 **교육자료** 를 확인하세요.
+> 기본값은 Ollama + `deepseek-r1:8b`입니다(16GB RAM 이상 권장). RAM이 부족하거나 응답이 너무 느리면 `.env`에서 `LLM_PROVIDER=openai`로 바꿔서 GPT-4o-mini를 쓸 수도 있습니다. 단, API 비용이 발생합니다. `.env` 파일에 `OPENAI_API_KEY=sk-xxxxxx` 형태로 키를 등록해 사용하시면 됩니다. 상세 안내는 **교육자료**를 확인해 주시기 바랍니다.
 
 이번 챕터에서는 **LangChain**이라는 프레임워크를 사용합니다. LLM 호출, 벡터 검색, 체인 조립처럼 RAG에 필요한 부품을 제공하는 도구입니다. 여기서는 맛보기로만 쓰고 CH05에서 본격적으로 다룹니다.
 
@@ -266,13 +267,13 @@ ollama pull nomic-embed-text
 4. `step3_rag_no_chunking.py` — 청킹 없이 비교
 5. `step4_rag.py` — 추론 심화
 
-환각을 직접 체험하고(step1), 문서를 넣으면 달라지는 걸 확인한 뒤(step2), RAG로 조립합니다(step3). 그다음 청킹 없이 돌려서 차이를 체감하고(step3_no_chunking), 추론이 필요한 질문까지 던져봅니다(step4). **step1부터 순서대로 실행하세요.**
+환각을 직접 체험하고(step1), 문서를 넣으면 달라지는 걸 확인한 뒤(step2), RAG로 조립합니다(step3). 그다음 청킹 없이 돌려서 차이를 체감하고(step3_no_chunking), 추론이 필요한 질문까지 던져봅니다(step4). **step1부터 순서대로 실행해 보겠습니다.**
 
 ---
 
 ### 2.5 실습 1 — step1_fail.py: LLM에게 직접 물어보기
 
-`ex01/step1_fail.py`의 TODO 부분을 다음과 같이 채웁니다.
+`ex01/step1_fail.py`의 TODO 부분을 다음과 같이 채워보겠습니다.
 
 ```python
 # TODO: ChatOllama로 deepseek-r1:8b 모델 연결 (temperature=0)
@@ -284,7 +285,7 @@ response = llm.invoke(question)
 console.print(f"[bold]답변:[/bold]\n{response.content}")
 ```
 
-`ChatOllama`는 LangChain이 Ollama LLM을 호출할 때 쓰는 래퍼입니다. `temperature=0`은 LLM이 창의적 변형 없이 가장 확률 높은 답변을 내놓게 하는 설정입니다. 실행하면 그럴듯하게 들리지만 커넥트의 실제 규정과는 다른 답변이 나옵니다.
+`ChatOllama`는 LangChain이 Ollama LLM을 호출할 때 쓰는 래퍼입니다. `temperature=0`은 LLM이 창의적 변형 없이 가장 확률 높은 답변을 내놓게 하는 설정입니다. 실행해 보면 그럴듯하게 들리지만 커넥트의 실제 규정과는 완전히 다른 답변이 나오는 것을 확인할 수 있습니다.
 
 ```bash
 # 실행
@@ -302,7 +303,7 @@ python step1_fail.py
 ### 2.6 실습 2 — step2_context.py: 문서를 직접 넣어보기
 
 step1에서 LLM이 거짓말하는 걸 봤습니다. 이번에는 **규정 내용을 프롬프트에 직접 포함** 시켜 봅니다.
-`ex01/step2_context.py`의 TODO 부분을 다음과 같이 채웁니다.
+`ex01/step2_context.py`의 TODO 부분을 다음과 같이 채워보겠습니다.
 
 ```python
 # TODO: ChatOllama로 deepseek-r1:8b 모델 연결 (temperature=0)
@@ -322,7 +323,7 @@ response = llm.invoke(prompt)
 console.print(f"[bold]답변:[/bold]\n{response.content}")
 ```
 
-step1과 달라진 부분은 `context_data`를 프롬프트에 직접 넣었다는 것뿐입니다. 이제 정확한 답변이 나옵니다. 하지만 한계도 명확합니다. 문서 하나면 괜찮지만 수십 개를 매번 통째로 붙이면 프롬프트가 엄청나게 길어집니다. LLM이 처리할 수 있는 텍스트 길이에는 한도(컨텍스트 윈도우)가 있기 때문입니다.
+step1과 달라진 부분은 `context_data`를 프롬프트에 직접 넣었다는 것뿐입니다. 이제야 의도했던 정확한 답변을 얻을 수 있습니다. 하지만 이 방식 역시 한계가 명확합니다. 문서 하나면 괜찮지만 수십 개를 매번 통째로 붙이면 프롬프트가 엄청나게 길어집니다. LLM이 처리할 수 있는 텍스트 길이에는 한도(컨텍스트 윈도우)가 있기 때문입니다.
 
 ```bash
 # 실행
@@ -333,13 +334,13 @@ python step2_context.py
 
 *그림 1-6: step2_context.py 실행 결과. 문서를 직접 넣으니 정확하게 답한다.*
 
-이번에는 "3년 동안 연차 없음, 매월 리프레시 데이 1회"라는 커넥트의 실제 규정이 답변에 나옵니다. step1과 코드 구조는 거의 같은데 결과가 완전히 달라졌습니다. 달라진 것은 `context_data`를 프롬프트에 넣었다는 것뿐입니다. LLM에게 정답지를 건네준 셈입니다. 환각이 사라진 건 좋지만, 이 방식은 문서가 늘어날수록 한계가 뚜렷합니다. 수십 개 문서를 매번 전부 붙일 수는 없기 때문입니다.
+이번에는 "3년 동안 연차 없음, 매월 리프레시 데이 1회"라는 커넥트의 실제 규정이 정확하게 답변으로 출력될 것입니다. step1과 코드 구조는 거의 같은데 결과가 완전히 달라졌습니다. 달라진 것은 `context_data`를 프롬프트에 넣었다는 것뿐입니다. LLM에게 정답지를 건네준 셈입니다. 환각이 사라진 건 좋지만, 이 방식은 문서가 늘어날수록 한계가 뚜렷합니다. 수십 개 문서를 매번 전부 붙일 수는 없기 때문입니다.
 
 ---
 
 ### 2.7 실습 3 — step3_rag.py: RAG 파이프라인 구성
 
-step2에서는 문서를 수동으로 넣었습니다. 이번에는 **벡터 DB에 문서를 저장하고 질문에 맞는 문서를 자동으로 찾아오는** RAG 파이프라인을 만들어 봅니다. `ex01/step3_rag.py`의 TODO 부분을 다음과 같이 채웁니다.
+step2에서는 문서를 수동으로 넣었습니다. 이번에는 **벡터 DB에 문서를 저장하고 질문에 맞는 문서를 자동으로 찾아오는** RAG 파이프라인을 만들어 보겠습니다. `ex01/step3_rag.py`의 TODO 부분을 다음과 같이 채워 넣습니다.
 
 ```python
 # TODO: OllamaEmbeddings(nomic-embed-text)로 임베딩 생성 → Chroma.from_documents로 벡터DB 저장
@@ -386,13 +387,13 @@ python step3_rag.py
 
 *그림 1-7: step3_rag.py 실행 결과. [인사규정] 문서를 찾아서 답변하고, 어디서 가져왔는지 출처까지 보여준다.*
 
-이제 답변과 함께 어느 문서를 참고했는지가 나옵니다. step2에서는 문서를 수동으로 넣어줬지만 이번에는 **질문에 맞는 문서를 자동으로 찾아왔습니다.** 환각이 사라지고 출처가 생겼습니다.
+이제 답변과 함께 어느 문서를 참고했는지가 깔끔하게 출력되는 것을 확인할 수 있습니다. step2에서는 문서를 수동으로 넣어줬지만 이번에는 **질문에 맞는 문서를 자동으로 찾아왔습니다.** 환각이 사라지고 명확한 출처가 생겼습니다.
 
 ---
 
 ### 2.8 실습 4 — step3_rag_no_chunking.py: 청킹이 왜 필요한가
 
-step3에서 문서 3개를 **각각 따로** 벡터 DB에 저장했습니다. 이번에는 반대로, 모든 문서를 **하나의 덩어리로 합쳐서** 저장하면 어떻게 되는지 비교해 봅니다. `ex01/step3_rag_no_chunking.py`의 TODO를 step3과 같은 방식으로 채웁니다. 다른 점은 두 가지입니다.
+step3에서 문서 3개를 **각각 따로** 벡터 DB에 저장했습니다. 이번에는 반대로, 모든 문서를 **하나의 덩어리로 합쳐서** 저장하면 어떻게 되는지 비교해 보겠습니다. `ex01/step3_rag_no_chunking.py`의 TODO를 step3과 동일한 방식으로 채워줍니다. 다른 점은 두 가지입니다.
 
 ```python
 # 데이터가 docs_bad (하나의 거대한 Document)
@@ -402,7 +403,7 @@ vectorstore = Chroma.from_documents(documents=docs_bad, embedding=embeddings)
 retriever = vectorstore.as_retriever(search_kwargs={"k": 1})
 ```
 
-나머지 흐름(임베딩 생성 → 체인 조립 → 질문 실행)은 step3과 동일합니다. 두 파일을 직접 실행해서 결과를 비교해 보세요.
+나머지 흐름(임베딩 생성 → 체인 조립 → 질문 실행)은 step3과 동일합니다. 두 파일을 직접 실행해서 결과를 비교해 보겠습니다.
 
 ```bash
 # 실행
@@ -413,13 +414,13 @@ python step3_rag_no_chunking.py
 
 *그림 1-8: 청킹 여부에 따른 검색 결과 비교. 조각으로 나누면 관련 문서만 정확히 찾는다.*
 
-step3에서는 인사규정만 깔끔하게 찾아왔지만 여기서는 인사규정 + 보안규정 + 복지규정이 통째로 들어옵니다. 관련 없는 내용이 섞이면 LLM이 정작 필요한 부분을 놓치기 쉽습니다. 문서를 조각으로 나누는 것, 즉 **청킹(Chunking)** 이 왜 필요한지 체감할 수 있습니다. 청킹 전략의 상세 비교는 CH08(검색 품질 튜닝)에서 다룹니다.
+step3에서는 인사규정만 깔끔하게 찾아왔지만 여기서는 인사규정 + 보안규정 + 복지규정이 통째로 들어옵니다. 관련 없는 내용이 섞이면 LLM이 정작 필요한 부분을 놓치기 쉽습니다. 문서를 조각으로 나누는 것, 즉 **청킹(Chunking)**이 왜 필요한지 바로 체감하실 수 있을 것입니다. 청킹 전략의 상세 비교는 CH08(검색 품질 튜닝)에서 다룹니다.
 
 ---
 
 ### 2.9 실습 5 — step4_rag.py: 추론이 필요한 질문
 
-step3까지의 질문은 "규정이 뭐야?" 같은 단순 검색이었습니다. 이번에는 **규정을 찾아서 읽고 계산까지 해야 하는 질문** 을 던져봅니다. `ex01/step4_rag.py`의 TODO를 step3과 같은 방식으로 채웁니다. 코드 구조는 step3과 동일하고, 달라진 건 파일에 준비된 **질문** 뿐입니다.
+step3까지의 질문은 "규정이 뭐야?" 같은 단순 검색이었습니다. 이번에는 **규정을 찾아서 읽고 계산까지 해야 하는 질문**을 던져보겠습니다. `ex01/step4_rag.py`의 TODO를 step3과 동일한 방식으로 채워 넣습니다. 코드 구조는 step3과 동일하고, 달라진 건 파일에 준비된 **질문**뿐입니다.
 
 "매월 1회 제공" → "6개월이면 6번" → "2번 썼으면 4번 남음"까지, 규정을 읽고 계산해야 하는 질문입니다.
 
@@ -432,7 +433,7 @@ python step4_rag.py
 
 *실행 결과 1-9: step4_rag.py 실행 결과. 규정을 바탕으로 연차를 스스로 계산하고 추론해 낸 모습이다.*
 
-DeepSeek R1은 `<think>` 태그 안에서 단계별로 생각하는 **Chain-of-Thought** 추론을 합니다. 실행하면 검색된 문서(근거)와 함께 계산 과정이 포함된 답변이 나옵니다.
+DeepSeek R1은 `<think>` 태그 안에서 단계별로 생각하는 **Chain-of-Thought** 추론을 합니다. 코드를 실행해 보면, 검색된 문서(근거)와 함께 상세한 계산 과정이 포함된 답변이 출력되는 것을 확인할 수 있습니다.
 
 ---
 

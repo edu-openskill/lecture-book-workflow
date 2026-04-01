@@ -60,18 +60,15 @@ rag-start/
 이 책의 모든 예제는 Python **3.12** 를 기준으로 작성됐습니다. 3.10~3.12에서 동작하며 3.13 이상에서는 일부 패키지 호환성 문제가 있을 수 있습니다.
 
 #### macOS
-
 ```bash
 # Homebrew로 설치
 brew install python@3.12
 ```
 
 #### Windows
-
 공식 사이트(https://www.python.org/downloads/)에서 Python 3.12를 다운로드합니다. 설치 시 **"Add Python to PATH"** 체크박스를 반드시 선택하세요.
 
 ### 2.2 가상환경 설정
-
 예제마다 패키지 버전이 다를 수 있으므로 **반드시 가상환경을 만들어서 진행하세요.**
 
 ```bash
