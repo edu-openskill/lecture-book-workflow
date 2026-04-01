@@ -406,7 +406,7 @@ def _detect_image_category(path: str) -> str:
     return 'default'
 
 
-def fix_typst_content(text: str, image_border_preset: str = "plain", use_image_variables: bool = False) -> str:
+def fix_typst_content(text: str, image_border_preset: str = "plain", use_image_variables: bool = False, **kwargs) -> str:
     """Pandoc 출력의 Typst 코드를 후처리.
     image_border_preset: 이미지 테두리 프리셋명 (plain, clean-border, shadow, primary-shadow, minimal)"""
 
@@ -491,8 +491,12 @@ def fix_typst_content(text: str, image_border_preset: str = "plain", use_image_v
         text
     )
 
-    # 3.6 머릿말 목차 제외: = 머릿말 → #heading(outlined: false)[머릿말]
-    text = re.sub(r'^= 머릿말\s*$', '#heading(outlined: false)[머릿말]', text, flags=re.MULTILINE)
+    # 3.6 pre_toc 콘텐츠 heading 목차 제외: = 제목 → #heading(outlined: false)[제목]
+    #     pre_toc 파일은 목차 앞에 배치되므로 목차에 포함되면 안 됨
+    if kwargs.get('exclude_from_toc'):
+        text = re.sub(r'^(=+)\s+(.+)$',
+                       lambda m: f'#heading(outlined: false, level: {len(m.group(1))})[{m.group(2).strip()}]',
+                       text, flags=re.MULTILINE)
 
     # 4. 한국어 라벨 제거 (Pandoc이 생성하는 <한국어-라벨>)
     text = re.sub(r'<[가-힣a-zA-Z0-9.\-_]+>\n', '\n', text)
@@ -667,7 +671,8 @@ def build_raw_typ(front: list, chapters: list, back: list,
                   mermaid_out: Path, assets_dir: Path,
                   md_output: Path,
                   image_border_preset: str = "plain",
-                  use_image_variables: bool = False) -> str:
+                  use_image_variables: bool = False,
+                  exclude_from_toc: bool = False) -> str:
     """Stage 1: MD 파일들 → 통합 MD → Pandoc → 후처리된 raw .typ 콘텐츠.
 
     템플릿/디자인 병합 전 단계까지만 실행하고 결과 문자열을 반환.
@@ -700,7 +705,7 @@ def build_raw_typ(front: list, chapters: list, back: list,
 
     # 후처리
     raw = raw_typ_path.read_text(encoding="utf-8")
-    fixed = fix_typst_content(raw, image_border_preset=image_border_preset, use_image_variables=use_image_variables)
+    fixed = fix_typst_content(raw, image_border_preset=image_border_preset, use_image_variables=use_image_variables, exclude_from_toc=exclude_from_toc)
     raw_typ_path.unlink(missing_ok=True)
     if _tmp_md:
         md_output.unlink(missing_ok=True)
@@ -878,7 +883,7 @@ def build(config: dict):
         if md_to_typst(pre_toc_md_path, pre_toc_raw):
             raw = pre_toc_raw.read_text(encoding="utf-8")
             image_border_preset = config.get('image_border_preset', 'plain')
-            pre_toc_typ_content = fix_typst_content(raw, image_border_preset=image_border_preset)
+            pre_toc_typ_content = fix_typst_content(raw, image_border_preset=image_border_preset, exclude_from_toc=True)
             pre_toc_raw.unlink(missing_ok=True)
         pre_toc_md_path.unlink(missing_ok=True)
 

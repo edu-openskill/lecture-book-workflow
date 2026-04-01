@@ -682,7 +682,13 @@ class PreviewServer:
             front, chapters, back = BuildPipeline.resolve_file_lists(
                 self._project_path, files_dict
             )
-            raw_typ = self._pipeline.build_raw_typ(front, chapters, back)
+            # pre_toc 파일을 front에서 분리 (목차 앞에 배치되는 파일)
+            pre_toc_names = {p.name for p in config.get("pre_toc", [])}
+            if pre_toc_names:
+                actual_front = [f for f in front if f.name not in pre_toc_names]
+            else:
+                actual_front = front
+            raw_typ = self._pipeline.build_raw_typ(actual_front, chapters, back)
             images = self._pipeline.image_registry.get_all()
             self._cache.update_stage1(raw_typ, file_hash, images)
             stage_run = 1

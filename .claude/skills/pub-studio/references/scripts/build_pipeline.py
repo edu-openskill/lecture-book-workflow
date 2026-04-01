@@ -100,6 +100,7 @@ class BuildPipeline:
                 md_output=None,
                 image_border_preset=self._config.get("image_border_preset", "plain"),
                 use_image_variables=self._config.get("use_image_variables", True),
+                exclude_from_toc=True,
             )
             self._pre_toc_typ = pre_toc_typ
 
