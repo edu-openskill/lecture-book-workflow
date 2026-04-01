@@ -189,12 +189,23 @@ def scan_project(project_path: Path) -> dict:
     }
     md_dir = project_path / BUILD_DIR_NAME / "md"
 
+    # front 파일 우선순위 (번호 접두사가 없으므로 이름 기반 정렬)
+    _FRONT_ORDER = {"preface": 0, "github": 1, "prologue": 2, "roadmap": 3}
+
+    def _front_sort_key(path):
+        stem = path.stem.lower()
+        for prefix, order in _FRONT_ORDER.items():
+            if stem.startswith(prefix):
+                return (order, stem)
+        return (99, stem)
+
     # .pdf-build/md/ 에서 스캔 (스테이징된 파일)
     for group, sub in [("chapters", "chapters"), ("front", "front"), ("back", "back")]:
         group_dir = md_dir / sub
         if not group_dir.exists():
             continue
-        for f in sorted(group_dir.glob("*.md")):
+        sort_fn = _front_sort_key if group == "front" else None
+        for f in sorted(group_dir.glob("*.md"), key=sort_fn):
             if f.name == "목차.md":
                 continue
             entry = {
