@@ -11,7 +11,7 @@
   block(above: figure-margin-top, below: figure-margin-bottom)[
     #align(center, it.body)
     #if it.caption != none {
-      v(2pt)
+      v(figure-caption-gap)
       let ch = counter(heading.where(level: 1)).get().first()
       let fig-num = counter(figure).display()
       align(center, text(figure-caption-size, fill: figure-caption-color)[그림 #ch\-#fig-num: #it.caption.body])

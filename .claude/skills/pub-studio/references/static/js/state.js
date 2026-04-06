@@ -168,7 +168,7 @@ export const BUILTIN_VARIANTS = {
     d2: { name: '확장', _globals: { tocDepth: 3, tocSpacing: 4 } },
   },
   figure: {
-    d1: { name: '기본', figure_marginTop: '8px', figure_marginBottom: '4px', figure_captionSize: '8px' },
+    d1: { name: '기본', figure_marginTop: '8px', figure_marginBottom: '4px', figure_captionGap: '2px', figure_captionSize: '8px' },
   },
 };
 
@@ -289,6 +289,7 @@ export const COMPONENT_SCHEMAS = {
     figure_marginTop: { type: 'range', min: 0, max: 30, unit: 'px', label: '위 여백' },
     figure_marginBottom: { type: 'range', min: 0, max: 30, unit: 'px', label: '아래 여백' },
     _sep_caption: { type: 'separator', label: '캡션' },
+    figure_captionGap: { type: 'range', min: 0, max: 20, unit: 'px', label: '이미지-캡션 간격' },
     figure_captionSize: { type: 'range', min: 4, max: 14, step: 0.5, unit: 'px', label: '캡션 크기' },
   },
   toc: {

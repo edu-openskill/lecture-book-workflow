@@ -108,6 +108,7 @@ COMPONENT_STYLE_MAP = {
     "figure": {
         "figure_marginTop": "figure-margin-top",
         "figure_marginBottom": "figure-margin-bottom",
+        "figure_captionGap": "figure-caption-gap",
         "figure_captionSize": "figure-caption-size",
     },
 }

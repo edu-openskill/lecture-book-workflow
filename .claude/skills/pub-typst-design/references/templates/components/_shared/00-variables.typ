@@ -113,6 +113,7 @@
 // Figure 캡션 변수
 #let figure-margin-top = 8pt
 #let figure-margin-bottom = 4pt
+#let figure-caption-gap = 2pt
 #let figure-caption-size = 8pt
 #let figure-caption-color = rgb("#6b7280")
 
