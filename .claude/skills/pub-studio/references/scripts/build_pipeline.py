@@ -219,19 +219,29 @@ class BuildPipeline:
                 prev_end = table_end
                 continue
 
-            # 자동 맞춤: 셀 내용 분석 (한글 2배 폭 가중치)
+            # 자동 맞춤: 셀 내용 분석 (한글 2배 폭, 인라인코드 1.3배 가중치)
             import unicodedata
             def _vlen(s):
                 return sum(2 if unicodedata.east_asian_width(c) in ('W', 'F') else 1 for c in s)
+
+            def _cell_width(cell_text):
+                """셀의 실질 렌더링 폭 추정. 인라인코드는 줄바꿈 안 되므로 가중치 부여."""
+                # 인라인코드 추출 (raw 텍스트) — 줄바꿈 불가이므로 최소 폭으로 반영
+                code_spans = re.findall(r'`([^`]+)`', cell_text)
+                code_width = max((_vlen(c) * 1.3 for c in code_spans), default=0)
+                # 일반 텍스트
+                clean = re.sub(r'#\w+\[([^\]]*)\]', r'\1', cell_text)
+                clean = re.sub(r'#\w+', '', clean)
+                clean = re.sub(r'`[^`]*`', '', clean)
+                clean = clean.replace('\\', '').strip()
+                text_width = _vlen(clean)
+                return max(code_width, text_width)
 
             cells = re.findall(r'\[([^\]]*)\]', table_text)
             max_len = [1] * ncols
             for ci, cell in enumerate(cells):
                 col = ci % ncols
-                clean = re.sub(r'#\w+\[([^\]]*)\]', r'\1', cell)
-                clean = re.sub(r'#\w+', '', clean)
-                clean = clean.replace('\\', '').strip()
-                max_len[col] = max(max_len[col], _vlen(clean))
+                max_len[col] = max(max_len[col], _cell_width(cell))
 
             # fr 비율 계산 (전체 합 기준 비례, 최소 0.5fr)
             total = max(sum(max_len), 1)
