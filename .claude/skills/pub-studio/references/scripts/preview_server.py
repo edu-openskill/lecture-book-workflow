@@ -683,11 +683,17 @@ class PreviewServer:
                 self._project_path, files_dict
             )
             # pre_toc 파일을 front에서 분리 (목차 앞에 배치되는 파일)
+            # UI에서 선택된 front 파일만 pre_toc에 포함
             pre_toc_names = {p.name for p in config.get("pre_toc", [])}
+            selected_front_names = {f.name for f in front}
+            active_pre_toc = [p for p in config.get("pre_toc", []) if p.name in selected_front_names]
             if pre_toc_names:
                 actual_front = [f for f in front if f.name not in pre_toc_names]
             else:
                 actual_front = front
+            # pre_toc를 UI 선택에 맞게 업데이트
+            config["pre_toc"] = active_pre_toc
+            self._pipeline.update_config(config)
             raw_typ = self._pipeline.build_raw_typ(actual_front, chapters, back)
             images = self._pipeline.image_registry.get_all()
             self._cache.update_stage1(raw_typ, file_hash, images)
