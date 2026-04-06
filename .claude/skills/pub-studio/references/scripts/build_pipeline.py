@@ -226,16 +226,23 @@ class BuildPipeline:
 
             def _cell_width(cell_text):
                 """셀의 실질 렌더링 폭 추정. 인라인코드는 줄바꿈 안 되므로 가중치 부여."""
-                # 인라인코드 추출 (raw 텍스트) — 줄바꿈 불가이므로 최소 폭으로 반영
-                code_spans = re.findall(r'`([^`]+)`', cell_text)
-                code_width = max((_vlen(c) * 1.3 for c in code_spans), default=0)
+                # Typst raw 인라인코드: `코드` 형태
+                raw_spans = re.findall(r'`([^`]+)`', cell_text)
+                # Typst raw.where(block:false) 형태도 포함
+                typst_raws = re.findall(r'#raw\("([^"]+)"\)', cell_text)
+                code_spans = raw_spans + typst_raws
+                # 인라인코드는 줄바꿈 불가 — 1.8배 가중치 (고정폭 폰트 + 패딩)
+                code_width = max((_vlen(c) * 1.8 for c in code_spans), default=0)
+                # 괄호 안 텍스트도 포함 (함수 인자 등)
+                paren_spans = re.findall(r'\(([^)]+)\)', cell_text)
+                paren_width = max((_vlen(p) * 1.5 for p in paren_spans), default=0)
                 # 일반 텍스트
                 clean = re.sub(r'#\w+\[([^\]]*)\]', r'\1', cell_text)
                 clean = re.sub(r'#\w+', '', clean)
                 clean = re.sub(r'`[^`]*`', '', clean)
                 clean = clean.replace('\\', '').strip()
                 text_width = _vlen(clean)
-                return max(code_width, text_width)
+                return max(code_width, paren_width, text_width)
 
             cells = re.findall(r'\[([^\]]*)\]', table_text)
             max_len = [1] * ncols
