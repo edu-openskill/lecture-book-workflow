@@ -10,17 +10,38 @@ local function is_text_flow(block)
       or t == "DefinitionList" or t == "LineBlock"
 end
 
+-- 블록이 이미지만 포함하는지 확인 (![](path) → Para[Image] 또는 Plain[Image])
+local function is_image_block(block)
+  if (block.t == "Para" or block.t == "Plain") and #block.content == 1 and block.content[1].t == "Image" then
+    return true
+  end
+  return false
+end
+
+-- Para 블록이 이탤릭 캡션인지 확인 (*캡션 텍스트* → Para[Emph])
+local function is_caption_para(block)
+  if block.t == "Para" and #block.content >= 1 and block.content[1].t == "Emph" then
+    return true
+  end
+  return false
+end
+
 function Blocks(blocks)
   local result = {}
   local prev_was_text = false
+  local prev_was_image = false
 
   for i, block in ipairs(blocks) do
-    if prev_was_text and is_text_flow(block) then
+    -- 이미지 바로 뒤 이탤릭 캡션이면 gap 삽입하지 않음
+    if prev_was_image and is_caption_para(block) then
+      -- gap 없이 바로 이어붙임 (후처리에서 auto-image alt로 병합됨)
+    elseif prev_was_text and is_text_flow(block) then
       table.insert(result, pandoc.RawBlock("typst", "#v(paragraph-gap)"))
     end
 
     table.insert(result, block)
     prev_was_text = is_text_flow(block)
+    prev_was_image = is_image_block(block)
   end
 
   return result
