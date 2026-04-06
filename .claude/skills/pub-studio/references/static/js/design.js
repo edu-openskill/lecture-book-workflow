@@ -453,6 +453,8 @@ export function applyPresetFromJSON(id) {
     if (ov.componentStyles) state.componentStyles = JSON.parse(JSON.stringify(ov.componentStyles));
     if (ov.tocDepth != null) state.tocDepth = ov.tocDepth;
     if (ov.tocSpacing != null) state.tocSpacing = ov.tocSpacing;
+    if (ov.images) state.images = JSON.parse(JSON.stringify(ov.images));
+    if (ov.colors) Object.assign(state.colors, ov.colors);
     syncTypoSizesUI();
     m.renderAllPropertyEditors();
     render();
@@ -493,6 +495,8 @@ export async function updatePresetValues(id) {
       typoSizes: { ...state.typoSizes },
       tocDepth: state.tocDepth,
       tocSpacing: state.tocSpacing,
+      images: JSON.parse(JSON.stringify(state.images)),
+      colors: { ...state.colors },
     };
     if (Object.keys(state.componentStyles).length > 0) {
       overrides.componentStyles = JSON.parse(JSON.stringify(state.componentStyles));

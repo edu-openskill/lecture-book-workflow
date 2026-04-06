@@ -33,7 +33,7 @@ Thin horizontal rule below title.
 [Bottom — timeline bar, full width, hairline border]
   가로 타임라인: ex01 → ex02 → ... → ex09 → ex10
   ex10에 깃발 아이콘, bold. 위에 라벨 "마지막 예제" -->
-![사서의 눈 + 성적표](../assets/CH10/10_chapter-opening-3.png)
+![](../assets/CH10/10_chapter-opening-3.png)
 
 ### 1.1 스캔 PDF -- 텍스트가 없다
 
@@ -47,8 +47,8 @@ CH04에서 PDF를 파싱했습니다. pypdf로 텍스트를 추출하고, 청킹
 
 *...아무것도 안 나온다?* PDF를 직접 열어보죠.
 
-![정보보안서약서 원본](../assets/CH10/10_broken-pdf-original.png)
-*그림 10-0: 팀장이 건넨 정보보안서약서. 결재란, 도장, 하이라이트가 있는 전형적인 사내 문서.*
+![](../assets/CH10/10_broken-pdf-original.png)
+*팀장이 건넨 정보보안서약서. 결재란, 도장, 하이라이트가 있는 전형적인 사내 문서.*
 
 스캔본이었습니다. 종이 문서를 스캐너로 찍어서 PDF로 만든 것입니다. 전체가 하나의 커다란 이미지입니다. 결재란에 서명이 있고, 빨간 도장도 찍혀 있고, 금지 사항에 하이라이트까지 되어 있어요. pypdf는 PDF 안의 텍스트 레이어를 읽는 도구입니다. CH04에서 언급했던 pdfplumber(표 추출 전용 라이브러리)도 마찬가지입니다. 둘 다 PDF 파일 구조에서 텍스트를 꺼내는 라이브러리입니다. 그런데 스캔본에는 텍스트 레이어가 없어요. 사진을 아무리 뒤져봐야 글자 데이터는 없어요.
 
@@ -131,8 +131,8 @@ path: assets/CH10/10_ocr-vs-vision.png
 | 속도 | ⚡ 빠름 | 🐢 느림 |
 | 표/차트 | ✗ 추출 불가 | ✓ 내용 설명 |
 | 스캔 PDF | ✓ (글자만) | ✓ (구조까지) | -->
-![OCR vs Vision LLM](../assets/CH10/10_ocr-vs-vision-3.png)
-*그림 10-1: 광학 문자 인식(OCR)은 이미지 속 글자를 읽고, 비전 LLM은 이미지의 의미를 이해한다.*
+![](../assets/CH10/10_ocr-vs-vision-3.png)
+*광학 문자 인식(OCR)은 이미지 속 글자를 읽고, 비전 LLM은 이미지의 의미를 이해한다.*
 
 
 ### 1.3 하이브리드 파서
@@ -201,8 +201,8 @@ Thin horizontal rule below title.
   Header: "개선 방향"
   3 columns, thin vertical dividers:
   | 정확도 낮음 → 리랭킹 강화 | 재현율 낮음 → 다중 질의 적용 | 환각률 높음 → 프롬프트 조정 | -->
-![평가 프레임워크](../assets/CH10/10_eval-concept-2.png)
-*그림 10-2: RAG 엔진의 성적표. 질문마다 검색 정확도와 환각률을 수치로 측정한다.*
+![](../assets/CH10/10_eval-concept-2.png)
+*RAG 엔진의 성적표. 질문마다 검색 정확도와 환각률을 수치로 측정한다.*
 
 
 ### 1.5 평가 프레임워크
@@ -384,8 +384,8 @@ def parse_pdf_ocr(pdf_path, dpi=150):
 python -m tuning.step1_document_parser --step 1-1
 ```
 
-![실험 1-1: OCR 파싱 결과](../assets/CH10/10_step1-1-ocr.png)
-*그림 10-2: OCR 파싱 결과. 스캔본에서 텍스트를 추출했지만 구조(표, 항목 번호)가 뭉개진다.*
+![](../assets/CH10/10_step1-1-ocr.png)
+*OCR 파싱 결과. 스캔본에서 텍스트를 추출했지만 구조(표, 항목 번호)가 뭉개진다.*
 
 OCR은 글자를 찾아내지만, 두 가지 한계가 있어요. 첫째, 문서의 **구조**를 모릅니다. 표의 셀 경계를 인식하지 못하고, 조항 번호와 본문이 한 줄로 이어집니다. 결재란의 도장이나 서명도 무시해요. 둘째, 글자 자체가 **깨지는** 경우가 많습니다. 스캔 품질이 낮거나 한국어처럼 획이 복잡한 문자에서는 "서약서"기 "서사서"으로, "스캔본"이 "스스년"으로 인식되기도 해요. ICCV 2025에서 발표된 연구에 따르면, 최고 성능의 OCR 엔진도 원본 텍스트 대비 7.5% 이상의 정확도 차이가 발생해요. 결국 OCR만으로는 "읽을 수 있는 문서"가 되지 않아요. 다른 PDF로도 직접 확인해 보시길 바랍니다.
 
@@ -455,8 +455,8 @@ python -m tuning.step1_document_parser --step 1-2
 python -m tuning.step1_document_parser --step 1-2 --timeout 900
 ```
 
-![실험 1-2: 비전 LLM 파싱 + 비교표](../assets/CH10/10_step1-2-vision.png)
-*그림 10-3: 같은 스캔 PDF를 OCR과 비전 LLM으로 파싱한 결과. OCR은 텍스트만, 비전 LLM은 구조화된 마크다운을 추출했다.*
+![](../assets/CH10/10_step1-2-vision.png)
+*같은 스캔 PDF를 OCR과 비전 LLM으로 파싱한 결과. OCR은 텍스트만, 비전 LLM은 구조화된 마크다운을 추출했다.*
 
 캡처 결과를 보면, 비전 LLM이 문서번호(2026-HR-SEC-002), 조항(제4조 생성형 AI 활용 지침), 금지 사항까지 마크다운 구조로 정리해냈습니다. OCR이 같은 내용을 평문으로 뽑아낸 것과 비교해 보십시오.
 
@@ -531,7 +531,7 @@ def process_image_hybrid(page, dpi=150, threshold=None, vision_model=None):
 python -m tuning.step2_hybrid_parser --step 2-1
 ```
 
-![실험 2-1: 하이브리드 파싱 결과](../assets/CH10/10_step2-1-hybrid.png)
+![](../assets/CH10/10_step2-1-hybrid.png)
 
 결과 테이블에서 페이지별로 어떤 전략이 선택되었는지 확인해 보시길 바랍니다. 텍스트가 풍부한 페이지는 OCR, 스캔본이나 이미지 위주 페이지는 비전 LLM이 자동으로 선택돼요.
 
@@ -575,7 +575,7 @@ def process_image_textlayer(page, dpi=150, vision_model=None):
 python -m tuning.step2_hybrid_parser --step 2-2
 ```
 
-![실험 2-2: 텍스트 레이어 기반 하이브리드](../assets/CH10/10_step2-2-textlayer.png)
+![](../assets/CH10/10_step2-2-textlayer.png)
 
 결과 테이블에서 "텍스트 레이어" 컬럼을 확인해 보시길 바랍니다. 디지털 PDF는 수천 자의 텍스트 레이어가 있어서 즉시 사용되고, 스캔본 PDF는 0자로 표시되며 비전 LLM이 처리해요.
 
@@ -665,7 +665,7 @@ def calculate_precision_at_k(retrieved_sources, relevant_sources, k):
 python -m tuning.step3_eval_framework --step 2-1 --k 3
 ```
 
-![실험 3-1: Precision@k 측정](../assets/CH10/10_step3-1-questions.png)
+![](../assets/CH10/10_step3-1-questions.png)
 
 평균 Precision@3이 0.64입니다. 3개를 가져오면 1개 정도는 엉뚱한 문서라는 뜻입니다. 이 숫자가 실습 4의 완성 웹 UI에서 CH08~09 기술을 적용한 뒤 얼마나 올라가는지가 핵심입니다.
 
@@ -690,7 +690,7 @@ k를 늘리면 재현율은 올라가지만 정확도는 떨어질 수 있어요
 python -m tuning.step3_eval_framework --step 2-2 --k 3
 ```
 
-![실험 3-2: Recall@3](../assets/CH10/10_step3-2-retrieval.png)
+![](../assets/CH10/10_step3-2-retrieval.png)
 
 정답 문서가 1개인 질문은 k=3이면 대부분 찾아냅니다(R@3 = 1.00). 하지만 "재택근무 시 보안 규정은?"처럼 정답이 HR 규정 **과** 보안 규정 두 곳에 걸치는 복합 질문은 R@3이 낮아집니다. `--k` 값을 5, 10으로 바꿔가며 실험해 보시길 바랍니다.
 
@@ -726,7 +726,7 @@ python -m tuning.step3_eval_framework --step 2-3
 
 > 이 실험은 Ollama LLM(llama3.1:8b)으로 37개 질문에 대한 답변을 생성해요. 모델에 따라 1~3분 정도 소요돼요.
 
-![실험 3-3: 환각률 측정](../assets/CH10/10_step3-3-hallucination.png)
+![](../assets/CH10/10_step3-3-hallucination.png)
 
 환각률이 높게 나오는 것이 정상입니다. 아직 리랭킹도, 쿼리 재작성도 적용하지 않은 상태이니까요. 검색이 엉뚱한 문서를 가져오면 LLM도 "그럴듯하게" 지어낼 수밖에 없어요. 이 숫자가 바로 **개선의 출발점**입니다.
 
@@ -780,7 +780,7 @@ def capture_pdf_pages(pdf_path):
 
 CH05에서 기본 검색을 만들고, CH08~09에서 기술을 하나씩 추가해온 파일입니다. 현재 검색 파이프라인의 전체 흐름은 다음과 같습니다.
 
-![검색 파이프라인 전체 흐름: 사용자 질문 → 약어 확장 → HyDE → 하이브리드 검색 → 리랭킹 → 결과](../assets/CH10/diagram/10_search-pipeline.png)
+![](../assets/CH10/diagram/10_search-pipeline.png)
 
 CH10에서 달라진 부분만 짚겠습니다.
 
@@ -901,7 +901,7 @@ python run.py
 > - "정보보안서약서에 어떤 내용이 있어?"
 > - "신규서비스 런칭 전략 알려줘"
 
-![웹 UI에서 질문을 던지면 답변 아래에 원본 PDF 페이지 이미지가 근거로 표시된다](../assets/CH10/10_step4-web-ui.png)
+![](../assets/CH10/10_step4-web-ui.png)
 
 
 #### 실습 4-4: 성능 비교 — 실습 3의 성적표와 대조

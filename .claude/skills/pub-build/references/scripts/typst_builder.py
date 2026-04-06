@@ -475,13 +475,13 @@ def fix_typst_content(text: str, image_border_preset: str = "plain", use_image_v
     # 3.5 이미지 바로 뒤의 #emph[그림 N-M: ...] 캡션을 auto-image의 alt 파라미터로 병합
     #     이미지와 캡션이 같은 페이지에 있도록 보장 (캡션만 다음 페이지로 넘어가는 고아 방지)
     def _merge_caption_into_auto_image(m):
-        img_call = m.group(1)  # #auto-image("path", max-width: 0.6)
+        img_call = m.group(1)  # #auto-image("path", alt: [...], max-width: 0.6)
         caption = m.group(2)    # 그림 2-4: 설명 텍스트
-        # alt: 파라미터가 이미 있으면 건드리지 않음
+        # 자동 번호 부여를 위해 수동 "그림 N-N:" / "실행 결과 N-N:" 접두어 제거
+        caption = re.sub(r'^(?:그림|실행\s*결과)\s*[\d서]+-\d+\s*[:：]\s*', '', caption)
         if 'alt:' in img_call:
-            return m.group(0)
-        # 자동 번호 부여를 위해 수동 "그림 N-N:" 접두어 제거
-        caption = re.sub(r'^그림\s*[\d서]+-\d+\s*[:：]\s*', '', caption)
+            # alt가 이미 있으면 이탤릭 캡션으로 교체
+            return re.sub(r'alt:\s*\[[^\]]*\]', f'alt: [{caption}]', img_call)
         # max-width: 앞에 alt: 삽입
         return img_call.replace('max-width:', f'alt: [{caption}], max-width:')
 
