@@ -37,10 +37,10 @@ ex01/
 ├── step1_fail.py           [실습] LLM 단독 호출 → 환각 체험
 ├── step2_context.py        [실습] 컨텍스트 직접 주입 → 임시 해결
 ├── step3_rag.py            [실습] RAG 기본 파이프라인 구성
-├── step3_rag_no_chunking.py [설명] 청킹 유무 비교 (읽기만)
-└── step4_rag.py            [참고] 추론 심화 (Chain-of-Thought)
+├── step3_rag_no_chunking.py [실습] 청킹 없이 비교 → 차이 체감
+└── step4_rag.py            [실습] 추론 심화 (Chain-of-Thought)
 ```
-**실습 요약**: 실습 3개 / 설명 1개 / 참고 1개
+**실습 요약**: 실습 5개
 
 ---
 
