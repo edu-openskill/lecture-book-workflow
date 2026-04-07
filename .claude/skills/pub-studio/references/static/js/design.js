@@ -455,7 +455,7 @@ export function applyPresetFromJSON(id) {
     if (ov.tocSpacing != null) state.tocSpacing = ov.tocSpacing;
     if (ov.images) state.images = JSON.parse(JSON.stringify(ov.images));
     if (ov.colors) Object.assign(state.colors, ov.colors);
-    syncTypoSizesUI();
+    syncAllUI();
     m.renderAllPropertyEditors();
     render();
     scheduleDesignRebuild();
