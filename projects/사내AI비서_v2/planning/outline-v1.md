@@ -96,16 +96,16 @@ ex01/
 **코드 실습 분류**:
 ```
 ex04/src/
-├── extractor.py    [실습] PDF/DOCX/XLSX 통합 파서
-├── chunker.py      [실습] Fixed-size 청킹 (500자+100오버랩)
-├── store.py        [실습] ko-sroberta 임베딩 + ChromaDB upsert
-├── main.py         [설명] 파이프라인 오케스트레이션
-├── cli_search.py   [설명] 벡터 검색 결과 시각화
+├── main.py         [실습] 파이프라인 오케스트레이션 (TODO 채우기)
+├── cli_search.py   [실습] 벡터 검색 결과 시각화 (TODO 채우기)
+├── extractor.py    [설명] PDF/DOCX/XLSX 통합 파서
+├── chunker.py      [설명] Fixed-size 청킹 (500자+100오버랩)
+├── store.py        [설명] ko-sroberta 임베딩 + ChromaDB upsert
 ├── extract_pdf.py  [참고] PDF 파싱 상세
 ├── extract_docx.py [참고] DOCX 파싱 상세
 └── extract_xlsx.py [참고] XLSX 파싱 상세
 ```
-**실습 요약**: 실습 3개 / 설명 2개 / 참고 3개
+**실습 요약**: 실습 2개 / 설명 3개 / 참고 3개
 
 ---
 
