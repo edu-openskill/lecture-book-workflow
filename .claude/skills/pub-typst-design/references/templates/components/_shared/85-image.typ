@@ -74,9 +74,9 @@
   if alt != none {
     figure(styled-img, caption: [#alt])
   } else {
-    block(above: figure-margin-top, below: figure-margin-bottom)[
-      #align(center, styled-img)
-    ]
+    v(figure-margin-top)
+    block[#align(center, styled-img)]
+    v(figure-margin-bottom)
   }
 })
 

@@ -6,9 +6,10 @@
 // ── 수평선은 후처리에서 #v + block으로 변환됨 ──
 
 // ── figure 스타일 (표/이미지 공통) ──
-// above/below를 명시하여 par(spacing)의 영향 차단
+// par(spacing: 0pt) 환경에서 block(below:)가 무시되므로 v()로 명시적 여백 확보
 #show figure: it => {
-  block(above: figure-margin-top, below: figure-margin-bottom)[
+  v(figure-margin-top)
+  block[
     #align(center, it.body)
     #if it.caption != none {
       v(figure-caption-gap)
@@ -17,6 +18,7 @@
       align(center, text(figure-caption-size, fill: figure-caption-color)[그림 #ch\-#fig-num: #it.caption.body])
     }
   ]
+  v(figure-margin-bottom)
 }
 
 // ── 링크 스타일 ──
