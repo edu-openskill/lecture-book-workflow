@@ -503,25 +503,44 @@ def fix_typst_content(text: str, image_border_preset: str = "plain", use_image_v
 
     # 3.7 callout-box 변환: > **라벨**: 내용 or > **라벨: 제목** 내용
     #     라벨을 프라이머리 색상 볼드로 강조
-    #     패턴 A: #strong[Tip]: 본문        → callout-box([Tip], [본문])
-    #     패턴 B: #strong[팁: LLM 선택] 본문 → callout-box([팁: LLM 선택], [본문])
-    def _callout_replacer(m):
-        label = m.group(1)
-        body = m.group(2).strip()
-        return f'#callout-box([{label}], [{body}])'
+    #     본문에 #strong[...] 등 중첩 브라켓이 있을 수 있으므로 정규식 대신 파싱
+    def _convert_callout_boxes(text):
+        result = []
+        i = 0
+        marker = '#quote(block: true)['
+        while i < len(text):
+            pos = text.find(marker, i)
+            if pos == -1:
+                result.append(text[i:])
+                break
+            result.append(text[i:pos])
+            # 브라켓 매칭으로 quote 블록 전체 추출
+            start = pos + len(marker)
+            depth = 1
+            j = start
+            while j < len(text) and depth > 0:
+                if text[j] == '[':
+                    depth += 1
+                elif text[j] == ']':
+                    depth -= 1
+                j += 1
+            inner = text[start:j-1].strip()
+            # 패턴 A: #strong[라벨]: 본문
+            m = re.match(r'#strong\[([^\]]+)\]:\s*(.*)', inner, re.DOTALL)
+            if not m:
+                # 패턴 B: #strong[라벨: 제목] (—|--)? 본문
+                m = re.match(r'#strong\[([^:\]]+:\s*[^\]]+)\]\s*(?:---|—|--)?\s*(.*)', inner, re.DOTALL)
+            if m:
+                label = m.group(1).strip()
+                body = m.group(2).strip()
+                result.append(f'#callout-box([{label}], [{body}])')
+            else:
+                # callout 패턴이 아니면 원본 유지
+                result.append(f'{marker}{inner}]')
+            i = j
+        return ''.join(result)
 
-    # 패턴 A: #strong[라벨]: 본문
-    text = re.sub(
-        r'#quote\(block: true\)\[\s*\n?#strong\[([^\]]+)\]:\s*(.*?)\n?\]',
-        _callout_replacer,
-        text, flags=re.DOTALL
-    )
-    # 패턴 B: #strong[라벨: 제목] — 본문 또는 줄바꿈 후 본문
-    text = re.sub(
-        r'#quote\(block: true\)\[\s*\n?#strong\[([^:\]]+:\s*[^\]]+)\]\s*(?:---|—|--)?\s*(.*?)\n?\]',
-        _callout_replacer,
-        text, flags=re.DOTALL
-    )
+    text = _convert_callout_boxes(text)
 
     # 4. 한국어 라벨 제거 (Pandoc이 생성하는 <한국어-라벨>)
     text = re.sub(r'<[가-힣a-zA-Z0-9.\-_]+>\n', '\n', text)
