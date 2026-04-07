@@ -74,8 +74,9 @@
   if alt != none {
     figure(styled-img, caption: [#alt])
   } else {
+    let fig-align = if figure-align == "left" { left } else if figure-align == "right" { right } else { center }
     v(figure-margin-top)
-    block[#align(center, styled-img)]
+    block[#align(fig-align, styled-img)]
     v(figure-margin-bottom)
   }
 })

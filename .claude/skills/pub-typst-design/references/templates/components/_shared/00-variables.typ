@@ -116,6 +116,7 @@
 #let figure-caption-gap = 2pt
 #let figure-caption-size = 8pt
 #let figure-caption-color = rgb("#6b7280")
+#let figure-align = "center"
 
 // 이미지 설정 변수 — 에디터 오버라이드 대상
 #let img-gemini-width = 0.7
