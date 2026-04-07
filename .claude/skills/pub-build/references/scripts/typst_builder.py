@@ -491,6 +491,9 @@ def fix_typst_content(text: str, image_border_preset: str = "plain", use_image_v
         text
     )
 
+    # 3.55 auto-image 뒤에 빈 줄 보장 (Typst가 figure와 다음 문단을 분리하도록)
+    text = re.sub(r'(#auto-image\([^)]*\))\n([^\n])', r'\1\n\n\2', text)
+
     # 3.6 pre_toc 콘텐츠 heading 목차 제외: = 제목 → #heading(outlined: false)[제목]
     #     pre_toc 파일은 목차 앞에 배치되므로 목차에 포함되면 안 됨
     if kwargs.get('exclude_from_toc'):

@@ -204,8 +204,8 @@
           "fontWeight": "800"
         },
         "figure": {
-          "figure_marginTop": "12pt",
-          "figure_marginBottom": "8pt",
+          "figure_marginTop": "16pt",
+          "figure_marginBottom": "16pt",
           "figure_captionGap": "4pt",
           "figure_captionSize": "8pt"
         }
