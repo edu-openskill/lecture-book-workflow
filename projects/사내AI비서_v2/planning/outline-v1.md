@@ -96,16 +96,20 @@ ex01/
 **코드 실습 분류**:
 ```
 ex04/src/
-├── main.py         [설명] 파이프라인 오케스트레이션 (실행+관찰)
-├── cli_search.py   [설명] 벡터 검색 결과 시각화 (실행+관찰)
-├── extractor.py    [설명] PDF/DOCX/XLSX 통합 파서
-├── chunker.py      [설명] Fixed-size 청킹 (500자+100오버랩)
-├── store.py        [설명] ko-sroberta 임베딩 + ChromaDB upsert
-├── extract_pdf.py  [참고] PDF 파싱 상세
-├── extract_docx.py [참고] DOCX 파싱 상세
-└── extract_xlsx.py [참고] XLSX 파싱 상세
+├── chunker.py        [실습] 청킹 핵심 로직 (TODO 1개)
+├── store.py          [실습] ChromaDB 저장+검색 (TODO 2개)
+├── main.py           [실습] 파이프라인 조립 (TODO 5개)
+├── cli_search.py     [실습] 벡터 검색 CLI (TODO 4개)
+├── _chunk_utils.py   [참고] 청크 생성/메타데이터
+├── _store_utils.py   [참고] 모델 로딩/컬렉션 관리
+├── _pipeline_utils.py [참고] argparse/마크다운 저장
+├── _search_utils.py  [참고] 유사도 변환/출력
+├── extractor.py      [설명] PDF/DOCX/XLSX 통합 파서
+├── extract_pdf.py    [참고] PDF 파싱 상세
+├── extract_docx.py   [참고] DOCX 파싱 상세
+└── extract_xlsx.py   [참고] XLSX 파싱 상세
 ```
-**실습 요약**: 설명 5개 / 참고 3개 (실행+관찰 챕터, 코드 작성 없음)
+**실습 요약**: 실습 4개(TODO 12개, ~60줄) / 설명 1개 / 참고 7개
 
 ---
 
