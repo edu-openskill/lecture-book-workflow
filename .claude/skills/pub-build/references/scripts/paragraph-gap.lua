@@ -30,18 +30,37 @@ function Blocks(blocks)
   local result = {}
   local prev_was_text = false
   local prev_was_image = false
+  local prev_was_caption = false
 
   for i, block in ipairs(blocks) do
     -- 이미지 바로 뒤 이탤릭 캡션이면 gap 삽입하지 않음
     if prev_was_image and is_caption_para(block) then
       -- gap 없이 바로 이어붙임 (후처리에서 auto-image alt로 병합됨)
-    elseif prev_was_text and is_text_flow(block) then
-      table.insert(result, pandoc.RawBlock("typst", "#v(paragraph-gap)"))
+      table.insert(result, block)
+      prev_was_text = false
+      prev_was_image = false
+      prev_was_caption = true
+    -- 캡션 바로 뒤 문단이면 gap 삽입하지 않음 (figure 자체 여백 사용)
+    elseif prev_was_caption and is_text_flow(block) then
+      table.insert(result, block)
+      prev_was_text = is_text_flow(block)
+      prev_was_image = false
+      prev_was_caption = false
+    -- 이미지(캡션 없음) 바로 뒤 문단이면 gap 삽입하지 않음
+    elseif prev_was_image and is_text_flow(block) then
+      table.insert(result, block)
+      prev_was_text = is_text_flow(block)
+      prev_was_image = false
+      prev_was_caption = false
+    else
+      if prev_was_text and is_text_flow(block) then
+        table.insert(result, pandoc.RawBlock("typst", "#v(paragraph-gap)"))
+      end
+      table.insert(result, block)
+      prev_was_text = is_text_flow(block)
+      prev_was_image = is_image_block(block)
+      prev_was_caption = false
     end
-
-    table.insert(result, block)
-    prev_was_text = is_text_flow(block)
-    prev_was_image = is_image_block(block)
   end
 
   return result
