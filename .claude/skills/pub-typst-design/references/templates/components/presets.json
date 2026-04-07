@@ -141,7 +141,7 @@
       },
       "typo": {
         "size": 12,
-        "tracking": 0,
+        "tracking": 0.5,
         "leading": 12,
         "paragraphGap": 24
       },
@@ -150,13 +150,33 @@
         "h2": 14,
         "h3": 13,
         "h4": 13,
-        "code": 8,
+        "code": 10,
         "quote": 9,
-        "table": 8,
+        "table": 10,
         "inlineCode": 12
       },
       "tocDepth": 3,
       "tocSpacing": 4,
+      "images": {
+        "gemini": {
+          "preset": "shadow",
+          "width": 50
+        },
+        "terminal": {
+          "preset": "minimal",
+          "width": 100
+        },
+        "diagram": {
+          "preset": "minimal",
+          "width": 100
+        }
+      },
+      "colors": {
+        "primary": "#2563eb",
+        "text": "#1a1a1a",
+        "codeText": "#1e40af",
+        "quoteBg": "#f5f8ff"
+      },
       "componentStyles": {
         "heading": {
           "h1_marginTop": "0pt",
@@ -176,6 +196,18 @@
           "h4_fontWeight": "500",
           "h4_color": "#555555",
           "h2_color": "#3754e1"
+        },
+        "code": {
+          "borderRadius": "10"
+        },
+        "inline_code": {
+          "fontWeight": "800"
+        },
+        "figure": {
+          "figure_marginTop": "12pt",
+          "figure_marginBottom": "8pt",
+          "figure_captionGap": "4pt",
+          "figure_captionSize": "8pt"
         }
       }
     }
