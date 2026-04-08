@@ -303,7 +303,7 @@ python step1_fail.py
 
 ### 2.6 실습 2 — step2_context.py: 문서를 직접 넣어보기
 
-step1에서 LLM이 거짓말하는 걸 봤습니다. 이번에는 **규정 내용을 프롬프트에 직접 포함** 시켜 봅니다.
+step1에서 LLM이 거짓말하는 걸 봤습니다. 이번에는 **규정 내용을 프롬프트에 직접 포함**시켜 봅니다.
 `ex01/step2_context.py`를 열어 두 TODO의 `pass`를 지우고 아래 코드를 작성합니다.
 
 ```python
@@ -436,14 +436,39 @@ python step3_rag_no_chunking.py
 
 *청킹 여부에 따른 검색 결과 비교. 조각으로 나누면 관련 문서만 정확히 찾는다.*
 
-step3에서는 인사규정만 깔끔하게 찾아왔지만 여기서는 인사규정 + 보안규정 + 복지규정이 통째로 들어옵니다. 관련 없는 내용이 섞이면 LLM이 정작 필요한 부분을 놓치기 쉽습니다. 문서를 조각으로 나누는 것, 즉 **청킹(Chunking)**이 왜 필요한지 바로 체감하실 수 있을 것입니다. 청킹 전략의 상세 비교는 CH08(검색 품질 튜닝)에서 다룹니다.
+step3에서는 인사규정만 깔끔하게 찾아왔지만 여기서는 인사규정 + 보안규정 + 복지규정이 통째로 들어옵니다. 관련 없는 내용이 섞이면 LLM이 정작 필요한 부분을 놓치기 쉽습니다. 문서를 조각으로 나누는 것, 즉 **청킹(Chunking)** 이 왜 필요한지 바로 체감하실 수 있을 겁니다. 청킹 전략의 상세 비교는 CH08(검색 품질 튜닝)에서 다룹니다.
 
 
 ### 2.9 실습 5 — step4_rag.py: 추론이 필요한 질문
 
-step3까지의 질문은 "규정이 뭐야?" 같은 단순 검색이었습니다. 이번에는 **규정을 찾아서 읽고 계산까지 해야 하는 질문**을 던져보겠습니다. `ex01/step4_rag.py`의 TODO를 step3과 동일한 방식으로 `pass`를 지우고 작성합니다. 코드 구조는 step3과 동일하고, 달라진 건 파일에 준비된 **질문**뿐입니다.
+step3까지의 질문은 "규정이 뭐야?" 같은 단순 검색이었습니다. 이번에는 **규정을 찾아서 읽고 계산까지 해야 하는 질문**을 던져보겠습니다. `ex01/step4_rag.py`의 TODO를 `pass`를 지우고 작성합니다. 코드 구조는 step3과 동일하고, 달라진 건 파일에 준비된 **질문**뿐입니다. "매월 1회 제공" → "6개월이면 6번" → "2번 썼으면 4번 남음"까지, 규정을 읽고 계산해야 하는 질문입니다.
 
-"매월 1회 제공" → "6개월이면 6번" → "2번 썼으면 4번 남음"까지, 규정을 읽고 계산해야 하는 질문입니다.
+```python
+# step4_rag.py — step3과 동일한 4개 TODO
+
+# 1. 임베딩 모델 로드 → 벡터DB 저장
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+vectorstore = Chroma.from_documents(documents=docs, embedding=embeddings)
+
+# 2. 검색기 생성 (k=3)
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+
+# 3. LLM + 체인 조립
+llm = ChatOllama(model="deepseek-r1:8b", temperature=0)
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm, retriever=retriever,
+    return_source_documents=True,
+    chain_type_kwargs={"prompt": PROMPT},
+)
+
+# 4. 질문 실행 + 출처/답변 출력
+result = qa_chain.invoke({"query": question})
+console.print("\n--- 검색된 문서(근거) ---")
+for doc in result["source_documents"]:
+    console.print(f"[{doc.metadata['source']}]: {doc.page_content}")
+console.print("\n--- AI 답변 ---")
+console.print(result["result"])
+```
 
 ```bash
 # 실행
