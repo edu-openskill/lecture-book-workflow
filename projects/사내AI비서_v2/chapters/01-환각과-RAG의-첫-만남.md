@@ -232,7 +232,7 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Ollama가 실행 중인지 확인합니다. macOS라면 Ollama 앱을 실행하거나, 터미널에서 `ollama serve`를 입력합니다. 모델이 아직 없다면 다운로드합니다.
+Ollama가 실행 중인지 확인합니다. 터미널에서 `ollama list`를 입력했을 때 모델 목록이 나오면 이미 실행 중입니다. 목록이 안 나오면 macOS에서는 Ollama 앱을 실행하거나 `ollama serve`를 입력합니다. 모델이 아직 없다면 다운로드합니다.
 
 ```bash
 ollama pull deepseek-r1:8b
