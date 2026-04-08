@@ -395,7 +395,7 @@ console.print("\n--- AI 답변 ---")
 console.print(result["result"])
 ```
 
-`return_source_documents=True` 덕분에 어떤 문서를 참고했는지도 함께 돌아옵니다. step2에서는 문서를 수동으로 넣었지만, 이번에는 질문에 맞는 문서를 자동으로 찾아옵니다.
+`return_source_documents=True` 덕분에 어떤 문서를 참고했는지도 함께 돌아옵니다. step2에서는 문서를 수동으로 넣었지만, 이번에는 질문에 맞는 문서를 자동으로 찾아옵니다. 프롬프트에 "참고 정보를 바탕으로 답하세요"라는 제약을 건 것도 눈여겨보시길 바랍니다. 이렇게 LLM이 제공된 문서에서만 답하도록 강제하는 기법을 **그라운딩(Grounding)** 이라고 합니다. CH05에서 본격적으로 다룹니다.
 
 > **이 챕터의 임베딩 모델**: `nomic-embed-text`를 사용합니다. CH04에서 한국어에 최적화된 `ko-sroberta-multitask`로 교체합니다.
 
