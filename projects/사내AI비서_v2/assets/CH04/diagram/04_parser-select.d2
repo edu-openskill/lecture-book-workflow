@@ -1,0 +1,87 @@
+direction: right
+
+classes: {
+  start-end: {
+    shape: oval
+    style: {
+      fill: "#ffffff"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+    }
+    width: 160
+    height: 70
+  }
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 18
+      bold: true
+    }
+    width: 160
+    height: 60
+  }
+  decision: {
+    shape: diamond
+    style: {
+      fill: "#ffffff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      shadow: true
+      font-size: 16
+      font-color: "#374151"
+      bold: true
+    }
+    width: 160
+    height: 80
+  }
+}
+
+D: 사내 문서 {
+  class: start-end
+}
+R: 확장자 확인 {
+  class: decision
+}
+P1: pypdf {
+  class: process
+}
+P2: python-docx {
+  class: process
+}
+P3: openpyxl {
+  class: process
+}
+T: 순수 텍스트 {
+  class: start-end
+}
+
+D -> R: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+R -> P1: .pdf {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+R -> P2: .docx {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+R -> P3: .xlsx {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+P1 -> T: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+P2 -> T: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+P3 -> T: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}

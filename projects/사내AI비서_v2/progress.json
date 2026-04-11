@@ -1,0 +1,240 @@
+{
+  "project": "사내AI비서_v2",
+  "title": "AI도 모르는 우리 회사 이야기",
+  "status": "done",
+  "current_step": "step_7_finish",
+  "created_at": "2026-03-04",
+  "updated_at": "2026-03-05",
+
+  "steps": {
+    "step_1_seed": {
+      "name": "씨앗",
+      "status": "done",
+      "artifact": "planning/seed-v1.md",
+      "artifact_version": 1,
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_2_code": {
+      "name": "코드 해부",
+      "status": "done",
+      "artifact": "planning/code-analysis-v1.md",
+      "artifact_version": 1,
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_3_scenario": {
+      "name": "시나리오+버전",
+      "status": "done",
+      "artifact": "planning/scenario-v1.md",
+      "artifact_version": 1,
+      "versions_created": ["v0.1", "v0.2", "v0.3", "v0.4", "v0.5", "v0.6", "v0.7", "v0.8", "v0.9", "v1.0"],
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_4_outline": {
+      "name": "뼈대",
+      "status": "done",
+      "artifact": "planning/outline-v1.md",
+      "artifact_version": 1,
+      "gap_analysis": {
+        "total_items": 5,
+        "applied": ["임베딩 모델 선택 기준(CH04)", "재인덱싱 전략(CH03)"],
+        "skipped": ["프롬프트 인젝션 방어", "LangChain vs 직접 구현 비교", "배포 전략"],
+        "total_pages": 110
+      },
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_5_chapters": {
+      "name": "챕터 집필",
+      "status": "done",
+      "chapters": [
+        {
+          "id": "CH01",
+          "title": "환각과 RAG의 첫 만남",
+          "version": "v0.1",
+          "status": "done",
+          "artifact": "chapters/01-환각과-RAG의-첫-만남.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "conditional_pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH02",
+          "title": "일단 사내 시스템부터",
+          "version": "v0.2",
+          "status": "done",
+          "artifact": "chapters/02-일단-사내-시스템부터.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH03",
+          "title": "어떤 문서를 넣을까",
+          "version": "v0.3",
+          "status": "done",
+          "artifact": "chapters/03-어떤-문서를-넣을까.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH04",
+          "title": "문서를 지식으로 바꾸다",
+          "version": "v0.4",
+          "status": "done",
+          "artifact": "chapters/04-문서를-지식으로-바꾸다.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH05",
+          "title": "드디어 답해준다",
+          "version": "v0.5",
+          "status": "done",
+          "artifact": "chapters/05-드디어-답해준다.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH06",
+          "title": "연차도, 규정도, 한번에",
+          "version": "v0.6",
+          "status": "done",
+          "artifact": "chapters/06-연차도-규정도-한번에.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH07",
+          "title": "실제로 써보니",
+          "version": "v0.7",
+          "status": "done",
+          "artifact": "chapters/07-실제로-써보니.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH08",
+          "title": "엉뚱한 문서를 가져온다",
+          "version": "v0.8",
+          "status": "done",
+          "artifact": "chapters/08-엉뚱한-문서를-가져온다.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH09",
+          "title": "질문을 제대로 이해 못한다",
+          "version": "v0.9",
+          "status": "done",
+          "artifact": "chapters/09-질문을-제대로-이해-못한다.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH10",
+          "title": "PDF 이미지까지 잡아라",
+          "version": "v1.0",
+          "status": "done",
+          "artifact": "chapters/10-PDF-이미지까지-잡아라.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        }
+      ]
+    },
+    "step_6_prologue": {
+      "name": "프롤로그+로드맵",
+      "status": "done",
+      "artifacts": {
+        "prologue": "book/front/prologue.md",
+        "roadmap": "book/front/roadmap.md"
+      },
+      "review": {
+        "audit": "pass"
+      }
+    },
+    "step_7_finish": {
+      "name": "마무리",
+      "status": "done",
+      "artifacts": {
+        "preface": "book/front/preface.md",
+        "epilogue": "book/back/epilogue.md",
+        "appendix": "book/back/appendix.md"
+      },
+      "final_title": "AI도 모르는 우리 회사 이야기 — LLM 환각부터 RAG 튜닝까지, 사내 AI 비서 ConnectHR 만들기",
+      "total_pages": 167,
+      "review": {
+        "audit": "pass"
+      }
+    }
+  },
+
+  "_chapter_template": {
+    "id": "CH01",
+    "title": "",
+    "version": "v0.1",
+    "status": "pending",
+    "artifact": null,
+    "review": {
+      "insight": null,
+      "intent_watch": null,
+      "audit": null
+    },
+    "questions_pending": 0
+  },
+
+  "_status_values": ["pending", "in_progress", "done", "review"],
+  "_review_values": [null, "pass", "conditional_pass", "fail"]
+}

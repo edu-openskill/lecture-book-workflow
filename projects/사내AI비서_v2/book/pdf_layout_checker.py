@@ -1,0 +1,1 @@
+../../.claude/skills/pub-layout-check/references/scripts/pdf_layout_checker.py

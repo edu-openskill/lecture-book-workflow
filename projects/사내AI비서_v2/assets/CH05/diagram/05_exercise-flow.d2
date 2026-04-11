@@ -1,0 +1,42 @@
+direction: right
+
+classes: {
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 16
+      bold: true
+    }
+    width: 200
+    height: 70
+  }
+}
+
+A: "rag_chain.py\n파이프라인 구축" {
+  class: process
+}
+B: "conversation.py\n메모리 연동" {
+  class: process
+}
+C: "chat_api.py\nAPI 연결" {
+  class: process
+}
+D: "서버 실행 및\n웹 UI 테스트" {
+  class: process
+}
+
+A -> B: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+B -> C: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+C -> D: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}

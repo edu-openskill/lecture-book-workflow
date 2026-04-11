@@ -1,0 +1,73 @@
+direction: right
+
+classes: {
+  start-end: {
+    shape: oval
+    style: {
+      fill: "#ffffff"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+    }
+    width: 160
+    height: 70
+  }
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 16
+      bold: true
+    }
+    width: 180
+    height: 60
+  }
+}
+
+Q: 질문 {
+  class: start-end
+}
+R: "QueryRouter\n(안내데스크)" {
+  class: process
+}
+A: "통합 에이전트\n(ReAct 패턴)" {
+  class: process
+}
+T1: "leave_balance\n(연차 조회)" {
+  class: process
+}
+T2: "search_documents\n(문서 검색)" {
+  class: process
+}
+ANS: 통합 답변 {
+  class: start-end
+}
+
+Q -> R: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+R -> A: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+A -> T1: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+A -> T2: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+T1 -> A: {
+  style: { stroke: "#2563eb"; stroke-width: 2; stroke-dash: 5 }
+}
+T2 -> A: {
+  style: { stroke: "#2563eb"; stroke-width: 2; stroke-dash: 5 }
+}
+A -> ANS: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}

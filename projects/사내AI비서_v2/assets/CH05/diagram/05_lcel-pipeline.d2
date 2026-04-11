@@ -1,0 +1,42 @@
+direction: right
+
+classes: {
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 18
+      bold: true
+    }
+    width: 140
+    height: 60
+  }
+}
+
+A: 검색 {
+  class: process
+}
+B: 프롬프트 {
+  class: process
+}
+C: LLM {
+  class: process
+}
+D: 파싱 {
+  class: process
+}
+
+A -> B: "|" {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+B -> C: "|" {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+C -> D: "|" {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}

@@ -1,0 +1,1 @@
+../../../../.claude/skills/pub-typst-design/references/templates/book_base.typ

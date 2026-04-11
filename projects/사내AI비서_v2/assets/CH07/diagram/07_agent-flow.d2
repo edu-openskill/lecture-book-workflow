@@ -1,0 +1,84 @@
+shape: sequence_diagram
+
+User: 사용자 {
+  style: {
+    fill: "#ffffff"
+    font-size: 16
+    font-color: "#374151"
+    bold: true
+    stroke: "#2563eb"
+    stroke-width: 2
+    border-radius: 8
+  }
+}
+Agent: ConnectHRAgent {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+    bold: true
+    border-radius: 8
+  }
+}
+Cache: ResponseCache {
+  style: {
+    fill: "#f8fafc"
+    stroke: "#94a3b8"
+    stroke-width: 2
+    font-size: 14
+    font-color: "#374151"
+    bold: true
+    border-radius: 8
+  }
+}
+Router: QueryRouter {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+    bold: true
+    border-radius: 8
+  }
+}
+LLM: "에이전트\n(RAG/Agent)" {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+    bold: true
+    border-radius: 8
+  }
+}
+Tracker: TokenTracker {
+  style: {
+    fill: "#f8fafc"
+    stroke: "#94a3b8"
+    stroke-width: 2
+    font-size: 14
+    font-color: "#374151"
+    bold: true
+    border-radius: 8
+  }
+}
+
+User -> Agent: 질문
+Agent -> Cache: 캐시 조회
+Cache -> Agent: HIT → 즉시 반환 / MISS → 계속 {
+  style.stroke-dash: 5
+}
+Agent -> Router: 질문 분류 (MISS)
+Router -> LLM: 경로별 실행
+LLM -> Agent: 결과 {
+  style.stroke-dash: 5
+}
+Agent -> Tracker: 사용량 기록
+Agent -> Cache: 결과 저장
+Agent -> User: 응답 반환 {
+  style.stroke-dash: 5
+}

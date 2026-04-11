@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+BASE_DIR="/Users/nomadlab/Desktop/김주혁/workspace/coding-study/집필에이전트 v2"
+SCRIPT="$BASE_DIR/.claude/skills/screenshot/scripts/terminal_screenshot.py"
+
+echo "=== Missing Terminal Captures ==="
+
+# CH08
+CWD="$BASE_DIR/projects/사내AI비서_v2/code/ex08"
+ASSETS="$BASE_DIR/projects/사내AI비서_v2/assets/CH08/terminal"
+mkdir -p "$ASSETS"
+PYTHON="$CWD/.venv/bin/python"
+WRAPPER="$BASE_DIR/projects/사내AI비서_v2/run_without_rich.py"
+
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step1_chunk_experiment --step 1-1" --cwd "$CWD" --png "$ASSETS/08_chunk-size.png" --title "step 1-1: 청크 크기 실험" --timeout 120 --display "python -m tuning.step1_chunk_experiment --step 1-1"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step1_chunk_experiment --step 1-3" --cwd "$CWD" --png "$ASSETS/08_strategy-comparison.png" --title "step 1-3: 긴 문서 청킹 전략 비교" --timeout 120 --display "python -m tuning.step1_chunk_experiment --step 1-3"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step3_hybrid_search" --cwd "$CWD" --png "$ASSETS/08_hybrid-search.png" --title "하이브리드 검색 (BM25 + Vector)" --timeout 120 --display "python -m tuning.step3_hybrid_search"
+
+# CH09
+CWD="$BASE_DIR/projects/사내AI비서_v2/code/ex09"
+ASSETS="$BASE_DIR/projects/사내AI비서_v2/assets/CH09/terminal"
+mkdir -p "$ASSETS"
+PYTHON="$CWD/.venv/bin/python"
+
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step1_advanced_retriever --step 1-1" --cwd "$CWD" --png "$ASSETS/09_parent-doc.png" --title "step 1-1: Parent Document Retriever" --timeout 120 --display "python -m tuning.step1_advanced_retriever --step 1-1"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step1_advanced_retriever --step 1-2" --cwd "$CWD" --png "$ASSETS/09_self-query.png" --title "step 1-2: Self-Query Retriever" --timeout 120 --display "python -m tuning.step1_advanced_retriever --step 1-2"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step1_advanced_retriever --step 1-3" --cwd "$CWD" --png "$ASSETS/09_compression.png" --title "step 1-3: Contextual Compression" --timeout 120 --display "python -m tuning.step1_advanced_retriever --step 1-3"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step2_query_rewrite --step 2-1" --cwd "$CWD" --png "$ASSETS/09_abbreviation.png" --title "step 2-1: 약어 / 동의어 확장" --timeout 120 --display "python -m tuning.step2_query_rewrite --step 2-1"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step2_query_rewrite --step 2-2" --cwd "$CWD" --png "$ASSETS/09_hyde.png" --title "step 2-2: HyDE (가상 답변 검색)" --timeout 120 --display "python -m tuning.step2_query_rewrite --step 2-2"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step2_query_rewrite --step 2-3" --cwd "$CWD" --png "$ASSETS/09_multi-query.png" --title "step 2-3: Multi-Query (다중 쿼리)" --timeout 120 --display "python -m tuning.step2_query_rewrite --step 2-3"
+
+# CH10
+CWD="$BASE_DIR/projects/사내AI비서_v2/code/ex10"
+ASSETS="$BASE_DIR/projects/사내AI비서_v2/assets/CH10/terminal"
+mkdir -p "$ASSETS"
+PYTHON="$CWD/.venv/bin/python"
+
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step1_document_parser --step 1-1 --pdf_path data/docs/ops/OPS_신규서비스_런칭전략.pdf" --cwd "$CWD" --png "$ASSETS/10_step1-1-ocr.png" --title "step 1-1: OCR 파싱 (EasyOCR)" --timeout 120 --display "python -m tuning.step1_document_parser --step 1-1 --pdf_path data/docs/ops/OPS_신규서비스_런칭전략.pdf"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step1_document_parser --step 1-2 --pdf_path data/docs/ops/OPS_신규서비스_런칭전략.pdf" --cwd "$CWD" --png "$ASSETS/10_step1-2-vision.png" --title "step 1-2: Vision 파싱 (Qwen2.5-VL)" --timeout 120 --display "python -m tuning.step1_document_parser --step 1-2 --pdf_path data/docs/ops/OPS_신규서비스_런칭전략.pdf"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step2_hybrid_parser --step 2-1 --pdf data/docs/ops/OPS_신규서비스_런칭전략.pdf" --cwd "$CWD" --png "$ASSETS/10_step2-1-hybrid.png" --title "step 2-1: 문자 수 기반 하이브리드 파싱" --timeout 120 --display "python -m tuning.step2_hybrid_parser --step 2-1 --pdf data/docs/ops/OPS_신규서비스_런칭전략.pdf"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step2_hybrid_parser --step 2-2 --pdf data/docs/ops/OPS_신규서비스_런칭전략.pdf" --cwd "$CWD" --png "$ASSETS/10_step2-2-textlayer.png" --title "step 2-2: 텍스트 레이어 기반 하이브리드 파싱" --timeout 120 --display "python -m tuning.step2_hybrid_parser --step 2-2 --pdf data/docs/ops/OPS_신규서비스_런칭전략.pdf"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step3_eval_framework --step 2-1 --k 3" --cwd "$CWD" --png "$ASSETS/10_step3-1-questions.png" --title "step 3-1: 정확도 (Precision@k)" --timeout 120 --display "python -m tuning.step3_eval_framework --step 2-1 --k 3"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step3_eval_framework --step 2-2 --k 3" --cwd "$CWD" --png "$ASSETS/10_step3-2-retrieval.png" --title "step 3-2: 재현율 (Recall@k)" --timeout 120 --display "python -m tuning.step3_eval_framework --step 2-2 --k 3"
+python3 "$SCRIPT" "'$PYTHON' '$WRAPPER' tuning.step3_eval_framework --step 2-3" --cwd "$CWD" --png "$ASSETS/10_step3-3-hallucination.png" --title "step 3-3: 환각률 (Hallucination Rate)" --timeout 120 --display "python -m tuning.step3_eval_framework --step 2-3"
+
+echo "Done"

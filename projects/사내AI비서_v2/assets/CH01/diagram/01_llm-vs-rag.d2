@@ -1,0 +1,165 @@
+grid-rows: 2
+
+classes: {
+  start-end: {
+    shape: oval
+    style: {
+      fill: "#ffffff"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+    }
+    width: 150
+    height: 70
+  }
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 18
+      bold: true
+    }
+    width: 120
+    height: 60
+  }
+  danger: {
+    shape: oval
+    style: {
+      fill: "#ffffff"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+      bold: true
+    }
+    width: 150
+    height: 70
+  }
+  success: {
+    shape: oval
+    style: {
+      fill: "#ffffff"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+      bold: true
+    }
+    width: 150
+    height: 70
+  }
+  storage: {
+    shape: cylinder
+    style: {
+      fill: "#f8fafc"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+      bold: true
+    }
+    width: 140
+    height: 80
+  }
+  group-box: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+      stroke-dash: 5
+      fill: "#ffffff"
+      font-size: 22
+      bold: true
+      font-color: "#1e3a5f"
+    }
+  }
+}
+
+llm_only: LLM 단독 {
+  class: group-box
+  direction: right
+
+  q1: 질문 {
+    class: start-end
+  }
+  llm1: LLM {
+    class: process
+  }
+  a1: 환각 답변 {
+    class: danger
+  }
+
+  q1 -> llm1: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+    }
+  }
+  llm1 -> a1: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+    }
+  }
+}
+
+rag: RAG {
+  class: group-box
+  direction: right
+
+  q2: 질문 {
+    class: start-end
+  }
+  retriever: 검색기 {
+    class: process
+  }
+  vectordb: 벡터 DB {
+    class: storage
+  }
+  llm2: LLM {
+    class: process
+  }
+  a2: 출처 포함 답변 {
+    class: success
+  }
+
+  q2 -> retriever: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+    }
+  }
+  retriever -> vectordb: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+    }
+  }
+  vectordb -> llm2: 관련 문서 {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+    }
+  }
+  q2 -> llm2: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+    }
+  }
+  llm2 -> a2: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+    }
+  }
+}

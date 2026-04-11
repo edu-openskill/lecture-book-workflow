@@ -1,0 +1,537 @@
+# Ch.1: Hallucination과 RAG (ex01)
+
+> 한 줄 요약: LLM은 우리 회사 문서를 읽은 적이 없다. 문서를 직접 넣어줘야 한다.  
+> 핵심 개념: LLM 환각, Context Injection, RAG
+
+## AI가 자신 있게 틀린 답을 말한다
+
+### 1.1 입사 3일 차, 첫 번째 임무
+
+<!-- [GEMINI PROMPT: 01_chapter-opening]
+path: assets/CH01/01_chapter-opening.png
+A minimalist black and white technical diagram with a strict 16:9 aspect ratio
+on a solid white background. No shading, no 3D effects, only clean thin line art.
+The entire assembly of icons, lines, and text is perfectly centered globally
+within the 16:9 frame, leaving generous and equal white space on all sides.
+
+A minimalist line-art person icon sitting at a desk with a laptop.
+Above the laptop, a large speech bubble from an off-screen figure (team lead)
+containing text 'AI 비서 만들어봐'. The person has a small thought bubble
+with a question mark '?'. On the desk, a sticky note labeled 'Wi-Fi PW'.
+To the right of the person, a minimalist line-art chat window icon with
+a robot face inside, representing the AI assistant to be built.
+Korean label at bottom: '입사 3일 차, 첫 번째 미션'.
+Style: scene-opener
+-->
+![](../assets/CH01/gemini/01_chapter-opening.png)
+
+*AI가 자신 있게 내놓은 답이 사실이 아닐 때, RAG라는 해법이 시작됩니다*
+
+커넥트에 입사한 지 3일 차. 아직 사내 Wi-Fi 비밀번호를 포스트잇에 적어 모니터에 붙여놓던 시절입니다. 오전 10시, 팀장이 저를 바라보며 다가옵니다.
+
+**팀장**: "AI로 사내 문서 검색 시스템 만들어봐. 직원들이 규정이나 정책 찾는 게 번거롭다고 해서. 채팅창에 물어보면 바로 답해주는 거."
+
+*AI 비서. 사내 문서. 대화식 검색. 나 혼자서?*
+
+**오픈이**: "언제까지요?". 
+**팀장**: "급하진 않아. 2주 내로 간단한 프로토타입만."
+
+노트북을 열고 ChatGPT를 실행했습니다.
+
+*ChatGPT도 뭐든 대답하잖아. LLM에게 직접 물어보면 되는 거 아니야?*
+
+코드부터 짰습니다.
+
+### 1.2 LLM의 자신감 넘치는 거짓말
+
+연차 규정을 예시로 물어봤습니다.
+
+**오픈이**: "우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"
+
+LLM이 답했습니다.
+
+**LLM**: "커넥트 사의 신입사원 연차 규정은 근로기준법에 따라, 입사 후 1년 미만 기간에는 1개월 개근 시 1일의 유급휴가가 발생합니다. 1년 이상 근무 시에는 15일의 연차가 발생하며, 3년 이상 근무한 경우 1년마다 1일씩 추가됩니다…"
+
+그럴듯했습니다. 공식적인 느낌도 났습니다. 입사할 때 받은 규정집을 꺼내 비교해봤습니다. 커넥트의 실제 규정은 이랬습니다.
+
+*신입사원은 입사 후 3년 동안은 연차가 없다. 대신 매월 1회 '리프레시 데이'를 유급으로 제공한다. 3년 근속 시 30일의 연차가 일시에 발생한다.*
+
+*잠깐, 뭐라고?*
+
+다시 읽었습니다. 완전히 다른 내용이었습니다. LLM이 방금 그럴듯한 거짓말을 한 것입니다.
+
+
+### 1.3 Hallucination — 왜 모르면서 아는 척하나
+
+여기서 의문이 생깁니다. LLM은 왜 자신 있게 틀린 대답을 했을까요?
+LLM을 이렇게 가정해 보겠습니다. 입사 면접을 보러 온 외부인이라고요. 이 외부인은 세상에 공개된 거의 모든 자료를 읽었습니다. 인터넷, 뉴스, 책, 논문까지. 공개된 텍스트라면 뭐든 섭렵했습니다. 그래서 근로기준법은 완벽하게 알고 일반적인 회사 연차 제도도 줄줄 외웁니다. 그런데 커넥트의 내부 규정집은 공개된 적이 없습니다. 이 외부인이 읽을 방법이 없었어요.
+
+문제는 이 외부인이 "모른다"고 솔직히 말하지 못한다는 점입니다. 질문을 받으면 자기가 아는 것 중에서 가장 비슷해 보이는 걸 자신감 있게 말합니다. "아마 일반적인 회사라면 이렇겠지"라는 추측인데, 마치 확실히 아는 것처럼 들립니다. 이게 **LLM 환각(Hallucination)** 입니다.
+
+<!-- [GEMINI PROMPT: 01_hallucination-outsider]
+path: assets/CH01/01_hallucination-outsider.png
+A minimalist black and white technical diagram with a strict 16:9 aspect ratio
+on a solid white background. No shading, no 3D effects, only clean thin line art.
+The entire assembly of icons, lines, and text is perfectly centered globally
+within the 16:9 frame, leaving generous and equal white space on all sides.
+
+Left side: a minimalist line-art person icon in a suit labeled 'LLM (외부인)',
+with a large speech bubble containing a confident checkmark and text '근로기준법에
+따르면...' — representing confident but wrong answers.
+Right side: a minimalist line-art building icon labeled '회사 내부' with a locked
+door icon. Behind the door, three stacked document icons labeled '사내 규정'.
+A dashed arrow from the person toward the locked door with a large X mark on it,
+indicating the person cannot access internal documents.
+Below the person: small icons of books, newspapers, globe labeled '공개 데이터 (학습 완료)'.
+Korean label at bottom: 'LLM은 공개 데이터는 알지만, 사내 문서는 읽은 적 없다'.
+Style: metaphor-diagram
+-->
+![](../assets/CH01/gemini/01_hallucination-outsider.png)
+
+*LLM은 세상의 공개 데이터는 학습했지만, 우리 회사 내부 문서는 읽은 적이 없다.*
+
+GPT든 Claude든 Gemini든 마찬가지입니다. 학습 데이터에 없는 정보는 알 방법이 없습니다. 그런데 솔직히 "모른다"고 하지 않고 그럴듯하게 지어냅니다. 일반적인 내용과 비슷한 맥락일수록 더 자연스럽게 지어냅니다. 커넥트의 연차 규정은 공개된 인터넷 어디에도 없습니다. LLM이 알 수 없습니다. 근로기준법 기반으로 그럴듯한 답을 만들어낸 것뿐입니다.
+
+
+### 1.4 Context Injection — 문서를 직접 넣어보기
+
+생각해보면 해결책은 단순합니다. LLM이 모른다면 직접 알려주면 됩니다.
+규정 내용을 통째로 프롬프트에 붙여서 다시 물어봤습니다.
+
+**오픈이**: 아래 [커넥트 취업규칙]을 참고해서 신입사원 연차 규정을 알려줘.
+
+이번엔 달랐습니다. 커넥트의 실제 규정을 정확히 설명해줬습니다.
+
+*오, 이거면 되는 거 아니야?*
+
+그런데 사내 문서가 규정집 하나가 아닙니다. 복지 정책, 보안 지침, 업무 가이드, 회의록, 프로젝트 문서까지 파일만 수십 개입니다. 매번 전부 복사해서 프롬프트에 붙이면 어떻게 됩니까? LLM에는 한 번에 처리할 수 있는 텍스트 길이 한도가 있습니다. 문서가 쌓일수록 한도를 넘기기 쉽습니다. 무엇보다 연차 규정을 물어보는데 보안 지침이나 복지 정책까지 다 넣어서 보내는 건 비효율적입니다. 관련 없는 내용이 섞일수록 LLM이 정작 필요한 부분을 놓치기 쉬워집니다.
+
+문서를 통째로 넣는 방식은 임시방편이었습니다.
+
+<!-- [GEMINI PROMPT: 01_context-overflow]
+path: assets/CH01/01_context-overflow.png
+A minimalist black and white technical diagram with a strict 16:9 aspect ratio
+on a solid white background. No shading, no 3D effects, only clean thin line art.
+The entire assembly of icons, lines, and text is perfectly centered globally
+within the 16:9 frame, leaving generous and equal white space on all sides.
+
+Center: a minimalist line-art rectangle representing a prompt window labeled
+'프롬프트 창'. Inside the window, three stacked document icons labeled '인사규정',
+'보안지침', '복지정책'. Above the window, five more document icons are falling
+toward the window but overflowing — some tilted and sticking out above the top edge.
+A dashed horizontal line near the top of the window labeled '컨텍스트 한도'.
+The documents above the line are drawn with lighter/thinner strokes to indicate
+they cannot fit. A small warning triangle icon with '!' at the top right corner.
+Korean labels below: '문서가 많아지면 프롬프트에 다 넣을 수 없다'.
+Style: limitation-diagram
+-->
+![](../assets/CH01/gemini/01_context-overflow.png)
+
+*문서를 통째로 넣는 방식의 한계. 문서가 늘어나면 프롬프트 창이 넘친다.*
+
+
+### 1.5 RAG — 오픈북 시험으로 바꾸기
+
+더 나은 방법이 있습니다.
+LLM이 모든 사내 문서를 외울 필요는 없습니다. 사람도 비슷한 문제를 해결한 방식이 있습니다. 시험에서 모든 내용을 통째로 외우는 대신 오픈북을 허용하면 됩니다. 시험지가 나오면 그 문제와 관련된 페이지를 찾아서 보면서 답하는 방식입니다.
+
+LLM도 마찬가지입니다. 사내 문서 전체를 외울 필요가 없습니다. 질문이 들어왔을 때 **그 질문과 관련된 문서 조각만 찾아서 LLM에게 건네주면 됩니다.**
+
+<!-- [GEMINI PROMPT: 01_openbook-exam]
+path: assets/CH01/01_openbook-exam.png
+A minimalist black and white technical diagram with a strict 16:9 aspect ratio
+on a solid white background. No shading, no 3D effects, only clean thin line art.
+The entire assembly of icons, lines, and text is perfectly centered globally
+within the 16:9 frame, leaving generous and equal white space on all sides.
+
+Left side: a minimalist line-art person icon sitting at a desk, stressed, with a
+closed book labeled '전체 암기' and a thought bubble with '???' — representing a
+closed-book exam. A large X mark over this scene.
+Right side: the same person icon, relaxed, with an open book on the desk labeled
+'관련 페이지만', a magnifying glass icon pointing at the open page, and a light
+bulb above the head — representing an open-book exam. A large O mark over this scene.
+An arrow from left to right labeled '오픈북 전환'.
+Korean labels: left '클로즈드북 (전부 외우기)', right '오픈북 (필요한 것만 찾기)'.
+Style: metaphor-comparison
+-->
+![](../assets/CH01/gemini/01_openbook-exam.png)
+
+*클로즈드북 vs 오픈북. RAG는 LLM에게 오픈북 시험을 치르게 하는 것입니다.*
+
+이것이 **RAG** — Retrieval-Augmented Generation, 검색 증강 생성입니다.
+흐름을 보면 이렇게 됩니다.
+
+![](../assets/CH01/diagram/01_llm-vs-rag.png)
+
+*LLM 단독 호출과 RAG의 차이. RAG는 질문마다 관련 문서를 찾아서 LLM에 건네줍니다.*
+
+1. 사내 문서들을 미리 **벡터 DB**에 조각으로 나눠 저장해 놓습니다 (오픈북 준비)
+2. 질문이 들어오면, 그 질문과 의미가 비슷한 문서 조각을 벡터 DB에서 찾습니다 (관련 페이지 찾기)
+3. 찾은 문서 조각 + 질문을 LLM에게 함께 넘깁니다
+4. LLM이 그 문서를 보면서 답합니다 (오픈북으로 시험 보기)
+
+이제 LLM이 우리 회사 규정을 외울 필요가 없습니다. 질문할 때마다 관련 규정을 찾아서 보여주면 되기 때문입니다. 어느 문서를 참고했는지도 함께 돌려줄 수 있습니다. 이번 챕터의 목표는 이 흐름을 직접 만들어보는 것입니다. 더미 문서 3개짜리 간단한 버전으로 시작하겠습니다. 실제 PDF 파싱이나 한국어 임베딩 모델 적용, DB 연동은 뒤 챕터에서 차례로 붙입니다.
+
+이제 실습으로 LLM 환각을 직접 확인하고, RAG로 해결해보겠습니다.
+
+## 환각을 잡는 RAG 파이프라인 만들기
+
+### 2.1 용어 정리
+
+| 이야기 속 표현 | 진짜 용어 | 정식 정의 |
+|------------|----------|---------|
+| "자신감 넘치는 거짓말" | LLM 환각 (Hallucination) | LLM이 학습 데이터에 없는 정보를 그럴듯하게 만들어내는 현상 |
+| "문서를 직접 붙여 넣기" | Context Injection | 관련 정보를 프롬프트에 직접 넣어서 LLM에 제공하는 방법 |
+| "오픈북 시험" | RAG (Retrieval-Augmented Generation) | 외부 지식 저장소에서 관련 문서를 검색해 LLM 생성에 활용하는 방식 |
+| "오픈북 준비" | 임베딩 + 벡터 DB 저장 | 문서를 수치 벡터로 변환해 ChromaDB에 인덱싱하는 과정 |
+| "관련 페이지 찾기" | 벡터 유사도 검색 | 질문 벡터와 문서 벡터 간 코사인 유사도를 계산해 가장 관련 있는 문서를 반환 |
+
+
+### 2.2 소스 코드 준비
+
+이 책의 실습은 GitHub 레포를 클론해서 진행합니다.
+
+| 레포 | 용도 | 주소 |
+|------|------|------|
+| **rag-start** | 실습용 (빈 파일 — 챕터 따라 코드 작성) | `https://github.com/metacoding-18-ai-applied-v4/rag-start` |
+| **rag-end** | 완성 코드 (막히면 참고) | `https://github.com/metacoding-18-ai-applied-v4/rag-end` |
+
+아직 클론하지 않았다면 터미널에서 아래 명령어를 실행해 보겠습니다.
+
+```bash
+git clone https://github.com/metacoding-18-ai-applied-v4/rag-start.git
+cd rag-start/ex01
+```
+
+이미 클론하셨다면 `ex01` 폴더로 이동해 보겠습니다.
+
+```bash
+cd rag-start/ex01
+```
+
+```
+ex01/
+├── step1_fail.py            [실습] LLM 단독 호출 → 환각 체험
+├── step2_context.py         [실습] 컨텍스트 직접 주입 → 임시 해결
+├── step3_rag.py             [실습] RAG 기본 파이프라인 구성
+├── step3_rag_no_chunking.py [실습] 청킹 없이 비교 → 차이 체감
+└── step4_rag.py             [실습] 추론 심화 (Chain-of-Thought)
+```
+
+`[실습]` 파일에는 import와 데이터가 미리 준비되어 있습니다. 각 TODO의 `pass`를 지우고 챕터의 코드를 작성합니다. 막히는 부분이 있다면 rag-end의 완성 코드를 참고해 주시기 바랍니다.
+
+
+### 2.3 실습 환경 구축
+
+> 기본 환경(Python 3.12, Docker)이 없다면 **교육자료**를 먼저 확인해 주시기 바랍니다.
+
+> **Apple Silicon(M1/M2/M3) 사용자**: psycopg2-binary 설치가 실패한다면 `brew install libpq`를 먼저 실행해 보시기 바랍니다.
+
+```bash
+cd ex01
+python3.12 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Ollama가 실행 중인지 확인합니다. 터미널에서 `ollama list`를 입력했을 때 모델 목록이 나오면 이미 실행 중입니다. 목록이 안 나오면 macOS에서는 Ollama 앱을 실행하거나 `ollama serve`를 입력합니다. 모델이 아직 없다면 다운로드합니다.
+
+```bash
+ollama pull deepseek-r1:8b
+ollama pull nomic-embed-text
+```
+
+> **팁: LLM 선택**
+> 기본값은 Ollama + `deepseek-r1:8b`입니다(16GB RAM 이상 권장). RAM이 부족하거나 응답이 너무 느리면 `.env`에서 `LLM_PROVIDER=openai`로 바꿔서 GPT-4o-mini를 쓸 수도 있습니다. 단, API 비용이 발생합니다. `.env` 파일에 `OPENAI_API_KEY=sk-xxxxxx` 형태로 키를 등록해 사용하시면 됩니다. 상세 안내는 **교육자료**를 확인해 주시기 바랍니다.
+
+이번 챕터에서는 **LangChain**이라는 프레임워크를 사용합니다. LLM 호출, 벡터 검색, 체인 조립처럼 RAG에 필요한 부품을 제공하는 도구입니다. 여기서는 맛보기로만 쓰고 CH05에서 본격적으로 다룹니다.
+
+| 패키지 | 역할 |
+|--------|------|
+| `langchain-ollama` | Ollama LLM/임베딩 연동 |
+| `langchain-chroma` | ChromaDB 벡터 저장소 |
+| `langchain-classic` | RetrievalQA 체인 (CH05에서 LCEL로 전환) |
+| `chromadb` | 벡터 DB |
+
+> **팁: 지금은 개념만 잡으세요**
+> LangChain, 임베딩, 벡터 DB 같은 용어가 한꺼번에 나와서 부담스러울 수 있습니다. 지금은 "문서를 넣어주면 LLM이 정확하게 답한다"는 **RAG의 개념**만 잡으면 충분합니다. 각 기술의 동작 원리는 CH04~CH05에서 차근차근 다룹니다.
+
+### 2.4 실습 순서
+
+1. `step1_fail.py` — LLM 단독 질문
+2. `step2_context.py` — 문서 직접 전달
+3. `step3_rag.py` — RAG 파이프라인
+4. `step3_rag_no_chunking.py` — 청킹 없이 비교
+5. `step4_rag.py` — 추론 심화
+
+환각을 직접 체험하고(step1), 문서를 넣으면 달라지는 걸 확인한 뒤(step2), RAG로 조립합니다(step3). 그다음 청킹 없이 돌려서 차이를 체감하고(step3_no_chunking), 추론이 필요한 질문까지 던져봅니다(step4). **step1부터 순서대로 실행해 보겠습니다.**
+
+
+### 2.5 실습 1 — step1_fail.py: LLM에게 직접 물어보기
+
+`ex01/step1_fail.py`를 열어 두 TODO의 `pass`를 지우고 아래 코드를 작성합니다.
+
+```python
+# step1_fail.py — TODO: ChatOllama로 deepseek-r1:8b 모델 연결 (temperature=0)
+
+# 1. Ollama에서 deepseek-r1:8b 모델을 로드 (temperature=0: 가장 확률 높은 답변)
+llm = ChatOllama(model="deepseek-r1:8b", temperature=0)
+```
+
+```python
+# step1_fail.py — TODO: 질문 출력 → llm.invoke로 답변 받기 → 답변 출력
+
+# 1. 질문을 터미널에 출력
+console.print(f"[bold]질문:[/bold] {question}\n")
+# 2. LLM에 질문을 보내고 답변을 받음
+response = llm.invoke(question)
+# 3. 답변을 출력
+console.print(f"[bold]답변:[/bold]\n{response.content}")
+```
+
+`ChatOllama`는 LangChain이 Ollama LLM을 호출할 때 쓰는 래퍼입니다. `temperature=0`은 창의적 변형 없이 가장 확률 높은 답변을 내놓게 하는 설정입니다.
+
+```bash
+# 실행
+python step1_fail.py
+```
+
+<!-- [CAPTURE NEEDED: 01_step1-hallucination]
+path: assets/CH01/terminal/01_step1-hallucination.png
+cmd: cd ex01 && python step1_fail.py
+desc: LLM 단독 질문 실행 결과. 커넥트 연차 규정을 물었지만 근로기준법 기반의 환각 답변이 출력된다.
+-->
+![](../assets/CH01/terminal/01_step1-hallucination.png)
+
+*step1_fail.py 실행 결과. 자신감 있게 답하지만 실제 커넥트 규정과 다르다.*
+
+답변을 읽어보면 "근로기준법에 따라 1년 미만은 매월 1일..." 같은 내용이 나옵니다. 공식적인 느낌도 나고 그럴듯합니다. 하지만 앞에서 봤듯이 커넥트의 실제 규정은 완전히 다릅니다. LLM은 커넥트라는 회사를 모릅니다. 학습 데이터에 없으니 일반적인 근로기준법 내용을 가져다 붙인 것입니다. 이것이 **환각(Hallucination)** 입니다. 틀린 답을 자신감 있게 내놓았고, 출처도 없습니다.
+
+
+### 2.6 실습 2 — step2_context.py: 문서를 직접 넣어보기
+
+step1에서 LLM이 거짓말하는 걸 봤습니다. 이번에는 **규정 내용을 프롬프트에 직접 포함**시켜 봅니다.
+`ex01/step2_context.py`를 열어 두 TODO의 `pass`를 지우고 아래 코드를 작성합니다.
+
+```python
+# step2_context.py — TODO: ChatOllama로 deepseek-r1:8b 모델 연결 (temperature=0)
+
+# 1. step1과 동일하게 LLM 로드
+llm = ChatOllama(model="deepseek-r1:8b", temperature=0)
+```
+
+LLM 아래에 `context_data`와 `question`이 이미 선언되어 있습니다. `context_data`에는 커넥트의 취업규칙 일부가, `question`에는 테스트 질문이 담겨 있습니다.
+
+```python
+# 정보를 변수에 담습니다 (아직 DB 안 씀)
+context_data = """
+[커넥트 취업규칙]
+1. 신입사원은 입사 후 3년 동안은 연차가 없다. (파격적인 규정)
+2. 대신 매월 1회 '리프레시 데이'를 유급으로 제공한다.
+3. 3년 근속 시 30일의 연차가 일시에 발생한다.
+"""
+
+question = "우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"
+```
+
+step1에서는 LLM이 학습 데이터만으로 답했습니다. 이번에는 이 `context_data`를 프롬프트에 직접 넣어서 정답지를 건네줍니다.
+
+```python
+# step2_context.py — TODO: f-string으로 context_data와 question을 포함한 프롬프트 작성 → llm.invoke로 답변 받기 → 출력
+
+# 1. 규정 문서(context_data)를 프롬프트에 직접 넣어서 LLM에 전달
+prompt = f"""
+아래 [참고 정보]를 보고 질문에 답해줘.
+[참고 정보]
+{context_data}
+
+질문: {question}
+"""
+
+# 2. 질문 출력 → LLM 호출 → 답변 출력
+console.print(f"[bold]질문:[/bold] {question}\n")
+response = llm.invoke(prompt)
+console.print(f"[bold]답변:[/bold]\n{response.content}")
+```
+
+step1과 달라진 부분은 `context_data`를 프롬프트에 직접 넣었다는 것뿐입니다. 문서를 넣으니 정확한 답변이 나옵니다. 하지만 문서가 수십 개로 늘어나면 매번 전부 붙일 수 없습니다. LLM이 한 번에 읽을 수 있는 텍스트 길이에는 한도가 있기 때문입니다. 이 한도를 **컨텍스트 윈도우(Context Window)** 라고 합니다. 모델마다 크기가 다르지만, 수십 개 문서를 전부 넣기에는 부족합니다.
+
+```bash
+# 실행
+python step2_context.py
+```
+
+<!-- [CAPTURE NEEDED: 01_step2-context]
+path: assets/CH01/terminal/01_step2-context.png
+cmd: cd ex01 && python step2_context.py
+desc: 규정 문서를 프롬프트에 직접 넣은 실행 결과. 커넥트 실제 규정(3년 연차 없음, 리프레시 데이)이 정확하게 답변된다.
+-->
+![](../assets/CH01/terminal/01_step2-context.png)
+
+*step2_context.py 실행 결과. 문서를 직접 넣으니 정확하게 답한다.*
+
+이번에는 "3년 동안 연차 없음, 매월 리프레시 데이 1회"라는 커넥트의 실제 규정이 정확하게 답변으로 출력될 것입니다. step1과 코드 구조는 거의 같은데 결과가 완전히 달라졌습니다. 달라진 것은 `context_data`를 프롬프트에 넣었다는 것뿐입니다. LLM에게 정답지를 건네준 셈입니다. 환각이 사라진 건 좋지만, 이 방식은 문서가 늘어날수록 한계가 뚜렷합니다. 수십 개 문서를 매번 전부 붙일 수는 없기 때문입니다.
+
+
+### 2.7 실습 3 — step3_rag.py: RAG 파이프라인 구성
+
+step2에서는 문서를 수동으로 넣었습니다. 이번에는 **벡터 DB에 문서를 저장하고 질문에 맞는 문서를 자동으로 찾아오는** RAG 파이프라인을 만들어 보겠습니다. `ex01/step3_rag.py`를 열어 네 TODO의 `pass`를 지우고 아래 코드를 작성합니다.
+
+```python
+# step3_rag.py — TODO: OllamaEmbeddings(nomic-embed-text)로 임베딩 생성 → Chroma.from_documents로 벡터DB 저장
+
+# 1. 문서를 숫자 벡터로 변환하는 임베딩 모델 로드
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+# 2. 문서 3개를 벡터로 변환해서 ChromaDB에 저장
+vectorstore = Chroma.from_documents(documents=docs, embedding=embeddings)
+```
+
+```python
+# step3_rag.py — TODO: vectorstore.as_retriever로 검색기 생성 (search_kwargs={"k": 3})
+
+# 3. 질문과 가장 비슷한 문서 3개를 가져오는 검색기 생성
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+```
+
+검색기를 만들었으니, 다음은 LLM에게 전달할 프롬프트를 살펴볼 차례입니다. 파일에 이미 작성되어 있는 프롬프트 템플릿입니다.
+
+```python
+# step3_rag.py — 프롬프트 템플릿 (파일에 이미 작성되어 있음)
+
+template = """당신은 회사의 규정에 대해 설명해주는 AI 비서입니다.
+아래의 참고 정보를 바탕으로 질문에 답하세요. 반드시 한국어로 답변해야 합니다.
+
+참고 정보: {context}
+
+질문: {question}
+답변:"""
+```
+
+"참고 정보를 바탕으로 질문에 답하세요"라는 한 줄이 핵심입니다. LLM에게 제공된 문서에서만 답하도록 제약을 거는 겁니다. 이 기법을 **그라운딩(Grounding)** 이라고 합니다. CH05에서 본격적으로 다룹니다.
+
+이제 이 프롬프트를 사용해서 검색기와 LLM을 체인으로 연결합니다.
+
+```python
+# step3_rag.py — TODO: ChatOllama(deepseek-r1:8b) → RetrievalQA.from_chain_type으로 체인 조립
+
+# 4. LLM 로드
+llm = ChatOllama(model="deepseek-r1:8b", temperature=0)
+# 5. 검색기 + LLM을 체인으로 연결 (검색된 문서를 LLM에 자동 전달)
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever,
+    return_source_documents=True,
+    chain_type_kwargs={"prompt": PROMPT}
+)
+```
+
+`chain_type_kwargs={"prompt": PROMPT}`는 위에서 만든 프롬프트 템플릿을 체인에 주입하는 옵션입니다. 이걸 넣지 않으면 LangChain 기본 프롬프트가 사용되는데, 한국어 답변을 요구하는 우리 프롬프트를 쓰려면 직접 넘겨줘야 합니다.
+`return_source_documents=True`는 LLM의 답변뿐 아니라 검색에 사용된 원본 문서도 결과에 포함시키는 옵션입니다. 이 옵션이 없으면 `result["result"]`(답변)만 돌아오고, 켜면 `result["source_documents"]`에 어떤 문서를 참고했는지까지 함께 돌아옵니다.
+
+```python
+# step3_rag.py — TODO: qa_chain.invoke로 질문 실행 → 검색된 문서(근거) 출력 → AI 답변 출력
+
+# 6. 질문 실행 — 검색 + LLM 답변이 한 번에 동작
+result = qa_chain.invoke({"query": question})
+
+# 7. 어떤 문서를 참고했는지 출처 출력
+console.print("\n--- 검색된 문서(근거) ---")
+for doc in result["source_documents"]:
+    console.print(f"[{doc.metadata['source']}]: {doc.page_content}")
+
+# 8. AI 답변 출력
+console.print("\n--- AI 답변 ---")
+console.print(result["result"])
+```
+
+step2에서는 문서를 수동으로 넣었지만, 이번에는 질문에 맞는 문서를 자동으로 찾아옵니다.
+
+```bash
+# 실행
+python step3_rag.py
+```
+
+<!-- [CAPTURE NEEDED: 01_step3-rag]
+path: assets/CH01/terminal/01_step3-rag.png
+cmd: cd ex01 && python step3_rag.py
+desc: RAG 파이프라인 실행 결과. 검색된 문서(인사규정) 출처와 함께 정확한 답변이 출력된다.
+-->
+![](../assets/CH01/terminal/01_step3-rag.png)
+
+*step3_rag.py 실행 결과. [인사규정] 문서를 찾아서 답변하고, 어디서 가져왔는지 출처까지 보여준다.*
+
+이제 답변과 함께 어느 문서를 참고했는지가 깔끔하게 출력되는 것을 확인할 수 있습니다. step2에서는 문서를 수동으로 넣어줬지만 이번에는 **질문에 맞는 문서를 자동으로 찾아왔습니다.** 환각이 사라지고 명확한 출처가 생겼습니다.
+
+
+### 2.8 실습 4 — step3_rag_no_chunking.py: 청킹이 왜 필요한가
+
+실습 3 — step3_rag.py에서 문서 3개를 **각각 따로** 벡터 DB에 저장했습니다. 이번에는 반대로, 모든 문서를 **하나의 덩어리로 합쳐서** 저장하면 어떻게 되는지 비교해 보겠습니다. `ex01/step3_rag_no_chunking.py`를 열면 step3_rag.py와 거의 같지만 두 군데가 다릅니다. TODO의 `pass`를 지우고 작성합니다.
+
+```python
+# step3_rag_no_chunking.py — TODO: OllamaEmbeddings(nomic-embed-text)로 임베딩 생성 → Chroma.from_documents로 벡터DB 저장 (docs_bad 사용)
+
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+vectorstore = Chroma.from_documents(documents=docs_bad, embedding=embeddings)
+```
+
+step3_rag.py에서는 문서 3개를 따로 저장했지만, 여기서는 모든 문서를 하나의 거대한 Document(`docs_bad`)로 합쳐서 저장합니다. 조각내지 않고 통째로 넣는 겁니다.
+
+```python
+# step3_rag_no_chunking.py — TODO: vectorstore.as_retriever로 검색기 생성 (search_kwargs={"k": 1})
+
+# 3. 검색기 및 프롬프트 설정 (통째로 하나뿐이므로 k=1로 검색해도 전체가 다 나옴)
+retriever = vectorstore.as_retriever(search_kwargs={"k": 1})
+```
+
+문서가 하나뿐이므로 `k=1`로도 전체가 다 나옵니다. step3_rag.py의 `k=3`과 비교해 보세요. 나머지 코드(LLM 로드, 체인 조립, 질문 실행)는 step3_rag.py와 동일하니 그대로 작성하면 됩니다.
+
+```bash
+# 실행
+python step3_rag_no_chunking.py
+```
+
+<!-- [CAPTURE NEEDED: 01_no-chunking-compare]
+path: assets/CH01/terminal/01_no-chunking-compare.png
+cmd: cd ex01 && python step3_rag_no_chunking.py
+desc: 청킹 미적용 실행 결과. 답변은 나오지만 문서를 통째로 넣어 출처가 '전체규정' 하나로만 표시된다.
+-->
+![](../assets/CH01/terminal/01_no-chunking-compare.png)
+
+*step3_rag_no_chunking.py 실행 결과. 답변은 나오지만 문서를 통째로 넣었기 때문에 출처 구분이 없다.*
+
+답변 자체는 나오지만, 문서 전체가 하나의 덩어리이므로 "어떤 문서에서 가져왔는지"를 구분할 수 없습니다. step3_rag.py에서는 인사규정만 깔끔하게 찾아왔던 것과 비교해 보세요. 관련 없는 내용이 섞이면 LLM이 정작 필요한 부분을 놓치기 쉽습니다. 문서를 조각으로 나누는 것, 즉 **청킹(Chunking)** 이 왜 필요한지 바로 체감하실 수 있을 겁니다. 청킹 전략의 상세 비교는 CH08(검색 품질 튜닝)에서 다룹니다.
+
+
+### 2.9 실습 5 — step4_rag.py: 추론이 필요한 질문
+
+step3_rag.py까지의 질문은 "규정이 뭐야?" 같은 단순 검색이었습니다. 이번에는 **규정을 찾아서 읽고 계산까지 해야 하는 질문**을 던져보겠습니다. `ex01/step4_rag.py`의 TODO를 `pass`를 지우고 작성합니다. 코드 구조는 step3_rag.py와 동일하므로 TODO도 같은 방식으로 작성하면 됩니다. 달라진 건 파일에 준비된 **질문**뿐입니다.
+
+```python
+question = "입사 6개월차 신입인데 리프레시 데이 2번 썼어. 몇 번 남았는지 규정 기반으로 계산해줘."
+```
+
+"리프레시 데이는 매월 1회 → 6개월이면 6번 → 2번 썼으면 4번 남음"처럼, 규정을 읽고 계산까지 해야 답할 수 있는 질문입니다.
+
+```bash
+# 실행
+python step4_rag.py
+```
+
+<!-- [CAPTURE NEEDED: 01_step4-rag]
+path: assets/CH01/terminal/01_step4-rag.png
+cmd: cd ex01 && python step4_rag.py
+desc: 추론 질문 실행 결과. 규정을 검색한 뒤 리프레시 데이 잔여 횟수(6-2=4번)를 계산하여 답변한다.
+-->
+![](../assets/CH01/terminal/01_step4-rag.png)
+
+*step4_rag.py 실행 결과. 규정을 바탕으로 리프레시 데이 잔여 횟수를 계산해 낸 모습이다.*
+
+검색된 문서(근거)와 함께 "매월 1회 × 6개월 = 6번, 2번 사용 → 4번 남음"이라는 계산 과정이 포함된 답변이 출력됩니다. 단순히 규정을 찾아오는 것을 넘어, LLM이 규정을 읽고 추론까지 해낸 겁니다.
+
+
+### 2.10 이것만은 기억하세요
+
+- **LLM은 우리 회사 문서를 읽은 적이 없습니다.** 아무리 자신감 있게 답해도 사내 정보는 우리가 직접 넣어줘야 합니다.
+- **RAG는 오픈북 시험입니다.** LLM이 모든 걸 외울 필요 없이 질문마다 관련 문서를 찾아보면서 답합니다.
+- 이 챕터의 `RetrievalQA`는 LangChain이 만들어둔 완성품입니다. "RAG가 동작한다"를 체험하기엔 좋지만, 응답을 가공하거나 대화 기록을 붙이려면 내부를 건드려야 합니다. CH05에서 LCEL 파이프라인으로 교체하여 각 단계를 직접 조립합니다.
+- 다음 챕터에서는 AI 비서가 조회할 실제 사내 시스템(직원, 연차, 매출 DB)을 FastAPI로 만들어 봅니다.

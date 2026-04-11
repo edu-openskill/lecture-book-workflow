@@ -1,0 +1,55 @@
+shape: sequence_diagram
+
+User: 사용자 {
+  style: {
+    fill: "#ffffff"
+    font-size: 16
+    font-color: "#374151"
+    bold: true
+    stroke: "#2563eb"
+    stroke-width: 2
+    border-radius: 8
+  }
+}
+Router: "QueryRouter\n(안내데스크)" {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+    bold: true
+    border-radius: 8
+  }
+}
+Agent: "통합 에이전트\n(ReAct 패턴)" {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+    bold: true
+    border-radius: 8
+  }
+}
+DB: PostgreSQL {
+  style: {
+    fill: "#f8fafc"
+    stroke: "#94a3b8"
+    stroke-width: 2
+    font-size: 16
+    font-color: "#374151"
+    bold: true
+    border-radius: 8
+  }
+}
+
+User -> Router: "홍길동 입사일 언제야?"
+Router."1단계: 키워드 매칭"
+Router -> Agent: "structured (정형)"
+Agent."생각: list_employees 써야지"
+Agent -> DB: "list_employees(홍길동)"
+DB -> Agent: "{name: 홍길동, hire_date: 2026-01-01}"
+Agent."관찰: 입사일 찾았다"
+Agent -> User: "홍길동 사원의 입사일은 2026년 1월 1일입니다."
