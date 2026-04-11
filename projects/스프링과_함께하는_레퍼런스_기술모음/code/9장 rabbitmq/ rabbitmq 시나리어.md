@@ -1,9 +1,0 @@
-      56 docs/9.1_scenario_structure.md
-     165 docs/9.2_setup.md
-      77 docs/9.3_polling_design.md
-     193 docs/9.4_producer.md
-      85 docs/9.5_rabbitmq_config.md
-     191 docs/9.7_consumer.md
-      70 docs/9.8_integration_test.md
-      74 docs/9.9_extensions.md
-     911 total
