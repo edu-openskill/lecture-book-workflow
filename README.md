@@ -339,7 +339,8 @@ flowchart LR
 CLAUDE.md                  ← 핵심 정책 + 명령어 라우팅
 │
 ├── .claude/
-│   ├── rules/             ← 글로벌 규칙 (style, code, structure)
+│   ├── rules/             ← 규칙 Single Source of Truth (style, code, structure, writing-chapters)
+│   ├── hooks/             ← PreToolUse 훅 (챕터 스타일 강제 차단)
 │   ├── agents/            ← 에이전트 5개
 │   │   ├── analyst-architect/  ← 코드 분석 + 구조 설계
 │   │   ├── writer/             ← 이야기 + 기술 파트 집필
@@ -374,7 +375,9 @@ CLAUDE.md                  ← 핵심 정책 + 명령어 라우팅
 | 계층 | 파일 | 로딩 시점 | 역할 |
 |------|------|----------|------|
 | 핵심 정책 | `CLAUDE.md` | 매 턴 자동 | 아이덴티티, 라우팅, 스타일 가드레일 |
-| 룰 | `.claude/rules/*.md` | 매 턴 자동 | 글로벌 스타일/코드/구조 규칙 |
+| 룰 (전역) | `.claude/rules/style,code,structure.md` | 매 턴 자동 | 글로벌 스타일/코드/구조 규칙 |
+| 룰 (스코핑) | `.claude/rules/writing-chapters.md` | chapters/book 파일 접근 시 | 비유 전략, 플레이스홀더, 스킬 트리거 |
+| 훅 | `.claude/hooks/check-chapter-style.sh` | Edit/Write 시 PreToolUse | 금지 패턴 강제 차단 |
 | 스킬 | `.claude/skills/*/SKILL.md` | 명령어 실행 시 on-demand | 상세 규칙, 예시, 상수 |
 | 워크플로우 | `.claude/workflow/step*.md` | 명령어 실행 시 Read | STEP별 절차 가이드 |
 
@@ -382,7 +385,7 @@ CLAUDE.md                  ← 핵심 정책 + 명령어 라우팅
 
 ## 글쓰기 규칙 — "교과서가 아니라 이야기"
 
-이 시스템은 기술 서적을 소설처럼 쓴다. 규칙이 여러 파일에 분산되어 있다.
+이 시스템은 기술 서적을 소설처럼 쓴다. 규칙은 `.claude/rules/`에서 한 곳에서만 정의한다 (Single Source of Truth).
 
 ### 핵심 흐름
 
@@ -420,11 +423,32 @@ CLAUDE.md                  ← 핵심 정책 + 명령어 라우팅
 | AI 선호어 금지 | "비로소", "드디어", "마침내", "진정한" |
 | 감각 묘사 | 시각 + 청각/촉각 1개 이상 |
 
+### 규칙 체계 (Single Source of Truth)
+
+규칙은 `rules/`에서 한 곳에서만 정의한다. 에이전트/스킬 파일은 규칙을 복제하지 않고 `rules/`를 참조만 한다.
+
+| 규칙 파일 | 적용 범위 | 내용 |
+|----------|----------|------|
+| `.claude/rules/style.md` | 전역 | 톤, 편집, 금지패턴, 글쓰기 원칙 |
+| `.claude/rules/code.md` | 전역 | 코드블록, Git레포, 스크립트 규칙 |
+| `.claude/rules/structure.md` | 전역 | 버전관리, 워크플로우, progress.json |
+| `.claude/rules/storytelling.md` | 전역 | 소설 작법, 캐릭터, 비유, 대화체, 챕터 패턴 |
+| `.claude/rules/writing-chapters.md` | `chapters/**` | 실습 규칙, 비유 전략, 플레이스홀더 |
+| `.claude/rules/writing-preface.md` | `book/front/preface*` | 머릿말 패턴 |
+| `.claude/rules/writing-epilogue.md` | `book/back/epilogue*` | 맺음말 패턴 |
+
+전역 규칙은 항상 로드. paths 스코핑 규칙은 해당 경로 파일 접근 시에만 자동 로드. 서브에이전트는 AGENT.md의 `@import`로 규칙을 자동 주입받는다.
+
+### Hooks 강제 차단
+
+`.claude/hooks/check-chapter-style.sh`가 PreToolUse 훅으로 실행된다. chapters/book 파일 수정 시 금지 패턴(설교, 이모지, 라벨형 H2, 수평선, AI 선호어) 위반 시 Edit/Write를 차단한다.
+
 ### 파트별 작성 규칙 위치
 
 | 파트 | 규칙 파일 | 핵심 |
 |------|----------|------|
 | **톤/편집** | `.claude/rules/style.md` | 존댓말, 볼드 띄어쓰기, 금지 패턴 |
+| **챕터 전용** | `.claude/rules/writing-chapters.md` | 비유 전략, 플레이스홀더, 소설 작법 (paths 스코핑) |
 | **스토리텔링** | `.claude/skills/writing/references/storytelling.md` | Show Don't Tell, 리듬, 비유 규칙 |
 | **내러티브 작법** | `.claude/skills/writing/references/style.md` | 명사구 단문, 비유→왜→정의 |
 | **프롤로그** | `.claude/workflow/step6-프롤로그.md` | 역순 훅, 문제 체인, 감정 밀도 |
@@ -434,8 +458,8 @@ CLAUDE.md                  ← 핵심 정책 + 명령어 라우팅
 | **코드 규칙** | `.claude/rules/code.md` | 이야기 파트 코드 금지, 파일 유형 |
 | **버전별 성장** | `.claude/skills/writing/references/project-buildup.md` | 한 프로젝트 점진적 빌드업 |
 | **박스 스타일** | `.claude/skills/writing/references/box-style.md` | 팁/주의/경고 박스 |
-| **Writer** | `.claude/agents/writer/AGENT.md` | 비유 전략, 브릿지 생성 |
-| **Editor** | `.claude/agents/editor/AGENT.md` | 소설 작법 검토 체크리스트 |
+| **Writer** | `.claude/agents/writer/AGENT.md` | STEP별 절차 (규칙은 rules/ 참조) |
+| **Editor** | `.claude/agents/editor/AGENT.md` | 검토 판정 (체크리스트는 review 스킬 참조) |
 
 ---
 

@@ -12,7 +12,7 @@
 대외비  (Confidential)
 4. 휴가  및  리 프 레 시  (Leave & Refresh)
 4.1 스마트  휴 가  승 인  (Smart Approval)
-ConnectHR은 구성원의  자 율 성을  존 중 하 며 , 휴 가  사 용에
+메타코딩는 구성원의  자 율 성을  존 중 하 며 , 휴 가  사 용에
 있어 불필요한  절 차 를  최 소화합니 다 . 이 를  위해  'Ask-
 Less, Trust-More' 원 칙 을  기 반 으 로  휴 가  제도를
 운영하고  있습니 다 .
@@ -60,4 +60,4 @@ Less, Trust-More' 원 칙 을  기 반 으 로  휴 가  제도를
 포터블  모니터 , 노 이 즈  캔 슬 링  헤 드 셋 , 5G 에그  등
 원격 근무  키트 (Remote Kit) 를  무상으 로  대여해
 드립니다 .
-ConnectHR  HR Department | 본  문서는  사 내  보안  규 정에  따 라  외 부  유 출 이  금 지 됩 니 다 . | Page 1 of 1
+메타코딩  HR Department | 본  문서는  사 내  보안  규 정에  따 라  외 부  유 출 이  금 지 됩 니 다 . | Page 1 of 1

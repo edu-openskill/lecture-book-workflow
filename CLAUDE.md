@@ -211,13 +211,30 @@ projects/[책이름]/
 
 ---
 
+## 규칙 체계
+
+규칙은 **한 곳에서만 정의**한다 (Single Source of Truth). 에이전트/스킬 파일은 규칙을 복제하지 않고 `rules/`를 참조한다.
+
+| 규칙 파일 | 적용 범위 | 내용 |
+|----------|----------|------|
+| `.claude/rules/style.md` | 전역 | 톤, 편집, 금지패턴, 글쓰기 원칙, 출력 형식 |
+| `.claude/rules/code.md` | 전역 | 코드블록, 파일유형, Git레포, 스크립트 출력 규칙 |
+| `.claude/rules/structure.md` | 전역 | 버전관리, 워크플로우 진행, progress.json, 질문/선택 규칙 |
+| `.claude/rules/storytelling.md` | 전역 | 소설 작법, 캐릭터, 비유, 대화체, 챕터 패턴 |
+| `.claude/rules/writing-chapters.md` | `chapters/**` | 실습 규칙, 비유 전략, 플레이스홀더 (paths 스코핑) |
+| `.claude/rules/writing-preface.md` | `book/front/preface*` | 머릿말 패턴 (paths 스코핑) |
+| `.claude/rules/writing-epilogue.md` | `book/back/epilogue*` | 맺음말 패턴 (paths 스코핑) |
+
+### Hooks (강제 차단)
+
+`chapters/` 또는 `book/` 파일 수정 시 `.claude/hooks/check-chapter-style.sh`가 PreToolUse 훅으로 실행된다. 금지 패턴(설교, 이모지, 라벨형 H2, 수평선, AI 선호어) 위반 시 Edit/Write를 차단한다.
+
 ## 참조
 
 | 위치 | 내용 |
 |------|------|
-| `.claude/rules/style.md` | 톤, 편집, 금지패턴, 글쓰기 원칙, 출력 형식 |
-| `.claude/rules/code.md` | 코드블록, 파일유형, Git레포, 스크립트 출력 규칙 |
-| `.claude/rules/structure.md` | 버전관리, 워크플로우 진행, progress.json, 질문/선택 규칙 |
+| `.claude/rules/` | 규칙 7개 (위 표 참조) |
+| `.claude/hooks/` | PreToolUse 훅 (챕터 스타일 강제) |
 | `.claude/skills/CATALOG.md` | 22개 스킬 카탈로그 |
 | `.claude/agents/` | 에이전트 6개 (analyst-architect, writer, editor, illustrator, publisher, pm-strategist) |
 | `.claude/workflow/step[N]-*.md` | STEP별 실행 가이드 |

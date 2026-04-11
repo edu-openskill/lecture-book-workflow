@@ -124,7 +124,7 @@
       "heading": "d2",
       "code": "d1",
       "inline_code": "d2",
-      "quote": "d1",
+      "quote": "d3",
       "table": "d2",
       "toc": "d1"
     },
@@ -167,7 +167,7 @@
           "width": 100
         },
         "diagram": {
-          "preset": "minimal",
+          "preset": "plain",
           "width": 100
         }
       },
@@ -181,16 +181,16 @@
         "heading": {
           "h1_marginTop": "0pt",
           "h1_marginBottom": "16pt",
-          "h1_fontWeight": "700",
+          "h1_fontWeight": "800",
           "h2_marginTop": "24pt",
           "h2_marginBottom": "24",
           "h2_fontWeight": "700",
           "h2_borderLeft": "",
           "h2_paddingLeft": "0",
-          "h3_marginTop": "16pt",
-          "h3_marginBottom": "10pt",
-          "h3_fontWeight": "600",
-          "h3_color": "#374151",
+          "h3_marginTop": "18",
+          "h3_marginBottom": "10",
+          "h3_fontWeight": "700",
+          "h3_color": "#001061",
           "h4_marginTop": "12pt",
           "h4_marginBottom": "8pt",
           "h4_fontWeight": "500",
@@ -198,13 +198,14 @@
           "h2_color": "#3754e1"
         },
         "code": {
-          "borderRadius": "10"
+          "borderRadius": "10",
+          "background": "#fafafa"
         },
         "inline_code": {
           "fontWeight": "800"
         },
         "figure": {
-          "figure_marginTop": "16pt",
+          "figure_marginTop": "10",
           "figure_marginBottom": "16pt",
           "figure_captionGap": "4pt",
           "figure_captionSize": "8pt"

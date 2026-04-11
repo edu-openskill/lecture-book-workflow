@@ -1,0 +1,9 @@
+{
+  "name": "jointjs-renderer",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "jointjs": "^3.7.0",
+    "puppeteer": "^24.0.0"
+  }
+}

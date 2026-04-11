@@ -1,5 +1,10 @@
 # 스토리텔링 규칙
 
+> 이 파일의 내용은 `.claude/rules/storytelling.md`로 이동했습니다.
+> 머릿말: `.claude/rules/writing-preface.md`
+> 맺음말: `.claude/rules/writing-epilogue.md`
+>
+> 아래는 레거시 참조용으로 유지합니다.
 > 출처: v1 writing-concept/storytelling + v3 적응
 > 관련 스킬: C1.비유-생성기, 전체 챕터
 

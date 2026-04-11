@@ -8,4 +8,4 @@
 #let book-series-sub = "개념편"
 #let book-badges = ("Docker", "OAuth2", "Redis", "S3", "SSE", "WebSocket", "HLS", "Elasticsearch", "RabbitMQ")
 #let book-publisher = "오픈스킬북스"
-#let book-cover-image = "/Users/nomadlab/Desktop/김주혁/workspace/coding-study/집필에이전트 v2/projects/스프링과_함께하는_레퍼런스_기술모음/.pdf-build/cover.png"
+#let book-cover-image = "/Users/nomadlab/Desktop/김주혁/workspace/coding-study/집필에이전트 v2/projects/스프링과_함께하는_레퍼런스_기술모음/assets/cover.png"
