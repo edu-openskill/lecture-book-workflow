@@ -60,6 +60,63 @@ def _escape(s: str) -> str:
     )
 
 
+_TODO_LINE_RE = re.compile(r'(\s*#\s*TODO:[^\n]*)', re.MULTILINE)
+_PYGMENTS_TODO_RE = re.compile(r'<span class="(c1?)">(\s*#\s*TODO:[^<]*)</span>')
+
+
+def _highlight_body(lang: str, body: str) -> str:
+    """
+    Pygments로 구문 강조된 HTML을 반환한다.
+    - 지원 언어: Pygments 강조 + TODO 주석 span을 .cb-todo로 교체
+    - 미지원 언어: HTML 이스케이프 후 TODO 라인만 .cb-todo로 래핑
+    두 경로 모두 TODO는 한 번만 래핑된다 (이중 래핑 방지).
+    """
+    try:
+        from pygments import highlight
+        from pygments.lexers import get_lexer_by_name
+        from pygments.formatters import HtmlFormatter
+        from pygments.util import ClassNotFound
+    except ImportError:
+        return _wrap_todo_plain(_escape(body))
+
+    lang_map = {
+        "py": "python", "python": "python",
+        "bash": "bash", "sh": "bash", "shell": "bash",
+        "text": None, "plain": None,
+        "markdown": "markdown", "md": "markdown",
+        "js": "javascript", "ts": "typescript",
+        "json": "json", "yaml": "yaml", "yml": "yaml",
+        "sql": "sql", "html": "html", "css": "css",
+    }
+    pyg_name = lang_map.get(lang.lower(), lang.lower())
+    if pyg_name is None:
+        return _wrap_todo_plain(_escape(body))
+    try:
+        lexer = get_lexer_by_name(pyg_name, stripnl=False)
+    except ClassNotFound:
+        return _wrap_todo_plain(_escape(body))
+
+    formatter = HtmlFormatter(nowrap=True)
+    highlighted = highlight(body, lexer, formatter)
+    if highlighted.endswith("\n"):
+        highlighted = highlighted[:-1]
+
+    # Pygments가 만든 TODO 주석 span 자체를 .cb-todo로 치환 (래핑 아닌 교체)
+    highlighted = _PYGMENTS_TODO_RE.sub(
+        lambda m: f'<span class="cb-todo">{m.group(2)}</span>',
+        highlighted,
+    )
+    return highlighted
+
+
+def _wrap_todo_plain(escaped_body: str) -> str:
+    """이스케이프만 된 본문에서 TODO 라인을 .cb-todo로 감싼다."""
+    return _TODO_LINE_RE.sub(
+        lambda m: f'<span class="cb-todo">{m.group(1)}</span>',
+        escaped_body,
+    )
+
+
 def _render_code_block(lang: str, badge: str | None, title: str, body: str) -> str:
     title = (title or "").strip().lstrip("—").strip()
     if title.startswith("- "):
@@ -81,9 +138,9 @@ def _render_code_block(lang: str, badge: str | None, title: str, body: str) -> s
 
     cb_title_inner = " ".join(cb_parts)
     cb_title_html = f'<div class="cb-title">{cb_title_inner}</div>' if cb_title_inner else ''
-    body_html = _escape(body)
+    body_html = _highlight_body(lang, body)
     return (
-        f'<div class="code-block" data-lang="{lang}">'
+        f'<div class="code-block highlight" data-lang="{lang}">'
         f'{cb_title_html}'
         f'{body_html}'
         f'</div>'
@@ -354,7 +411,12 @@ def ensure_build_symlinks() -> None:
             print(f"  ⚠️  심링크 생성 실패 {name}: {exc}", file=sys.stderr)
 
 
-def render_html_file(chapter: Chapter, pagedjs: bool) -> Path:
+def render_html_file(chapter: Chapter) -> Path:
+    """
+    HTML 프리뷰 파일 생성. 브라우저에서 한 장으로 흐르게 읽을 수 있도록
+    Paged.js는 항상 **로드하지 않는다**. PDF 생성 시에는 Playwright가
+    런타임에 Paged.js 스크립트를 주입한다 (render_pdf 참고).
+    """
     from jinja2 import Environment, FileSystemLoader, select_autoescape
 
     env = Environment(
@@ -372,14 +434,23 @@ def render_html_file(chapter: Chapter, pagedjs: bool) -> Path:
         tokens_css="./styles/tokens.css",
         book_css="./styles/book.css",
         print_css="./styles/print.css",
-        pagedjs=pagedjs,
+        pagedjs=False,  # HTML 프리뷰는 항상 단일 페이지 흐름
     )
     out_html.write_text(html, encoding="utf-8")
     return out_html
 
 
 # ========== PDF 렌더링 =====================================================
+PAGEDJS_CDN = "https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"
+
+
 def render_pdf(html_path: Path, pdf_path: Path, pagedjs: bool) -> None:
+    """
+    Playwright로 HTML을 PDF로 렌더.
+    pagedjs=True면 page.goto 후 Paged.js 스크립트를 주입해 페이지 조판을 시킨다.
+    HTML 파일 자체엔 Paged.js가 들어 있지 않기 때문에 브라우저 프리뷰는
+    영향을 받지 않는다.
+    """
     from playwright.sync_api import sync_playwright
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -395,12 +466,12 @@ def render_pdf(html_path: Path, pdf_path: Path, pagedjs: bool) -> None:
         page = context.new_page()
         page.goto(url, wait_until="networkidle")
         if pagedjs:
-            # Paged.js가 페이지 조판을 완료할 때까지 대기
+            # PDF 렌더링 시에만 Paged.js 주입 — HTML 파일은 건드리지 않음
+            page.add_script_tag(url=PAGEDJS_CDN)
             page.wait_for_function(
                 "() => window.PagedPolyfill && document.querySelector('.pagedjs_pages')",
                 timeout=60000,
             )
-            # 추가 안정화
             page.wait_for_timeout(500)
             page.pdf(
                 path=str(pdf_path),
@@ -456,7 +527,7 @@ def main() -> int:
         print(f"📖 {md_path.name}")
         chapter = render_chapter(md_path, md)
 
-        html_path = render_html_file(chapter, use_pagedjs)
+        html_path = render_html_file(chapter)
         print(f"  ✅ HTML: {html_path.relative_to(PROJECT_ROOT)}")
 
         if args.html_only:
