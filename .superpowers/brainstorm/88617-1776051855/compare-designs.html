@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>비교 도식 4가지 안</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.7; }
+.container { max-width: 820px; margin: 0 auto; }
+h1 { font-size: 26px; margin-bottom: 8px; color: #1a202c; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+
+.design-block {
+  background: #fff; border-radius: 14px; padding: 24px; margin: 24px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #edf0f5;
+}
+.design-label {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 6px; margin-bottom: 12px;
+  background: #4299e1; color: #fff; letter-spacing: 1px;
+}
+.design-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 20px; }
+
+/* ========== 현재 (v8) ========== */
+.v8-current { background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #edf0f5; }
+.v8-title { color: #4a5568; font-size: 13px; font-weight: 700; margin-bottom: 16px; }
+.v8-flow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.v8-col { background: #fafbfc; border-radius: 10px; padding: 18px; }
+.v8-col.bad { border: 1px solid #fed7d7; }
+.v8-col.good { border: 1px solid #c6f6d5; }
+.v8-col .fl { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.v8-col.bad .fl { color: #c53030; }
+.v8-col.good .fl { color: #2f855a; }
+.v8-step { background: #fff; border-radius: 8px; padding: 10px 14px; margin: 8px 0; font-size: 13px; color: #4a5568; border: 1px solid #edf0f5; }
+.v8-step.final.bad { background: #fed7d7; color: #c53030; border-color: #fc8181; }
+.v8-step.final.good { background: #c6f6d5; color: #2f855a; border-color: #68d391; }
+
+/* ========== A: VS 배틀 ========== */
+.vs-battle {
+  position: relative;
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch;
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  border-radius: 16px; padding: 32px 24px; overflow: hidden;
+}
+.vs-col { padding: 20px; border-radius: 12px; }
+.vs-col.left { background: rgba(245, 101, 101, 0.08); border: 1px solid rgba(245, 101, 101, 0.3); }
+.vs-col.right { background: rgba(72, 187, 120, 0.08); border: 1px solid rgba(72, 187, 120, 0.3); }
+.vs-col-title { text-align: center; margin-bottom: 16px; }
+.vs-col-title .t-label { font-size: 11px; letter-spacing: 2px; opacity: 0.7; }
+.vs-col.left .t-label { color: #feb2b2; }
+.vs-col.right .t-label { color: #9ae6b4; }
+.vs-col-title .t-name { font-size: 16px; font-weight: 700; margin-top: 4px; }
+.vs-col.left .t-name { color: #fc8181; }
+.vs-col.right .t-name { color: #68d391; }
+.vs-item { background: rgba(255,255,255,0.05); padding: 10px 14px; margin: 6px 0; border-radius: 8px; font-size: 13px; color: #e2e8f0; }
+.vs-item.strike { text-decoration: line-through; opacity: 0.5; }
+.vs-divider {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 12px; position: relative;
+}
+.vs-divider .vs-badge {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, #f56565, #48bb78);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  border: 3px solid rgba(255,255,255,0.1);
+}
+.vs-result { text-align: center; margin-top: 20px; }
+.vs-result .r-text {
+  display: inline-block; padding: 8px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+}
+.vs-col.left .r-text { background: rgba(245, 101, 101, 0.15); color: #fc8181; }
+.vs-col.right .r-text { background: rgba(72, 187, 120, 0.15); color: #68d391; }
+
+/* ========== B: 대화 버블 ========== */
+.chat-compare {
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 24px; background: #f7fafc; border-radius: 16px;
+}
+.chat-row { display: flex; gap: 12px; align-items: flex-start; }
+.chat-row.right { flex-direction: row-reverse; }
+.avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.avatar.llm { background: #fed7d7; color: #c53030; }
+.avatar.doc { background: #c6f6d5; color: #2f855a; }
+.bubble {
+  max-width: 75%; padding: 14px 18px; border-radius: 16px;
+  font-size: 14px; line-height: 1.6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.bubble.llm {
+  background: #fff; border: 1px solid #fed7d7; border-top-left-radius: 4px;
+}
+.bubble.doc {
+  background: #2f855a; color: #fff; border-top-right-radius: 4px;
+}
+.bubble .speaker-tag { font-size: 11px; font-weight: 700; opacity: 0.8; margin-bottom: 4px; }
+.bubble.llm .speaker-tag { color: #c53030; }
+.bubble.doc .speaker-tag { color: #c6f6d5; }
+.bubble ul { padding-left: 16px; margin-top: 4px; }
+.bubble li { margin-bottom: 2px; }
+.bubble .verdict {
+  margin-top: 8px; font-weight: 700; font-size: 13px;
+}
+.bubble.llm .verdict { color: #c53030; }
+.bubble.doc .verdict { color: #fff; }
+
+/* ========== C: 매트릭스 행 매칭 ========== */
+.matrix {
+  background: #fff; border-radius: 14px; overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+.matrix-header {
+  display: grid; grid-template-columns: 1fr 1fr;
+  background: linear-gradient(90deg, #fff5f5 0%, #fff5f5 50%, #f0fff4 50%, #f0fff4 100%);
+  padding: 16px 20px; font-weight: 700; font-size: 13px;
+  border-bottom: 2px solid #edf0f5;
+}
+.matrix-header .h-left { color: #c53030; }
+.matrix-header .h-right { color: #2f855a; text-align: right; }
+.matrix-row {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; padding: 14px 20px;
+  border-bottom: 1px solid #edf0f5;
+  background: linear-gradient(90deg, rgba(254,215,215,0.2) 0%, rgba(254,215,215,0.2) 50%, rgba(198,246,213,0.2) 50%, rgba(198,246,213,0.2) 100%);
+}
+.matrix-row:last-child { border-bottom: none; }
+.matrix-row.final {
+  background: linear-gradient(90deg, #fed7d7 0%, #fed7d7 50%, #c6f6d5 50%, #c6f6d5 100%);
+  font-weight: 700;
+}
+.matrix-row .m-left { color: #4a5568; font-size: 13px; }
+.matrix-row .m-right { color: #4a5568; font-size: 13px; text-align: right; }
+.matrix-row.final .m-left { color: #c53030; }
+.matrix-row.final .m-right { color: #2f855a; }
+.matrix-row .m-vs {
+  padding: 0 12px; color: #a0aec0; font-size: 11px; font-weight: 700;
+}
+
+/* ========== D: 팩트체크 카드 ========== */
+.factcheck {
+  background: linear-gradient(135deg, #fff 0%, #fafbfc 100%);
+  border-radius: 16px; padding: 0; overflow: hidden;
+  border: 1px solid #edf0f5;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+.fc-header {
+  padding: 20px 24px; background: #f7fafc;
+  border-bottom: 1px solid #edf0f5;
+  display: flex; align-items: center; gap: 12px;
+}
+.fc-header .fc-badge {
+  background: #2d3748; color: #fff; padding: 6px 12px;
+  border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+}
+.fc-header .fc-title { font-size: 15px; font-weight: 700; color: #2d3748; }
+.fc-body { padding: 0; }
+.fc-claim {
+  padding: 16px 24px; border-bottom: 1px solid #edf0f5;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 16px;
+  align-items: center;
+}
+.fc-claim:last-child { border-bottom: none; }
+.fc-claim .fc-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+.fc-claim.false .fc-icon { background: #fed7d7; color: #c53030; }
+.fc-claim.true .fc-icon { background: #c6f6d5; color: #2f855a; }
+.fc-claim .fc-text { font-size: 14px; color: #2d3748; }
+.fc-claim .fc-text .fc-source { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+.fc-claim .fc-verdict {
+  padding: 4px 12px; border-radius: 12px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+}
+.fc-claim.false .fc-verdict { background: #fed7d7; color: #c53030; }
+.fc-claim.true .fc-verdict { background: #c6f6d5; color: #2f855a; }
+.fc-footer {
+  padding: 14px 24px; background: #f7fafc;
+  border-top: 1px solid #edf0f5;
+  display: flex; justify-content: space-between; font-size: 13px;
+}
+.fc-footer .fc-score-false { color: #c53030; font-weight: 700; }
+.fc-footer .fc-score-true { color: #2f855a; font-weight: 700; }
+
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>"LLM의 답변 vs 실제 규정" 비교 도식 — 4가지 안</h1>
+<p class="subtitle">현재(v8)는 아래 회색 상자. 그 아래 4가지 대안을 만들었습니다.</p>
+
+<!-- 현재 디자인 -->
+<div class="design-block" style="background:#f7fafc;">
+  <div class="design-label" style="background:#a0aec0;">현재 (v8)</div>
+  <div class="design-title">좌우 2단 카드 + 색 border</div>
+  <div class="design-desc">정보 전달은 명확하지만 시각적 임팩트가 약하고 평범함</div>
+
+  <div class="v8-current">
+    <div class="v8-title">LLM의 답변 vs 실제 규정</div>
+    <div class="v8-flow">
+      <div class="v8-col bad">
+        <div class="fl">LLM의 답변 (환각)</div>
+        <div class="v8-step">근로기준법 제60조 적용</div>
+        <div class="v8-step">입사 후 매월 1일 유급휴가</div>
+        <div class="v8-step">1년 근속 시 15일 연차</div>
+        <div class="v8-step final bad">× 전부 지어낸 내용</div>
+      </div>
+      <div class="v8-col good">
+        <div class="fl">커넥트 실제 규정</div>
+        <div class="v8-step">입사 후 3년간 연차 없음</div>
+        <div class="v8-step">매월 1회 리프레시 데이 (유급)</div>
+        <div class="v8-step">3년 근속 시 30일 일시 발생</div>
+        <div class="v8-step final good">✓ 커넥트만의 파격 규정</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== A: VS 배틀 ========== -->
+<div class="design-block">
+  <div class="design-label" style="background:#805ad5;">A안</div>
+  <div class="design-title">VS 배틀 — 어두운 배경, 대결 구도</div>
+  <div class="design-desc">격투 게임처럼 "환각 vs 진실" 대결로 시각화. 임팩트 최대, 기억에 남음</div>
+
+  <div class="vs-battle">
+    <div class="vs-col left">
+      <div class="vs-col-title">
+        <div class="t-label">ROUND 1</div>
+        <div class="t-name">🤖 LLM의 답변</div>
+      </div>
+      <div class="vs-item strike">근로기준법 제60조 적용</div>
+      <div class="vs-item strike">입사 후 매월 1일 유급휴가</div>
+      <div class="vs-item strike">1년 근속 시 15일 연차</div>
+      <div class="vs-result">
+        <span class="r-text">× 환각 (지어낸 내용)</span>
+      </div>
+    </div>
+    <div class="vs-divider">
+      <div class="vs-badge">VS</div>
+    </div>
+    <div class="vs-col right">
+      <div class="vs-col-title">
+        <div class="t-label">FACT</div>
+        <div class="t-name">📄 커넥트 실제 규정</div>
+      </div>
+      <div class="vs-item">입사 후 3년간 연차 없음</div>
+      <div class="vs-item">매월 1회 리프레시 데이 (유급)</div>
+      <div class="vs-item">3년 근속 시 30일 일시 발생</div>
+      <div class="vs-result">
+        <span class="r-text">✓ 커넥트만의 파격 규정</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== B: 대화 버블 ========== -->
+<div class="design-block">
+  <div class="design-label" style="background:#3182ce;">B안</div>
+  <div class="design-title">대화 버블 — 메신저 스타일</div>
+  <div class="design-desc">LLM이 지어낸 답 vs 규정집이 제시하는 팩트를 채팅 대화처럼 시각화</div>
+
+  <div class="chat-compare">
+    <div class="chat-row">
+      <div class="avatar llm">🤖</div>
+      <div class="bubble llm">
+        <div class="speaker-tag">LLM 답변</div>
+        커넥트의 신입사원 연차 규정은 근로기준법에 따라...
+        <ul>
+          <li>입사 후 매월 1일 유급휴가</li>
+          <li>1년 근속 시 15일 연차</li>
+          <li>3년 이상 1년마다 1일씩 추가</li>
+        </ul>
+        <div class="verdict">× 전부 지어낸 내용</div>
+      </div>
+    </div>
+    <div class="chat-row right">
+      <div class="avatar doc">📄</div>
+      <div class="bubble doc">
+        <div class="speaker-tag">커넥트 실제 규정</div>
+        커넥트 취업규칙에 따르면:
+        <ul>
+          <li>입사 후 3년간 연차 없음</li>
+          <li>매월 1회 리프레시 데이 (유급)</li>
+          <li>3년 근속 시 30일 일시 발생</li>
+        </ul>
+        <div class="verdict">✓ 커넥트만의 파격 규정</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== C: 매트릭스 행 매칭 ========== -->
+<div class="design-block">
+  <div class="design-label" style="background:#d69e2e;">C안</div>
+  <div class="design-title">매트릭스 — 양쪽 항목이 자동 매칭</div>
+  <div class="design-desc">같은 주제(연차/휴가)에 대한 답변을 행별로 나란히 배치. 차이가 한눈에 보임</div>
+
+  <div class="matrix">
+    <div class="matrix-header">
+      <div class="h-left">🤖 LLM의 답변</div>
+      <div class="h-right">📄 커넥트 실제 규정</div>
+    </div>
+    <div class="matrix-row">
+      <div class="m-left">근로기준법 제60조 적용</div>
+      <div class="m-vs">vs</div>
+      <div class="m-right">입사 후 3년간 연차 없음</div>
+    </div>
+    <div class="matrix-row">
+      <div class="m-left">입사 후 매월 1일 유급휴가</div>
+      <div class="m-vs">vs</div>
+      <div class="m-right">매월 1회 리프레시 데이 (유급)</div>
+    </div>
+    <div class="matrix-row">
+      <div class="m-left">1년 근속 시 15일 연차</div>
+      <div class="m-vs">vs</div>
+      <div class="m-right">3년 근속 시 30일 일시 발생</div>
+    </div>
+    <div class="matrix-row final">
+      <div class="m-left">× 전부 지어낸 내용</div>
+      <div class="m-vs">vs</div>
+      <div class="m-right">✓ 커넥트만의 파격 규정</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== D: 팩트체크 ========== -->
+<div class="design-block">
+  <div class="design-label" style="background:#e53e3e;">D안</div>
+  <div class="design-title">팩트체크 — 뉴스 스타일</div>
+  <div class="design-desc">각 주장을 개별 항목으로 분리하고 TRUE/FALSE 판정. 저널리즘 스타일</div>
+
+  <div class="factcheck">
+    <div class="fc-header">
+      <div class="fc-badge">FACT CHECK</div>
+      <div class="fc-title">LLM이 말한 "커넥트 연차 규정"의 진위</div>
+    </div>
+    <div class="fc-body">
+      <div class="fc-claim false">
+        <div class="fc-icon">✕</div>
+        <div class="fc-text">
+          "근로기준법 제60조에 따라 적용됩니다"
+          <div class="fc-source">실제: 커넥트는 자체 취업규칙을 적용 (법정 기준과 다름)</div>
+        </div>
+        <div class="fc-verdict">FALSE</div>
+      </div>
+      <div class="fc-claim false">
+        <div class="fc-icon">✕</div>
+        <div class="fc-text">
+          "입사 후 1년 미만은 매월 1일의 유급휴가"
+          <div class="fc-source">실제: 입사 후 3년간 연차 없음, 대신 월 1회 리프레시 데이</div>
+        </div>
+        <div class="fc-verdict">FALSE</div>
+      </div>
+      <div class="fc-claim false">
+        <div class="fc-icon">✕</div>
+        <div class="fc-text">
+          "1년 근속 시 15일의 연차 발생"
+          <div class="fc-source">실제: 3년 근속 시 30일 일시 발생</div>
+        </div>
+        <div class="fc-verdict">FALSE</div>
+      </div>
+    </div>
+    <div class="fc-footer">
+      <div>판정 결과</div>
+      <div><span class="fc-score-false">거짓 3개</span> · <span class="fc-score-true">진실 0개</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 비교 평가 ========== -->
+<div class="design-block" style="background:linear-gradient(135deg,#f0fff4,#e6fffa);">
+  <div class="design-title" style="color:#2f855a;">각 안의 장단점</div>
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <tr style="background:rgba(0,0,0,0.04);">
+      <th style="text-align:left; padding:10px;">안</th>
+      <th style="text-align:left; padding:10px;">장점</th>
+      <th style="text-align:left; padding:10px;">단점</th>
+      <th style="text-align:left; padding:10px;">추천 상황</th>
+    </tr>
+    <tr><td style="padding:10px;"><b>A. VS 배틀</b></td><td style="padding:10px;">임팩트 최대, 기억에 남음, 긴장감</td><td style="padding:10px;">어두운 배경이 책 전체 톤과 상충 가능</td><td style="padding:10px;">강한 대비가 필요한 극적 순간</td></tr>
+    <tr><td style="padding:10px;"><b>B. 대화 버블</b></td><td style="padding:10px;">직관적, 이야기와 자연스럽게 연결</td><td style="padding:10px;">공간 많이 차지, LLM이 말하는 느낌이 과장될 수 있음</td><td style="padding:10px;">캐릭터/대화 중심 챕터</td></tr>
+    <tr><td style="padding:10px;"><b>C. 매트릭스</b></td><td style="padding:10px;">차이가 한눈에 보임, 정렬 깔끔, 책 톤과 잘 맞음</td><td style="padding:10px;">덜 극적, 평범</td><td style="padding:10px;">체계적 비교가 중요할 때 <b>(가장 범용)</b></td></tr>
+    <tr><td style="padding:10px;"><b>D. 팩트체크</b></td><td style="padding:10px;">저널리즘 느낌, 근거 명확, 신뢰감</td><td style="padding:10px;">공간 가장 많이 차지, 설명 길어짐</td><td style="padding:10px;">환각을 체계적으로 반박할 때</td></tr>
+  </table>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<h2>청사진 방식 비교 — 독자에게 전체 그림을 주는 두 가지 방법</h2>
+<p class="subtitle">코드가 등장하기 전, 독자가 "전체 속에서 지금 여기"를 아는 방식을 비교합니다.</p>
+
+<div class="options">
+  <div class="option" data-choice="journey-map" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>여정 지도 — "이 지도에서 오늘은 여기입니다"</h3>
+      <p style="color:#888; margin-bottom:12px;">프롤로그에서 최종 완성본을 먼저 보여주고, 각 챕터 도입에서 전체 지도 위에 현재 위치를 찍는 방식</p>
+      <div style="background:#1a1a2e; color:#e0e0e0; padding:20px; border-radius:8px; font-size:14px; line-height:1.9; white-space:pre-wrap; text-align:left; max-height:800px; overflow-y:auto;">
+<span style="color:#888;">── 프롤로그(책 시작) 에서 먼저 보여준 장면 ──</span>
+
+<span style="color:#82aaff; font-style:italic;">"김대리 연차 며칠 남았어? 그리고 휴가 규정도 알려줘."</span>
+
+ConnectHR이 2초 만에 답합니다. DB에서 김대리의 연차 잔여일을 조회하고, 사내 규정 문서에서 휴가 관련 조항을 찾아서, 하나로 엮어 답변합니다.
+
+이 비서를 만드는 데 10개의 챕터가 필요합니다.
+
+<div style="background:#0d1117; padding:16px; border-radius:8px; margin:12px 0; font-family:monospace; font-size:13px;">
+<span style="color:#888;">┌─────────────────────────────────────┐</span>
+<span style="color:#888;">│</span>  <span style="color:#f78c6c;">CH01</span> 환각 체험    →  LLM이 거짓말한다는 걸 확인   <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH02</span> 사내 시스템   →  답변할 데이터가 있는 API      <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH03</span> 문서 수집     →  어떤 문서를 넣을지 설계       <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH04</span> 벡터DB 구축   →  문서를 검색 가능하게 저장      <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH05</span> RAG 엔진     →  질문하면 문서 찾아서 답변      <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH06</span> 통합 에이전트  →  DB + 문서 동시 처리          <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH07</span> 운영 안정화   →  캐시, 모니터링, 비용 관리     <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH08</span> 검색 튜닝     →  엉뚱한 문서 안 가져오게       <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH09</span> 질문 이해     →  애매한 질문도 정확히 처리      <span style="color:#888;">│</span>
+<span style="color:#888;">│</span>  <span style="color:#616161;">CH10</span> 이미지+평가   →  PDF 이미지까지, 품질 측정      <span style="color:#888;">│</span>
+<span style="color:#888;">└─────────────────────────────────────┘</span></div>
+
+<span style="color:#888;">── 여기서부터 CH01 시작 ──</span>
+
+<b style="color:#f78c6c; font-size:16px;">Ch.1 환각과 RAG의 첫 만남</b>
+
+<div style="background:rgba(247,140,108,0.1); padding:12px; border-radius:6px; border-left:3px solid #f78c6c; margin:12px 0;">
+<span style="color:#f78c6c;">지금 여기</span>
+<div style="background:#0d1117; padding:8px; border-radius:4px; margin-top:8px; font-family:monospace; font-size:12px;">
+  <span style="color:#f78c6c; font-weight:bold;">▶ CH01 환각 체험</span> → <span style="color:#616161;">CH02</span> → <span style="color:#616161;">CH03</span> → ... → <span style="color:#616161;">CH10</span>
+</div>
+<span style="color:#c3e88d;">이번 챕터가 끝나면:</span> AI가 거짓말을 한다는 걸 직접 확인하고, "문서를 넘겨주면 해결된다"는 핵심 원리를 알게 됩니다.
+</div>
+
+입사 3일 차, 오픈이에게 첫 미션이 떨어졌습니다.
+
+팀장이 커피를 들고 다가왔습니다.
+<b style="color:#82aaff;">팀장</b>: "ChatGPT한테 우리 회사 연차 규정 물어봤더니, 그럴듯하게 거짓말을 하더라."
+
+<span style="color:#c792ea; font-style:italic;">*거짓말? AI가?*</span>
+
+정말 그런지 직접 확인해볼까요? 로컬에 deepseek-r1 모델을 올려두었습니다. 이 모델에 우리 회사 규정을 물어보면 어떻게 될까요?
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #82aaff; margin:8px 0;"><span style="color:#888;"># step1_fail.py — TODO: LLM 단독 호출로 환각 체험</span>
+<span style="color:#ff7b72;">from</span> langchain_ollama <span style="color:#ff7b72;">import</span> ChatOllama
+
+llm = ChatOllama(model=<span style="color:#a5d6ff;">"deepseek-r1:8b"</span>, temperature=<span style="color:#79c0ff;">0</span>)
+question = <span style="color:#a5d6ff;">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+response = llm.invoke(question)
+print(response.content)</div>
+
+결과가 나왔습니다. "커넥트 사의 신입사원 연차 발생 규정은 근로기준법 제60조에 따라..."
+
+그럴듯하죠? 그런데 실제 규정집과 대조해보면 첫 줄부터 다릅니다. 이 모델은 커넥트라는 회사를 학습한 적이 없으니까요.
+
+이걸 <b style="color:#f78c6c;">환각(Hallucination)</b>이라고 합니다. 유령의 집 같은 거예요. 진짜처럼 보이지만 전부 세트입니다.
+
+...</div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="goal-first" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>목표 선언 — "이번 챕터가 끝나면 이걸 알게 됩니다"</h3>
+      <p style="color:#888; margin-bottom:12px;">프롤로그 없이, 각 챕터가 독립적으로 목표를 선언하고 시작. 이야기 속에서 전체 맥락을 자연스럽게 전달</p>
+      <div style="background:#1a1a2e; color:#e0e0e0; padding:20px; border-radius:8px; font-size:14px; line-height:1.9; white-space:pre-wrap; text-align:left; max-height:800px; overflow-y:auto;">
+<b style="color:#f78c6c; font-size:16px;">Ch.1 환각과 RAG의 첫 만남</b>
+
+<div style="background:rgba(195,232,141,0.1); padding:14px; border-radius:6px; border-left:3px solid #c3e88d; margin:12px 0;">
+<b style="color:#c3e88d;">이번 챕터의 질문</b>
+AI한테 우리 회사 이야기를 물어보면, 정확하게 답할 수 있을까?
+
+<b style="color:#c3e88d;">끝나면 알게 되는 것</b>
+• LLM은 모르는 걸 자신 있게 지어낸다 (환각)
+• 문서를 직접 건네주면 거짓말을 멈춘다 (컨텍스트 주입)
+• 이걸 자동화한 구조가 RAG다
+</div>
+
+입사 3일 차.
+
+오픈이는 사내 AI 비서를 만들라는 미션을 받았습니다. 직원들이 회사 규정, 연차, 매출 같은 걸 AI한테 물어보면 정확하게 답해주는 시스템. 지금은 아무것도 없습니다. 이 책이 끝날 때쯤이면 이 비서가 완성됩니다.
+
+그런데 첫 번째 의문이 생겼습니다.
+
+<span style="color:#c792ea; font-style:italic;">*ChatGPT 같은 AI가 이미 있잖아. 그냥 물어보면 되는 거 아니야?*</span>
+
+팀장이 그 의문에 답을 줬습니다.
+<b style="color:#82aaff;">팀장</b>: "ChatGPT한테 우리 회사 연차 규정 물어봤더니, 그럴듯하게 거짓말을 하더라."
+
+정말 그런지 직접 확인해보겠습니다.
+
+Ollama라는 도구를 쓰면 내 컴퓨터에서 LLM을 돌릴 수 있어요. deepseek-r1이라는 모델을 하나 올려두었습니다. 이 모델에 우리 회사 규정을 물어보면 어떤 일이 벌어지는지 봅시다.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #c3e88d; margin:8px 0;"><span style="color:#888;"># step1_fail.py — TODO: LLM 단독 호출로 환각 체험</span>
+<span style="color:#ff7b72;">from</span> langchain_ollama <span style="color:#ff7b72;">import</span> ChatOllama
+
+llm = ChatOllama(model=<span style="color:#a5d6ff;">"deepseek-r1:8b"</span>, temperature=<span style="color:#79c0ff;">0</span>)
+question = <span style="color:#a5d6ff;">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+response = llm.invoke(question)
+print(response.content)</div>
+
+결과입니다. "커넥트 사의 신입사원 연차 발생 규정은 근로기준법 제60조에 따라..."
+
+조항 번호까지 달려 있으니 누구라도 믿을 만합니다. 그런데 오픈이가 인사팀에서 받은 실제 규정집을 열어보니, 첫 줄부터 달랐습니다.
+
+<span style="color:#c792ea; font-style:italic;">*조항 번호까지 붙여놓고 전부 지어낸 거야?*</span>
+
+이 현상을 <b style="color:#f78c6c;">환각(Hallucination)</b>이라고 합니다. 유령의 집에 들어가면 귀신이 진짜처럼 보이잖아요? 하지만 조명이 켜지면 전부 마네킹이고 세트입니다. AI의 답변도 같아요. 형식은 완벽한데 내용은 허구입니다.
+
+이 모델은 커넥트라는 회사를 학습한 적이 없습니다. 없는 정보를 요청받으면, "모릅니다" 대신 있을 법한 답을 지어냅니다.
+
+그러면 어떻게 해야 할까요?
+
+팀장이 힌트를 줬습니다.
+<b style="color:#82aaff;">팀장</b>: "전부 외우게 하지 말고, 필요한 문서만 찾아서 읽게 해."
+
+오픈북 시험이 떠올랐습니다. 시험 범위를 전부 외우는 대신, 교재를 펼쳐놓고 답을 찾는 방식. AI한테도 교재를 직접 건네주면 되지 않을까요?
+
+...</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px; padding:16px; background:rgba(255,255,255,0.05); border-radius:8px;">
+  <h3 style="margin-top:0;">핵심 차이</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+      <td style="padding:10px; width:40%;"><b style="color:#82aaff;">A. 여정 지도</b></td>
+      <td style="padding:10px; width:40%;"><b style="color:#c3e88d;">B. 목표 선언</b></td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+      <td style="padding:10px;">프롤로그에서 완성본 + 10챕터 지도를 먼저 보여줌</td>
+      <td style="padding:10px;">프롤로그 없이 각 챕터가 자기 목표를 선언</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+      <td style="padding:10px;">매 챕터 도입에 "지금 여기" 위치 표시</td>
+      <td style="padding:10px;">이야기 속 대사/상황으로 전체 맥락 전달</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+      <td style="padding:10px;">독자가 항상 전체 속 위치를 앎</td>
+      <td style="padding:10px;">독자가 챕터 목표에 집중</td>
+    </tr>
+    <tr>
+      <td style="padding:10px; color:#f78c6c;">단점: 스포일러 느낌이 될 수 있음</td>
+      <td style="padding:10px; color:#f78c6c;">단점: 전체 그림은 읽어가며 점진적으로 형성</td>
+    </tr>
+  </table>
+</div>

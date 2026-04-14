@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CH01 비교 — book_v5 vs v4</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fafbfc; color: #2d3748;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    line-height: 1.8; padding: 32px 20px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  h1 { color: #1a202c; font-size: 26px; margin-bottom: 8px; font-weight: 800; letter-spacing: -0.5px; }
+  .subtitle { color: #718096; font-size: 15px; margin-bottom: 32px; }
+
+  /* 비교 그리드 */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .version-card {
+    background: #fff; border-radius: 16px; padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border: 1px solid #edf0f5;
+  }
+  .version-card.old { border-top: 4px solid #a0aec0; }
+  .version-card.new { border-top: 4px solid #ff7849; }
+
+  .version-tag {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 6px;
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .version-card.old .version-tag { background: #e2e8f0; color: #4a5568; }
+  .version-card.new .version-tag { background: #fef3ec; color: #ff7849; }
+
+  .version-title { font-size: 18px; font-weight: 700; color: #1a202c; margin-bottom: 4px; }
+  .version-meta { color: #a0aec0; font-size: 12px; margin-bottom: 16px; }
+
+  .section {
+    padding: 10px 14px;
+    margin: 6px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    border-left: 3px solid transparent;
+  }
+  .section.story { background: #f7fafc; border-left-color: #805ad5; color: #4a5568; }
+  .section.tech { background: #f7fafc; border-left-color: #3182ce; color: #4a5568; }
+  .section.unified { background: #fef5f0; border-left-color: #ff7849; color: #744210; }
+  .section.setup { background: #fef8e6; border-left-color: #d69e2e; color: #744210; font-weight: 600; }
+  .section.missing { background: #fed7d7; border-left-color: #f56565; color: #c53030; font-weight: 600; }
+  .section .s-label {
+    font-size: 10px; color: #a0aec0; font-weight: 700;
+    letter-spacing: 0.8px; display: block; margin-bottom: 2px;
+  }
+
+  /* 갭 분석 */
+  .gap-section {
+    background: linear-gradient(135deg, #fef5e7, #fff5ee);
+    border-radius: 16px; padding: 28px;
+    margin: 32px 0;
+    border: 1px solid #feebc8;
+  }
+  .gap-title {
+    font-size: 16px; font-weight: 700; color: #744210;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .gap-title::before { content: '⚠'; font-size: 18px; }
+
+  .gap-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .gap-item {
+    background: #fff; border-radius: 10px; padding: 14px;
+    border: 1px solid #feebc8;
+  }
+  .gap-item .gi-title { font-weight: 700; color: #2d3748; font-size: 14px; margin-bottom: 6px; }
+  .gap-item .gi-desc { color: #718096; font-size: 12px; line-height: 1.6; }
+
+  /* 옵션 카드 */
+  .options-section {
+    margin: 32px 0;
+  }
+  .options-title {
+    font-size: 18px; font-weight: 700; color: #1a202c;
+    margin-bottom: 16px;
+  }
+  .options-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  }
+  .option-card {
+    background: #fff; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    border: 1px solid #edf0f5;
+    transition: all 0.2s;
+  }
+  .option-card.recommended { border: 2px solid #ff7849; box-shadow: 0 4px 20px rgba(255,120,73,0.15); }
+  .opt-num {
+    display: inline-block;
+    width: 28px; height: 28px; line-height: 28px;
+    background: #edf2f7; color: #4a5568;
+    border-radius: 50%; text-align: center;
+    font-weight: 700; font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .option-card.recommended .opt-num { background: #ff7849; color: white; }
+  .opt-title { font-size: 15px; font-weight: 700; color: #1a202c; margin-bottom: 8px; }
+  .opt-desc { color: #718096; font-size: 13px; line-height: 1.6; margin-bottom: 12px; }
+  .opt-struct {
+    background: #f7fafc; border-radius: 8px; padding: 10px;
+    font-size: 11px; color: #4a5568; line-height: 1.8;
+    font-family: monospace;
+  }
+  .opt-struct .hl { color: #ff7849; font-weight: 700; }
+  .opt-badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 4px; margin-top: 8px;
+    background: #ff7849; color: white;
+  }
+
+  /* 범례 */
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 16px; font-size: 12px;
+  }
+  .lg-item { display: flex; align-items: center; gap: 6px; color: #718096; }
+  .lg-dot { width: 12px; height: 12px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>CH01 비교 — book_v5 vs 새 스타일 (v4)</h1>
+<p class="subtitle">기존 버전과 새 버전의 구조 차이, 그리고 빠진 설정 관련 섹션을 어디에 둘지</p>
+
+<!-- ===== 구조 비교 ===== -->
+<div class="legend">
+  <div class="lg-item"><div class="lg-dot" style="background:#805ad5;"></div>이야기 파트</div>
+  <div class="lg-item"><div class="lg-dot" style="background:#3182ce;"></div>기술 파트 (분리)</div>
+  <div class="lg-item"><div class="lg-dot" style="background:#ff7849;"></div>통합 흐름 (이야기+코드)</div>
+  <div class="lg-item"><div class="lg-dot" style="background:#d69e2e;"></div>환경 구축/설정</div>
+  <div class="lg-item"><div class="lg-dot" style="background:#f56565;"></div>v4에 빠진 부분</div>
+</div>
+
+<div class="compare-grid">
+  <!-- book_v5 -->
+  <div class="version-card old">
+    <span class="version-tag">OLD · book_v5</span>
+    <div class="version-title">CH01 — 444줄</div>
+    <div class="version-meta">이야기 파트(1.x) → 기술 파트(2.x) 하드 분리</div>
+
+    <div class="section story">
+      <span class="s-label">이야기 파트</span>
+      1.1 입사 3일 차, 첫 번째 임무
+    </div>
+    <div class="section story">1.2 LLM의 자신감 넘치는 거짓말</div>
+    <div class="section story">1.3 Hallucination — 왜 모르면서 아는 척하나</div>
+    <div class="section story">1.4 Context Injection — 문서를 직접 넣어보기</div>
+    <div class="section story">1.5 RAG — 오픈북 시험으로 바꾸기</div>
+
+    <div class="section tech">
+      <span class="s-label">기술 파트</span>
+      2.1 용어 정리 (비유 → 진짜 용어 매핑 표)
+    </div>
+    <div class="section setup">2.2 소스 코드 준비 (레포 2개 소개 + 클론)</div>
+    <div class="section setup">2.3 실습 환경 구축 (venv, pip, ollama pull)</div>
+    <div class="section setup">2.4 실습 순서 (5개 실습 개요)</div>
+    <div class="section tech">2.5 실습 1 — step1_fail.py (환각 체험)</div>
+    <div class="section tech">2.6 실습 2 — step2_context.py (컨텍스트 주입)</div>
+    <div class="section tech">2.7 실습 3 — step3_rag.py (RAG 파이프라인)</div>
+    <div class="section tech">2.8 실습 4 — step3_rag_no_chunking.py (청킹 비교)</div>
+    <div class="section tech">2.9 실습 5 — step4_rag.py (추론 심화)</div>
+  </div>
+
+  <!-- v4 새 스타일 -->
+  <div class="version-card new">
+    <span class="version-tag">NEW · v4</span>
+    <div class="version-title">CH01 — 현재 샘플</div>
+    <div class="version-meta">아키텍처 다이어그램 + 통합 흐름</div>
+
+    <div class="section" style="background:#fef5f0; border-left-color:#ff7849; color:#744210; font-weight:700;">
+      <span class="s-label" style="color:#ff7849;">청사진</span>
+      아키텍처 다이어그램 (CH01 부분 하이라이트)
+    </div>
+    <div class="section" style="background:#f0fff4; border-left-color:#48bb78; color:#2f855a; font-weight:700;">
+      이번 챕터 목표 선언 (3줄)
+    </div>
+
+    <div class="section unified">
+      <span class="s-label">통합 흐름</span>
+      1.1 그럴듯한 거짓말 (입사 → 팀장 → step1 코드 → 결과 → 환각)
+    </div>
+    <div class="section unified">1.2 교재를 펼쳐놓으면 (힌트 → step2 코드 → 결과 → 컨텍스트 주입)</div>
+    <div class="section unified">1.3 사서가 필요합니다 (문제 → RAG 파이프라인 도식 → step3 코드 → 결과)</div>
+
+    <div class="section" style="background:#f0fff4; border-left-color:#48bb78; color:#2f855a;">
+      이것만은 기억하자 + 다음 예고
+    </div>
+
+    <div class="section missing">- 용어 정리 표 없음</div>
+    <div class="section missing">- 소스 코드 준비 (레포 클론) 없음</div>
+    <div class="section missing">- 실습 환경 구축 (venv, pip, ollama) 없음</div>
+    <div class="section missing">- 라이브러리 소개 (langchain-ollama 등) 없음</div>
+    <div class="section missing">- LLM 선택 팁 (Ollama vs OpenAI) 없음</div>
+    <div class="section missing">- 실습 4, 5 (청킹 비교, 추론 심화) 없음</div>
+  </div>
+</div>
+
+<!-- ===== 갭 분석 ===== -->
+<div class="gap-section">
+  <div class="gap-title">v4에 빠진 "설정·환경" 섹션들</div>
+  <div class="gap-list">
+    <div class="gap-item">
+      <div class="gi-title">소스 코드 준비</div>
+      <div class="gi-desc">rag-start (실습용) + rag-end (완성) 두 레포 소개. git clone 명령.</div>
+    </div>
+    <div class="gap-item">
+      <div class="gi-title">실습 환경 구축</div>
+      <div class="gi-desc">Python 3.12, venv, pip install, ollama pull 명령.</div>
+    </div>
+    <div class="gap-item">
+      <div class="gi-title">라이브러리 소개</div>
+      <div class="gi-desc">langchain-ollama, langchain-chroma, chromadb 등 사용할 패키지 표.</div>
+    </div>
+    <div class="gap-item">
+      <div class="gi-title">LLM 선택 팁</div>
+      <div class="gi-desc">Ollama 기본, RAM 부족 시 OpenAI 대안. .env 설정 안내.</div>
+    </div>
+    <div class="gap-item">
+      <div class="gi-title">용어 정리 표</div>
+      <div class="gi-desc">"자신감 거짓말 → 환각", "문서 붙이기 → Context Injection" 매핑.</div>
+    </div>
+    <div class="gap-item">
+      <div class="gi-title">실습 4, 5</div>
+      <div class="gi-desc">청킹 비교(step3_no_chunking), 추론 심화(step4_rag) 생략됨.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 배치 옵션 ===== -->
+<div class="options-section">
+  <div class="options-title">환경 구축·라이브러리·용어를 어디에 둘까?</div>
+  <div class="options-grid">
+
+    <div class="option-card recommended">
+      <div class="opt-num">A</div>
+      <div class="opt-title">챕터 시작 직후 "준비" 박스</div>
+      <div class="opt-desc">아키텍처 다이어그램 + 목표 선언 다음에 "준비하기" 접이식 박스. 환경, 레포, 라이브러리를 여기에 몰아둠. 이야기는 그 다음부터 깨끗하게 흐름.</div>
+      <div class="opt-struct">
+        아키텍처 다이어그램<br>
+        이번 챕터 목표<br>
+        <span class="hl">📦 준비하기 (접이식)</span><br>
+        &nbsp;&nbsp;· 레포 클론<br>
+        &nbsp;&nbsp;· 환경 구축<br>
+        &nbsp;&nbsp;· 라이브러리<br>
+        1.1 그럴듯한 거짓말<br>
+        1.2 교재를 펼쳐놓으면<br>
+        1.3 사서가 필요합니다
+      </div>
+      <div class="opt-badge">추천</div>
+    </div>
+
+    <div class="option-card">
+      <div class="opt-num">B</div>
+      <div class="opt-title">첫 코드 직전에 자연스럽게</div>
+      <div class="opt-desc">이야기를 먼저 풀고, 첫 코드 등장 직전(1.1 step1 코드 위)에 "일단 환경부터 준비해볼까요" 식으로 끼워넣음. 자연스럽지만 호흡이 길어짐.</div>
+      <div class="opt-struct">
+        아키텍처 다이어그램<br>
+        1.1 그럴듯한 거짓말<br>
+        &nbsp;&nbsp;(팀장 대화)<br>
+        &nbsp;&nbsp;<span class="hl">📦 환경·라이브러리</span><br>
+        &nbsp;&nbsp;step1 코드<br>
+        1.2 교재를 펼쳐놓으면<br>
+        1.3 사서가 필요합니다
+      </div>
+    </div>
+
+    <div class="option-card">
+      <div class="opt-num">C</div>
+      <div class="opt-title">부록으로 이동</div>
+      <div class="opt-desc">CH01 본문에서 완전히 빼고, 책 앞쪽 "부록: 환경 설정"에 한 번에 정리. 각 챕터 본문은 코드에 집중. 이미 준비된 독자에게 최적.</div>
+      <div class="opt-struct">
+        <span class="hl">책 앞부분</span><br>
+        프롤로그<br>
+        부록: 환경 설정<br>
+        <br>
+        <span class="hl">CH01 본문</span><br>
+        아키텍처 다이어그램<br>
+        1.1 그럴듯한 거짓말<br>
+        1.2 교재를 펼쳐놓으면<br>
+        1.3 사서가 필요합니다
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 추가 이슈 ===== -->
+<div class="gap-section" style="background: linear-gradient(135deg, #ebf8ff, #e6f6ff); border-color: #bee3f8;">
+  <div class="gap-title" style="color:#2c5282;">추가로 결정할 것</div>
+  <div class="gap-list">
+    <div class="gap-item" style="border-color:#bee3f8;">
+      <div class="gi-title">실습 5개 다 포함할까?</div>
+      <div class="gi-desc">book_v5는 step1~step4 + no_chunking까지 5개 실습. v4는 step1~step3만. 청킹 비교와 추론 심화를 CH01에 둘지, 뒷 챕터로 미룰지.</div>
+    </div>
+    <div class="gap-item" style="border-color:#bee3f8;">
+      <div class="gi-title">용어 정리 표는 어디에?</div>
+      <div class="gi-desc">기존에는 기술 파트 시작(2.1)에 모아둠. 통합 흐름에서는 각 용어가 처음 등장할 때 바로 정의하거나, 챕터 끝에 "용어 복습" 박스로 둘 수 있음.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

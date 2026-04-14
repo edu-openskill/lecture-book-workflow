@@ -1,0 +1,213 @@
+<h2>기술 서적 스토리텔링 스타일 비교</h2>
+<p class="subtitle">같은 장면(CH01: LLM 환각 체험)을 3가지 스타일로 작성했습니다. 읽어보고 끌리는 스타일을 선택해주세요.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>소설 속 코딩 — 캐릭터가 코드를 짜는 장면을 지켜보는 느낌</h3>
+      <p style="color:#888; margin-bottom:12px;">코드가 캐릭터의 행동으로 등장. 소설을 읽다 보면 자연스럽게 코드를 만나는 구조</p>
+      <div style="background:#1a1a2e; color:#e0e0e0; padding:20px; border-radius:8px; font-size:14px; line-height:1.8; white-space:pre-wrap; text-align:left; max-height:600px; overflow-y:auto;">
+입사 3일 차.
+
+오픈이는 모니터 앞에서 턱을 괴고 있었습니다. 인사팀에서 넘어온 메일 한 통이 화면을 채우고 있었습니다.
+
+<span style="color:#888; font-style:italic;">"AI 비서 프로토타입, 이번 주 금요일까지 가능할까요?"</span>
+
+금요일이면 이틀 남았습니다. 뭘 어디서부터 해야 하는지도 모르는데.
+
+팀장이 커피를 들고 다가왔습니다.
+<b style="color:#82aaff;">팀장</b>: "어제 ChatGPT한테 우리 회사 연차 규정 물어봤거든. 그럴듯하게 대답하더라. 근데 틀렸어."
+
+<span style="color:#c792ea; font-style:italic;">*ChatGPT도 뭐든 대답하잖아. 직접 물어보면 되는 거 아니야?*</span>
+
+오픈이는 터미널을 열었습니다. 우선 로컬에서 돌릴 수 있는 LLM부터 연결해보기로 했습니다. Ollama에 deepseek-r1 모델을 올려두었으니, Python에서 불러오면 됩니다.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #82aaff; margin:8px 0;"><span style="color:#888;"># step1_fail.py — TODO: LLM 단독 호출로 환각 체험</span>
+<span style="color:#ff7b72;">from</span> langchain_ollama <span style="color:#ff7b72;">import</span> ChatOllama
+
+llm = ChatOllama(model=<span style="color:#a5d6ff;">"deepseek-r1:8b"</span>, temperature=<span style="color:#79c0ff;">0</span>)
+question = <span style="color:#a5d6ff;">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+
+response = llm.invoke(question)
+print(response.content)</div>
+
+엔터를 눌렀습니다.
+
+화면에 답변이 올라오기 시작했습니다. "커넥트 사의 신입사원 연차 발생 규정은..." 그럴듯한 문장이 줄줄 흘러나왔습니다. 조항 번호까지 달려 있었습니다.
+
+오픈이는 인사팀에서 받은 실제 규정집을 열어봤습니다.
+
+첫 줄부터 달랐습니다.
+
+<span style="color:#c792ea; font-style:italic;">*...이거 다 지어낸 거잖아?*</span>
+
+규정집을 들고 있는 손에 힘이 들어갔습니다. 자신 있게 대답하더니, 전부 거짓말이었습니다.
+
+이 현상에는 이름이 있습니다. <b style="color:#f78c6c;">환각(Hallucination)</b>. AI가 모르는 것을 모른다고 하지 않고, 있을 법한 답을 지어내는 증상입니다. 유령의 집에 들어간 것과 비슷합니다. 진짜처럼 보이지만 전부 세트입니다. AI의 답변도 마찬가지로, 형식은 완벽한데 내용은 허구입니다.
+
+<b style="color:#82aaff;">팀장</b>: "그래서 전부 외우게 하지 말고, 필요한 문서만 찾아서 읽게 해."
+
+오픈이는 고개를 끄덕였습니다. 오픈북 시험이 떠올랐습니다. 시험 범위를 전부 외우는 대신, 시험지 옆에 교재를 펼쳐놓고 답을 찾는 방식. AI한테도 그렇게 하면 되지 않을까?
+
+문서를 직접 넘겨주면 어떻게 되는지 확인해봤습니다.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #82aaff; margin:8px 0;"><span style="color:#888;"># step2_context.py — TODO: 컨텍스트 직접 주입</span>
+<span style="color:#ff7b72;">from</span> langchain_ollama <span style="color:#ff7b72;">import</span> ChatOllama
+
+llm = ChatOllama(model=<span style="color:#a5d6ff;">"deepseek-r1:8b"</span>, temperature=<span style="color:#79c0ff;">0</span>)
+
+<span style="color:#888;"># 1. 실제 사내 규정 문서를 직접 넣어준다</span>
+context = <span style="color:#a5d6ff;">"""커넥트 연차 규정:
+- 신입사원: 입사일 기준 월 1개 발생
+- 1년 이상: 15일 + 근속 2년마다 1일 추가"""</span>
+
+prompt = <span style="color:#a5d6ff;">f"다음 문서를 참고해서 답변해줘:\n{context}\n\n질문: {question}"</span>
+response = llm.invoke(prompt)</div>
+
+이번에는 달랐습니다. "신입사원은 입사일 기준으로 매월 1개의 연차가 발생합니다." 규정집과 한 글자도 다르지 않았습니다.
+
+<span style="color:#c792ea; font-style:italic;">*문서를 넘겨주니까 거짓말을 안 하네.*</span>
+
+됐습니다. 방향이 보이기 시작했습니다. 그런데 문제가 하나 있었습니다. 지금은 규정 하나를 직접 복사해서 넣었지만, 사내 문서가 수백 개입니다. 질문할 때마다 관련 문서를 찾아서 넣어줄 수는 없잖아요.
+
+이걸 자동으로 해주는 구조가 있습니다. <b style="color:#f78c6c;">RAG(Retrieval-Augmented Generation)</b>. 질문이 들어오면 관련 문서를 자동으로 찾아서 LLM에 넘겨주는 파이프라인입니다.</div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>실황 해설 — 독자와 함께 코딩하는 멘토의 목소리</h3>
+      <p style="color:#888; margin-bottom:12px;">저자가 독자에게 말을 걸며 진행. 요리 방송처럼 "자, 이제 이걸 해볼까요?" 느낌</p>
+      <div style="background:#1a1a2e; color:#e0e0e0; padding:20px; border-radius:8px; font-size:14px; line-height:1.8; white-space:pre-wrap; text-align:left; max-height:600px; overflow-y:auto;">
+입사 3일 차, 오픈이에게 첫 미션이 떨어졌습니다. 사내 AI 비서를 만들라는 겁니다.
+
+그런데 팀장이 의미심장한 한마디를 던졌습니다.
+<b style="color:#82aaff;">팀장</b>: "ChatGPT한테 우리 회사 연차 규정 물어봤더니, 그럴듯하게 거짓말을 하더라."
+
+정말 그런지 직접 확인해볼까요?
+
+로컬 LLM을 하나 연결해보겠습니다. Ollama라는 도구를 쓰면 내 컴퓨터에서 LLM을 돌릴 수 있어요. deepseek-r1이라는 8B 파라미터짜리 모델을 올려두었습니다.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #c3e88d; margin:8px 0;"><span style="color:#888;"># step1_fail.py — TODO: LLM 단독 호출로 환각 체험</span>
+<span style="color:#ff7b72;">from</span> langchain_ollama <span style="color:#ff7b72;">import</span> ChatOllama
+
+llm = ChatOllama(model=<span style="color:#a5d6ff;">"deepseek-r1:8b"</span>, temperature=<span style="color:#79c0ff;">0</span>)</div>
+
+<span style="color:#c3e88d;">temperature=0</span>은 "가장 확률 높은 답변만 내놓아라"라는 뜻입니다. 창의성을 낮추고 정확성을 높이겠다는 의도인데요, 과연 효과가 있을까요?
+
+우리 회사 규정을 물어보겠습니다.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #c3e88d; margin:8px 0;">question = <span style="color:#a5d6ff;">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+response = llm.invoke(question)
+print(response.content)</div>
+
+결과가 나왔습니다. "커넥트 사의 신입사원 연차 발생 규정은 근로기준법 제60조에 따라..."
+
+그럴듯하죠? 조항 번호까지 달려 있으니 누구라도 믿을 만합니다. 그런데 실제 규정집과 대조해보면 첫 줄부터 다릅니다. 이 모델은 커넥트라는 회사를 학습한 적이 없으니까요.
+
+없는 정보를 자신 있게 지어내는 겁니다. 이걸 <b style="color:#f78c6c;">환각(Hallucination)</b>이라고 부릅니다.
+
+유령의 집에 들어가본 적 있으시죠? 진짜처럼 보이지만 전부 세트입니다. AI의 답변도 같습니다. 형식은 완벽한데 내용은 허구예요.
+
+그러면 어떻게 해야 할까요? 답은 의외로 간단합니다. AI한테 정답지를 주면 됩니다.
+
+여러분도 시험 볼 때 교재를 옆에 펼쳐놓으면 훨씬 정확하게 답할 수 있잖아요? 같은 원리입니다. 사내 문서를 AI에게 직접 건네주는 거죠.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #c3e88d; margin:8px 0;"><span style="color:#888;"># step2_context.py — TODO: 컨텍스트 직접 주입</span>
+context = <span style="color:#a5d6ff;">"""커넥트 연차 규정:
+- 신입사원: 입사일 기준 월 1개 발생
+- 1년 이상: 15일 + 근속 2년마다 1일 추가"""</span>
+
+prompt = <span style="color:#a5d6ff;">f"다음 문서를 참고해서 답변해줘:\n{context}\n\n질문: {question}"</span>
+response = llm.invoke(prompt)
+print(response.content)</div>
+
+이번에는 "신입사원은 입사일 기준으로 매월 1개의 연차가 발생합니다." 규정집과 정확히 일치합니다.
+
+보셨죠? 문서를 넘겨주니까 거짓말을 안 합니다. 그런데 여기서 문제가 생깁니다. 지금은 규정 하나를 직접 복사해서 넣었지만, 사내 문서가 수백 개라면요? 질문할 때마다 관련 문서를 손으로 찾아서 넣을 수는 없잖아요.
+
+이걸 자동으로 해주는 구조를 <b style="color:#f78c6c;">RAG(Retrieval-Augmented Generation)</b>라고 합니다. 질문이 들어오면 관련 문서를 자동으로 찾아서 LLM에게 넘겨주는 파이프라인이에요.</div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>추리소설 — 사건을 해결해가는 긴장감</h3>
+      <p style="color:#888; margin-bottom:12px;">매 챕터가 미스터리. 에러는 단서, 코드는 수사 도구, 해결은 반전</p>
+      <div style="background:#1a1a2e; color:#e0e0e0; padding:20px; border-radius:8px; font-size:14px; line-height:1.8; white-space:pre-wrap; text-align:left; max-height:600px; overflow-y:auto;">
+사건은 월요일 아침에 시작됐습니다.
+
+오픈이가 자리에 앉자마자 팀장이 다가왔습니다.
+<b style="color:#82aaff;">팀장</b>: "어제 ChatGPT한테 우리 회사 연차 규정 물어봤거든. 틀렸어."
+
+틀렸다. 그 한마디가 마음에 걸렸습니다.
+
+어떻게 틀렸을까? 직접 확인해봐야겠습니다. 용의자를 심문하려면 먼저 만나야 합니다. 오픈이는 로컬에 설치해둔 deepseek-r1 모델에 질문을 던졌습니다.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #ff5370; margin:8px 0;"><span style="color:#888;"># step1_fail.py — TODO: LLM 단독 호출로 환각 체험</span>
+<span style="color:#ff7b72;">from</span> langchain_ollama <span style="color:#ff7b72;">import</span> ChatOllama
+
+llm = ChatOllama(model=<span style="color:#a5d6ff;">"deepseek-r1:8b"</span>, temperature=<span style="color:#79c0ff;">0</span>)
+question = <span style="color:#a5d6ff;">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+
+response = llm.invoke(question)
+print(response.content)</div>
+
+답변이 올라왔습니다.
+
+"커넥트 사의 신입사원 연차 발생 규정은 근로기준법 제60조에 따라..."
+
+조항 번호까지 달려 있었습니다. 그럴듯했습니다. <b style="color:#ff5370;">너무</b> 그럴듯했습니다.
+
+오픈이는 인사팀에서 받은 실제 규정집을 꺼냈습니다. 첫 번째 증거 대조.
+
+첫 줄부터 달랐습니다.
+
+용의자는 거짓말을 하고 있었습니다. 그것도 자신 있게. 이 현상을 <b style="color:#f78c6c;">환각(Hallucination)</b>이라고 부릅니다. 모르는 것을 모른다고 하지 않고, 그럴듯한 답을 지어내는 증상입니다.
+
+범인의 수법은 파악했습니다. 그러면 이 용의자가 진실만 말하게 할 방법은 없을까요?
+
+수사관이라면 증거를 내밀겠죠. "이 문서를 봐. 여기 뭐라고 적혀 있어?"
+
+오픈이도 같은 방법을 써봤습니다.
+
+<div style="background:#0d1117; padding:12px; border-radius:6px; border-left:3px solid #ff5370; margin:8px 0;"><span style="color:#888;"># step2_context.py — TODO: 컨텍스트 직접 주입</span>
+context = <span style="color:#a5d6ff;">"""커넥트 연차 규정:
+- 신입사원: 입사일 기준 월 1개 발생
+- 1년 이상: 15일 + 근속 2년마다 1일 추가"""</span>
+
+prompt = <span style="color:#a5d6ff;">f"다음 문서를 참고해서 답변해줘:\n{context}\n\n질문: {question}"</span>
+response = llm.invoke(prompt)
+print(response.content)</div>
+
+자백이 나왔습니다. "신입사원은 입사일 기준으로 매월 1개의 연차가 발생합니다."
+
+증거를 들이대니 정직해집니다. 하지만 사건은 여기서 끝이 아닙니다.
+
+지금은 증거 하나를 직접 건넸지만, 현실에서는 사내 문서가 수백 개입니다. 매번 수동으로 증거를 찾아서 건넬 수는 없습니다. 자동으로 관련 증거를 찾아서 용의자 앞에 내미는 시스템이 필요합니다.
+
+그게 바로 <b style="color:#f78c6c;">RAG(Retrieval-Augmented Generation)</b>입니다. 질문이 들어올 때마다 증거 보관소(벡터 DB)에서 관련 문서를 찾아 LLM에 넘겨주는 자동 수사 시스템이죠.</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px; padding:16px; background:rgba(255,255,255,0.05); border-radius:8px;">
+  <h3 style="margin-top:0;">스타일 비교 요약</h3>
+  <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+      <td style="padding:8px; font-weight:bold;">A. 소설 속 코딩</td>
+      <td style="padding:8px;">캐릭터의 감정/행동이 중심. 코드는 행동의 결과물로 등장. 몰입감 최고</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+      <td style="padding:8px; font-weight:bold;">B. 실황 해설</td>
+      <td style="padding:8px;">저자가 독자에게 직접 말을 걸며 진행. 친근하고 이해하기 쉬움. 접근성 최고</td>
+    </tr>
+    <tr>
+      <td style="padding:8px; font-weight:bold;">C. 추리소설</td>
+      <td style="padding:8px;">매 챕터가 사건 해결. 에러=단서, 코드=수사도구. 긴장감과 페이지 터닝 최고</td>
+    </tr>
+  </table>
+</div>

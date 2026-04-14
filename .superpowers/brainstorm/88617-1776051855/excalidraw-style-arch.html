@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ConnectHR — Excalidraw 스타일 아키텍처</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #fafbfc; color: #2d3748;
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  padding: 40px 20px; line-height: 1.7;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+.design-block { background: #fff; border-radius: 12px; padding: 28px; margin: 32px 0; border: 1px solid #edf0f5; }
+.design-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 24px; }
+
+.arch-canvas {
+  background: #fafafa;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+}
+.arch-canvas svg {
+  width: 100%; height: auto;
+  min-width: 1100px;
+  display: block;
+  font-family: 'Gaegu', 'Pretendard', sans-serif;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>ConnectHR 아키텍처 — Excalidraw 스타일</h1>
+<p class="subtitle">영역을 색상 해치(빗금)로 묶고, 옆에 주석으로 설명하는 손그림 느낌</p>
+
+<div class="design-block">
+  <div class="design-title">ConnectHR 전체 맵 (Excalidraw 스타일)</div>
+  <div class="design-desc">영역별 해치 배경 + 커브 화살표 + 사이드 주석. 레퍼런스 이미지의 쿠버네티스 아키텍처와 같은 어법</div>
+
+  <div class="arch-canvas">
+    <svg viewBox="0 0 1100 740" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Hatch patterns (diagonal stripes) per zone -->
+        <pattern id="hatch-user" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="12" stroke="#fbbf24" stroke-width="1.5" opacity="0.3"/>
+        </pattern>
+        <pattern id="hatch-gateway" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="12" stroke="#60a5fa" stroke-width="1.5" opacity="0.3"/>
+        </pattern>
+        <pattern id="hatch-app" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="12" stroke="#f87171" stroke-width="1.5" opacity="0.3"/>
+        </pattern>
+        <pattern id="hatch-service" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="12" stroke="#a78bfa" stroke-width="1.5" opacity="0.3"/>
+        </pattern>
+        <pattern id="hatch-tuning" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="12" stroke="#fb923c" stroke-width="1.5" opacity="0.3"/>
+        </pattern>
+        <pattern id="hatch-data" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="12" stroke="#34d399" stroke-width="1.5" opacity="0.3"/>
+        </pattern>
+
+        <!-- Hand-drawn arrow marker -->
+        <marker id="exc-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+          <path d="M0,2 L10,6 L0,10" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="exc-arrow-gray" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+          <path d="M0,2 L10,6 L0,10" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <marker id="exc-arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+          <path d="M0,2 L10,6 L0,10" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- ================ BACKGROUND ZONES ================ -->
+      <!-- User zone (top-left, yellow) -->
+      <rect x="40" y="90" width="180" height="80" fill="url(#hatch-user)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" rx="8"/>
+
+      <!-- Cluster boundary (dashed big box) -->
+      <rect x="260" y="90" width="640" height="560" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="8,4" rx="10"/>
+      <text x="580" y="80" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14" fill="#4b5563" font-weight="700">ConnectHR 시스템 경계</text>
+
+      <!-- Gateway zone (top of cluster) -->
+      <rect x="290" y="120" width="480" height="90" fill="url(#hatch-gateway)" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3" rx="8"/>
+
+      <!-- Application zone (red hatch) -->
+      <rect x="290" y="220" width="480" height="120" fill="url(#hatch-app)" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,3" rx="8"/>
+
+      <!-- Service zone (purple hatch) -->
+      <rect x="290" y="350" width="480" height="100" fill="url(#hatch-service)" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="5,3" rx="8"/>
+
+      <!-- Tuning zone (orange hatch) -->
+      <rect x="290" y="460" width="480" height="80" fill="url(#hatch-tuning)" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5,3" rx="8"/>
+
+      <!-- Data zone (green hatch) -->
+      <rect x="290" y="550" width="480" height="80" fill="url(#hatch-data)" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5,3" rx="8"/>
+
+      <!-- ================ NODES ================ -->
+      <!-- 사내 직원 (user) -->
+      <rect x="70" y="110" width="120" height="40" rx="20" fill="#fff" stroke="#374151" stroke-width="2"/>
+      <text x="130" y="135" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="16" font-weight="700" fill="#374151">사내 직원</text>
+
+      <!-- FastAPI (gateway) -->
+      <rect x="330" y="140" width="130" height="50" rx="6" fill="#fef3c7" stroke="#ca8a04" stroke-width="2"/>
+      <text x="395" y="162" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700" fill="#78350f">FastAPI</text>
+      <text x="395" y="180" text-anchor="middle" font-family="Kalam, sans-serif" font-size="11" fill="#92400e">API Gateway</text>
+
+      <!-- Query Router (app) -->
+      <path d="M 310 250 L 440 250 L 470 275 L 440 300 L 310 300 L 340 275 Z" fill="#fee2e2" stroke="#b91c1c" stroke-width="2"/>
+      <text x="390" y="273" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="15" font-weight="700" fill="#7f1d1d">Query Router</text>
+      <text x="390" y="289" text-anchor="middle" font-family="Kalam, sans-serif" font-size="11" fill="#991b1b">질문 분류</text>
+
+      <!-- ReAct Agent (app) -->
+      <rect x="550" y="245" width="160" height="60" rx="8" fill="#fecaca" stroke="#b91c1c" stroke-width="2.5"/>
+      <text x="630" y="268" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="16" font-weight="700" fill="#7f1d1d">ReAct Agent</text>
+      <text x="630" y="287" text-anchor="middle" font-family="Kalam, sans-serif" font-size="11" fill="#991b1b">Think / Act / Observe</text>
+
+      <!-- LCEL Chain (service) -->
+      <rect x="320" y="370" width="120" height="50" rx="6" fill="#ede9fe" stroke="#6b21a8" stroke-width="2"/>
+      <text x="380" y="392" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14" font-weight="700" fill="#4c1d95">LCEL Chain</text>
+      <text x="380" y="408" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#5b21b6">RAG pipeline</text>
+
+      <!-- MCP Tools (service) -->
+      <rect x="470" y="370" width="120" height="50" rx="6" fill="#ede9fe" stroke="#6b21a8" stroke-width="2"/>
+      <text x="530" y="392" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14" font-weight="700" fill="#4c1d95">MCP Tools</text>
+      <text x="530" y="408" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#5b21b6">DB query fn</text>
+
+      <!-- Doc Pipeline (service) -->
+      <rect x="620" y="370" width="130" height="50" rx="6" fill="#ede9fe" stroke="#6b21a8" stroke-width="2"/>
+      <text x="685" y="390" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#4c1d95">Doc Pipeline</text>
+      <text x="685" y="406" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#5b21b6">Parse·Chunk·Embed</text>
+
+      <!-- Tuning: Hybrid+Rerank -->
+      <rect x="320" y="475" width="130" height="48" rx="6" fill="#ffedd5" stroke="#c2410c" stroke-width="2"/>
+      <text x="385" y="495" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#9a3412">Hybrid+Rerank</text>
+      <text x="385" y="510" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#7c2d12">BM25·X-Enc</text>
+
+      <!-- Tuning: Query Rewrite -->
+      <rect x="470" y="475" width="130" height="48" rx="6" fill="#ffedd5" stroke="#c2410c" stroke-width="2"/>
+      <text x="535" y="495" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#9a3412">Query Rewrite</text>
+      <text x="535" y="510" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#7c2d12">HyDE·Multi-Query</text>
+
+      <!-- Tuning: Vision LLM -->
+      <rect x="620" y="475" width="130" height="48" rx="6" fill="#ffedd5" stroke="#c2410c" stroke-width="2"/>
+      <text x="685" y="495" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#9a3412">Vision LLM · OCR</text>
+      <text x="685" y="510" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#7c2d12">이미지 문서</text>
+
+      <!-- Data: ChromaDB (cylinder) -->
+      <ellipse cx="380" cy="570" rx="55" ry="8" fill="#d1fae5" stroke="#047857" stroke-width="2"/>
+      <path d="M 325 570 L 325 605 A 55 8 0 0 0 435 605 L 435 570" fill="#d1fae5" stroke="#047857" stroke-width="2"/>
+      <text x="380" y="590" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#064e3b">ChromaDB</text>
+      <text x="380" y="604" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#065f46">vectors</text>
+
+      <!-- Data: PostgreSQL -->
+      <ellipse cx="530" cy="570" rx="55" ry="8" fill="#d1fae5" stroke="#047857" stroke-width="2"/>
+      <path d="M 475 570 L 475 605 A 55 8 0 0 0 585 605 L 585 570" fill="#d1fae5" stroke="#047857" stroke-width="2"/>
+      <text x="530" y="590" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#064e3b">PostgreSQL</text>
+      <text x="530" y="604" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#065f46">정형 DB</text>
+
+      <!-- 문서 저장소 -->
+      <rect x="625" y="560" width="130" height="56" rx="4" fill="#d1fae5" stroke="#047857" stroke-width="2"/>
+      <text x="690" y="582" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#064e3b">문서 저장소</text>
+      <text x="690" y="598" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#065f46">PDF·DOCX·XLSX</text>
+
+      <!-- External Ollama (outside cluster) -->
+      <rect x="930" y="265" width="130" height="50" rx="6" fill="#f3f4f6" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="995" y="287" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14" font-weight="700" fill="#1f2937">Ollama LLM</text>
+      <text x="995" y="303" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#374151">DeepSeek-R1:8b</text>
+
+      <!-- ================ ARROWS ================ -->
+      <!-- user → FastAPI (curved red) -->
+      <path d="M 190 130 Q 250 130 330 160" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#exc-arrow)"/>
+
+      <!-- FastAPI → Query Router -->
+      <path d="M 395 190 Q 395 215 390 245" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#exc-arrow)"/>
+
+      <!-- Query Router → ReAct Agent (curved) -->
+      <path d="M 470 275 Q 510 275 548 275" fill="none" stroke="#dc2626" stroke-width="2" marker-end="url(#exc-arrow)"/>
+
+      <!-- Agent → LCEL, MCP, Doc pipeline (branches) -->
+      <path d="M 610 305 Q 500 340 380 368" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#exc-arrow)"/>
+      <path d="M 630 305 Q 580 340 530 368" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#exc-arrow)"/>
+      <path d="M 680 305 Q 685 340 685 368" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#exc-arrow)"/>
+
+      <!-- LCEL → Hybrid+Rerank → Query Rewrite (tuning chain) -->
+      <path d="M 380 420 Q 380 450 385 473" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#exc-arrow)"/>
+      <path d="M 450 500 Q 460 500 468 500" fill="none" stroke="#dc2626" stroke-width="1.5" marker-end="url(#exc-arrow)"/>
+
+      <!-- Tuning → ChromaDB -->
+      <path d="M 385 523 Q 385 545 380 560" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#exc-arrow)"/>
+
+      <!-- MCP Tools → PostgreSQL -->
+      <path d="M 530 420 Q 530 495 530 560" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#exc-arrow)"/>
+
+      <!-- Doc Pipeline → 문서 저장소 & ChromaDB (ingestion) -->
+      <path d="M 685 420 Q 685 490 690 560" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#exc-arrow-gray)"/>
+      <path d="M 625 420 Q 500 500 400 560" fill="none" stroke="#6b7280" stroke-width="1" stroke-dasharray="6,4" marker-end="url(#exc-arrow-gray)"/>
+
+      <!-- Agent → Ollama (external) -->
+      <path d="M 710 275 Q 820 275 930 290" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#exc-arrow-gray)"/>
+
+      <!-- Agent → back to user (response, green) -->
+      <path d="M 580 245 Q 400 150 195 130" fill="none" stroke="#059669" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#exc-arrow-green)"/>
+
+      <!-- ================ ZONE LABELS (top of each zone) ================ -->
+      <text x="130" y="102" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#92400e">로컬호스트</text>
+      <text x="535" y="135" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#1e40af">사내 직원 접점 (API Gateway)</text>
+      <text x="535" y="235" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#991b1b">오케스트레이션 (질문 이해 · 분기)</text>
+      <text x="535" y="365" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#6b21a8">서비스 컴포넌트</text>
+      <text x="535" y="470" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#9a3412">검색 품질 튜닝</text>
+      <text x="535" y="547" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#064e3b">지식 저장소</text>
+      <text x="995" y="255" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="13" font-weight="700" fill="#4b5563">외부 LLM</text>
+
+      <!-- ================ SIDE ANNOTATIONS (right column) ================ -->
+      <!-- Gateway annotation -->
+      <line x1="780" y1="165" x2="810" y2="165" stroke="#6b7280" stroke-width="1"/>
+      <text x="820" y="155" font-family="Gaegu, sans-serif" font-size="13" fill="#374151" font-weight="700">API 진입점</text>
+      <text x="820" y="172" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">REST · async</text>
+      <text x="820" y="186" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">직원 요청 접수</text>
+
+      <!-- App annotation -->
+      <line x1="780" y1="275" x2="810" y2="275" stroke="#6b7280" stroke-width="1"/>
+      <text x="820" y="262" font-family="Gaegu, sans-serif" font-size="13" fill="#374151" font-weight="700">질문 이해 & 분기</text>
+      <text x="820" y="280" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">Router: DB? RAG?</text>
+      <text x="820" y="295" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">Agent: Think·Act·Observe</text>
+
+      <!-- Service annotation -->
+      <line x1="780" y1="395" x2="810" y2="395" stroke="#6b7280" stroke-width="1"/>
+      <text x="820" y="380" font-family="Gaegu, sans-serif" font-size="13" fill="#374151" font-weight="700">실제 정보 수집</text>
+      <text x="820" y="398" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">RAG · DB 조회</text>
+      <text x="820" y="413" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">문서 인제스천</text>
+
+      <!-- Tuning annotation -->
+      <line x1="780" y1="498" x2="810" y2="498" stroke="#6b7280" stroke-width="1"/>
+      <text x="820" y="485" font-family="Gaegu, sans-serif" font-size="13" fill="#374151" font-weight="700">검색 품질 향상</text>
+      <text x="820" y="503" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">리랭킹 · 질문 재작성</text>
+      <text x="820" y="518" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">이미지까지 이해</text>
+
+      <!-- Data annotation -->
+      <line x1="780" y1="585" x2="810" y2="585" stroke="#6b7280" stroke-width="1"/>
+      <text x="820" y="572" font-family="Gaegu, sans-serif" font-size="13" fill="#374151" font-weight="700">사내 지식 원천</text>
+      <text x="820" y="590" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">벡터 · 정형 · 원본 파일</text>
+      <text x="820" y="605" font-family="Kalam, sans-serif" font-size="11" fill="#4b5563">재인덱싱 대상</text>
+
+      <!-- ================ LEGEND (bottom-left) ================ -->
+      <rect x="40" y="450" width="220" height="210" fill="#fff" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4,3" rx="8"/>
+      <text x="150" y="475" text-anchor="middle" font-family="Gaegu, sans-serif" font-size="14" font-weight="700" fill="#374151">범례</text>
+
+      <rect x="55" y="490" width="50" height="26" rx="4" fill="#fef3c7" stroke="#ca8a04" stroke-width="1.5"/>
+      <text x="80" y="507" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#78350f">API</text>
+      <text x="115" y="508" font-family="Gaegu, sans-serif" font-size="12" fill="#4b5563">게이트웨이</text>
+
+      <path d="M 55 530 L 105 530 L 120 540 L 105 550 L 55 550 L 70 540 Z" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.5"/>
+      <text x="130" y="545" font-family="Gaegu, sans-serif" font-size="12" fill="#4b5563">오케스트레이션</text>
+
+      <rect x="55" y="558" width="50" height="24" rx="4" fill="#ede9fe" stroke="#6b21a8" stroke-width="1.5"/>
+      <text x="80" y="574" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#4c1d95">S</text>
+      <text x="115" y="575" font-family="Gaegu, sans-serif" font-size="12" fill="#4b5563">서비스</text>
+
+      <rect x="55" y="590" width="50" height="24" rx="4" fill="#ffedd5" stroke="#c2410c" stroke-width="1.5"/>
+      <text x="80" y="606" text-anchor="middle" font-family="Kalam, sans-serif" font-size="10" fill="#9a3412">T</text>
+      <text x="115" y="607" font-family="Gaegu, sans-serif" font-size="12" fill="#4b5563">튜닝</text>
+
+      <path d="M 55 622 L 105 622 L 105 644 A 25 4 0 0 1 55 644 Z" fill="#d1fae5" stroke="#047857" stroke-width="1.5"/>
+      <ellipse cx="80" cy="622" rx="25" ry="4" fill="#d1fae5" stroke="#047857" stroke-width="1.5"/>
+      <text x="115" y="638" font-family="Gaegu, sans-serif" font-size="12" fill="#4b5568">데이터</text>
+
+      <line x1="55" y1="658" x2="105" y2="658" stroke="#dc2626" stroke-width="2"/>
+      <text x="115" y="661" font-family="Gaegu, sans-serif" font-size="11" fill="#4b5568">쿼리 흐름</text>
+      <line x1="55" y1="672" x2="105" y2="672" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="115" y="675" font-family="Gaegu, sans-serif" font-size="11" fill="#4b5568">인제스천 / 외부</text>
+
+    </svg>
+  </div>
+
+  <p style="font-size:13px; color:#718096; margin-top:14px;">
+    <strong>레퍼런스 이미지와 일치 요소</strong>: ① 영역별 해치(빗금) 배경 + 점선 보더 / ② 커브 화살표(빨강: 쿼리, 회색 점선: 인제스천·외부, 초록: 응답) / ③ 오른쪽 사이드 주석으로 각 영역 설명 / ④ 왼쪽 하단 범례 박스 / ⑤ 손그림 느낌 폰트(Gaegu)
+  </p>
+</div>
+
+</div>
+</body>
+</html>

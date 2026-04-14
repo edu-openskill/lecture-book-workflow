@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ConnectHR 전체 아키텍처 맵 — 4가지 디자인</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.7; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+.design-block { background: #fff; border-radius: 12px; padding: 32px; margin: 32px 0; border: 1px solid #edf0f5; }
+.design-label { display: inline-block; font-size: 11px; font-weight: 700; color: #fff; background: #2563eb; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; margin-bottom: 10px; }
+.design-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 24px; }
+
+/* ============ A안: 기술서적 전통 스타일 ============ */
+.book-arch { background: #fff; padding: 28px 24px; border: 1px solid #4a5568; }
+.ba-title { text-align: center; font-size: 13px; font-weight: 700; color: #2d3748; margin-bottom: 20px; letter-spacing: 1.5px; text-transform: uppercase; }
+.ba-layer { display: grid; grid-template-columns: 80px 1fr; gap: 14px; padding: 10px 0; border-bottom: 1px dashed #cbd5e0; }
+.ba-layer:last-child { border-bottom: none; }
+.ba-layer-label { font-size: 10px; font-weight: 800; color: #4a5568; letter-spacing: 1.5px; align-self: center; font-family: 'Courier New', monospace; }
+.ba-items { display: flex; gap: 10px; flex-wrap: wrap; }
+.ba-box { border: 1.5px solid #2d3748; padding: 8px 12px; background: #fff; min-width: 140px; flex: 1; text-align: center; }
+.ba-box.actor { border-radius: 50% / 30%; background: #fff; }
+.ba-box.db { border-radius: 40% 40% 8px 8px / 20% 20% 8px 8px; background: #f7fafc; }
+.ba-box.external { border: 1.5px dashed #4a5568; background: #fafbfc; }
+.ba-stereo { font-size: 9px; color: #718096; font-family: 'Courier New', monospace; margin-bottom: 2px; }
+.ba-name { font-size: 12.5px; font-weight: 700; color: #1a202c; }
+.ba-tech { font-size: 10.5px; color: #4a5568; font-style: italic; margin-top: 1px; }
+.ba-ch { font-size: 9px; color: #718096; font-family: monospace; margin-top: 2px; }
+
+/* ============ B안: 머메이드 C4 ============ */
+.mermaid-arch { background: #f0f8ff; padding: 28px 20px; border-radius: 10px; }
+.ma-layer { margin-bottom: 14px; }
+.ma-layer:last-child { margin-bottom: 0; }
+.ma-layer-label { font-size: 10px; font-weight: 800; color: #0e4968; letter-spacing: 2px; margin-bottom: 6px; padding-left: 4px; }
+.ma-items { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.ma-container { border: 2px solid #0e4968; border-radius: 6px; padding: 10px 12px; text-align: center; min-height: 60px; display: flex; flex-direction: column; justify-content: center; }
+.ma-container.person { background: #08427b; color: #fff; border-color: #052e56; }
+.ma-container.person .ma-stereo { color: #bfd5e6; }
+.ma-container.software { background: #1168bd; color: #fff; border-color: #073d78; }
+.ma-container.software .ma-stereo { color: #a9cff1; }
+.ma-container.component { background: #85bbf0; color: #0e2a3f; border-color: #3c7fc0; }
+.ma-container.database { background: #438dca; color: #fff; border-color: #2563eb; }
+.ma-container.database .ma-stereo { color: #bfd5e6; }
+.ma-container.external { background: #999; color: #fff; border-color: #666; }
+.ma-container.external .ma-stereo { color: #d0d0d0; }
+.ma-container.tuning { background: #ffa54f; color: #fff; border-color: #c05a10; }
+.ma-container.tuning .ma-stereo { color: #ffe1c5; }
+.ma-stereo { font-size: 9px; letter-spacing: 1px; font-weight: 700; margin-bottom: 2px; text-transform: uppercase; }
+.ma-name { font-size: 12.5px; font-weight: 700; margin-bottom: 1px; }
+.ma-tech { font-size: 10px; opacity: 0.85; font-style: italic; }
+.ma-ch { font-size: 9px; opacity: 0.75; font-family: monospace; margin-top: 2px; letter-spacing: 0.3px; }
+
+/* ============ C안: 엔터프라이즈 ============ */
+.ent-arch { background: #fafbfc; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+.ent-tier { padding: 14px 20px 14px 56px; border-bottom: 1px solid #e2e8f0; position: relative; }
+.ent-tier:last-child { border-bottom: none; }
+.ent-tier.presentation { background: linear-gradient(to right, #fef3c7, #fef9e3); }
+.ent-tier.application { background: linear-gradient(to right, #dbeafe, #eff6ff); }
+.ent-tier.service { background: linear-gradient(to right, #ede9fe, #f5f3ff); }
+.ent-tier.tuning { background: linear-gradient(to right, #ffe4e6, #fff1f2); }
+.ent-tier.data { background: linear-gradient(to right, #d1fae5, #ecfdf5); }
+.ent-tier.external { background: linear-gradient(to right, #f3f4f6, #fafbfc); }
+.ent-tier-label { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #4a5568; }
+.ent-items { display: flex; gap: 10px; flex-wrap: wrap; }
+.ent-item { background: #fff; border: 1.5px solid rgba(0,0,0,0.15); border-radius: 6px; padding: 8px 12px; min-width: 140px; flex: 1; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.ent-name { font-size: 12.5px; font-weight: 700; color: #1a202c; }
+.ent-tech { font-size: 10.5px; color: #6b7280; margin-top: 1px; }
+.ent-ch { font-family: monospace; font-size: 9.5px; color: #9ca3af; margin-top: 2px; font-weight: 700; }
+
+/* ============ D안: 화이트보드 ============ */
+.wb-arch {
+  background: #fafaf5;
+  background-image: linear-gradient(0deg, transparent 24%, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.04) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.04) 75%, rgba(0,0,0,0.04) 76%, transparent 77%), linear-gradient(90deg, transparent 24%, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.04) 26%, transparent 27%, transparent 74%, rgba(0,0,0,0.04) 75%, rgba(0,0,0,0.04) 76%, transparent 77%);
+  background-size: 40px 40px;
+  padding: 28px 24px; border-radius: 6px; border: 1px solid #d4d4d4; position: relative;
+}
+.wb-arch::before { content: 'WHITEBOARD'; position: absolute; top: 6px; right: 10px; font-size: 9px; font-weight: 800; letter-spacing: 2px; color: rgba(0,0,0,0.15); }
+.wb-zone { margin-bottom: 14px; }
+.wb-zone:last-child { margin-bottom: 0; }
+.wb-zone-label { display: inline-block; background: rgba(251,191,36,0.3); padding: 2px 8px; font-size: 10px; color: #78350f; font-family: 'Courier New', monospace; font-weight: 700; transform: rotate(-1deg); margin-bottom: 8px; }
+.wb-items { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.wb-box { background: #fff; border: 2px solid #2d3748; border-radius: 4px; padding: 8px 12px; text-align: center; position: relative; box-shadow: 2px 2px 0 rgba(0,0,0,0.08); font-family: 'Pretendard', sans-serif; }
+.wb-box.actor { border-radius: 20px; }
+.wb-box.db { border-radius: 40% 40% 8px 8px / 24% 24% 8px 8px; }
+.wb-name { font-size: 12.5px; font-weight: 700; color: #1a202c; }
+.wb-tech { font-size: 10px; color: #4a5568; margin-top: 1px; font-style: italic; }
+.wb-ch { position: absolute; top: -8px; right: -8px; background: #fbbf24; color: #78350f; font-size: 8.5px; font-weight: 800; padding: 2px 6px; border-radius: 10px; border: 1.5px solid #78350f; transform: rotate(6deg); font-family: 'Courier New', monospace; }
+
+/* 범례 */
+.legend-row { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px; color: #4a5568; margin-top: 14px; padding-top: 14px; border-top: 1px solid #e2e8f0; }
+.legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>ConnectHR 전체 아키텍처 맵 — 4가지 디자인</h1>
+<p class="subtitle">Ch.1~Ch.10 전체 컴포넌트를 포함한 최종 시스템 맵. 서문(프롤로그) 또는 Ch.1 "오늘 만들 것" 자리에 들어갈 후보.</p>
+
+<!-- ============ A안: 기술서적 전통 ============ -->
+<div class="design-block">
+  <span class="design-label">A안</span>
+  <div class="design-title">기술서적 전통 · 레이어드</div>
+  <div class="design-desc">흑백 UML 스타일. 레이어 라벨과 컴포넌트 타입(stereotype)이 명시된 정통 구조도</div>
+
+  <div class="book-arch">
+    <div class="ba-title">Figure 0-1. ConnectHR System Architecture (Full)</div>
+
+    <div class="ba-layer">
+      <div class="ba-layer-label">ACTOR</div>
+      <div class="ba-items">
+        <div class="ba-box actor"><div class="ba-stereo">&lt;&lt;actor&gt;&gt;</div><div class="ba-name">사내 직원</div><div class="ba-tech">Web client</div></div>
+      </div>
+    </div>
+    <div class="ba-layer">
+      <div class="ba-layer-label">GATEWAY</div>
+      <div class="ba-items">
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;api gateway&gt;&gt;</div><div class="ba-name">FastAPI</div><div class="ba-tech">REST · async</div><div class="ba-ch">Ch.2</div></div>
+      </div>
+    </div>
+    <div class="ba-layer">
+      <div class="ba-layer-label">APP</div>
+      <div class="ba-items">
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;router&gt;&gt;</div><div class="ba-name">Query Router</div><div class="ba-tech">rule·schema·LLM</div><div class="ba-ch">Ch.6</div></div>
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;orchestrator&gt;&gt;</div><div class="ba-name">ReAct Agent</div><div class="ba-tech">Think/Act/Observe</div><div class="ba-ch">Ch.6</div></div>
+      </div>
+    </div>
+    <div class="ba-layer">
+      <div class="ba-layer-label">SERVICE</div>
+      <div class="ba-items">
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;rag&gt;&gt;</div><div class="ba-name">LCEL Chain</div><div class="ba-tech">Retriever+LLM</div><div class="ba-ch">Ch.5</div></div>
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;tools&gt;&gt;</div><div class="ba-name">MCP Tools</div><div class="ba-tech">DB query fn</div><div class="ba-ch">Ch.6</div></div>
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;pipeline&gt;&gt;</div><div class="ba-name">Document Pipeline</div><div class="ba-tech">Parse·Chunk·Embed</div><div class="ba-ch">Ch.4</div></div>
+      </div>
+    </div>
+    <div class="ba-layer">
+      <div class="ba-layer-label">TUNING</div>
+      <div class="ba-items">
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;reranker&gt;&gt;</div><div class="ba-name">Hybrid+Rerank</div><div class="ba-tech">BM25·Cross-Encoder</div><div class="ba-ch">Ch.8</div></div>
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;query rewrite&gt;&gt;</div><div class="ba-name">HyDE · Multi-Query</div><div class="ba-tech">질문 재작성</div><div class="ba-ch">Ch.9</div></div>
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;vision&gt;&gt;</div><div class="ba-name">Vision LLM · OCR</div><div class="ba-tech">이미지 문서</div><div class="ba-ch">Ch.10</div></div>
+      </div>
+    </div>
+    <div class="ba-layer">
+      <div class="ba-layer-label">OPS</div>
+      <div class="ba-items">
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;cache&gt;&gt;</div><div class="ba-name">ResponseCache</div><div class="ba-tech">TTL cache</div><div class="ba-ch">Ch.7</div></div>
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;monitor&gt;&gt;</div><div class="ba-name">TokenTracker</div><div class="ba-tech">비용 추적</div><div class="ba-ch">Ch.7</div></div>
+        <div class="ba-box"><div class="ba-stereo">&lt;&lt;eval&gt;&gt;</div><div class="ba-name">Eval Framework</div><div class="ba-tech">Precision@k·Halluc</div><div class="ba-ch">Ch.10</div></div>
+      </div>
+    </div>
+    <div class="ba-layer">
+      <div class="ba-layer-label">DATA</div>
+      <div class="ba-items">
+        <div class="ba-box db"><div class="ba-stereo">&lt;&lt;database&gt;&gt;</div><div class="ba-name">PostgreSQL</div><div class="ba-tech">직원·연차·매출</div><div class="ba-ch">Ch.2</div></div>
+        <div class="ba-box db"><div class="ba-stereo">&lt;&lt;vector DB&gt;&gt;</div><div class="ba-name">ChromaDB</div><div class="ba-tech">embedding vectors</div><div class="ba-ch">Ch.4</div></div>
+        <div class="ba-box db"><div class="ba-stereo">&lt;&lt;file store&gt;&gt;</div><div class="ba-name">문서 저장소</div><div class="ba-tech">PDF·DOCX·XLSX</div><div class="ba-ch">Ch.3</div></div>
+      </div>
+    </div>
+    <div class="ba-layer">
+      <div class="ba-layer-label">EXT</div>
+      <div class="ba-items">
+        <div class="ba-box external"><div class="ba-stereo">&lt;&lt;external&gt;&gt;</div><div class="ba-name">Ollama LLM</div><div class="ba-tech">DeepSeek-R1:8b</div><div class="ba-ch">Ch.1</div></div>
+        <div class="ba-box external"><div class="ba-stereo">&lt;&lt;external&gt;&gt;</div><div class="ba-name">Embedding Model</div><div class="ba-tech">ko-sroberta</div><div class="ba-ch">Ch.4</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ B안: 머메이드 C4 ============ -->
+<div class="design-block">
+  <span class="design-label" style="background:#1168bd;">B안</span>
+  <div class="design-title">머메이드 C4 · 레이어드</div>
+  <div class="design-desc">Mermaid.js의 C4Context/Component 다이어그램 색상 체계. 파란색 계열 + 주황 튜닝 레이어</div>
+
+  <div class="mermaid-arch">
+    <div class="ma-layer">
+      <div class="ma-layer-label">ACTORS</div>
+      <div class="ma-items">
+        <div class="ma-container person"><div class="ma-stereo">Person</div><div class="ma-name">사내 직원</div><div class="ma-tech">사용자</div></div>
+      </div>
+    </div>
+    <div class="ma-layer">
+      <div class="ma-layer-label">GATEWAY</div>
+      <div class="ma-items">
+        <div class="ma-container software"><div class="ma-stereo">Software System</div><div class="ma-name">FastAPI Gateway</div><div class="ma-tech">REST API</div><div class="ma-ch">Ch.2</div></div>
+      </div>
+    </div>
+    <div class="ma-layer">
+      <div class="ma-layer-label">APPLICATION</div>
+      <div class="ma-items">
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">Query Router</div><div class="ma-tech">질문 분류</div><div class="ma-ch">Ch.6</div></div>
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">ReAct Agent</div><div class="ma-tech">Think/Act/Observe</div><div class="ma-ch">Ch.6</div></div>
+      </div>
+    </div>
+    <div class="ma-layer">
+      <div class="ma-layer-label">SERVICES</div>
+      <div class="ma-items">
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">LCEL Chain</div><div class="ma-tech">RAG</div><div class="ma-ch">Ch.5</div></div>
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">MCP Tools</div><div class="ma-tech">DB Functions</div><div class="ma-ch">Ch.6</div></div>
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">Document Pipeline</div><div class="ma-tech">Parse·Chunk·Embed</div><div class="ma-ch">Ch.4</div></div>
+      </div>
+    </div>
+    <div class="ma-layer">
+      <div class="ma-layer-label">TUNING & QUALITY</div>
+      <div class="ma-items">
+        <div class="ma-container tuning"><div class="ma-stereo">Tuning</div><div class="ma-name">Hybrid+Rerank</div><div class="ma-tech">BM25·Cross-Enc</div><div class="ma-ch">Ch.8</div></div>
+        <div class="ma-container tuning"><div class="ma-stereo">Tuning</div><div class="ma-name">Query Rewrite</div><div class="ma-tech">HyDE·MQ</div><div class="ma-ch">Ch.9</div></div>
+        <div class="ma-container tuning"><div class="ma-stereo">Tuning</div><div class="ma-name">Vision LLM</div><div class="ma-tech">이미지 처리</div><div class="ma-ch">Ch.10</div></div>
+      </div>
+    </div>
+    <div class="ma-layer">
+      <div class="ma-layer-label">OPERATIONS</div>
+      <div class="ma-items">
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">ResponseCache</div><div class="ma-tech">TTL</div><div class="ma-ch">Ch.7</div></div>
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">TokenTracker</div><div class="ma-tech">monitoring</div><div class="ma-ch">Ch.7</div></div>
+        <div class="ma-container component"><div class="ma-stereo">Component</div><div class="ma-name">Eval Framework</div><div class="ma-tech">Precision@k</div><div class="ma-ch">Ch.10</div></div>
+      </div>
+    </div>
+    <div class="ma-layer">
+      <div class="ma-layer-label">DATA</div>
+      <div class="ma-items">
+        <div class="ma-container database"><div class="ma-stereo">Database</div><div class="ma-name">PostgreSQL</div><div class="ma-tech">정형 DB</div><div class="ma-ch">Ch.2</div></div>
+        <div class="ma-container database"><div class="ma-stereo">Database</div><div class="ma-name">ChromaDB</div><div class="ma-tech">Vector Store</div><div class="ma-ch">Ch.4</div></div>
+        <div class="ma-container database"><div class="ma-stereo">File Store</div><div class="ma-name">문서 저장소</div><div class="ma-tech">PDF·DOCX·XLSX</div><div class="ma-ch">Ch.3</div></div>
+      </div>
+    </div>
+    <div class="ma-layer">
+      <div class="ma-layer-label">EXTERNAL</div>
+      <div class="ma-items">
+        <div class="ma-container external"><div class="ma-stereo">External</div><div class="ma-name">Ollama LLM</div><div class="ma-tech">DeepSeek-R1:8b</div><div class="ma-ch">Ch.1</div></div>
+        <div class="ma-container external"><div class="ma-stereo">External</div><div class="ma-name">Embedding Model</div><div class="ma-tech">ko-sroberta</div><div class="ma-ch">Ch.4</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ C안: 엔터프라이즈 ============ -->
+<div class="design-block">
+  <span class="design-label" style="background:#7c3aed;">C안</span>
+  <div class="design-title">엔터프라이즈 · 클라우드 설계서</div>
+  <div class="design-desc">티어별 배경색 + 아이콘 + 기술 스펙. AWS·Azure 설계서 느낌</div>
+
+  <div class="ent-arch">
+    <div class="ent-tier presentation">
+      <div class="ent-tier-label">PRESENTATION</div>
+      <div class="ent-items">
+        <div class="ent-item"><div class="ent-name">사내 직원</div><div class="ent-tech">Web Client · Chat UI</div><div class="ent-ch">ACTOR</div></div>
+        <div class="ent-item"><div class="ent-name">FastAPI Gateway</div><div class="ent-tech">REST · async</div><div class="ent-ch">Ch.2</div></div>
+      </div>
+    </div>
+    <div class="ent-tier application">
+      <div class="ent-tier-label">APPLICATION</div>
+      <div class="ent-items">
+        <div class="ent-item"><div class="ent-name">Query Router</div><div class="ent-tech">rule·schema·LLM</div><div class="ent-ch">Ch.6</div></div>
+        <div class="ent-item"><div class="ent-name">ReAct Agent</div><div class="ent-tech">Think/Act/Observe</div><div class="ent-ch">Ch.6</div></div>
+      </div>
+    </div>
+    <div class="ent-tier service">
+      <div class="ent-tier-label">SERVICES</div>
+      <div class="ent-items">
+        <div class="ent-item"><div class="ent-name">LCEL Chain</div><div class="ent-tech">Retriever → LLM</div><div class="ent-ch">Ch.5</div></div>
+        <div class="ent-item"><div class="ent-name">MCP Tools</div><div class="ent-tech">DB 조회 fn</div><div class="ent-ch">Ch.6</div></div>
+        <div class="ent-item"><div class="ent-name">Document Pipeline</div><div class="ent-tech">Parse · Chunk · Embed</div><div class="ent-ch">Ch.4</div></div>
+      </div>
+    </div>
+    <div class="ent-tier tuning">
+      <div class="ent-tier-label">TUNING</div>
+      <div class="ent-items">
+        <div class="ent-item"><div class="ent-name">Hybrid+Reranker</div><div class="ent-tech">BM25+Vector·Cross-Enc</div><div class="ent-ch">Ch.8</div></div>
+        <div class="ent-item"><div class="ent-name">Query Rewrite</div><div class="ent-tech">HyDE · Multi-Query</div><div class="ent-ch">Ch.9</div></div>
+        <div class="ent-item"><div class="ent-name">Vision LLM · OCR</div><div class="ent-tech">이미지 문서 처리</div><div class="ent-ch">Ch.10</div></div>
+      </div>
+    </div>
+    <div class="ent-tier service">
+      <div class="ent-tier-label">OPS</div>
+      <div class="ent-items">
+        <div class="ent-item"><div class="ent-name">ResponseCache</div><div class="ent-tech">TTL cache</div><div class="ent-ch">Ch.7</div></div>
+        <div class="ent-item"><div class="ent-name">TokenTracker</div><div class="ent-tech">비용·토큰 추적</div><div class="ent-ch">Ch.7</div></div>
+        <div class="ent-item"><div class="ent-name">Eval Framework</div><div class="ent-tech">Precision@k · Hallucination</div><div class="ent-ch">Ch.10</div></div>
+      </div>
+    </div>
+    <div class="ent-tier data">
+      <div class="ent-tier-label">DATA</div>
+      <div class="ent-items">
+        <div class="ent-item"><div class="ent-name">PostgreSQL</div><div class="ent-tech">직원·연차·매출</div><div class="ent-ch">Ch.2</div></div>
+        <div class="ent-item"><div class="ent-name">ChromaDB</div><div class="ent-tech">embedding vectors</div><div class="ent-ch">Ch.4</div></div>
+        <div class="ent-item"><div class="ent-name">사내 문서 저장소</div><div class="ent-tech">PDF · DOCX · XLSX</div><div class="ent-ch">Ch.3</div></div>
+      </div>
+    </div>
+    <div class="ent-tier external">
+      <div class="ent-tier-label">EXTERNAL</div>
+      <div class="ent-items">
+        <div class="ent-item"><div class="ent-name">Ollama LLM</div><div class="ent-tech">DeepSeek-R1:8b · local</div><div class="ent-ch">Ch.1</div></div>
+        <div class="ent-item"><div class="ent-name">Embedding Model</div><div class="ent-tech">ko-sroberta-multitask</div><div class="ent-ch">Ch.4</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ D안: 화이트보드 ============ -->
+<div class="design-block">
+  <span class="design-label" style="background:#059669;">D안</span>
+  <div class="design-title">화이트보드 · 시스템 디자인</div>
+  <div class="design-desc">그리드 배경 + 손그림 느낌 박스 + 포스트잇 챕터 라벨. 세미나·면접 분위기</div>
+
+  <div class="wb-arch">
+    <div class="wb-zone">
+      <span class="wb-zone-label">ACTOR</span>
+      <div class="wb-items">
+        <div class="wb-box actor"><div class="wb-name">사내 직원</div><div class="wb-tech">user</div></div>
+      </div>
+    </div>
+    <div class="wb-zone">
+      <span class="wb-zone-label">GATEWAY</span>
+      <div class="wb-items">
+        <div class="wb-box"><div class="wb-ch">Ch.2</div><div class="wb-name">FastAPI</div><div class="wb-tech">REST</div></div>
+      </div>
+    </div>
+    <div class="wb-zone">
+      <span class="wb-zone-label">APP + ORCHESTRATION</span>
+      <div class="wb-items">
+        <div class="wb-box"><div class="wb-ch">Ch.6</div><div class="wb-name">Query Router</div><div class="wb-tech">classifier</div></div>
+        <div class="wb-box"><div class="wb-ch">Ch.6</div><div class="wb-name">ReAct Agent</div><div class="wb-tech">Think/Act/Obs</div></div>
+      </div>
+    </div>
+    <div class="wb-zone">
+      <span class="wb-zone-label">SERVICES</span>
+      <div class="wb-items">
+        <div class="wb-box"><div class="wb-ch">Ch.5</div><div class="wb-name">LCEL Chain</div><div class="wb-tech">RAG</div></div>
+        <div class="wb-box"><div class="wb-ch">Ch.6</div><div class="wb-name">MCP Tools</div><div class="wb-tech">DB fn</div></div>
+        <div class="wb-box"><div class="wb-ch">Ch.4</div><div class="wb-name">Doc Pipeline</div><div class="wb-tech">Parse+Embed</div></div>
+      </div>
+    </div>
+    <div class="wb-zone">
+      <span class="wb-zone-label">TUNING</span>
+      <div class="wb-items">
+        <div class="wb-box"><div class="wb-ch">Ch.8</div><div class="wb-name">Hybrid+Rerank</div><div class="wb-tech">BM25+X-Enc</div></div>
+        <div class="wb-box"><div class="wb-ch">Ch.9</div><div class="wb-name">Query Rewrite</div><div class="wb-tech">HyDE·MQ</div></div>
+        <div class="wb-box"><div class="wb-ch">Ch.10</div><div class="wb-name">Vision · OCR</div><div class="wb-tech">images</div></div>
+      </div>
+    </div>
+    <div class="wb-zone">
+      <span class="wb-zone-label">OPS</span>
+      <div class="wb-items">
+        <div class="wb-box"><div class="wb-ch">Ch.7</div><div class="wb-name">Cache</div><div class="wb-tech">TTL</div></div>
+        <div class="wb-box"><div class="wb-ch">Ch.7</div><div class="wb-name">Monitor</div><div class="wb-tech">tokens</div></div>
+        <div class="wb-box"><div class="wb-ch">Ch.10</div><div class="wb-name">Eval</div><div class="wb-tech">P@k·Halluc</div></div>
+      </div>
+    </div>
+    <div class="wb-zone">
+      <span class="wb-zone-label">DATA STORES</span>
+      <div class="wb-items">
+        <div class="wb-box db"><div class="wb-ch">Ch.2</div><div class="wb-name">PostgreSQL</div><div class="wb-tech">정형</div></div>
+        <div class="wb-box db"><div class="wb-ch">Ch.4</div><div class="wb-name">ChromaDB</div><div class="wb-tech">vectors</div></div>
+        <div class="wb-box db"><div class="wb-ch">Ch.3</div><div class="wb-name">문서 저장소</div><div class="wb-tech">files</div></div>
+      </div>
+    </div>
+    <div class="wb-zone">
+      <span class="wb-zone-label">EXTERNAL</span>
+      <div class="wb-items">
+        <div class="wb-box" style="border-style:dashed;"><div class="wb-ch">Ch.1</div><div class="wb-name">Ollama</div><div class="wb-tech">DeepSeek-R1</div></div>
+        <div class="wb-box" style="border-style:dashed;"><div class="wb-ch">Ch.4</div><div class="wb-name">Embedder</div><div class="wb-tech">ko-sroberta</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 요약 -->
+<div class="design-block" style="background:#f7fafc;">
+  <div class="design-title" style="font-size:15px;">요약</div>
+  <p style="font-size:13px; color:#4a5568; margin-bottom:8px;">4가지 안 모두 <b>Ch.1~Ch.10 전체 컴포넌트</b>를 포함하며, 8개 레이어로 구성:</p>
+  <p style="font-size:12px; color:#718096;"><b>ACTOR</b> · <b>GATEWAY</b> · <b>APPLICATION</b> · <b>SERVICES</b> · <b>TUNING</b> · <b>OPS</b> · <b>DATA</b> · <b>EXTERNAL</b></p>
+</div>
+
+</div>
+</body>
+</html>

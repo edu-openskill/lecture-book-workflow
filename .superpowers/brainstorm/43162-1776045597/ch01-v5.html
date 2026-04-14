@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CH01 v5 — 중복 제거 + 미니맵</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fafbfc; color: #2d3748;
+    font-family: 'Pretendard', -apple-system, 'Segoe UI', sans-serif;
+    line-height: 1.9; padding: 40px 20px;
+  }
+  .container { max-width: 820px; margin: 0 auto; }
+
+  /* ========== 챕터 미니맵 (간단) ========== */
+  .chapter-minimap {
+    background: #fff; border-radius: 14px; padding: 20px 24px;
+    margin: 0 0 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    border: 1px solid #edf0f5;
+  }
+  .minimap-label {
+    font-size: 11px; font-weight: 700; color: #718096;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .minimap-label::before {
+    content: ''; display: inline-block;
+    width: 8px; height: 8px; background: #ff7849;
+    border-radius: 50%;
+  }
+  .minimap-boxes {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .mm-box {
+    background: linear-gradient(135deg, #fef3ec, #fef5f0);
+    border: 1px solid #fbd38d;
+    border-radius: 10px; padding: 10px 14px;
+    flex: 1; min-width: 140px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mm-box .mm-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #ff7849; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700;
+  }
+  .mm-box .mm-text .mm-title { font-size: 13px; font-weight: 700; color: #7b341e; }
+  .mm-box .mm-text .mm-tech { font-size: 11px; color: #9c4221; }
+  .mm-arrow { color: #fbd38d; font-size: 18px; font-weight: 700; }
+
+  .minimap-note {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px dashed #edf0f5;
+    font-size: 12px; color: #a0aec0;
+    font-style: italic;
+  }
+
+  /* ========== 챕터 본문 ========== */
+  h1 { color: #1a202c; font-size: 30px; margin: 16px 0 24px; letter-spacing: -0.5px; font-weight: 700; }
+  h1 .num { color: #ff7849; font-weight: 700; }
+
+  h2 { color: #2d3748; font-size: 22px; margin: 52px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #edf0f5; font-weight: 700; letter-spacing: -0.3px; }
+  h3 { color: #2d3748; font-size: 17px; margin: 32px 0 12px; font-weight: 700; }
+  p { margin-bottom: 16px; font-size: 16px; color: #2d3748; }
+
+  /* 목표 박스 (유일한 intro) */
+  .goal-box {
+    background: linear-gradient(135deg, #f0fff4, #e6fffa);
+    border-left: 4px solid #48bb78; border-radius: 0 12px 12px 0;
+    padding: 20px 24px; margin: 0 0 32px;
+  }
+  .goal-box .gl { color: #2f855a; font-weight: 700; font-size: 14px; margin-bottom: 10px; letter-spacing: 0.5px; }
+  .goal-box ul { padding-left: 20px; color: #2d3748; }
+  .goal-box li { margin-bottom: 4px; }
+
+  /* 준비하기 박스 */
+  .prep-section {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 14px; padding: 0; margin: 28px 0;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  }
+  .prep-header {
+    background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .prep-header-title { font-size: 15px; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 10px; }
+  .prep-header-title .pico { font-size: 18px; }
+  .prep-header-meta { font-size: 12px; color: #718096; }
+  .prep-body { padding: 24px; }
+  .prep-item { margin-bottom: 28px; }
+  .prep-item:last-child { margin-bottom: 0; }
+  .prep-item-title { font-size: 15px; font-weight: 700; color: #2d3748; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .prep-item-title .num-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #4299e1; color: white; font-size: 12px; font-weight: 700;
+  }
+
+  /* 대사 */
+  .dialogue { margin: 16px 0; color: #2d3748; }
+  .speaker { color: #3182ce; font-weight: 700; }
+  .thought { color: #805ad5; font-style: italic; margin: 16px 0; }
+  .term { color: #ff7849; font-weight: 700; }
+
+  /* 코드블록 ★ white-space 수정 */
+  .code-block {
+    background: #1a202c; border-radius: 10px; padding: 20px 24px;
+    margin: 20px 0;
+    font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+    font-size: 13px; line-height: 1.75;
+    overflow-x: auto;
+    color: #cbd5e0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    white-space: pre;                /* ← 줄바꿈 보존 */
+    tab-size: 2;
+  }
+  .code-block .cb-title {
+    font-family: -apple-system, 'Pretendard', sans-serif;
+    font-size: 12px; color: #718096;
+    margin-bottom: 12px;
+    white-space: normal;              /* 타이틀은 기본 래핑 */
+    display: flex; align-items: center; gap: 8px;
+  }
+  .badge { background: #4299e1; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge.bash { background: #48bb78; }
+  .cm { color: #718096; } .kw { color: #f687b3; } .st { color: #9ae6b4; } .nb { color: #f6ad55; } .fn { color: #63b3ed; }
+
+  /* 결과 박스 */
+  .result {
+    background: #fff; border-radius: 10px; padding: 16px 20px; margin: 16px 0;
+    font-size: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #edf0f5;
+  }
+  .result.fail { border-left: 4px solid #f56565; }
+  .result.fail .rl { color: #c53030; font-weight: 700; font-size: 13px; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .result.ok { border-left: 4px solid #48bb78; }
+  .result.ok .rl { color: #2f855a; font-weight: 700; font-size: 13px; margin-bottom: 8px; letter-spacing: 0.5px; }
+
+  /* 팁 박스 */
+  .tip {
+    background: #fffaf0; border: 1px solid #feebc8; border-radius: 10px;
+    padding: 16px 20px; margin: 20px 0; font-size: 14px;
+  }
+  .tip .tip-title {
+    color: #b7791f; font-weight: 700; font-size: 13px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tip .tip-title::before { content: '💡'; font-size: 14px; }
+  .tip p { font-size: 14px; color: #744210; margin-bottom: 8px; }
+  .tip p:last-child { margin-bottom: 0; }
+
+  /* 일반 테이블 */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+  th { background: #f7fafc; color: #2d3748; font-weight: 700; text-align: left; padding: 12px 16px; border-bottom: 2px solid #e2e8f0; font-size: 13px; }
+  td { padding: 12px 16px; border-bottom: 1px solid #edf0f5; color: #4a5568; }
+  tr:last-child td { border-bottom: none; }
+
+  /* HTML 비교 도식 */
+  .compare-diagram {
+    background: #fff; border-radius: 12px; padding: 24px; margin: 24px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #edf0f5;
+  }
+  .compare-title { color: #4a5568; font-size: 13px; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.5px; }
+  .compare-flow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .flow-col { background: #fafbfc; border-radius: 10px; padding: 18px; }
+  .flow-col.bad { border: 1px solid #fed7d7; }
+  .flow-col.good { border: 1px solid #c6f6d5; }
+  .flow-col .fl { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .flow-col.bad .fl { color: #c53030; }
+  .flow-col.good .fl { color: #2f855a; }
+  .flow-step { background: #fff; border-radius: 8px; padding: 10px 14px; margin: 8px 0; font-size: 13px; color: #4a5568; border: 1px solid #edf0f5; }
+  .flow-step.final.bad { background: #fed7d7; color: #c53030; border-color: #fc8181; }
+  .flow-step.final.good { background: #c6f6d5; color: #2f855a; border-color: #68d391; }
+
+  /* RAG 파이프라인 */
+  .rag-pipeline-box {
+    background: #fff; border-radius: 12px; padding: 28px 24px; margin: 24px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid #edf0f5;
+  }
+  .rag-pipeline-title { color: #4a5568; font-size: 13px; font-weight: 700; margin-bottom: 20px; letter-spacing: 0.5px; }
+  .rag-pipeline { display: flex; align-items: stretch; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .rag-step {
+    flex: 1; min-width: 140px; max-width: 220px;
+    background: linear-gradient(135deg, #ebf8ff, #e6f6ff);
+    border: 1px solid #bee3f8; border-radius: 14px; padding: 20px 16px; text-align: center;
+  }
+  .rag-step .s-num {
+    color: #3182ce; font-size: 32px; font-weight: 800;
+    display: inline-block; width: 48px; height: 48px; line-height: 46px;
+    background: #fff; border-radius: 50%; box-shadow: 0 2px 8px rgba(49,130,206,0.15); border: 2px solid #bee3f8;
+  }
+  .rag-step .s-title { color: #2c5282; font-size: 15px; font-weight: 700; margin: 10px 0 4px; }
+  .rag-step .s-desc { color: #4a5568; font-size: 12px; line-height: 1.6; }
+  .rag-step .s-meta { color: #3182ce; font-size: 11px; font-style: italic; margin-top: 6px; }
+  .rag-arrow { display: flex; align-items: center; color: #cbd5e0; font-size: 28px; padding: 0 4px; }
+
+  /* 플레이스홀더 */
+  .placeholder {
+    background: repeating-linear-gradient(45deg, rgba(255,183,77,0.05), rgba(255,183,77,0.05) 10px, transparent 10px, transparent 20px);
+    border: 2px dashed #f6ad55; border-radius: 12px; padding: 20px 24px; margin: 20px 0;
+  }
+  .placeholder.capture { background: repeating-linear-gradient(45deg, rgba(99,179,237,0.05), rgba(99,179,237,0.05) 10px, transparent 10px, transparent 20px); border-color: #63b3ed; }
+  .placeholder .ph-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; }
+  .placeholder.gemini .ph-label { color: #dd6b20; }
+  .placeholder.capture .ph-label { color: #3182ce; }
+  .placeholder .ph-desc { color: #718096; font-size: 13px; margin-bottom: 4px; font-style: italic; }
+  .placeholder .ph-caption { color: #4a5568; font-size: 13px; }
+
+  /* 이것만은 기억하자 */
+  .remember {
+    margin-top: 48px; padding: 24px;
+    background: linear-gradient(135deg, #f0fff4, #e6fffa);
+    border-radius: 12px; border-left: 4px solid #48bb78;
+  }
+  .remember h2 { border: none; margin: 0 0 12px; padding: 0; color: #2f855a; font-size: 18px; }
+  .remember ul { padding-left: 20px; }
+  .remember li { margin-bottom: 8px; }
+  .remember .next { color: #718096; margin-top: 16px; font-size: 14px; padding-top: 12px; border-top: 1px solid rgba(72,187,120,0.2); }
+
+  code { background: #edf2f7; padding: 1px 6px; border-radius: 4px; font-size: 0.9em; color: #c53030; font-family: 'JetBrains Mono', monospace; }
+
+  /* 변경 안내 */
+  .change-note {
+    background: #ebf8ff; border-left: 4px solid #4299e1;
+    padding: 16px 20px; margin-bottom: 24px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+  }
+  .change-note strong { color: #2c5282; }
+  .change-note ul { padding-left: 20px; margin-top: 6px; color: #2c5282; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="change-note">
+  <strong>v4 → v5 변경점</strong>
+  <ul>
+    <li>전체 아키텍처 다이어그램 제거 → 서문(프롤로그)으로 이동 예정</li>
+    <li>챕터에는 "오늘 만들 것" 미니맵만 (3개 컴포넌트)</li>
+    <li>subtitle + 한 줄 요약 + 핵심 개념 중복 제거 → 목표 박스 하나로 통일</li>
+    <li>코드블록 줄바꿈 보존 (white-space: pre)</li>
+  </ul>
+</div>
+
+<!-- ========== 1. 챕터 제목 (깔끔하게) ========== -->
+<h1><span class="num">Ch.1</span> AI한테 물어봤더니 거짓말을 합니다</h1>
+
+<!-- ========== 2. 미니맵 (오늘 만들 것만) ========== -->
+<div class="chapter-minimap">
+  <div class="minimap-label">오늘 만들 것</div>
+  <div class="minimap-boxes">
+    <div class="mm-box">
+      <div class="mm-icon">1</div>
+      <div class="mm-text">
+        <div class="mm-title">RAG Pipeline</div>
+        <div class="mm-tech">Retriever</div>
+      </div>
+    </div>
+    <div class="mm-arrow">→</div>
+    <div class="mm-box">
+      <div class="mm-icon">2</div>
+      <div class="mm-text">
+        <div class="mm-title">Vector DB</div>
+        <div class="mm-tech">ChromaDB</div>
+      </div>
+    </div>
+    <div class="mm-arrow">→</div>
+    <div class="mm-box">
+      <div class="mm-icon">3</div>
+      <div class="mm-text">
+        <div class="mm-title">LLM</div>
+        <div class="mm-tech">DeepSeek-R1</div>
+      </div>
+    </div>
+  </div>
+  <div class="minimap-note">전체 시스템 아키텍처는 책 서문을 참고하세요.</div>
+</div>
+
+<!-- ========== 3. 목표 (하나로 통합) ========== -->
+<div class="goal-box">
+  <div class="gl">이번 챕터가 끝나면</div>
+  <ul>
+    <li>LLM이 모르는 것을 자신 있게 지어낸다는 걸 직접 확인합니다 <em style="color:#718096; font-size:13px;">(환각)</em></li>
+    <li>문서를 직접 건네주면 거짓말을 멈춘다는 걸 배웁니다 <em style="color:#718096; font-size:13px;">(Context Injection)</em></li>
+    <li>이걸 자동화한 RAG 파이프라인을 직접 만들어봅니다 <em style="color:#718096; font-size:13px;">(RAG)</em></li>
+  </ul>
+</div>
+
+<!-- ========== 4. 준비하기 박스 ========== -->
+<div class="prep-section">
+  <div class="prep-header">
+    <div class="prep-header-title"><span class="pico">📦</span> 준비하기</div>
+    <div class="prep-header-meta">실습 시작 전 한 번만 설정</div>
+  </div>
+  <div class="prep-body">
+
+    <!-- 4.1 소스 코드 준비 -->
+    <div class="prep-item">
+      <div class="prep-item-title"><span class="num-badge">1</span>소스 코드 준비</div>
+      <p>이 책의 실습은 GitHub 레포를 클론해서 진행합니다.</p>
+
+      <table>
+        <tr>
+          <th>레포</th>
+          <th>용도</th>
+          <th>주소</th>
+        </tr>
+        <tr>
+          <td><strong>rag-start</strong></td>
+          <td>실습용 (빈 파일 — 챕터 따라 코드 작성)</td>
+          <td><code>github.com/metacoding-18-ai-applied-v4/rag-start</code></td>
+        </tr>
+        <tr>
+          <td><strong>rag-end</strong></td>
+          <td>완성 코드 (막히면 참고)</td>
+          <td><code>github.com/metacoding-18-ai-applied-v4/rag-end</code></td>
+        </tr>
+      </table>
+
+      <p>아직 클론하지 않았다면 터미널에서 실행합니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> 레포 클론</div>git clone https://github.com/metacoding-18-ai-applied-v4/rag-start.git
+cd rag-start/ex01</div>
+
+      <p>파일 구조는 이렇습니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> ex01 디렉토리</div>ex01/
+├── step1_fail.py            <span class="cm">[실습] LLM 단독 호출 → 환각 체험</span>
+├── step2_context.py         <span class="cm">[실습] 컨텍스트 직접 주입 → 임시 해결</span>
+├── step3_rag.py             <span class="cm">[실습] RAG 기본 파이프라인 구성</span>
+├── step3_rag_no_chunking.py <span class="cm">[실습] 청킹 없이 비교 → 차이 체감</span>
+└── step4_rag.py             <span class="cm">[실습] 추론 심화 (Chain-of-Thought)</span></div>
+
+      <p><code>[실습]</code> 파일에는 import와 데이터가 미리 준비되어 있습니다. 챕터를 따라 하며 TODO 부분을 채워넣으세요. 막히면 rag-end의 완성 코드를 참고하세요.</p>
+    </div>
+
+    <!-- 4.2 실습 환경 구축 -->
+    <div class="prep-item">
+      <div class="prep-item-title"><span class="num-badge">2</span>실습 환경 구축</div>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> Python 환경 구성</div>cd ex01
+python3.12 -m venv .venv
+source .venv/bin/activate  <span class="cm"># Windows: .venv\Scripts\activate</span>
+pip install -r requirements.txt</div>
+
+      <p>Ollama 모델이 아직 없다면 다운로드합니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> Ollama 모델 다운로드</div>ollama pull deepseek-r1:8b
+ollama pull nomic-embed-text</div>
+
+      <div class="tip">
+        <div class="tip-title">팁: LLM 선택</div>
+        <p>기본값은 Ollama + <code>deepseek-r1:8b</code>입니다 (16GB RAM 이상 권장). RAM이 부족하거나 응답이 너무 느리면 <code>.env</code>에서 <code>LLM_PROVIDER=openai</code>로 바꿔서 GPT-4o-mini를 쓸 수도 있습니다. 단, API 비용이 발생합니다. <code>.env</code> 파일에 <code>OPENAI_API_KEY=sk-xxxxxx</code> 형태로 키를 등록하세요.</p>
+      </div>
+    </div>
+
+    <!-- 4.3 라이브러리 -->
+    <div class="prep-item">
+      <div class="prep-item-title"><span class="num-badge">3</span>사용할 라이브러리</div>
+
+      <p>이번 챕터에서는 <strong>LangChain</strong>이라는 프레임워크를 사용합니다. LLM 호출, 벡터 검색, 체인 조립처럼 RAG에 필요한 부품을 제공하는 도구입니다. 여기서는 맛보기로만 쓰고 CH05에서 본격적으로 다룹니다.</p>
+
+      <table>
+        <tr><th>패키지</th><th>역할</th></tr>
+        <tr><td><code>langchain-ollama</code></td><td>Ollama LLM/임베딩 연동</td></tr>
+        <tr><td><code>langchain-chroma</code></td><td>ChromaDB 벡터 저장소</td></tr>
+        <tr><td><code>langchain-classic</code></td><td>RetrievalQA 체인 (CH05에서 LCEL로 전환)</td></tr>
+        <tr><td><code>chromadb</code></td><td>벡터 DB</td></tr>
+      </table>
+
+      <div class="tip">
+        <div class="tip-title">팁: 지금은 개념만 잡으세요</div>
+        <p>LangChain, 임베딩, 벡터 DB 같은 용어가 한꺼번에 나와서 부담스러울 수 있습니다. 지금은 "문서를 넣어주면 LLM이 정확하게 답한다"는 <strong>RAG의 개념</strong>만 잡으면 충분합니다. 각 기술의 동작 원리는 CH04~CH05에서 차근차근 다룹니다.</p>
+      </div>
+    </div>
+
+    <!-- 4.4 실습 순서 -->
+    <div class="prep-item">
+      <div class="prep-item-title"><span class="num-badge">4</span>실습 순서</div>
+      <p>이번 챕터의 실습 5개는 이 순서로 진행합니다.</p>
+      <ol style="padding-left: 24px; margin-top: 8px;">
+        <li><code>step1_fail.py</code> — LLM 단독 질문 (환각 체험)</li>
+        <li><code>step2_context.py</code> — 문서 직접 전달</li>
+        <li><code>step3_rag.py</code> — RAG 파이프라인</li>
+        <li><code>step3_rag_no_chunking.py</code> — 청킹 없이 비교</li>
+        <li><code>step4_rag.py</code> — 추론 심화</li>
+      </ol>
+      <p style="margin-top:12px;">환각을 직접 체험하고(step1), 문서를 넣으면 달라지는 걸 확인한 뒤(step2), RAG로 조립합니다(step3). 그다음 청킹 없이 돌려서 차이를 체감하고(step3_no_chunking), 추론이 필요한 질문까지 던져봅니다(step4). <strong>step1부터 순서대로 실행하세요.</strong></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 5. 본문 시작 ========== -->
+<h2>1.1 그럴듯한 거짓말</h2>
+
+<p>입사 3일 차. 아직 사내 Wi-Fi 비밀번호를 포스트잇에 적어 모니터에 붙여놓던 시절입니다. 오전 10시, 팀장이 저를 바라보며 다가왔습니다.</p>
+
+<div class="dialogue">
+  <span class="speaker">팀장</span>: "AI로 사내 문서 검색 시스템 만들어봐. 직원들이 규정이나 정책 찾는 게 번거롭다고 해서."
+</div>
+
+<p class="thought">*AI 비서. 사내 문서. 대화식 검색. 나 혼자서?*</p>
+
+<div class="dialogue">
+  <span class="speaker">오픈이</span>: "언제까지요?"<br>
+  <span class="speaker">팀장</span>: "급하진 않아. 2주 내로 간단한 프로토타입만."
+</div>
+
+<p>노트북을 열고 ChatGPT를 실행했습니다.</p>
+
+<p class="thought">*ChatGPT도 뭐든 대답하잖아. LLM에게 직접 물어보면 되는 거 아니야?*</p>
+
+<p>연차 규정을 예시로 물어보기로 했습니다. 우선 로컬에서 돌릴 수 있는 <code>step1_fail.py</code>부터 열어보겠습니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge">실습 1</span> step1_fail.py — LLM에게 직접 물어보기</div><span class="cm"># TODO: ChatOllama로 deepseek-r1:8b 모델 연결 (temperature=0)</span>
+llm = ChatOllama(model=<span class="st">"deepseek-r1:8b"</span>, temperature=<span class="nb">0</span>)
+
+question = <span class="st">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+
+<span class="cm"># TODO: 질문 출력 → llm.invoke로 답변 받기 → 답변 출력</span>
+console.print(<span class="st">f"[bold]질문:[/bold] {question}\n"</span>)
+response = llm.<span class="fn">invoke</span>(question)
+console.print(<span class="st">f"[bold]답변:[/bold]\n{response.content}"</span>)</div>
+
+<p><code>ChatOllama</code>는 LangChain이 Ollama LLM을 호출할 때 쓰는 래퍼입니다. <code>temperature=0</code>은 LLM이 창의적 변형 없이 가장 확률 높은 답변을 내놓게 하는 설정입니다. 실행해볼까요?</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> 실행</div>python step1_fail.py</div>
+
+<div class="placeholder capture">
+  <div class="ph-label">[CAPTURE NEEDED] 01_step1-hallucination</div>
+  <div class="ph-desc">step1_fail.py 실행 결과 터미널 캡처</div>
+  <div class="ph-caption">그림 1-1: 자신감 있게 답하지만 실제 커넥트 규정과 다르다.</div>
+</div>
+
+<p>답변이 이렇게 나왔습니다.</p>
+
+<div class="result fail">
+  <div class="rl">LLM의 답변 (환각)</div>
+  커넥트 사의 신입사원 연차 규정은 근로기준법에 따라, 입사 후 1년 미만 기간에는 1개월 개근 시 1일의 유급휴가가 발생합니다. 1년 이상 근무 시에는 15일의 연차가 발생하며, 3년 이상 근무한 경우 1년마다 1일씩 추가됩니다…
+</div>
+
+<p>그럴듯했습니다. 공식적인 느낌도 났습니다. 입사할 때 받은 규정집을 꺼내 비교해봤습니다. 커넥트의 실제 규정은 이랬습니다.</p>
+
+<p class="thought">*신입사원은 입사 후 3년 동안은 연차가 없다. 대신 매월 1회 '리프레시 데이'를 유급으로 제공한다. 3년 근속 시 30일의 연차가 일시에 발생한다.*</p>
+
+<p class="thought">*잠깐, 뭐라고?*</p>
+
+<p>다시 읽었습니다. 완전히 다른 내용이었습니다. LLM이 방금 그럴듯한 거짓말을 한 것입니다.</p>
+
+<div class="compare-diagram">
+  <div class="compare-title">LLM의 답변 vs 실제 규정</div>
+  <div class="compare-flow">
+    <div class="flow-col bad">
+      <div class="fl">LLM의 답변 (환각)</div>
+      <div class="flow-step">근로기준법 제60조 적용</div>
+      <div class="flow-step">입사 후 매월 1일 유급휴가</div>
+      <div class="flow-step">1년 근속 시 15일 연차</div>
+      <div class="flow-step final bad">× 전부 지어낸 내용</div>
+    </div>
+    <div class="flow-col good">
+      <div class="fl">커넥트 실제 규정</div>
+      <div class="flow-step">입사 후 3년간 연차 없음</div>
+      <div class="flow-step">매월 1회 리프레시 데이 (유급)</div>
+      <div class="flow-step">3년 근속 시 30일 일시 발생</div>
+      <div class="flow-step final good">✓ 커넥트만의 파격 규정</div>
+    </div>
+  </div>
+</div>
+
+<p>여기서 의문이 생깁니다. LLM은 왜 자신 있게 틀린 대답을 했을까요?</p>
+
+<p>LLM을 이렇게 가정해보겠습니다. 입사 면접을 보러 온 외부인이라고요. 이 외부인은 세상에 공개된 거의 모든 자료를 읽었습니다. 인터넷, 뉴스, 책, 논문까지. 공개된 텍스트라면 뭐든 섭렵했습니다. 그래서 근로기준법은 완벽하게 알고 일반적인 회사 연차 제도도 줄줄 외웁니다. 그런데 커넥트의 내부 규정집은 공개된 적이 없습니다. 이 외부인이 읽을 방법이 없었어요.</p>
+
+<p>문제는 이 외부인이 "모른다"고 솔직히 말하지 못한다는 점입니다. 질문을 받으면 자기가 아는 것 중에서 가장 비슷해 보이는 걸 자신감 있게 말합니다. 마치 확실히 아는 것처럼 들립니다. 이게 <span class="term">LLM 환각(Hallucination)</span>입니다.</p>
+
+<div class="placeholder gemini">
+  <div class="ph-label">[GEMINI PROMPT] 01_hallucination-outsider</div>
+  <div class="ph-desc">LLM(외부인)이 공개 데이터는 알지만 사내 문서는 읽은 적 없다는 개념도</div>
+  <div class="ph-caption">그림 1-2: LLM은 세상의 공개 데이터는 학습했지만, 우리 회사 내부 문서는 읽은 적이 없다.</div>
+</div>
+
+<h2>1.2 교재를 펼쳐놓으면</h2>
+
+<p>생각해보면 해결책은 단순합니다. LLM이 모른다면 직접 알려주면 됩니다. 규정 내용을 통째로 프롬프트에 붙여서 다시 물어보는 거죠. <code>step2_context.py</code>를 열어보겠습니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge">실습 2</span> step2_context.py — 문서를 직접 넣어보기</div><span class="cm"># 정보를 변수에 담습니다 (아직 DB 안 씀)</span>
+context_data = <span class="st">"""
+[커넥트 취업규칙]
+1. 신입사원은 입사 후 3년 동안은 연차가 없다. (파격적인 규정)
+2. 대신 매월 1회 '리프레시 데이'를 유급으로 제공한다.
+3. 3년 근속 시 30일의 연차가 일시에 발생한다.
+"""</span>
+
+question = <span class="st">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+
+<span class="cm"># TODO: f-string으로 context_data와 question을 포함한 프롬프트 작성</span>
+prompt = <span class="st">f"""
+아래 [참고 정보]를 보고 질문에 답해줘.
+[참고 정보]
+{context_data}
+
+질문: {question}
+"""</span>
+
+response = llm.<span class="fn">invoke</span>(prompt)
+console.print(<span class="st">f"[bold]답변:[/bold]\n{response.content}"</span>)</div>
+
+<p>step1과 달라진 부분은 <code>context_data</code>를 프롬프트에 직접 넣었다는 것뿐입니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> 실행</div>python step2_context.py</div>
+
+<div class="placeholder capture">
+  <div class="ph-label">[CAPTURE NEEDED] 01_step2-context</div>
+  <div class="ph-desc">step2_context.py 실행 결과 터미널 캡처</div>
+  <div class="ph-caption">그림 1-3: 문서를 직접 넣으니 정확하게 답한다.</div>
+</div>
+
+<div class="result ok">
+  <div class="rl">실행 결과 — 정확</div>
+  커넥트의 신입사원은 입사 후 3년 동안은 법정 연차가 발생하지 않습니다. 대신 매월 1회 유급 '리프레시 데이'가 제공됩니다. 3년 근속 시 30일의 연차가 일시에 부여됩니다.
+</div>
+
+<p>코드 구조는 거의 같은데 결과가 완전히 달라졌습니다. LLM에게 정답지를 건네준 셈입니다. 이걸 <span class="term">Context Injection (컨텍스트 주입)</span>이라고 해요.</p>
+
+<p class="thought">*오, 이거면 되는 거 아니야?*</p>
+
+<p>그런데 사내 문서가 규정집 하나가 아닙니다. 복지 정책, 보안 지침, 업무 가이드, 회의록, 프로젝트 문서까지 파일만 수십 개입니다. 매번 전부 복사해서 프롬프트에 붙이면 어떻게 될까요?</p>
+
+<p>LLM에는 한 번에 처리할 수 있는 텍스트 길이 한도(<strong>컨텍스트 윈도우</strong>)가 있습니다. 문서가 쌓일수록 한도를 넘기기 쉽습니다. 무엇보다 연차 규정을 물어보는데 보안 지침이나 복지 정책까지 다 넣어서 보내는 건 비효율적입니다. 관련 없는 내용이 섞일수록 LLM이 정작 필요한 부분을 놓치기 쉬워집니다.</p>
+
+<div class="placeholder gemini">
+  <div class="ph-label">[GEMINI PROMPT] 01_context-overflow</div>
+  <div class="ph-desc">문서가 많아지면 프롬프트에 다 넣을 수 없다는 한계 개념도</div>
+  <div class="ph-caption">그림 1-4: 문서를 통째로 넣는 방식의 한계. 문서가 늘어나면 프롬프트 창이 넘친다.</div>
+</div>
+
+<h2>1.3 사서가 필요합니다 — RAG 파이프라인</h2>
+
+<p>더 나은 방법이 있습니다. LLM이 모든 사내 문서를 외울 필요는 없습니다. 사람도 비슷한 문제를 해결한 방식이 있습니다. 시험에서 모든 내용을 통째로 외우는 대신 오픈북을 허용하면 됩니다. 시험지가 나오면 그 문제와 관련된 페이지를 찾아서 보면서 답하는 방식입니다.</p>
+
+<p>LLM도 마찬가지입니다. 사내 문서 전체를 외울 필요가 없습니다. 질문이 들어왔을 때 <strong>그 질문과 관련된 문서 조각만 찾아서 LLM에게 건네주면 됩니다.</strong></p>
+
+<p>이것이 <span class="term">RAG (Retrieval-Augmented Generation, 검색 증강 생성)</span>입니다. 도서관에 사서를 앉히는 것과 같아요. 누군가 질문하면 사서가 관련 책을 찾아서 건네주고, AI는 그 책을 읽고 답합니다.</p>
+
+<div class="rag-pipeline-box">
+  <div class="rag-pipeline-title">RAG 파이프라인 — 사서가 일하는 순서</div>
+  <div class="rag-pipeline">
+    <div class="rag-step">
+      <div class="s-num">1</div>
+      <div class="s-title">문서 저장</div>
+      <div class="s-desc">문서를 벡터로 변환<br>ChromaDB에 저장</div>
+      <div class="s-meta">서가에 책 꽂기</div>
+    </div>
+    <div class="rag-arrow">→</div>
+    <div class="rag-step">
+      <div class="s-num">2</div>
+      <div class="s-title">문서 검색</div>
+      <div class="s-desc">질문과 가장 비슷한<br>문서를 자동으로 찾기</div>
+      <div class="s-meta">사서가 책 찾기</div>
+    </div>
+    <div class="rag-arrow">→</div>
+    <div class="rag-step">
+      <div class="s-num">3</div>
+      <div class="s-title">답변 생성</div>
+      <div class="s-desc">찾은 문서를 LLM에<br>넘겨서 답변 생성</div>
+      <div class="s-meta">AI가 읽고 답하기</div>
+    </div>
+  </div>
+</div>
+
+<h3>1.3.1 서가에 책 꽂기 — 벡터 DB 저장</h3>
+
+<p><code>step3_rag.py</code>에는 사내 규정 3개가 더미 데이터로 미리 준비되어 있습니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge">실습 3</span> step3_rag.py — RAG 파이프라인 (1/2: 문서 저장)</div><span class="cm"># 1. 더미 데이터 준비</span>
+docs = [
+    Document(page_content=<span class="st">"[인사규정] 신입사원 휴가 및 연차..."</span>,
+             metadata={<span class="st">"source"</span>: <span class="st">"인사규정"</span>}),
+    Document(page_content=<span class="st">"[보안규정] 업무 보안: 모든 임직원은..."</span>,
+             metadata={<span class="st">"source"</span>: <span class="st">"보안규정"</span>}),
+    Document(page_content=<span class="st">"[복지규정] 식대 지원: 점심 식사는..."</span>,
+             metadata={<span class="st">"source"</span>: <span class="st">"복지규정"</span>}),
+]
+
+<span class="cm"># TODO: OllamaEmbeddings(nomic-embed-text)로 임베딩 생성 → Chroma.from_documents로 벡터DB 저장</span>
+embeddings = OllamaEmbeddings(model=<span class="st">"nomic-embed-text"</span>)
+vectorstore = Chroma.<span class="fn">from_documents</span>(documents=docs, embedding=embeddings)
+
+<span class="cm"># TODO: vectorstore.as_retriever로 검색기 생성 (search_kwargs={"k": 3})</span>
+retriever = vectorstore.<span class="fn">as_retriever</span>(search_kwargs={<span class="st">"k"</span>: <span class="nb">3</span>})</div>
+
+<p><code>OllamaEmbeddings</code>는 각 문서를 수백 차원의 숫자 배열(벡터)로 변환합니다. 의미가 비슷한 문서일수록 벡터 공간에서 가까이 위치하게 됩니다. <code>Chroma.from_documents()</code>가 이 벡터를 ChromaDB에 저장합니다. <code>k=3</code>은 "질문과 가장 비슷한 문서 3개를 가져오라"는 설정입니다.</p>
+
+<div class="tip">
+  <div class="tip-title">이 챕터의 임베딩 모델</div>
+  <p><code>nomic-embed-text</code>를 사용합니다. CH04에서 한국어에 최적화된 <code>ko-sroberta-multitask</code>로 교체합니다.</p>
+</div>
+
+<h3>1.3.2 사서에게 질문하기 — 체인 연결</h3>
+
+<div class="code-block"><div class="cb-title"><span class="badge">실습 3</span> step3_rag.py — RAG 파이프라인 (2/2: 체인 연결)</div><span class="cm"># 프롬프트 템플릿</span>
+template = <span class="st">"""당신은 회사의 규정에 대해 설명해주는 AI 비서입니다.
+아래의 참고 정보를 바탕으로 질문에 답하세요.
+
+참고 정보: {context}
+질문: {question}
+답변:"""</span>
+
+PROMPT = PromptTemplate(template=template, input_variables=[<span class="st">"context"</span>, <span class="st">"question"</span>])
+
+<span class="cm"># TODO: ChatOllama(deepseek-r1:8b) → RetrievalQA.from_chain_type으로 체인 조립</span>
+llm = ChatOllama(model=<span class="st">"deepseek-r1:8b"</span>, temperature=<span class="nb">0</span>)
+qa_chain = RetrievalQA.<span class="fn">from_chain_type</span>(
+    llm=llm,
+    retriever=retriever,
+    return_source_documents=<span class="nb">True</span>,
+    chain_type_kwargs={<span class="st">"prompt"</span>: PROMPT},
+)
+
+<span class="cm"># TODO: qa_chain.invoke로 질문 실행 → 검색된 문서(근거) 출력 → AI 답변 출력</span>
+result = qa_chain.<span class="fn">invoke</span>({<span class="st">"query"</span>: <span class="st">"신입사원 휴가 규정에 대해 알려줘."</span>})
+
+console.print(<span class="st">"\n--- 검색된 문서(근거) ---"</span>)
+<span class="kw">for</span> doc <span class="kw">in</span> result[<span class="st">"source_documents"</span>]:
+    console.print(<span class="st">f"[{doc.metadata['source']}]: {doc.page_content}"</span>)
+
+console.print(<span class="st">"\n--- AI 답변 ---"</span>)
+console.print(result[<span class="st">"result"</span>])</div>
+
+<p><code>RetrievalQA</code>가 검색기와 LLM을 체인으로 연결합니다. <code>return_source_documents=True</code> 덕분에 어떤 문서를 참고했는지도 함께 돌아옵니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> 실행</div>python step3_rag.py</div>
+
+<div class="placeholder capture">
+  <div class="ph-label">[CAPTURE NEEDED] 01_step3-rag</div>
+  <div class="ph-desc">step3_rag.py 실행 결과 터미널 캡처</div>
+  <div class="ph-caption">그림 1-5: [인사규정] 문서를 찾아서 답변하고, 어디서 가져왔는지 출처까지 보여준다.</div>
+</div>
+
+<div class="result ok">
+  <div class="rl">실행 결과</div>
+  <strong>--- 검색된 문서(근거) ---</strong><br>
+  [인사규정]: 신입사원 휴가 및 연차: 신입사원은 입사 후 처음 3년 동안은...<br>
+  [복지규정]: 식대 지원: 점심 식사는 무제한 법인카드로...<br>
+  [보안규정]: 업무 보안: 모든 임직원은...<br><br>
+  <strong>--- AI 답변 ---</strong><br>
+  신입사원은 입사 후 처음 3년 동안은 법정 연차가 발생하지 않습니다. 대신 매월 1회의 유급 '리프레시 데이'를 휴가로 사용할 수 있습니다.
+</div>
+
+<p>이제 답변과 함께 어느 문서를 참고했는지가 나옵니다. step2에서는 문서를 수동으로 넣어줬지만 이번에는 <strong>질문에 맞는 문서를 자동으로 찾아왔습니다.</strong> 환각이 사라지고 출처가 생겼습니다.</p>
+
+<h2>1.4 청킹, 있을 때와 없을 때</h2>
+
+<p>step3에서 문서 3개를 <strong>각각 따로</strong> 벡터 DB에 저장했습니다. 이번에는 반대로, 모든 문서를 <strong>하나의 덩어리로 합쳐서</strong> 저장하면 어떻게 되는지 비교해봅니다. <code>step3_rag_no_chunking.py</code>의 다른 점은 두 가지입니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge">실습 4</span> step3_rag_no_chunking.py — 청킹 없이</div><span class="cm"># 데이터가 docs_bad (하나의 거대한 Document)</span>
+vectorstore = Chroma.<span class="fn">from_documents</span>(documents=docs_bad, embedding=embeddings)
+
+<span class="cm"># 문서가 하나뿐이므로 k=1</span>
+retriever = vectorstore.<span class="fn">as_retriever</span>(search_kwargs={<span class="st">"k"</span>: <span class="nb">1</span>})</div>
+
+<p>나머지 흐름(임베딩 생성 → 체인 조립 → 질문 실행)은 step3과 동일합니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> 실행</div>python step3_rag_no_chunking.py</div>
+
+<div class="placeholder capture">
+  <div class="ph-label">[CAPTURE NEEDED] 01_no-chunking-compare</div>
+  <div class="ph-desc">청킹 여부 비교 — step3 결과 vs no_chunking 결과</div>
+  <div class="ph-caption">그림 1-6: 청킹 여부에 따른 검색 결과 비교. 조각으로 나누면 관련 문서만 정확히 찾는다.</div>
+</div>
+
+<p>step3에서는 인사규정만 깔끔하게 찾아왔지만 여기서는 인사규정 + 보안규정 + 복지규정이 통째로 들어옵니다. 관련 없는 내용이 섞이면 LLM이 정작 필요한 부분을 놓치기 쉽습니다. 문서를 조각으로 나누는 것, 즉 <span class="term">청킹(Chunking)</span>이 왜 필요한지 체감할 수 있습니다. 청킹 전략의 상세 비교는 CH08(검색 품질 튜닝)에서 다룹니다.</p>
+
+<h2>1.5 복잡한 질문 던져보기</h2>
+
+<p>step3까지의 질문은 "규정이 뭐야?" 같은 단순 검색이었습니다. 이번에는 <strong>규정을 찾아서 읽고 계산까지 해야 하는 질문</strong>을 던져봅니다. <code>step4_rag.py</code>의 코드 구조는 step3과 동일하고, 달라진 건 파일에 준비된 <strong>질문</strong>뿐입니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge">실습 5</span> step4_rag.py — 추론 심화</div>question = <span class="st">"입사 6개월차 신입인데 리프레시 데이 2번 썼어. 몇 번 남았는지 규정 기반으로 계산해줘."</span></div>
+
+<p>"매월 1회 제공" → "6개월이면 6번" → "2번 썼으면 4번 남음"까지, 규정을 읽고 계산해야 하는 질문입니다.</p>
+
+<div class="code-block"><div class="cb-title"><span class="badge bash">bash</span> 실행</div>python step4_rag.py</div>
+
+<div class="placeholder capture">
+  <div class="ph-label">[CAPTURE NEEDED] 01_step4-rag</div>
+  <div class="ph-desc">step4_rag.py 실행 결과 — Chain-of-Thought 추론 과정 포함</div>
+  <div class="ph-caption">그림 1-7: 규정을 바탕으로 연차를 스스로 계산하고 추론해낸 모습.</div>
+</div>
+
+<p>DeepSeek R1은 <code>&lt;think&gt;</code> 태그 안에서 단계별로 생각하는 <span class="term">Chain-of-Thought</span> 추론을 합니다. 실행하면 검색된 문서(근거)와 함께 계산 과정이 포함된 답변이 나옵니다.</p>
+
+<h2>용어 정리</h2>
+
+<p>이야기 속에서 사용한 비유가 실제로는 어떤 기술 용어에 해당하는지 정리합니다.</p>
+
+<table>
+  <tr>
+    <th>이야기 속 표현</th>
+    <th>진짜 용어</th>
+    <th>정식 정의</th>
+  </tr>
+  <tr>
+    <td>"자신감 넘치는 거짓말"</td>
+    <td><strong>LLM 환각 (Hallucination)</strong></td>
+    <td>LLM이 학습 데이터에 없는 정보를 그럴듯하게 만들어내는 현상</td>
+  </tr>
+  <tr>
+    <td>"문서를 직접 붙여 넣기"</td>
+    <td><strong>Context Injection</strong></td>
+    <td>관련 정보를 프롬프트에 직접 넣어서 LLM에 제공하는 방법</td>
+  </tr>
+  <tr>
+    <td>"오픈북 시험", "사서"</td>
+    <td><strong>RAG (Retrieval-Augmented Generation)</strong></td>
+    <td>외부 지식 저장소에서 관련 문서를 검색해 LLM 생성에 활용하는 방식</td>
+  </tr>
+  <tr>
+    <td>"서가에 책 꽂기"</td>
+    <td><strong>임베딩 + 벡터 DB 저장</strong></td>
+    <td>문서를 수치 벡터로 변환해 ChromaDB에 인덱싱하는 과정</td>
+  </tr>
+  <tr>
+    <td>"사서가 책 찾기"</td>
+    <td><strong>벡터 유사도 검색</strong></td>
+    <td>질문 벡터와 문서 벡터 간 코사인 유사도를 계산해 가장 관련 있는 문서를 반환</td>
+  </tr>
+  <tr>
+    <td>"관련 페이지만 건네기"</td>
+    <td><strong>청킹 (Chunking)</strong></td>
+    <td>긴 문서를 의미 단위로 조각내어 검색 정확도를 높이는 기법</td>
+  </tr>
+</table>
+
+<!-- ========== 이것만은 기억하자 ========== -->
+<div class="remember">
+  <h2 style="color:#2f855a;">이것만은 기억하자</h2>
+  <ul>
+    <li><strong>LLM은 우리 회사 문서를 읽은 적이 없습니다.</strong> 아무리 자신감 있게 답해도 사내 정보는 우리가 직접 넣어줘야 합니다.</li>
+    <li><strong>RAG는 오픈북 시험입니다.</strong> LLM이 모든 걸 외울 필요 없이 질문마다 관련 문서를 찾아보면서 답합니다.</li>
+    <li>이 챕터의 <code>RetrievalQA</code>는 구버전 API입니다. CH05에서 LCEL 파이프라인으로 교체합니다.</li>
+  </ul>
+  <p class="next">다음 챕터에서는 AI 비서가 조회할 실제 사내 시스템(직원, 연차, 매출 DB)을 FastAPI로 만들어봅니다.</p>
+</div>
+
+</div>
+</body>
+</html>

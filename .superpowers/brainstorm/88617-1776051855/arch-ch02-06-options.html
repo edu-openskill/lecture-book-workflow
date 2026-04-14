@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Ch.2~Ch.6 아키텍처 디자인 4안</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.7; }
+.container { max-width: 960px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+.design-block { background: #fff; border-radius: 12px; padding: 32px; margin: 32px 0; border: 1px solid #edf0f5; }
+.design-label { display: inline-block; font-size: 11px; font-weight: 700; color: #a0aec0; letter-spacing: 1.5px; margin-bottom: 6px; }
+.design-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 24px; }
+
+/* ========== A: 레이어드 아키텍처 ========== */
+.layered {
+  background: #fafbfc;
+  border-radius: 8px;
+  padding: 24px;
+}
+.ly-layer {
+  background: #fff;
+  border: 1.5px solid #c5cee0;
+  border-radius: 8px;
+  padding: 14px 20px;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.ly-layer:last-child { margin-bottom: 0; }
+.ly-layer-label {
+  font-size: 12px; font-weight: 700;
+  color: #4a5568; letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.ly-layer-desc {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.ly-comp {
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+  background: #eef2ff; color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+.ly-comp .ly-ch {
+  font-size: 10px; opacity: 0.7; margin-left: 6px;
+  font-family: monospace;
+}
+.ly-presentation .ly-comp { background: #fef3c7; color: #854d0e; border-color: #fde68a; }
+.ly-application .ly-comp { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+.ly-retrieval .ly-comp { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+.ly-data .ly-comp { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+.ly-ai .ly-comp { background: #fce7f3; color: #9f1239; border-color: #fbcfe8; }
+
+/* ========== B: 시퀀스 플로우 (Request Flow) ========== */
+.seq-flow {
+  background: #fafbfc;
+  border-radius: 8px;
+  padding: 24px;
+}
+.seq-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.seq-row:last-child { border-bottom: none; }
+.seq-step {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #2563eb; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.seq-body { flex: 1; }
+.seq-component {
+  font-size: 14px; font-weight: 700; color: #2d3748;
+}
+.seq-tech {
+  font-size: 12px; color: #718096; margin-top: 2px;
+}
+.seq-ch {
+  font-family: monospace; font-size: 11px;
+  padding: 3px 8px; border-radius: 4px;
+  background: #edf2f7; color: #4a5568;
+  font-weight: 700; flex-shrink: 0;
+}
+.seq-arrow {
+  display: flex; justify-content: center;
+  color: #cbd5e0; font-size: 14px;
+  padding: 2px 0;
+}
+
+/* ========== C: 컴포넌트 다이어그램 (C4 스타일) ========== */
+.c4-diagram {
+  background: #fafbfc;
+  border-radius: 8px;
+  padding: 24px;
+  position: relative;
+}
+.c4-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.c4-row:last-child { margin-bottom: 0; }
+.c4-box {
+  padding: 14px 16px; border-radius: 6px;
+  border: 2px solid #2563eb;
+  background: #fff;
+  position: relative;
+}
+.c4-box-type {
+  font-size: 9px; font-weight: 700;
+  color: #2563eb; letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.c4-box-name {
+  font-size: 13px; font-weight: 700; color: #1a202c;
+  margin-bottom: 2px;
+}
+.c4-box-tech {
+  font-size: 11px; color: #718096;
+}
+.c4-box.user {
+  background: #2563eb; color: #fff;
+  text-align: center;
+  grid-column: span 3;
+}
+.c4-box.user .c4-box-type { color: #bfdbfe; }
+.c4-box.user .c4-box-name { color: #fff; }
+.c4-box.user .c4-box-tech { color: #dbeafe; }
+.c4-box.container {
+  background: #dbeafe; border-color: #2563eb;
+}
+.c4-box.external {
+  background: #f3f4f6; border-color: #6b7280; border-style: dashed;
+}
+.c4-box.db {
+  background: #d1fae5; border-color: #059669;
+}
+.c4-box.db .c4-box-type { color: #059669; }
+.c4-divider {
+  text-align: center; color: #cbd5e0;
+  font-size: 18px; padding: 4px 0;
+}
+.c4-row.single-center {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+.c4-row.single-center .c4-box { max-width: 320px; width: 100%; }
+
+/* ========== D: 블록 다이어그램 (영역 구분) ========== */
+.block-diagram {
+  background: #fafbfc;
+  border-radius: 8px;
+  padding: 24px;
+}
+.bd-zone {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.bd-zone:last-child { margin-bottom: 0; }
+.bd-zone-header {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #edf0f5;
+}
+.bd-zone-title {
+  font-size: 14px; font-weight: 700;
+}
+.bd-zone.user .bd-zone-title { color: #059669; }
+.bd-zone.app .bd-zone-title { color: #2563eb; }
+.bd-zone.rag .bd-zone-title { color: #7c3aed; }
+.bd-zone.agent .bd-zone-title { color: #c2410c; }
+.bd-zone-sub {
+  font-size: 11px; color: #a0aec0; font-family: monospace;
+  letter-spacing: 0.5px;
+}
+.bd-comps {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.bd-comp {
+  padding: 8px 14px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 120px;
+}
+.bd-comp-name { font-weight: 700; color: #2d3748; }
+.bd-comp-desc { font-size: 11px; color: #718096; }
+.bd-comp-ch {
+  font-family: monospace; font-size: 10px; color: #a0aec0;
+  align-self: flex-end;
+}
+.bd-flow-arrow {
+  text-align: center;
+  color: #cbd5e0;
+  font-size: 16px;
+  padding: 2px 0;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Ch.2~Ch.6 메인 시스템 아키텍처 4안</h1>
+<p class="subtitle">튜닝 전 단계의 ConnectHR 메인 시스템을 4가지 디자인 스타일로 시각화.</p>
+
+<!-- ========== A안: 레이어드 아키텍처 ========== -->
+<div class="design-block">
+  <div class="design-label">A안</div>
+  <div class="design-title">레이어드 아키텍처</div>
+  <div class="design-desc">전통적 레이어 구조. 위→아래로 Presentation · Application · Retrieval · Data · AI 레이어. 각 레이어에 컴포넌트가 나열됨</div>
+
+  <div class="layered">
+    <div class="ly-layer ly-presentation">
+      <div class="ly-layer-label">Presentation</div>
+      <div class="ly-layer-desc">
+        <div class="ly-comp">사용자 (직원·관리자)<span class="ly-ch">Web/API</span></div>
+      </div>
+    </div>
+    <div class="ly-layer ly-application">
+      <div class="ly-layer-label">Application</div>
+      <div class="ly-layer-desc">
+        <div class="ly-comp">FastAPI<span class="ly-ch">Ch.2</span></div>
+        <div class="ly-comp">Query Router<span class="ly-ch">Ch.6</span></div>
+        <div class="ly-comp">ReAct Agent<span class="ly-ch">Ch.6</span></div>
+      </div>
+    </div>
+    <div class="ly-layer ly-retrieval">
+      <div class="ly-layer-label">Retrieval</div>
+      <div class="ly-layer-desc">
+        <div class="ly-comp">Document Parser<span class="ly-ch">Ch.4</span></div>
+        <div class="ly-comp">Chunker+Embedder<span class="ly-ch">Ch.4</span></div>
+        <div class="ly-comp">LCEL Chain<span class="ly-ch">Ch.5</span></div>
+        <div class="ly-comp">MCP Tools<span class="ly-ch">Ch.6</span></div>
+      </div>
+    </div>
+    <div class="ly-layer ly-data">
+      <div class="ly-layer-label">Data</div>
+      <div class="ly-layer-desc">
+        <div class="ly-comp">PostgreSQL<span class="ly-ch">Ch.2</span></div>
+        <div class="ly-comp">사내 문서 저장소<span class="ly-ch">Ch.3</span></div>
+        <div class="ly-comp">ChromaDB<span class="ly-ch">Ch.4</span></div>
+      </div>
+    </div>
+    <div class="ly-layer ly-ai">
+      <div class="ly-layer-label">AI</div>
+      <div class="ly-layer-desc">
+        <div class="ly-comp">Ollama LLM (DeepSeek-R1)<span class="ly-ch">Ch.1</span></div>
+        <div class="ly-comp">Embedding Model<span class="ly-ch">Ch.4</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== B안: 시퀀스 플로우 ========== -->
+<div class="design-block">
+  <div class="design-label">B안</div>
+  <div class="design-title">시퀀스 플로우 — 요청이 거치는 순서</div>
+  <div class="design-desc">하나의 질문이 들어왔을 때 어떤 컴포넌트를 순서대로 거치는지. 번호가 달린 단계형</div>
+
+  <div class="seq-flow">
+    <div class="seq-row">
+      <div class="seq-step">1</div>
+      <div class="seq-body">
+        <div class="seq-component">질문 접수</div>
+        <div class="seq-tech">직원이 FastAPI 엔드포인트로 자연어 질문 전송</div>
+      </div>
+      <div class="seq-ch">Ch.2</div>
+    </div>
+    <div class="seq-arrow">&darr;</div>
+    <div class="seq-row">
+      <div class="seq-step">2</div>
+      <div class="seq-body">
+        <div class="seq-component">질문 분류</div>
+        <div class="seq-tech">Query Router — 규칙·스키마·LLM 3단계로 경로 결정</div>
+      </div>
+      <div class="seq-ch">Ch.6</div>
+    </div>
+    <div class="seq-arrow">&darr;</div>
+    <div class="seq-row">
+      <div class="seq-step">3</div>
+      <div class="seq-body">
+        <div class="seq-component">정보 수집 (RAG 경로)</div>
+        <div class="seq-tech">Retriever가 ChromaDB에서 관련 문서 k개 검색</div>
+      </div>
+      <div class="seq-ch">Ch.4·Ch.5</div>
+    </div>
+    <div class="seq-arrow">&darr;</div>
+    <div class="seq-row">
+      <div class="seq-step">3'</div>
+      <div class="seq-body">
+        <div class="seq-component">정보 수집 (DB 경로)</div>
+        <div class="seq-tech">MCP Tools가 PostgreSQL에서 직원·연차·매출 조회</div>
+      </div>
+      <div class="seq-ch">Ch.2·Ch.6</div>
+    </div>
+    <div class="seq-arrow">&darr;</div>
+    <div class="seq-row">
+      <div class="seq-step">4</div>
+      <div class="seq-body">
+        <div class="seq-component">답변 합성</div>
+        <div class="seq-tech">ReAct Agent가 Think·Act·Observe 루프로 LLM과 답변 조립</div>
+      </div>
+      <div class="seq-ch">Ch.6</div>
+    </div>
+    <div class="seq-arrow">&darr;</div>
+    <div class="seq-row">
+      <div class="seq-step">5</div>
+      <div class="seq-body">
+        <div class="seq-component">응답 반환</div>
+        <div class="seq-tech">출처가 포함된 답변을 FastAPI로 반환</div>
+      </div>
+      <div class="seq-ch">Ch.5·Ch.6</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== C안: C4 컴포넌트 다이어그램 ========== -->
+<div class="design-block">
+  <div class="design-label">C안</div>
+  <div class="design-title">C4 컴포넌트 다이어그램</div>
+  <div class="design-desc">소프트웨어 아키텍처 설계서 표준. 사용자·컨테이너·외부 시스템을 박스로 명확히 구분. 실무 다이어그램 느낌</div>
+
+  <div class="c4-diagram">
+    <div class="c4-row single-center">
+      <div class="c4-box user">
+        <div class="c4-box-type">&lt;&lt;ACTOR&gt;&gt;</div>
+        <div class="c4-box-name">사내 직원</div>
+        <div class="c4-box-tech">규정·연차·매출 질문</div>
+      </div>
+    </div>
+    <div class="c4-divider">&darr;</div>
+    <div class="c4-row single-center">
+      <div class="c4-box container">
+        <div class="c4-box-type">&lt;&lt;API GATEWAY&gt;&gt;</div>
+        <div class="c4-box-name">FastAPI</div>
+        <div class="c4-box-tech">Python · 비동기 · Ch.2</div>
+      </div>
+    </div>
+    <div class="c4-divider">&darr;</div>
+    <div class="c4-row">
+      <div class="c4-box container">
+        <div class="c4-box-type">&lt;&lt;ORCHESTRATOR&gt;&gt;</div>
+        <div class="c4-box-name">Query Router + Agent</div>
+        <div class="c4-box-tech">ReAct · Ch.6</div>
+      </div>
+      <div class="c4-box container">
+        <div class="c4-box-type">&lt;&lt;RAG&gt;&gt;</div>
+        <div class="c4-box-name">LCEL Chain</div>
+        <div class="c4-box-tech">LangChain · Ch.5</div>
+      </div>
+      <div class="c4-box container">
+        <div class="c4-box-type">&lt;&lt;TOOLS&gt;&gt;</div>
+        <div class="c4-box-name">MCP Tools</div>
+        <div class="c4-box-tech">DB 조회 함수 · Ch.6</div>
+      </div>
+    </div>
+    <div class="c4-divider">&darr;</div>
+    <div class="c4-row">
+      <div class="c4-box db">
+        <div class="c4-box-type">&lt;&lt;DATABASE&gt;&gt;</div>
+        <div class="c4-box-name">PostgreSQL</div>
+        <div class="c4-box-tech">직원·연차·매출 · Ch.2</div>
+      </div>
+      <div class="c4-box db">
+        <div class="c4-box-type">&lt;&lt;VECTOR DB&gt;&gt;</div>
+        <div class="c4-box-name">ChromaDB</div>
+        <div class="c4-box-tech">임베딩 · 문서 조각 · Ch.4</div>
+      </div>
+      <div class="c4-box external">
+        <div class="c4-box-type">&lt;&lt;EXTERNAL&gt;&gt;</div>
+        <div class="c4-box-name">Ollama LLM</div>
+        <div class="c4-box-tech">DeepSeek-R1:8b</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== D안: 영역 블록 다이어그램 ========== -->
+<div class="design-block">
+  <div class="design-label">D안</div>
+  <div class="design-title">영역 블록 다이어그램</div>
+  <div class="design-desc">책임 영역별로 블록을 나누고 내부에 컴포넌트 나열. 영역 간에 화살표로 데이터 흐름 표시</div>
+
+  <div class="block-diagram">
+    <div class="bd-zone user">
+      <div class="bd-zone-header">
+        <div class="bd-zone-title">User Interface</div>
+        <div class="bd-zone-sub">사용자가 보는 것</div>
+      </div>
+      <div class="bd-comps">
+        <div class="bd-comp">
+          <div class="bd-comp-name">FastAPI</div>
+          <div class="bd-comp-desc">REST API · Swagger UI</div>
+          <div class="bd-comp-ch">Ch.2</div>
+        </div>
+      </div>
+    </div>
+    <div class="bd-flow-arrow">&darr;</div>
+    <div class="bd-zone app">
+      <div class="bd-zone-header">
+        <div class="bd-zone-title">Application Logic</div>
+        <div class="bd-zone-sub">요청 처리 & 조정</div>
+      </div>
+      <div class="bd-comps">
+        <div class="bd-comp">
+          <div class="bd-comp-name">Query Router</div>
+          <div class="bd-comp-desc">질문 분류 · 경로 결정</div>
+          <div class="bd-comp-ch">Ch.6</div>
+        </div>
+        <div class="bd-comp">
+          <div class="bd-comp-name">ReAct Agent</div>
+          <div class="bd-comp-desc">Think · Act · Observe</div>
+          <div class="bd-comp-ch">Ch.6</div>
+        </div>
+      </div>
+    </div>
+    <div class="bd-flow-arrow">&darr;</div>
+    <div class="bd-zone rag">
+      <div class="bd-zone-header">
+        <div class="bd-zone-title">Knowledge Layer</div>
+        <div class="bd-zone-sub">문서 기반 지식 접근</div>
+      </div>
+      <div class="bd-comps">
+        <div class="bd-comp">
+          <div class="bd-comp-name">Document Parser</div>
+          <div class="bd-comp-desc">PDF · DOCX 파싱</div>
+          <div class="bd-comp-ch">Ch.4</div>
+        </div>
+        <div class="bd-comp">
+          <div class="bd-comp-name">Chunker + Embedder</div>
+          <div class="bd-comp-desc">청킹 · 한국어 임베딩</div>
+          <div class="bd-comp-ch">Ch.4</div>
+        </div>
+        <div class="bd-comp">
+          <div class="bd-comp-name">ChromaDB</div>
+          <div class="bd-comp-desc">벡터 저장소</div>
+          <div class="bd-comp-ch">Ch.4</div>
+        </div>
+        <div class="bd-comp">
+          <div class="bd-comp-name">LCEL Chain</div>
+          <div class="bd-comp-desc">Retriever → LLM</div>
+          <div class="bd-comp-ch">Ch.5</div>
+        </div>
+      </div>
+    </div>
+    <div class="bd-flow-arrow">&darr;</div>
+    <div class="bd-zone agent">
+      <div class="bd-zone-header">
+        <div class="bd-zone-title">Data Sources</div>
+        <div class="bd-zone-sub">정형 · 비정형 데이터</div>
+      </div>
+      <div class="bd-comps">
+        <div class="bd-comp">
+          <div class="bd-comp-name">PostgreSQL</div>
+          <div class="bd-comp-desc">직원·연차·매출</div>
+          <div class="bd-comp-ch">Ch.2</div>
+        </div>
+        <div class="bd-comp">
+          <div class="bd-comp-name">사내 문서 저장소</div>
+          <div class="bd-comp-desc">메타데이터·폴더 설계</div>
+          <div class="bd-comp-ch">Ch.3</div>
+        </div>
+        <div class="bd-comp">
+          <div class="bd-comp-name">MCP Tools</div>
+          <div class="bd-comp-desc">DB 조회 함수</div>
+          <div class="bd-comp-ch">Ch.6</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 비교 -->
+<div class="design-block" style="background:#f7fafc;">
+  <div class="design-title" style="font-size:15px;">각 안의 특징</div>
+  <table style="width:100%; border-collapse:collapse; font-size:13px; background:#fff;">
+    <tr style="background:rgba(0,0,0,0.04);">
+      <th style="text-align:left; padding:10px;">안</th>
+      <th style="text-align:left; padding:10px;">장점</th>
+      <th style="text-align:left; padding:10px;">느낌</th>
+    </tr>
+    <tr style="border-top:1px solid #edf0f5;">
+      <td style="padding:10px;"><b>A. 레이어드</b></td>
+      <td style="padding:10px;">레이어별로 기술이 어디 위치하는지 명확</td>
+      <td style="padding:10px;">전통적·안정감 있는 아키텍처 문서</td>
+    </tr>
+    <tr style="border-top:1px solid #edf0f5;">
+      <td style="padding:10px;"><b>B. 시퀀스 플로우</b></td>
+      <td style="padding:10px;">요청이 거치는 순서를 이야기하듯</td>
+      <td style="padding:10px;">튜토리얼·가이드 느낌</td>
+    </tr>
+    <tr style="border-top:1px solid #edf0f5;">
+      <td style="padding:10px;"><b>C. C4 컴포넌트</b></td>
+      <td style="padding:10px;">실무 설계서 표준. 액터·컨테이너·DB 구분</td>
+      <td style="padding:10px;">엔터프라이즈 설계 문서</td>
+    </tr>
+    <tr style="border-top:1px solid #edf0f5;">
+      <td style="padding:10px;"><b>D. 영역 블록</b></td>
+      <td style="padding:10px;">책임 영역별 묶음. 색으로 구분</td>
+      <td style="padding:10px;">부드럽고 읽기 편함</td>
+    </tr>
+  </table>
+</div>
+
+</div>
+</body>
+</html>

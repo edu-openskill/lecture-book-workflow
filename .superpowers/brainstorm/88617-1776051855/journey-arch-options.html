@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>앞으로의 여정 — 아키텍처 다이어그램 3안</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.7; }
+.container { max-width: 820px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+.design-block { background: #fff; border-radius: 12px; padding: 28px; margin: 32px 0; border: 1px solid #edf0f5; }
+.design-label { display: inline-block; font-size: 11px; font-weight: 700; color: #a0aec0; letter-spacing: 1.5px; margin-bottom: 6px; }
+.design-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 24px; }
+
+/* 공통: 파트 그룹 */
+.part-group { background: #f7fafc; border-radius: 10px; padding: 20px; margin: 16px 0; }
+.part-group-label { font-size: 11px; font-weight: 700; color: #ed8936; letter-spacing: 1.5px; margin-bottom: 12px; }
+.part-items { display: flex; gap: 16px; margin-top: 12px; }
+.part-item { flex: 1; }
+.part-item .pi-ch { font-size: 11px; font-weight: 700; color: #718096; font-family: monospace; }
+.part-item .pi-title { font-size: 13px; font-weight: 600; color: #2d3748; margin-top: 2px; }
+
+/* ========== A: 누적형 (전체 아키텍처 + 하이라이트) ========== */
+.accum-wrap {
+  background: #ffffff;
+  border: 2px dashed #c5cee0;
+  border-radius: 8px;
+  padding: 22px 18px;
+  position: relative;
+  margin: 16px 0;
+}
+.accum-label {
+  position: absolute; top: -11px; left: 16px;
+  background: #ffffff; padding: 0 8px;
+  font-size: 11px; font-weight: 700;
+  color: #718096; letter-spacing: 0.5px;
+}
+.accum-rows { display: flex; flex-direction: column; gap: 10px; }
+.accum-row { display: grid; grid-template-columns: 70px 1fr; gap: 12px; align-items: center; }
+.accum-row-label { font-size: 10px; font-weight: 700; color: #a0aec0; letter-spacing: 0.5px; text-align: right; }
+.accum-flow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.accum-node {
+  padding: 7px 12px; font-size: 12px;
+  border: 1.5px solid #c5cee0; border-radius: 6px;
+  background: #ffffff; color: #a0aec0;
+  min-width: 60px; text-align: center;
+}
+.accum-node.active {
+  background: #eef2ff; color: #1e40af;
+  border-color: #2563eb; font-weight: 700;
+  box-shadow: 0 1px 3px rgba(37,99,235,0.15);
+}
+.accum-node.new {
+  background: #fff5eb; color: #7b341e;
+  border-color: #ed8936; font-weight: 700;
+  box-shadow: 0 1px 3px rgba(237,137,54,0.2);
+}
+.accum-arrow { color: #c5cee0; font-size: 14px; }
+.accum-arrow.active { color: #2563eb; }
+
+/* ========== B: D2 스타일 (그림 1-6 팔레트) ========== */
+.d2-part-box {
+  background: #ffffff;
+  border: 2px dashed #2563eb;
+  border-radius: 8px;
+  padding: 20px 18px 16px;
+  position: relative;
+  margin: 16px 0;
+}
+.d2-part-label {
+  position: absolute; top: -11px; left: 16px;
+  background: #ffffff; padding: 0 8px;
+  font-size: 12px; font-weight: 700;
+  color: #1e3a5f; letter-spacing: 0.5px;
+}
+.d2-part-flow {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; justify-content: center;
+}
+.d2-mini-node {
+  padding: 7px 12px; font-size: 12px;
+  text-align: center; min-width: 60px;
+}
+.d2-mini-node.startend {
+  background: #ffffff; border: 2px solid #c5cee0;
+  border-radius: 999px; color: #374151;
+}
+.d2-mini-node.process {
+  background: #eef2ff; border: 2px solid #2563eb;
+  border-radius: 6px; color: #1e40af; font-weight: 700;
+}
+.d2-mini-node.storage {
+  background: #f8fafc; border: 2px solid #c5cee0;
+  border-radius: 50% / 25%; color: #374151; font-weight: 700;
+}
+.d2-mini-arrow { color: #2563eb; font-size: 14px; font-weight: 700; }
+.d2-mini-branch {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.d2-mini-branch .d2-mini-node { padding: 5px 10px; font-size: 11px; }
+
+/* ========== C: 미니멀 배지 스타일 ========== */
+.minimal-add {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #edf0f5;
+  margin: 12px 0;
+}
+.minimal-add-label {
+  font-size: 11px; font-weight: 700; color: #718096;
+  align-self: center; margin-right: 8px; letter-spacing: 0.5px;
+}
+.minimal-badge {
+  padding: 6px 12px; border-radius: 16px;
+  font-size: 12px; font-weight: 600;
+  background: #eef2ff; color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+.minimal-badge.storage {
+  background: #f0fdf4; color: #166534;
+  border-color: #bbf7d0;
+}
+.minimal-badge.tool {
+  background: #faf5ff; color: #6b21a8;
+  border-color: #e9d5ff;
+}
+.minimal-badge.interface {
+  background: #fef3c7; color: #854d0e;
+  border-color: #fde68a;
+}
+.minimal-badge .m-plus {
+  opacity: 0.5; margin-right: 4px; font-weight: 400;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>앞으로의 여정 — 아키텍처 다이어그램 3안</h1>
+<p class="subtitle">PART 1~4 각각 다른 디자인으로. 어떤 느낌이 맞는지 봐주세요.</p>
+
+<!-- ========== A안: 누적형 ========== -->
+<div class="design-block">
+  <div class="design-label">A안</div>
+  <div class="design-title">누적형 — 전체 아키텍처에 파트별 하이라이트</div>
+  <div class="design-desc">ConnectHR 전체 아키텍처가 계속 같은 자리에 있고, 각 파트에서 "추가되는 부분"만 주황색 하이라이트. 시스템이 쌓여가는 느낌</div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 1 · 사내 시스템 만들기</div>
+    <div class="accum-wrap">
+      <div class="accum-label">ConnectHR 아키텍처</div>
+      <div class="accum-rows">
+        <div class="accum-row">
+          <div class="accum-row-label">API</div>
+          <div class="accum-flow">
+            <div class="accum-node new">FastAPI</div>
+          </div>
+        </div>
+        <div class="accum-row">
+          <div class="accum-row-label">데이터</div>
+          <div class="accum-flow">
+            <div class="accum-node new">PostgreSQL</div>
+            <div class="accum-node new">사내 문서 저장소</div>
+          </div>
+        </div>
+        <div class="accum-row">
+          <div class="accum-row-label">처리</div>
+          <div class="accum-flow">
+            <div class="accum-node">Retriever</div>
+            <div class="accum-node">Agent</div>
+          </div>
+        </div>
+        <div class="accum-row">
+          <div class="accum-row-label">추론</div>
+          <div class="accum-flow">
+            <div class="accum-node">Vector DB</div>
+            <div class="accum-node">LLM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH02</div><div class="pi-title">사내 시스템 API</div></div>
+      <div class="part-item"><div class="pi-ch">CH03</div><div class="pi-title">문서 설계와 메타데이터</div></div>
+    </div>
+  </div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 2 · RAG 엔진 만들기</div>
+    <div class="accum-wrap">
+      <div class="accum-label">ConnectHR 아키텍처</div>
+      <div class="accum-rows">
+        <div class="accum-row">
+          <div class="accum-row-label">API</div>
+          <div class="accum-flow"><div class="accum-node active">FastAPI</div></div>
+        </div>
+        <div class="accum-row">
+          <div class="accum-row-label">데이터</div>
+          <div class="accum-flow">
+            <div class="accum-node active">PostgreSQL</div>
+            <div class="accum-node active">사내 문서 저장소</div>
+          </div>
+        </div>
+        <div class="accum-row">
+          <div class="accum-row-label">처리</div>
+          <div class="accum-flow">
+            <div class="accum-node new">Retriever</div>
+            <div class="accum-node">Agent</div>
+          </div>
+        </div>
+        <div class="accum-row">
+          <div class="accum-row-label">추론</div>
+          <div class="accum-flow">
+            <div class="accum-node new">Vector DB</div>
+            <div class="accum-node active">LLM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH04</div><div class="pi-title">벡터 DB 구축</div></div>
+      <div class="part-item"><div class="pi-ch">CH05</div><div class="pi-title">LCEL 파이프라인</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== B안: D2 스타일 ========== -->
+<div class="design-block">
+  <div class="design-label">B안</div>
+  <div class="design-title">D2 스타일 — 그림 1-6과 톤 통일</div>
+  <div class="design-desc">그림 1-6에 쓴 D2 팔레트 그대로. 점선 보더 박스 + 파란 화살표. 책 전체의 다이어그램 톤이 한 언어로 통일됨</div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 1 · 사내 시스템 만들기</div>
+    <div class="d2-part-box">
+      <div class="d2-part-label">PART 1</div>
+      <div class="d2-part-flow">
+        <div class="d2-mini-node startend">직원·관리자</div>
+        <div class="d2-mini-arrow">&rarr;</div>
+        <div class="d2-mini-node process">FastAPI</div>
+        <div class="d2-mini-arrow">&rarr;</div>
+        <div class="d2-mini-branch">
+          <div class="d2-mini-node storage">PostgreSQL</div>
+          <div class="d2-mini-node storage">사내 문서 저장소</div>
+        </div>
+      </div>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH02</div><div class="pi-title">사내 시스템 API</div></div>
+      <div class="part-item"><div class="pi-ch">CH03</div><div class="pi-title">문서 설계와 메타데이터</div></div>
+    </div>
+  </div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 2 · RAG 엔진 만들기</div>
+    <div class="d2-part-box">
+      <div class="d2-part-label">PART 2</div>
+      <div class="d2-part-flow">
+        <div class="d2-mini-node startend">질문</div>
+        <div class="d2-mini-arrow">&rarr;</div>
+        <div class="d2-mini-node process">파싱·청킹·임베딩</div>
+        <div class="d2-mini-arrow">&rarr;</div>
+        <div class="d2-mini-node storage">Vector DB</div>
+        <div class="d2-mini-arrow">&rarr;</div>
+        <div class="d2-mini-node process">LCEL 체인</div>
+        <div class="d2-mini-arrow">&rarr;</div>
+        <div class="d2-mini-node startend">답변+출처</div>
+      </div>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH04</div><div class="pi-title">벡터 DB 구축</div></div>
+      <div class="part-item"><div class="pi-ch">CH05</div><div class="pi-title">LCEL 파이프라인</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== C안: 미니멀 배지 ========== -->
+<div class="design-block">
+  <div class="design-label">C안</div>
+  <div class="design-title">미니멀 배지 — 아키텍처 박스 없이 추가되는 기술만</div>
+  <div class="design-desc">다이어그램 없음. "이 파트에서 추가되는 것"만 배지로. 공간 절약, 담백, 가독성 최고</div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 1 · 사내 시스템 만들기</div>
+    <div class="minimal-add">
+      <span class="minimal-add-label">+ 새로 추가</span>
+      <span class="minimal-badge interface"><span class="m-plus">+</span>FastAPI</span>
+      <span class="minimal-badge storage"><span class="m-plus">+</span>PostgreSQL</span>
+      <span class="minimal-badge storage"><span class="m-plus">+</span>사내 문서 저장소</span>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH02</div><div class="pi-title">사내 시스템 API</div></div>
+      <div class="part-item"><div class="pi-ch">CH03</div><div class="pi-title">문서 설계와 메타데이터</div></div>
+    </div>
+  </div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 2 · RAG 엔진 만들기</div>
+    <div class="minimal-add">
+      <span class="minimal-add-label">+ 새로 추가</span>
+      <span class="minimal-badge tool"><span class="m-plus">+</span>Document Parser</span>
+      <span class="minimal-badge tool"><span class="m-plus">+</span>Embedding Model</span>
+      <span class="minimal-badge storage"><span class="m-plus">+</span>ChromaDB</span>
+      <span class="minimal-badge"><span class="m-plus">+</span>LCEL 체인</span>
+      <span class="minimal-badge"><span class="m-plus">+</span>출처 Prompt</span>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH04</div><div class="pi-title">벡터 DB 구축</div></div>
+      <div class="part-item"><div class="pi-ch">CH05</div><div class="pi-title">LCEL 파이프라인</div></div>
+    </div>
+  </div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 3 · 진짜 비서 만들기</div>
+    <div class="minimal-add">
+      <span class="minimal-add-label">+ 새로 추가</span>
+      <span class="minimal-badge"><span class="m-plus">+</span>Query Router</span>
+      <span class="minimal-badge tool"><span class="m-plus">+</span>MCP Tools</span>
+      <span class="minimal-badge"><span class="m-plus">+</span>ReAct Agent</span>
+      <span class="minimal-badge storage"><span class="m-plus">+</span>ResponseCache</span>
+      <span class="minimal-badge"><span class="m-plus">+</span>TokenTracker</span>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH06</div><div class="pi-title">통합 에이전트</div></div>
+      <div class="part-item"><div class="pi-ch">CH07</div><div class="pi-title">운영 안정화</div></div>
+    </div>
+  </div>
+
+  <div class="part-group">
+    <div class="part-group-label">PART 4 · 튜닝과 평가</div>
+    <div class="minimal-add">
+      <span class="minimal-add-label">+ 새로 추가</span>
+      <span class="minimal-badge tool"><span class="m-plus">+</span>Reranker</span>
+      <span class="minimal-badge tool"><span class="m-plus">+</span>Hybrid Search</span>
+      <span class="minimal-badge tool"><span class="m-plus">+</span>HyDE</span>
+      <span class="minimal-badge tool"><span class="m-plus">+</span>Multi-Query</span>
+      <span class="minimal-badge"><span class="m-plus">+</span>Vision LLM</span>
+      <span class="minimal-badge"><span class="m-plus">+</span>Eval Metrics</span>
+    </div>
+    <div class="part-items">
+      <div class="part-item"><div class="pi-ch">CH08</div><div class="pi-title">검색 품질 튜닝</div></div>
+      <div class="part-item"><div class="pi-ch">CH09</div><div class="pi-title">질문 이해 강화</div></div>
+      <div class="part-item"><div class="pi-ch">CH10</div><div class="pi-title">이미지 처리 + 평가</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 비교 -->
+<div class="design-block" style="background:#f7fafc;">
+  <div class="design-title" style="font-size:15px;">각 안의 특징</div>
+  <table style="width:100%; border-collapse:collapse; font-size:13px; background:#fff;">
+    <tr style="background:rgba(0,0,0,0.04);">
+      <th style="text-align:left; padding:10px;">안</th>
+      <th style="text-align:left; padding:10px;">장점</th>
+      <th style="text-align:left; padding:10px;">단점</th>
+    </tr>
+    <tr style="border-top:1px solid #edf0f5;"><td style="padding:10px;"><b>A. 누적형</b></td><td style="padding:10px;">시스템이 쌓이는 과정 시각화, 전체 조감 가능</td><td style="padding:10px;">공간 많이 차지, 파트마다 반복되면 무거워짐</td></tr>
+    <tr style="border-top:1px solid #edf0f5;"><td style="padding:10px;"><b>B. D2 스타일</b></td><td style="padding:10px;">그림 1-6과 톤 일치, 책 전체 일관성</td><td style="padding:10px;">여전히 가로 플로우 반복</td></tr>
+    <tr style="border-top:1px solid #edf0f5;"><td style="padding:10px;"><b>C. 미니멀 배지</b></td><td style="padding:10px;">가장 깔끔, 공간 효율, 색으로 기술 종류 구분</td><td style="padding:10px;">시스템 흐름·구조는 안 보임</td></tr>
+  </table>
+</div>
+
+</div>
+</body>
+</html>

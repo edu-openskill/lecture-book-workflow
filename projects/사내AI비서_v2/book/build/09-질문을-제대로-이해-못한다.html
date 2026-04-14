@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>챕터 9 질문을 제대로 이해 못한다. HyDE와 Multi-Query</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/book.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+
+
+<script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
+
+</head>
+<body>
+<div class="container">
+<h1>챕터 9 질문을 제대로 이해 못한다. HyDE와 Multi-Query</h1>
+<div class="goal-box">
+<p><strong>이번 챕터가 끝나면</strong></p>
+<ul>
+<li><strong>Parent Document Retriever</strong>로 조각이 아닌 원본 문서 전체를 참고하게 합니다</li>
+<li><strong>Contextual Compression</strong>으로 검색 결과에서 핵심 문장만 압축합니다</li>
+<li><strong>HyDE(Hypothetical Document Embeddings)</strong> 로 &quot;상상 답변을 먼저 만들어 검색&quot;합니다</li>
+<li><strong>Multi-Query</strong>로 하나의 질문을 여러 관점으로 풀어 재현율을 올립니다</li>
+<li><strong>약어, 동의어 확장</strong>으로 &quot;WFH&quot; ↔ &quot;재택근무&quot; 같은 단어 차이를 흡수합니다</li>
+</ul>
+</div>
+<div class="prep-section-md">
+<p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
+<h3>1. 실습 폴더 이동</h3>
+<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div>cd rag-start/ex09</div>
+<p>파일 구조는 다음과 같습니다.</p>
+<div class="code-block" data-lang="text"><div class="cb-title">ex09 디렉토리</div>ex09/
+└── tuning/
+    ├── step1_advanced_retriever/   # [실습] Parent Doc / Compression
+    │   ├── __main__.py
+    │   ├── retrievers.py
+    │   ├── experiments.py
+    │   └── data.py
+    └── step2_query_rewrite/        # [실습] HyDE / Multi-Query / 약어 확장
+        ├── __main__.py
+        ├── rewriters.py
+        ├── experiments.py
+        └── data.py</div>
+<h3>2. 실습 환경 구축</h3>
+<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div>cd ex09
+python3.12 -m venv .venv
+source .venv/bin/activate
+ollama pull llama3.1:8b
+pip install -r requirements.txt</div>
+<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div>cd ex09
+py -3.12 -m venv .venv
+.venv\Scripts\activate
+ollama pull llama3.1:8b
+pip install -r requirements.txt</div>
+<h3>3. 사용할 라이브러리</h3>
+<table>
+<thead>
+<tr>
+<th>패키지</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>langchain</code></td>
+<td>Retriever 인터페이스·LCEL</td>
+</tr>
+<tr>
+<td><code>langchain-community</code></td>
+<td>ParentDocumentRetriever, MultiQueryRetriever</td>
+</tr>
+<tr>
+<td><code>langchain-ollama</code></td>
+<td>LLM 연결 (쿼리 재작성용)</td>
+</tr>
+<tr>
+<td><code>langchain-chroma</code> · <code>chromadb</code></td>
+<td>벡터 DB</td>
+</tr>
+</tbody>
+</table>
+<h3>4. 실습 순서</h3>
+<ol>
+<li><code>python -m tuning.step1_advanced_retriever</code>. Parent Doc, Compression</li>
+<li><code>python -m tuning.step2_query_rewrite</code>. HyDE, Multi-Query, 약어 확장</li>
+</ol>
+</div>
+<h2>9.1 &quot;휴가&quot;라고 물었는데 &quot;연차유급휴가&quot;를 못 찾는다</h2>
+<div class="chapter-image gemini"><img src="./assets/CH09/gemini/09_chapter-opening.png" alt="" /><div class="caption">그림 9-1. 질문 해석 튜닝. 질문을 바꾸고 결과를 가공해 검색의 앞뒤를 매만집니다</div></div>
+<p>챕터 8에서 검색 엔진 자체를 튜닝했습니다. 청킹, 리랭커, 하이브리드. 검색 정확도가 꽤 올랐어요. 동료가 다시 테스트합니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "휴가 규정 알려줘."</div>
+<p>답변이 이상했습니다. &quot;복리후생 안내&quot; 문서의 단편이 나왔고, 정작 찾고 싶던 <strong>취업규칙 제15조 연차유급휴가</strong>는 빠졌어요. 문서에는 &quot;연차유급휴가&quot;라고 적혀 있고 동료는 &quot;휴가&quot;라고 물었습니다. <strong>같은 뜻인데 단어가 다른</strong> 상황입니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "WFH 정책이 뭐야?"</div>
+<p><em>&quot;관련 문서를 찾지 못했습니다.&quot;</em></p>
+<p>문서에는 &quot;재택근무&quot;라고 적혀 있습니다. WFH → 재택근무를 연결하지 못한 것이죠. 챕터 8에서 푼 건 <strong>&quot;어떤 문서를 가져오느냐&quot;</strong> 였습니다. 지금 문제는 다릅니다. <strong>검색 엔진이 잘 돌아도 질문을 이해 못 하면 소용이 없어요.</strong></p>
+<h2>9.2 사서의 언어 능력을 키운다</h2>
+<p>챕터 8의 사서는 서가 정리 법을 배웠습니다. 이번 챕터의 사서는 <strong>언어 능력</strong>을 키웁니다.</p>
+<p><strong>첫째, 단어를 번역합니다.</strong> &quot;쉬는 날&quot; → &quot;연차유급휴가&quot;. <strong>약어, 동의어 확장</strong>입니다.</p>
+<p><strong>둘째, 답을 먼저 상상합니다.</strong> &quot;쉬는 날 규정이라면… 1년 근속 시 15일 유급휴가 같은 내용이겠지.&quot; 그 상상한 답과 비슷한 실제 문서를 찾습니다. <strong>HyDE(Hypothetical Document Embeddings)</strong>. 질문이 아니라 <strong>상상 답변</strong>으로 검색.</p>
+<p><strong>셋째, 질문을 여러 갈래로 바꿉니다.</strong> &quot;휴가 규정&quot; → &quot;연차 사용 방법&quot;, &quot;유급휴가 일수&quot;, &quot;휴가 신청 절차&quot;. 각각 검색 후 합집합. <strong>Multi-Query</strong>.</p>
+<p><strong>넷째, 찾은 조각의 원본 전체를 꺼냅니다.</strong> &quot;연차 신청은 3일 전 서면&quot; 같은 짧은 청크가 걸리면, 그 청크가 속한 원 문서(제15~16조) 전체를 반환. <strong>Parent Document Retriever</strong>.</p>
+<p><strong>다섯째, 긴 결과를 압축합니다.</strong> 검색된 문서에서 질문과 관련된 문장만 추려 LLM에 넘깁니다. <strong>Contextual Compression</strong>.</p>
+<div class="chapter-image gemini"><img src="./assets/CH09/gemini/09_librarian-growth.png" alt="" /><div class="caption">그림 9-2. 챕터 8이 서가 정리였다면, 챕터 9는 사서의 언어, 요약 능력입니다</div></div>
+<h2>9.3 이번 챕터의 두 묶음</h2>
+<p><strong>검색 후 결과 가공</strong> (Step 1). Parent Doc, Compression
+<strong>검색 전 질의 변환</strong> (Step 2). HyDE, Multi-Query, 약어 확장</p>
+<div class="chapter-image diagram"><img src="./assets/CH09/diagram/09_ch08-vs-ch09.png" alt="" /><div class="caption">그림 9-3. 챕터 8은 검색 엔진 자체, 챕터 9는 질문, 결과를 가공하는 층</div></div>
+<h2>9.4 실습 1: Parent Document Retriever (step1)</h2>
+<p>작은 청크로 검색하되, LLM에게는 그 청크가 속한 <strong>부모 문서 전체</strong>를 넘깁니다. 정확도(작은 청크)와 맥락(큰 문서)의 장점을 동시에 취합니다.</p>
+<div class="code-block" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_advanced_retriever/retrievers.py. ParentDocumentRetriever</div>from langchain.retrievers import ParentDocumentRetriever
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+def build_parent_retriever(vectorstore, docstore) -&gt; ParentDocumentRetriever:
+    # 작은 청크(검색용): 400자
+    child_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
+    # 큰 청크(반환용): 2000자
+    parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
+
+    return ParentDocumentRetriever(
+        vectorstore=vectorstore,
+        docstore=docstore,
+        child_splitter=child_splitter,
+        parent_splitter=parent_splitter,
+    )</div>
+<p><code>docstore</code>는 부모 문서를 id로 저장해 두는 in-memory 저장소입니다. 벡터 DB는 자식 청크를 가지고 있고, 검색 시 자식의 <code>parent_id</code>로 원본을 꺼내 반환합니다.</p>
+<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1 실행</div>python -m tuning.step1_advanced_retriever</div>
+<div class="chapter-image terminal"><img src="./assets/CH09/terminal/09_parent-doc.png" alt="" /><div class="caption">그림 9-4. Parent Doc. 작은 조각이 매칭돼도 반환은 큰 맥락 단위로 돌아옵니다</div></div>
+<p>이어지는 <strong>Contextual Compression</strong>은 검색된 큰 문서에서 질문과 무관한 부분을 LLM이 잘라내 줍니다. 토큰 비용이 줄고 LLM이 핵심에 집중합니다.</p>
+<div class="chapter-image terminal"><img src="./assets/CH09/terminal/09_compression.png" alt="" /><div class="caption">그림 9-5. Compression 후. 관련 문장만 남아 프롬프트가 가벼워집니다</div></div>
+<h2>9.5 실습 2: HyDE / Multi-Query / 약어 확장 (step2)</h2>
+<h3>HyDE: 상상 답변으로 검색</h3>
+<p>질문 대신 <strong>&quot;이 질문에 어울릴 법한 답변&quot;</strong> 을 LLM에 먼저 생성시키고, 그 가상 답변을 임베딩해 검색합니다. 답변과 답변 간 거리가 질문-답변 거리보다 가까운 경우가 많기 때문입니다.</p>
+<div class="code-block" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> tuning/step2_query_rewrite/rewriters.py. HyDE</div>from langchain.prompts import PromptTemplate
+
+HYDE_PROMPT = PromptTemplate.from_template(
+    "다음 질문에 대한 가상의 회사 규정 조항을 3~4문장으로 작성하세요.\n질문: {question}"
+)
+
+def hyde_retrieve(question: str, llm, vectorstore, k: int = 5):
+    hypothetical = llm.invoke(HYDE_PROMPT.format(question=question)).content
+    # 실제 검색은 원 질문이 아니라 가상 답변으로 진행
+    return vectorstore.similarity_search(hypothetical, k=k)</div>
+<div class="chapter-image terminal"><img src="./assets/CH09/terminal/09_hyde.png" alt="" /><div class="caption">그림 9-6. HyDE 적용 전/후. 상상 답변과의 유사도가 원 질문보다 높은 청크를 찾아옵니다</div></div>
+<h3>Multi-Query: 질문을 여러 갈래로</h3>
+<p>LLM에게 &quot;이 질문을 다른 표현으로 3가지 만들어 줘&quot;라고 시킨 뒤, 각 표현으로 따로 검색하고 합집합을 만듭니다. 단일 질문의 어휘 다양성 한계를 흡수합니다.</p>
+<div class="code-block" data-lang="python"><div class="cb-title">tuning/step2_query_rewrite/rewriters.py. MultiQuery</div>from langchain.retrievers.multi_query import MultiQueryRetriever
+
+multi_q = MultiQueryRetriever.from_llm(retriever=base_retriever, llm=llm)
+docs = multi_q.get_relevant_documents("휴가 규정 알려줘")</div>
+<div class="chapter-image terminal"><img src="./assets/CH09/terminal/09_multi-query.png" alt="" /><div class="caption">그림 9-7. 하나의 질문이 3개의 재작성으로 확장되어 각각 검색됩니다</div></div>
+<h3>약어, 동의어 확장</h3>
+<p>사내 용어 사전을 하나 만들어 두고, 질문에 약어가 포함되면 원 표현으로 치환합니다.</p>
+<div class="code-block" data-lang="python"><div class="cb-title">tuning/step2_query_rewrite/rewriters.py. 약어 확장</div>COMPANY_GLOSSARY = {
+    "WFH": "재택근무",
+    "PTO": "연차유급휴가",
+    "OT": "초과근무",
+}
+
+def expand_abbreviations(question: str) -&gt; str:
+    for abbr, full in COMPANY_GLOSSARY.items():
+        question = question.replace(abbr, f"{abbr}({full})")
+    return question</div>
+<div class="chapter-image terminal"><img src="./assets/CH09/terminal/09_abbreviation.png" alt="" /><div class="caption">그림 9-8. &quot;WFH&quot; → &quot;WFH(재택근무)&quot;로 확장된 뒤 관련 문서가 잡힙니다</div></div>
+<h2>9.6 Self-Query Retriever: 메타데이터 필터를 LLM이 채우기</h2>
+<p>&quot;2025년 인사팀 문서만&quot; 같은 조건이 섞인 질문에서 LLM이 <strong>메타데이터 필터</strong>(<code>department=인사팀</code>, <code>year=2025</code>)를 자동으로 추출하게 할 수 있습니다. Self-Query Retriever가 LLM을 호출해 쿼리에서 조건을 뽑아 벡터 검색의 <code>where</code> 절에 심어 줍니다.</p>
+<div class="chapter-image terminal"><img src="./assets/CH09/terminal/09_self-query.png" alt="" /><div class="caption">그림 9-9. Self-Query. LLM이 &quot;2025년 인사팀&quot;이라는 조건을 메타데이터 필터로 변환합니다</div></div>
+<h2>9.7 종합 비교</h2>
+<div class="chapter-image diagram"><img src="./assets/CH09/diagram/09_sequence-pipeline.png" alt="" /><div class="caption">그림 9-10. 챕터 9 파이프라인. 질문을 변환(확장, 재작성, HyDE)한 뒤 검색하고, 결과를 가공(Parent, Compression)해 LLM에 넘깁니다</div></div>
+<p>동료가 다시 테스트했습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "WFH 정책이 뭐야?"</div>
+<p>&quot;재택근무&quot; 문서를 정확히 가져와 답변합니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "쉬는 날 규정 알려줘."</div>
+<p>취업규칙 제15조 연차유급휴가 원본 문서 전체를 근거로 답합니다.</p>
+<h2>9.8 전체 구성도에서 챕터 9의 자리</h2>
+<div class="arch-fullmap">
+  <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 9 튜닝 대상</div>
+  <div class="afm-row afm-user">
+    <div class="afm-box afm-faint afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">대시보드</span>
+    <div class="afm-row">
+      <div class="afm-box afm-faint"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 6+7</span>
+    <span class="afm-zone-label">오케스트레이션 + 운영</span>
+    <div class="afm-row afm-three">
+      <div class="afm-box afm-faint"><div class="afm-label">Query Router</div><div class="afm-sub">규칙·스키마·LLM</div></div>
+      <div class="afm-box afm-faint"><div class="afm-label">ConnectHRAgent</div><div class="afm-sub">ReAct + 캐시</div></div>
+      <div class="afm-box afm-faint"><div class="afm-label">MCP Tools</div><div class="afm-sub">DB · 문서</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 5</span>
+    <span class="afm-zone-label">검색 (실시간)</span>
+    <div class="afm-row">
+      <div class="afm-box afm-on"><div class="afm-tag">챕터 9 질의/결과 튜닝</div><div class="afm-label">LCEL Chain</div><div class="afm-sub">HyDE · Multi-Query · Parent Doc · Compression</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 4</span>
+    <span class="afm-zone-label">파싱·벡터화 (오프라인)</span>
+    <div class="afm-row afm-three">
+      <div class="afm-box afm-faint afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
+      <div class="afm-box afm-faint"><div class="afm-label">Doc Pipeline</div><div class="afm-sub">파싱·청킹·임베딩</div></div>
+      <div class="afm-box afm-faint"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">데이터</span>
+    <div class="afm-row">
+      <div class="afm-box afm-faint"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
+    </div>
+  </div>
+  <div class="afm-row afm-ext">
+    <div class="afm-box afm-faint afm-dashed"><div class="afm-label">Ollama LLM (외부)</div></div>
+  </div>
+  <div class="afm-note">
+    챕터 9는 LCEL Chain의 <b>입구(쿼리 변환)</b> 와 <b>출구(결과 가공)</b> 를 다듬었습니다. 같은 ChromaDB, 같은 문서인데 질문 해석력이 올라가 체감 품질이 크게 개선됩니다. 챕터 10에서는 텍스트로 못 잡는 <b>이미지, 표</b> 영역을 Vision LLM으로 공략합니다.
+  </div>
+</div>
+<h2>용어 정리</h2>
+<table>
+<thead>
+<tr>
+<th>본문 속 표현</th>
+<th>진짜 용어</th>
+<th>정식 정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;단어를 번역&quot;</td>
+<td><strong>약어·동의어 확장</strong></td>
+<td>사내 용어 사전을 이용해 약어를 원 표현으로 치환</td>
+</tr>
+<tr>
+<td>&quot;답을 먼저 상상&quot;</td>
+<td><strong>HyDE</strong></td>
+<td>질문에 대한 가상 답변을 LLM이 먼저 생성하고, 그 답변으로 검색</td>
+</tr>
+<tr>
+<td>&quot;여러 갈래로 물어보기&quot;</td>
+<td><strong>Multi-Query</strong></td>
+<td>한 질문을 LLM이 여러 표현으로 재작성해 각각 검색 후 합집합</td>
+</tr>
+<tr>
+<td>&quot;원본 문서 전체 꺼내기&quot;</td>
+<td><strong>Parent Document Retriever</strong></td>
+<td>작은 청크로 검색하되 반환은 큰 부모 문서 단위</td>
+</tr>
+<tr>
+<td>&quot;핵심 문장만 추리기&quot;</td>
+<td><strong>Contextual Compression</strong></td>
+<td>검색된 문서에서 질문과 무관한 부분을 LLM이 제거</td>
+</tr>
+<tr>
+<td>&quot;조건을 필터로 변환&quot;</td>
+<td><strong>Self-Query Retriever</strong></td>
+<td>LLM이 질문에서 메타데이터 조건을 뽑아 <code>where</code> 필터로 심음</td>
+</tr>
+</tbody>
+</table>
+<div class="remember">
+<p><strong>이것만은 기억하자</strong></p>
+<ul>
+<li><strong>검색의 앞뒤를 다듬으면 같은 엔진이 더 똑똑해집니다.</strong> 챕터 8이 엔진 자체를 바꿨다면 챕터 9는 입력(쿼리)과 출력(결과)을 가공합니다. 인프라 변경 없이 체감 품질이 가장 크게 오르는 구간입니다.</li>
+<li><strong>약어, 동의어 사전은 무조건 만드세요.</strong> 사내 용어는 공식 문서와 일상 표현이 다릅니다. &quot;WFH ↔ 재택근무&quot; 같은 매핑 한 줄이 실패 질문을 크게 줄여 줍니다.</li>
+<li><strong>Parent Doc + Compression 조합이 안정적입니다.</strong> 정확도는 작은 청크, 맥락은 부모 문서, 프롬프트 비용은 압축으로 잡는 전략입니다. 챕터 10에서는 텍스트로 못 잡는 이미지, 표 영역을 다룹니다.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

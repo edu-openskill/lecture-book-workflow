@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CH01 v3 — 아키텍처 여정</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f0f1a; color: #e0e0e0;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    line-height: 2.0; padding: 40px 20px;
+  }
+  .container { max-width: 760px; margin: 0 auto; }
+
+  h1 { color: #fff; font-size: 28px; margin: 40px 0 8px; }
+  h1 .num { color: #f78c6c; }
+  .chapter-sub { color: #888; font-size: 15px; margin-bottom: 24px; }
+  h2 { color: #e0e0e0; font-size: 21px; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  h3 { color: #c3e88d; font-size: 17px; margin: 32px 0 12px; }
+  p { margin-bottom: 16px; font-size: 16px; }
+
+  /* ===== 아키텍처 여정 지도 ===== */
+  .arch-map {
+    background: linear-gradient(135deg, #0d1117, #161b22);
+    border: 1px solid rgba(130,170,255,0.12);
+    border-radius: 16px; padding: 28px; margin: 24px 0 32px;
+    position: relative; overflow: hidden;
+  }
+  .arch-map::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(247,140,108,0.06), transparent);
+    border-radius: 50%;
+  }
+  .arch-title {
+    color: #82aaff; font-size: 14px; font-weight: bold;
+    margin-bottom: 4px; letter-spacing: 1px; position: relative;
+  }
+  .arch-subtitle { color: #555; font-size: 12px; margin-bottom: 20px; }
+
+  /* 아키텍처 레이어 */
+  .arch-layer {
+    display: flex; align-items: stretch; gap: 8px;
+    margin: 8px 0; position: relative;
+  }
+  .arch-layer-label {
+    writing-mode: vertical-rl; text-orientation: mixed;
+    font-size: 10px; color: #444; letter-spacing: 1px;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 20px; padding: 4px 0;
+  }
+  .arch-nodes { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; }
+
+  .arch-node {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 10px 14px;
+    flex: 1; min-width: 100px; text-align: center;
+    transition: all 0.3s;
+  }
+  .arch-node .n-icon { font-size: 20px; filter: grayscale(1) opacity(0.3); }
+  .arch-node .n-name { font-size: 12px; color: #555; margin-top: 4px; font-weight: bold; }
+  .arch-node .n-tech { font-size: 10px; color: #333; margin-top: 2px; }
+  .arch-node .n-ch { font-size: 9px; color: #333; margin-top: 4px; }
+
+  /* 현재 챕터 하이라이트 */
+  .arch-node.active {
+    background: rgba(247,140,108,0.1);
+    border-color: rgba(247,140,108,0.4);
+    box-shadow: 0 0 20px rgba(247,140,108,0.08);
+  }
+  .arch-node.active .n-icon { filter: none; }
+  .arch-node.active .n-name { color: #f78c6c; }
+  .arch-node.active .n-tech { color: #888; }
+  .arch-node.active .n-ch { color: #f78c6c; }
+
+  /* 화살표 */
+  .arch-arrow {
+    text-align: center; color: #2a2a3a; font-size: 16px;
+    margin: 2px 0; padding-left: 28px;
+  }
+
+  /* 범례 */
+  .arch-legend {
+    display: flex; gap: 16px; margin-top: 16px; padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #555; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+  .legend-dot.on { background: rgba(247,140,108,0.5); border: 1px solid #f78c6c; }
+  .legend-dot.off { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* 목표 선언 */
+  .goal-box {
+    background: rgba(195,232,141,0.08); border-left: 3px solid #c3e88d;
+    border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 20px 0;
+  }
+  .goal-box .gl { color: #c3e88d; font-weight: bold; font-size: 14px; margin-bottom: 6px; }
+  .goal-box ul { padding-left: 20px; color: #b0b0b0; }
+
+  /* 대사/독백 */
+  .dialogue { margin: 16px 0; }
+  .speaker { color: #82aaff; font-weight: bold; }
+  .thought { color: #c792ea; font-style: italic; margin: 16px 0; }
+  .term { color: #f78c6c; font-weight: bold; }
+
+  /* 코드블록 */
+  .code-block {
+    background: #1a1b26; border-radius: 8px; padding: 16px 20px;
+    margin: 16px 0; font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px; line-height: 1.7; overflow-x: auto;
+    border-left: 3px solid #7aa2f7;
+  }
+  .cb-title {
+    font-family: sans-serif; font-size: 12px; color: #565f89;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .badge { background: rgba(122,162,247,0.15); color: #7aa2f7; padding: 1px 8px; border-radius: 4px; font-size: 11px; }
+  .cm { color: #565f89; } .kw { color: #bb9af7; } .st { color: #9ece6a; } .nb { color: #ff9e64; } .fn { color: #7aa2f7; }
+
+  /* 결과 박스 */
+  .result { background: #1a1b26; border-radius: 8px; padding: 16px 20px; margin: 16px 0; font-size: 14px; color: #a9b1d6; }
+  .result.fail { border-left: 3px solid #f7768e; }
+  .result.fail .rl { color: #f7768e; font-weight: bold; font-size: 13px; margin-bottom: 8px; }
+  .result.ok { border-left: 3px solid #9ece6a; }
+  .result.ok .rl { color: #9ece6a; font-weight: bold; font-size: 13px; margin-bottom: 8px; }
+
+  /* 도식 */
+  .diagram {
+    background: linear-gradient(135deg, rgba(15,15,30,0.9), rgba(20,20,45,0.9));
+    border: 1px solid rgba(130,170,255,0.12);
+    border-radius: 12px; padding: 24px; margin: 24px 0;
+  }
+  .diagram-title { color: #7aa2f7; font-size: 13px; font-weight: bold; margin-bottom: 16px; }
+
+  .compare-flow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .flow-col { background: rgba(255,255,255,0.02); border-radius: 8px; padding: 16px; border: 1px solid rgba(255,255,255,0.05); }
+  .flow-col.bad { border-color: rgba(247,118,142,0.2); }
+  .flow-col.good { border-color: rgba(158,206,106,0.2); }
+  .flow-col .fl { font-size: 13px; font-weight: bold; margin-bottom: 12px; }
+  .flow-col.bad .fl { color: #f7768e; }
+  .flow-col.good .fl { color: #9ece6a; }
+  .flow-step { background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px 12px; margin: 6px 0; font-size: 13px; text-align: center; color: #a9b1d6; }
+
+  /* RAG 파이프라인 */
+  .rag-pipeline { display: flex; align-items: stretch; gap: 4px; justify-content: center; flex-wrap: wrap; }
+  .rag-step { flex: 1; min-width: 130px; max-width: 200px; background: rgba(122,162,247,0.08); border: 1px solid rgba(122,162,247,0.2); border-radius: 10px; padding: 16px 12px; text-align: center; }
+  .rag-step .s-num { color: #7aa2f7; font-size: 28px; font-weight: bold; }
+  .rag-step .s-title { color: #e0e0e0; font-size: 14px; font-weight: bold; margin: 8px 0 4px; }
+  .rag-step .s-desc { color: #888; font-size: 12px; line-height: 1.5; }
+  .rag-arrow { display: flex; align-items: center; color: #444; font-size: 24px; padding: 0 4px; }
+
+  /* GEMINI 플레이스홀더 */
+  .gemini {
+    background: repeating-linear-gradient(45deg, rgba(255,183,77,0.03), rgba(255,183,77,0.03) 10px, transparent 10px, transparent 20px);
+    border: 2px dashed rgba(255,183,77,0.3);
+    border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;
+  }
+  .gemini .gp-l { color: #ffb74d; font-size: 13px; font-weight: bold; margin-bottom: 8px; }
+  .gemini .gp-d { color: #888; font-size: 13px; }
+  .gemini .gp-p { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; margin-top: 12px; text-align: left; font-size: 12px; color: #a9b1d6; line-height: 1.6; }
+
+  /* 마무리 */
+  .remember { margin-top: 48px; padding: 20px; background: rgba(195,232,141,0.08); border-radius: 8px; border-left: 3px solid #c3e88d; }
+  .remember strong { color: #c3e88d; }
+  .remember .next { color: #888; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ========== 아키텍처 여정 지도 ========== -->
+<div class="arch-map">
+  <div class="arch-title">ConnectHR 아키텍처</div>
+  <div class="arch-subtitle">이번 챕터에서 만드는 부분이 주황색으로 표시됩니다</div>
+
+  <!-- 사용자 레이어 -->
+  <div class="arch-layer">
+    <div class="arch-layer-label"></div>
+    <div class="arch-nodes">
+      <div class="arch-node" style="flex:0 0 100%;">
+        <div class="n-icon">&#x1F464;</div>
+        <div class="n-name">사용자 질문</div>
+        <div class="n-tech">"신입사원 연차 규정 알려줘"</div>
+      </div>
+    </div>
+  </div>
+  <div class="arch-arrow">&#x25BC;</div>
+
+  <!-- 라우팅 레이어 -->
+  <div class="arch-layer">
+    <div class="arch-layer-label"></div>
+    <div class="arch-nodes">
+      <div class="arch-node">
+        <div class="n-icon">&#x1F6A6;</div>
+        <div class="n-name">Query Router</div>
+        <div class="n-tech">규칙 / 스키마 / LLM</div>
+        <div class="n-ch">CH06</div>
+      </div>
+    </div>
+  </div>
+  <div class="arch-arrow">&#x25BC;</div>
+
+  <!-- 처리 레이어 -->
+  <div class="arch-layer">
+    <div class="arch-layer-label" style="font-size:9px;">처리</div>
+    <div class="arch-nodes">
+      <div class="arch-node active">
+        <div class="n-icon">&#x1F50D;</div>
+        <div class="n-name">RAG 파이프라인</div>
+        <div class="n-tech">Retriever → LLM</div>
+        <div class="n-ch">CH01 · 04 · 05</div>
+      </div>
+      <div class="arch-node">
+        <div class="n-icon">&#x1F5C3;</div>
+        <div class="n-name">MCP 도구</div>
+        <div class="n-tech">DB 조회 · API 호출</div>
+        <div class="n-ch">CH06</div>
+      </div>
+      <div class="arch-node">
+        <div class="n-icon">&#x1F916;</div>
+        <div class="n-name">ReAct Agent</div>
+        <div class="n-tech">Think → Act → Observe</div>
+        <div class="n-ch">CH06 · 07</div>
+      </div>
+    </div>
+  </div>
+  <div class="arch-arrow">&#x25BC;</div>
+
+  <!-- 데이터 레이어 -->
+  <div class="arch-layer">
+    <div class="arch-layer-label" style="font-size:9px;">데이터</div>
+    <div class="arch-nodes">
+      <div class="arch-node active">
+        <div class="n-icon">&#x1F9F2;</div>
+        <div class="n-name">Vector DB</div>
+        <div class="n-tech">ChromaDB · 임베딩</div>
+        <div class="n-ch">CH01 · 04</div>
+      </div>
+      <div class="arch-node">
+        <div class="n-icon">&#x1F4C4;</div>
+        <div class="n-name">문서 파이프라인</div>
+        <div class="n-tech">파싱 → 청킹 → 임베딩</div>
+        <div class="n-ch">CH03 · 04</div>
+      </div>
+      <div class="arch-node">
+        <div class="n-icon">&#x1F5C4;</div>
+        <div class="n-name">PostgreSQL</div>
+        <div class="n-tech">직원 · 연차 · 매출</div>
+        <div class="n-ch">CH02</div>
+      </div>
+    </div>
+  </div>
+  <div class="arch-arrow">&#x25BC;</div>
+
+  <!-- LLM 레이어 -->
+  <div class="arch-layer">
+    <div class="arch-layer-label" style="font-size:9px;">추론</div>
+    <div class="arch-nodes">
+      <div class="arch-node active">
+        <div class="n-icon">&#x1F9E0;</div>
+        <div class="n-name">LLM</div>
+        <div class="n-tech">Ollama · DeepSeek-R1</div>
+        <div class="n-ch">CH01</div>
+      </div>
+      <div class="arch-node">
+        <div class="n-icon">&#x26A1;</div>
+        <div class="n-name">캐시 · 모니터링</div>
+        <div class="n-tech">ResponseCache · TokenTracker</div>
+        <div class="n-ch">CH07</div>
+      </div>
+      <div class="arch-node">
+        <div class="n-icon">&#x1F527;</div>
+        <div class="n-name">튜닝</div>
+        <div class="n-tech">리랭킹 · HyDE · 평가</div>
+        <div class="n-ch">CH08 · 09 · 10</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 범례 -->
+  <div class="arch-legend">
+    <div class="legend-item"><div class="legend-dot on"></div> 이번 챕터에서 만드는 부분</div>
+    <div class="legend-item"><div class="legend-dot off"></div> 아직 만들지 않은 부분</div>
+  </div>
+</div>
+
+<!-- ========== 챕터 시작 ========== -->
+<h1><span class="num">Ch.1</span> AI한테 물어봤더니 거짓말을 합니다</h1>
+<p class="chapter-sub">환각, 컨텍스트 주입, RAG의 기본 원리</p>
+
+<div class="goal-box">
+  <div class="gl">이번 챕터가 끝나면</div>
+  <ul>
+    <li>LLM은 모르는 것을 자신 있게 지어낸다는 걸 직접 확인합니다</li>
+    <li>문서를 건네주면 거짓말을 멈추는 이유를 이해합니다</li>
+    <li>이걸 자동화한 RAG 파이프라인을 직접 만들어봅니다</li>
+  </ul>
+</div>
+
+<!-- ===== 1.1 ===== -->
+<h2>1.1 그럴듯한 거짓말</h2>
+
+<p>입사 3일 차.</p>
+
+<p>오픈이는 모니터 앞에서 턱을 괴고 있었습니다. 인사팀에서 넘어온 메일이 화면을 채우고 있었습니다. "직원들이 회사 규정을 쉽게 물어볼 수 있는 AI 비서, 프로토타입 가능할까요?" 금요일까지. 이틀 남았습니다.</p>
+
+<p>팀장이 커피를 들고 다가왔습니다.</p>
+
+<div class="dialogue">
+  <span class="speaker">팀장</span>: "어제 ChatGPT한테 우리 회사 연차 규정 물어봤거든. 그럴듯하게 대답하더라. 근데 틀렸어."
+</div>
+
+<p class="thought">*ChatGPT도 뭐든 대답하잖아. 그냥 물어보면 되는 거 아니야?*</p>
+
+<p>정말 틀리는지 직접 확인해보겠습니다. Ollama라는 도구를 쓰면 내 컴퓨터에서 LLM을 돌릴 수 있어요. deepseek-r1이라는 8B 파라미터짜리 모델을 올려두었습니다.</p>
+
+<div class="code-block">
+  <div class="cb-title"><span class="badge">실습</span> step1_fail.py — LLM 단독 호출로 환각 체험</div>
+<span class="kw">from</span> langchain_ollama <span class="kw">import</span> ChatOllama
+<span class="kw">from</span> rich.console <span class="kw">import</span> Console
+
+console = Console()
+
+<span class="cm"># 1. Ollama에서 deepseek-r1:8b 모델을 로드</span>
+llm = ChatOllama(model=<span class="st">"deepseek-r1:8b"</span>, temperature=<span class="nb">0</span>)
+
+question = <span class="st">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+
+<span class="cm"># 2. 질문 출력 → LLM 호출 → 답변 출력</span>
+console.print(<span class="st">f"[bold]질문:[/bold] {question}\n"</span>)
+response = llm.<span class="fn">invoke</span>(question)
+console.print(<span class="st">f"[bold]답변:[/bold]\n{response.content}"</span>)
+</div>
+
+<p><code>temperature=0</code>은 "가장 확률 높은 답변만 내놓아라"라는 설정입니다. 창의성을 낮추면 정확해지지 않을까 기대하면서 엔터를 눌렀습니다.</p>
+
+<div class="result fail">
+  <div class="rl">실행 결과 — 환각</div>
+  <strong>질문:</strong> 우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?<br><br>
+  <strong>답변:</strong> 커넥트 사의 신입사원 연차 발생 규정은 근로기준법 제60조에 따라 입사 후 1년간 매월 1일의 유급휴가가 발생하며...
+</div>
+
+<p>오픈이는 인사팀에서 받은 실제 규정집을 열어봤습니다. 첫 줄부터 달랐습니다.</p>
+
+<!-- 비교 도식 -->
+<div class="diagram">
+  <div class="diagram-title">LLM의 답변 vs 실제 규정</div>
+  <div class="compare-flow">
+    <div class="flow-col bad">
+      <div class="fl">LLM의 답변 (환각)</div>
+      <div class="flow-step">근로기준법 제60조 적용</div>
+      <div class="flow-step">입사 후 매월 1일 유급휴가</div>
+      <div class="flow-step">1년 근속 시 15일 연차</div>
+      <div class="flow-step" style="background:rgba(247,118,142,0.1); color:#f7768e;">&#10005; 전부 지어낸 내용</div>
+    </div>
+    <div class="flow-col good">
+      <div class="fl">커넥트 실제 규정</div>
+      <div class="flow-step">입사 후 3년간 연차 없음</div>
+      <div class="flow-step">매월 1회 리프레시 데이 (유급)</div>
+      <div class="flow-step">3년 근속 시 30일 일시 발생</div>
+      <div class="flow-step" style="background:rgba(158,206,106,0.1); color:#9ece6a;">&#10003; 커넥트만의 파격 규정</div>
+    </div>
+  </div>
+</div>
+
+<p>이 현상을 <span class="term">환각(Hallucination)</span>이라고 합니다. 유령의 집에 들어가면 귀신이 진짜처럼 보이잖아요? 하지만 조명이 켜지면 전부 마네킹입니다. AI의 답변도 같습니다. 형식은 완벽한데 내용은 허구예요.</p>
+
+<!-- ===== 1.2 ===== -->
+<h2>1.2 교재를 펼쳐놓으면</h2>
+
+<p>팀장이 힌트를 줬습니다.</p>
+
+<div class="dialogue">
+  <span class="speaker">팀장</span>: "전부 외우게 하지 말고, 필요한 문서만 찾아서 읽게 해."
+</div>
+
+<p>오픈북 시험이 떠올랐습니다. 교재를 옆에 펼쳐놓고 답을 찾는 방식. AI한테도 교재를 직접 건네주면 되지 않을까요?</p>
+
+<div class="code-block">
+  <div class="cb-title"><span class="badge">실습</span> step2_context.py — 컨텍스트 직접 주입</div>
+<span class="kw">from</span> langchain_ollama <span class="kw">import</span> ChatOllama
+<span class="kw">from</span> rich.console <span class="kw">import</span> Console
+
+console = Console()
+llm = ChatOllama(model=<span class="st">"deepseek-r1:8b"</span>, temperature=<span class="nb">0</span>)
+
+<span class="cm"># 1. 실제 사내 규정을 변수에 담는다</span>
+context_data = <span class="st">"""
+[커넥트 취업규칙]
+1. 신입사원은 입사 후 3년 동안은 연차가 없다.
+2. 대신 매월 1회 '리프레시 데이'를 유급으로 제공한다.
+3. 3년 근속 시 30일의 연차가 일시에 발생한다.
+"""</span>
+
+question = <span class="st">"우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?"</span>
+
+<span class="cm"># 2. 규정 문서를 프롬프트에 직접 넣어서 전달</span>
+prompt = <span class="st">f"""
+아래 [참고 정보]를 보고 질문에 답해줘.
+[참고 정보]
+{context_data}
+
+질문: {question}
+"""</span>
+
+console.print(<span class="st">f"[bold]질문:[/bold] {question}\n"</span>)
+response = llm.<span class="fn">invoke</span>(prompt)
+console.print(<span class="st">f"[bold]답변:[/bold]\n{response.content}"</span>)
+</div>
+
+<div class="result ok">
+  <div class="rl">실행 결과 — 정확</div>
+  <strong>답변:</strong> 커넥트의 신입사원은 입사 후 3년 동안은 법정 연차가 발생하지 않습니다. 대신 매월 1회 유급 '리프레시 데이'가 제공됩니다.
+</div>
+
+<p>규정집과 정확히 일치합니다. 이걸 <span class="term">컨텍스트 주입(Context Injection)</span>이라고 해요. 시험지 옆에 교재를 펼쳐놓는 원리입니다.</p>
+
+<!-- ===== 1.3 ===== -->
+<h2>1.3 사서가 필요합니다</h2>
+
+<p>그런데 지금은 규정 하나를 직접 복사해서 넣었잖아요. 사내 문서가 수십 개인데, 매번 손으로 찾아서 넣을 수는 없습니다.</p>
+
+<div class="dialogue">
+  <span class="speaker">동료</span>: "그걸 사람이 해주면 AI가 왜 필요해?"
+</div>
+
+<p>도서관의 사서처럼, 질문이 들어오면 관련 문서를 자동으로 찾아서 LLM에 넘겨주는 구조가 필요합니다. 이게 <span class="term">RAG(Retrieval-Augmented Generation)</span>입니다.</p>
+
+<!-- RAG 파이프라인 도식 -->
+<div class="diagram">
+  <div class="diagram-title">RAG 파이프라인 — 사서가 일하는 순서</div>
+  <div class="rag-pipeline">
+    <div class="rag-step">
+      <div class="s-num">1</div>
+      <div class="s-title">문서 저장</div>
+      <div class="s-desc">문서를 벡터로 변환<br>→ ChromaDB에 저장<br><em style="color:#7aa2f7;">서가에 책 꽂기</em></div>
+    </div>
+    <div class="rag-arrow">&#x279C;</div>
+    <div class="rag-step">
+      <div class="s-num">2</div>
+      <div class="s-title">문서 검색</div>
+      <div class="s-desc">질문과 가장 비슷한<br>문서를 자동으로 찾기<br><em style="color:#7aa2f7;">사서가 책 찾기</em></div>
+    </div>
+    <div class="rag-arrow">&#x279C;</div>
+    <div class="rag-step">
+      <div class="s-num">3</div>
+      <div class="s-title">답변 생성</div>
+      <div class="s-desc">찾은 문서를 LLM에<br>넘겨서 답변 생성<br><em style="color:#7aa2f7;">AI가 읽고 답하기</em></div>
+    </div>
+  </div>
+</div>
+
+<h3>1.3.1 서가에 책 꽂기</h3>
+
+<p>사내 규정 3개를 문서로 만들고, 벡터로 변환해서 저장합니다.</p>
+
+<div class="code-block">
+  <div class="cb-title"><span class="badge">실습</span> step3_rag.py — RAG 파이프라인 (1/2: 문서 저장)</div>
+<span class="cm"># 1. 사내 규정 3개를 문서로 준비</span>
+docs = [
+    Document(page_content=<span class="st">"[인사규정] 신입사원은 입사 후 3년간 연차 없음..."</span>,
+             metadata={<span class="st">"source"</span>: <span class="st">"인사규정"</span>}),
+    Document(page_content=<span class="st">"[보안규정] 승인된 보안 USB만 사용..."</span>,
+             metadata={<span class="st">"source"</span>: <span class="st">"보안규정"</span>}),
+    Document(page_content=<span class="st">"[복지규정] 점심 무제한 법인카드..."</span>,
+             metadata={<span class="st">"source"</span>: <span class="st">"복지규정"</span>}),
+]
+
+<span class="cm"># 2. 문서를 벡터로 변환 → ChromaDB에 저장</span>
+embeddings = OllamaEmbeddings(model=<span class="st">"nomic-embed-text"</span>)
+vectorstore = Chroma.<span class="fn">from_documents</span>(documents=docs, embedding=embeddings)
+
+<span class="cm"># 3. 검색기 생성</span>
+retriever = vectorstore.<span class="fn">as_retriever</span>(search_kwargs={<span class="st">"k"</span>: <span class="nb">3</span>})
+</div>
+
+<p><code>nomic-embed-text</code>는 문서의 의미를 숫자 벡터로 바꾸는 임베딩 모델이고, ChromaDB는 이 벡터들을 저장하고 검색해주는 벡터 데이터베이스입니다. 사서에게 서가를 준 겁니다.</p>
+
+<h3>1.3.2 사서에게 질문하기</h3>
+
+<p>검색기와 LLM을 하나의 체인으로 연결합니다.</p>
+
+<div class="code-block">
+  <div class="cb-title"><span class="badge">실습</span> step3_rag.py — RAG 파이프라인 (2/2: 체인 연결)</div>
+<span class="cm"># 4. 검색기 + LLM을 체인으로 연결</span>
+llm = ChatOllama(model=<span class="st">"deepseek-r1:8b"</span>, temperature=<span class="nb">0</span>)
+qa_chain = RetrievalQA.<span class="fn">from_chain_type</span>(
+    llm=llm,
+    retriever=retriever,
+    return_source_documents=<span class="nb">True</span>,
+    chain_type_kwargs={<span class="st">"prompt"</span>: PROMPT}
+)
+
+<span class="cm"># 5. 질문 실행</span>
+result = qa_chain.<span class="fn">invoke</span>({<span class="st">"query"</span>: <span class="st">"신입사원 휴가 규정에 대해 알려줘."</span>})
+</div>
+
+<div class="result ok">
+  <div class="rl">실행 결과</div>
+  <strong>검색된 근거:</strong> [인사규정] 신입사원은 입사 후 3년간 연차 없음...<br><br>
+  <strong>AI 답변:</strong> 신입사원은 입사 후 처음 3년 동안은 법정 연차가 발생하지 않습니다. 대신 매월 1회의 유급 '리프레시 데이'를 사용할 수 있습니다.
+</div>
+
+<p>사서가 서가에서 인사규정을 찾아 AI에게 건넸고, AI는 그 문서를 읽고 정확하게 답했습니다. 아키텍처의 <strong>RAG 파이프라인</strong>과 <strong>Vector DB</strong>, <strong>LLM</strong> — 이 세 조각이 이번 챕터에서 처음 연결된 겁니다.</p>
+
+<div class="dialogue">
+  <span class="speaker">동료</span>: "오, 진짜 되네. 근데 규정이 3개밖에 없잖아."
+</div>
+
+<p>맞습니다. 지금은 더미 데이터 3개로 원리만 확인한 겁니다. 진짜 사내 문서 수십 개를 넣으려면 — 어떤 문서를 넣을지, 어떻게 자를지, 어떤 형식으로 저장할지 — 이 질문들에 먼저 답해야 합니다. 그 이야기는 CH02~04에서 합니다.</p>
+
+<!-- 마무리 -->
+<h2>이것만은 기억하자</h2>
+
+<div class="remember">
+  <p><strong>LLM은 모르는 것을 자신 있게 지어냅니다.</strong> 이걸 환각이라고 합니다.</p>
+  <p style="margin-top:8px;">문서를 직접 건네주면 해결되지만, 매번 사람이 찾아줄 수는 없습니다. RAG는 이 과정을 자동화한 구조입니다. 도서관에 사서를 앉힌 겁니다.</p>
+  <p class="next">다음 챕터에서는 이 사서가 답변할 데이터가 있는 사내 시스템을 먼저 살펴봅니다.</p>
+</div>
+
+</div>
+</body>
+</html>
