@@ -10,6 +10,145 @@
 2. `새 책 만들기` 입력
 3. STEP 순서대로 진행
 
+---
+
+## 새 책을 시작하는 방법 (HTML 미리보기 워크플로우)
+
+마크다운을 편집하면서 브라우저에서 실시간으로 결과를 보는 **HTML → PDF 파이프라인** 사용법. 스킬: [`pub-html-build`](.claude/skills/pub-html-build/SKILL.md)
+
+### 1단계. 프로젝트 골격 생성
+
+```bash
+# 레포 루트에서 실행
+bash .claude/skills/pub-html-build/scripts/init_book.sh projects/새책이름
+```
+
+생기는 구조:
+```
+projects/새책이름/
+├── chapters/                # 마크다운 챕터 (NN-제목.md)
+├── assets/                  # 이미지·다이어그램
+└── book/
+    ├── tokens.css           # 브랜드 오버라이드 (선택, 비워 두면 기본값)
+    ├── front/               # 프롤로그·머릿말
+    ├── back/                # 에필로그·부록
+    ├── build/               # HTML 산출물 (빌드 시 자동 생성)
+    └── output/              # 최종 PDF
+```
+
+### 2단계. 의존성 설치 (프로젝트별 1회)
+
+```bash
+cd projects/새책이름
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install markdown-it-py mdit-py-plugins jinja2 playwright pygments
+python -m playwright install chromium   # PDF 생성용 (HTML만 볼 거면 생략 가능)
+cd ../..
+```
+
+### 3단계. 첫 챕터 작성
+
+```bash
+# chapters/01-시작하기.md 같은 파일을 에디터로 작성
+# 커스텀 블록(:::goal, :::tip, :::remember), 코드 배지([실습 N], [터미널], [설명], [참고]),
+# HTML 컴포넌트(.lcel-pipeline, .wrapper-arch, ...)를 자유롭게 사용 가능.
+```
+
+### 4단계. 첫 빌드
+
+```bash
+# 레포 루트에서
+projects/새책이름/.venv/bin/python3 \
+  .claude/skills/pub-html-build/build_pdf_html.py \
+  --project-root projects/새책이름 --chapter 1 --html-only
+```
+
+성공 시 `projects/새책이름/book/build/01-*.html` 생성.
+
+### 5단계. 브라우저로 미리보기
+
+별도 터미널에서 HTTP 서버를 띄우고 브라우저로 접속:
+
+```bash
+projects/새책이름/.venv/bin/python3 -m http.server 8766 \
+  --bind 127.0.0.1 --directory projects/새책이름/book/build
+```
+
+브라우저에서 `http://127.0.0.1:8766/01-시작하기.html` 열기.
+
+### 6단계. 편집 ↔ 자동 재빌드 루프
+
+Claude Code 안에서 챕터 md를 Edit/Write로 수정하면 **자동으로 백그라운드 빌드**가 돌아갑니다 (2~3초). 브라우저만 새로고침하면 반영됨.
+
+훅 위치: `.claude/hooks/auto-rebuild-chapter.sh`
+설정: `.claude/settings.local.json` → `hooks.PostToolUse`
+
+파일 조건:
+- `projects/*/chapters/NN-*.md` 만 반응 (legacy 폴더 제외)
+- 다른 파일(코드·스타일 등)은 훅이 조용히 넘어감
+
+### 7단계. PDF 출력 (최종)
+
+```bash
+projects/새책이름/.venv/bin/python3 \
+  .claude/skills/pub-html-build/build_pdf_html.py \
+  --project-root projects/새책이름 --chapter 1
+# → projects/새책이름/book/output/01-*.pdf
+```
+
+모든 챕터 한 번에:
+```bash
+projects/새책이름/.venv/bin/python3 \
+  .claude/skills/pub-html-build/build_pdf_html.py \
+  --project-root projects/새책이름
+```
+
+### 브랜드 색상 바꾸기
+
+프로젝트의 `book/tokens.css`만 편집하면 전체 디자인이 따라옵니다:
+
+```css
+:root {
+  --color-accent: #2563eb;        /* 인디고 → 블루 */
+  --color-accent-bg: #dbeafe;
+  --color-accent-border: #93c5fd;
+  --color-accent-text: #1e40af;
+}
+```
+
+### 빌드 옵션 요약
+
+| 플래그 | 효과 |
+|--------|------|
+| `--project-root PATH` | 필수. 책 프로젝트 루트 |
+| `--chapter N` | 특정 챕터만 빌드 (생략 시 모든 챕터) |
+| `--html-only` | HTML만 생성, PDF 건너뛰기 |
+| `--no-pagedjs` | Chromium 기본 인쇄로 PDF 생성 (Paged.js 생략, 빠름) |
+
+### 스킬이 제공하는 자산
+
+```
+.claude/skills/pub-html-build/
+├── SKILL.md                      # 스킬 문서
+├── build_pdf_html.py             # 파이프라인 진입점
+├── templates/
+│   └── chapter-template.html     # Jinja2 템플릿
+├── styles/
+│   ├── tokens.css                # 디자인 토큰 (브랜드 오버라이드 가능)
+│   ├── fonts.css                 # 폰트
+│   ├── base.css                  # 타이포그래피·코드블록·Pygments
+│   ├── components.css            # 커스텀 블록 (:::goal 등)
+│   ├── diagrams.css              # 시각화 컴포넌트 (lcel-pipeline 등)
+│   └── print.css                 # @page 규칙
+└── scripts/
+    └── init_book.sh              # 새 책 초기화
+```
+
+프로젝트는 콘텐츠만 소유, 인프라는 스킬이 담당.
+
+---
+
 ## 상황별 사용 가이드
 
 ### 처음 시작할 때
