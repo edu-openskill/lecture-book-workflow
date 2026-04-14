@@ -95,7 +95,7 @@
   .badge.explain { background: #a855f7; }      /* 보라: 설명 (완성본 발췌) */
   .badge.reference { background: var(--color-text-subtle); }    /* 회색: 참고 (구현 보지 않음) */
   .code-block code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
-  .cm { color: var(--color-text-muted); font-style: italic; } .kw { color: #be185d; } .st { color: #047857; } .nb { color: var(--color-warning); } .fn { color: #1d4ed8; }
+  .cm { color: var(--color-text-muted); font-style: italic; } .kw { color: #be185d; } .st { color: #047857; } .nb { color: #b45309; /* 구문 강조: Python builtin, 시맨틱 warning과 무관 */ } .fn { color: #1d4ed8; }
 
   /* 결과 박스 */
   .result { background: #fff; border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-size: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--color-border-dashed); }
@@ -113,7 +113,7 @@
 
   /* 테이블 */
   table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; background: transparent; }
-  th { background: transparent; color: var(--color-text-heading); font-weight: 700; text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--color-text-heading); font-size: 13px; word-break: keep-all; }
+  th { background: transparent; color: var(--color-text-heading); font-weight: 700; text-align: left; padding: 12px 16px; border-bottom: 2px solid #2d3748; /* 구조적 구분선, heading 텍스트 색과 분리 */ font-size: 13px; word-break: keep-all; }
   td { padding: 12px 16px; border-bottom: 1px solid var(--color-border-dashed); color: #4a5568; word-break: keep-all; }
   tr:last-child td { border-bottom: none; }
 
@@ -1641,7 +1641,7 @@
   }
   .exec-flow .ef-node.start,
   .exec-flow .ef-node.end {
-    background: var(--color-text);
+    background: #1e293b;  /* 진한 중립 배경. 텍스트 토큰에 묶지 않음 */
     color: #fff;
     border: none;
     text-align: center;
@@ -1682,7 +1682,7 @@
     align-items: center; justify-content: center;
     width: 20px; height: 20px;
     border-radius: 50%;
-    background: var(--color-text);
+    background: #1e293b;  /* 번호 배지의 진한 배경. 텍스트 토큰과 분리 */
     color: #fff;
     font-size: 11px; font-weight: 700;
   }
