@@ -63,7 +63,8 @@ Phase 6 ── 출판 (인쇄소)
 | `마무리` | 7 | `book/에필로그.md` 등 | `.claude/workflow/step7-마무리.md` |
 | `이미지 분석` | 5 | `[GEMINI PROMPT]` 플레이스홀더 | illustrator + image-analyzer 스킬 |
 | `출판정보 생성` | 출판 | `book/publish-info-*.md` | publisher + pub-info 스킬 |
-| `인쇄소` | 출판 | `book/output/*.pdf` | 아래 "인쇄소 실행 흐름" 참조 |
+| `인쇄소` | 출판 | `book/output/*.pdf` | Typst 파이프라인. 아래 "인쇄소 실행 흐름" 참조 |
+| `HTML 빌드` | 출판 | `book/output/*.pdf` | `pub-html-build` 스킬. 아래 "HTML 파이프라인" 참조 |
 | `이어하기` | — | — | `prompts/next-session-*.md` 읽기 |
 | `현재 상태` | — | 터미널 출력 | progress.json 기반 |
 | `PM 전략 [서비스]` | — | `docs/pm/[서비스]-전략.md` | pm-strategist 에이전트 |
@@ -133,6 +134,39 @@ python3 build_pdf_typst.py --cover-confirm --ebook
 4. PDF 빌드    → MD통합 → autocrop → Pandoc → Typst → PDF
 5. 레이아웃 검수 → 빈 페이지/고아줄/이미지 밀림 감지 → 자동수정 (최대 3회)
 ```
+
+### HTML 파이프라인 (`pub-html-build` 스킬)
+
+마크다운 챕터를 HTML→PDF로 빌드하는 공용 스킬. 디자인 토큰(`styles/tokens.css`) + 커스텀 블록(`:::goal`/`:::tip` 등) + Playwright + Paged.js 기반. 사내AI비서_v2 프로젝트가 이 스킬을 사용한다.
+
+**빌드 실행**:
+```bash
+python .claude/skills/pub-html-build/build_pdf_html.py \
+  --project-root projects/<책이름> \
+  --chapter N
+```
+
+옵션:
+- `--project-root PATH` (필수): 책 프로젝트 루트
+- `--chapter N` (선택): 특정 챕터만 빌드
+- `--html-only`: HTML 중간 산출물만 생성 (PDF 생략)
+- `--no-pagedjs`: Chromium 기본 인쇄 (빠른 빌드)
+
+**새 책 프로젝트 시작**:
+```bash
+bash .claude/skills/pub-html-build/scripts/init_book.sh projects/<새-책이름>
+```
+
+- `chapters/`·`assets/`·`book/{front,back,build,output}` 디렉토리 생성
+- `book/tokens.css` 오버라이드 템플릿 자동 심기 (브랜드 컬러 변경용)
+
+**스킬이 소유하는 자산**:
+- `templates/chapter-template.html` — Jinja2 챕터 템플릿
+- `styles/tokens.css` — 디자인 토큰(CSS 변수, 브랜드 오버라이드 가능)
+- `styles/{fonts,base,components,diagrams,print}.css` — 공용 스타일
+- `build_pdf_html.py` — 파이프라인 진입점 (markdown-it + Pygments + Playwright)
+
+자세한 내용은 `.claude/skills/pub-html-build/SKILL.md`.
 
 ### `새 책 만들기`
 
