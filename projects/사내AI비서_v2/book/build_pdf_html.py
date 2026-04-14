@@ -432,7 +432,9 @@ def render_html_file(chapter: Chapter) -> Path:
         chapter={"title": chapter.title, "html": chapter.html},
         fonts_css="./styles/fonts.css",
         tokens_css="./styles/tokens.css",
-        book_css="./styles/book.css",
+        base_css="./styles/base.css",
+        components_css="./styles/components.css",
+        diagrams_css="./styles/diagrams.css",
         print_css="./styles/print.css",
         pagedjs=False,  # HTML 프리뷰는 항상 단일 페이지 흐름
     )

@@ -1,0 +1,134 @@
+/* base.css — 타이포그래피·HTML 기본 요소·코드블록·Pygments
+ * book.css에서 분리 (Task 4). tokens.css의 변수를 참조.
+ */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--color-surface); color: var(--color-text-heading);
+    font-family: 'Pretendard', -apple-system, 'Segoe UI', sans-serif;
+    line-height: 1.9; padding: 40px 20px;
+  }
+  .container { max-width: 820px; margin: 0 auto; }
+
+  /* 챕터 본문 */
+  h1 { color: #1a202c; font-size: 30px; margin: 16px 0 24px; letter-spacing: -0.5px; font-weight: 700; }
+  h1 .num { color: var(--color-accent-warm); font-weight: 700; }
+  h2 { color: var(--color-text-heading); font-size: 22px; margin: 52px 0 18px; padding-bottom: 10px; border-bottom: 2px solid var(--color-border-dashed); font-weight: 700; letter-spacing: -0.3px; }
+  h3 { color: var(--color-text-heading); font-size: 17px; margin: 32px 0 12px; font-weight: 700; }
+  p { margin-bottom: 16px; font-size: 16px; color: var(--color-text-heading); }
+
+  /* 이미지 */
+  .chapter-image {
+    margin: 24px 0;
+    text-align: center;
+  }
+  .chapter-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: 1px solid var(--color-border-dashed);
+  }
+  .chapter-image .caption {
+    margin-top: 10px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .chapter-image.terminal img { background: #1a202c; }
+  .chapter-image.gemini img { max-width: 50%; }
+  .chapter-image.diagram img { max-width: 100%; }
+
+  /* 코드블록 — 라이트 모드 */
+  .code-block {
+    background: #f4f6fa; border: 1px solid var(--color-border); border-radius: 10px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+    font-size: 13px; line-height: 1.75;
+    overflow-x: auto;
+    color: var(--color-text);
+    white-space: pre;
+    tab-size: 2;
+  }
+  .code-block .cb-title { font-family: -apple-system, 'Pretendard', sans-serif; font-size: 12px; color: var(--color-text-muted); margin-bottom: 12px; white-space: normal; display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--color-border); }
+  .badge { background: var(--color-info); color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge.bash { background: #48bb78; }         /* 초록: 터미널 */
+  .badge.explain { background: #a855f7; }      /* 보라: 설명 (완성본 발췌) */
+  .badge.reference { background: var(--color-text-subtle); }    /* 회색: 참고 (구현 보지 않음) */
+  .code-block code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+
+  /* ===== Pygments 구문 강조 (light 테마) ===== */
+  .code-block .c,  .code-block .c1, .code-block .cm { color: #6b7280; font-style: italic; } /* 주석 */
+  .code-block .k,  .code-block .kn, .code-block .kd, .code-block .kc { color: #be185d; font-weight: 600; } /* 키워드 (def, class, return, import) */
+  .code-block .kt { color: #0369a1; } /* 타입 */
+  .code-block .s,  .code-block .s1, .code-block .s2, .code-block .sd, .code-block .se { color: #047857; } /* 문자열 */
+  .code-block .n,  .code-block .na { color: #1e293b; } /* 일반 이름 */
+  .code-block .nb { color: #b45309; } /* 빌트인 (print, len, dict...) */
+  .code-block .nc { color: #7c3aed; font-weight: 600; } /* 클래스명 */
+  .code-block .nf { color: #1d4ed8; font-weight: 600; } /* 함수명 */
+  .code-block .nn { color: #0891b2; } /* 네임스페이스/모듈 */
+  .code-block .mi, .code-block .mf { color: #b45309; } /* 숫자 */
+  .code-block .o  { color: var(--color-text-muted); } /* 연산자 */
+  .code-block .p  { color: var(--color-text-muted); } /* 구두점 */
+  .code-block .bp { color: #7c3aed; } /* self, cls */
+  .code-block .err { color: #dc2626; }
+
+  /* ===== TODO 주석 하이라이트 ===== */
+  .code-block .cb-todo,
+  .code-block .cb-todo-wrap {
+    display: inline-block;
+    background: #fef9c3;
+    border-left: 3px solid #ca8a04;
+    padding: 1px 8px 1px 6px;
+    border-radius: 3px;
+    margin: 2px 0;
+    font-weight: 600;
+  }
+  .code-block .cb-todo-wrap .c,
+  .code-block .cb-todo-wrap .c1,
+  .code-block .cb-todo { color: #854d0e !important; font-style: normal !important; }
+
+  /* 테이블 */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; background: transparent; }
+  th { background: transparent; color: var(--color-text-heading); font-weight: 700; text-align: left; padding: 12px 16px; border-bottom: 2px solid #2d3748; /* 구조적 구분선, heading 텍스트 색과 분리 */ font-size: 13px; word-break: keep-all; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--color-border-dashed); color: var(--color-text-muted); word-break: keep-all; }
+  tr:last-child td { border-bottom: none; }
+
+  /* 본문 인라인 코드. 파일 경로·함수명·상수 등 */
+  code {
+    background: var(--color-surface-alt);
+    color: var(--color-accent-text);
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 0.88em;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+  }
+
+  /* 본문 일반 리스트 (ol, ul) — 기본 여백·들여쓰기 통일 */
+  .container > ol,
+  .container > ul,
+  p + ol,
+  p + ul {
+    margin: 14px 0 18px;
+    padding-left: 28px;
+  }
+  .container > ol > li,
+  .container > ul > li,
+  p + ol > li,
+  p + ul > li {
+    margin-bottom: 8px;
+    line-height: 1.8;
+  }
+  .container > ol > li:last-child,
+  .container > ul > li:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 그림 캡션 */
+  .fig-caption {
+    text-align: center; font-size: 13px;
+    color: var(--color-text-secondary); font-style: italic; margin: 8px 0 24px;
+  }
