@@ -24,14 +24,31 @@ from pathlib import Path
 from urllib.parse import quote
 
 # ----- 경로 기준 ----------------------------------------------------------
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-BOOK_DIR = PROJECT_ROOT / "book"
-CHAPTERS_DIR = PROJECT_ROOT / "chapters"
-ASSETS_DIR = PROJECT_ROOT / "assets"
-STYLES_DIR = BOOK_DIR / "styles"
-TEMPLATES_DIR = BOOK_DIR / "templates"
-BUILD_DIR = BOOK_DIR / "build"
-OUTPUT_DIR = BOOK_DIR / "output"
+# 스킬 내부 경로 (templates/styles는 스킬이 소유)
+SKILL_DIR = Path(__file__).resolve().parent
+SKILL_TEMPLATES = SKILL_DIR / "templates"
+SKILL_STYLES = SKILL_DIR / "styles"
+
+# 프로젝트 경로는 CLI --project-root로 주입. configure_paths()에서 설정.
+PROJECT_ROOT: Path = None  # type: ignore[assignment]
+CHAPTERS_DIR: Path = None  # type: ignore[assignment]
+ASSETS_DIR: Path = None    # type: ignore[assignment]
+BUILD_DIR: Path = None     # type: ignore[assignment]
+OUTPUT_DIR: Path = None    # type: ignore[assignment]
+PROJECT_TOKENS_OVERRIDE: Path = None  # type: ignore[assignment]
+
+
+def configure_paths(project_root: Path) -> None:
+    """CLI에서 --project-root 값이 확정된 뒤 전역 경로 변수를 설정."""
+    global PROJECT_ROOT, CHAPTERS_DIR, ASSETS_DIR, BUILD_DIR, OUTPUT_DIR, PROJECT_TOKENS_OVERRIDE
+    PROJECT_ROOT = project_root.resolve()
+    CHAPTERS_DIR = PROJECT_ROOT / "chapters"
+    ASSETS_DIR = PROJECT_ROOT / "assets"
+    BUILD_DIR = PROJECT_ROOT / "book" / "build"
+    OUTPUT_DIR = PROJECT_ROOT / "book" / "output"
+    # 프로젝트가 book/tokens.css로 브랜드 오버라이드를 제공할 수 있음
+    override = PROJECT_ROOT / "book" / "tokens.css"
+    PROJECT_TOKENS_OVERRIDE = override if override.exists() else None
 
 
 # ========== 코드블록 타이틀 전처리 =========================================
@@ -394,16 +411,26 @@ def render_chapter(md_path: Path, md_renderer) -> Chapter:
 
 # ========== Jinja2 템플릿 병합 =============================================
 def ensure_build_symlinks() -> None:
-    """build 폴더에서 프로젝트 자원(styles, assets)을 상대 경로로 접근할 수 있게
-    심링크를 만든다. 이미 있으면 스킵."""
+    """build/에서 styles(스킬), assets(프로젝트), 선택적 tokens-override(프로젝트)를 상대 경로로 접근 가능하게 심볼릭 링크 생성."""
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
     targets = {
-        "styles": BOOK_DIR / "styles",
+        "styles": SKILL_STYLES,
         "assets": ASSETS_DIR,
     }
+    if PROJECT_TOKENS_OVERRIDE is not None:
+        targets["tokens-override.css"] = PROJECT_TOKENS_OVERRIDE
+
     for name, src in targets.items():
         link = BUILD_DIR / name
-        if link.is_symlink() or link.exists():
+        if link.is_symlink():
+            # 기존 링크가 다른 곳을 가리키면 갱신
+            try:
+                if link.resolve() == src.resolve():
+                    continue
+            except FileNotFoundError:
+                pass
+            link.unlink()
+        elif link.exists():
             continue
         try:
             link.symlink_to(src)
@@ -414,13 +441,12 @@ def ensure_build_symlinks() -> None:
 def render_html_file(chapter: Chapter) -> Path:
     """
     HTML 프리뷰 파일 생성. 브라우저에서 한 장으로 흐르게 읽을 수 있도록
-    Paged.js는 항상 **로드하지 않는다**. PDF 생성 시에는 Playwright가
-    런타임에 Paged.js 스크립트를 주입한다 (render_pdf 참고).
+    Paged.js는 항상 로드하지 않는다.
     """
     from jinja2 import Environment, FileSystemLoader, select_autoescape
 
     env = Environment(
-        loader=FileSystemLoader(TEMPLATES_DIR),
+        loader=FileSystemLoader(SKILL_TEMPLATES),
         autoescape=select_autoescape(["html"]),
     )
     tpl = env.get_template("chapter-template.html")
@@ -436,7 +462,8 @@ def render_html_file(chapter: Chapter) -> Path:
         components_css="./styles/components.css",
         diagrams_css="./styles/diagrams.css",
         print_css="./styles/print.css",
-        pagedjs=False,  # HTML 프리뷰는 항상 단일 페이지 흐름
+        pagedjs=False,
+        tokens_override=(PROJECT_TOKENS_OVERRIDE is not None),
     )
     out_html.write_text(html, encoding="utf-8")
     return out_html
@@ -500,6 +527,12 @@ def render_pdf(html_path: Path, pdf_path: Path, pagedjs: bool) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="HTML→PDF 챕터 빌더")
     parser.add_argument(
+        "--project-root",
+        type=Path,
+        required=True,
+        help="책 프로젝트 루트 경로 (예: projects/사내AI비서_v2)",
+    )
+    parser.add_argument(
         "--chapter",
         type=int,
         default=None,
@@ -516,6 +549,9 @@ def main() -> int:
         help="Paged.js 없이 Chromium 기본 인쇄로 PDF 생성 (빠름)",
     )
     args = parser.parse_args()
+
+    # 경로 설정 (CLI 인자 확정 후)
+    configure_paths(args.project_root)
 
     use_pagedjs = not args.no_pagedjs
     md = make_md()
