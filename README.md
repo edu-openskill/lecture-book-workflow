@@ -16,6 +16,21 @@
 
 마크다운을 편집하면서 브라우저에서 실시간으로 결과를 보는 **HTML → PDF 파이프라인** 사용법. 스킬: [`pub-html-build`](.claude/skills/pub-html-build/SKILL.md)
 
+### 시작하기 전: 어떤 상황인가요?
+
+네 가지 진입 경로가 있습니다. 자기 상황에 맞는 걸 고르세요.
+
+| 상황 | 시작 방법 | 링크 |
+|------|----------|------|
+| **완전히 새 책** (0부터 기획·집필까지) | `새 책 만들기` 명령 → 7 STEP 워크플로우 | [워크플로우 (7 STEP)](#워크플로우-7-step) |
+| **이미 md가 있음** (빌드/디자인만 필요) | `init_book.sh` → 아래 1단계부터 | 이 섹션 계속 |
+| **기존 디자인 재사용** (브랜드 컬러만 바꾸기) | `init_book.sh` → `book/tokens.css` 오버라이드 | [`modes/reuse.md`](.claude/skills/pub-html-build/modes/reuse.md) |
+| **새 디자인 탐색** (새 컴포넌트·새 톤) | 내장 7 질문 → 강제 4축 변형(Editorial/Playful/Technical/Bold) → 카탈로그 등록 | [`modes/design-explore.md`](.claude/skills/pub-html-build/modes/design-explore.md) |
+
+**카탈로그 우선 원칙**: 챕터를 쓸 때 [`components-catalog/`](.claude/skills/pub-html-build/components-catalog/) 6 카테고리(boxes / fullmap / cards / comparisons / pipelines / captions)에서 컴포넌트를 먼저 조립하세요. 재사용률 80% 이상이면 `reuse.md`로, 미만이면 `design-explore.md`로 갑니다.
+
+**superpowers 없이도 동작**: `pub-html-build`는 자기완결형 스킬입니다. superpowers 플러그인이 있으면 `brainstorming`·`writing-plans`·`verification` 연계 가능하지만, 없어도 내장 절차로 완주할 수 있습니다.
+
 ### 1단계. 프로젝트 골격 생성
 
 ```bash
