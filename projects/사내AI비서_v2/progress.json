@@ -5,9 +5,9 @@
   "current_step": "step_5_chapters",
   "book_version": "v6",
   "created_at": "2026-03-04",
-  "updated_at": "2026-04-11",
-  "milestone": "ch01_pdf",
-  "_milestone_note": "Ch.1 완결(HTML→MD→PDF)까지 먼저. 확정 후 Ch.2~10 + 서문 + 최종 빌드",
+  "updated_at": "2026-04-21",
+  "milestone": "ch11_split",
+  "_milestone_note": "CH10 §10.7~§10.10을 CH11(커넥트HR 에이전트의 완성)로 분리. ex11 레포 신설 + PDF 캡처 근거 + 카테고리 분기 추가",
 
   "steps": {
     "step_1_seed": {
@@ -60,8 +60,23 @@
     "step_5_chapters": {
       "name": "챕터 집필",
       "status": "in_progress",
-      "chapters": [],
-      "_note": "Ch.1만 먼저 완결. PDF 확정 후 Ch.2~10 진행"
+      "chapters": [
+        {
+          "id": "CH10",
+          "title": "PDF 이미지까지 잡아라",
+          "artifact": "chapters/10-PDF-이미지까지-잡아라.md",
+          "status": "in_progress",
+          "_note": "§10.7~§10.10을 CH11로 분리. §10.1~§10.6 + 닫기 블록만 남음"
+        },
+        {
+          "id": "CH11",
+          "title": "커넥트HR 에이전트의 완성",
+          "artifact": "chapters/11-커넥트HR-에이전트의-완성.md",
+          "status": "in_progress",
+          "_note": "§11.1 파이프라인 조립 + §11.2 웹 UI + §11.3 PDF 캡처 근거 + §11.4 카테고리 분기 + §11.5 마지막 여정 + §11.6 전체 구성도. 코드 레포: code/rag-end/ex11/"
+        }
+      ],
+      "_note": "CH01~CH11 총 11장으로 재편(원래 10장 계획에서 CH11 분리). Ch.1~11 차례로 폴리싱 진행"
     },
     "step_6_prologue": {
       "name": "프롤로그+로드맵",

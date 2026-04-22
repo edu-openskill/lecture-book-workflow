@@ -47,7 +47,6 @@ class ChatResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 _agent_instance = None
-_router_instance = None
 
 
 def _get_agent():
@@ -61,18 +60,6 @@ def _get_agent():
         from src.agent import IntegratedAgent
         _agent_instance = IntegratedAgent()
     return _agent_instance
-
-
-def _get_router():
-    """QueryRouter 싱글턴을 반환한다."""
-    global _router_instance
-    if _router_instance is None:
-        src_path = os.path.join(_BASE_DIR, "src")
-        if src_path not in sys.path:
-            sys.path.insert(0, src_path)
-        from src.router import QueryRouter
-        _router_instance = QueryRouter()
-    return _router_instance
 
 
 # ---------------------------------------------------------------------------
@@ -116,12 +103,8 @@ async def chat_endpoint(body: ChatRequest):
         # ② 단순 RAG 모드 (문서 검색만)
         try:
             from src.mcp_tools import search_documents
-            from src.router import QueryRouter
 
-            query_router = _get_router()  # ②
-            query_type = query_router.classify_query(body.query)
-
-            search_result = search_documents.invoke({"query": body.query, "k": 3})  # ③
+            search_result = search_documents.invoke({"query": body.query, "k": 3})  # ②
             docs = search_result.get("results", []) if isinstance(search_result, dict) else []
 
             # 간단한 컨텍스트 조합 응답
@@ -134,7 +117,7 @@ async def chat_endpoint(body: ChatRequest):
             return ChatResponse(
                 query=body.query,
                 answer=answer,
-                query_type=query_type,
+                query_type="unstructured",
                 mode="rag",
                 unstructured_data=docs,
             )

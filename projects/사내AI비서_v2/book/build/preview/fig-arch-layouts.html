@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 구성도 — 배치 레이아웃 4종 (CH10 완성본 기준)</title>
+<style>
+:root {
+  --color-surface: #f8fafc;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #cbd5e1;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-heading: #0f172a;
+  --color-accent: #2563eb;
+  --color-accent-text: #1e40af;
+  --color-accent-bg: #eff6ff;
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-success-text: #166534;
+  --color-info: #0284c7;
+  --color-info-bg: #e0f2fe;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --font-mono: "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--color-text); background: white; max-width: 1100px; margin: 32px auto; padding: 0 24px 64px; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--color-text-heading); padding-bottom: 8px; margin-bottom: 8px; }
+.intro { color: var(--color-text-muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
+h2 { margin-top: 56px; font-size: 17px; color: var(--color-accent-text); border-bottom: 1px solid var(--color-border); padding-bottom: 6px; }
+.tag { display: inline-block; background: var(--color-accent-bg); color: var(--color-accent-text); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.tag.current { background: var(--color-surface-alt); color: var(--color-text-muted); }
+.note { color: var(--color-text-muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.6; }
+code { font-family: var(--font-mono); font-size: 0.92em; background: var(--color-surface-alt); padding: 1px 5px; border-radius: 3px; }
+
+/* 공통 카드·존 스타일 */
+.card { border-radius: var(--radius-sm); padding: 6px 8px; font-size: 11px; line-height: 1.3; }
+.card .t { font-weight: 700; font-size: 11px; }
+.card .s { color: var(--color-text-muted); font-size: 9px; margin-top: 1px; }
+.card.built { background: var(--color-surface-alt); border: 1px solid var(--color-border); }
+.card.accent { background: white; border: 1px solid var(--color-accent); }
+.card.accent .t { color: var(--color-accent-text); }
+.card.dashed { background: white; border: 1px dashed var(--color-border); }
+.zone-mini { border-radius: var(--radius-md); padding: 12px 10px 10px; position: relative; background: white; }
+.zone-mini.built { border: 1px solid var(--color-border); }
+.zone-mini.accent { border: 2px solid var(--color-accent); background: var(--color-accent-bg); }
+.zone-mini > .bdg { position: absolute; top: -9px; left: 12px; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; color: white; }
+.zone-mini.built > .bdg { background: var(--color-text-muted); }
+.zone-mini.accent > .bdg { background: var(--color-accent); }
+</style>
+</head>
+<body>
+
+<h1>전체 구성도 — 배치 레이아웃 4종</h1>
+<p class="intro">
+같은 내용(<strong>CH10 완성본</strong>)을 4가지 배치로 비교합니다. "세로로 너무 길어서 한눈에 안 들어온다"는 문제를 4가지 접근으로 해결. CH02·CH04·CH05·CH06·CH07 시점은 골라진 레이아웃으로 후속 적용 예정.
+</p>
+
+<!-- ============ V1. 세로 스택 (현재) ============ -->
+<h2>V1. 세로 스택 (현재 안) <span class="tag current">BASELINE</span></h2>
+<p class="note">위→아래 흐름. 요소가 많아질수록 세로로 길어짐. <strong>CH10 완성본</strong>처럼 층이 많을 때 스크롤 필요.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;margin:16px 0">
+<div style="font-size:13px;font-weight:700;color:var(--color-text-heading);margin-bottom:16px;text-align:center">V1 · 세로 스택</div>
+
+<div style="display:flex;justify-content:center;margin-bottom:8px"><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent);border-radius:100px;padding:5px 18px;font-size:11px;color:var(--color-accent-text);font-weight:600">▼ 사용자</div></div>
+<div class="zone-mini built" style="margin-bottom:10px"><span class="bdg">CH02 · 대시보드</span><div class="card built"><div class="t">FastAPI</div><div class="s">REST API · 채팅 UI</div></div></div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini built" style="margin-bottom:10px"><span class="bdg">CH06 + CH07 · 오케스트레이션 + 운영</span>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px"><div class="card built"><div class="t">ResponseCache</div></div><div class="card built"><div class="t">TokenTracker</div></div><div class="card built"><div class="t">Retry</div></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div class="card built"><div class="t">IntegratedAgent (ReAct)</div></div><div class="card built"><div class="t">MCP Tools (4개)</div></div></div>
+</div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini built" style="margin-bottom:10px"><span class="bdg">CH05 + 8 + 9 · 검색</span><div class="card built"><div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);display:inline-block;padding:1px 5px;border-radius:3px;margin-bottom:2px;font-weight:600">튜닝 완료</div><div class="t">LCEL Chain</div><div class="s">Reranker · Hybrid · HyDE · Parent Doc</div></div></div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini accent" style="margin-bottom:10px"><span class="bdg">CH04 + CH10 · 파싱·벡터화</span>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px"><div class="card dashed"><div class="t">CH03 문서 규칙</div></div><div class="card accent"><div style="font-size:9px;color:var(--color-accent-text);font-weight:700;background:var(--color-accent-bg);display:inline-block;padding:1px 5px;border-radius:3px;margin-bottom:2px">+ Vision</div><div class="t">Doc Pipeline</div></div><div class="card built"><div class="t">ChromaDB</div></div></div>
+</div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini built" style="margin-bottom:10px"><span class="bdg">CH02 · 데이터</span><div class="card built"><div class="t">PostgreSQL</div></div></div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini accent" style="margin-bottom:10px"><span class="bdg">CH10 · 평가</span><div class="card accent"><div class="t">RAG 평가 프레임워크</div><div class="s">Precision@k · Recall · Hallucination</div></div></div>
+<div style="display:flex;justify-content:center;margin-top:6px"><div style="background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:4px 12px;font-size:10px;color:var(--color-text-muted)">외부 · Ollama · llama3.1 + minicpm-v</div></div>
+</div>
+
+<!-- ============ V2. 2열 컴팩트 ============ -->
+<h2>V2. 2열 컴팩트 (좌우 분할) <span class="tag">NEW</span></h2>
+<p class="note">왼쪽 = <strong>요청 경로</strong>(UI · 오케 · 검색 · 파싱), 오른쪽 = <strong>저장소·외부</strong>(DB · Chroma · LLM) + <strong>평가 뒷단</strong>. 한 화면에 들어옴. 세로 길이 절반 이하.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;margin:16px 0">
+<div style="font-size:13px;font-weight:700;color:var(--color-text-heading);margin-bottom:16px;text-align:center">V2 · 2열 컴팩트</div>
+
+<div style="display:flex;justify-content:center;margin-bottom:10px"><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent);border-radius:100px;padding:5px 18px;font-size:11px;color:var(--color-accent-text);font-weight:600">▼ 사용자</div></div>
+
+<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:12px">
+<!-- 왼쪽: 요청 경로 -->
+<div>
+<div class="zone-mini built" style="margin-bottom:10px"><span class="bdg">CH02 · 대시보드</span><div class="card built"><div class="t">FastAPI</div><div class="s">REST · 채팅 UI</div></div></div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini built" style="margin-top:6px;margin-bottom:10px"><span class="bdg">CH06 + CH07 · 오케 + 운영</span>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:4px"><div class="card built" style="font-size:10px"><div class="t" style="font-size:10px">Cache</div></div><div class="card built" style="font-size:10px"><div class="t" style="font-size:10px">Tracker</div></div><div class="card built" style="font-size:10px"><div class="t" style="font-size:10px">Retry</div></div></div>
+<div class="card built"><div class="t">IntegratedAgent (ReAct) + MCP Tools</div></div>
+</div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini built" style="margin-top:6px;margin-bottom:10px"><span class="bdg">CH05 + 8 + 9 · 검색</span><div class="card built"><div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);display:inline-block;padding:1px 5px;border-radius:3px;font-weight:600">튜닝 완료</div><div class="t">LCEL Chain</div></div></div>
+<div style="text-align:center;color:var(--color-text-subtle);font-size:12px">↓</div>
+<div class="zone-mini accent" style="margin-top:6px"><span class="bdg">CH04 + CH10 · 파싱</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div class="card accent"><div style="font-size:9px;color:var(--color-accent-text);font-weight:700">+ Vision</div><div class="t">Doc Pipeline</div></div><div class="card built"><div class="t">ChromaDB</div></div></div>
+</div>
+</div>
+
+<!-- 오른쪽: 저장소 + 외부 + 평가 -->
+<div style="display:flex;flex-direction:column;gap:10px">
+<div class="zone-mini built"><span class="bdg">CH02 · 데이터</span><div class="card built"><div class="t">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div></div>
+<div class="zone-mini built"><span class="bdg">외부 · LLM</span><div class="card dashed"><div class="t">Ollama</div><div class="s">llama3.1:8b + minicpm-v</div></div></div>
+<div class="zone-mini accent"><span class="bdg">CH10 · 평가 (NEW)</span><div class="card accent"><div class="t">RAG 평가 프레임워크</div><div class="s">Precision@k · Recall · Hallucination · Latency</div></div></div>
+</div>
+</div>
+</div>
+
+<!-- ============ V3. 수평 파이프 (가로 흐름) ============ -->
+<h2>V3. 수평 파이프 (가로 흐름) <span class="tag">NEW</span></h2>
+<p class="note">왼→오 가로. 사용자 질문이 어떤 경로로 흘러가는지 <strong>시계열</strong>로 한 줄에 표현. 시퀀스 다이어그램 느낌. 세로는 짧고 가로는 김 (인쇄 시 가로 방향 페이지 권장).</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;margin:16px 0;overflow-x:auto">
+<div style="font-size:13px;font-weight:700;color:var(--color-text-heading);margin-bottom:16px;text-align:center">V3 · 수평 파이프</div>
+
+<div style="display:flex;align-items:stretch;gap:0;min-width:900px">
+<!-- 사용자 -->
+<div style="flex:0 0 90px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<div style="background:var(--color-accent-bg);border:1px solid var(--color-accent);border-radius:100px;padding:6px 12px;font-size:11px;color:var(--color-accent-text);font-weight:700;text-align:center">사용자</div>
+<div style="font-size:9px;color:var(--color-text-muted);margin-top:4px">CH02</div>
+</div>
+
+<div style="flex:0 0 30px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-accent)">→</div>
+
+<!-- FastAPI -->
+<div style="flex:0 0 120px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<div class="zone-mini built" style="padding:14px 8px 8px;width:100%"><span class="bdg" style="font-size:9px">CH02</span><div class="card built" style="text-align:center"><div class="t">FastAPI</div></div></div>
+</div>
+
+<div style="flex:0 0 30px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-accent)">→</div>
+
+<!-- CH06+7 Agent 기둥 -->
+<div style="flex:1 1 260px">
+<div class="zone-mini built" style="padding:14px 8px 8px"><span class="bdg" style="font-size:9px">CH06 + CH07 · 오케 + 운영</span>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:4px"><div class="card built" style="font-size:10px"><div class="t" style="font-size:10px">Cache</div></div><div class="card built" style="font-size:10px"><div class="t" style="font-size:10px">Tracker</div></div><div class="card built" style="font-size:10px"><div class="t" style="font-size:10px">Retry</div></div></div>
+<div class="card built"><div class="t">Agent + Tools</div></div>
+</div>
+</div>
+
+<div style="flex:0 0 30px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-accent)">→</div>
+
+<!-- 데이터 원천 (LCEL + Chroma + Postgres 한 기둥) -->
+<div style="flex:1 1 200px;display:flex;flex-direction:column;gap:6px;justify-content:center">
+<div class="zone-mini built" style="padding:12px 6px 6px"><span class="bdg" style="font-size:9px">CH05+8+9 · 검색</span><div class="card built" style="text-align:center"><div class="t">LCEL Chain</div></div></div>
+<div class="zone-mini accent" style="padding:12px 6px 6px"><span class="bdg" style="font-size:9px">CH04+10 · 파싱</span><div class="card accent" style="text-align:center"><div class="t">Doc Pipeline</div><div class="s">+ Vision</div></div></div>
+<div class="zone-mini built" style="padding:12px 6px 6px"><span class="bdg" style="font-size:9px">CH04 · 저장</span><div class="card built" style="text-align:center"><div class="t">ChromaDB</div></div></div>
+<div class="zone-mini built" style="padding:12px 6px 6px"><span class="bdg" style="font-size:9px">CH02 · 데이터</span><div class="card built" style="text-align:center"><div class="t">PostgreSQL</div></div></div>
+</div>
+
+<div style="flex:0 0 30px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--color-accent)">→</div>
+
+<!-- LLM -->
+<div style="flex:0 0 110px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<div class="zone-mini built" style="padding:14px 8px 8px;width:100%"><span class="bdg" style="font-size:9px">외부</span><div class="card dashed" style="text-align:center"><div class="t">Ollama</div><div class="s">llama3.1 + Vision</div></div></div>
+</div>
+
+</div>
+
+<!-- 뒷단: RAG 평가 -->
+<div style="display:flex;justify-content:center;margin-top:14px;padding-top:14px;border-top:1px dashed var(--color-border)">
+<div class="zone-mini accent" style="padding:12px 10px 10px;max-width:400px"><span class="bdg">CH10 · 뒷단 평가 (NEW)</span><div class="card accent" style="text-align:center"><div class="t">RAG 평가 프레임워크</div><div class="s">Precision@k · Recall · Hallucination · Latency</div></div></div>
+</div>
+</div>
+
+<!-- ============ V4. 격자 매트릭스 ============ -->
+<h2>V4. 격자 매트릭스 <span class="tag">NEW · 한눈에</span></h2>
+<p class="note">3열 그리드. 각 셀에 컴포넌트 1~2개. 화살표 대신 <strong>행/열 위치</strong>로 관계 암시. 한 화면에 완전히 들어옴. 인쇄물에 최적. 세로·가로 균형.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;margin:16px 0">
+<div style="font-size:13px;font-weight:700;color:var(--color-text-heading);margin-bottom:16px;text-align:center">V4 · 격자 매트릭스 (3열)</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+
+<!-- Row 1: User, Dashboard, (empty) -->
+<div style="grid-column:1/4;display:flex;justify-content:center;margin-bottom:4px"><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent);border-radius:100px;padding:5px 18px;font-size:11px;color:var(--color-accent-text);font-weight:600">사용자</div></div>
+
+<!-- Row 2: (empty) | FastAPI | (empty) -->
+<div></div>
+<div class="zone-mini built"><span class="bdg">CH02</span><div class="card built" style="text-align:center"><div class="t">FastAPI</div><div class="s">REST · 채팅 UI</div></div></div>
+<div></div>
+
+<!-- Row 3: Orchestration (span 3) -->
+<div class="zone-mini built" style="grid-column:1/4"><span class="bdg">CH06 + CH07 · 오케스트레이션 + 운영</span>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:4px">
+<div class="card built" style="text-align:center"><div class="t">ResponseCache</div></div>
+<div class="card built" style="text-align:center"><div class="t">TokenTracker</div></div>
+<div class="card built" style="text-align:center"><div class="t">Retry</div></div>
+<div class="card built" style="text-align:center"><div class="t">IntegratedAgent</div><div class="s">ReAct</div></div>
+<div class="card built" style="text-align:center"><div class="t">MCP Tools</div><div class="s">4개 도구</div></div>
+</div>
+</div>
+
+<!-- Row 4: LCEL | Doc Pipeline (accent) | Chroma -->
+<div class="zone-mini built"><span class="bdg">CH05 + 8 + 9 · 검색</span><div class="card built" style="text-align:center"><div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);display:inline-block;padding:1px 5px;border-radius:3px;font-weight:600;margin-bottom:2px">튜닝 완료</div><div class="t">LCEL Chain</div></div></div>
+<div class="zone-mini accent"><span class="bdg">CH04 + CH10 · 파싱</span><div class="card accent" style="text-align:center"><div style="font-size:9px;color:var(--color-accent-text);font-weight:700;background:var(--color-accent-bg);display:inline-block;padding:1px 5px;border-radius:3px;margin-bottom:2px">+ Vision</div><div class="t">Doc Pipeline</div><div class="s">pypdf → Vision</div></div></div>
+<div class="zone-mini built"><span class="bdg">CH04 · 저장</span><div class="card built" style="text-align:center"><div class="t">ChromaDB</div><div class="s">벡터 저장소</div></div></div>
+
+<!-- Row 5: Postgres | LLM | RAG 평가 (accent) -->
+<div class="zone-mini built"><span class="bdg">CH02 · 데이터</span><div class="card built" style="text-align:center"><div class="t">PostgreSQL</div><div class="s">직원·연차·매출</div></div></div>
+<div class="zone-mini built"><span class="bdg">외부 · LLM</span><div class="card dashed" style="text-align:center"><div class="t">Ollama</div><div class="s">llama3.1 + Vision</div></div></div>
+<div class="zone-mini accent"><span class="bdg">CH10 · 평가</span><div class="card accent" style="text-align:center"><div class="t">RAG 평가</div><div class="s">Precision · Recall · Hallucination</div></div></div>
+
+</div>
+
+<div style="margin-top:12px;font-size:10px;color:var(--color-text-muted);text-align:center">행/열 위치가 관계를 암시: 1행 사용자 → 2행 UI → 3행 오케 → 4행 검색·파싱 → 5행 저장·외부·평가.</div>
+</div>
+
+<!-- ============ 비교 요약 ============ -->
+<h2 style="margin-top:80px">4개 레이아웃 비교</h2>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px;font-size:13px;line-height:1.8">
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+<tr style="background:var(--color-surface-alt)"><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">레이아웃</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">세로 길이</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">가로 길이</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">흐름 가독성</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">적합 상황</th></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>V1 세로 스택</b></td><td style="padding:6px;border:1px solid var(--color-border)">길다</td><td style="padding:6px;border:1px solid var(--color-border)">좁음</td><td style="padding:6px;border:1px solid var(--color-border)">위→아래 명확</td><td style="padding:6px;border:1px solid var(--color-border)">전자책·긴 페이지</td></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>V2 2열 컴팩트</b></td><td style="padding:6px;border:1px solid var(--color-border)">보통</td><td style="padding:6px;border:1px solid var(--color-border)">보통</td><td style="padding:6px;border:1px solid var(--color-border)">왼쪽 흐름 + 오른쪽 저장</td><td style="padding:6px;border:1px solid var(--color-border)">한 페이지 인쇄 · 균형</td></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>V3 수평 파이프</b></td><td style="padding:6px;border:1px solid var(--color-border)">짧다</td><td style="padding:6px;border:1px solid var(--color-border)">매우 김</td><td style="padding:6px;border:1px solid var(--color-border)">시계열 흐름 최강</td><td style="padding:6px;border:1px solid var(--color-border)">가로 페이지·슬라이드</td></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>V4 격자 매트릭스</b></td><td style="padding:6px;border:1px solid var(--color-border)">짧다</td><td style="padding:6px;border:1px solid var(--color-border)">보통</td><td style="padding:6px;border:1px solid var(--color-border)">한눈 조망</td><td style="padding:6px;border:1px solid var(--color-border)">완성본 요약 · 인쇄 최적</td></tr>
+</table>
+</div>
+
+<h2 style="margin-top:48px">선택 가이드</h2>
+<ul style="font-size:13px;line-height:1.8">
+<li><strong>전자책·웹 읽기</strong> (스크롤 무제한) → V1 세로 스택</li>
+<li><strong>인쇄 한 페이지에 맞춤 + 흐름도 보존</strong> → V2 2열 컴팩트</li>
+<li><strong>"질문이 들어와서 답변까지" 시계열 강조</strong> → V3 수평 파이프 (책은 세로이지만 가로 전면 페이지로 배치 가능)</li>
+<li><strong>완성본을 한 장에 조망</strong> → V4 격자 매트릭스 (§10.10 최종본 특히 좋음)</li>
+</ul>
+
+<h2 style="margin-top:48px">권장 조합</h2>
+<ul style="font-size:13px;line-height:1.8">
+<li><strong>CH02~CH07 §N.last</strong>: <b>V2 2열 컴팩트</b>. 한 페이지에 요청 경로 + 저장소를 깔끔히. 챕터가 진행되며 accent 영역이 채워지는 progression 시각화도 유지</li>
+<li><strong>CH10 §10.10 최종 완성본</strong>: <b>V4 격자 매트릭스</b>. 모든 층이 채워진 상태를 한 장에 조망. 마지막 장의 여운</li>
+<li><strong>대안</strong>: 모든 챕터에 V4로 통일해도 일관성 확보. "완성된 지도에 어디가 채워졌는지"를 매 챕터 한눈에</li>
+</ul>
+
+</body>
+</html>

@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>챕터 6 연차도 규정도 한번에. QueryRouter와 ReAct Agent</title>
+<title>챕터 6. 연차도 규정도 한번에. ReAct Agent와 Tool Calling</title>
 
 <link rel="stylesheet" href="./styles/fonts.css">
 <link rel="stylesheet" href="./styles/tokens.css">
+
 <link rel="stylesheet" href="./styles/base.css">
 <link rel="stylesheet" href="./styles/components.css">
 <link rel="stylesheet" href="./styles/diagrams.css">
@@ -16,13 +17,13 @@
 </head>
 <body>
 <div class="container">
-<h1>챕터 6 연차도 규정도 한번에. QueryRouter와 ReAct Agent</h1>
+<h1>챕터 6. 연차도 규정도 한번에. ReAct Agent와 Tool Calling</h1>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
-<li>질문을 정형(DB) / 비정형(문서) / 복합으로 분류하는 <strong>3단계 QueryRouter</strong>를 만듭니다</li>
 <li><strong>@tool 데코레이터</strong>로 DB 조회, 문서 검색을 에이전트가 선택할 수 있는 도구로 감쌉니다</li>
 <li><strong>ReAct 패턴</strong>(Reason, Act, Observe 반복)으로 복잡한 질문을 단계적으로 해결합니다</li>
+<li>에이전트가 <strong>어떤 도구를 호출했는지로</strong> 질문 유형(정형·비정형·복합)을 사후 판정합니다</li>
 <li>&quot;A 사원 연차 며칠? 그리고 신청 절차도 알려줘&quot; 같은 복합 질문에 한 번의 답으로 응답합니다</li>
 </ul>
 </div>
@@ -34,7 +35,6 @@
 <div class="code-block highlight" data-lang="text"><div class="cb-title">ex06 디렉토리</div>ex06/
 ├── run.py
 ├── src/
-│   ├── router.py          # [실습] 3단계 QueryRouter
 │   ├── mcp_tools.py       # [실습] @tool 4개
 │   ├── agent.py           # [실습] ReAct 에이전트 조립
 │   ├── llm_factory.py     # [참고] Ollama/OpenAI 분기
@@ -99,7 +99,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </table>
 <div class="tip">
 <p><strong>Tool Calling 지원 모델을 써야 합니다</strong></p>
-<p>모든 Ollama 모델이 Tool Calling을 지원하지는 않습니다. <code>llama3.1:8b</code>는 추론과 Tool Calling을 <strong>둘 다</strong> 안정적으로 해내서 이 챕터에 적합해요 (16GB RAM에서 무리 없이 돌고 한국어 품질도 무난). 반면 <code>deepseek-r1</code>은 <strong>추론에 특화된 대신</strong> Tool Calling이 지원되지 않습니다. 에이전트가 도구를 스스로 호출해야 하는 이 챕터에서는 쓸 수 없으니 <code>llama3.1:8b</code>로 교체해 주세요.</p>
+<p>모든 Ollama 모델이 Tool Calling을 지원하지는 않습니다. <code>llama3.1:8b</code>는 추론과 Tool Calling을 <strong>둘 다</strong> 안정적으로 해내서 이 챕터에 적합합니다 (16GB RAM에서 무리 없이 돌고 한국어 품질도 무난). 반면 <code>deepseek-r1</code>은 <strong>추론에 특화된 대신</strong> Tool Calling이 지원되지 않습니다. 에이전트가 도구를 스스로 호출해야 하는 이 챕터에서는 쓸 수 없으니 <code>llama3.1:8b</code>로 교체해 주세요.</p>
 </div>
 <p><code>.env</code> 핵심 상수입니다. 챕터 5에서 쓰던 <code>.env</code>와 비교해 LLM 모델이 바뀌고, DB 접속 정보가 추가됩니다.</p>
 <table>
@@ -145,25 +145,37 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </table>
 <h3>4. 실습 순서</h3>
 <ol>
-<li><code>src/router.py</code>. 3단계 QueryRouter</li>
 <li><code>src/mcp_tools.py</code>. @tool 4개 (연차, 매출, 직원, 문서)</li>
-<li><code>src/agent.py</code>. ReAct 에이전트 조립</li>
+<li><code>src/agent.py</code>. ReAct 에이전트 조립 + 사후 분류</li>
 <li><code>python run.py</code>. 서버 실행 후 <code>http://localhost:8000/chat</code> 에서 복합 질문 테스트</li>
 </ol>
 </div>
 <h2>6.1 RAG가 답 못 하는 질문</h2>
-<div class="chapter-image gemini"><img src="./assets/CH06/gemini/06_chapter-opening.png" alt="" /><div class="caption">그림 6-1. 안내데스크. 질문을 듣고 담당자에게 넘기는 통합 에이전트</div></div>
-<p>목요일 오후 4시. 사무실 창밖이 살짝 노랗게 물들고 있었습니다.</p>
-<p>챕터 5에서 채팅 UI를 띄워 두고 동료들이 한 번씩 써 보게 했습니다. 반응이 나쁘지 않았어요. 그런데 얼마 후 다른 동료가 노트북을 들고 제 책상 앞까지 왔습니다.</p>
+<!-- [GEMINI PROMPT: 06_chapter-opening]
+한 명의 사서를 중앙에 크게 배치. 왼손에 두꺼운 연차 장부(가죽 표지, "LEDGER" 라벨),
+오른손에는 규정집(두꺼운 책, "HR RULES" 라벨)을 들고 있는 모습.
+배경 왼쪽은 장부실 — 회색 메탈 캐비닛 서랍이 줄지어 있음.
+배경 오른쪽은 서가 — 책장에 규정집과 매뉴얼이 빼곡.
+사서는 중간에 서서 좌우를 번갈아 보는 여유로운 자세. 표정은 차분하고 자신감 있음.
+톤: 따뜻한 편집 일러스트. 채도 낮춤. 종이 질감.
+인물은 성별·나이 중립적, 도서관 카디건과 안경 착용.
+기존 "안내데스크/리셉션" 느낌은 완전히 배제 — 창구/카운터 없음.
+-->
+<div class="chapter-image gemini"><img src="./assets/CH06/gemini/06_chapter-opening-2.png" alt="" /><div class="caption">그림 6-1. 서가뿐 아니라 장부실 열쇠까지 쥔 사서. 질문 하나에 두 자료함을 모두 살피는 통합 에이전트</div></div>
+<p>목요일 오후 4시. 창밖이 노랗게 물들고 있었습니다. 키보드 소리가 드문드문 울리는 사무실이었습니다.</p>
+<p>챕터 5에서 채팅 UI를 띄워 두고 동료들이 한 번씩 써 보게 했습니다. 첫 반응은 나쁘지 않았습니다. 그런데 얼마 후 다른 동료가 노트북을 들고 책상 앞까지 왔습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "이게 그 AI 비서예요? 한번 써봐도 되죠?"</div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "당연하죠. 뭐든 물어보세요."</div>
 <p>동료가 채팅창에 입력을 시작했습니다.</p>
-<div class="dialogue"><span class="speaker">동료</span>: "A 사원 남은 연차는? 그리고 연차 신청 절차 알려줘."</div>
-<p>잠시 후 돌아온 답변.</p>
-<div class="code-block highlight" data-lang="text"><div class="cb-title">RAG 엔진 응답</div>죄송합니다. 해당 직원에 대한 정보를 찾지 못했습니다.</div>
+<div class="dialogue"><span class="speaker">동료</span>: "A 사원 남은 연차는? 그리고 연차 신청 절차 알려줘요."</div>
+<p>잠시 후 돌아온 답변은 &quot;해당 직원에 대한 정보를 찾지 못했습니다&quot;였습니다.</p>
+<p>오픈이는 당황해서 질문을 바꿔 넣어 봤습니다. &quot;이번 달 매출 합계.&quot; 같은 대답. &quot;직원 목록 보여줘.&quot; 역시 같은 대답.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "직원 이름도 모르는 AI 비서예요?"</div>
-<p class="thought">아…</p>
-<p>RAG는 사내 문서에서 'A 사원'을 찾으려 했습니다. 당연히 없죠. 직원 연차 정보는 문서가 아니라 <strong>PostgreSQL DB</strong>에 있습니다. 챕터 2에서 저장해 둔 데이터요. 문서 검색이 아니라 DB 조회가 필요한 질문인데, AI 비서는 그 차이를 몰랐습니다.</p>
+<p>동료가 돌아간 자리에는 노트북 화면 위의 에러 문구만 남았습니다.</p>
+<p class="thought">사서는 여전히 서가만 뒤지고 있었다. 챕터 2에서 만들어 둔 장부실이 옆방에 있는데, 그쪽 문을 열 줄 모른다.</p>
+<p>옆자리 팀장이 모니터를 흘끔 보고 한 마디 던졌습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "사서한테 책만 찾게 하지 말고, 장부도 꺼내게 해봐요."</div>
+<p>지금의 사서는 서가에서 규정집만 꺼내 줍니다. 하지만 'A 사원'은 서가 어디에도 없습니다. 직원 연차 정보는 책이 아니라 <strong>PostgreSQL 장부</strong>에 적혀 있습니다. 장부실을 여는 법을 배우지 못한 사서는 &quot;없어요&quot;만 반복했습니다.</p>
 <h2>6.2 정형 데이터와 비정형 데이터</h2>
 <p>지금 만들어 둔 것을 정리하면:</p>
 <ul>
@@ -194,32 +206,123 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </tbody>
 </table>
 <p>진짜 비서가 되려면 이 둘을 상황에 맞게 고르거나, 필요하면 동시에 써야 합니다.</p>
-<h2>6.3 안내데스크 구조</h2>
-<p>회사 건물 1층 안내데스크를 떠올려 보세요.</p>
-<div class="dialogue"><span class="speaker">방문자</span>: "인사 관련 서류는 어디서 받아요?"</div>
-<div class="dialogue"><span class="speaker">안내데스크</span>: "인사팀은 3층이에요. 엘리베이터 내리시면 오른쪽입니다."</div>
+<h2>6.3 사서가 두 자료함을 연다</h2>
+<p>팀장이 말한 &quot;장부까지 꺼내는 사서&quot;를 그려 보겠습니다. 지금까지 서가 하나만 맡던 사서에게 옆방 장부실 열쇠를 새로 쥐여 주는 장면입니다.</p>
+<div class="dialogue"><span class="speaker">이용자</span>: "A 사원 연차 며칠 남았어요?"</div>
+<div class="dialogue"><span class="speaker">사서</span>: (장부실로 가서 연차 장부를 펼친다) "3일 남았습니다."</div>
 <p>며칠 후 복잡한 질문.</p>
-<div class="dialogue"><span class="speaker">방문자</span>: "신입 교육 신청이랑, 노트북 배정은 어디서 해요?"</div>
-<div class="dialogue"><span class="speaker">안내데스크</span>: "교육 신청은 3층 인사팀, 노트북은 2층 IT 지원팀이에요. 두 곳 다 가셔야 해요."</div>
-<p>안내데스크는 질문을 듣고 어떤 부서 소관인지 파악해 담당자를 연결합니다. 복합 질문이면 여러 부서로 동시에 안내합니다.</p>
-<div class="chapter-image gemini"><img src="./assets/CH06/gemini/06_receptionist-analogy.png" alt="" /><div class="caption">그림 6-2. 사용자 질문을 목적지에 맞게 담당자에게 배정하는 안내데스크</div></div>
-<p>AI 비서도 같은 구조가 됩니다. 질문을 보고 DB가 필요한지 문서가 필요한지 둘 다인지 판단합니다. 판단 후 각 담당자(도구)에게 작업을 맡기고 결과를 하나로 묶어 답합니다. 이번 챕터의 <strong>통합 에이전트</strong>가 이 안내데스크입니다.</p>
-<h2>6.4 QueryRouter: 3단계 질문 분류</h2>
-<p>에이전트 안에는 <strong>QueryRouter</strong>라는 판단 규칙이 들어갑니다. 모든 질문은 3단계를 거치는데, 베테랑 안내 직원이 일하는 방식과 같습니다.</p>
-<p><strong>1단계. 키워드 매칭 (빠르고 확실)</strong></p>
-<ul>
-<li>&quot;연차&quot;, &quot;매출&quot;이 들리면 DB(정형)</li>
-<li>&quot;절차&quot;, &quot;규정&quot;이 들리면 문서(비정형)</li>
-<li>둘 다 들리면 복합</li>
-</ul>
-<p><strong>2단계. 컬럼명 매칭 (전문 용어)</strong>
-개발자가 쓴 <code>remaining_days</code>, <code>emp_no</code> 같은 DB 컬럼명이 섞여 있는지 확인. 있으면 DB로.</p>
-<p><strong>3단계. LLM 판단 (최후의 수단)</strong>
-단어만으로 모르겠으면 LLM에게 직접 물어 최종 경로를 결정.</p>
-<p>대부분 질문은 1단계에서 끝납니다. 2, 3단계는 예비책입니다. 쉬운 건 빠르게, 어려운 것만 시간 들여 고민하는 구조예요.</p>
-<div class="chapter-image gemini"><img src="./assets/CH06/gemini/06_query-router.png" alt="" /><div class="caption">그림 6-3. QueryRouter 3단계 흐름. 단계마다 결론이 나면 바로 다음 단계를 건너뜁니다</div></div>
-<h2>6.5 Tool: @tool 데코레이터</h2>
-<p>안내데스크 뒤에는 실제로 일하는 <strong>담당자(도구)</strong> 들이 있습니다. 우리는 네 명을 준비합니다.</p>
+<div class="dialogue"><span class="speaker">이용자</span>: "A 사원 연차 며칠 남았고, 신청 절차도 알려주세요."</div>
+<div class="dialogue"><span class="speaker">사서</span>: (장부실에서 연차를 확인한 뒤 서가로 가서 규정집까지 찾아온다) "3일 남았고, 규정은 이렇습니다..."</div>
+<p>한 명의 사서가 자료의 성격을 보고 <strong>장부실과 서가를 스스로 오갑니다</strong>. 바깥에 안내 직원을 따로 두고 &quot;너는 장부실, 너는 서가&quot; 하고 미리 나누지 않습니다. 사서가 질문을 보자마자 필요한 자료함을 직접 엽니다.</p>
+<!-- [GEMINI PROMPT: 06_librarian-two-rooms]
+path: assets/CH06/gemini/06_librarian-two-rooms.png
+A minimalist black and white infographic-style technical diagram with a strict 16:9
+aspect ratio on a solid white background. No shading, no 3D effects, only clean thin
+line art. Use everyday metaphors to visualize abstract concepts.
+The entire assembly of icons, lines, and text is perfectly centered globally
+within the 16:9 frame, leaving generous and equal white space on all sides.
+
+Center: one minimalist line-art librarian icon.
+Top: a speech bubble labeled "사용자 질문", with one thin arrow descending to the librarian.
+
+From the librarian, two diverging thin arrows branch left and right:
+ - Left box: a line-art filing cabinet icon labeled "장부실 (PostgreSQL)",
+   sub-labels "leave_balance / sales_sum / list_employees".
+ - Right box: a line-art bookshelf icon labeled "서가 (ChromaDB)",
+   sub-label "search_documents".
+
+Dashed arrows indicate the librarian can open one room, or both together.
+Bottom caption (small): "어느 자료함을 열지 사서가 알아서 판단합니다".
+
+No reception desk, no counter, no service window — strictly prohibited.
+Style: architecture-infographic
+-->
+<div class="chapter-image gemini"><img src="./assets/CH06/gemini/06_librarian-two-rooms.png" alt="" /><div class="caption">그림 6-2. 어느 자료함을 열지는 사서가 알아서 판단합니다.</div></div>
+<p>AI 비서도 같은 구조가 됩니다. 한 명의 <strong>에이전트</strong>가 질문을 보고 장부 도구(<code>leave_balance</code> 등)를 열지, 문서 도구(<code>search_documents</code>)를 열지, 둘 다 열지 판단합니다. 판단 주체는 에이전트 속 LLM 자신이지, 바깥의 분류기가 아닙니다. 이번 챕터의 <strong>통합 에이전트</strong>가 이 &quot;만능 사서&quot;입니다.</p>
+<h3>6.3.1 파이프라인에서 에이전트로 (챕터 5 엔진은 유지됩니다)</h3>
+<p>챕터 5에서 만든 건 <strong>고정된 파이프라인</strong>이었습니다. 질문이 들어오면 언제나 같은 순서로 흐릅니다. Retriever로 문서 조각을 가져오고, Prompt로 감싸고, LLM에 보내고, 답을 돌려받죠. 입력 질문이 &quot;휴가 규정&quot;이든 &quot;A 사원 연차&quot;든 똑같은 경로를 탑니다. 문제는 그 경로 중간에 <strong>PostgreSQL 장부를 들여다보는 단계가 없다</strong>는 점입니다. 체인을 새로 짠다 해도 &quot;이 질문에는 DB를 볼까 문서만 볼까?&quot;를 <strong>실시간으로 판단할 자리가 없습니다</strong>. 고정 파이프는 분기가 약합니다.</p>
+<p><strong>에이전트는 다릅니다.</strong> 질문을 받으면 LLM이 먼저 &quot;지금 어느 자료함을 열어야 하지?&quot;를 스스로 판단합니다. 결과를 보고 &quot;충분한가, 아니면 한 곳 더?&quot;를 다시 판단합니다. 이 <strong>생각(Reason) → 행동(Act) → 관찰(Observe)</strong> 루프가 <strong>ReAct 패턴</strong>입니다. 경로가 질문마다 달라지죠.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-lg) var(--space-xl);margin:var(--space-lg) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-md);text-align:center">그림 6-3. LCEL 체인 vs ReAct 에이전트</div>
+<table style="width:100%;border-collapse:collapse;font-size:var(--fs-xs)">
+<tr style="color:var(--color-text-muted);background:var(--color-surface-alt)"><th style="padding:6px 10px;text-align:left">항목</th><th style="padding:6px 10px;text-align:left">LCEL 체인 (챕터 5)</th><th style="padding:6px 10px;text-align:left">ReAct 에이전트 (이 챕터)</th></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:6px 10px;font-weight:600">흐름</td><td style="padding:6px 10px">고정 순서. Retriever → Prompt → LLM</td><td style="padding:6px 10px">동적. 질문을 보고 매 턴 경로 결정</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:6px 10px;font-weight:600">도구 선택</td><td style="padding:6px 10px">없음 (문서 검색만)</td><td style="padding:6px 10px">LLM이 스스로 고름</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:6px 10px;font-weight:600">분기</td><td style="padding:6px 10px">파이프를 짤 때 하드코딩</td><td style="padding:6px 10px">런타임에 판단</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:6px 10px;font-weight:600">적합한 질문</td><td style="padding:6px 10px">순수 문서 Q&A</td><td style="padding:6px 10px">정형·비정형·복합을 한 창구로</td></tr>
+</table>
+</div>
+<p><strong>&quot;그럼 파이프라인에서 Tool Calling만 붙이면 되지 않나?&quot;</strong> 사실 LCEL에서도 <code>llm.bind_tools([...])</code>로 도구를 묶을 수 있고, LLM이 어떤 도구를 호출할지 고르는 것까진 됩니다. 여기까지는 체인 한 번으로 충분하죠. 진짜 문제는 <strong>루프</strong>입니다. 도구가 답을 내놓으면 LLM은 그걸 보고 &quot;충분한가? 한 번 더?&quot;를 다시 판단해야 합니다. LCEL 체인은 입력 → 출력 한 번 흐르고 끝나는 구조라 이 <strong>재판단</strong>을 자동으로 돌리지 않습니다. 필요할 때마다 수동으로 while 루프를 짜야 하죠.</p>
+<p><strong>ReAct 에이전트</strong>(AgentExecutor)는 그 루프를 <strong>한 줄 호출로 자동화</strong>합니다. 도구 선택 → 실행 → 결과 관찰 → 다음 판단 → (끝까지) 를 AgentExecutor가 알아서 돌립니다. 복합 질문(&quot;A 사원 연차 + 신청 절차&quot;)처럼 도구를 두세 번 연달아 써야 할 때 이 자동 루프가 빛을 발합니다.</p>
+<p>그림으로 보면 파이프라인이 어디에 박혀 있는지 한눈에 보입니다. 바깥을 <strong>ReAct 루프</strong>가 감싸고, 그 안에서 에이전트가 도구 4개를 골라 씁니다. 그중 <code>search_documents</code> 도구의 속을 열어 보면 챕터 5에서 만든 <strong>LCEL 파이프라인이 그대로</strong> 들어 있습니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 6-4. ReAct 에이전트 안의 파이프라인. 챕터 5 엔진은 버려지지 않고 도구 하나로 감싸져 들어옵니다</div>
+<div style="border:2px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-lg);background:var(--color-surface-alt)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);margin-bottom:var(--space-sm);letter-spacing:1px;text-align:center">REACT 루프 (AgentExecutor가 자동 반복)</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-sm);font-size:var(--fs-sm)">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center;flex:1">
+<div style="font-weight:700">① Reason</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">어느 도구를?</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-text-muted)">→</div>
+<div style="background:var(--color-accent-bg);border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center;flex:1">
+<div style="font-weight:700;color:var(--color-accent-text)">② Act</div>
+<div style="font-size:var(--fs-xs);color:var(--color-accent-text)">도구 호출 ↓</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-text-muted)">→</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center;flex:1">
+<div style="font-weight:700">③ Observe</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">결과 확인</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-text-muted)">↵</div>
+</div>
+<div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-sm)">충분하면 최종 답변, 부족하면 ①로 되돌아가 루프</div>
+</div>
+<div style="text-align:center;padding:var(--space-xs) 0">
+<div style="display:inline-block;width:2px;height:18px;background:var(--color-accent)"></div>
+</div>
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:var(--color-accent-bg);position:relative;margin-top:4px">
+<div style="position:absolute;top:-11px;left:20px;background:var(--color-accent);color:white;padding:3px 12px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700;letter-spacing:0.5px">② Act 의 도구 상자 (자료함 4개)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-sm);margin-top:var(--space-xs);margin-bottom:var(--space-sm)">
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:white;text-align:center">
+<div style="font-weight:700;font-size:var(--fs-sm)">leave_balance</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL 직접 조회</div>
+</div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:white;text-align:center">
+<div style="font-weight:700;font-size:var(--fs-sm)">sales_sum</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL 직접 조회</div>
+</div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:white;text-align:center">
+<div style="font-weight:700;font-size:var(--fs-sm)">list_employees</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL 직접 조회</div>
+</div>
+</div>
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-md);background:white">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-sm)">
+<div style="font-weight:700;font-size:var(--fs-sm)">search_documents <span style="font-weight:400;color:var(--color-text-muted)">(속을 열어 보면)</span></div>
+<div style="font-size:var(--fs-footnote);color:var(--color-success-text);font-weight:600;background:var(--color-success-bg);padding:2px 8px;border-radius:4px">챕터 5 엔진 그대로</div>
+</div>
+<div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm);font-family:var(--font-mono);font-size:var(--fs-xs)">
+<div style="color:var(--color-text-subtle);margin-bottom:6px;text-align:center">챕터 5의 LCEL 파이프라인</div>
+<div style="display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap">
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Retriever</span>
+<span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Prompt</span>
+<span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">LLM</span>
+<span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Parser</span>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-md);font-size:var(--fs-xs);color:var(--color-text-muted);text-align:center">SQL 도구 3개는 DB 직접 호출, <code style="background:white;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border)">search_documents</code>만 <strong>챕터 5 파이프라인</strong>을 품고 있습니다.</div>
+</div>
+</div>
+<p>정리하면 세 층입니다. <strong>바깥층</strong>은 ReAct 루프가 질문마다 경로를 정합니다. <strong>중간층</strong>은 도구 4개 중 어떤 걸 쓸지 선택하는 자리입니다. <strong>안쪽층</strong>이 <code>search_documents</code> 안에서 돌아가는 챕터 5의 LCEL 파이프라인이고요. 복합 질문이 들어오면 바깥 루프가 두 번 돕니다. 먼저 <code>leave_balance</code>로 SQL 한 번, 다음 턴에 <code>search_documents</code> 안의 파이프라인이 문서 한 번. 두 결과를 합쳐 최종 답변을 만듭니다.</p>
+<p>여기서 중요한 건 <strong>챕터 5 엔진을 버리지 않는다</strong>는 점입니다. <code>rag_chain.py</code>의 LCEL 파이프라인은 그대로 보존됩니다. 다만 이번 챕터에서는 그 엔진을 <strong>에이전트의 도구 하나</strong>(<code>search_documents</code>)로 감싸 넣고, 옆에 <code>leave_balance</code>·<code>sales_sum</code>·<code>list_employees</code> 세 도구를 나란히 둡니다. 엔진을 버리는 게 아니라 <strong>더 큰 판단 구조(에이전트) 아래에 배치</strong>하는 것입니다. 다음 챕터 7, 10도 이 에이전트 구조를 그대로 이어받습니다.</p>
+<p>다음 절부터 이 사서의 손에 들릴 <strong>도구</strong>를 하나씩 만들어 보겠습니다.</p>
+<h2>6.4 MCP Tools: @tool 데코레이터</h2>
+<p>사서가 손에 들 <strong>자료함(도구)</strong> 을 네 개 준비합니다. 앞의 세 개는 장부실, 마지막 하나는 서가에 있습니다.</p>
 <table>
 <thead>
 <tr>
@@ -230,12 +333,12 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </thead>
 <tbody>
 <tr>
-<td><code>get_leave_balance</code></td>
+<td><code>leave_balance</code></td>
 <td>특정 직원 연차 잔여일</td>
-<td>PostgreSQL <code>leave_balances</code></td>
+<td>PostgreSQL <code>employees</code> + <code>leave_balance</code></td>
 </tr>
 <tr>
-<td><code>get_sales_sum</code></td>
+<td><code>sales_sum</code></td>
 <td>부서·기간별 매출 합계</td>
 <td>PostgreSQL <code>sales</code></td>
 </tr>
@@ -251,16 +354,169 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </tr>
 </tbody>
 </table>
-<p>LangChain은 평범한 Python 함수에 <code>@tool</code> 데코레이터만 붙이면 에이전트가 호출 가능한 도구로 승격시켜 줍니다. 함수 시그니처, docstring이 그대로 LLM에게 전달돼 &quot;이 도구가 무슨 일 하는지, 인자는 무엇인지&quot;를 LLM이 읽고 스스로 고릅니다.</p>
-<div class="term-box">
-<p><strong><code>@tool</code> 데코레이터</strong>. 파이썬 <code>@decorator</code> 문법은 함수 정의 위에 붙여 <strong>함수를 다른 함수로 감싸 주는</strong> 표시입니다. <code>@tool</code>은 LangChain이 제공하는 데코레이터로, 일반 함수를 LLM이 호출 가능한 <code>Tool</code> 객체로 자동 변환해 줍니다. 함수 이름·인자 타입·반환 타입·docstring을 읽어 스키마를 만들고, 에이전트에게 &quot;이 도구는 <code>(emp_no: str, year: int) -&gt; dict</code>를 받습니다&quot;처럼 구조화된 정보로 전달해요. 직접 <code>Tool(name=..., func=..., description=...)</code>를 수동 조립하지 않아도 됩니다.</p>
-<p><strong>docstring</strong>. 함수 본문 첫 줄에 놓이는 삼중 따옴표 문자열(<code>&quot;&quot;&quot;...&quot;&quot;&quot;</code>)입니다. 원래는 사람 개발자용 설명이지만, <code>@tool</code>에서는 <strong>LLM이 도구를 고를 때 읽는 사용 설명서</strong>로 쓰여요. &quot;언제 이 도구를 쓰는가&quot;를 명확히 적어야 에이전트가 올바르게 선택합니다. 예: <code>&quot;&quot;&quot;주어진 사번의 연차 잔여일수를 반환합니다.&quot;&quot;&quot;</code></p>
+<h3>6.4.1 @tool vs MCP — 도구 호출의 두 가지 방식</h3>
+<p>AI 에이전트가 외부 기능을 호출하는 방법은 크게 두 가지가 있습니다. 하나는 Anthropic이 만든 <strong>MCP(Model Context Protocol)</strong> 입니다. 도구를 별도 서버로 분리하고 표준 메시지 규격으로 통신하는 방식이라 어떤 프레임워크에서든 같은 도구를 재사용할 수 있습니다. 다른 하나는 LangChain의 <code>@tool</code> 데코레이터입니다. 같은 프로세스 안에서 함수를 직접 호출하니 설정이 간단합니다.</p>
+<div class="proc-compare">
+  <div class="pc-case pc-tool">
+    <div class="pc-header">
+      <span class="pc-badge pc-badge-tool">@tool</span>
+      같은 프로세스 — 에이전트와 함수가 한 경계 안
+    </div>
+    <div class="pc-boundary">
+      <span class="pc-scope-label">내 파이썬 앱 (한 프로세스)</span>
+      <div class="pc-node">에이전트</div>
+      <div class="pc-arrow">→</div>
+      <div class="pc-node">@tool 함수</div>
+      <div class="pc-arrow">→</div>
+      <div class="pc-node pc-store">DB · 문서</div>
+    </div>
+  </div>
+  <div class="pc-case pc-mcp">
+    <div class="pc-header">
+      <span class="pc-badge pc-badge-mcp">MCP</span>
+      별도 프로세스 — 에이전트와 서버가 다른 경계
+    </div>
+    <div class="pc-layout">
+      <div class="pc-boundary pc-left">
+        <span class="pc-scope-label">내 파이썬 앱</span>
+        <div class="pc-node">에이전트</div>
+      </div>
+      <span class="pc-bridge">stdio · HTTP</span>
+      <div class="pc-boundary pc-right">
+        <span class="pc-scope-label">외부 MCP 서버 (별도 프로세스)</span>
+        <div class="pc-node">MCP 서버</div>
+        <div class="pc-arrow">→</div>
+        <div class="pc-node pc-store">DB · 문서</div>
+      </div>
+    </div>
+  </div>
+  <div class="pc-caption">그림 6-3. LangChain <code>@tool</code> 데코레이터와 MCP 방식의 도구 호출 비교. 전자는 에이전트와 함수가 한 프로세스, 후자는 MCP 서버로 분리된 별도 프로세스입니다</div>
 </div>
-<h2>6.6 ReAct 패턴: Reason, Act, Observe 반복</h2>
-<p>안내 직원은 복합 질문에 한 번에 답하지 않습니다. 머릿속에서 다음 루프를 돕니다.</p>
+<p>MCP 쪽 화살표에 적힌 <strong><code>stdio · HTTP</code></strong> 는 에이전트와 MCP 서버가 대화할 때 쓰는 통신 규격입니다. 두 프로세스가 따로 떠 있으니 직접 함수 호출은 못 하고, 중간에 약속된 메시지 형식이 필요합니다. 같은 컴퓨터 안에서는 <strong>stdio</strong>(표준 입출력 스트림)로, 원격 서버는 <strong>HTTP</strong>로 메시지를 주고받습니다. Claude Desktop·Cursor·IDE 에이전트 같은 여러 앱이 같은 MCP 서버에 붙을 수 있는 이유도 이 표준 규격 덕분입니다. 반대로 <code>@tool</code>은 파이썬 함수를 그대로 호출하므로 이런 프로토콜이 필요 없습니다.</p>
+<p>핵심 개념은 같습니다. &quot;AI가 함수의 이름과 설명을 보고 스스로 호출한다.&quot; 이 책에서는 <code>@tool</code>로 원리를 익혀 보겠습니다. 원리를 이해하면 MCP로 확장하는 건 어렵지 않습니다.</p>
+<p>각 도구 함수에 <code>@tool</code> 데코레이터와 독스트링(설명)을 붙여두면 LangChain이 도구의 이름과 설명, 파라미터를 자동으로 읽어갑니다. 에이전트는 이 정보를 보고 &quot;이 질문에는 어떤 도구가 맞지?&quot;를 판단합니다. 이처럼 LLM이 상황에 맞는 도구를 스스로 골라서 호출하는 기능을 <strong>도구 호출(Tool Calling)</strong> 이라고 합니다. 모든 LLM이 지원하는 건 아니라서 OpenAI의 <code>gpt-4o-mini</code>나 Ollama의 <code>llama3.1:8b</code>처럼 Tool Calling을 지원하는 모델을 골라야 합니다.</p>
+<div class="term-box">
+<p><strong><code>@tool</code> 데코레이터</strong>. 파이썬 <code>@decorator</code> 문법은 함수 정의 위에 붙여 <strong>함수를 다른 함수로 감싸 주는</strong> 표시입니다. <code>@tool</code>은 LangChain이 제공하는 데코레이터로, 일반 함수를 LLM이 호출 가능한 <code>Tool</code> 객체로 자동 변환해 줍니다. 함수 이름·인자 타입·반환 타입·docstring을 읽어 스키마를 만들고, 에이전트에게 &quot;이 도구는 <code>(emp_no: str) -&gt; dict</code>를 받습니다&quot;처럼 구조화된 정보로 전달합니다. 직접 <code>Tool(name=..., func=..., description=...)</code>를 수동 조립하지 않아도 됩니다.</p>
+<p><strong>docstring</strong>. 함수 본문 첫 줄에 놓이는 삼중 따옴표 문자열(<code>&quot;&quot;&quot;...&quot;&quot;&quot;</code>)입니다. 원래는 사람 개발자용 설명이지만, <code>@tool</code>에서는 <strong>LLM이 도구를 고를 때 읽는 사용 설명서</strong>로 쓰입니다. &quot;언제 이 도구를 쓰는가&quot;를 명확히 적어야 에이전트가 올바르게 선택합니다. 예: <code>&quot;&quot;&quot;주어진 사번의 연차 잔여일수를 반환합니다.&quot;&quot;&quot;</code></p>
+</div>
+<h3>6.4.2 도구 구현하기</h3>
+<p><code>src/mcp_tools.py</code>에 네 개의 함수 TODO가 있습니다. 각 TODO의 <code>pass</code>를 지우고 <code>@tool</code>과 docstring, 인자를 채웁니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> ex06/src/mcp_tools.py. @tool 데코레이터</div><span class="kn">from</span><span class="w"> </span><span class="nn">src.db_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_query</span><span class="p">,</span> <span class="n">get_vectorstore</span><span class="p">,</span> <span class="n">DB_ERROR_MSG</span>
+
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">leave_balance</span><span class="p">(</span><span class="n">emp_no</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;직원의 연차 잔여 일수를 조회한다.&quot;&quot;&quot;</span>
+    <span class="cb-todo"># TODO: leave_balance — 사번으로 연차 조회</span>
+
+    <span class="c1"># 1. DB 조회 (employees + leave_balance 조인)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">run_query</span><span class="p">(</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;SELECT e.name, l.total_days, l.used_days,</span>
+<span class="sd">                  (l.total_days - l.used_days) AS remaining_days</span>
+<span class="sd">           FROM employees e</span>
+<span class="sd">           LEFT JOIN leave_balance l ON e.emp_no = l.emp_no</span>
+<span class="sd">           WHERE e.emp_no = %s&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">emp_no</span><span class="p">,),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 2. 결과 있으면 반환, 없으면 에러</span>
+    <span class="k">return</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">rows</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">DB_ERROR_MSG</span><span class="p">}</span>
+
+
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">search_documents</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;사내 문서에서 관련 내용을 벡터 검색한다.&quot;&quot;&quot;</span>
+    <span class="cb-todo"># TODO: search_documents — ChromaDB로 관련 청크 검색</span>
+
+    <span class="c1"># 1. ChromaDB 컬렉션 가져오기</span>
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">get_vectorstore</span><span class="p">()</span>
+
+    <span class="c1"># 2. 벡터 검색 수행</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query_texts</span><span class="o">=</span><span class="p">[</span><span class="n">query</span><span class="p">],</span> <span class="n">n_results</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="c1"># 3. content / source 형태로 가공</span>
+    <span class="n">docs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">,</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;metadatas&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;documents&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="n">docs</span><span class="p">,</span> <span class="s2">&quot;total_found&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)}</span></div>
+<p><code>run_query</code>·<code>get_vectorstore</code>는 <code>src/db_helper.py</code>의 보조 함수로, PostgreSQL 커넥션과 ChromaDB 컬렉션을 감싼 헬퍼입니다. 직접 작성하지 않고 import만 합니다.</p>
+<p>나머지 두 개는 DB 조회의 다른 변형입니다. <code>sales_sum</code>은 <strong>집계 쿼리</strong>(SUM + GROUP BY), <code>list_employees</code>는 <strong>동적 WHERE 조립</strong>(부서·이름 필터).</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> ex06/src/mcp_tools.py. 집계·동적 필터</div><span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sales_sum</span><span class="p">(</span><span class="n">dept</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">end_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;부서별 또는 전체 매출 합계를 조회한다.&quot;&quot;&quot;</span>
+    <span class="cb-todo"># TODO: sales_sum — 기간·부서 필터로 매출 집계</span>
+
+    <span class="c1"># 1. 파라미터 기본값 처리</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">start_date</span> <span class="ow">or</span> <span class="s2">&quot;2024-11-01&quot;</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">end_date</span> <span class="ow">or</span> <span class="s2">&quot;2024-12-31&quot;</span>
+
+    <span class="c1"># 2. DB 조회 (부서 필터 적용)</span>
+    <span class="n">dept_filter</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;AND e.department LIKE &#39;%</span><span class="si">{</span><span class="n">dept</span><span class="si">}</span><span class="s2">%&#39;&quot;</span> <span class="k">if</span> <span class="n">dept</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">run_query</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;SELECT SUM(s.amount) AS total_amount</span>
+<span class="s2">            FROM sales s JOIN employees e ON s.emp_no = e.emp_no</span>
+<span class="s2">            WHERE s.sale_date BETWEEN %s AND %s </span><span class="si">{</span><span class="n">dept_filter</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 3. 결과 가공해서 반환</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;total_amount&quot;</span><span class="p">:</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;total_amount&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">rows</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;period&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s2"> ~ </span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+
+
+<span class="nd">@tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_employees</span><span class="p">(</span><span class="n">dept</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;직원 목록을 조회한다. 부서·이름으로 필터 가능.&quot;&quot;&quot;</span>
+    <span class="cb-todo"># TODO: list_employees — WHERE 조건을 동적으로 조립</span>
+
+    <span class="c1"># 1. 조건 조립 (부서/이름 필터)</span>
+    <span class="n">conditions</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">dept</span><span class="p">:</span>
+        <span class="n">conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;department LIKE </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">);</span> <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">dept</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;name LIKE </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">);</span> <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 2. SQL 문자열 완성 + 실행</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT emp_no, name, department, position, hire_date FROM employees&quot;</span>
+    <span class="k">if</span> <span class="n">conditions</span><span class="p">:</span>
+        <span class="n">sql</span> <span class="o">+=</span> <span class="s2">&quot; WHERE &quot;</span> <span class="o">+</span> <span class="s2">&quot; AND &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">conditions</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">run_query</span><span class="p">(</span><span class="n">sql</span> <span class="o">+</span> <span class="s2">&quot; ORDER BY name&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+
+    <span class="c1"># 3. 결과 반환</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;employees&quot;</span><span class="p">:</span> <span class="n">rows</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)}</span></div>
+<p>도구의 docstring이 <strong>LLM의 판단 근거</strong>가 되므로 &quot;이 도구는 언제 써야 하는가&quot;를 명확히 써 주세요. 설명이 불명확하면 에이전트가 엉뚱한 도구를 고릅니다. AI 비서에게 각 도구가 무슨 일을 하는지 제대로 알려줘야 제대로 골라 쓰는 것과 마찬가지입니다.</p>
+<div class="term-box">
+<p><strong>MCP Tools? Tool?</strong> 이 책에서는 LangChain <code>@tool</code>로 만든 함수를 포괄해 <strong>MCP Tools</strong>라고 부릅니다. Model Context Protocol의 의미를 확장해 &quot;AI가 호출 가능한 도구 계층&quot;이라는 개념적 명칭으로 씁니다. 구현 수단은 LangChain의 Tool Calling이지만, 같은 역할(도구 호출 계층)을 MCP 서버로도 구현할 수 있습니다.</p>
+</div>
+<h2>6.5 ReAct 패턴 &amp; 에이전트 조립</h2>
+<p>챕터 1에서 &quot;리프레시 데이 몇 번 남았어?&quot;라는 질문을 던졌습니다. LLM이 규정을 읽고 &quot;매월 1회 → 6개월이면 6번 → 2번 썼으면 4번&quot;까지 스스로 계산해 냈죠. 생각의 고리가 사슬처럼 이어지는 <strong>사슬 추론(Chain-of-Thought)</strong> 입니다. ReAct는 여기에 <strong>도구 호출</strong>을 끼워 넣은 확장판입니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl)">
+<div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);text-align:center;margin-bottom:var(--space-sm)">CH01 사슬 추론</div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs)">
+<div style="margin-bottom:var(--space-xs)"><span style="font-weight:600">하는 일:</span> 문서를 읽고 단계별 계산</div>
+<div style="margin-bottom:var(--space-xs)"><span style="font-weight:600">반복:</span> 머릿속에서 1회</div>
+<div style="margin-bottom:var(--space-xs)"><span style="font-weight:600">예시:</span> "6개월이면 6번, 2번 쓰면 4번"</div>
+<div><span style="font-weight:600;color:var(--color-info-text)">핵심: 읽고 생각</span></div>
+</div>
+</div>
+<div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-success-text);text-align:center;margin-bottom:var(--space-sm)">CH06 ReAct</div>
+<div style="border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);background:var(--color-success-bg)">
+<div style="margin-bottom:var(--space-xs)"><span style="font-weight:600">하는 일:</span> 도구를 고르고 호출하고 결과 확인</div>
+<div style="margin-bottom:var(--space-xs)"><span style="font-weight:600">반복:</span> Reason→Act→Observe 여러 바퀴</div>
+<div style="margin-bottom:var(--space-xs)"><span style="font-weight:600">예시:</span> "DB 조회 → 결과 보고 → 문서 검색"</div>
+<div><span style="font-weight:600;color:var(--color-success-text)">핵심: 생각하고 행동</span></div>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);padding:var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-md)">"생각만 하는" 사슬 추론에서 "생각하고 <b>행동하고</b> 결과를 보는" ReAct로 진화합니다.</div>
+</div>
+<p>사서는 복합 질문을 한 번에 풀지 않습니다. 장부실과 서가 사이를 왔다 갔다 하면서 자료를 조각조각 모읍니다. 그 왕복의 머릿속 패턴은 이렇습니다.</p>
 <ol>
 <li><strong>Reason (추론)</strong>. &quot;연차 잔여일이 먼저 필요하겠네. 그다음 신청 절차.&quot;</li>
-<li><strong>Act (행동)</strong>. <code>get_leave_balance(emp_no=&quot;E003&quot;)</code> 호출</li>
+<li><strong>Act (행동)</strong>. <code>leave_balance(emp_no=&quot;E003&quot;)</code> 호출</li>
 <li><strong>Observe (관찰)</strong>. &quot;총 15일, 잔여 8일이 돌아왔군&quot;</li>
 <li><strong>Reason</strong>. &quot;이제 신청 절차를 문서에서 찾자&quot;</li>
 <li><strong>Act</strong>. <code>search_documents(query=&quot;연차 신청 절차&quot;)</code></li>
@@ -293,145 +549,34 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
   <div class="rl-exit">최종 답이 충분하면 루프 종료 → 자연어 답변 생성</div>
   <div class="rl-caption">그림 6-4. ReAct 루프는 충분한 정보를 모을 때까지 같은 순환을 반복하며, 매 Observe 단계의 결과가 다음 Reason의 입력이 됩니다</div>
 </div>
-<h2>6.7 실습 1: router.py: 3단계 QueryRouter</h2>
-<p><code>ex06/src/router.py</code> 상단에는 세 상수가 이미 준비돼 있습니다. 1, 2단계 매칭의 <strong>사전</strong>이에요. <strong>아래</strong> 실제 내용을 먼저 눈으로 훑고 넘어갑시다.</p>
-<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge explain">설명</span> ex06/src/router.py. 판단 기준 키워드 (상수)</div><span class="n">STRUCTURED_KEYWORDS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;잔여&quot;</span><span class="p">,</span> <span class="s2">&quot;잔량&quot;</span><span class="p">,</span> <span class="s2">&quot;연차&quot;</span><span class="p">,</span> <span class="s2">&quot;휴가&quot;</span><span class="p">,</span> <span class="s2">&quot;남은&quot;</span><span class="p">,</span> <span class="s2">&quot;며칠&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;매출&quot;</span><span class="p">,</span> <span class="s2">&quot;합계&quot;</span><span class="p">,</span> <span class="s2">&quot;총액&quot;</span><span class="p">,</span> <span class="s2">&quot;금액&quot;</span><span class="p">,</span> <span class="s2">&quot;얼마&quot;</span><span class="p">,</span> <span class="s2">&quot;실적&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;목록&quot;</span><span class="p">,</span> <span class="s2">&quot;명단&quot;</span><span class="p">,</span> <span class="s2">&quot;직원&quot;</span><span class="p">,</span> <span class="s2">&quot;사원&quot;</span><span class="p">,</span> <span class="s2">&quot;리스트&quot;</span><span class="p">,</span> <span class="s2">&quot;조회&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;통계&quot;</span><span class="p">,</span> <span class="s2">&quot;평균&quot;</span><span class="p">,</span> <span class="s2">&quot;부서별&quot;</span><span class="p">,</span> <span class="s2">&quot;합산&quot;</span><span class="p">,</span> <span class="s2">&quot;입사일&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<h3>6.5.1 에이전트 조립하기</h3>
+<p><code>src/agent.py</code>에 에이전트 조립 TODO가 있습니다. TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다. <code>create_tool_calling_agent</code> + <code>AgentExecutor</code>로 ReAct 루프를 만듭니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> ex06/src/agent.py. ReAct 에이전트</div><span class="kn">from</span><span class="w"> </span><span class="nn">src.mcp_tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">ALL_TOOLS</span>
 
-<span class="n">UNSTRUCTURED_KEYWORDS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;절차&quot;</span><span class="p">,</span> <span class="s2">&quot;방법&quot;</span><span class="p">,</span> <span class="s2">&quot;어떻게&quot;</span><span class="p">,</span> <span class="s2">&quot;규정&quot;</span><span class="p">,</span> <span class="s2">&quot;정책&quot;</span><span class="p">,</span> <span class="s2">&quot;기준&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;온보딩&quot;</span><span class="p">,</span> <span class="s2">&quot;가이드&quot;</span><span class="p">,</span> <span class="s2">&quot;매뉴얼&quot;</span><span class="p">,</span> <span class="s2">&quot;복지&quot;</span><span class="p">,</span> <span class="s2">&quot;혜택&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;보안&quot;</span><span class="p">,</span> <span class="s2">&quot;출장&quot;</span><span class="p">,</span> <span class="s2">&quot;비용&quot;</span><span class="p">,</span> <span class="s2">&quot;설명해&quot;</span><span class="p">,</span> <span class="s2">&quot;무엇인가&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<span class="n">SYSTEM_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;당신은 사내 HR 및 업무 질문에 답변하는 AI 어시스턴트입니다.</span>
+<span class="s2">- 정형 데이터(숫자·통계·목록)는 DB 조회 도구를 사용하세요.</span>
+<span class="s2">- 비정형 질문(절차·정책·설명)은 search_documents를 사용하세요.</span>
+<span class="s2">- 복합 질문은 두 종류의 도구를 모두 사용하세요.&quot;&quot;&quot;</span>
 
-<span class="n">SCHEMA_TERMS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;remaining_days&quot;</span><span class="p">:</span> <span class="s2">&quot;structured&quot;</span><span class="p">,</span> <span class="s2">&quot;used_days&quot;</span><span class="p">:</span> <span class="s2">&quot;structured&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;total_days&quot;</span><span class="p">:</span> <span class="s2">&quot;structured&quot;</span><span class="p">,</span>     <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="s2">&quot;structured&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;emp_no&quot;</span><span class="p">:</span> <span class="s2">&quot;structured&quot;</span><span class="p">,</span>         <span class="s2">&quot;department&quot;</span><span class="p">:</span> <span class="s2">&quot;structured&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hire_date&quot;</span><span class="p">:</span> <span class="s2">&quot;structured&quot;</span><span class="p">,</span>
-<span class="p">}</span></div>
-<p>정형은 <strong>숫자·조회 중심 단어</strong>, 비정형은 <strong>절차·방법 중심 단어</strong>. <code>SCHEMA_TERMS</code>는 개발자가 실수로 컬럼명을 섞어 쓸 때를 대비한 보조 사전입니다. <code>&quot;알려줘&quot;</code>, <code>&quot;뭐야&quot;</code> 같은 <strong>범용 어미는 일부러 뺐어요</strong> — 어느 질문에나 붙을 수 있어 판별력이 없기 때문입니다.</p>
-<p>이제 <code>QueryRouter</code> 클래스의 네 메서드 TODO를 채울 차례입니다. 공개 인터페이스 <code>classify_query</code> 하나와 내부 판단 메서드 <code>_step1_rule_based</code>·<code>_step2_schema_based</code>·<code>_step3_llm_based</code> 세 개, 총 네 개의 TODO를 순서대로 구현합니다.</p>
-<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex06/src/router.py. 3단계 순차 분류</div><span class="k">def</span><span class="w"> </span><span class="nf">classify_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-    <span class="cb-todo"># TODO: classify_query. 3단계로 질문 분류 (키워드 → 스키마 → LLM)</span>
-    <span class="c1"># 1. 규칙 기반 키워드 매칭</span>
-    <span class="n">step1_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step1_rule_based</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">step1_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">step1_result</span>
-    <span class="c1"># 2. DB 스키마 컬럼명 매칭</span>
-    <span class="n">step2_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step2_schema_based</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">step2_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">step2_result</span>
-    <span class="c1"># 3. LLM 판단 (폴백)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_llm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">step3_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step3_llm_based</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">step3_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">step3_result</span>
-    <span class="c1"># 4. 기본값: 비정형으로 처리</span>
-    <span class="k">return</span> <span class="s2">&quot;unstructured&quot;</span></div>
-<p>1단계는 정형/비정형 키워드 히트 수를 비교합니다. 양쪽 모두 히트면 2배 이상 우세한 쪽을 고르고, 아니면 <code>hybrid</code>입니다.</p>
-<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex06/src/router.py. _step1_rule_based</div><span class="k">def</span><span class="w"> </span><span class="nf">_step1_rule_based</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-    <span class="cb-todo"># TODO: _step1_rule_based. 키워드 매칭으로 경로 결정</span>
-    <span class="n">query_lower</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-    <span class="n">structured_hits</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">STRUCTURED_KEYWORDS</span> <span class="k">if</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">query_lower</span><span class="p">)</span>
-    <span class="n">unstructured_hits</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">UNSTRUCTURED_KEYWORDS</span> <span class="k">if</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">query_lower</span><span class="p">)</span>
+<span class="cb-todo"># TODO: agent 조립 — 도구 + LLM + 프롬프트</span>
 
-    <span class="k">if</span> <span class="n">structured_hits</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">unstructured_hits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">structured_hits</span> <span class="o">&gt;</span> <span class="n">unstructured_hits</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;structured&quot;</span>
-        <span class="k">if</span> <span class="n">unstructured_hits</span> <span class="o">&gt;</span> <span class="n">structured_hits</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;unstructured&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;hybrid&quot;</span>
-    <span class="k">if</span> <span class="n">structured_hits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;structured&quot;</span>
-    <span class="k">if</span> <span class="n">unstructured_hits</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;unstructured&quot;</span>
-    <span class="k">return</span> <span class="kc">None</span></div>
-<p>2단계는 <code>emp_no</code>, <code>remaining_days</code> 같은 DB 컬럼명이 질문에 섞여 있는지 확인합니다.</p>
-<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex06/src/router.py. _step2_schema_based</div><span class="k">def</span><span class="w"> </span><span class="nf">_step2_schema_based</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-    <span class="cb-todo"># TODO: _step2_schema_based. DB 컬럼명 매칭으로 경로 결정</span>
-    <span class="n">query_lower</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">SCHEMA_TERMS</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">query_lower</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">SCHEMA_TERMS</span><span class="p">[</span><span class="n">term</span><span class="p">]</span>
-    <span class="k">return</span> <span class="kc">None</span></div>
-<p>3단계는 두 단계로도 결정 못 한 질문만 LLM에 맡깁니다. JSON으로 <code>{&quot;route&quot;: &quot;...&quot;, &quot;reason&quot;: &quot;...&quot;}</code> 형식을 강제해 파싱 안정성을 높입니다.</p>
-<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex06/src/router.py. _step3_llm_based</div><span class="k">def</span><span class="w"> </span><span class="nf">_step3_llm_based</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-    <span class="cb-todo"># TODO: _step3_llm_based. LLM에게 질문 분류 위임</span>
-    <span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;다음 질문을 아래 세 가지 유형 중 하나로 분류하세요.</span>
-
-<span class="s2">질문: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span>
-
-<span class="s2">유형:</span>
-<span class="s2">- structured: 숫자, 통계, 목록 등 데이터베이스 조회가 필요한 질문</span>
-<span class="s2">- unstructured: 절차, 정책, 설명 등 문서 검색이 필요한 질문</span>
-<span class="s2">- hybrid: 두 가지가 모두 필요한 복합 질문</span>
-
-<span class="s2">반드시 JSON 형식으로만 답하세요:</span>
-<span class="se">{{</span><span class="s2">&quot;route&quot;: &quot;structured|unstructured|hybrid&quot;, &quot;reason&quot;: &quot;한 줄 근거&quot;</span><span class="se">}}</span><span class="s2">&quot;&quot;&quot;</span>
-
-    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_llm</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
-    <span class="n">content</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-    <span class="n">content</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;&lt;think&gt;.*?&lt;/think&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-    <span class="n">json_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{.*\}&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">json_match</span><span class="p">:</span>
-        <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_match</span><span class="o">.</span><span class="n">group</span><span class="p">())</span>
-        <span class="n">route</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;route&quot;</span><span class="p">,</span> <span class="s2">&quot;unstructured&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">route</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;structured&quot;</span><span class="p">,</span> <span class="s2">&quot;unstructured&quot;</span><span class="p">,</span> <span class="s2">&quot;hybrid&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">route</span>
-    <span class="k">return</span> <span class="kc">None</span></div>
-<h2>6.8 실습 2: mcp_tools.py: @tool 4개</h2>
-<p><code>src/mcp_tools.py</code>에 네 개의 함수가 스켈레톤으로 있습니다. <code>@tool</code>과 docstring, 인자를 채웁니다.</p>
-<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> ex06/src/mcp_tools.py. @tool 데코레이터</div><span class="nd">@tool</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_leave_balance</span><span class="p">(</span><span class="n">emp_no</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">year</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2025</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;주어진 사번(emp_no)의 해당 연도 연차 잔여일수를 반환합니다.</span>
-<span class="sd">    인자:</span>
-<span class="sd">        emp_no: 사번 (예: E003)</span>
-<span class="sd">        year: 조회 연도 (기본 2025)</span>
-<span class="sd">    반환: {&#39;total_days&#39;: int, &#39;used_days&#39;: int, &#39;remaining_days&#39;: int}</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="cb-todo"># TODO: PostgreSQL에서 leave_balances 테이블 조회</span>
-    <span class="k">with</span> <span class="n">db_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
-        <span class="n">row</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
-            <span class="s2">&quot;SELECT total_days, used_days, remaining_days FROM leave_balances &quot;</span>
-            <span class="s2">&quot;WHERE emp_no=</span><span class="si">%s</span><span class="s2"> AND year=</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">emp_no</span><span class="p">,</span> <span class="n">year</span><span class="p">)</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">if</span> <span class="n">row</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;해당 직원 정보를 찾을 수 없습니다.&quot;</span><span class="p">}</span>
-
-
-<span class="nd">@tool</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">search_documents</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;사내 규정·정책 문서에서 의미 기반으로 관련 청크를 검색합니다.&quot;&quot;&quot;</span>
-    <span class="cb-todo"># TODO: ChromaDB Retriever로 검색</span>
-    <span class="n">docs</span> <span class="o">=</span> <span class="n">vectorstore</span><span class="o">.</span><span class="n">similarity_search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">top_k</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;file_name&quot;</span><span class="p">],</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">page_content</span><span class="p">}</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">]</span></div>
-<p>나머지 두 개(<code>get_sales_sum</code>, <code>list_employees</code>)도 같은 방식으로 채웁니다. 도구의 docstring이 <strong>LLM의 판단 근거</strong>가 되므로 &quot;이 도구는 언제 써야 하는가&quot;를 명확히 써 주세요.</p>
-<div class="term-box">
-<p><strong>MCP Tools? Tool?</strong> 이 책에서는 LangChain <code>@tool</code>로 만든 함수를 포괄해 <strong>MCP Tools</strong>라고 부릅니다. Model Context Protocol의 의미를 확장해 &quot;AI가 호출 가능한 도구 계층&quot;이라는 개념적 명칭으로 씁니다. 구현 수단은 LangChain의 Tool Calling입니다.</p>
-</div>
-<h2>6.9 실습 3: agent.py: ReAct 에이전트 조립</h2>
-<p><code>src/agent.py</code>에 에이전트 조립 TODO가 있습니다. <code>create_tool_calling_agent</code> + <code>AgentExecutor</code>로 ReAct 루프를 만듭니다.</p>
-<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> ex06/src/agent.py. ReAct 에이전트</div><span class="cb-todo"># TODO: 도구 + LLM + 프롬프트로 에이전트 생성</span>
-<span class="n">tools</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_leave_balance</span><span class="p">,</span> <span class="n">get_sales_sum</span><span class="p">,</span> <span class="n">list_employees</span><span class="p">,</span> <span class="n">search_documents</span><span class="p">]</span>
-
-<span class="n">system_prompt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;당신은 사내 AI 비서 &#39;커넥트HR 에이전트&#39;입니다.</span>
-<span class="s2">질문을 분석해 필요한 도구를 고르고, 결과를 모아 자연어로 답변하세요.</span>
-<span class="s2">DB에서 얻은 수치와 문서에서 얻은 절차를 함께 제시해도 됩니다.</span>
-<span class="s2">답변 마지막에는 사용한 출처(파일명 또는 테이블명)를 명시하세요.&quot;&quot;&quot;</span>
-
+<span class="c1"># 1. 프롬프트 구성 (system + history + input + scratchpad)</span>
 <span class="n">prompt</span> <span class="o">=</span> <span class="n">ChatPromptTemplate</span><span class="o">.</span><span class="n">from_messages</span><span class="p">([</span>
-    <span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">system_prompt</span><span class="p">),</span>
-    <span class="n">MessagesPlaceholder</span><span class="p">(</span><span class="s2">&quot;history&quot;</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-    <span class="p">(</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{question}</span><span class="s2">&quot;</span><span class="p">),</span>
-    <span class="n">MessagesPlaceholder</span><span class="p">(</span><span class="s2">&quot;agent_scratchpad&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">SYSTEM_PROMPT</span><span class="p">),</span>
+    <span class="n">MessagesPlaceholder</span><span class="p">(</span><span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;chat_history&quot;</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{input}</span><span class="s2">&quot;</span><span class="p">),</span>
+    <span class="n">MessagesPlaceholder</span><span class="p">(</span><span class="n">variable_name</span><span class="o">=</span><span class="s2">&quot;agent_scratchpad&quot;</span><span class="p">),</span>
 <span class="p">])</span>
 
-<span class="n">agent</span> <span class="o">=</span> <span class="n">create_tool_calling_agent</span><span class="p">(</span><span class="n">llm</span><span class="p">,</span> <span class="n">tools</span><span class="p">,</span> <span class="n">prompt</span><span class="p">)</span>
-<span class="n">executor</span> <span class="o">=</span> <span class="n">AgentExecutor</span><span class="p">(</span><span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span></div>
+<span class="c1"># 2. Tool Calling Agent 생성</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">create_tool_calling_agent</span><span class="p">(</span><span class="n">llm</span><span class="o">=</span><span class="n">llm</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">ALL_TOOLS</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">)</span>
+
+<span class="c1"># 3. AgentExecutor 래핑 (중간 단계 반환 활성화)</span>
+<span class="n">executor</span> <span class="o">=</span> <span class="n">AgentExecutor</span><span class="p">(</span>
+    <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">ALL_TOOLS</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_intermediate_steps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">max_iterations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">handle_parsing_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span></div>
 <p>등장한 LangChain 부품 세 개를 한 줄씩 정리합니다.</p>
 <table>
 <thead>
@@ -455,34 +600,91 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </tr>
 </tbody>
 </table>
-<p>&quot;LLM이 도구를 한 번 고르는 것&quot;과 &quot;복잡한 질문을 풀기 위해 도구를 여러 번 반복 호출하는 것&quot;은 다릅니다. 전자는 <code>create_tool_calling_agent</code>만으로 되지만, 후자는 <code>AgentExecutor</code>가 루프를 돌려야 가능해요. <code>agent_scratchpad</code>는 그 루프의 기억 창구입니다.</p>
-<h2>6.10 서버 실행 + 복합 질문 테스트</h2>
+<p>&quot;LLM이 도구를 한 번 고르는 것&quot;과 &quot;복잡한 질문을 풀기 위해 도구를 여러 번 반복 호출하는 것&quot;은 다릅니다. 전자는 <code>create_tool_calling_agent</code>만으로 되지만, 후자는 <code>AgentExecutor</code>가 루프를 돌려야 가능합니다. <code>agent_scratchpad</code>는 그 루프의 기억 창구입니다.</p>
+<h2>6.6 서버 실행 + 복합 질문 테스트</h2>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 서버 실행</div>python<span class="w"> </span>run.py</div>
-<p>브라우저에서 <code>http://localhost:8000/chat</code>을 엽니다. 이번엔 모드 토글이 생겼어요. <strong>Agent 모드</strong>로 바꾼 뒤 동료가 처음 했던 복합 질문을 던져 봅니다.</p>
-<div class="dialogue"><span class="speaker">동료</span>: "A 사원 연차 며칠 남았어요? 그리고 연차 신청 절차도 알려주세요."</div>
-<div class="chapter-image terminal"><img src="./assets/CH06/terminal/06_chat-hybrid-demo.png" alt="" /><div class="caption">그림 6-5. 복합 질문에 대한 답변. DB에서 숫자를 꺼내고 문서에서 절차를 찾아 한 답으로 정리합니다</div></div>
-<p>에이전트가 내부에서 <code>get_leave_balance</code> → <code>search_documents</code> 순으로 도구를 호출하고, 결과를 묶어 자연어로 답변한 모습입니다.</p>
-<div class="chapter-image terminal"><img src="./assets/CH06/terminal/06_agent-run.png" alt="" /><div class="caption">그림 6-6. 터미널 <code>verbose=True</code> 로그. Reason, Act, Observe 루프가 실제로 돌아가는 모습</div></div>
+<p>브라우저에서 <code>http://localhost:8000/chat</code>을 엽니다. 이번엔 모드 토글이 생겼습니다. <strong>Agent 모드</strong>로 바꾸면 화면 상단에 <strong>정형·비정형·복합</strong> 세 그룹으로 묶인 샘플 질문 버튼이 나타납니다. 하나씩 눌러 에이전트가 어떤 경로로 답변하는지 확인합니다.</p>
+<table>
+<thead>
+<tr>
+<th>질문 유형</th>
+<th>예시 버튼</th>
+<th>에이전트가 부르는 도구</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>정형</strong></td>
+<td>&quot;김민준 연차 잔여일수 알려줘&quot; · &quot;영업부 11월 매출 합계가 얼마야?&quot; · &quot;개발부 직원 목록 보여줘&quot;</td>
+<td><code>leave_balance</code> · <code>sales_sum</code> · <code>list_employees</code></td>
+</tr>
+<tr>
+<td><strong>비정형</strong></td>
+<td>&quot;온보딩 절차가 어떻게 되나요?&quot; · &quot;보안 정책에 대해 설명해줘&quot; · &quot;출장 비용 규정 알려줘&quot;</td>
+<td><code>search_documents</code></td>
+</tr>
+<tr>
+<td><strong>복합</strong></td>
+<td>&quot;매출 상위 부서의 워케이션 규정은?&quot; · &quot;정시우 사원의 연차 잔여와 휴가 규정을 설명해주세요&quot;</td>
+<td>여러 도구 연쇄 호출</td>
+</tr>
+</tbody>
+</table>
+<div class="chapter-image terminal"><img src="./assets/CH06/terminal/06_chat-hybrid-demo.png" alt="" /><div class="caption">그림 6-5. 복합 질문 &quot;정시우 사원의 연차 잔여와 휴가 규정을 설명해주세요&quot;에 대한 답변입니다. DB에서 숫자를 꺼내고 문서에서 절차를 찾아 한 답으로 정리합니다</div></div>
+<p>&quot;정시우 사원의 연차 잔여와 휴가 규정을 설명해주세요&quot;라는 복합 질문이 들어왔을 때, 에이전트 머릿속의 사슬 추론은 이렇게 흘러갑니다.</p>
+<blockquote>
+<p><strong>Reason 1</strong>: &quot;연차 잔여일은 DB에 있겠지. leave_balance를 호출하자.&quot;
+<strong>Act 1</strong>: <code>leave_balance(emp_no=&quot;E003&quot;)</code> → <strong>Observe 1</strong>: &quot;총 15일, 사용 7일, 잔여 8일&quot;
+<strong>Reason 2</strong>: &quot;잔여일은 알았고, 휴가 규정은 문서에 있겠지.&quot;
+<strong>Act 2</strong>: <code>search_documents(&quot;휴가 규정&quot;)</code> → <strong>Observe 2</strong>: &quot;취업규칙 제15조 연차유급휴가...&quot;
+<strong>Reason 3</strong>: &quot;두 정보 다 모였다. 답변을 만들자.&quot;</p>
+</blockquote>
+<p>챕터 1의 사슬 추론은 머릿속에서 한 번에 끝났지만, ReAct는 <strong>도구를 호출하고 결과를 확인하는 행동</strong>이 추론 사이사이에 끼어듭니다. 생각의 고리가 행동으로 이어지고, 행동의 결과가 다음 생각의 입력이 됩니다.</p>
+<div class="chapter-image terminal"><img src="./assets/CH06/terminal/06_agent-run-real.png" alt="" /><div class="caption">그림 6-6. <code>python -m src.agent</code> 실행 결과입니다. 도구 호출 → 사후 분류 → 최종 답변까지 실제 단계별 로그가 찍힙니다</div></div>
 <div class="dialogue"><span class="speaker">동료</span>: "이제 진짜 비서 같은데요."</div>
-<h2>6.11 전체 구성도에서 챕터 6의 자리</h2>
+<p>오픈이가 수첩을 꺼냈습니다. 입사 3일 차에 처음 AI 비서를 켰을 때와 지금의 차이를 한 장 안에 적어 두고 싶었습니다.</p>
+<div class="memo-box">
+<p><strong>— 생각 정리 —</strong></p>
+<ol>
+<li><strong>정형 질문</strong>
+<ul>
+<li>&quot;A 사원 연차 잔여?&quot; 같은 숫자·필드 조회</li>
+<li>DB 도구 하나면 빠르게 답함</li>
+</ul>
+</li>
+<li><strong>비정형 질문</strong>
+<ul>
+<li>&quot;연차 신청 절차?&quot; 같은 규정·매뉴얼 조회</li>
+<li>문서 검색으로 정확한 근거 제공</li>
+</ul>
+</li>
+<li><strong>복합 질문</strong>
+<ul>
+<li>정형 + 비정형이 한 문장에 섞인 경우</li>
+<li>ReAct로 도구를 연쇄 호출해 한 번에 답함</li>
+</ul>
+</li>
+</ol>
+<p><strong>→ 에이전트가 &quot;어느 자료함을 열지&quot; 스스로 판단</strong></p>
+</div>
+<h2>6.7 전체 구성도에서 챕터 6의 자리</h2>
 <div class="arch-fullmap">
   <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 6 범위</div>
   <div class="afm-row afm-user">
-    <div class="afm-box afm-faint afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
+    <div class="afm-box afm-built afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
   </div>
   <div class="afm-zone">
     <span class="afm-zone-ch">챕터 2</span>
     <span class="afm-zone-label">대시보드</span>
     <div class="afm-row">
-      <div class="afm-box afm-faint"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
     </div>
   </div>
   <div class="afm-zone">
     <span class="afm-zone-ch">챕터 6</span>
     <span class="afm-zone-label">오케스트레이션</span>
-    <div class="afm-row afm-three">
-      <div class="afm-box afm-on"><div class="afm-tag">오늘 만든 부분</div><div class="afm-label">Query Router</div><div class="afm-sub">규칙·스키마·LLM</div></div>
-      <div class="afm-box afm-on"><div class="afm-tag">오늘 만든 부분</div><div class="afm-label">LCEL Agent Chain</div><div class="afm-sub">ReAct 패턴</div></div>
+    <div class="afm-row afm-two">
+      <div class="afm-box afm-on"><div class="afm-tag">오늘 만든 부분</div><div class="afm-label">Tool Calling Agent</div><div class="afm-sub">ReAct 패턴 · 사후 분류</div></div>
       <div class="afm-box afm-on"><div class="afm-tag">오늘 만든 부분</div><div class="afm-label">MCP Tools</div><div class="afm-sub">DB 조회 · 문서 검색</div></div>
     </div>
   </div>
@@ -490,31 +692,35 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
     <span class="afm-zone-ch">챕터 5</span>
     <span class="afm-zone-label">검색 (실시간)</span>
     <div class="afm-row">
-      <div class="afm-box afm-faint"><div class="afm-label">LCEL Chain</div><div class="afm-sub">검색기 → 프롬프트 → LLM</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">LCEL Chain</div><div class="afm-sub">검색기 → 프롬프트 → LLM</div></div>
     </div>
   </div>
   <div class="afm-zone">
     <span class="afm-zone-ch">챕터 4</span>
     <span class="afm-zone-label">파싱·벡터화 (오프라인)</span>
     <div class="afm-row afm-three">
-      <div class="afm-box afm-faint afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
-      <div class="afm-box afm-faint"><div class="afm-label">Doc Pipeline</div><div class="afm-sub">파싱·청킹·임베딩</div></div>
-      <div class="afm-box afm-faint"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
+      <div class="afm-box afm-built afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">Doc Pipeline</div><div class="afm-sub">파싱·청킹·임베딩</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
     </div>
   </div>
   <div class="afm-zone">
     <span class="afm-zone-ch">챕터 2</span>
     <span class="afm-zone-label">데이터</span>
     <div class="afm-row">
-      <div class="afm-box afm-faint"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
     </div>
   </div>
   <div class="afm-row afm-ext">
     <div class="afm-box afm-faint afm-dashed"><div class="afm-label">Ollama LLM (외부)</div></div>
   </div>
   <div class="afm-note">
-    오늘 채운 건 <b>Query Router, LCEL Agent Chain, MCP Tools</b> 세 박스입니다. 위쪽 사용자 입력부터 아래쪽 데이터, 문서 저장소까지 전 구간이 하나로 연결됐어요. 챕터 7에서는 이 에이전트를 실제 운영에 올렸을 때 생기는 속도, 비용 문제를 ResponseCache와 TokenTracker로 잡습니다.
+    오늘 채운 건 <b>Tool Calling Agent와 MCP Tools</b> 두 박스입니다. 위쪽 사용자 입력부터 아래쪽 데이터, 문서 저장소까지 전 구간이 하나로 연결됐습니다. 챕터 7에서는 이 에이전트를 실제 운영에 올렸을 때 생기는 속도, 비용 문제를 ResponseCache와 TokenTracker로 잡습니다.
   </div>
+</div>
+<div class="tip">
+<p><strong>종료합니다</strong></p>
+<p><code>Ctrl + C</code>로 서버를 종료합니다. Docker 컨테이너는 챕터 7에서도 같은 PostgreSQL·ChromaDB를 쓰므로 그대로 두세요.</p>
 </div>
 <h2>용어 정리</h2>
 <table>
@@ -527,19 +733,19 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </thead>
 <tbody>
 <tr>
-<td>&quot;안내데스크 전체&quot;</td>
+<td>&quot;만능 사서&quot;</td>
 <td><strong>에이전트 (Agent)</strong></td>
 <td>질문을 받아 스스로 판단하고 도구를 선택·실행해 답변을 만드는 자율 프로그램</td>
 </tr>
 <tr>
-<td>&quot;안내데스크 분류 기준&quot;</td>
-<td><strong>QueryRouter</strong></td>
-<td>질문을 분석해 처리 경로(structured·unstructured·hybrid)를 결정하는 분류기</td>
-</tr>
-<tr>
-<td>&quot;담당자&quot;</td>
+<td>&quot;자료함&quot; (장부실 · 서가)</td>
 <td><strong>도구 (Tool)</strong></td>
 <td><code>@tool</code> 데코레이터로 감싼 함수. 에이전트가 선택 실행하는 원자 작업 단위</td>
+</tr>
+<tr>
+<td>&quot;호출한 도구로 라벨 붙이기&quot;</td>
+<td><strong>사후 분류 (Post-hoc)</strong></td>
+<td>에이전트가 실행 후 실제 호출한 도구 종류로 질문 유형(structured·unstructured·hybrid)을 확정하는 방식</td>
 </tr>
 <tr>
 <td>&quot;생각 → 행동 → 관찰&quot;</td>
@@ -557,7 +763,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
 <li><strong>문서 검색만으론 진짜 비서가 될 수 없습니다.</strong> 정형 데이터(DB)와 비정형 데이터(문서)를 한 에이전트에서 통합해야 &quot;연차 며칠?&quot;, &quot;신청 절차?&quot;, &quot;둘 다&quot;를 모두 답할 수 있습니다.</li>
-<li><strong>QueryRouter는 단순 → 정교 순서로 판단합니다.</strong> 키워드 → 컬럼명 → LLM. 쉬운 건 빨리, 어려운 것만 비용을 들여 판단하는 계층 구조입니다.</li>
+<li><strong>분류는 사전 판정이 아니라 사후 분류입니다.</strong> 에이전트가 자율적으로 도구를 고르고, 실제 호출된 도구 종류로 질문 유형이 확정됩니다. 두 도구가 모두 호출되면 그게 바로 복합(hybrid)입니다.</li>
 <li><strong>ReAct 루프가 복합 질문을 풉니다.</strong> Reason, Act, Observe 반복으로 에이전트가 도구를 여러 번 호출하고 결과를 묶어 한 답으로 돌려 줍니다. 챕터 7에서는 이 에이전트의 속도, 비용을 잡는 운영 기술을 다룹니다.</li>
 </ul>
 </div>

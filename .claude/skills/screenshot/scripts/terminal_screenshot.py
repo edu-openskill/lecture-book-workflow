@@ -96,11 +96,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .output {{
     color: #222222;
     font-size: 13px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    word-break: break-all;
-    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
-                 'Menlo', 'Monaco', 'Courier New', monospace;
+    line-height: 1.5;
+    white-space: pre;
+    word-break: normal;
+    overflow-x: auto;
+    font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+  }}
+  .output pre {{
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }}
+  .output code {{
+    font-family: inherit;
   }}
   .output .err {{ color: #cc0000; font-weight: 500; }}
   .output .ok  {{ color: #2a9d2a; font-weight: 500; }}
@@ -124,7 +133,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 """
 
 
+def strip_ansi(text: str) -> str:
+    """ANSI escape codes 제거"""
+    import re
+    return re.sub(r'\x1b\[[0-9;]*[mGKHJr]', '', text)
+
+
 def escape_html(text: str) -> str:
+    text = strip_ansi(text)
     return (text
             .replace("&", "&amp;")
             .replace("<", "&lt;")
@@ -132,14 +148,138 @@ def escape_html(text: str) -> str:
             .replace('"', "&quot;"))
 
 
-def colorize_output(text: str) -> str:
-    """에러/성공 키워드에 색상 클래스 적용"""
+NOISE_KEYWORDS = [
+    "deprecationwarning", "loading weights", "load report", "unexpected",
+    "warning: you are", "position_ids", "huggingfacehub", "can be ignored",
+    "langchaindeprecationwarning", "pip install", "import as",
+    "notes:", "status", "it/s]", "it/s",
+    "huggingfaceembeddings", "embeddings =", "model_kwargs",
+]
+
+
+def _filter_noise(text: str) -> str:
+    """노이즈 라인을 제거한다."""
     lines = []
     for line in text.split("\n"):
+        lower = line.lower().strip()
+        if any(k in lower for k in NOISE_KEYWORDS):
+            continue
+        if lower.startswith("---") and "+" in lower:
+            continue
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _make_table_html(table_lines: list, title: str = "", compact: bool = False) -> str:
+    """파싱된 테이블 행을 HTML <table>로 변환."""
+    html = ""
+    if title:
+        html += f'<div style="text-align:center;font-size:12px;font-weight:bold;margin:6px 0 3px">{escape_html(title)}</div>'
+    fs = "11px" if compact else "12px"
+    pad = "4px 6px" if compact else "5px 10px"
+    html += f'<table style="border-collapse:collapse;width:100%;font-size:{fs};margin:0 0 6px">'
+    for tl in table_lines:
+        cells = [c.strip() for c in tl.split("│")[1:-1]]
+        if not cells:
+            cells = [c.strip() for c in tl.split("┃")[1:-1]]
+        if cells:
+            # compact 모드: 긴 셀 30자 제한
+            if compact:
+                cells = [c[:30] + "…" if len(c) > 30 else c for c in cells]
+            tag = "th" if "┃" in tl else "td"
+            style = f'style="padding:{pad};border:1px solid #ddd;text-align:left;white-space:nowrap"'
+            if tag == "th":
+                style = f'style="padding:{pad};border:1px solid #ccc;background:#f5f5f5;font-weight:bold;text-align:left;white-space:nowrap"'
+            html += "<tr>" + "".join(f"<{tag} {style}>{escape_html(c)}</{tag}>" for c in cells) + "</tr>"
+    html += "</table>"
+    return html
+
+
+def _rich_table_to_html(text: str) -> str:
+    """Rich 유니코드 테이블(┏━┳ 등)을 HTML <table>로 변환한다.
+    테이블 2개 이상이면 2열(grid)로 배치."""
+    cleaned = strip_ansi(text)
+    lines = cleaned.split("\n")
+    pre_lines = []      # 테이블 전 텍스트
+    tables = []          # [(title, table_html), ...]
+    post_lines = []      # 테이블 후 텍스트
+    table_rows = []
+    in_table = False
+    title_candidate = ""
+    tables_done = False
+
+    for line in lines:
+        stripped = line.strip()
+        # 테이블 시작
+        if stripped.startswith("┏") or stripped.startswith("╒"):
+            in_table = True
+            table_rows = []
+            continue
+        # 테이블 끝
+        if in_table and (stripped.startswith("└") or stripped.startswith("╘")):
+            in_table = False
+            tables.append((title_candidate, table_rows[:]))  # (title, rows) 저장, 나중에 HTML 변환
+            title_candidate = ""
+            continue
+        # 테이블 구분선
+        if in_table and (stripped.startswith("┡") or stripped.startswith("├") or stripped.startswith("╞")):
+            continue
+        # 테이블 데이터 행
+        if in_table and ("│" in stripped or "┃" in stripped):
+            table_rows.append(stripped)
+            continue
+        # 테이블 밖
+        if not in_table:
+            # 제목 후보: 다음 줄이 ┏일 수 있음
+            if stripped and not any(c in stripped for c in "┏┃│└┡━"):
+                if title_candidate and not tables:
+                    pre_lines.append(escape_html(title_candidate))
+                title_candidate = stripped
+            elif not stripped:
+                if title_candidate and not tables:
+                    pre_lines.append(escape_html(title_candidate))
+                    title_candidate = ""
+                if tables:
+                    pass  # 테이블 사이 빈 줄 스킵
+                else:
+                    pre_lines.append("")
+            else:
+                if tables:
+                    post_lines.append(escape_html(line))
+                else:
+                    pre_lines.append(escape_html(line))
+
+    # 마지막 제목 후보 처리
+    if title_candidate and not tables:
+        pre_lines.append(escape_html(title_candidate))
+
+    # 조립
+    compact = len(tables) >= 2
+    result = "\n".join(pre_lines)
+    if tables:
+        for title, rows in tables:
+            result += "\n" + _make_table_html(rows, title, compact=compact)
+    if post_lines:
+        result += "\n" + "\n".join(post_lines)
+    return result
+
+
+def colorize_output(text: str) -> str:
+    """Rich 출력을 HTML로 변환. 테이블은 <table>로, 나머지는 텍스트로."""
+    text = _filter_noise(text)
+    cleaned = strip_ansi(text)
+
+    # 테이블이 있으면 변환
+    if "┏" in cleaned or "╒" in cleaned:
+        return _rich_table_to_html(text)
+
+    # 테이블 없으면 기본 처리
+    lines = []
+    for line in cleaned.split("\n"):
         lower = line.lower()
-        if any(k in lower for k in ["error", "traceback", "failed", "exception", "not found"]):
+        if any(k in lower for k in ["error", "traceback", "failed", "exception"]):
             lines.append(f'<span class="err">{escape_html(line)}</span>')
-        elif any(k in lower for k in ["success", "done", "completed", "ok", "pass"]):
+        elif any(k in lower for k in ["success", "done", "completed"]):
             lines.append(f'<span class="ok">{escape_html(line)}</span>')
         else:
             lines.append(escape_html(line))
@@ -147,22 +287,56 @@ def colorize_output(text: str) -> str:
 
 
 def run_and_capture(command: str, cwd: str = None, timeout: int = 60) -> tuple[str, int]:
+    """명령어를 PTY로 실행하여 Rich 유니코드 박스를 유지한다."""
+    import select, pty, errno
     try:
-        result = subprocess.run(
+        master_fd, slave_fd = pty.openpty()
+        env = os.environ.copy()
+        env["TERM"] = "xterm-256color"
+        env["COLUMNS"] = "100"
+        env["LINES"] = "50"
+        proc = subprocess.Popen(
             command,
             shell=True,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
+            stdout=slave_fd,
+            stderr=slave_fd,
             cwd=cwd,
-            timeout=timeout,
+            env=env,
+            close_fds=True,
         )
-        output = result.stdout
-        if result.stderr:
-            output += "\n[stderr]\n" + result.stderr
-        return output.strip(), result.returncode
+        os.close(slave_fd)
+        output_chunks = []
+        while True:
+            try:
+                r, _, _ = select.select([master_fd], [], [], 1.0)
+                if r:
+                    data = os.read(master_fd, 4096)
+                    if not data:
+                        break
+                    output_chunks.append(data.decode("utf-8", errors="replace"))
+                elif proc.poll() is not None:
+                    # 프로세스 종료 후 남은 데이터 읽기
+                    try:
+                        while True:
+                            data = os.read(master_fd, 4096)
+                            if not data:
+                                break
+                            output_chunks.append(data.decode("utf-8", errors="replace"))
+                    except OSError:
+                        pass
+                    break
+            except OSError as e:
+                if e.errno == errno.EIO:
+                    break
+                raise
+        os.close(master_fd)
+        proc.wait(timeout=timeout)
+        output = "".join(output_chunks)
+        # \r\n → \n, carriage return 정리
+        output = output.replace("\r\n", "\n").replace("\r", "")
+        return output.strip(), proc.returncode
     except subprocess.TimeoutExpired:
+        proc.kill()
         return f"[타임아웃: {timeout}초 초과]", 1
     except Exception as e:
         return f"[실행 오류: {e}]", 1
@@ -218,6 +392,7 @@ def main():
     parser.add_argument("--title", default="Terminal", help="창 제목")
     parser.add_argument("--timeout", type=int, default=60, help="타임아웃(초)")
     parser.add_argument("--display", default=None, help="스크린샷에 표시할 명령어 (실제 실행과 다를 때)")
+    parser.add_argument("--width", type=int, default=860, help="터미널 폭(px). 2열 테이블은 1200 권장")
     args = parser.parse_args()
 
     if not args.output and not args.png:

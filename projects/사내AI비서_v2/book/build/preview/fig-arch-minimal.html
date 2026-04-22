@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 구성도 — 미니멀 버전 (테두리 최소화)</title>
+<style>
+:root {
+  --color-surface: #f8fafc;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #cbd5e1;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-heading: #0f172a;
+  --color-accent: #2563eb;
+  --color-accent-text: #1e40af;
+  --color-accent-bg: #eff6ff;
+  --color-accent-soft: #dbeafe;
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-success-text: #166534;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --font-mono: "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--color-text); background: white; max-width: 1100px; margin: 32px auto; padding: 0 24px 64px; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--color-text-heading); padding-bottom: 8px; margin-bottom: 8px; }
+.intro { color: var(--color-text-muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
+h2 { margin-top: 56px; font-size: 17px; color: var(--color-accent-text); border-bottom: 1px solid var(--color-border); padding-bottom: 6px; }
+.tag { display: inline-block; background: var(--color-accent-bg); color: var(--color-accent-text); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.note { color: var(--color-text-muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.6; }
+
+/* ==== 미니멀 스타일: 테두리 최소, 배경색과 여백으로 계층 표현 ==== */
+
+/* Zone 라벨: 좌측 상단 작은 태그. 박스 테두리 없음. */
+.zl { font-size: 10px; font-weight: 700; color: var(--color-text-muted); letter-spacing: 0.5px; margin-bottom: 6px; text-transform: uppercase; }
+.zl.accent { color: var(--color-accent); }
+
+/* Card: 테두리 없이 배경색으로 상태 표시 */
+.c { border-radius: var(--radius-md); padding: 9px 12px; font-size: 12px; line-height: 1.35; }
+.c .t { font-weight: 700; font-size: 12px; color: var(--color-text-heading); }
+.c .s { color: var(--color-text-muted); font-size: 10px; margin-top: 2px; }
+.c.built { background: var(--color-surface-alt); }
+.c.accent { background: var(--color-accent-soft); }
+.c.accent .t { color: var(--color-accent-text); }
+.c.outline { background: white; border: 1px dashed var(--color-border); }
+.c.ext { background: transparent; border: 1px dashed var(--color-border); }
+
+/* 미니 태그 inside card */
+.mini-badge { display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-bottom: 3px; letter-spacing: 0.3px; }
+.mini-badge.new { background: var(--color-accent); color: white; }
+.mini-badge.keep { background: var(--color-success-bg); color: var(--color-success-text); }
+.mini-badge.tuned { background: var(--color-success); color: white; }
+
+/* 단계 번호 */
+.n { display: inline-flex; width: 18px; height: 18px; border-radius: 50%; background: var(--color-accent); color: white; font-size: 10px; font-weight: 700; align-items: center; justify-content: center; margin-right: 4px; vertical-align: middle; }
+
+/* 행 */
+.row { display: grid; gap: 8px; }
+.row.c1 { grid-template-columns: 1fr; }
+.row.c2 { grid-template-columns: 1fr 1fr; }
+.row.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.row.c5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+
+/* Zone: 배경색으로만 구분, 테두리 제거 */
+.zone { padding: 14px 14px 14px; border-radius: var(--radius-lg); }
+.zone.normal { background: transparent; }
+.zone.accent-bg { background: var(--color-accent-bg); }
+
+/* 좌측 accent 라인 (박스 전체 감싸는 대신) */
+.zone.rail-accent { border-left: 3px solid var(--color-accent); padding-left: 16px; background: transparent; }
+.zone.rail-muted { border-left: 3px solid var(--color-border); padding-left: 16px; background: transparent; }
+
+/* 전체 구성도 컨테이너: 테두리 1개만 유지 */
+.arch { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 24px; margin: 16px 0; }
+.arch-title { font-size: 13px; font-weight: 700; color: var(--color-text-heading); margin-bottom: 20px; text-align: center; }
+
+.arrow-v { text-align: center; color: var(--color-text-subtle); font-size: 13px; line-height: 1; margin: 3px 0; }
+.arrow-h { display: flex; align-items: center; justify-content: center; color: var(--color-accent); font-size: 16px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1>전체 구성도 — 미니멀 버전</h1>
+<p class="intro">
+테두리·박스 중첩을 <strong>최소화</strong>. 상태 구분은 <strong>배경색</strong>으로(accent-bg / 회색 / 투명), 그룹 구분은 <strong>좌측 3px 레일</strong> 또는 <strong>영역 배경</strong>만. 뱃지는 라벨만(박스 없음). 외곽은 전체 한 장에만 border 하나.
+</p>
+
+<!-- ============ V5m. 2열 + 번호 (미니멀) ============ -->
+<h2>V5m. 2열 + 번호 화살표 (미니멀) <span class="tag">추천</span></h2>
+<p class="note">왼쪽 = 요청 처리, 오른쪽 = 저장소·외부. 각 zone은 <strong>좌측 3px 레일 + 작은 라벨</strong>로만 구분. 카드는 배경색만 (테두리 없음).</p>
+
+<div class="arch">
+<div class="arch-title">V5m · 2열 + 번호 · 미니멀</div>
+
+<div style="display:flex;justify-content:center;margin-bottom:18px">
+<div style="background:var(--color-accent-bg);border-radius:100px;padding:6px 20px;font-size:12px;color:var(--color-accent-text);font-weight:700"><span class="n">1</span>사용자 · 채팅으로 질문</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1.4fr 30px 1fr;gap:20px;align-items:stretch">
+
+<!-- 왼쪽 파이프 -->
+<div style="display:flex;flex-direction:column;gap:14px">
+
+<div class="zone rail-muted">
+<div class="zl">CH02 · 대시보드</div>
+<div class="c built"><div class="t"><span class="n">2</span>FastAPI</div><div class="s">REST · 채팅 UI</div></div>
+</div>
+<div class="arrow-v">↓</div>
+
+<div class="zone rail-muted">
+<div class="zl">CH06 + CH07 · 오케스트레이션 + 운영</div>
+<div class="row c3" style="margin-bottom:6px">
+<div class="c built"><div class="t">ResponseCache</div></div>
+<div class="c built"><div class="t">TokenTracker</div></div>
+<div class="c built"><div class="t">Retry</div></div>
+</div>
+<div class="c built"><div class="t"><span class="n">3</span>IntegratedAgent (ReAct) + MCP Tools</div></div>
+</div>
+<div class="arrow-v">↓</div>
+
+<div class="zone rail-muted">
+<div class="zl">CH05 + 8 + 9 · 검색</div>
+<div class="c built"><span class="mini-badge tuned">튜닝 완료</span><div class="t"><span class="n">4</span>LCEL Chain</div></div>
+</div>
+<div class="arrow-v">↓</div>
+
+<div class="zone rail-accent">
+<div class="zl accent">CH04 + CH10 · 파싱 (NEW)</div>
+<div class="row c2">
+<div class="c accent"><span class="mini-badge new">+ Vision</span><div class="t">Doc Pipeline</div></div>
+<div class="c built"><div class="t">ChromaDB</div></div>
+</div>
+</div>
+</div>
+
+<!-- 중간 가로 화살표 -->
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:space-around;color:var(--color-accent);font-size:11px">
+<div style="font-size:18px">↔</div>
+<div style="font-size:18px">↔</div>
+<div style="font-size:18px">↔</div>
+</div>
+
+<!-- 오른쪽: 저장소 + 외부 -->
+<div style="display:flex;flex-direction:column;gap:14px;justify-content:center">
+<div class="zone rail-muted">
+<div class="zl">CH02 · 데이터</div>
+<div class="c built"><div class="t">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="zone rail-muted">
+<div class="zl">CH04 · 저장소</div>
+<div class="c built"><div class="t">ChromaDB</div><div class="s">벡터 저장소</div></div>
+</div>
+<div class="zone rail-muted">
+<div class="zl">외부 · LLM</div>
+<div class="c ext"><div class="t">Ollama</div><div class="s">llama3.1 + minicpm-v</div></div>
+</div>
+</div>
+</div>
+
+<!-- 하단: RAG 평가 -->
+<div style="margin-top:20px;padding-top:16px;border-top:1px dashed var(--color-border)">
+<div style="display:flex;justify-content:center">
+<div class="zone rail-accent" style="max-width:520px">
+<div class="zl accent">CH10 · 뒷단 평가 (NEW)</div>
+<div class="c accent"><div class="t"><span class="n">5</span>RAG 평가 프레임워크</div><div class="s">Precision@k · Recall · Hallucination · Latency</div></div>
+</div>
+</div>
+</div>
+
+<div style="margin-top:12px;font-size:10px;color:var(--color-text-muted);text-align:center;line-height:1.6">번호 ①~⑤가 질문의 시간순 이동. 왼쪽 = 처리 흐름 · 오른쪽 = 참조 저장소·외부. 좌측 파란 레일이 이번 챕터(CH10) 확장 구간.</div>
+</div>
+
+<!-- ============ V7m. 격자 + 번호 (미니멀) ============ -->
+<h2>V7m. 격자 매트릭스 + 번호 (미니멀) <span class="tag">추천 · 조망형</span></h2>
+<p class="note">3열 격자. zone 외곽 테두리 없음. <strong>배경색</strong>(accent-bg / 투명)으로만 이번 챕터 추가분 표시. 카드도 테두리 없이 배경색만.</p>
+
+<div class="arch">
+<div class="arch-title">V7m · 격자 매트릭스 · 미니멀</div>
+
+<!-- 사용자 -->
+<div style="display:flex;justify-content:center;margin-bottom:18px">
+<div style="background:var(--color-accent-bg);border-radius:100px;padding:6px 20px;font-size:12px;color:var(--color-accent-text);font-weight:700"><span class="n">1</span>사용자</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+
+<!-- Row: FastAPI (center only) -->
+<div></div>
+<div class="zone normal" style="text-align:center"><div class="zl">CH02 · 대시보드</div><div class="c built"><div class="t"><span class="n">2</span>FastAPI</div><div class="s">REST · 채팅 UI</div></div></div>
+<div></div>
+
+<!-- Row: Orchestration span 3 -->
+<div class="zone normal" style="grid-column:1/4"><div class="zl">CH06 + CH07 · 오케스트레이션 + 운영</div>
+<div class="row c5"><div class="c built"><div class="t">ResponseCache</div></div><div class="c built"><div class="t">TokenTracker</div></div><div class="c built"><div class="t">Retry</div></div><div class="c built"><div class="t"><span class="n">3</span>IntegratedAgent</div><div class="s">ReAct 루프</div></div><div class="c built"><div class="t">MCP Tools</div><div class="s">4개 도구</div></div></div>
+</div>
+
+<!-- Row: LCEL | Doc Pipeline(accent) | Chroma -->
+<div class="zone normal"><div class="zl">CH05+8+9 · 검색</div><div class="c built"><span class="mini-badge tuned">튜닝 완료</span><div class="t"><span class="n">4</span>LCEL Chain</div></div></div>
+<div class="zone accent-bg"><div class="zl accent">CH04+10 · 파싱 (NEW)</div><div class="c accent"><span class="mini-badge new">+ Vision</span><div class="t">Doc Pipeline</div><div class="s">pypdf → Vision</div></div></div>
+<div class="zone normal"><div class="zl">CH04 · 저장</div><div class="c built"><div class="t"><span class="n">5</span>ChromaDB</div><div class="s">벡터 저장소</div></div></div>
+
+<!-- Row: Postgres | LLM | RAG 평가 (accent) -->
+<div class="zone normal"><div class="zl">CH02 · 데이터</div><div class="c built"><div class="t"><span class="n">5</span>PostgreSQL</div><div class="s">직원·연차·매출</div></div></div>
+<div class="zone normal"><div class="zl">외부 · LLM</div><div class="c ext"><div class="t"><span class="n">6</span>Ollama</div><div class="s">llama3.1 + Vision</div></div></div>
+<div class="zone accent-bg"><div class="zl accent">CH10 · 평가 (NEW)</div><div class="c accent"><div class="t"><span class="n">7</span>RAG 평가</div><div class="s">Precision · Recall · Hallucination</div></div></div>
+</div>
+
+<!-- 범례 -->
+<div style="margin-top:18px;padding-top:14px;border-top:1px dashed var(--color-border);display:flex;justify-content:center;gap:14px;font-size:10px;color:var(--color-text-muted);flex-wrap:wrap">
+<div><span class="n">1</span>질문</div><div><span class="n">2</span>FastAPI</div><div><span class="n">3</span>Agent 판단</div><div><span class="n">4</span>도구 + LCEL</div><div><span class="n">5</span>Chroma / Postgres</div><div><span class="n">6</span>LLM</div><div><span class="n">7</span>평가</div>
+</div>
+</div>
+
+<!-- ============ V7mx. 격자 + 가로 화살표 강조 ============ -->
+<h2>V7mx. 격자 + 방향 화살표 오버레이 <span class="tag">실험</span></h2>
+<p class="note">V7m 위에 row 사이에 <strong>굵은 accent 세로선</strong>을 그어 "위에서 아래로 흐름" 강화. 격자 조망 + 흐름 화살표 동시.</p>
+
+<div class="arch">
+<div class="arch-title">V7mx · 격자 + 세로 흐름선</div>
+
+<div style="display:flex;justify-content:center;margin-bottom:14px">
+<div style="background:var(--color-accent-bg);border-radius:100px;padding:6px 20px;font-size:12px;color:var(--color-accent-text);font-weight:700"><span class="n">1</span>사용자</div>
+</div>
+<div style="text-align:center;color:var(--color-accent);font-size:16px;margin-bottom:8px">↓</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;position:relative">
+<!-- 가운데 세로 흐름 선 -->
+<div style="position:absolute;left:50%;top:60px;bottom:60px;width:2px;background:var(--color-accent);opacity:0.25;transform:translateX(-50%);pointer-events:none"></div>
+
+<div></div>
+<div class="zone normal" style="text-align:center"><div class="zl">CH02 · 대시보드</div><div class="c built"><div class="t"><span class="n">2</span>FastAPI</div></div></div>
+<div></div>
+
+<div class="zone normal" style="grid-column:1/4"><div class="zl">CH06 + CH07 · 오케스트레이션 + 운영</div>
+<div class="row c5"><div class="c built"><div class="t">ResponseCache</div></div><div class="c built"><div class="t">TokenTracker</div></div><div class="c built"><div class="t">Retry</div></div><div class="c built"><div class="t"><span class="n">3</span>IntegratedAgent</div></div><div class="c built"><div class="t">MCP Tools</div></div></div>
+</div>
+
+<div class="zone normal"><div class="zl">CH05+8+9 · 검색</div><div class="c built"><span class="mini-badge tuned">튜닝</span><div class="t"><span class="n">4</span>LCEL Chain</div></div></div>
+<div class="zone accent-bg"><div class="zl accent">CH04+10 · 파싱 (NEW)</div><div class="c accent"><span class="mini-badge new">+ Vision</span><div class="t">Doc Pipeline</div></div></div>
+<div class="zone normal"><div class="zl">CH04 · 저장</div><div class="c built"><div class="t"><span class="n">5</span>ChromaDB</div></div></div>
+
+<div class="zone normal"><div class="zl">CH02 · 데이터</div><div class="c built"><div class="t"><span class="n">5</span>PostgreSQL</div></div></div>
+<div class="zone normal"><div class="zl">외부 · LLM</div><div class="c ext"><div class="t"><span class="n">6</span>Ollama</div></div></div>
+<div class="zone accent-bg"><div class="zl accent">CH10 · 평가 (NEW)</div><div class="c accent"><div class="t"><span class="n">7</span>RAG 평가</div></div></div>
+</div>
+</div>
+
+<!-- ============ 비교 ============ -->
+<h2 style="margin-top:80px">3개 비교</h2>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px;font-size:13px;line-height:1.8">
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+<tr style="background:var(--color-surface-alt)"><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">레이아웃</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">테두리</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">흐름 표현</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">적합</th></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>V5m · 2열 + 번호</b></td><td style="padding:6px;border:1px solid var(--color-border)">좌측 3px 레일만 · 카드 0</td><td style="padding:6px;border:1px solid var(--color-border)">번호 ①~⑤ + 세로 ↓ + 가로 ↔</td><td style="padding:6px;border:1px solid var(--color-border)">각 챕터 §N.last 기본</td></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>V7m · 격자 + 번호</b></td><td style="padding:6px;border:1px solid var(--color-border)">외곽 1개 · 영역 배경색만</td><td style="padding:6px;border:1px solid var(--color-border)">번호만으로 시계열 암시</td><td style="padding:6px;border:1px solid var(--color-border)">§10.10 완성본 · 한 장 조망</td></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>V7mx · 격자 + 세로 흐름선</b></td><td style="padding:6px;border:1px solid var(--color-border)">V7m 동일</td><td style="padding:6px;border:1px solid var(--color-border)">중앙 흐름선 + 번호</td><td style="padding:6px;border:1px solid var(--color-border)">조망 + 방향감</td></tr>
+</table>
+</div>
+
+<h2 style="margin-top:48px">적용 추천</h2>
+<ul style="font-size:13px;line-height:1.8">
+<li><strong>CH02~CH07 §N.last</strong>: <b>V5m (2열 + 번호)</b>. 챕터 진행에 따라 왼쪽 레일이 점차 accent로 채워짐. 처리 흐름·저장소 역할 분리 명확.</li>
+<li><strong>CH10 §10.10 완성본</strong>: <b>V7m 또는 V7mx (격자)</b>. 모든 요소를 한 장에 조망. "완성됐다"의 여운.</li>
+<li><strong>또는 모두 V7mx로 통일</strong>: 매 챕터 "같은 격자가 어디까지 채워졌는지" 한눈. 일관성 최강.</li>
+</ul>
+
+</body>
+</html>

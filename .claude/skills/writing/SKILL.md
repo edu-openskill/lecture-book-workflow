@@ -43,7 +43,15 @@ description: 스토리텔링 기반 기술 서적 집필. STEP 5(챕터 집필),
 
 | 파일 | 로드 시점 |
 |------|----------|
+| `projects/[책이름]/planning/code-analysis-vN.md` (최신) | **챕터 집필 시 (항상, 최우선)** — 코드 구조·재사용 원칙·기술 스택의 단일 근거 |
 | `references/storytelling.md` | 챕터 집필 시 (항상) |
 | `references/style.md` | 챕터 집필 시 (항상) |
 | `references/box-style.md` | 팁/주의/경고 박스 삽입 시 |
 | `references/project-buildup.md` | 버전 전환부 작성 시 |
+
+### code-analysis 사용 규칙
+
+1. 챕터 작성 전 `planning/code-analysis-vN.md` 가장 최근 버전을 반드시 읽는다
+2. 본문의 파일 경로·함수명·기술 스택이 code-analysis와 **일치**해야 한다
+3. 불일치 발견 시 본문만 고치지 말고 **어느 쪽이 현실과 맞는지 코드와 대조**한 뒤 두 문서를 동기화
+4. 코드 구조가 바뀌면 code-analysis에 **새 버전**(`-vN+1`) 생성 (덮어쓰기 금지)

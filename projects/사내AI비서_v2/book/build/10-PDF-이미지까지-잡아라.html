@@ -3,24 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>챕터 10 PDF 이미지까지 잡아라. Vision LLM과 RAG 평가</title>
+<title>챕터 10. PDF 이미지까지 잡아라. Vision LLM과 RAG 평가</title>
 
 <link rel="stylesheet" href="./styles/fonts.css">
-<link rel="stylesheet" href="./styles/book.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
 <link rel="stylesheet" href="./styles/print.css" media="print">
 
-
-<script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
 
 </head>
 <body>
 <div class="container">
-<h1>챕터 10 PDF 이미지까지 잡아라. Vision LLM과 RAG 평가</h1>
+<h1>챕터 10. PDF 이미지까지 잡아라. Vision LLM과 RAG 평가</h1>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
 <li><strong>스캔 PDF / 이미지 문서</strong>를 <strong>OCR</strong>과 <strong>Vision LLM</strong>으로 읽어 벡터 DB에 넣습니다</li>
-<li><strong>하이브리드 파서</strong>로 텍스트 레이어가 있으면 pypdf, 없으면 Vision LLM으로 자동 분기합니다</li>
+<li><strong>하이브리드 파서</strong>로 이미지가 있는 페이지는 Vision LLM, 텍스트만 있는 페이지는 pypdf로 자동 분기합니다</li>
 <li><strong>RAG 평가 프레임워크</strong>로 Precision@k, Recall, Hallucination Rate를 숫자로 측정합니다</li>
 <li><strong>느낌이 아니라 숫자</strong>로 품질을 판단하는 습관을 가집니다</li>
 </ul>
@@ -28,35 +30,85 @@
 <div class="prep-section-md">
 <p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
 <h3>1. 실습 폴더 이동</h3>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div>cd rag-start/ex10</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div><span class="nb">cd</span><span class="w"> </span>rag-start/ex10</div>
 <p>파일 구조는 다음과 같습니다.</p>
-<div class="code-block" data-lang="text"><div class="cb-title">ex10 디렉토리</div>ex10/
-├── run.py
-├── NanumGothic.ttf               # [참고] 한글 OCR용 폰트
-├── generate_real_pdfs.py         # [참고] 테스트 PDF 생성
-├── make_scanned_pdf.py           # [참고] 스캔본 시뮬레이션
+<div class="code-block highlight" data-lang="text"><div class="cb-title">ex10 디렉토리</div>ex10/
+├── requirements.txt              # [참고] easyocr · PyMuPDF · chromadb 등
 ├── data/
-│   ├── docs/                     # [참고] 원본(텍스트 PDF + 스캔 PDF)
-│   └── chroma_db/                # [참고] 벡터 DB
+│   ├── docs/                     # [참고] 원본 PDF (텍스트 + 스캔본)
+│   ├── test_questions.json       # [참고] 평가 셋 (질문·정답·근거 문서)
+│   └── chroma_db/                # 런타임 생성 (평가 프레임워크 벡터 DB)
 └── tuning/
     ├── step1_document_parser/    # [실습] OCR / Vision LLM 파서 비교
-    ├── step2_hybrid_parser/      # [실습] 텍스트 레이어 감지 후 자동 분기
-    └── step3_eval_framework/     # [실습] Precision@k · Hallucination Rate</div>
+    │   ├── __main__.py
+    │   ├── ocr.py                # [실습] EasyOCR 파서
+    │   ├── vision.py             # [실습] Vision LLM 파서
+    │   └── display.py
+    ├── step2_hybrid_parser/      # [실습] 텍스트 길이로 Vision 분기
+    │   ├── __main__.py
+    │   ├── hybrid_parser.py      # [실습] 하이브리드 파서
+    │   └── display.py
+    └── step3_eval_framework/     # [실습] Precision@k · Recall · 환각률 + A/B/C/D 조합 평가
+        ├── __main__.py
+        ├── metrics.py            # [실습] Precision@k · Recall@k · 환각률
+        ├── strategies.py         # [참고] A/B/C/D 4 조합 정의
+        ├── pipelines.py          # [참고] 파싱·청킹·쿼리·검색·리랭크 부품
+        ├── evaluator.py          # [참고] run_evaluation(strategy)
+        └── display.py</div>
+<blockquote>
+<p>챕터 7의 FastAPI 서버·채팅 UI·에이전트 레이어는 <strong>챕터 11 · <code>ex11/</code> 레포</strong>에서 완성 형태로 사용합니다. 챕터 10의 ex10은 튜닝 실험만 다룹니다.</p>
+</blockquote>
 <h3>2. 실습 환경 구축</h3>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div>cd ex10
-python3.12 -m venv .venv
-source .venv/bin/activate
-ollama pull llama3.2-vision:11b
-pip install -r requirements.txt
-brew install tesseract tesseract-lang</div>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div>cd ex10
-py -3.12 -m venv .venv
-.venv\Scripts\activate
-ollama pull llama3.2-vision:11b
-pip install -r requirements.txt</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div><span class="nb">cd</span><span class="w"> </span>ex10
+python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+ollama<span class="w"> </span>pull<span class="w"> </span>qwen2.5vl:7b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div><span class="nb">cd</span><span class="w"> </span>ex10
+py<span class="w"> </span>-3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+copy<span class="w"> </span>.env.example<span class="w"> </span>.env
+ollama<span class="w"> </span>pull<span class="w"> </span>qwen2.5vl:7b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
 <div class="tip">
-<p><strong>Tesseract, Vision LLM 모두 한국어 지원 모델을 고르세요</strong></p>
-<p>Tesseract는 <code>tesseract-lang</code> 패키지가 필요하고(<code>kor</code> 언어팩 포함), Ollama Vision 모델은 <code>llama3.2-vision:11b</code> 또는 <code>qwen2.5vl:7b</code>가 한국어 품질이 괜찮습니다. Windows에서는 Tesseract 공식 설치 후 PATH 등록이 필요합니다.</p>
+<p><strong>Vision LLM, 어떤 모델로 실습을 돌릴지 먼저 정하세요</strong></p>
+<p>EasyOCR은 <code>Reader([&quot;ko&quot;, &quot;en&quot;])</code>처럼 언어 코드만 지정하면 한국어+영어를 함께 인식하니 별다른 선택지가 없습니다. 갈림길은 <strong>Ollama Vision 모델</strong> 쪽입니다. 파라미터 수가 성능과 요구 사양을 동시에 결정하고, <strong>3B 이하</strong>는 노트북 CPU에서도 돌지만 한글·표 인식이 불안정합니다. <strong>7~8B</strong>가 로컬 실무의 현실적 기준선이고, <strong>13B 이상</strong>은 품질이 더 좋지만 GPU가 사실상 필수입니다.</p>
+<table>
+<thead>
+<tr>
+<th>모델</th>
+<th>VRAM/RAM</th>
+<th>한국어 품질</th>
+<th>권장 환경</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>qwen2.5vl:7b</code></td>
+<td>8GB 이상</td>
+<td>좋음</td>
+<td>RAM 8~16GB 노트북 (기본 권장)</td>
+</tr>
+<tr>
+<td><code>minicpm-v:latest</code></td>
+<td>8GB 이상</td>
+<td>괜찮음 (환각 있음)</td>
+<td>노트북, 빠른 실습용</td>
+</tr>
+<tr>
+<td><code>llama3.2-vision:11b</code></td>
+<td>16GB 이상</td>
+<td>좋음</td>
+<td>RAM 16GB 이상 데스크톱 (고품질)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>양자화(Quantization)</strong> : Ollama 태그에 보이는 <code>q4_0</code>·<code>q5_K_M</code>는 모델 가중치를 4~5비트로 압축했다는 뜻입니다. 용량과 RAM 사용량을 30~50% 줄여 주는 대신 정확도가 살짝 내려갑니다. 기본 태그(<code>:latest</code>)는 대개 품질과 크기의 절충점을 골라 둔 버전이라 실습에서는 그대로 써도 충분합니다.</li>
+<li><strong>고르는 순서</strong>: (1) 내 머신 RAM·VRAM 확인 → (2) 그 안에 들어가는 후보 1~2개 선정 → (3) 사내 문서 5~10장으로 품질 비교. 벤치마크 점수보다 <strong>우리 문서에서 잘 읽는지</strong>가 최종 기준입니다.</li>
+<li><strong>상용 API를 쓸 수 있는 경우</strong>: 인사 기록·계약서처럼 <strong>외부 유출이 금지된 사내 문서</strong>는 품질이 좋아도 API를 선택할 수 없습니다. 공개 자료나 외부 공문처럼 유출 제약이 없다면, <strong>GPT-4V가 아니라 <code>gpt-4o-mini</code></strong> 부터 검토하세요. Vision 입력을 그대로 지원하면서 <strong>GPT-4o의 약 1/10 요금</strong>으로, 표·스캔본 정도는 품질 차이를 체감하기 어렵습니다.</li>
+</ul>
 </div>
 <h3>3. 사용할 라이브러리</h3>
 <table>
@@ -68,12 +120,12 @@ pip install -r requirements.txt</div>
 </thead>
 <tbody>
 <tr>
-<td><code>pytesseract</code></td>
-<td>Tesseract OCR 파이썬 바인딩</td>
+<td><code>easyocr</code></td>
+<td>한국어+영어 OCR (EasyOCR)</td>
 </tr>
 <tr>
-<td><code>pdf2image</code></td>
-<td>PDF 페이지를 PIL 이미지로 변환</td>
+<td><code>PyMuPDF</code> (<code>import fitz</code>)</td>
+<td>PDF 페이지를 이미지로 변환</td>
 </tr>
 <tr>
 <td><code>Pillow</code></td>
@@ -92,75 +144,441 @@ pip install -r requirements.txt</div>
 <h3>4. 실습 순서</h3>
 <ol>
 <li><code>python -m tuning.step1_document_parser</code>. OCR vs Vision LLM 비교</li>
-<li><code>python -m tuning.step2_hybrid_parser</code>. 텍스트 레이어 감지 후 자동 분기</li>
+<li><code>python -m tuning.step2_hybrid_parser</code>. 이미지 감지 후 자동 분기</li>
 <li><code>python -m tuning.step3_eval_framework</code>. Precision@k, Hallucination Rate 측정</li>
 </ol>
 </div>
 <h2>10.1 스캔 PDF: 텍스트가 없다</h2>
-<div class="chapter-image gemini"><img src="./assets/CH10/gemini/10_chapter-opening.png" alt="" /><div class="caption">그림 10-1. 사서의 눈 + 성적표. 이미지도 읽고, 품질도 숫자로 측정합니다</div></div>
-<p>챕터 9까지 검색, 쿼리 모든 축을 다듬었습니다. 어느 날 팀장이 PDF 하나를 던져 줍니다.</p>
-<div class="dialogue"><span class="speaker">팀장</span>: "이 정보보안서약서도 검색되게 해줘."</div>
-<p>기존 파이프라인에 넣었습니다. pypdf 결과. <strong>빈 문자열</strong>. 스캔본이었습니다. 종이 문서를 스캐너로 찍은 PDF로, 전체가 하나의 이미지예요. 텍스트 레이어가 없으니 pypdf로는 한 글자도 못 꺼냅니다.</p>
-<p class="thought">사람은 한눈에 읽는데 사서는 속수무책이네.</p>
-<p>사내 문서에는 글자만 있는 게 아닙니다. 조직도(박스와 화살표), 매출 차트, 셀 병합된 표, 스캔한 종이. 이 중 어느 것도 챕터 4의 파서로는 제대로 못 읽습니다.</p>
-<h2>10.2 OCR vs Vision LLM</h2>
-<h3>OCR: 확대경</h3>
-<p><strong>광학 문자 인식(OCR)</strong> 은 이미지에서 글자를 인식합니다. 스캔본에서 글자를 꺼낼 때 씁니다. 사서에게 <strong>확대경</strong>을 쥐여 준 셈이에요. 작은 글씨는 읽지만 조직도의 &quot;박스 안팎 관계&quot;나 표의 &quot;셀 병합&quot;은 이해하지 못합니다.</p>
-<h3>Vision LLM. 눈을 가진 LLM</h3>
-<p><strong>Vision LLM</strong>은 이미지를 <strong>이해</strong>합니다. &quot;이 차트에서 2024년 매출이 얼마야?&quot;라고 물으면 막대그래프를 읽어 숫자를 알려 줍니다. 조직도의 보고 관계도 설명합니다. OCR이 확대경이라면 Vision LLM은 <strong>눈과 두뇌</strong>예요.</p>
-<div class="chapter-image gemini"><img src="./assets/CH10/gemini/10_ocr-vs-vision.png" alt="" /><div class="caption">그림 10-2. OCR은 글자만 읽고, Vision LLM은 이미지를 이해합니다</div></div>
-<h2>10.3 하이브리드 파서: 있으면 pypdf, 없으면 Vision</h2>
-<p>모든 PDF를 Vision LLM으로 처리하면 <strong>느리고 비쌉니다</strong>. 효율적 전략은 이렇습니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px;margin:var(--space-xl) 0">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:24px;text-align:center">그림 10-1. 스캔 PDF 문제 해결. OCR + Vision LLM으로 이미지도 읽고, 숫자로 품질을 측정합니다</div>
+<div style="display:flex;align-items:stretch;gap:16px">
+<div style="flex:1;background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-danger);margin-top:8px">Before</div>
+<div style="margin-top:8px;font-size:13px;color:var(--color-text-muted)">"정보보안서약서 내용?"</div>
+<div style="margin-top:12px;background:white;border:1px solid #fca5a5;border-radius:4px;padding:8px 12px;font-size:12px;color:var(--color-danger);line-height:1.5">텍스트를 찾을 수 없습니다<br><span style="font-size:11px;color:var(--color-text-subtle)">(스캔 PDF — 전체가 이미지)</span></div>
+</div>
+<div style="flex:2;display:flex;flex-direction:column;gap:10px;justify-content:center">
+<div style="display:flex;align-items:center;gap:12px;background:var(--color-info-bg);border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-info);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-info-text)">OCR (확대경)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">글자를 인식해 텍스트로 변환</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:var(--color-success-bg);border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-success);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-success-text)">Vision LLM (눈)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">이미지를 이해하고 구조까지 설명</div>
+</div>
+</div>
+</div>
+<div style="flex:1;background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-success);margin-top:8px">After</div>
+<div style="margin-top:8px;font-size:13px;color:var(--color-text-muted)">"정보보안서약서 내용?"</div>
+<div style="margin-top:12px;background:white;border:1px solid #86efac;border-radius:4px;padding:8px 12px;font-size:12px;color:var(--color-success);line-height:1.5">서약서 내용은 다음과 같습니다.<br>1. 기밀 유지 의무...<br><span style="font-size:11px;color:var(--color-text-subtle)">(Vision LLM이 이미지에서 읽음)</span></div>
+</div>
+</div>
+</div>
+<p>챕터 9까지 검색과 쿼리, 모든 축을 다듬었습니다. 금요일 오후, 키보드 소리만 또록또록 울리는 사무실에서 오픈이가 모니터를 정리하고 있을 때 팀장이 다가왔습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "이것도 넣어 줘요. 정보보안서약서."</div>
+<p>A4 용지를 스캔한 듯한 PDF 한 장. 오픈이가 기존 파이프라인에 넣었습니다.
+pypdf 결과, 빈 문자열.
+한 글자도 안 나왔습니다.</p>
+<p>파일을 열어 봤습니다. 스캔본이었습니다. 종이를 스캐너에 올려 찍은 PDF라 페이지 전체가 하나의 큰 이미지. 텍스트 레이어가 없으니 pypdf가 꺼낼 글자 자체가 없었습니다.</p>
+<p class="thought">사람 눈에는 선명하게 보이는데, 사서한테는 백지나 마찬가지잖아.</p>
+<p>오픈이가 docs 폴더를 훑었습니다. 조직도는 박스와 화살표가 얽힌 이미지, 매출 차트는 막대그래프, 서약서는 스캔본. 사내 문서에는 글자만 있는 게 아닙니다. 이 중 어느 것도 챕터 4의 파서로는 제대로 못 읽습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "사서한테 눈을 달아야죠."</div>
+<p>한마디가 머리에 걸렸습니다.</p>
+<h3>기존 파이프라인은 그대로, 앞뒤에 두 층만 얹습니다</h3>
+<p>챕터 4부터 7까지 쌓아 올린 파이프라인은 이번 챕터에서 건드리지 않습니다. 파싱·청킹·임베딩·검색·에이전트·캐시·모니터링까지 모든 층이 원래 자리에 그대로 있습니다. 챕터 8·9에서 실험한 튜닝(단락 청킹·리랭킹·약어 확장·부모 문서 검색 등)은 아직 이 파이프라인에 얹지 않은 부품 상태로 따로 놓여 있습니다. 이번 장의 할 일은 기존 파이프라인의 앞단과 뒷단에 한 층씩 새로 얹고(PDF 이미지 파서 · RAG 평가 프레임워크), 뒷단에서 그 평가 도구로 챕터 8·9의 부품들을 조합해 어떤 조합이 정말 수치를 끌어올리는지 확인하는 작업입니다. 이 과정을 마치면 커넥트HR 파이프라인은 챕터 7의 기본 형태에서 스캔본까지 읽고 품질을 수치로 검증하는 <strong>새 버전</strong>으로 올라가 다음 챕터의 조립대 위로 넘어갑니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 10-2. 챕터 4~07 파이프라인은 그대로 두고 앞뒤에 두 층을 더합니다. 챕터 8·09 튜닝은 뒷단 평가에서 부품으로 조립합니다</div>
+<div style="display:flex;flex-direction:column;align-items:stretch;gap:var(--space-sm)">
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-md);background:var(--color-accent-bg);position:relative">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 10 추가 · 앞단</div>
+<div style="margin-top:var(--space-xs);padding:var(--space-sm) var(--space-md);background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm)">
+<div style="font-weight:700;font-size:var(--fs-sm);margin-bottom:4px">PDF 이미지 파서</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">스캔본·그래프·표가 들어와도 읽어냄. OCR(확대경) · Vision LLM(눈) · 하이브리드(pypdf → Vision 폴백)</div>
+</div>
+</div>
+<div style="text-align:center;font-size:var(--fs-lg);color:var(--color-text-muted)">↓</div>
+<div style="border:2px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-md) var(--space-md) var(--space-md);background:var(--color-surface-alt);position:relative">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 4 ~ 챕터 7 기존 파이프라인 (그대로)</div>
+<div style="margin-top:var(--space-xs);display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-xs);font-size:11px;margin-bottom:var(--space-sm)">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm) 8px;text-align:center"><div style="font-weight:700;font-size:var(--fs-xs)">챕터 4</div><div style="color:var(--color-text-muted)">청킹·임베딩·Chroma</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm) 8px;text-align:center"><div style="font-weight:700;font-size:var(--fs-xs)">챕터 5~07</div><div style="color:var(--color-text-muted)">LCEL · 에이전트 · 운영 래퍼</div></div>
+</div>
+<div style="border-top:1px dashed var(--color-border);padding-top:var(--space-sm);margin-top:var(--space-sm)">
+<div style="font-size:10px;color:var(--color-text-muted);margin-bottom:4px;text-align:center">챕터 8 · 챕터 9 — 파이프라인에 얹지 않은 튜닝 부품 (뒷단 평가에서 조합)</div>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-xs);font-size:11px">
+<div style="background:var(--color-surface);border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm) 8px;text-align:center;opacity:0.85"><div style="font-weight:700;font-size:var(--fs-xs)">챕터 8</div><div style="color:var(--color-text-muted)">검색 튜닝 (실험)</div></div>
+<div style="background:var(--color-surface);border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm) 8px;text-align:center;opacity:0.85"><div style="font-weight:700;font-size:var(--fs-xs)">챕터 9</div><div style="color:var(--color-text-muted)">질의 재작성 (실험)</div></div>
+</div>
+</div>
+</div>
+<div style="text-align:center;font-size:var(--fs-lg);color:var(--color-text-muted)">↓</div>
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-md);background:var(--color-accent-bg);position:relative">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 10 추가 · 뒷단</div>
+<div style="margin-top:var(--space-xs);padding:var(--space-sm) var(--space-md);background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm)">
+<div style="font-weight:700;font-size:var(--fs-sm);margin-bottom:4px">RAG 평가 프레임워크</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">답변 품질을 숫자로 측정. Precision@k · Recall · Hallucination Rate · Latency</div>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-md);font-size:var(--fs-xs);color:var(--color-text-muted);text-align:center">중간(회색 점선)은 손대지 않습니다. 맨 위(파서)와 맨 아래(평가)만 이번 챕터에서 추가합니다.</div>
+</div>
+<h2>10.2 확대경 달기 - OCR</h2>
+<p>팀장의 말에서 첫 번째 도구가 떠올랐습니다. <strong>확대경</strong>, 즉 <strong>광학 문자 인식(OCR)</strong> 입니다. 이미지 위의 글자를 한 자 한 자 인식해 텍스트로 바꿔 줍니다. 스캔본에서 글자를 꺼낼 때 씁니다.</p>
+<p>확대경을 직접 만들어 보겠습니다. <code>tuning/step1_document_parser/ocr.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_document_parser/ocr.py. EasyOCR로 글자 추출</div><span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">fitz</span>  <span class="c1"># PyMuPDF</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_pdf_ocr</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dpi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">150</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="cb-todo"># TODO: EasyOCR로 PDF 페이지를 읽어 텍스트를 추출합니다.</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">easyocr</span>
+    <span class="c1"># 1. EasyOCR 리더 생성 (한국어+영어)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">easyocr</span><span class="o">.</span><span class="n">Reader</span><span class="p">([</span><span class="s2">&quot;ko&quot;</span><span class="p">,</span> <span class="s2">&quot;en&quot;</span><span class="p">],</span> <span class="n">gpu</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># 2. PyMuPDF로 PDF를 열고 페이지별 이미지 변환</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">fitz</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">))</span>
+    <span class="n">page_texts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">page_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)):</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">page_num</span><span class="p">]</span>
+        <span class="n">pix</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get_pixmap</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">pix</span><span class="o">.</span><span class="n">tobytes</span><span class="p">(</span><span class="s2">&quot;png&quot;</span><span class="p">)))</span>
+        <span class="c1"># 3. 이미지를 numpy 배열로 변환 후 OCR 실행</span>
+        <span class="n">img_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">ocr_results</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">readtext</span><span class="p">(</span><span class="n">img_array</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">page_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ocr_results</span><span class="p">))</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">page_texts</span><span class="p">)}</span></div>
+<p>PyMuPDF가 PDF 페이지를 PNG 이미지로 변환해 주면, EasyOCR이 그 이미지에서 글자를 읽어 텍스트 문자열로 돌려줍니다.</p>
+<p>두 도구의 역할은 정반대입니다. 하나는 <strong>그려 내는 쪽</strong>이고 다른 하나는 <strong>읽어 내는 쪽</strong>입니다. PDF에 텍스트 레이어가 있으면 pypdf로 바로 꺼내면 그만이지만, 스캔본은 글자 자체가 이미지로 박혀 있어 그 길이 막혀 있습니다. 그래서 한 발 돌아가는 셈입니다. PyMuPDF로 페이지를 고해상도 이미지로 그려 낸 뒤, EasyOCR에게 그 이미지에서 글자를 짚어 보라고 맡기는 두 단계 파이프라인을 탑니다.</p>
+<div class="term-box">
+<p><strong>PyMuPDF</strong> (<code>import fitz</code>). PDF 렌더링 라이브러리. 페이지를 원하는 해상도의 이미지로 그려내는 것이 주 역할입니다. 텍스트 레이어가 없는 스캔본도 겉모습(글자 모양·도장의 위치·표의 선)은 언제든 이미지로 뽑을 수 있습니다.</p>
+<p><strong>OCR</strong> (Optical Character Recognition, 광학 문자 인식). 이미지 속 글자 모양을 딥러닝 모델로 알아보고 텍스트로 옮기는 기술. <code>EasyOCR</code>은 한글을 포함해 80여 개 언어를 기본 지원하는 오픈소스 구현체입니다.</p>
+<p><strong>DPI</strong> (Dots Per Inch). 1인치에 점을 몇 개 찍어 이미지를 만드는지 나타내는 해상도 단위. 숫자가 클수록 글자가 또렷해지는 대신 이미지가 커지고 처리 시간이 길어집니다.</p>
+</div>
+<p>첫 단계에서 해상도를 정하는 값이 <code>dpi=150</code>입니다. 72는 화면에 띄우기엔 거칠고, 300은 인쇄용으로 선명하지만 무겁습니다. 그 사이 150은 OCR이 한글·영문 획을 구분할 만큼은 보이면서 페이지당 이미지 크기를 과하게 키우지 않는 실무 기본값으로 굳어졌습니다.</p>
+<p>대상 파일은 <code>data/docs/hr/HR_정보보안서약서.pdf</code>(스캔본 1p)입니다. 이 장의 파싱 실험은 전부 이 한 장으로 진행합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1-1 실행. OCR로 스캔 PDF 읽기</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_document_parser<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-1</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 10-3. 실험 1-1. OCR 파싱 (EasyOCR)</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-lg)">대상: HR_정보보안서약서.pdf</div>
+<div style="display:flex;gap:var(--space-md);margin-bottom:var(--space-md);font-size:var(--fs-xs)">
+<div style="flex:1;background:var(--color-info-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">전략</span><br><span style="font-weight:600">OCR (EasyOCR)</span></div>
+<div style="flex:1;background:var(--color-info-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">추출 글자 수</span><br><span style="font-weight:600">755자</span></div>
+<div style="flex:1;background:var(--color-info-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">소요 시간</span><br><span style="font-weight:600">71.85초</span></div>
+</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);color:var(--color-text);line-height:1.6;margin-bottom:var(--space-sm)">
+<div style="font-size:10px;color:var(--color-text-subtle);margin-bottom:4px">미리보기</div>
+가인 승인 Choi Jang 정보보안 서사서 (스스년) 단서면요 2026-HK SEC 002 공기능하 대외비 (Conhidcntil)...
+</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">글자는 대부분 읽지만 표 구조는 일렬로 늘어섭니다.</div>
+</div>
+<p>1분 남짓 걸려 글자 대부분을 읽었지만, 미리보기를 보면 '정보보안 서사서'처럼 한글 오인식이 섞여 있습니다. 표는 더 심각했습니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-md);text-align:center">그림 10-4. OCR의 한계. 글자는 읽지만 표 구조가 사라집니다</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-md);align-items:center">
+<div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-sm)">원본 (사람 눈에 보이는 것)</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse;border:1px solid var(--color-border)">
+<tr style="background:var(--color-surface-alt)"><th style="border:1px solid var(--color-border);padding:4px 8px">이름</th><th style="border:1px solid var(--color-border);padding:4px 8px">직급</th><th style="border:1px solid var(--color-border);padding:4px 8px">부서</th></tr>
+<tr><td style="border:1px solid var(--color-border);padding:4px 8px">김철수</td><td style="border:1px solid var(--color-border);padding:4px 8px">대리</td><td style="border:1px solid var(--color-border);padding:4px 8px">인사팀</td></tr>
+<tr><td style="border:1px solid var(--color-border);padding:4px 8px">박영희</td><td style="border:1px solid var(--color-border);padding:4px 8px">과장</td><td style="border:1px solid var(--color-border);padding:4px 8px">개발팀</td></tr>
+</table>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-danger);font-weight:700">→</div>
+<div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-danger);margin-bottom:var(--space-sm)">OCR 결과 (확대경이 읽은 것)</div>
+<div style="border:1px solid var(--color-danger);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);color:var(--color-danger);line-height:1.8;font-family:var(--font-mono)">이름 직급 부서 김철수 대리 인사팀 박영희 과장 개발팀</div>
+<div style="font-size:var(--fs-footnote);color:var(--color-text-muted);margin-top:var(--space-xs)">셀 구분 없이 일렬로 늘어섭니다</div>
+</div>
+</div>
+</div>
+<p>오픈이는 화면을 잠시 내려다봤습니다. 형광등 빛을 받은 커서가 &quot;정보보안 서사서&quot;라는 일곱 글자 옆에서 조용히 깜빡였습니다. 분명 규정집 첫 페이지에 또박또박 박혀 있던 제목. 기계의 눈을 거치자 '약'이 '사'로, '연'이 '년'으로 얼굴이 바뀌어 돌아와 있었습니다. 표도 마찬가지. 행과 열이 만들던 격자는 사라지고, 이름과 직급과 부서가 한 줄로 쏟아져 내렸습니다.</p>
+<p class="thought">이대로 벡터 DB에 들어가면, 질문을 해도 엉뚱한 답이 돌아오겠지.</p>
+<p>키보드 위에 얹혀 있던 손을 거두고 서랍에서 수첩을 꺼냈습니다. 터미널은 그대로 열어 둔 채, 방금 눈으로 본 두 가지를 적어 둘 참이었습니다. 한 시간만 지나도 &quot;OCR이 좀 아쉬웠지&quot;라는 인상만 남고, 정확히 어디서 어떻게 깨졌는지는 뭉툭해집니다. <strong>어디서 어떻게 깨졌는지</strong>를 손으로 짚어 두지 않으면, 나중에 다른 도구를 고를 때 같은 함정으로 걸어 들어가기 쉽습니다.</p>
+<div class="memo-box">
+<p><strong>— 실험 메모 —</strong></p>
 <ol>
-<li>pypdf로 텍스트 추출을 <strong>시도</strong></li>
-<li>의미 있는 텍스트가 나오면 <strong>그대로 사용</strong></li>
-<li>비어 있거나 너무 적으면 → Vision LLM으로 <strong>폴백</strong></li>
+<li><strong>한글 오인식</strong>
+<ul>
+<li>'정보보안 서약서' → '정보보안 서사서'</li>
+<li>'대외비 (Confidential)' → '공기능하 대외비 (Conhidcntil)'</li>
+<li>도장·고유명사 근처 글자가 뭉개짐</li>
+</ul>
+</li>
+<li><strong>표 구조 소실</strong>
+<ul>
+<li>행·열이 사라지고 한 줄로 늘어섬</li>
+<li>&quot;김철수 대리 인사팀 박영희 과장 개발팀&quot;</li>
+<li>누가 어느 부서인지 추론 불가</li>
+</ul>
+</li>
 </ol>
-<p>이것이 <strong>하이브리드 파서</strong>입니다.</p>
-<div class="code-block" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step2_hybrid_parser/hybrid.py. 텍스트 레이어 감지 후 분기</div>def parse_pdf_hybrid(pdf_path: Path, threshold_chars: int = 50) -&gt; str:
-    """텍스트 레이어가 있으면 pypdf, 없으면 Vision LLM으로 처리."""
-    # TODO: 1) pypdf로 시도
-    text = extract_with_pypdf(pdf_path)
+</div>
+<p class="thought">글자는 읽는데, 읽기만 하는구나.</p>
+<p>수첩을 덮고 의자 깊숙이 기댔습니다. 화면 속 &quot;스보보안 서의서&quot;와 일렬로 늘어선 이름들이 천천히 위로 올라가다 사라졌습니다. 확대경은 글자를 크게 키워 주긴 했지만, 제 손에 쥐인 것이 서약서인지 출근부인지는 알지 못했습니다. 한 획씩 더듬어 읽는 점자. 딱 그 수준이었습니다.</p>
+<p class="thought">다른 방법 없을까?</p>
+<p>주전자에서 보리차를 따르며 며칠 전 팀장이 지나가듯 던진 말을 곱씹었습니다. &quot;눈을 달아야죠.&quot; 그때는 무슨 뜻인지 흘려들었는데, 확대경의 한계를 눈으로 보고 나니 문장이 다르게 들렸습니다. 사람이 문서를 볼 때는 글자 하나하나를 읽기 전에 이미 제목을 알아보고, 표인지 도장인지 구분하고, 네모 칸이 누구를 가리키는지 짐작합니다. 글자를 해독하기 전에 <strong>이해</strong>가 먼저 옵니다.</p>
+<p>지금 이 도구에 필요한 건 더 정밀한 확대경이 아니었습니다. 문서를 그림째로 이해해 주는 무언가, 표의 행과 열을 의미로 묶고 &quot;스보보안 서의서&quot;를 &quot;정보보안 서약서&quot;로 복구해 주는 <strong>더 높은 층위의 눈</strong>이 필요했습니다.</p>
+<h2>10.3 눈 달기 - Vision LLM</h2>
+<p>두 번째 도구는 <strong>눈</strong>입니다. 글자를 한 획씩 따라 읽는 눈이 아니라, 이미지 전체를 한 장면으로 이해하는 쪽입니다. <strong>Vision LLM</strong>은 사진·도표·스캔본을 보고 그 안에서 일어나고 있는 일을 말로 설명합니다. &quot;이 차트에서 2024년 매출이 얼마야?&quot;라고 물으면 막대그래프의 높이를 눈으로 재고 축의 숫자를 읽어 답을 돌려 줍니다. 조직도 앞에서는 화살표 방향을 따라가며 &quot;마케팅팀장은 대표에게 보고하고, 그 아래 3명이 있습니다&quot; 식으로 관계를 설명합니다. 표는 셀의 위치를 기억해 행과 열을 다시 짭니다.</p>
+<p>OCR이 확대경이었다면, Vision LLM은 눈과 두뇌에 가깝습니다. 확대경은 보이는 것을 크게 보여 줄 뿐이지만, 눈은 본 것을 해석합니다. 문장의 의미를 알고, 문맥으로 오타를 복원하고, 표가 표라는 사실을 이해합니다. 확대경이 놓친 자리에 눈을 대면, 앞 실험에서 뭉개졌던 제목과 무너졌던 격자가 다시 제자리를 찾습니다.</p>
+<p>이제 에이전트에 눈을 달아 줄 차례입니다. <code>tuning/step1_document_parser/vision.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_document_parser/vision.py. Vision LLM으로 이미지 이해</div><span class="kn">from</span><span class="w"> </span><span class="nn">._parser_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_vision_llm</span>
 
-    # TODO: 2) 추출 글자 수가 threshold 미만이면 Vision LLM 폴백
-    if len(text.strip()) &lt; threshold_chars:
-        images = pdf_to_images(pdf_path)
-        text = vision_llm_describe(images)
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_pdf_vllm</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dpi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">150</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="cb-todo"># TODO: Vision LLM으로 PDF 페이지 이미지를 읽어 텍스트를 추출합니다.</span>
+    <span class="c1"># 1. PyMuPDF로 PDF를 열고 페이지별 이미지 변환</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">fitz</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">))</span>
+    <span class="n">page_texts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">page_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">doc</span><span class="p">)):</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="n">page_num</span><span class="p">]</span>
+        <span class="n">pix</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get_pixmap</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="c1"># 2. 페이지 이미지를 임시 파일로 저장</span>
+        <span class="n">img_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;_vllm_page_</span><span class="si">{</span><span class="n">page_num</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.png&quot;</span>
+        <span class="n">pix</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+        <span class="c1"># 3. Vision LLM에 이미지를 보내 텍스트 추출</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="n">call_vision_llm</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+        <span class="n">page_texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">page_texts</span><span class="p">)}</span></div>
+<p><code>call_vision_llm</code>은 <code>_parser_utils.py</code>에 있는 보조 함수로, Ollama의 Vision 모델에 이미지를 보내고 응답을 받습니다. 페이지를 임시 PNG로 저장한 뒤 LLM에 넘기고, 처리가 끝나면 임시 파일을 삭제합니다.</p>
+<p>실험 1-1과 같은 <code>data/docs/hr/HR_정보보안서약서.pdf</code>(스캔본 1p)를 대상으로 돌려 OCR과 같은 조건에서 결과를 비교합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1-2 실행. Vision LLM으로 스캔 PDF 읽기</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_document_parser<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-2</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 10-5. 실험 1-2. Vision LLM 파싱</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-lg)">대상: HR_정보보안서약서.pdf(스캔본 1p) · 모델: qwen2.5vl:7b · DPI: 100</div>
+<div style="display:flex;gap:var(--space-md);margin-bottom:var(--space-md);font-size:var(--fs-xs)">
+<div style="flex:1;background:var(--color-success-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">전략</span><br><span style="font-weight:600">Vision LLM</span></div>
+<div style="flex:1;background:var(--color-success-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">추출 글자 수</span><br><span style="font-weight:600">788자</span></div>
+<div style="flex:1;background:var(--color-success-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">소요 시간</span><br><span style="font-weight:600">21.86초</span></div>
+</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);color:var(--color-text);line-height:1.6;margin-bottom:var(--space-sm)">
+<div style="font-size:10px;color:var(--color-text-subtle);margin-bottom:4px">미리보기</div>
+<code style="font-size:11px">```markdown # 정보보안 서약서 (스캔본) **문서번호:** 2026-HR-SEC-002 **보존연한:** 영구 **공개등급:** 대외비 (Confidential) ## 제4조 (생성형 AI 활용 지침)...</code>
+</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">제목·문서번호·조항 번호까지 마크다운 구조로 살려 냅니다.</div>
+</div>
+<p>글자 수는 OCR과 비슷한데도 제목과 조항 번호까지 정확히 돌려주고, 마크다운 표 구조가 살아 있어 훨씬 다루기 좋은 결과입니다. 대신 페이지 하나에 22초 남짓 걸렸습니다. 로컬 Vision LLM은 정확한 값을 주는 만큼 연산을 쓰고 있는 셈입니다. (qwen2.5vl:7b, CPU, DPI 100 기준. 더 큰 모델이나 GPU를 쓰면 품질은 올라가고 시간은 줄어듭니다)</p>
+<p>오픈이는 모니터 앞으로 몸을 당겼습니다. 파이프 기호와 하이픈으로 그려진 마크다운 표. 줄을 맞춰 서 있었습니다. 조금 전까지 &quot;김철수 대리 인사팀 박영희 과장 개발팀&quot;이라고 한 줄로 쏟아지던 이름들이, 이번에는 이름끼리 직급끼리 각자 제자리로 돌아와 앉았습니다. 제목도 마찬가지. &quot;정보보안 서약서&quot; 여섯 글자가, 방금 전 &quot;정보보안 서사서&quot;로 얼굴이 바뀌어 있던 바로 그 자리에 또렷하게 박혀 있었습니다.</p>
+<p class="thought">이건 확실히 다르네.</p>
+<p>확대경은 점을 하나씩 따라가며 읽었는데, 이 친구는 페이지 전체를 한 번에 훑은 모양이었습니다. 표가 표라는 걸 알고, 제목이 제목이라는 걸 알고, 빈칸 다음에 오는 글자가 문맥상 무엇이어야 하는지까지 짐작해서 채워 넣었습니다.</p>
+<p>그런데 감탄 끝에 붙은 조건이 마음에 걸렸습니다. 이 눈이 한 페이지를 읽어 낼 때마다 비싼 값을 치릅니다.</p>
+<div class="tip">
+<p><strong>Vision LLM을 상시로 켜 두기 전에 확인할 비용</strong></p>
+<ul>
+<li><strong>토큰 비용</strong>. Vision LLM은 한 페이지를 통째로 이미지로 본 뒤 그 안에서 읽어 낸 내용을 토큰으로 쏟아냅니다. 도장·도표가 섞인 스캔본이라면 입력 이미지 토큰만 수천 단위로 불어나고, 답으로 되돌아오는 마크다운 텍스트도 덩달아 쌓입니다. API로 부르면 페이지 수만큼 요금이, 로컬이면 메모리·연산이 그만큼 빠져나갑니다.</li>
+<li><strong>하드웨어 문턱</strong>. <code>qwen2.5vl</code>·<code>minicpm-v</code> 같은 7B급 모델은 양자화본 기준 6~8GB 여유 RAM을 요구합니다. CPU만으로도 돌아가지만 페이지당 수십 초 단위로 밀리고, GPU가 있어도 VRAM 8GB 이상이 있어야 안정적입니다. 속도는 단순히 &quot;빠르다/느리다&quot;가 아니라 어떤 머신에서 돌리느냐에 따라 몇 배씩 갈리는 값입니다. (모델 선택 기준은 장 앞쪽 준비하기 tip 참조)</li>
+<li><strong>중복 비용</strong>. 사내 문서 대부분은 이미 텍스트 레이어가 멀쩡한 PDF입니다. pypdf 한 줄이면 끝날 문서에까지 Vision을 들이밀면 토큰도 메모리도 낭비입니다.</li>
+</ul>
+</div>
+<p class="thought">좋은 도구긴 한데, 아무 데나 쓸 건 아니구나.</p>
+<p>같은 서약서를 두 도구로 읽은 결과를 나란히 놓으면 차이가 선명합니다.</p>
+<div style="display:flex;gap:16px;margin:var(--space-xl) 0">
+<div style="flex:1;border:1px solid var(--color-accent-border);border-radius:var(--radius-lg);padding:24px;background:var(--color-info-bg)">
+<div style="text-align:center;margin-bottom:16px">
+<div style="width:48px;height:48px;background:var(--color-info);border-radius:50%;display:inline-flex;align-items:center;justify-content:center">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+</div>
+</div>
+<div style="font-size:16px;font-weight:700;color:var(--color-info-text);text-align:center;margin-bottom:4px">OCR</div>
+<div style="font-size:13px;color:var(--color-text-secondary);text-align:center;margin-bottom:16px">확대경 (글자는 읽지만 구조는 모릅니다)</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px;font-size:12px;color:var(--color-text);line-height:1.6">
+<div style="font-size:11px;color:var(--color-text-subtle);margin-bottom:6px">표를 읽은 결과</div>
+<span style="color:var(--color-danger)">이름 직급 부서 김철수 대리 인사팀 박영희 과장 개발팀</span>
+<div style="font-size:11px;color:var(--color-text-subtle);margin-top:8px">셀 구분 없이 일렬로 늘어섭니다</div>
+</div>
+<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+<span style="background:white;border:1px solid var(--color-border);border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-text-muted)">빠름</span>
+<span style="background:white;border:1px solid var(--color-border);border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-text-muted)">저렴</span>
+<span style="background:white;border:1px solid var(--color-border);border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-text-muted)">구조 인식 불가</span>
+</div>
+</div>
+<div style="flex:1;border:1px solid #86efac;border-radius:var(--radius-lg);padding:24px;background:var(--color-success-bg)">
+<div style="text-align:center;margin-bottom:16px">
+<div style="width:48px;height:48px;background:var(--color-success);border-radius:50%;display:inline-flex;align-items:center;justify-content:center">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7"/></svg>
+</div>
+</div>
+<div style="font-size:16px;font-weight:700;color:var(--color-success-text);text-align:center;margin-bottom:4px">Vision LLM</div>
+<div style="font-size:13px;color:var(--color-text-secondary);text-align:center;margin-bottom:16px">눈 (이미지를 이해합니다)</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px;font-size:12px;color:var(--color-text);line-height:1.6">
+<div style="font-size:11px;color:var(--color-text-subtle);margin-bottom:6px">표를 읽은 결과</div>
+<span style="color:var(--color-success)">| 이름 | 직급 | 부서 |<br>| 김철수 | 대리 | 인사팀 |<br>| 박영희 | 과장 | 개발팀 |</span>
+<div style="font-size:11px;color:var(--color-text-subtle);margin-top:8px">표 구조와 관계까지 설명합니다</div>
+</div>
+<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+<span style="background:white;border:1px solid var(--color-border);border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-text-muted)">느림</span>
+<span style="background:white;border:1px solid var(--color-border);border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-text-muted)">비쌈</span>
+<span style="background:white;border:1px solid var(--color-border);border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-text-muted)">구조+관계 인식</span>
+</div>
+</div>
+</div>
+<div style="text-align:center;font-size:12px;color:var(--color-text-secondary);margin-top:-8px;margin-bottom:var(--space-xl)">그림 10-6. OCR은 빠르고 저렴하지만 구조를 모릅니다. Vision LLM은 느리지만 표, 차트, 조직도까지 정확하게 읽습니다</div>
+<p>이해는 깊지만 그만큼 토큰과 메모리를 요구합니다. 이미 글자로 잘 꺼낼 수 있는 문서에까지 같은 비용을 치를 이유는 없습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "규정집은 텍스트 PDF잖아요. 그것까지 Vision에 돌리면 토큰도 시간도 아깝지 않아요?"</div>
+<h2>10.4 하이브리드 파서 - pypdf가 충분히 읽어 내면 그대로, 아니면 Vision</h2>
+<p>맞는 말이었습니다. 오픈이가 마우스 휠을 천천히 내리며 docs 폴더를 다시 훑었습니다. 파일 아이콘이 두 갈래로 나뉘어 있었습니다. HR 규정집, 출근 규정, 연차 매뉴얼. 내부에서 워드로 작성해 그대로 PDF로 내보낸 문서들이었습니다. 그 옆에 섞여 있는 정보보안 서약서. 종이에 도장을 찍은 뒤 스캐너를 거친 파일이었습니다.</p>
+<p class="thought">한 폴더 안에 성질이 다른 두 종류가 있잖아.</p>
+<p>두 유형에 같은 도구를 쓰는 것부터 어긋난 접근이었습니다. 규정집까지 Vision에 돌리면 한 줄이면 꺼낼 텍스트를 수십 초에 걸쳐 눈으로 다시 읽는 꼴이 되고, 반대로 pypdf만 고집하면 서약서 앞에서는 손을 놓게 됩니다. 둘 중 하나를 고르는 이분법이 아니라, 페이지마다 상황을 보고 쓰는 도구를 갈라야 했습니다.</p>
+<p>오픈이가 의자를 모니터 가까이 당겼습니다. 머릿속에서 그림이 한 장 그려졌습니다. 페이지가 들어오면 일단 pypdf에 맡긴다. 글자가 제대로 돌아오면 그대로. 빈손이거나 한 줌뿐이면 그제야 눈을 호출한다.</p>
+<p>전략은 한 줄이었습니다.</p>
+<blockquote>
+<p><strong>pypdf가 꺼낸 텍스트가 충분하면 그대로 쓰고, 아니면 눈을 부른다.</strong></p>
+</blockquote>
+<p>페이지마다 <code>page.get_text()</code>로 텍스트를 꺼낸 뒤, 길이가 50자 이상이면 pypdf 결과를 그대로 쓰고, 그보다 적으면 스캔본이나 차트 페이지로 보고 Vision에 넘깁니다. 판단은 페이지 단위로 독립이라, 10페이지짜리 문서에 스캔 페이지가 1장만 섞여 있어도 그 1장만 Vision으로 가고 나머지는 pypdf가 즉시 끝냅니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 10-7. 하이브리드 파서의 판단 흐름. 페이지마다 텍스트 길이로 분기합니다</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+<div style="background:white;border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:10px 22px;font-size:13px;font-weight:700;color:var(--color-text-heading)">PDF 페이지 1장</div>
+<div style="width:2px;height:18px;background:var(--color-border-strong)"></div>
+<div style="background:var(--color-surface-alt);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:10px 22px;font-family:var(--font-mono);font-size:12px;color:var(--color-text)">text = page.get_text().strip()</div>
+<div style="width:2px;height:18px;background:var(--color-border-strong)"></div>
+<div style="background:var(--color-accent-bg);border:1px solid var(--color-accent);border-radius:var(--radius-md);padding:10px 22px;font-size:13px;font-weight:700;color:var(--color-accent-text)">len(text) ≥ 50?</div>
+<div style="display:flex;gap:96px;margin-top:6px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+<div style="font-size:11px;color:var(--color-success);font-weight:700;letter-spacing:2px">YES</div>
+<div style="width:2px;height:18px;background:var(--color-success)"></div>
+<div style="background:var(--color-success-bg);border:2px solid var(--color-success);border-radius:var(--radius-md);padding:12px 20px;text-align:center">
+<div style="font-size:13px;font-weight:700;color:var(--color-success-text)">text_layer</div>
+<div style="font-size:11px;color:var(--color-text-muted);margin-top:2px">pypdf 결과 그대로</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+<div style="font-size:11px;color:var(--color-accent-warm);font-weight:700;letter-spacing:2px">NO</div>
+<div style="width:2px;height:18px;background:var(--color-accent-warm)"></div>
+<div style="background:#fff7ed;border:2px solid var(--color-accent-warm);border-radius:var(--radius-md);padding:12px 20px;text-align:center">
+<div style="font-size:13px;font-weight:700;color:var(--color-accent-warm-text)">vision</div>
+<div style="font-size:11px;color:var(--color-text-muted);margin-top:2px">Vision LLM 호출</div>
+</div>
+</div>
+</div>
+</div>
+<div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--color-border-dashed);font-size:12px;color:var(--color-text-muted);line-height:1.7;text-align:center">일반 텍스트 페이지는 수백~수천 자, 스캔본·차트 페이지는 0~수십 자. 50자 기준 하나로 자연스럽게 갈라집니다</div>
+</div>
+<p>간단하게 만들어 보겠습니다. <code>tuning/step2_hybrid_parser/hybrid_parser.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> tuning/step2_hybrid_parser/hybrid_parser.py. pypdf 결과로 파서 선택</div><span class="kn">import</span><span class="w"> </span><span class="nn">fitz</span>  <span class="c1"># PyMuPDF</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._hybrid_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">vision_page</span>
 
-    return text</div>
-<div class="chapter-image terminal"><img src="./assets/CH10/terminal/10_step2-2-textlayer.png" alt="" /><div class="caption">그림 10-3. 텍스트 레이어 감지 로그. 스캔본에서만 Vision LLM이 돌아 비용을 절약합니다</div></div>
-<h2>10.4 실습 1: OCR vs Vision LLM 비교 (step1)</h2>
-<p>같은 스캔 PDF를 두 방식으로 처리하고, 검색 결과 품질을 비교합니다.</p>
-<div class="code-block" data-lang="python"><div class="cb-title">tuning/step1_document_parser/ocr.py. Tesseract OCR</div>import pytesseract
-from pdf2image import convert_from_path
+<span class="n">MIN_TEXT_LENGTH</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># 이 미만이면 스캔본 or 차트 페이지로 간주하고 Vision</span>
 
-def parse_with_ocr(pdf_path: Path) -&gt; str:
-    pages = convert_from_path(pdf_path, dpi=300)
-    return "\n\n".join(
-        pytesseract.image_to_string(page, lang="kor+eng") for page in pages
-    )</div>
-<div class="code-block" data-lang="python"><div class="cb-title">tuning/step1_document_parser/vision.py. Ollama Vision LLM</div>from langchain_ollama import ChatOllama
-
-def parse_with_vision(pdf_path: Path) -&gt; str:
-    pages = convert_from_path(pdf_path, dpi=200)
-    llm = ChatOllama(model="llama3.2-vision:11b")
-    results = []
-    for page in pages:
-        msg = llm.invoke([{"role": "user", "content": [
-            {"type": "text", "text": "이 문서의 내용을 한국어로 빠짐없이 옮겨 적어줘."},
-            {"type": "image_url", "image_url": page_to_data_url(page)},
-        ]}])
-        results.append(msg.content)
-    return "\n\n".join(results)</div>
-<div class="chapter-image terminal"><img src="./assets/CH10/terminal/10_step1-1-ocr.png" alt="" /><div class="caption">그림 10-4. Tesseract OCR 결과. 글자는 대부분 읽지만 표 구조는 일렬로 늘어섭니다</div></div>
-<div class="chapter-image terminal"><img src="./assets/CH10/terminal/10_step1-2-vision.png" alt="" /><div class="caption">그림 10-5. Vision LLM 결과. 표의 셀 관계와 하이라이트, 도장의 의미까지 설명합니다</div></div>
-<h2>10.5 실습 2: 하이브리드 파서 (step2)</h2>
-<p>같은 폴더에서 텍스트 PDF와 스캔 PDF가 섞여 있을 때 자동 분기합니다.</p>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 2 실행</div>python -m tuning.step2_hybrid_parser</div>
-<div class="chapter-image terminal"><img src="./assets/CH10/terminal/10_step2-1-hybrid.png" alt="" /><div class="caption">그림 10-6. 하이브리드 파서 로그. 텍스트 PDF는 pypdf, 스캔 PDF는 Vision LLM으로 자동 분기</div></div>
-<div class="chapter-image terminal"><img src="./assets/CH10/terminal/10_capture-pipeline.png" alt="" /><div class="caption">그림 10-7. 전체 파이프라인. 챕터 4 + Vision 폴백이 결합된 최종 형태입니다</div></div>
-<h2>10.6 RAG 평가: 느낌이 아니라 숫자</h2>
-<p>챕터 8~10에서 튜닝을 여러 번 했습니다. <strong>어느 튜닝이 얼마나 도움이 됐는지</strong> 를 어떻게 증명하죠? &quot;체감상 좋아졌어요&quot;로는 의사결정이 어렵습니다. 숫자로 측정해야 합니다.</p>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_page_hybrid</span><span class="p">(</span>
+    <span class="n">page</span><span class="p">:</span> <span class="n">fitz</span><span class="o">.</span><span class="n">Page</span><span class="p">,</span>
+    <span class="n">dpi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="n">vision_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="cb-todo"># TODO: pypdf 텍스트가 충분하면 text_layer, 부족하면 Vision.</span>
+    <span class="c1"># 1. pypdf 텍스트 레이어 추출</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="c1"># 2. 텍스트 충분 → 그대로 사용 (밀리초 단위)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">MIN_TEXT_LENGTH</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;text_layer&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span> <span class="s2">&quot;char_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)}</span>
+    <span class="c1"># 3. 텍스트 부족 → 스캔본 or 차트 페이지. Vision으로 전환</span>
+    <span class="n">vision_text</span> <span class="o">=</span> <span class="n">vision_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">vision_model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;strategy&quot;</span><span class="p">:</span> <span class="s2">&quot;vision&quot;</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">vision_text</span><span class="p">,</span> <span class="s2">&quot;char_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">vision_text</span><span class="p">)</span> <span class="k">if</span> <span class="n">vision_text</span> <span class="k">else</span> <span class="mi">0</span><span class="p">}</span></div>
+<p><code>page.get_text()</code>는 PDF 페이지의 텍스트 레이어를 꺼내는 한 줄이고, <code>MIN_TEXT_LENGTH</code> 임계값은 &quot;이 정도도 안 나오면 그림이 자리를 차지하고 있다&quot;는 판단 기준입니다. 스캔본은 0자가 돌아오니 곧장 Vision으로 넘어가고, 텍스트 PDF는 수백 자가 돌아와 그 자리에서 끝납니다. 네이티브 벡터 차트 페이지도 축 레이블 몇 글자 정도라 50자 아래로 떨어지고, 결국 Vision 차례가 됩니다. 10.2절에서 한계를 확인한 OCR은 이 조합에 넣지 않았습니다.</p>
+<div class="tip">
+<p><strong>이 하이브리드의 경계와 한 걸음 더</strong></p>
+<p>이번 파서는 <strong>페이지 단위 텍스트 길이 하나</strong>로 판단합니다. 그래서 커버하는 범위와 남는 한계가 명확합니다.</p>
+<ul>
+<li><strong>잘 잡는 것</strong>: 스캔본(전체가 이미지), 일반 텍스트 PDF, 네이티브 벡터 차트로만 이뤄진 페이지. 이 챕터의 테스트 문서 전부가 여기 해당합니다.</li>
+<li><strong>놓치는 것</strong>: <strong>한 페이지 안에 본문 텍스트 + 작은 차트가 섞여 있는 경우</strong>. 본문이 50자를 훌쩍 넘기니 <code>text_layer</code>로 분기되고, 차트의 막대 높이·선 기울기 같은 시각 정보는 손실됩니다. 축 레이블·범례 텍스트만 엉뚱하게 남습니다.</li>
+<li><strong>한 걸음 더</strong>: 이 한계를 넘으려면 페이지를 <strong>영역(bounding box) 단위로 쪼개서</strong> 텍스트 영역은 pypdf, 차트 영역은 Vision으로 따로 보내야 합니다. 실무에서는 <code>unstructured</code>, <code>docling</code>(IBM), <code>LayoutParser</code> 같은 레이아웃 분석 도구가 이 역할을 맡습니다. 대신 설치·학습·디버깅이 한 단계 무거워집니다.</li>
+<li><strong>언제 확장하나</strong>: 사내 보고서·기획서처럼 본문과 차트가 같은 페이지에 뒤섞인 문서 비중이 의미 있게 커지면 그때 레이아웃 분석 도구를 도입하세요. 스캔본·텍스트 PDF가 대부분이라면 지금 하이브리드로 충분합니다.</li>
+</ul>
+</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 2 실행. 하이브리드 파서로 페이지별 자동 분기</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_hybrid_parser</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 10-8. 실험 2. 하이브리드 파싱</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-lg)">대상: HR_정보보안서약서.pdf(스캔본 1p) · HR_취업규칙_v1.0.pdf(텍스트 1p) · Vision: qwen2.5vl:7b · DPI 100</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse;margin-bottom:var(--space-md)">
+<tr style="color:var(--color-text-muted)"><th style="padding:4px 8px;text-align:left">페이지</th><th style="padding:4px 8px;text-align:left">전략</th><th style="text-align:right;padding:4px 8px">글자 수</th></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 8px">서약서 p.1</td><td style="padding:4px 8px">vision</td><td style="text-align:right;padding:4px 8px">788</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 8px">취업규칙 p.1</td><td style="padding:4px 8px">text_layer</td><td style="text-align:right;padding:4px 8px">1,426</td></tr>
+</table>
+<div style="display:flex;gap:var(--space-md);margin-bottom:var(--space-md);font-size:var(--fs-xs)">
+<div style="flex:1;background:var(--color-info-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">전략 분포</span><br><span style="font-weight:600">vision 1/2 · text_layer 1/2</span></div>
+<div style="flex:1;background:var(--color-info-bg);border-radius:var(--radius-md);padding:var(--space-sm)"><span style="color:var(--color-text-muted)">총 소요 시간</span><br><span style="font-weight:600">91.94초</span></div>
+</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">스캔본은 Vision이, 텍스트 PDF는 pypdf가 맡습니다. 한 파이프라인이 두 경로를 자동 선택합니다.</div>
+</div>
+<p>오픈이가 실행 버튼을 누르고 터미널을 지켜봤습니다. 노트북 팬이 제법 오래 숨을 몰아쉬더니 첫 줄이 올라왔습니다. <code>서약서 p.1 ... vision</code>. 한 페이지를 읽는 데 1분 30초 남짓. 그러다가 다음 줄에서 속도가 뚝 바뀌었습니다. <code>취업규칙 p.1 ... text_layer</code>, 1,426자, 0.17초. 깜빡이 한 번에 끝이었습니다.</p>
+<p>파이프라인이 페이지를 한 장씩 들춰 본 다음 스캔본에는 눈을 대고, 텍스트 PDF는 pypdf로 곧장 꿰어 낸 모양새였습니다. 총 91.94초 가운데 91.77초가 Vision 한 번에 쓰였고, 텍스트 한 페이지는 사실상 공짜로 빠졌습니다. 필요할 때만 비싼 도구를 부르는 구조가 숫자로 그대로 드러났습니다. (Vision 시간은 모델을 처음 메모리에 올리는 콜드 스타트를 포함한 값입니다. 한 번 예열되면 호출당 20초 남짓으로 줄어듭니다)</p>
+<p class="thought">되긴 됐다.</p>
+<p>오픈이가 의자 등받이에 몸을 기댔습니다. 어깨에 들어가 있던 힘이 천천히 빠졌습니다. 고개를 돌려 옆자리 팀장을 불렀습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "팀장님, 서약서 건 돌아갑니다. 스캔본은 Vision으로, 규정집은 pypdf로 페이지마다 알아서 갈라져요."</div>
+<p>팀장이 의자를 밀며 다가와 터미널 로그를 훑어봤습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "오, 둘 다 한 파이프라인에서 처리되네요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "네. 글자가 충분히 나오면 그대로 쓰고, 부족하면 그때 Vision을 붙이는 식이에요."</div>
+<p>팀장이 고개를 몇 번 끄덕이더니 로그를 처음부터 끝까지 한 번 더 눈으로 따라갔습니다. 그러고는 의자에서 일어서며 한 마디 던졌습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "이게 얼마나 좋아진 건지는 어떻게 알아요?"</div>
+<h2>10.5 RAG 평가: 느낌이 아니라 숫자</h2>
+<p>바로 대답이 나오지 않았습니다. 오픈이가 잠시 시선을 내리더니 수첩을 펼쳤습니다. 챕터 8부터 여기까지 손본 튜닝이 한 페이지를 가득 메우고 있었습니다.</p>
+<div class="memo-box">
+<p><strong>— 지금까지 쌓인 튜닝 —</strong></p>
+<ol>
+<li><strong>청킹</strong>
+<ul>
+<li>의미 기반 분리 (챕터 8)</li>
+</ul>
+</li>
+<li><strong>리랭커</strong> (챕터 8)
+<ul>
+<li>CrossEncoder 재정렬</li>
+</ul>
+</li>
+<li><strong>하이브리드 검색</strong> (챕터 8)
+<ul>
+<li>BM25 + 벡터 유사도</li>
+</ul>
+</li>
+<li><strong>HyDE</strong> (챕터 9)
+<ul>
+<li>가상 답변을 먼저 만들어 검색</li>
+</ul>
+</li>
+<li><strong>부모 문서 검색</strong> (챕터 9)
+<ul>
+<li>자식 청크로 찾고 부모 페이지 반환</li>
+</ul>
+</li>
+<li><strong>약어 확장</strong> (챕터 9)
+<ul>
+<li>WFH → 재택근무</li>
+</ul>
+</li>
+<li><strong>하이브리드 파서</strong> (챕터 10)
+<ul>
+<li>pypdf 부족하면 Vision 전환</li>
+</ul>
+</li>
+</ol>
+</div>
+<p class="thought">생각해 보니 이 파서 하나만이 아니네. 지금까지 얹은 것들도 다 "좋아졌다"고만 말했지, 얼마나 기여했는지는 모른다.</p>
+<p>체감만 있고 근거가 없었습니다. 튜닝을 더 얹을지, 이쯤에서 멈출지, 어느 조합으로 갈지. 전부 숫자가 뒤를 받쳐 줘야 답할 수 있는 질문이었습니다. 팀장의 한마디는 이번 파서 하나를 묻고 있는 것이 아니었습니다. 지금까지 쌓인 튜닝 전부에 대한 답을 요구하고 있었습니다.</p>
+<p>평가 프레임워크를 꺼낼 차례였습니다.</p>
+<p>평가 프레임워크는 RAG 시스템의 품질을 숫자로 재는 채점기입니다. 같은 질문 셋을 여러 튜닝 조합에 던지고, 미리 정해 둔 지표로 결과를 찍어 비교하는 구조입니다. 선생님이 학생들의 시험지를 같은 채점표로 내려 점수를 매기듯, 여러 조합을 같은 잣대 위에 놓아야 어느 튜닝이 정말 값을 하는지 가려낼 수 있습니다.</p>
+<p>먼저 어떤 지표로 잴지 정해야 합니다. 이 책에서는 서로 다른 각도를 잡아 줄 네 가지로 추렸습니다.</p>
+<ul>
+<li><strong>Precision@k</strong> — &quot;검색이 정답을 위에 잘 올렸나?&quot; (상위 k칸의 정확성)</li>
+<li><strong>Recall@k</strong> — &quot;정답을 빠짐없이 잡았나?&quot; (정답 커버리지)</li>
+<li><strong>Hallucination Rate</strong> — &quot;답변이 근거 문서 안에서 나왔나?&quot; (지어내기 억제)</li>
+<li><strong>Latency</strong> — &quot;사용자가 기다릴 만한 속도인가?&quot; (응답 시간)</li>
+</ul>
+<p>Precision과 Recall은 검색이 어떻게 돌아가는지를 들여다보고, Hallucination Rate는 만들어진 답변을 뜯어 보고, Latency는 사용자가 실제로 겪는 대기 시간을 잽니다. 한 지표만 붙들면 다른 쪽이 무너져도 모르고 지나칩니다. Recall만 끌어올리다 보면 관련 없는 문서까지 딸려 와 환각이 늘어나고, 속도만 좇으면 품질이 뒷줄로 밀립니다. 네 지표를 한 세트로 놓고 봐야 전체 모양이 보입니다.</p>
 <table>
 <thead>
 <tr>
@@ -183,7 +601,7 @@ def parse_with_vision(pdf_path: Path) -&gt; str:
 <tr>
 <td><strong>Hallucination Rate</strong></td>
 <td>답변 중 문서 근거 없는 문장 비율</td>
-<td>LLM 판정 (제공 문서와 답변의 일치 여부)</td>
+<td>답변과 근거 문서의 단어 겹침 비율 (더 정확히 잴 땐 별도 LLM에게 채점을 맡깁니다)</td>
 </tr>
 <tr>
 <td><strong>Latency</strong></td>
@@ -192,87 +610,409 @@ def parse_with_vision(pdf_path: Path) -&gt; str:
 </tr>
 </tbody>
 </table>
-<p><code>step3_eval_framework/</code>에 평가 셋 (질문, 정답 청크 id, 정답 답변)이 JSON으로 준비돼 있습니다. 평가 루프가 각 질문마다 실제 RAG 파이프라인을 돌리고 결과를 정답과 비교합니다.</p>
-<div class="code-block" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> tuning/step3_eval_framework/metrics.py. Precision@k</div>def precision_at_k(retrieved_ids: list[str], gold_ids: set[str], k: int) -&gt; float:
-    """상위 k개 중 정답 청크 비율."""
-    if k == 0:
-        return 0.0
-    hits = sum(1 for rid in retrieved_ids[:k] if rid in gold_ids)
-    return hits / k</div>
-<div class="code-block" data-lang="python"><div class="cb-title">tuning/step3_eval_framework/hallucination.py. 환각률</div>def measure_hallucination(answer: str, context: str, judge_llm) -&gt; float:
-    """답변의 각 문장이 context에 근거가 있는지 LLM에 판정 요청."""
-    sentences = split_sentences(answer)
-    unsupported = 0
-    for sent in sentences:
-        verdict = judge_llm.invoke(HALLUCINATION_JUDGE_PROMPT.format(
-            sentence=sent, context=context
-        )).content.strip()
-        if "근거없음" in verdict:
-            unsupported += 1
-    return unsupported / max(len(sentences), 1)</div>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 평가 실행</div>python -m tuning.step3_eval_framework --strategy baseline
-python -m tuning.step3_eval_framework --strategy tuned</div>
-<div class="chapter-image terminal"><img src="./assets/CH10/terminal/10_eval-compare.png" alt="" /><div class="caption">그림 10-8. 챕터 4 기본 vs 챕터 8~10 튜닝 후. Precision@3이 0.62 → 0.84, 환각률이 0.18 → 0.05로 개선됐습니다</div></div>
-<div class="chapter-image gemini"><img src="./assets/CH10/gemini/10_eval-concept.png" alt="" /><div class="caption">그림 10-9. 평가 프레임워크. 질문, 정답 쌍을 반복 돌려 숫자로 품질을 측정합니다</div></div>
-<h2>10.7 마지막 여정: 커넥트HR 에이전트의 완성</h2>
-<div class="chapter-image diagram"><img src="./assets/CH10/diagram/10_search-pipeline.png" alt="" /><div class="caption">그림 10-10. 완성된 커넥트HR 에이전트의 검색 파이프라인. 챕터 4~10의 튜닝이 모두 얹혀 있습니다</div></div>
-<p>동료들이 다시 테스트했습니다.</p>
-<p><strong>동료 A</strong>: &quot;이제 속도도 빠르고 답도 정확하네요.&quot;
-<strong>동료 B</strong>: &quot;스캔된 정보보안서약서도 제대로 답하더라고요.&quot;
-<strong>동료 C</strong>: &quot;Precision@3 수치도 올라갔어요. 개선이 눈에 보이네요.&quot;</p>
-<p>챕터 1의 맛보기 RAG에서 출발해 챕터 10까지, 문서 규칙, 벡터화, RAG 엔진, 통합 에이전트, 운영 안정화, 검색 품질, 쿼리 해석, 멀티모달, 평가를 모두 경험했습니다. <strong>커넥트HR 에이전트</strong> 한 명이 완성됐어요.</p>
-<h2>10.8 전체 구성도의 완성</h2>
-<div class="arch-fullmap">
-  <div class="arch-fullmap-title">전체 구성도. 챕터 1~10의 모든 박스가 완성</div>
-  <div class="afm-row afm-user">
-    <div class="afm-box afm-on afm-round"><div class="afm-tag">실사용자</div><div class="afm-label">사내 직원 · 관리자</div></div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 2</span>
-    <span class="afm-zone-label">대시보드</span>
-    <div class="afm-row">
-      <div class="afm-box afm-on"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 6+7</span>
-    <span class="afm-zone-label">오케스트레이션 + 운영</span>
-    <div class="afm-row afm-three">
-      <div class="afm-box afm-on"><div class="afm-label">Query Router</div><div class="afm-sub">규칙·스키마·LLM</div></div>
-      <div class="afm-box afm-on"><div class="afm-label">ConnectHRAgent</div><div class="afm-sub">ReAct + 캐시 + 모니터링</div></div>
-      <div class="afm-box afm-on"><div class="afm-label">MCP Tools</div><div class="afm-sub">DB 조회 · 문서 검색</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 5 + 8 + 9</span>
-    <span class="afm-zone-label">검색 (실시간)</span>
-    <div class="afm-row">
-      <div class="afm-box afm-on"><div class="afm-tag">튜닝 완료</div><div class="afm-label">LCEL Chain</div><div class="afm-sub">출처 강제 · Reranker · Hybrid · HyDE · Parent Doc · Compression</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 4 + 10</span>
-    <span class="afm-zone-label">파싱·벡터화 (오프라인)</span>
-    <div class="afm-row afm-three">
-      <div class="afm-box afm-on afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
-      <div class="afm-box afm-on"><div class="afm-tag">+ Vision 폴백</div><div class="afm-label">Doc Pipeline</div><div class="afm-sub">pypdf → OCR/Vision LLM 하이브리드</div></div>
-      <div class="afm-box afm-on"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 2</span>
-    <span class="afm-zone-label">데이터</span>
-    <div class="afm-row">
-      <div class="afm-box afm-on"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
-    </div>
-  </div>
-  <div class="afm-row afm-ext">
-    <div class="afm-box afm-on afm-dashed"><div class="afm-label">Ollama LLM (외부). Llama 3.1 + Vision</div></div>
-  </div>
-  <div class="afm-note">
-    챕터 1의 맛보기에서 출발해 10개 챕터 만에 전 구간이 완성됐습니다. 이제 모든 박스에 색이 들어왔어요. <b>커넥트HR 에이전트</b>가 사내 문서와 DB, 스캔본과 이미지, 복합 질문까지 한 창구로 답합니다. 평가 지표로 품질이 숫자로 잡히니, 이후 개선도 감이 아닌 근거 위에서 굴러갑니다.
-  </div>
+<div class="tip">
+<p><strong>이 네 지표는 업계 표준과 같은 축을 잽니다</strong></p>
+<p>Precision@k·Recall@k는 <strong>문서 검색</strong> 분야에서 오래 쓰인 교과서 지표이고, Hallucination Rate는 RAG가 등장한 뒤 자리 잡은 항목, Latency는 운영 지표의 기본입니다. RAGAS·LangSmith 같은 오픈소스 RAG 평가 도구도 이름만 살짝 바꿔 같은 네 축(혹은 그 변형)을 잽니다. 뒤 §10.5.3에서 &quot;이 책의 간단한 구현을 실무에선 어떻게 더 정밀하게 바꾸는지&quot;를 다시 짚습니다.</p>
 </div>
+<p>오픈이가 새 파일을 하나 만들었습니다. <code>data/test_questions.json</code>. 비어 있는 배열. 대괄호 사이에서 커서가 조용히 깜빡였습니다.</p>
+<p class="thought">뭘 기준으로 물어보지?</p>
+<p>동료들이 이제까지 던진 질문들을 떠올려봤습니다. &quot;연차 신청은 어떻게 해요?&quot;, &quot;병가 며칠까지 돼요?&quot;, &quot;USB 써도 돼요?&quot;, &quot;이번 분기 매출 얼마예요?&quot; 기억나는 것들을 한 줄씩 적어 내려갔습니다. 매 질문 옆에는 이 답이 어느 문서에서 나와야 하는지, 이상적인 답변은 어떤 내용인지를 함께 적어 뒀습니다.</p>
+<p>질문 31개가 쌓였습니다. 각 건은 <code>query</code>(테스트 질문), <code>relevant_sources</code>(그 답이 담겨 있어야 할 원본 문서명 리스트), <code>expected_answer</code>(이상적 답변) 세 축. 앞 두 필드는 Precision@k·Recall 계산에, 마지막 필드는 Hallucination Rate 판정에 쓰입니다.</p>
+<p class="thought">이게 우리 시스템의 채점지네.</p>
+<p><code>tuning/step3_eval_framework/metrics.py</code>를 열면 Precision@k와 환각률 함수 두 개가 TODO로 비어 있습니다. 하나씩 채워 나갑니다.</p>
+<h3>10.5.1 Precision@k — 상위 k개에 정답 문서가 얼마나 올라왔나</h3>
+<p>첫 번째 지표는 <strong>Precision@k</strong>. 시스템이 돌려준 검색 결과 상위 k개 중에 정답 문서가 몇 개 들어 있는지를 비율로 재는 지표입니다. 채점지로 치면 &quot;답안지 첫 k칸 중 정답이 몇 칸인가&quot;를 세는 항목입니다. 오픈이가 JSON에 적어 둔 <code>relevant_sources</code>가 정답지가 되고, 시스템이 돌려준 검색 결과 문서명이 답안지가 됩니다.</p>
+<p><code>calculate_precision_at_k</code> 함수의 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> tuning/step3_eval_framework/metrics.py. Precision@k 계산</div><span class="k">def</span><span class="w"> </span><span class="nf">calculate_precision_at_k</span><span class="p">(</span>
+    <span class="n">retrieved_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">relevant_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="cb-todo"># TODO: 상위 k개 결과 중 정답 문서명을 포함한 비율을 반환합니다.</span>
+    <span class="c1"># 1. 상위 k개만 추린다</span>
+    <span class="n">top_k</span> <span class="o">=</span> <span class="n">retrieved_sources</span><span class="p">[:</span><span class="n">k</span><span class="p">]</span>
+    <span class="c1"># 2. 정답 문서명은 set으로 묶어 조회 속도를 O(1)로 만든다</span>
+    <span class="n">relevant_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">relevant_sources</span><span class="p">)</span>
+    <span class="c1"># 3. 각 top-k 결과 source가 정답 문서명 중 하나라도 포함하는지 센다</span>
+    <span class="n">hits</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">top_k</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">rel</span> <span class="ow">in</span> <span class="n">src</span> <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">relevant_set</span><span class="p">))</span>
+    <span class="c1"># 4. k로 나눠 비율을 돌려준다 (k=0 방어)</span>
+    <span class="k">return</span> <span class="n">hits</span> <span class="o">/</span> <span class="n">k</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+<p>매개변수·동작을 풀면 다음과 같습니다.</p>
+<table>
+<thead>
+<tr>
+<th>매개변수</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>retrieved_sources</code></td>
+<td>시스템이 검색해 가져온 청크의 source 문서명 리스트. 순서가 중요 (위에 올린 것부터 k번째까지만 본다)</td>
+</tr>
+<tr>
+<td><code>relevant_sources</code></td>
+<td>JSON에 적어 둔 정답 문서명 리스트</td>
+</tr>
+<tr>
+<td><code>k</code></td>
+<td>상위 몇 개까지 채점할지 정하는 숫자 (보통 3 또는 5)</td>
+</tr>
+</tbody>
+</table>
+<p>문자열 부분 일치(<code>rel in src</code>)로 판단한 데는 이유가 있습니다. 검색 결과 source에는 <code>_chunk_5</code> 같은 청크 번호 접미사가 붙을 때가 많아서, 정답 문서명이 포함되기만 하면 맞다고 처리해야 합니다. 결과는 0에서 1 사이 값이고, 1에 가까울수록 상위 k 안에 정답 문서가 많이 들어와 있다는 뜻입니다.</p>
+<p>예시를 따라가 보겠습니다. <code>retrieved_sources = ['HR_취업규칙_v1.0_chunk2', 'SEC_보안규정_v1.0_chunk1', 'HR_취업규칙_v1.0_chunk7']</code>, <code>relevant_sources = ['HR_취업규칙_v1.0']</code>, <code>k=3</code>일 때, 상위 3개 중 2개가 <code>HR_취업규칙_v1.0</code>을 포함하니 <code>Precision@3 = 2/3 ≈ 0.67</code>이 됩니다.</p>
+<p>그럼 0.67이라는 숫자는 무엇을 의미하는 걸까요. 상위 3칸 중 약 67%가 정답 문서였다는 얘기입니다. 1.0이면 상위 k칸이 전부 정답 문서로 채워진 이상적인 상태, 0.0이면 상위 k칸 어디에서도 정답을 찾지 못한 상태입니다. 실무에서는 0.7 이상이 나오면 검색이 꽤 잘 맞추고 있다고 보고, 0.5 아래로 떨어지면 튜닝이 필요하다는 신호로 읽습니다. 이 숫자 하나로 &quot;검색이 정답을 위에 얼마나 잘 올렸나&quot;를 비교할 바탕이 생긴 셈입니다.</p>
+<h3>10.5.2 Recall@k — 정답 문서를 빠짐없이 찾았나</h3>
+<p><strong>Recall@k</strong>는 Precision@k의 반대편에서 같은 검색 결과를 바라봅니다. Precision이 &quot;답안지에 정답이 몇 %냐&quot;를 물었다면, Recall은 &quot;정답지의 문서를 몇 개나 찾았느냐&quot;를 묻습니다. 정답 문서를 놓치는 일이 잦을수록 점수가 떨어지는 지표입니다.</p>
+<p>같은 파일의 <code>calculate_recall_at_k</code> 함수 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> tuning/step3_eval_framework/metrics.py. Recall@k 계산</div><span class="k">def</span><span class="w"> </span><span class="nf">calculate_recall_at_k</span><span class="p">(</span>
+    <span class="n">retrieved_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">relevant_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="cb-todo"># TODO: 정답 문서 중 상위 k개 안에 들어온 비율을 반환합니다.</span>
+    <span class="c1"># 1. 상위 k개만 추린다</span>
+    <span class="n">top_k</span> <span class="o">=</span> <span class="n">retrieved_sources</span><span class="p">[:</span><span class="n">k</span><span class="p">]</span>
+    <span class="c1"># 2. 정답 문서명을 set으로 묶는다</span>
+    <span class="n">relevant_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">relevant_sources</span><span class="p">)</span>
+    <span class="c1"># 3. 각 정답 문서명이 top-k 결과 중 하나라도 포함되는지 센다</span>
+    <span class="n">hits</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">relevant_set</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">rel</span> <span class="ow">in</span> <span class="n">src</span> <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">top_k</span><span class="p">))</span>
+    <span class="c1"># 4. 정답 문서 개수로 나눠 비율을 돌려준다</span>
+    <span class="k">return</span> <span class="n">hits</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">relevant_set</span><span class="p">)</span> <span class="k">if</span> <span class="n">relevant_set</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+<p>Precision@k와 코드가 거의 똑같아 보이지만, <strong>나눗셈의 분모</strong>가 다릅니다.</p>
+<table>
+<thead>
+<tr>
+<th>지표</th>
+<th>보는 방향</th>
+<th>분모</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Precision@k</strong></td>
+<td>답안지에 정답이 얼마나?</td>
+<td><code>k</code> (답안 칸 수)</td>
+</tr>
+<tr>
+<td><strong>Recall@k</strong></td>
+<td>정답 중 얼마나 찾았나?</td>
+<td>정답 문서 개수</td>
+</tr>
+</tbody>
+</table>
+<p>예시로 감을 잡아 보겠습니다. 정답 문서가 <code>['HR_취업규칙_v1.0']</code> 하나인데 상위 3개 중 2개가 이 문서 청크라면, <code>Precision@3 = 2/3 ≈ 0.67</code>이지만 <code>Recall@3 = 1/1 = 1.0</code>입니다. 답안지에 오답이 하나 섞였어도 정답은 빠짐없이 잡아낸 셈입니다. Precision은 답안의 정확성을, Recall은 빠짐없는 정도를 본다고 기억해 두면 됩니다.</p>
+<p>Precision과 Recall 두 지표는 검색 쪽 성적표 역할을 합니다. 상위 k개에 정답이 얼마나 들어 있는지(정확성), 정답이 얼마나 빠짐없이 잡혔는지(커버리지)를 각각 보여 줍니다. 다만 검색을 잘했다고 답까지 맞다는 보장은 없습니다. 올바른 문서를 펴 놓고도 내용을 엉뚱하게 옮기면 답은 틀어집니다. 이번엔 답변 자체를 채점할 차례입니다.</p>
+<h3>10.5.3 환각률 — 답변이 근거 문서에서 벗어났나</h3>
+<p>두 번째 지표는 <strong>환각률</strong>. 시스템이 문서에 없는 내용을 지어내진 않았는지 재는 지표입니다. 학생이 시험에서 문제지에 없는 답을 써내는 상황을 떠올리면 됩니다.</p>
+<p>가장 정확한 방법은 또 다른 LLM을 심사위원으로 세워 문장마다 판정하게 하는 것이지만, 로컬 환경에선 너무 무겁습니다. 그래서 이 책은 <strong>가벼운 방식</strong>을 씁니다. 답변에서 핵심 단어를 뽑아 근거 문서에 실제로 등장하는지 센 다음, 너무 적게 나오면 &quot;문서에서 벗어난 답&quot;으로 판정하는 방식입니다.</p>
+<p>같은 파일의 <code>estimate_hallucination_rate</code> 함수 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> tuning/step3_eval_framework/metrics.py. 환각률 추정</div><span class="k">def</span><span class="w"> </span><span class="nf">estimate_hallucination_rate</span><span class="p">(</span>
+    <span class="n">answers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">contexts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="cb-todo"># TODO: 답변이 컨텍스트에 근거하지 않는 비율을 추정합니다.</span>
+    <span class="n">hallucination_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># 1. 각 (답변, 컨텍스트) 쌍을 순회한다</span>
+    <span class="k">for</span> <span class="n">answer</span><span class="p">,</span> <span class="n">context_docs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">answers</span><span class="p">,</span> <span class="n">contexts</span><span class="p">):</span>
+        <span class="c1"># 2. 컨텍스트 문서들을 하나의 소문자 문자열로 합친다</span>
+        <span class="n">context_combined</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">context_docs</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="c1"># 3. 답변에서 4자 이상 단어만 뽑아 핵심 단어 후보로 삼는다</span>
+        <span class="n">key_words</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">answer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">key_words</span><span class="p">:</span>
+            <span class="n">context_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">context_combined</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+            <span class="c1"># 4. 핵심 단어 중 컨텍스트에 등장하는 비율이 30% 미만이면 환각으로 카운트</span>
+            <span class="n">overlap</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">key_words</span> <span class="k">if</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">context_words</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_words</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mf">0.3</span><span class="p">:</span>
+                <span class="n">hallucination_count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># 5. 환각 답변 수를 전체 답변 수로 나눠 비율 반환</span>
+    <span class="k">return</span> <span class="n">hallucination_count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">answers</span><span class="p">)</span> <span class="k">if</span> <span class="n">answers</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+<table>
+<thead>
+<tr>
+<th>매개변수</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>answers</code></td>
+<td>시스템이 낸 답변 문자열 리스트</td>
+</tr>
+<tr>
+<td><code>contexts</code></td>
+<td>각 답변에 쓰인 근거 문서 조각들의 리스트 (답변당 여러 조각이 묶임)</td>
+</tr>
+</tbody>
+</table>
+<p>4자 이상 단어만 뽑는 건 한국어 조사나 짧은 단어가 비율을 흐리지 않게 하려는 장치입니다. 30% 기준은 &quot;답변 핵심 단어 10개 중 3개도 문서에 못 찾으면 수상하다&quot;고 보는 실무 감각에서 나온 숫자입니다. 결과는 0에서 1 사이의 비율이고, 0에 가까우면 시스템이 문서에 충실한 쪽, 1에 가까우면 지어낸 답이 많은 쪽입니다.</p>
+<p>이 방식의 한계는 <strong>표현만 바꾼 답</strong>을 잡지 못한다는 점입니다. 문서에 &quot;연간 30일&quot;이라고 써 있는데 답변이 &quot;한 해에 30일&quot;로 바꿔 쓰면, 단어가 달라졌다는 이유로 환각으로 오판할 수 있습니다. 더 높은 정밀도가 필요한 실무에선 별도의 LLM에 판정을 맡기는 방식으로 갈아타는 게 좋습니다.</p>
+<div class="tip">
+<p><strong>이 책의 환각률 측정을 실무에선 이렇게 업그레이드합니다</strong></p>
+<ul>
+<li><strong>간단한 단어 겹침 대신 LLM 채점</strong>: 이 책의 환각률은 &quot;답변 단어가 근거 문서에 얼마나 겹치나&quot;를 세는 간단한 방식입니다. 실무에선 보통 <strong>별도 LLM에게 문장별로 채점을 맡기는 방식</strong>(업계에선 이 접근을 LLM-as-judge라고 부릅니다)으로 바꿉니다. 단어가 달라져도 뜻이 같으면 옳은 답으로 인정해 줘서 오판이 줄어듭니다.</li>
+<li><strong>또는 의미 유사도 비교</strong>: 문장을 벡터로 바꾼 뒤 답변 문장과 근거 문장의 벡터가 얼마나 가까운지 잽니다. 챕터 4의 임베딩을 똑같이 씁니다. 단어 겹침보다 &quot;표현만 바꾼 답&quot;에 강합니다.</li>
+<li><strong>대표 평가 도구</strong>:
+<ul>
+<li><strong>RAGAS</strong>: 가장 많이 쓰이는 오픈소스. Faithfulness(답변이 근거에 충실한가) · Answer Relevancy(질문에 잘 답하는가) · Context Precision · Context Recall 네 축을 자동 측정</li>
+<li><strong>TruLens</strong>: Groundedness · Context Relevance · Answer Relevance 세 축(&quot;RAG Triad&quot;라는 이름으로 통용)</li>
+<li><strong>LangSmith</strong>: LangChain의 실행 기록·평가 플랫폼. 서비스에 올라간 뒤 들어오는 요청 로그와 평가를 한자리에서 봅니다</li>
+<li><strong>DeepEval</strong>: <code>pytest</code>로 단위 테스트를 쓰듯 RAG 품질을 테스트. 자동 빌드·테스트 환경(CI)에 붙이기 쉽습니다</li>
+<li><strong>Arize Phoenix</strong>: 오픈소스 실행 기록 + 평가 도구. 결과를 그래프 대시보드로 보여주는 게 강점</li>
+</ul>
+</li>
+<li><strong>출발점 추천</strong>: 지표만 빠르게 보고 싶다면 RAGAS, LangChain으로 시스템을 만들었다면 LangSmith, 자동 테스트 중심이면 DeepEval이 시작점으로 좋습니다.</li>
+</ul>
+</div>
+<h3>10.5.4 조합별 측정 - 튜닝을 플러그처럼 갈아끼운다</h3>
+<p>지표는 준비됐지만 아직 절반입니다. 같은 질문 셋을 돌려 보려면 <strong>튜닝 조합을 갈아끼우는 스위치</strong>가 있어야 합니다. 파싱·청킹·쿼리 변환·검색·리랭크 같은 조각을 이름별로 하나씩 꺼내 써서, 조합마다 파이프라인 하나를 조립하는 구조가 필요합니다.</p>
+<p>오픈이가 <code>step3_eval_framework/pipelines.py</code>에 부품 함수들을 모았습니다. 한 함수가 한 조각을 담당합니다. 그리고 <code>strategies.py</code>에서 이 부품들을 묶어 A/B/C/D 네 조합으로 정의했습니다. D 조합(챕터 8~10 튜닝이 모두 켜진 최종 형태)을 기준으로, 파이프라인의 네 단계에 어떤 튜닝이 어디에 붙는지 한 장에 담았습니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px 28px;margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:28px;text-align:center">그림 10-9. 튜닝 로드맵. 네 단계를 ㄹ자로 잇고 각 단계에 어떤 튜닝이 붙는지 표시합니다</div>
+<div style="display:grid;grid-template-columns:1fr 64px 1fr;gap:18px 12px;align-items:stretch;max-width:760px;margin:0 auto">
+<!-- ① 질문 -->
+<div style="background:var(--color-bg);border:2px solid var(--color-accent);border-radius:var(--radius-lg);padding:18px 18px 16px;position:relative">
+<div style="position:absolute;top:-12px;left:16px;background:var(--color-accent);color:white;font-size:11px;font-weight:700;padding:2px 10px;border-radius:12px;letter-spacing:1px">① 질문</div>
+<div style="font-size:15px;font-weight:700;color:var(--color-accent-text);margin-bottom:10px;margin-top:6px">사용자 입력 받기</div>
+<div style="font-size:12px;color:var(--color-text);line-height:1.7">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="color:var(--color-accent);font-weight:700">▸</span><span><b>약어 확장</b></span></div>
+<div style="margin-left:16px;font-size:11px;color:var(--color-text-subtle)">WFH → 재택근무(WFH)</div>
+</div>
+</div>
+<!-- Right arrow -->
+<div style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px">
+<div style="font-size:10px;color:var(--color-text-subtle);letter-spacing:1px;text-transform:uppercase">Step</div>
+<div style="font-size:28px;color:var(--color-accent);font-weight:700;line-height:1">━━▶</div>
+</div>
+<!-- ② 검색 -->
+<div style="background:var(--color-bg);border:2px solid var(--color-accent);border-radius:var(--radius-lg);padding:18px 18px 16px;position:relative">
+<div style="position:absolute;top:-12px;left:16px;background:var(--color-accent);color:white;font-size:11px;font-weight:700;padding:2px 10px;border-radius:12px;letter-spacing:1px">② 검색</div>
+<div style="font-size:15px;font-weight:700;color:var(--color-accent-text);margin-bottom:10px;margin-top:6px">관련 문서 끌어오기</div>
+<div style="font-size:12px;color:var(--color-text);line-height:1.7">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="color:var(--color-accent);font-weight:700">▸</span><span><b>Parent Document Retriever</b></span></div>
+<div style="margin-left:16px;font-size:11px;color:var(--color-text-subtle)">자식 청크 검색 → 부모 문맥 반환</div>
+<div style="display:flex;align-items:baseline;gap:6px;margin-top:4px"><span style="color:var(--color-accent);font-weight:700">▸</span><span><b>Ensemble</b></span></div>
+<div style="margin-left:16px;font-size:11px;color:var(--color-text-subtle)">BM25 + 벡터 유사도 결합</div>
+</div>
+</div>
+<!-- Turn: blank, blank, down arrow -->
+<div></div>
+<div></div>
+<div style="display:flex;justify-content:flex-end;align-items:center;padding-right:24px;gap:6px">
+<div style="font-size:10px;color:var(--color-text-subtle);letter-spacing:1px">turn</div>
+<div style="font-size:24px;color:var(--color-accent);font-weight:700;line-height:1">▼</div>
+</div>
+<!-- ④ 답변 (bottom-left) -->
+<div style="background:var(--color-bg);border:2px solid var(--color-accent-warm);border-radius:var(--radius-lg);padding:18px 18px 16px;position:relative">
+<div style="position:absolute;top:-12px;left:16px;background:var(--color-accent-warm);color:white;font-size:11px;font-weight:700;padding:2px 10px;border-radius:12px;letter-spacing:1px">④ 답변</div>
+<div style="font-size:15px;font-weight:700;color:var(--color-accent-warm-text);margin-bottom:10px;margin-top:6px">결과 조립 + 근거 제공</div>
+<div style="font-size:12px;color:var(--color-text);line-height:1.7">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="color:var(--color-accent-warm);font-weight:700">▸</span><span><b>리랭킹 (키워드 오버랩)</b></span></div>
+<div style="display:flex;align-items:baseline;gap:6px"><span style="color:var(--color-accent-warm);font-weight:700">▸</span><span><b>LLM 답변 생성</b></span></div>
+<div style="margin-top:10px;padding:8px 10px;background:#fff4ed;border:1px dashed #fbbf24;border-radius:6px">
+<div style="font-size:11px;font-weight:700;color:var(--color-accent-warm-text);margin-bottom:4px">근거 분기 (카테고리별)</div>
+<div style="font-size:11px;color:var(--color-text);display:flex;gap:6px;align-items:baseline"><span style="color:var(--color-accent-warm)">◆</span><span><b>정형</b> → JSON (DB/계산 결과)</span></div>
+<div style="font-size:11px;color:var(--color-text);display:flex;gap:6px;align-items:baseline"><span style="color:var(--color-accent-warm)">◆</span><span><b>비정형·복합</b> → 문서 전체 이미지</span></div>
+</div>
+</div>
+</div>
+<!-- Left arrow -->
+<div style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px">
+<div style="font-size:10px;color:var(--color-text-subtle);letter-spacing:1px;text-transform:uppercase">Step</div>
+<div style="font-size:28px;color:var(--color-accent);font-weight:700;line-height:1">◀━━</div>
+</div>
+<!-- ③ 벡터 (bottom-right) -->
+<div style="background:var(--color-bg);border:2px solid var(--color-accent);border-radius:var(--radius-lg);padding:18px 18px 16px;position:relative">
+<div style="position:absolute;top:-12px;left:16px;background:var(--color-accent);color:white;font-size:11px;font-weight:700;padding:2px 10px;border-radius:12px;letter-spacing:1px">③ 벡터</div>
+<div style="font-size:15px;font-weight:700;color:var(--color-accent-text);margin-bottom:4px;margin-top:6px">벡터 저장소</div>
+<div style="font-size:11px;color:var(--color-text-subtle);margin-bottom:8px;font-style:italic">오프라인 사전 구축 (임베딩 인덱스)</div>
+<div style="font-size:12px;color:var(--color-text);line-height:1.7">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="color:var(--color-accent);font-weight:700">▸</span><span><b>하이브리드 파서</b></span></div>
+<div style="margin-left:16px;font-size:11px;color:var(--color-text-subtle)">pypdf · 부족 시 Vision 전환</div>
+<div style="display:flex;align-items:baseline;gap:6px;margin-top:4px"><span style="color:var(--color-accent);font-weight:700">▸</span><span><b>Semantic 청킹</b></span></div>
+<div style="margin-left:16px;font-size:11px;color:var(--color-text-subtle)">단락 단위 분리</div>
+<div style="display:flex;align-items:baseline;gap:6px;margin-top:4px"><span style="color:var(--color-accent);font-weight:700">▸</span><span><b>ChromaDB 임베딩</b></span></div>
+</div>
+</div>
+</div>
+<div style="margin-top:24px;padding-top:16px;border-top:1px dashed var(--color-border);font-size:12px;color:var(--color-text-muted);line-height:1.7;text-align:center">
+① 사용자 질문 ▶ ② 관련 문서 검색 ▼ ③ 벡터 저장소 참조(오프라인 준비 결과) ◀ ④ 답변 조립 + 근거 제공
+</div>
+</div>
+<p>각 조합(A/B/C/D)은 위 네 단계에서 <strong>얼마나 많은 튜닝 스위치를 켜는지</strong>만 다릅니다. A는 한 개도 켜지 않은 baseline, D는 모두 켠 최종 형태입니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge reference">참고</span> tuning/step3_eval_framework/strategies.py. 조합 정의</div><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">pipelines</span> <span class="k">as</span> <span class="n">P</span>
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Strategy</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">parse_fn</span><span class="p">:</span> <span class="nb">callable</span>
+    <span class="n">chunk_fn</span><span class="p">:</span> <span class="nb">callable</span>
+    <span class="n">query_transform_fn</span><span class="p">:</span> <span class="nb">callable</span>
+    <span class="n">retrieve_fn</span><span class="p">:</span> <span class="nb">callable</span>
+    <span class="n">rerank_fn</span><span class="p">:</span> <span class="nb">callable</span>
+
+<span class="n">STRATEGIES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="n">Strategy</span><span class="p">(</span><span class="s2">&quot;A (baseline)&quot;</span><span class="p">,</span> <span class="s2">&quot;페이지 청킹 + 벡터 검색&quot;</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">parse_pypdf</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">chunk_page</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">query_noop</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">retrieve_cosine</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">rerank_noop</span><span class="p">),</span>
+    <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="n">Strategy</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;단락 청킹 + 키워드 리랭킹&quot;</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">parse_pypdf</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">chunk_semantic</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">query_noop</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">retrieve_cosine</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">rerank_keyword</span><span class="p">),</span>
+    <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="n">Strategy</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;B + 약어 확장 + Parent Doc&quot;</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">parse_pypdf</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">chunk_semantic</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">query_expand_abbreviations</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">retrieve_parent_doc</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">rerank_keyword</span><span class="p">),</span>
+    <span class="s2">&quot;D&quot;</span><span class="p">:</span> <span class="n">Strategy</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;C + 하이브리드 파서&quot;</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">parse_hybrid</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">chunk_semantic</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">query_expand_abbreviations</span><span class="p">,</span>
+                  <span class="n">P</span><span class="o">.</span><span class="n">retrieve_parent_doc</span><span class="p">,</span> <span class="n">P</span><span class="o">.</span><span class="n">rerank_keyword</span><span class="p">),</span>
+<span class="p">}</span></div>
+<p><code>pipelines.py</code>에는 각 부품의 실제 로직이 들어 있습니다. 예를 들어 하이브리드 파서를 갈아끼우는 부품은 <code>step2_hybrid_parser</code>에서 이미 만든 <code>process_page_hybrid</code>를 그대로 재사용합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge reference">참고</span> tuning/step3_eval_framework/pipelines.py. 하이브리드 파서 부품</div><span class="k">def</span><span class="w"> </span><span class="nf">parse_hybrid</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;pypdf 텍스트가 부족하면 Vision으로 전환. step2_hybrid_parser 재사용.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..step2_hybrid_parser.hybrid_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">process_page_hybrid</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">fitz</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pdf_path</span><span class="p">))</span>
+    <span class="n">pages</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">process_page_hybrid</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+        <span class="n">pages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">pages</span></div>
+<p><code>evaluator.run_evaluation(k, strategy_name)</code>이 <code>STRATEGIES</code>에서 조합을 꺼내 부품을 순서대로 호출합니다. A를 돌리면 A 파이프라인이, D를 돌리면 D 파이프라인이 동일 질문 셋에 적용되어 지표가 나옵니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 조합별 평가 실행</div><span class="c1"># 조합 하나만</span>
+python<span class="w"> </span>-m<span class="w"> </span>tuning.step3_eval_framework<span class="w"> </span>--strategy<span class="w"> </span>D<span class="w"> </span>--k<span class="w"> </span><span class="m">3</span>
+
+<span class="c1"># 네 조합을 한 번에 (그림 10-10 비교표 스타일로 출력)</span>
+python<span class="w"> </span>-m<span class="w"> </span>tuning.step3_eval_framework<span class="w"> </span>--strategy<span class="w"> </span>all<span class="w"> </span>--k<span class="w"> </span><span class="m">3</span></div>
+<p><code>--strategy all</code>을 쓰면 A부터 D까지 차례로 벡터DB를 다시 짓고 같은 질문 셋을 돌려 <strong>네 줄짜리 비교표</strong>를 터미널에 찍어 줍니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 10-10. RAG 평가 — 조합별 비교</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-lg)">같은 질문 31개로 4가지 튜닝 조합을 비교한 <b>실측 결과표</b>입니다. 환경: data/docs 문서 6건(PDF 3 · DOCX 1 · XLSX 2), k=3, Vision: qwen2.5vl:7b, 로컬 임베딩(ko-sroberta-multitask)</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse;margin-bottom:var(--space-sm)">
+<tr style="color:var(--color-text-muted)"><th style="padding:4px 8px;text-align:left">조합</th><th style="padding:4px 8px;text-align:left">구성</th><th style="text-align:right;padding:4px 8px">Precision@3</th><th style="text-align:right;padding:4px 8px">Recall@3</th><th style="text-align:right;padding:4px 8px">환각률</th><th style="text-align:right;padding:4px 8px">Latency</th></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 8px;font-weight:600">A (baseline)</td><td style="padding:4px 8px;color:var(--color-text-muted)">페이지 청킹 + 벡터 검색</td><td style="text-align:right;padding:4px 8px">0.204</td><td style="text-align:right;padding:4px 8px">0.452</td><td style="text-align:right;padding:4px 8px">0.871</td><td style="text-align:right;padding:4px 8px">78 ms</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 8px;font-weight:600">B</td><td style="padding:4px 8px;color:var(--color-text-muted)">단락 청킹 + 키워드 리랭킹</td><td style="text-align:right;padding:4px 8px">0.333</td><td style="text-align:right;padding:4px 8px">0.323</td><td style="text-align:right;padding:4px 8px;color:var(--color-danger)">1.000</td><td style="text-align:right;padding:4px 8px">78 ms</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 8px;font-weight:600">C</td><td style="padding:4px 8px;color:var(--color-text-muted)">B + 약어 확장 + Parent Doc</td><td style="text-align:right;padding:4px 8px">0.247</td><td style="text-align:right;padding:4px 8px">0.548</td><td style="text-align:right;padding:4px 8px">0.903</td><td style="text-align:right;padding:4px 8px">85 ms</td></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-success-bg)"><td style="padding:4px 8px;font-weight:700;color:var(--color-success-text)">D</td><td style="padding:4px 8px;color:var(--color-success-text)">C + 하이브리드 파서</td><td style="text-align:right;padding:4px 8px;font-weight:700;color:var(--color-success-text)">0.236</td><td style="text-align:right;padding:4px 8px;font-weight:700;color:var(--color-success-text)">0.532</td><td style="text-align:right;padding:4px 8px;font-weight:700;color:var(--color-success-text)">0.871</td><td style="text-align:right;padding:4px 8px;font-weight:700;color:var(--color-success-text)">80 ms</td></tr>
+</table>
+<div style="font-size:var(--fs-xs);color:var(--color-success-text)">환각률은 D가 최저(0.871). Recall은 C·D가 베이스라인 A를 0.08~0.10 끌어올렸고, 스캔본까지 본문으로 편입되는 조합은 D뿐입니다</div>
+</div>
+<div class="tip">
+<p><strong>실측표를 어떻게 읽을까</strong></p>
+<ul>
+<li><strong>Precision@3이 낮게 보이는 이유</strong>: 6건짜리 문서 세트는 질문당 정답 후보가 보통 한 건입니다. k=3으로 세 칸을 다 채울 때 앞 한 칸만 맞아도 Precision은 1/3(≈0.33)이 위쪽 한계입니다. 표의 B가 그 한계에 거의 맞닿아 있습니다.</li>
+<li><strong>Recall@3을 최우선 지표로</strong>: 이 시스템은 &quot;정답 문서를 놓치지 않고 올리느냐&quot;가 먼저입니다. C·D가 A(0.452)보다 0.08~0.10 높고, 약어 확장·부모 문서 복원·Vision 편입이 검색 커버리지를 실제로 넓혔다는 뜻입니다.</li>
+<li><strong>환각률이 왜 0.87~1.00인가</strong>: <code>estimate_hallucination_rate</code>는 <code>expected_answer</code>(문서에 없는 가상 정답)와 검색된 청크의 단어 겹침만 봅니다. 예제용 6건 문서 세트에는 이 가상 수치가 그대로 담겨 있지 않아 겹침이 낮게 나옵니다. 수치의 절대값보다 조합 간 상대 비교로 읽으세요.</li>
+<li><strong>D가 환각률에서 앞서는 이유</strong>: qwen2.5vl이 스캔본에서 &quot;정보보안 서약서&quot; &quot;제4조 (생성형 AI 활용 지침)&quot;처럼 원문 용어를 정확히 복원하기 때문에 검색된 청크에 질문 키워드가 더 자주 등장합니다. 이 차이가 환각률을 C의 0.903에서 D의 0.871로 내렸습니다.</li>
+</ul>
+</div>
+<p>오픈이가 표를 한참 들여다봤습니다. D 행의 환각률 <code>0.871</code>이 눈에 들어왔습니다. 같은 줄의 <code>0.903</code>(C), <code>1.000</code>(B)보다 한 단계 낮은 숫자. Recall은 C와 0.016 차이로 거의 붙어 있고, Latency도 80 ms 대로 체감 차이 없는 범위였습니다. 대신 D 쪽에는 다른 조합에는 없는 무기가 있었습니다. <strong>스캔본 서약서의 본문이 벡터DB에 들어와 있다는 것.</strong> A·B·C는 서약서 페이지를 아예 인덱싱하지 못했는데, D는 Vision으로 788자를 꺼내 집어넣었습니다.</p>
+<p>커서가 D 행 위에서 멈췄습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "팀장님, D가 환각률이 제일 낮아요. 서약서 본문까지 올라와 있어서 검색 결과 청크에 질문 단어가 더 자주 등장하는 거예요."</div>
+<p>팀장이 잠깐 화면을 내려다보더니 고개를 끄덕였습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "스캔본이 한 장뿐인데도 숫자에 반영되네요. 종류가 다른 문서를 한 파이프라인으로 다 받는다는 점에서도 D가 맞는 옷이에요."</div>
+<p>의자 등받이에 몸이 닿는 순간, 머릿속에서 다른 정리가 됐습니다.</p>
+<p class="thought">튜닝은 지표 하나를 위로 올리는 게 아니라, 쌓아 둔 부품이 서로 물려 돌아가는지 확인하는 작업이구나.</p>
+<p>![](../assets/챕터 10/gemini/10_eval-concept.png)
+<em>그림 10-11. 평가 프레임워크. 질문과 정답 쌍을 반복 돌려 숫자로 품질을 측정합니다</em></p>
+<h2>10.6 튜닝 메뉴판 - 무엇을 골라 쓸까</h2>
+<p>평가 결과에서 고른 D 조합을 실제로 어떻게 조립할지, 챕터 8~10에 등장한 튜닝을 한 줄씩 놓고 재점검할 차례였습니다. 오픈이가 화이트보드에 튜닝 이름을 하나씩 적어 내려갔습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "전부 다 켜면 좋겠지만, 느려지고 복잡해집니다. 평가에서 숫자로 증명된 것만 남기겠습니다."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "규정 문서 성격 그대로 가면 돼요. 조항이 짧고, 약어가 많고, 스캔본도 일부 섞여 있고요."</div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);padding:var(--space-md) var(--space-md) var(--space-sm);text-align:center">그림 10-12. 챕터 8~10 튜닝 메뉴판. 체크 표시가 커넥트HR 에이전트에 적용한 일곱 조합입니다</div>
+<table style="width:100%;border-collapse:collapse;font-size:13px">
+<thead>
+<tr style="background:var(--color-surface-alt)">
+<th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--color-border);width:40px"></th>
+<th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--color-border);font-weight:700;color:var(--color-text-heading)">튜닝</th>
+<th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--color-border);font-weight:700;color:var(--color-text-heading)">무엇을 바꾸나</th>
+<th style="padding:10px 12px;text-align:left;border-bottom:2px solid var(--color-border);font-weight:700;color:var(--color-text-heading)">언제 쓰나</th>
+<th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--color-border);font-weight:700;color:var(--color-text-heading);width:80px">LLM 호출</th>
+<th style="padding:10px 12px;text-align:center;border-bottom:2px solid var(--color-border);font-weight:700;color:var(--color-text-heading);width:50px">챕터</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-success);font-weight:700">&#10003;</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);font-weight:600;color:var(--color-success-text)">청킹 전략</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">문서 자르는 방법 교체</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">주제 섞일 때</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted);font-size:11px">없음</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted)">8</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-success);font-weight:700">&#10003;</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);font-weight:600;color:var(--color-success-text)">리랭킹</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">Cross-Encoder 재정렬</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">상위 결과 부정확</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted);font-size:11px">없음 <span style="color:var(--color-text-subtle);font-size:10px">(reranker 모델)</span></td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted)">8</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-success);font-weight:700">&#10003;</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);font-weight:600;color:var(--color-success-text)">하이브리드 검색</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">Vector+BM25 합산</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">의미+키워드 둘 다</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted);font-size:11px">없음</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted)">8</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)"></td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">HyDE</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">상상 답변으로 검색</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">어휘 차이 클 때</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-accent-warm-text);font-size:11px;font-weight:600">있음</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">9</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)"></td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">Multi-Query</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">질문 여러 갈래</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">의미가 넓을 때</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-accent-warm-text);font-size:11px;font-weight:600">있음</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">9</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-success);font-weight:700">&#10003;</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);font-weight:600;color:var(--color-success-text)">약어/동의어 확장</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">WFH&#8594;재택근무</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">약어 많을 때</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted);font-size:11px">없음 <span style="color:var(--color-text-subtle);font-size:10px">(사전 치환)</span></td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted)">9</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-success);font-weight:700">&#10003;</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);font-weight:600;color:var(--color-success-text)">Parent Document</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">자식 청크 검색 → 부모 반환</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">맥락이 짧게 잘릴 때</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted);font-size:11px">없음</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted)">9</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)"></td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">Compression</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">핵심 문장만 압축</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">토큰 절약</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-accent-warm-text);font-size:11px;font-weight:600">있음</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">9</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-success);font-weight:700">&#10003;</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);font-weight:600;color:var(--color-success-text)">Vision LLM 파서</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">스캔PDF/이미지 읽기</td>
+<td style="padding:8px 12px;border-bottom:1px solid var(--color-border);color:var(--color-text)">스캔본이 섞여 있을 때</td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-accent-warm-text);font-size:11px;font-weight:600">있음 <span style="color:var(--color-text-subtle);font-size:10px">(Vision)</span></td>
+<td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--color-border);color:var(--color-text-muted)">10</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "Semantic 청킹으로 단락별로 자르고, 리랭커로 순위를 보정하고, 검색은 BM25와 벡터를 섞은 하이브리드로 넓혀 두고, 약어 사전으로 WFH 같은 말을 풀어 주고, Parent Doc으로 짧은 청크에 맥락을 얹습니다. 스캔본은 Vision 파서로 텍스트를 꺼내 같은 벡터DB에 태우고요. 파이프라인 밖에서는 RAG 평가 프레임워크로 주기적으로 질문셋을 돌려 이 일곱 가지가 실제로 효과가 있는지 숫자로 확인합니다."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "HyDE랑 Multi-Query, Compression은 왜 뺐어요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "셋 다 질문이 들어올 때마다 LLM을 한 번씩 더 부릅니다. 하지만 규정 문서에서는 질문과 문서 어휘가 거의 같아 가상 답변(HyDE)이나 질문 확장(Multi-Query)의 이득이 작고, 청크도 이미 짧아서 Compression이 얻을 게 별로 없었습니다. 비용은 올라가는데 숫자는 제자리였던 거죠."</div>
+<p>체크한 일곱 항목이 커넥트HR 에이전트에 실제로 적용한 D 조합입니다. RAG 평가는 조합 밖에서 이 일곱 가지가 제값을 하는지 수치로 검증하는 장치로 따로 돌립니다.</p>
 <h2>용어 정리</h2>
 <table>
 <thead>
@@ -294,9 +1034,9 @@ python -m tuning.step3_eval_framework --strategy tuned</div>
 <td>이미지·표·도식을 이해해 자연어로 설명하는 멀티모달 LLM</td>
 </tr>
 <tr>
-<td>&quot;텍스트 레이어 감지 후 분기&quot;</td>
+<td>&quot;이미지 감지 후 분기&quot;</td>
 <td><strong>하이브리드 파서</strong></td>
-<td>텍스트 PDF는 pypdf, 스캔 PDF는 Vision LLM으로 자동 분기</td>
+<td><code>page.get_images()</code>·텍스트 길이로 Vision LLM과 pypdf를 자동 선택</td>
 </tr>
 <tr>
 <td>&quot;정답 비율&quot;</td>
@@ -304,24 +1044,35 @@ python -m tuning.step3_eval_framework --strategy tuned</div>
 <td>상위 k개 중 정답 청크 비율</td>
 </tr>
 <tr>
+<td>&quot;정답 커버리지&quot;</td>
+<td><strong>Recall@k</strong></td>
+<td>정답 문서 중 상위 k개에 포함된 비율</td>
+</tr>
+<tr>
 <td>&quot;근거 없는 답변 비율&quot;</td>
 <td><strong>Hallucination Rate</strong></td>
-<td>답변 문장 중 문서 근거가 없는 비율 (LLM 판정)</td>
+<td>답변 문장 중 문서 근거가 없는 비율. 답변과 근거 문서의 단어 겹침으로 간단히 잡거나, 더 정확히 잴 땐 별도 LLM에 채점을 맡깁니다</td>
 </tr>
 <tr>
 <td>&quot;성적표&quot;</td>
 <td><strong>RAG Evaluation Framework</strong></td>
 <td>평가셋(질문·정답)으로 파이프라인을 돌려 Precision·Recall·환각률을 수치화</td>
 </tr>
+<tr>
+<td>&quot;튜닝 조합 스위치&quot;</td>
+<td><strong>Strategy Pattern (A/B/C/D)</strong></td>
+<td>파서·청킹·쿼리변환·검색·리랭크 부품을 갈아끼워 조합별로 성능을 비교</td>
+</tr>
 </tbody>
 </table>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
-<li><strong>이미지는 텍스트가 아닙니다.</strong> 스캔 PDF, 차트, 조직도, 복잡한 표는 pypdf로 못 읽습니다. 필요할 때만 Vision LLM으로 폴백하는 하이브리드 전략이 비용, 품질의 균형을 잡습니다.</li>
-<li><strong>느낌이 아니라 숫자로 판단합니다.</strong> Precision@k, Recall, Hallucination Rate를 한 번 측정해 두면 이후 개선안이 &quot;진짜 나아졌는지&quot; 근거를 가지고 말할 수 있습니다.</li>
-<li><strong>여기서 끝이 아닙니다.</strong> 평가셋을 늘리고, 사용자 로그로 실패 쿼리를 수집하고, Langfuse 같은 도구로 운영 중 품질을 상시 관측하세요. 커넥트HR 에이전트는 이제 <strong>계속 자라는</strong> 시스템입니다.</li>
+<li><strong>스캔 PDF는 pypdf로 안 읽힙니다.</strong> 텍스트 레이어가 있는 페이지는 pypdf가 살리고, 그렇지 않은 페이지는 Vision LLM이 눈 역할을 합니다. 하이브리드 파서의 분기 기준은 <strong>페이지에서 꺼낸 텍스트 길이</strong>입니다.</li>
+<li><strong>RAG 평가는 네 지표 세트</strong>입니다. Precision@k(정확성) · Recall@k(커버리지) · Hallucination Rate(근거 충실성) · Latency(속도). 한 면만 보면 다른 쪽이 무너집니다.</li>
+<li><strong>튜닝은 숫자로 증명된 것만 얹습니다.</strong> 우리 문서(규정·짧은 조항·약어 많음·스캔본 일부)에는 D 조합(Semantic 청킹 + 하이브리드 검색 + 리랭커 + 약어 확장 + Parent Doc + Vision 파서)이 환각률과 커버리지 모두에서 가장 좋은 수치를 냈습니다. 스캔본이 없는 환경이라면 Vision 파서를 빼고 C로도 충분합니다. RAG 평가 프레임워크는 이 조합을 고를 때 쓴 채점기이지 파이프라인에 얹는 부품은 아닙니다.</li>
 </ul>
+<p>다음 챕터에서는 이 D 조합을 <strong>하나의 파이프라인으로 조립</strong>하고, 답변에 <strong>근거를 붙여</strong> 사용자에게 내보냅니다. 커넥트HR 에이전트가 완성되는 마지막 장입니다.</p>
 </div>
 
 </div>

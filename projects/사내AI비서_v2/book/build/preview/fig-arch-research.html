@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>시스템 아키텍처 — 리서치 기반 3종</title>
+<style>
+:root {
+  --ink: #0f172a;
+  --text: #334155;
+  --muted: #64748b;
+  --subtle: #94a3b8;
+  --line: #cbd5e1;
+  --line-soft: #e2e8f0;
+  --bg: #ffffff;
+  --bg-soft: #f8fafc;
+  --bg-soft2: #f1f5f9;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --accent-ink: #1e40af;
+  --amber: #d97706;
+  --amber-soft: #fef3c7;
+  --amber-ink: #92400e;
+  --emerald: #059669;
+  --emerald-soft: #d1fae5;
+  --emerald-ink: #065f46;
+  --rose: #e11d48;
+  --rose-soft: #ffe4e6;
+  --radius: 8px;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 24px 64px; line-height: 1.55; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 8px; color: var(--ink); }
+.intro { color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.7; }
+h2 { margin-top: 64px; font-size: 18px; color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+h3 { margin-top: 24px; font-size: 14px; color: var(--ink); }
+.tag { display: inline-block; background: var(--accent-soft); color: var(--accent-ink); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.note { color: var(--muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.6; }
+.principles { background: var(--bg-soft); padding: 16px 20px; border-radius: var(--radius); margin: 16px 0; font-size: 13px; line-height: 1.7; }
+.principles ol { margin: 8px 0 0 16px; padding: 0; }
+.principles li { margin-bottom: 4px; }
+code { font-family: "SF Mono", Menlo, monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 5px; border-radius: 3px; }
+
+.board { background: white; padding: 40px 28px; margin: 24px 0; overflow-x: auto; }
+
+/* ===================== R1. C4 Container-style ===================== */
+.r1-wrap { min-width: 1100px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+.r1-col { display: flex; flex-direction: column; gap: 20px; }
+
+.r1-boundary { border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 18px 18px; position: relative; background: white; }
+.r1-boundary .b-label { position: absolute; top: -10px; left: 16px; background: white; padding: 0 10px; font-size: 10px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+.r1-boundary.online { background: var(--accent-soft); border-color: var(--accent); }
+.r1-boundary.online .b-label { background: var(--accent-soft); color: var(--accent-ink); }
+.r1-boundary.data { background: var(--bg-soft2); }
+.r1-boundary.data .b-label { background: var(--bg-soft2); }
+.r1-boundary.ingest { background: var(--amber-soft); border-color: var(--amber); }
+.r1-boundary.ingest .b-label { background: var(--amber-soft); color: var(--amber-ink); }
+.r1-boundary.ext { background: var(--emerald-soft); border-color: var(--emerald); }
+.r1-boundary.ext .b-label { background: var(--emerald-soft); color: var(--emerald-ink); }
+
+.r1-comp { background: white; padding: 10px 14px; border-radius: var(--radius); margin-bottom: 8px; }
+.r1-comp:last-child { margin-bottom: 0; }
+.r1-comp .n { font-size: 13px; font-weight: 700; color: var(--ink); }
+.r1-comp .t { font-size: 10px; color: var(--accent); letter-spacing: 1px; font-weight: 700; margin-top: 1px; }
+.r1-comp .s { font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+.r1-stack { display: flex; flex-direction: column; gap: 8px; }
+
+/* 상단 클라이언트 한 줄 */
+.r1-top { display: flex; justify-content: center; margin-bottom: 20px; }
+.r1-client { background: var(--rose-soft); padding: 10px 24px; border-radius: 100px; border: 1px solid var(--rose); }
+.r1-client .n { font-size: 13px; font-weight: 700; color: var(--ink); }
+.r1-client .s { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ===================== R2. Split ETL + Query ===================== */
+.r2-wrap { min-width: 1100px; display: grid; grid-template-columns: 1fr 60px 1fr; gap: 0; }
+.r2-pane { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 18px 18px; position: relative; }
+.r2-pane .b-label { position: absolute; top: -10px; left: 16px; background: white; padding: 0 10px; font-size: 10px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+.r2-pane.ingest { background: var(--amber-soft); border-color: var(--amber); }
+.r2-pane.ingest .b-label { background: var(--amber-soft); color: var(--amber-ink); }
+.r2-pane.query { background: var(--accent-soft); border-color: var(--accent); }
+.r2-pane.query .b-label { background: var(--accent-soft); color: var(--accent-ink); }
+
+.r2-node { background: white; padding: 10px 14px; border-radius: var(--radius); margin-bottom: 8px; }
+.r2-node .n { font-size: 12px; font-weight: 700; color: var(--ink); }
+.r2-node .s { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.r2-arr { text-align: center; color: var(--subtle); font-size: 14px; margin: -2px 0 6px; }
+
+.r2-middle { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 40px; }
+.r2-middle .m-arr { color: var(--muted); font-size: 20px; font-weight: 700; }
+.r2-middle .m-label { font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; text-align: center; writing-mode: vertical-rl; transform: rotate(180deg); }
+
+.r2-shared { grid-column: 1/4; margin-top: 24px; background: var(--bg-soft); border: 1px dashed var(--line); border-radius: var(--radius); padding: 16px 20px; }
+.r2-shared .label { font-size: 10px; color: var(--muted); letter-spacing: 2px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+.r2-shared .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+/* ===================== R3. Dataflow Diagram (DFD) ===================== */
+.r3-wrap { min-width: 1100px; position: relative; padding: 24px 12px; }
+
+/* DFD 노드 모양 구분:
+   - External Entity (사용자, LLM): 사각형 실선 + double border
+   - Process (FastAPI, Agent, LCEL): 둥근 사각형
+   - Data Store (PG, Chroma): 평행선 (위아래만 선)
+*/
+.r3-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: nowrap; }
+
+.r3-entity { background: white; border: 2px double var(--rose); padding: 12px 16px; border-radius: 4px; text-align: center; min-width: 120px; }
+.r3-entity .n { font-size: 12px; font-weight: 700; color: var(--ink); }
+.r3-entity .s { font-size: 9px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+
+.r3-process { background: var(--accent-soft); padding: 12px 16px; border-radius: 20px; text-align: center; min-width: 120px; }
+.r3-process .n { font-size: 12px; font-weight: 700; color: var(--accent-ink); }
+.r3-process .s { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+.r3-store { background: white; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); padding: 10px 16px; text-align: center; min-width: 120px; }
+.r3-store .n { font-size: 12px; font-weight: 700; color: var(--ink); }
+.r3-store .s { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+.r3-arr { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 60px; }
+.r3-arr .lbl { font-size: 9px; color: var(--muted); font-style: italic; white-space: nowrap; margin-bottom: 2px; }
+.r3-arr .line { color: var(--accent); font-size: 16px; font-weight: 700; }
+.r3-arr.down .line { font-size: 18px; }
+.r3-arr.reverse { flex-direction: column-reverse; }
+
+.r3-legend { margin-top: 28px; padding-top: 18px; border-top: 1px dashed var(--line); display: flex; gap: 20px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+.r3-legend .l-item { display: flex; align-items: center; gap: 6px; }
+.r3-legend .l-shape { width: 40px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: var(--ink); }
+
+/* ===================== 공통 ===================== */
+.legend { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 11px; color: var(--muted); display: flex; gap: 20px; flex-wrap: wrap; }
+.legend .item { display: flex; align-items: center; gap: 6px; }
+.legend .swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<h1>시스템 아키텍처 — 리서치 기반 배치 3종</h1>
+<p class="intro">
+C4 Container Model(Simon Brown) · AWS/Azure 참조 아키텍처 · Grokking System Design · Data Flow Diagram(Yourdon) 원칙을 종합해 <strong>독자가 빠르게 이해할 수 있는 3가지 배치</strong>를 제안합니다. 챕터 분류 대신 <strong>시스템 책임과 통신</strong>에 초점.
+</p>
+
+<div class="principles">
+<strong>리서치 기반 공통 원칙</strong>
+<ol>
+<li><strong>경계 박스로 책임 구분</strong> (C4 Container) — Online serving / Offline ingestion / External / Data store</li>
+<li><strong>화살표에 protocol·data 라벨</strong> — "HTTP POST JSON", "Vector Search k=5", "SQL Query", "Prompt + Context"</li>
+<li><strong>메인 요청 경로 강조</strong> — 굵은 파란 선, 보조 흐름은 얇은 회색·점선</li>
+<li><strong>좌→우 · 위→아래 시선 이동</strong> — 한국어 독자에게 자연스러운 동선</li>
+<li><strong>모양으로 요소 타입 구분</strong> (DFD) — 외부 엔티티 = 사각형, 프로세스 = 둥근 사각형, 데이터 저장소 = 평행선</li>
+<li><strong>범례 필수</strong> — 색·선 스타일 의미 하단에</li>
+<li><strong>노이즈 최소</strong> — 비핵심 요소는 생략, 필요한 것만</li>
+</ol>
+</div>
+
+<!-- ================================================= -->
+<!-- R1. C4 Container 스타일 -->
+<!-- ================================================= -->
+<h2>R1. C4 Container 스타일 (경계 + 라벨 화살표) <span class="tag">가장 표준적</span></h2>
+<p class="note">C4 Level 2 Container Diagram 원칙. <strong>4개 경계 박스</strong>(Online · Data · Ingestion · External)로 책임을 구분하고, 각 경계 안에 컨테이너(FastAPI, Agent 등)를 배치. 화살표 라벨로 통신을 명시. 레퍼런스: <code>c4model.com</code>, Simon Brown "Software Architecture for Developers".</p>
+
+<div class="board">
+<!-- 상단 Client -->
+<div class="r1-top"><div class="r1-client"><div class="n">사용자 · Web Browser</div><div class="s">채팅 UI에서 질문 입력</div></div></div>
+<div style="text-align:center;color:var(--accent);font-size:14px;margin-bottom:16px;font-weight:700">▼ <span style="font-size:10px;color:var(--muted);font-weight:400;font-style:italic;margin-left:4px">HTTP POST /api/chat (JSON)</span></div>
+
+<div class="r1-wrap">
+
+<!-- 좌: Online Serving -->
+<div class="r1-col">
+<div class="r1-boundary online">
+<span class="b-label">Online Serving</span>
+<div class="r1-stack">
+<div class="r1-comp"><div class="n">FastAPI</div><div class="t">REST · SESSION</div><div class="s">요청 수신 · 라우팅 · 응답 직렬화</div></div>
+<div style="text-align:center;color:var(--accent);font-size:12px;font-style:italic">↓ dispatch</div>
+<div class="r1-comp"><div class="n">ConnectHRAgent</div><div class="t">RUNTIME WRAPPER</div><div class="s">Cache · Tracker · Retry · Orchestration</div></div>
+<div style="text-align:center;color:var(--accent);font-size:12px;font-style:italic">↓ invoke</div>
+<div class="r1-comp"><div class="n">ReAct Agent</div><div class="t">AGENT EXECUTOR</div><div class="s">Reason · Act · Observe 루프</div></div>
+<div style="text-align:center;color:var(--accent);font-size:12px;font-style:italic">↓ tool call</div>
+<div class="r1-comp"><div class="n">MCP Tools (4)</div><div class="t">TOOL REGISTRY</div><div class="s">leave_balance · sales_sum · list_employees · search_documents</div></div>
+<div style="text-align:center;color:var(--accent);font-size:12px;font-style:italic">↓ search</div>
+<div class="r1-comp"><div class="n">LCEL Chain</div><div class="t">RETRIEVAL PIPELINE</div><div class="s">Retriever → Reranker → Hybrid → Prompt → LLM → Parser</div></div>
+</div>
+</div>
+</div>
+
+<!-- 우: Data + External + Ingestion -->
+<div class="r1-col">
+<div class="r1-boundary data">
+<span class="b-label">Data Store</span>
+<div class="r1-stack">
+<div class="r1-comp"><div class="n">ChromaDB</div><div class="t">VECTOR · 768D</div><div class="s">문서 청크 + 메타데이터</div></div>
+<div class="r1-comp"><div class="n">PostgreSQL</div><div class="t">RDBMS · 16</div><div class="s">employees · leave_balance · sales</div></div>
+</div>
+</div>
+
+<div class="r1-boundary ext">
+<span class="b-label">External</span>
+<div class="r1-stack">
+<div class="r1-comp"><div class="n">Ollama</div><div class="t">LLM · llama3.1</div><div class="s">답변 생성 · Tool Calling</div></div>
+<div class="r1-comp"><div class="n">Vision Model</div><div class="t">MULTIMODAL · minicpm-v</div><div class="s">이미지 이해</div></div>
+</div>
+</div>
+
+<div class="r1-boundary ingest">
+<span class="b-label">Offline Ingestion</span>
+<div class="r1-stack">
+<div class="r1-comp"><div class="n">Doc Pipeline</div><div class="t">EXTRACT · pypdf / Vision</div><div class="s">텍스트 / 스캔 자동 분기</div></div>
+<div class="r1-comp"><div class="n">Chunker · Embedder</div><div class="t">TRANSFORM</div><div class="s">500자 · ko-sroberta-multitask</div></div>
+<div class="r1-comp"><div class="n">Vector Writer</div><div class="t">LOAD</div><div class="s">ChromaDB upsert</div></div>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- 하단 Observability -->
+<div style="margin-top:20px;padding-top:16px;border-top:1px dashed var(--line-soft)">
+<div style="display:flex;justify-content:center">
+<div style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);padding:12px 20px;max-width:600px;text-align:center">
+<div style="font-size:10px;color:var(--accent-ink);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:4px">Observability · Quality</div>
+<div style="font-size:13px;font-weight:700;color:var(--ink)">RAG Evaluation Framework</div>
+<div style="font-size:11px;color:var(--muted);margin-top:3px">Precision@k · Recall · Hallucination Rate · Latency p95</div>
+</div>
+</div>
+</div>
+
+<div class="legend">
+<div class="item"><span class="swatch" style="background:var(--accent-soft);border-color:var(--accent)"></span> Online Serving</div>
+<div class="item"><span class="swatch" style="background:var(--bg-soft2)"></span> Data Store</div>
+<div class="item"><span class="swatch" style="background:var(--amber-soft);border-color:var(--amber)"></span> Offline Ingestion</div>
+<div class="item"><span class="swatch" style="background:var(--emerald-soft);border-color:var(--emerald)"></span> External</div>
+<div class="item"><span style="color:var(--accent);font-weight:700">↓</span> 메인 요청 경로</div>
+</div>
+</div>
+
+<!-- ================================================= -->
+<!-- R2. Split ETL + Query -->
+<!-- ================================================= -->
+<h2>R2. ETL / Query 분리 + 공유 Data Store <span class="tag">RAG 본질 반영</span></h2>
+<p class="note">RAG 시스템의 두 축(<strong>오프라인 Ingestion ETL</strong> + <strong>온라인 Query serving</strong>)이 <strong>공유 데이터 저장소</strong>로 연결되는 구조. 데이터 엔지니어링 파이프라인 다이어그램의 표준 패턴. 레퍼런스: Kappa/Lambda architecture, Kafka ecosystem diagrams.</p>
+
+<div class="board">
+<div class="r2-wrap">
+
+<!-- 좌: Ingestion ETL -->
+<div class="r2-pane ingest">
+<span class="b-label">Offline · ETL</span>
+<div class="r2-node"><div class="n">원본 문서</div><div class="s">PDF · DOCX · XLSX · 스캔본</div></div>
+<div class="r2-arr">↓ <span style="font-style:italic;color:var(--muted);font-size:9px">Extract</span></div>
+<div class="r2-node"><div class="n">Doc Pipeline</div><div class="s">pypdf → Vision LLM 하이브리드</div></div>
+<div class="r2-arr">↓ <span style="font-style:italic;color:var(--muted);font-size:9px">Transform</span></div>
+<div class="r2-node"><div class="n">Chunker · Embedder</div><div class="s">500자 · ko-sroberta</div></div>
+<div class="r2-arr">↓ <span style="font-style:italic;color:var(--muted);font-size:9px">Load</span></div>
+<div class="r2-node" style="background:var(--amber-soft);border:1px solid var(--amber)"><div class="n">ChromaDB upsert</div><div class="s">배치 업데이트</div></div>
+</div>
+
+<!-- 중간 화살표 영역 -->
+<div class="r2-middle">
+<div class="m-arr">→</div>
+<div class="m-label">Vector Store Read/Write</div>
+<div class="m-arr">←</div>
+</div>
+
+<!-- 우: Query Serving -->
+<div class="r2-pane query">
+<span class="b-label">Online · Serving</span>
+<div class="r2-node"><div class="n">사용자 질문</div><div class="s">HTTP POST</div></div>
+<div class="r2-arr">↓</div>
+<div class="r2-node"><div class="n">FastAPI + Agent Runtime</div><div class="s">Cache · Retry · Tracker</div></div>
+<div class="r2-arr">↓ <span style="font-style:italic;color:var(--muted);font-size:9px">ReAct tool call</span></div>
+<div class="r2-node"><div class="n">LCEL Retrieval</div><div class="s">Reranker · Hybrid · HyDE</div></div>
+<div class="r2-arr">↓ <span style="font-style:italic;color:var(--muted);font-size:9px">Vector Search k=5</span></div>
+<div class="r2-node" style="background:var(--accent-soft);border:1px solid var(--accent)"><div class="n">Top-k 문서 + Prompt</div><div class="s">LLM에 전달</div></div>
+<div class="r2-arr">↓ <span style="font-style:italic;color:var(--muted);font-size:9px">Completion</span></div>
+<div class="r2-node"><div class="n">답변 + 출처</div><div class="s">사용자 화면</div></div>
+</div>
+
+<!-- 공유 데이터 -->
+<div class="r2-shared">
+<div class="label">Shared · Data Stores</div>
+<div class="row">
+<div class="r2-node" style="margin:0"><div class="n">ChromaDB</div><div class="s">벡터 저장소 · Ingestion이 쓰고 Query가 읽음</div></div>
+<div class="r2-node" style="margin:0"><div class="n">PostgreSQL</div><div class="s">정형 데이터 · Agent Tools가 직접 조회</div></div>
+<div class="r2-node" style="margin:0"><div class="n">External · Ollama LLM</div><div class="s">llama3.1 · minicpm-v 호출</div></div>
+</div>
+</div>
+</div>
+
+<div class="legend">
+<div class="item"><span class="swatch" style="background:var(--amber-soft);border-color:var(--amber)"></span> 오프라인 ETL (배치)</div>
+<div class="item"><span class="swatch" style="background:var(--accent-soft);border-color:var(--accent)"></span> 온라인 서빙 (실시간)</div>
+<div class="item"><span class="swatch" style="background:var(--bg-soft)"></span> 공유 데이터 스토어</div>
+</div>
+</div>
+
+<!-- ================================================= -->
+<!-- R3. Data Flow Diagram (Yourdon) -->
+<!-- ================================================= -->
+<h2>R3. Data Flow Diagram (Yourdon 스타일) <span class="tag">흐름 + 요소 타입 명확</span></h2>
+<p class="note">Yourdon DFD 원칙: <strong>모양으로 요소 타입을 구분</strong>(외부 엔티티·프로세스·데이터 저장소). 화살표 위에 데이터 이름 표시. 기술 독자가 아닌 일반 독자에게도 "무엇이 무엇인지" 한눈에 보임. 레퍼런스: Yourdon "Modern Structured Analysis".</p>
+
+<div class="board">
+<div class="r3-wrap">
+
+<!-- Row 1: User → FastAPI → Agent -->
+<div class="r3-row">
+<div class="r3-entity"><div class="n">사용자</div><div class="s">External Entity</div></div>
+<div class="r3-arr"><div class="lbl">question (JSON)</div><div class="line">→</div></div>
+<div class="r3-process"><div class="n">FastAPI</div><div class="s">Process · REST</div></div>
+<div class="r3-arr"><div class="lbl">request</div><div class="line">→</div></div>
+<div class="r3-process"><div class="n">Agent Runtime</div><div class="s">Process · ReAct</div></div>
+<div class="r3-arr"><div class="lbl">answer</div><div class="line">→</div></div>
+<div class="r3-entity"><div class="n">응답</div><div class="s">To User</div></div>
+</div>
+
+<!-- Row 2: Agent → Tools → LCEL / SQL -->
+<div class="r3-row" style="padding-left:140px">
+<div class="r3-arr down"><div class="lbl">tool dispatch</div><div class="line">↓</div></div>
+</div>
+<div class="r3-row" style="padding-left:80px">
+<div class="r3-process"><div class="n">search_documents</div><div class="s">Tool · LCEL</div></div>
+<div class="r3-arr"><div class="lbl">embedding</div><div class="line">→</div></div>
+<div class="r3-store"><div class="n">ChromaDB</div><div class="s">Data Store</div></div>
+<div class="r3-arr"><div class="lbl">Top-k docs</div><div class="line">→</div></div>
+<div class="r3-process"><div class="n">Prompt + LLM</div><div class="s">Process</div></div>
+</div>
+
+<!-- Row 3: Agent → SQL Tools -->
+<div class="r3-row" style="padding-left:80px;margin-top:10px">
+<div class="r3-process"><div class="n">leave_balance<br>sales_sum<br>list_employees</div><div class="s">Tool · SQL</div></div>
+<div class="r3-arr"><div class="lbl">SELECT</div><div class="line">→</div></div>
+<div class="r3-store"><div class="n">PostgreSQL</div><div class="s">Data Store</div></div>
+<div class="r3-arr"><div class="lbl">rows</div><div class="line">→</div></div>
+<div class="r3-process" style="background:var(--bg-soft);color:var(--muted)"><div class="n">Agent 조립</div><div class="s">최종 답변</div></div>
+</div>
+
+<!-- Row 4: LLM 외부 -->
+<div class="r3-row" style="padding-left:400px;margin-top:10px">
+<div class="r3-process" style="background:var(--emerald-soft)"><div class="n">Prompt + LLM</div><div class="s">계속</div></div>
+<div class="r3-arr"><div class="lbl">prompt + context</div><div class="line">→</div></div>
+<div class="r3-entity" style="border-color:var(--emerald)"><div class="n">Ollama LLM</div><div class="s">External · llama3.1+Vision</div></div>
+</div>
+
+<!-- Row 5: Offline Ingestion -->
+<div class="r3-row" style="margin-top:28px;padding-top:16px;border-top:1px dashed var(--line)">
+<div class="r3-entity" style="border-color:var(--amber)"><div class="n">원본 문서</div><div class="s">External · PDF/Scan</div></div>
+<div class="r3-arr"><div class="lbl">파일</div><div class="line">→</div></div>
+<div class="r3-process" style="background:var(--amber-soft)"><div class="n">Doc Pipeline</div><div class="s">ETL · Batch</div></div>
+<div class="r3-arr"><div class="lbl">chunks + vectors</div><div class="line">→</div></div>
+<div class="r3-store"><div class="n">ChromaDB</div><div class="s">Data Store</div></div>
+</div>
+
+<!-- Row 6: Evaluation -->
+<div class="r3-row" style="padding-left:200px;margin-top:14px">
+<div class="r3-store" style="border-color:var(--accent)"><div class="n">Test Questions</div><div class="s">평가셋</div></div>
+<div class="r3-arr"><div class="lbl">질문·정답 쌍</div><div class="line">→</div></div>
+<div class="r3-process" style="background:var(--accent-soft)"><div class="n">RAG Eval</div><div class="s">Process · Metric</div></div>
+<div class="r3-arr"><div class="lbl">숫자</div><div class="line">→</div></div>
+<div class="r3-entity" style="border-color:var(--accent)"><div class="n">Ops Team</div><div class="s">External</div></div>
+</div>
+
+<div class="r3-legend">
+<div class="l-item"><span class="l-shape" style="border:2px double var(--rose);border-radius:4px">Entity</span>외부 엔티티</div>
+<div class="l-item"><span class="l-shape" style="background:var(--accent-soft);border-radius:20px;color:var(--accent-ink)">Process</span>프로세스 (처리 단위)</div>
+<div class="l-item"><span class="l-shape" style="border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)">Store</span>데이터 저장소</div>
+<div class="l-item"><span style="font-style:italic">label</span>화살표 라벨 = 흐르는 데이터</div>
+</div>
+</div>
+</div>
+
+<!-- ================================================= -->
+<!-- 비교 -->
+<!-- ================================================= -->
+<h2 style="margin-top:80px">3종 비교 및 추천</h2>
+<div style="background:var(--bg-soft);padding:16px;border-radius:var(--radius);font-size:13px;line-height:1.8">
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+<tr style="background:white;color:var(--ink);font-weight:700"><th style="padding:8px;text-align:left">스타일</th><th style="padding:8px;text-align:left">레퍼런스</th><th style="padding:8px;text-align:left">강점</th><th style="padding:8px;text-align:left">권장 위치</th></tr>
+<tr><td style="padding:6px"><b>R1 · C4 Container</b></td><td style="padding:6px">c4model.com · Simon Brown</td><td style="padding:6px">경계가 명확 · 책임 구분 직관적 · 엔지니어 친숙</td><td style="padding:6px">§10.10 메인 완성본</td></tr>
+<tr><td style="padding:6px"><b>R2 · ETL/Query 분리</b></td><td style="padding:6px">Lambda/Kappa · Kafka 생태계</td><td style="padding:6px">RAG 본질(offline 인덱싱 + online 검색) 반영</td><td style="padding:6px">서문·부록 · RAG 개념 설명</td></tr>
+<tr><td style="padding:6px"><b>R3 · DFD (Yourdon)</b></td><td style="padding:6px">Yourdon · Structured Analysis</td><td style="padding:6px">모양으로 요소 타입 구분 · 비전공자 친화</td><td style="padding:6px">용어 정리·에필로그</td></tr>
+</table>
+</div>
+
+<h3>적용 가이드</h3>
+<ul style="font-size:13px;line-height:1.8">
+<li><strong>§10.10 "전체 구성도의 완성"</strong> → <b>R1 (C4 Container)</b>. 가장 표준적이고 경계·흐름이 명확. 책의 마지막 시스템 뷰로 손색없음</li>
+<li><strong>프롤로그 또는 부록의 "RAG 시스템이란?"</strong> → <b>R2 (ETL/Query)</b>. RAG를 처음 접하는 독자에게 "오프라인 인덱싱 + 온라인 검색" 두 축을 한 눈에 설명</li>
+<li><strong>용어 정리 섹션의 비주얼 요약</strong> → <b>R3 (DFD)</b>. 외부 엔티티·프로세스·저장소 타입을 모양으로 보여주니 용어 이해를 돕는 참고도로 적합</li>
+</ul>
+
+<h3>리서치 참고 자료</h3>
+<ul style="font-size:12px;line-height:1.7;color:var(--muted)">
+<li>Simon Brown, <em>C4 Model for Visualising Software Architecture</em> — c4model.com</li>
+<li>Edward Yourdon, <em>Modern Structured Analysis</em> (1989) — DFD 표기법 원전</li>
+<li>Martin Kleppmann, <em>Designing Data-Intensive Applications</em> — 데이터 파이프라인 시각화 패턴</li>
+<li>AWS Solutions Architecture Reference — 경계·아이콘 가이드</li>
+<li>Google SRE / Site Reliability Engineering — Observability 다이어그램 관습</li>
+</ul>
+
+</body>
+</html>

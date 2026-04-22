@@ -10,6 +10,7 @@
 - `.wrapper-arch` (CH07 래퍼 아키텍처)
 - `.journey-forward` + `.jf-*` (CH01 여정 맵)
 - `.journey-roadmap` + `.roadmap-*`, `.node-*` (CH01 노드 기반 로드맵)
+- `.qr-flow` + `.qr-*` (CH06 QueryRouter 3단계 분기 플로우차트)
 
 ## 속하지 않음
 
@@ -352,3 +353,70 @@
 - `.node-story`에 코드/긴 문장 넣지 말 것 → 큰따옴표로 감싼 8~12자 비유 한 줄이 디자인 의도
 - **그룹 단위 펼침 설명**이 필요하면 `.journey-roadmap` 대신 `.journey-forward` 사용. 두 컴포넌트는 한 페이지에 동시 등장할 수 있으나 의미가 다르므로 역할을 섞지 말 것
 - `rc-*` 네임스페이스(CH03/CH07)와는 무관하지만, `.node-*` 클래스를 다른 컴포넌트가 재사용하지 못하게 항상 `.journey-roadmap` 자식 컨텍스트 안에서만 사용
+
+---
+
+### .qr-flow
+
+**언제 쓰는가**: **"단계별 분기 + 공통 결과 풀" 플로우차트**. 여러 단계(stage)가 순서대로 흐르고, 각 단계에서 "조건 충족 시 결과 반환(실선 ↑)" / "미충족 시 다음 단계로 fall-through(점선 ⇢)"가 동시에 존재할 때. 출력 후보가 단계마다 공통이면 위쪽 `.qr-pool` 박스에 묶고, 각 단계 성공 경로는 `.qr-up` 수직 stem + 라벨로 박스 전체를 가리킨다. CH06 `QueryRouter` 3단계(키워드→컬럼→LLM) 분류기처럼 **단순→정교 단계 fall-through 구조**에 쓴다.
+
+**사용 챕터**: CH06
+
+**HTML 사용 예** (`projects/사내AI비서_v2/chapters/06-연차도-규정도-한번에.md` CH06 §6.4):
+
+```html
+<div class="qr-flow">
+  <div class="qr-pool">
+    <span class="qr-pool-label">route 반환</span>
+    <span class="qr-out">structured</span>
+    <span class="qr-out">unstructured</span>
+    <span class="qr-out">hybrid</span>
+  </div>
+
+  <div class="qr-up qr-up-1">
+    <span class="qr-up-stem"></span>
+    <span class="qr-up-label">명확</span>
+    <span class="qr-up-stem"></span>
+  </div>
+  <div class="qr-up qr-up-2">
+    <span class="qr-up-stem"></span>
+    <span class="qr-up-label">있음</span>
+    <span class="qr-up-stem"></span>
+  </div>
+
+  <div class="qr-node qr-input qr-input-col">질문 입력</div>
+  <div class="qr-arrow-h qr-arrow-1"><span>→</span></div>
+  <div class="qr-node qr-stage-1">
+    <span class="qr-stage-num">STAGE 1</span>키워드 매칭
+  </div>
+  <div class="qr-arrow-h dashed qr-arrow-2">
+    <span>⇢</span><span class="qr-arrow-lbl">불명확</span>
+  </div>
+  <div class="qr-node qr-stage-2">
+    <span class="qr-stage-num">STAGE 2</span>컬럼명 매칭
+  </div>
+  <div class="qr-arrow-h dashed qr-arrow-3">
+    <span>⇢</span><span class="qr-arrow-lbl">없음</span>
+  </div>
+  <div class="qr-node qr-stage-3">
+    <span class="qr-stage-num">STAGE 3</span>LLM 판단
+  </div>
+  <div class="qr-arrow-h qr-arrow-4"><span>→</span></div>
+  <div class="qr-node qr-final qr-final-col">최종 결정</div>
+</div>
+```
+
+**렌더 CSS**: `styles/diagrams.css` — 9컬럼 × 3행 CSS Grid. Row1 = `.qr-pool`(3~7열 span), Row2 = `.qr-up`(3, 5열), Row3 = stages 가로 흐름. 색상은 `--color-success`(pool), `--color-info`(입력), `--color-accent`(최종), `--color-border-strong`(stage).
+
+**변형**:
+- `.qr-node` 기본 변형: `.qr-input`(info 블루), `.qr-final`(accent 인디고, 대시 테두리)
+- `.qr-arrow-h` modifier: `.dashed`(점선 + 뮤티드 컬러, fall-through 전용)
+- `.qr-up-N` / `.qr-stage-N` / `.qr-arrow-N`의 `N`은 CSS에 명시적으로 grid-column 지정돼 있음. 단계 수가 달라지면 CSS 확장 필요 (현재 3단계 고정)
+- 출력 풀(`.qr-pool`) 내부 `.qr-out` 칩 개수는 3개 기준. 더 많으면 `grid-column` span 조정
+
+**피해야 할 것**
+- 단계 수가 3개와 다르면 `qr-up-N` / `qr-stage-N` 수동 확장 필요. 4단계 이상은 **새 컴포넌트로 분기**를 고려. 기본 그리드 9열 구조는 "질문→3단계→최종"에 특화
+- `.qr-up` stem 상·하 양쪽에 두는 게 필수. stem 하나만 두면 연결선이 중간에 끊겨 보임
+- `.qr-up-label`에 긴 문장 금지. "명확"/"있음" 같은 2~4자 조건 라벨만. 더 길면 라벨이 넓어져 outputs pool 컬럼을 초과
+- `.qr-pool`을 비교(A vs B)에 사용 금지. 결과 **풀**(pool)을 표현하는 단일 목적지이며, 2분할이 필요하면 `../comparisons/`의 `.annotated-compare`나 `.reindex-compare`를 쓴다
+- 단계 내부에서 "여러 output 중 하나만 반환되는 경우"(예: CH06 STAGE 2 있음 → structured 단일)를 강조해야 하면 `.qr-pool` 옆에 별도 `.qr-out` 단일 칩을 배치하거나 본문으로 보충 설명. 단계마다 output 차이를 시각화하려면 수직 자기완결 레이아웃이 더 적합

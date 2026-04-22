@@ -16,13 +16,14 @@
 | `:::remember` | 10 | boxes |
 | `:::goal` | 10 | boxes |
 | `::::prep` | 9 | boxes |
+| `:::memo` | 4 | boxes (CH06, CH08, CH09, CH10) |
 | `:::note` | 3 | boxes |
 | `:::preview` | 1 | boxes (거의 미사용) |
 
 ## CSS 클래스 카테고리
 
 ### boxes
-박스형 블록. `:::`/`::::` directive의 렌더 결과.
+박스형 블록. `:::`/`::::` directive의 렌더 결과 + raw HTML 박스.
 
 - `.goal-box`, `.gl`
 - `.prep-section`, `.prep-header`, `.prep-header-title`, `.prep-header-meta`, `.prep-body`, `.prep-item`, `.prep-item-title`, `.prep-note`, `.prep-section-md`
@@ -31,6 +32,7 @@
 - `.tip`
 - `.change-note`, `.preview-notice`
 - `.result`, `.result.fail`, `.result.ok`
+- `.memo-box` (directive `:::memo`) — 캐릭터가 실험 결과·생각·꼭 기억할 것을 수첩에 적는 장면. 아이보리 배경 + 모노스페이스 + 포스트잇 그림자. 상세: [`boxes/memo.md`](boxes/memo.md)
 
 ### fullmap
 책 전체 구성도.
@@ -55,6 +57,7 @@
 - `.reindex-compare` + `.rc-arrow`, `.rc-badge-full`, `.rc-badge-inc` (CH03) — **주의**: CH07의 `.rc-timeline`과 같은 `rc-*` 접두어지만 별도 컴포넌트
 - `.cache-diff` (CH07)
 - `.dual-image` + `figure`/`figcaption` (CH04)
+- `.proc-compare` + `.pc-case` (`.pc-tool`/`.pc-mcp`), `.pc-header` (카드 헤더), `.pc-caption` (그림 캡션), `.pc-badge` (`.pc-badge-tool`/`.pc-badge-mcp`), `.pc-boundary` (`.pc-left`/`.pc-right`), `.pc-layout`, `.pc-bridge`, `.pc-node` (`.pc-store`), `.pc-arrow` (CH06 프로세스 경계 비교)
 
 ### pipelines
 흐름/타임라인/파이프라인.
@@ -65,6 +68,7 @@
 - `.wrapper-arch` (CH07)
 - `.journey-forward`, `.jf-group`, `.jf-group-label`, `.jf-items`, `.jf-item`, `.jf-part-desc`, `.jf-ch`, `.jf-title`, `.jf-sub`, `.jf-hint`, `.jf-desc` (CH01 여정 맵)
 - `.journey-roadmap`, `.roadmap-line`, `.roadmap-part`, `.roadmap-node`, `.node-dot`, `.node-icon`, `.node-title`, `.node-story` (CH01)
+- `.qr-flow`, `.qr-pool`, `.qr-pool-label`, `.qr-out`, `.qr-up` (+ `.qr-up-1`/`.qr-up-2`), `.qr-up-stem`, `.qr-up-label`, `.qr-node` (+ `.qr-input`/`.qr-final`), `.qr-stage-num`, `.qr-arrow-h` (+ `.dashed`), `.qr-arrow-lbl`, `.qr-input-col`/`.qr-arrow-1~4`/`.qr-stage-1~3`/`.qr-final-col` (CH06 QueryRouter 3단계)
 
 ### captions
 인라인 라벨/캡션/태그.
@@ -94,7 +98,7 @@
 | CH03 | overlap-text-demo, reindex-compare |
 | CH04 | chunk-with-meta, embed-example-row, dual-image |
 | CH05 | (주로 rag chain 코드 + fullmap) |
-| CH06 | rl-caption, arch-fullmap (ReAct 시퀀스) |
+| CH06 | qr-flow (QueryRouter 3단계), proc-compare (@tool vs MCP), rl-caption (ReAct 루프), arch-fullmap |
 | CH07 | rc-timeline, ec-cabinet, wrapper-arch, cache-diff |
 | CH08~10 | arch-fullmap 주로 |
 
@@ -105,3 +109,5 @@
   - CH07: `rc-timeline` (타임라인) — `rc-*` 서브 클래스
   - 신규 컴포넌트 생성 시 `rc-*` 접두어 재사용 금지. 고유 접두어 확보 필요.
 - `s-*` 접두어는 `rag-pipeline` 내부 step 전용.
+- `qr-*` 접두어는 `.qr-flow` (CH06 QueryRouter) 전용. 다른 컴포넌트에서 재사용 금지.
+- `pc-*` 접두어는 `.proc-compare` (CH06 @tool vs MCP) 전용.

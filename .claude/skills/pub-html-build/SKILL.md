@@ -44,6 +44,8 @@ python .claude/skills/pub-html-build/build_pdf_html.py \
 - `--chapter N` (선택): 특정 챕터만 빌드
 - `--html-only`: HTML 중간 산출물만 생성 (PDF 생략)
 - `--no-pagedjs`: Chromium 기본 인쇄 (빠른 빌드)
+- `--serve`: 빌드 후 HTTP 서버(`http://localhost:8765`) 자동 시작 + 첫 챕터 브라우저 열기. `file://` + NFD 인코딩 문제 회피
+- `--port N`: `--serve` 포트 변경 (기본 8765)
 
 ## 새 책 초기화
 

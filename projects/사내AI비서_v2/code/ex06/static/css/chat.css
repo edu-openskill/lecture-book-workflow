@@ -317,6 +317,24 @@ input:checked + .toggle-slider::before {
     color: #2563eb;
 }
 
+.db-json {
+    margin: 0;
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    border-radius: 6px;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.72rem;
+    line-height: 1.55;
+    color: #334155;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 260px;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
 .source-list {
     display: flex;
     flex-direction: column;

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -215,6 +216,7 @@ CONTAINER_CLASSES = {
     "rag-pipeline": "rag-pipeline-box",
     "term-box": "term-box",
     "remember": "remember",
+    "memo": "memo-box",
     "journey": "journey-forward",
     "result-fail": "result fail",
     "result-ok": "result ok",
@@ -523,6 +525,79 @@ def render_pdf(html_path: Path, pdf_path: Path, pagedjs: bool) -> None:
         browser.close()
 
 
+# ========== 서버/브라우저 유틸 ===============================================
+def _server_cwd(port: int) -> Path | None:
+    """포트를 점유 중인 프로세스의 cwd를 반환. 없으면 None."""
+    try:
+        pids = subprocess.check_output(
+            ["lsof", "-ti", f":{port}", "-sTCP:LISTEN"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip().splitlines()
+    except subprocess.CalledProcessError:
+        return None
+    if not pids:
+        return None
+    try:
+        out = subprocess.check_output(
+            ["lsof", "-p", pids[0], "-a", "-d", "cwd", "-Fn"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+        for line in out.splitlines():
+            if line.startswith("n"):
+                return Path(line[1:])
+    except subprocess.CalledProcessError:
+        pass
+    return None
+
+
+def _kill_port(port: int) -> None:
+    """포트를 점유 중인 프로세스를 종료한다."""
+    try:
+        subprocess.run(
+            ["lsof", "-ti", f":{port}", "-sTCP:LISTEN"],
+            check=True, capture_output=True, text=True,
+        )
+        subprocess.run(["pkill", "-f", f"http.server {port}"], check=False)
+        import time; time.sleep(0.5)
+    except subprocess.CalledProcessError:
+        pass
+
+
+def serve_and_open(project_root: Path, chapter_files: list[Path], port: int = 8765) -> None:
+    """프로젝트 루트에서 HTTP 서버를 띄우고 첫 챕터 HTML을 브라우저로 연다."""
+    existing_cwd = _server_cwd(port)
+    target_cwd = project_root.resolve()
+    if existing_cwd and existing_cwd.resolve() != target_cwd:
+        print(f"  ⚠ 포트 {port}에 다른 cwd({existing_cwd}) 서버 감지. 종료 후 재시작.")
+        _kill_port(port)
+        existing_cwd = None
+
+    if not existing_cwd:
+        subprocess.Popen(
+            [sys.executable, "-m", "http.server", str(port)],
+            cwd=str(target_cwd),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        import time; time.sleep(0.8)
+        print(f"  🌐 서버 시작: http://localhost:{port}  (cwd: {target_cwd.name})")
+    else:
+        print(f"  🌐 서버 재사용: http://localhost:{port}")
+
+    from urllib.parse import quote
+    for md_path in chapter_files:
+        html_name = f"{md_path.stem}.html"
+        url = f"http://localhost:{port}/book/build/{quote(html_name)}"
+        print(f"     → {url}")
+
+    if chapter_files:
+        first_url = f"http://localhost:{port}/book/build/{quote(chapter_files[0].stem + '.html')}"
+        subprocess.run(["open", first_url], check=False)
+
+
 # ========== 메인 ============================================================
 def main() -> int:
     parser = argparse.ArgumentParser(description="HTML→PDF 챕터 빌더")
@@ -547,6 +622,17 @@ def main() -> int:
         "--no-pagedjs",
         action="store_true",
         help="Paged.js 없이 Chromium 기본 인쇄로 PDF 생성 (빠름)",
+    )
+    parser.add_argument(
+        "--serve",
+        action="store_true",
+        help="빌드 후 HTTP 서버를 띄우고 브라우저로 열기 (file:// 대신)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8765,
+        help="--serve 시 HTTP 포트 (기본 8765)",
     )
     args = parser.parse_args()
 
@@ -574,6 +660,9 @@ def main() -> int:
         pdf_path = OUTPUT_DIR / f"{chapter.md_path.stem}.pdf"
         render_pdf(html_path, pdf_path, use_pagedjs)
         print(f"  ✅ PDF : {pdf_path.relative_to(PROJECT_ROOT)}")
+
+    if args.serve:
+        serve_and_open(args.project_root, files, port=args.port)
 
     return 0
 

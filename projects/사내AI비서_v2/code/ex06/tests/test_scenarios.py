@@ -9,7 +9,6 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from src.router import QueryRouter
 from src.mcp_tools import (
     leave_balance,
     sales_sum,
@@ -19,63 +18,7 @@ from src.mcp_tools import (
 
 
 # ---------------------------------------------------------------------------
-# 1. QueryRouter 테스트
-# ---------------------------------------------------------------------------
-
-class TestQueryRouter(unittest.TestCase):
-    """QueryRouter 3단계 라우팅 전략 테스트."""
-
-    def setUp(self):
-        """LLM 없이 라우터를 초기화한다."""
-        self.router = QueryRouter(llm=None)
-
-    def test_step1_structured_keyword(self):
-        """Step 1: 정형 키워드(연차)를 올바르게 분류한다."""
-        result = self.router.classify_query("김민준 연차 잔여일수 알려줘")
-        self.assertEqual(result, "structured")
-
-    def test_step1_unstructured_keyword(self):
-        """Step 1: 비정형 키워드(온보딩)를 올바르게 분류한다."""
-        result = self.router.classify_query("온보딩 절차가 어떻게 되나요?")
-        self.assertEqual(result, "unstructured")
-
-    def test_step1_hybrid_keyword(self):
-        """Step 1: 정형 + 비정형 키워드가 모두 있으면 hybrid로 분류한다."""
-        result = self.router.classify_query("매출 합계와 출장 규정 모두 알려줘")
-        self.assertEqual(result, "hybrid")
-
-    def test_step1_sales_keyword(self):
-        """Step 1: 매출 키워드를 정형으로 분류한다."""
-        result = self.router.classify_query("영업부 11월 매출 합계가 얼마야?")
-        self.assertEqual(result, "structured")
-
-    def test_step1_security_keyword(self):
-        """Step 1: 보안 정책 키워드를 비정형으로 분류한다."""
-        result = self.router.classify_query("보안 정책에 대해 설명해줘")
-        self.assertEqual(result, "unstructured")
-
-    def test_step2_schema_term(self):
-        """Step 2: DB 컬럼명(remaining_days)을 정형으로 분류한다."""
-        result = self.router.classify_query("remaining_days가 0인 직원은?")
-        self.assertEqual(result, "structured")
-
-    def test_explain_routing_format(self):
-        """explain_routing 반환 형식이 올바른지 확인한다."""
-        result = self.router.explain_routing("연차 잔여일수 조회")
-        self.assertIn("query", result)
-        self.assertIn("step1", result)
-        self.assertIn("step2", result)
-        self.assertIn("route", result)
-        self.assertIn(result["route"], ("structured", "unstructured", "hybrid"))
-
-    def test_default_unstructured(self):
-        """키워드 없는 질문은 기본값 unstructured로 분류된다."""
-        result = self.router.classify_query("안녕하세요")
-        self.assertEqual(result, "unstructured")
-
-
-# ---------------------------------------------------------------------------
-# 2. 정형 시나리오 테스트 (DB 조회)
+# 1. 정형 시나리오 테스트 (DB 조회)
 # ---------------------------------------------------------------------------
 
 class TestStructuredScenarios(unittest.TestCase):
@@ -249,7 +192,6 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    suite.addTests(loader.loadTestsFromTestCase(TestQueryRouter))
     suite.addTests(loader.loadTestsFromTestCase(TestStructuredScenarios))
     suite.addTests(loader.loadTestsFromTestCase(TestUnstructuredScenarios))
     suite.addTests(loader.loadTestsFromTestCase(TestHybridScenarios))

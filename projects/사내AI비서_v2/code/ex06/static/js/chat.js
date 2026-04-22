@@ -173,13 +173,13 @@
       }[toolName] || toolName;
 
       const content = typeof result === 'object'
-        ? JSON.stringify(result, null, 2).slice(0, 200)
-        : String(result).slice(0, 200);
+        ? JSON.stringify(result, null, 2)
+        : String(result);
 
       cards += `
         <div class="source-card db-result-card">
           <div class="source-card-title">${escapeHtml(title)}</div>
-          <div class="source-card-content" style="white-space:pre-wrap;font-family:monospace">${escapeHtml(content)}</div>
+          <pre class="db-json">${escapeHtml(content)}</pre>
         </div>
       `;
     });

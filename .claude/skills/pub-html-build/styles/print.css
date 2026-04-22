@@ -76,7 +76,8 @@ h2 + .code-block {
 .result,
 .term-box,
 .preview-notice,
-.prep-note {
+.prep-note,
+.memo-box {
   page-break-inside: avoid;
   break-inside: avoid;
 }

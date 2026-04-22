@@ -2,8 +2,11 @@
 __pycache__/
 *.pyc
 .venv/
+.pdf_venv/
 *.log
 chroma_db/
 *.sqlite3
 outputs/
 .pdf-build/
+.playwright-mcp/
+.vscode/

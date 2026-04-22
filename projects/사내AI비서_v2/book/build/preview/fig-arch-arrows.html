@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>화살표 전략 3종 비교</title>
+<style>
+:root {
+  --color-text: #1e293b;
+  --color-text-heading: #2d3748;
+  --color-text-secondary: #718096;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-bg: #ffffff;
+  --color-surface: #fafbfc;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-accent: #4f46e5;
+  --color-accent-bg: #eef2ff;
+  --color-accent-text: #3730a3;
+  --color-accent-warm: #ff7849;
+  --color-accent-warm-text: #7b341e;
+  --color-success: #059669;
+  --color-success-bg: #d1fae5;
+  --color-success-text: #166534;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+
+  --fs-footnote: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  --fs-base: 14px;
+  --fs-lg: 15px;
+  --fs-xl: 17px;
+  --fs-2xl: 20px;
+  --fs-3xl: 24px;
+  --fs-4xl: 32px;
+
+  --font-body: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+body { font-family: var(--font-body); color: var(--color-text); background: white; max-width: 1100px; margin: 32px auto; padding: 0 24px 64px; line-height: 1.55; }
+h1 { font-size: var(--fs-3xl); border-bottom: 2px solid var(--color-text-heading); padding-bottom: var(--space-sm); margin-bottom: var(--space-sm); color: var(--color-text-heading); font-weight: 800; letter-spacing: -0.3px; }
+.intro { color: var(--color-text-secondary); font-size: var(--fs-base); margin-bottom: var(--space-3xl); line-height: 1.7; }
+h2 { margin-top: 56px; font-size: var(--fs-xl); color: var(--color-accent-text); border-bottom: 1px solid var(--color-border); padding-bottom: 6px; font-weight: 800; }
+.note { color: var(--color-text-secondary); font-size: var(--fs-sm); margin-top: 4px; margin-bottom: var(--space-lg); line-height: 1.7; }
+
+/* 공통 박스 */
+.board { background: var(--color-surface); padding: 32px 28px; margin: 16px 0; overflow-x: auto; border-radius: var(--radius-xl); }
+
+.grid { display: grid; grid-template-columns: 160px 50px 1fr 50px 220px; gap: var(--space-sm); align-items: stretch; min-width: 900px; }
+
+/* LLM 상단 */
+.llm-top { display: flex; justify-content: center; margin-bottom: var(--space-md); position: relative; }
+.llm-box { background: white; border: 1px solid var(--color-text-heading); padding: var(--space-md) var(--space-2xl); text-align: center; min-width: 260px; border-radius: var(--radius-md); }
+.llm-box .l { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.llm-box .n { font-size: var(--fs-xl); color: var(--color-text-heading); font-weight: 700; margin: 2px 0; }
+.llm-box .s { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); }
+
+/* 공통 컬럼 */
+.col { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-lg) var(--space-md); min-height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.col.accent { background: var(--color-accent-bg); border-color: var(--color-accent); }
+.col .tag { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs); }
+.col .name { font-size: var(--fs-lg); font-weight: 800; color: var(--color-text-heading); text-align: center; }
+.col .sub { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); margin-top: 4px; text-align: center; }
+
+/* 다중 박스 (Agent) */
+.col.multi { padding: var(--space-md) var(--space-sm); gap: var(--space-sm); justify-content: space-between; align-items: stretch; }
+.col.multi .ops-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+.col.multi .ops-row .c { background: white; border: 1px solid var(--color-border); border-radius: 4px; padding: 4px 2px; text-align: center; font-family: var(--font-mono); font-size: 9px; color: var(--color-text-heading); font-weight: 700; }
+.col.multi .loop-card { background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-sm); text-align: center; }
+.col.multi .loop-card .lb { font-family: var(--font-mono); font-size: 9px; color: var(--color-accent); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.col.multi .loop-card .stages { display: flex; align-items: center; justify-content: center; gap: 3px; font-family: var(--font-mono); font-size: 9px; color: var(--color-text-heading); }
+.col.multi .loop-card .st { padding: 2px 5px; border: 1px solid var(--color-border); border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700; }
+.col.multi .core-name { text-align: center; padding: var(--space-xs); }
+.col.multi .core-name .n { font-size: var(--fs-base); font-weight: 800; color: var(--color-accent-text); }
+
+/* Tools 리스트 */
+.col.tools { padding: var(--space-md) var(--space-sm); justify-content: flex-start; align-items: stretch; }
+.col.tools .tool { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-sm); align-items: center; padding: 6px 4px; border-bottom: 1px dashed var(--color-border); font-size: var(--fs-xs); }
+.col.tools .tool:last-child { border-bottom: none; }
+.col.tools .tool .no { font-family: var(--font-mono); color: var(--color-text-subtle); font-weight: 700; }
+.col.tools .tool .n { font-family: var(--font-mono); color: var(--color-text-heading); font-weight: 700; font-size: 11px; }
+.col.tools .tool .b { font-family: var(--font-mono); font-size: 9px; color: var(--color-accent-warm-text); background: #fff4ed; padding: 1px 4px; border-radius: 3px; font-weight: 700; letter-spacing: 1px; }
+.col.tools .tool .b.rag { color: var(--color-accent-text); background: var(--color-accent-bg); }
+
+/* ================ 전략별 화살표 ================ */
+
+/* 공통 flow-arrows */
+.fa { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--space-md); font-family: var(--font-mono); }
+.fa .pair { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.fa .lbl { font-size: 8px; color: var(--color-text-subtle); font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+.fa .ar { font-size: var(--fs-lg); font-weight: 700; line-height: 1; }
+.fa .ar.call { color: var(--color-accent); }
+.fa .ar.ret { color: var(--color-success); }
+
+/* 번호 뱃지 (전략 A) */
+.num { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; background: var(--color-accent); color: white; font-size: 9px; font-weight: 800; align-items: center; justify-content: center; margin-right: 3px; font-family: var(--font-mono); }
+
+/* LLM flow 화살표 */
+.llm-flow-v { position: absolute; left: 50%; transform: translateX(-50%); top: 100%; display: flex; gap: 24px; padding-top: 4px; font-family: var(--font-mono); font-size: 8px; letter-spacing: 1px; }
+.llm-flow-v .u { color: var(--color-accent); font-weight: 700; }
+.llm-flow-v .d { color: var(--color-success); font-weight: 700; }
+
+/* 전략 B: 점선 */
+.fa.dashed .ar { border-bottom: 2px dashed; padding-bottom: 2px; background: transparent; font-size: var(--fs-md); }
+.fa.dashed .ar.llm-call { color: var(--color-accent-warm); }
+
+/* 전략 C: 라벨 chip */
+.fa.labeled .chip { font-family: var(--font-mono); font-size: 8px; background: var(--color-surface); color: var(--color-text-heading); padding: 1px 5px; border-radius: 3px; font-weight: 700; letter-spacing: 0.3px; white-space: nowrap; }
+
+/* 범례 */
+.legend { margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px dashed var(--color-border); display: flex; flex-wrap: wrap; gap: var(--space-lg); font-size: var(--fs-xs); color: var(--color-text-secondary); }
+.legend .item { display: flex; align-items: center; gap: 6px; }
+.legend .sw { font-size: var(--fs-md); font-weight: 700; }
+
+/* A: sequence path */
+.sequence-path { margin-top: var(--space-lg); padding: var(--space-md) var(--space-lg); background: white; border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--fs-xs); color: var(--color-text-secondary); }
+.sequence-path .step { display: inline-block; margin-right: var(--space-md); }
+.sequence-path .step .n { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; background: var(--color-accent); color: white; font-size: 9px; font-weight: 800; align-items: center; justify-content: center; margin-right: 4px; font-family: var(--font-mono); vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<h1>화살표 전략 3종 프리뷰</h1>
+<p class="intro">
+에이전트·LLM·도구·FastAPI 사이 관계를 화살표로 전달하는 3가지 방식. 같은 구성(CH10 완성본)에 화살표만 다르게 적용해 비교합니다.
+</p>
+
+<!-- ============ 전략 A. 번호 시계열 ============ -->
+<h2>전략 A · 번호 시계열 ①~⑥</h2>
+<p class="note">모든 화살표에 순서 번호 뱃지. 독자가 ①→②→③ 따라가며 여정을 읽음. 하단에 순서 범례.</p>
+
+<div class="board">
+<div class="llm-top">
+<div class="llm-box"><div class="l">외부 · LLM</div><div class="n">Ollama</div><div class="s">llama3.1 · deepseek-r1 · minicpm-v</div></div>
+</div>
+
+<div class="grid">
+<div class="col"><div class="tag">CH02</div><div class="name">사용자 ·<br>FastAPI</div><div class="sub">REST · 세션</div></div>
+
+<div class="fa">
+<div class="pair"><div class="lbl"><span class="num">1</span>요청</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="lbl"><span class="num">6</span>응답</div></div>
+</div>
+
+<div class="col multi accent">
+<div class="ops-row"><div class="c">Cache</div><div class="c">Tracker</div><div class="c">Retry</div></div>
+<div class="loop-card">
+<div class="lb">ReAct 루프</div>
+<div class="stages"><div class="st">Reason <span class="num" style="width:14px;height:14px;font-size:8px;margin-left:3px">2</span></div><div>→</div><div class="st">Act <span class="num" style="width:14px;height:14px;font-size:8px;margin-left:3px">3</span></div><div>→</div><div class="st">Obs <span class="num" style="width:14px;height:14px;font-size:8px;margin-left:3px">5</span></div></div>
+</div>
+<div class="core-name"><div class="n">통합 에이전트</div></div>
+</div>
+
+<div class="fa">
+<div class="pair"><div class="lbl"><span class="num">3</span>호출</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="lbl"><span class="num">4</span>결과</div></div>
+</div>
+
+<div class="col tools">
+<div class="tag" style="text-align:center;width:100%;font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--color-text-secondary);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:var(--space-sm)">MCP TOOLS</div>
+<div class="tool"><div class="no">01</div><div class="n">leave_balance</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div class="n">sales_sum</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div class="n">list_employees</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div class="n">search_documents</div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="sequence-path">
+<span class="step"><span class="n">1</span>사용자 요청</span>
+<span class="step"><span class="n">2</span>에이전트 판단 (LLM Reason)</span>
+<span class="step"><span class="n">3</span>도구 호출 (Act)</span>
+<span class="step"><span class="n">4</span>결과 반환 (Observe)</span>
+<span class="step"><span class="n">5</span>최종 답변 생성 (LLM)</span>
+<span class="step"><span class="n">6</span>응답</span>
+</div>
+</div>
+
+<!-- ============ 전략 B. 색상 + 스타일 ============ -->
+<h2>전략 B · 색상 + 스타일 구분</h2>
+<p class="note">연결 유형을 색·선 스타일로 구분. <span style="color:var(--color-accent);font-weight:700">파란 실선</span>(요청) · <span style="color:var(--color-success);font-weight:700">초록 실선</span>(응답) · <span style="color:var(--color-accent-warm);font-weight:700">오렌지 점선</span>(LLM 내부 호출). 하단 범례.</p>
+
+<div class="board">
+<div class="llm-top">
+<div class="llm-box"><div class="l">외부 · LLM</div><div class="n">Ollama</div><div class="s">llama3.1 · deepseek-r1 · minicpm-v</div></div>
+</div>
+<div style="text-align:center;margin:var(--space-sm) 0 var(--space-md);font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--color-accent-warm);font-weight:700;letter-spacing:1px">
+⇅ &nbsp; LLM 호출 (점선 · 에이전트 ↔ Ollama)
+</div>
+
+<div class="grid">
+<div class="col"><div class="tag">CH02</div><div class="name">사용자 ·<br>FastAPI</div><div class="sub">REST · 세션</div></div>
+
+<div class="fa">
+<div class="pair"><div class="lbl" style="color:var(--color-accent)">요청</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="lbl" style="color:var(--color-success)">응답</div></div>
+</div>
+
+<div class="col multi accent">
+<div class="ops-row"><div class="c">Cache</div><div class="c">Tracker</div><div class="c">Retry</div></div>
+<div class="loop-card">
+<div class="lb">ReAct 루프</div>
+<div class="stages"><div class="st">Reason</div><div>→</div><div class="st">Act</div><div>→</div><div class="st">Obs</div></div>
+</div>
+<div class="core-name"><div class="n">통합 에이전트</div></div>
+</div>
+
+<div class="fa">
+<div class="pair"><div class="lbl" style="color:var(--color-accent)">호출</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="lbl" style="color:var(--color-success)">결과</div></div>
+</div>
+
+<div class="col tools">
+<div class="tag" style="text-align:center;width:100%;margin-bottom:var(--space-sm)">MCP TOOLS</div>
+<div class="tool"><div class="no">01</div><div class="n">leave_balance</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div class="n">sales_sum</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div class="n">list_employees</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div class="n">search_documents</div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="legend">
+<div class="item"><span class="sw" style="color:var(--color-accent)">→</span><span>요청 · Request (사용자·도구 호출)</span></div>
+<div class="item"><span class="sw" style="color:var(--color-success)">←</span><span>응답 · Response (결과 반환)</span></div>
+<div class="item"><span class="sw" style="color:var(--color-accent-warm)">⇅</span><span>LLM 호출 (에이전트 내부 · Ollama)</span></div>
+</div>
+</div>
+
+<!-- ============ 전략 C. 데이터 라벨 ============ -->
+<h2>전략 C · 데이터 라벨 (칩)</h2>
+<p class="note">각 화살표 옆에 실제 전송되는 데이터 이름을 작은 칩으로. "무엇이 흐르는가"가 명시적.</p>
+
+<div class="board">
+<div class="llm-top">
+<div class="llm-box"><div class="l">외부 · LLM</div><div class="n">Ollama</div><div class="s">llama3.1 · deepseek-r1 · minicpm-v</div></div>
+</div>
+<div style="text-align:center;margin:var(--space-sm) 0 var(--space-md);display:flex;justify-content:center;gap:var(--space-md)">
+<span style="font-family:var(--font-mono);font-size:8px;background:var(--color-surface);padding:2px 6px;border-radius:3px;font-weight:700;color:var(--color-text-heading)">↑ prompt</span>
+<span style="font-family:var(--font-mono);font-size:8px;background:var(--color-surface);padding:2px 6px;border-radius:3px;font-weight:700;color:var(--color-text-heading)">↓ completion</span>
+</div>
+
+<div class="grid">
+<div class="col"><div class="tag">CH02</div><div class="name">사용자 ·<br>FastAPI</div><div class="sub">REST · 세션</div></div>
+
+<div class="fa labeled">
+<div class="pair"><div class="chip">question</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="chip">answer</div></div>
+</div>
+
+<div class="col multi accent">
+<div class="ops-row"><div class="c">Cache</div><div class="c">Tracker</div><div class="c">Retry</div></div>
+<div class="loop-card">
+<div class="lb">ReAct 루프</div>
+<div class="stages"><div class="st">Reason</div><div>→</div><div class="st">Act</div><div>→</div><div class="st">Obs</div></div>
+</div>
+<div class="core-name"><div class="n">통합 에이전트</div></div>
+</div>
+
+<div class="fa labeled">
+<div class="pair"><div class="chip">tool_call</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="chip">result</div></div>
+</div>
+
+<div class="col tools">
+<div class="tag" style="text-align:center;width:100%;margin-bottom:var(--space-sm)">MCP TOOLS</div>
+<div class="tool"><div class="no">01</div><div class="n">leave_balance</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div class="n">sales_sum</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div class="n">list_employees</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div class="n">search_documents</div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="legend">
+<div class="item"><code style="font-family:var(--font-mono);font-size:var(--fs-xs);background:var(--color-surface);padding:1px 5px;border-radius:3px">question</code><span>사용자 질문 문자열</span></div>
+<div class="item"><code style="font-family:var(--font-mono);font-size:var(--fs-xs);background:var(--color-surface);padding:1px 5px;border-radius:3px">tool_call</code><span>도구명 + 인자</span></div>
+<div class="item"><code style="font-family:var(--font-mono);font-size:var(--fs-xs);background:var(--color-surface);padding:1px 5px;border-radius:3px">result</code><span>도구 실행 결과 (JSON)</span></div>
+<div class="item"><code style="font-family:var(--font-mono);font-size:var(--fs-xs);background:var(--color-surface);padding:1px 5px;border-radius:3px">prompt</code><span>LLM 입력 (context 포함)</span></div>
+<div class="item"><code style="font-family:var(--font-mono);font-size:var(--fs-xs);background:var(--color-surface);padding:1px 5px;border-radius:3px">completion</code><span>LLM 생성 답변</span></div>
+</div>
+</div>
+
+<!-- ============ 추천 조합 ============ -->
+<h2>추천 · A + C 하이브리드</h2>
+<p class="note">순서 번호 ①~⑥ + 화살표 옆 데이터 라벨. "언제" + "무엇이" 동시 전달. 범례에 각 단계 설명.</p>
+
+<div class="board">
+<div class="llm-top">
+<div class="llm-box"><div class="l">외부 · LLM</div><div class="n">Ollama</div><div class="s">llama3.1 · deepseek-r1 · minicpm-v</div></div>
+</div>
+<div style="text-align:center;margin:var(--space-sm) 0 var(--space-md);display:flex;justify-content:center;gap:var(--space-md);align-items:center">
+<span style="font-family:var(--font-mono);font-size:8px;background:var(--color-surface);padding:2px 6px;border-radius:3px;font-weight:700;color:var(--color-text-heading)"><span class="num" style="width:12px;height:12px;font-size:8px;margin-right:3px">2</span>prompt ↑</span>
+<span style="font-family:var(--font-mono);font-size:8px;background:var(--color-surface);padding:2px 6px;border-radius:3px;font-weight:700;color:var(--color-text-heading)">↓ completion <span class="num" style="width:12px;height:12px;font-size:8px;margin-left:3px">5</span></span>
+</div>
+
+<div class="grid">
+<div class="col"><div class="tag">CH02</div><div class="name">사용자 ·<br>FastAPI</div><div class="sub">REST · 세션</div></div>
+
+<div class="fa labeled">
+<div class="pair"><div class="lbl"><span class="num">1</span>question</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="lbl"><span class="num">6</span>answer</div></div>
+</div>
+
+<div class="col multi accent">
+<div class="ops-row"><div class="c">Cache</div><div class="c">Tracker</div><div class="c">Retry</div></div>
+<div class="loop-card">
+<div class="lb">ReAct 루프</div>
+<div class="stages"><div class="st">Reason</div><div>→</div><div class="st">Act</div><div>→</div><div class="st">Obs</div></div>
+</div>
+<div class="core-name"><div class="n">통합 에이전트</div></div>
+</div>
+
+<div class="fa labeled">
+<div class="pair"><div class="lbl"><span class="num">3</span>tool_call</div><div class="ar call">→</div></div>
+<div class="pair"><div class="ar ret">←</div><div class="lbl"><span class="num">4</span>result</div></div>
+</div>
+
+<div class="col tools">
+<div class="tag" style="text-align:center;width:100%;margin-bottom:var(--space-sm)">MCP TOOLS</div>
+<div class="tool"><div class="no">01</div><div class="n">leave_balance</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div class="n">sales_sum</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div class="n">list_employees</div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div class="n">search_documents</div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="sequence-path">
+<span class="step"><span class="n">1</span>사용자가 질문 전송 (question)</span>
+<span class="step"><span class="n">2</span>에이전트 → LLM 판단 (prompt)</span>
+<span class="step"><span class="n">3</span>도구 호출 (tool_call)</span>
+<span class="step"><span class="n">4</span>결과 반환 (result)</span>
+<span class="step"><span class="n">5</span>LLM 최종 답변 (completion)</span>
+<span class="step"><span class="n">6</span>사용자에게 응답 (answer)</span>
+</div>
+</div>
+
+<!-- ============ 비교 ============ -->
+<h2 style="margin-top:80px">4개 버전 비교</h2>
+<div style="background:var(--color-surface);padding:16px;border-radius:var(--radius-lg);font-size:var(--fs-md);line-height:1.8">
+<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm)">
+<tr style="background:white;color:var(--color-text-heading);font-weight:700"><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">전략</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">장점</th><th style="padding:8px;text-align:left;border:1px solid var(--color-border)">단점</th></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>A · 번호</b></td><td style="padding:6px;border:1px solid var(--color-border)">시간순 명확 · 독자가 숫자로 읽기</td><td style="padding:6px;border:1px solid var(--color-border)">라벨 많아지면 시선 이동</td></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>B · 색상·스타일</b></td><td style="padding:6px;border:1px solid var(--color-border)">유형 즉시 인식 · 깔끔</td><td style="padding:6px;border:1px solid var(--color-border)">범례 기억 필요</td></tr>
+<tr><td style="padding:6px;border:1px solid var(--color-border)"><b>C · 데이터 라벨</b></td><td style="padding:6px;border:1px solid var(--color-border)">통신 내용 투명 · 프로그래머 친화</td><td style="padding:6px;border:1px solid var(--color-border)">칩 많아지면 시각 혼잡</td></tr>
+<tr style="background:var(--color-accent-bg)"><td style="padding:6px;border:1px solid var(--color-border)"><b>A + C 하이브리드</b></td><td style="padding:6px;border:1px solid var(--color-border)">순서 + 데이터 동시 · 여정 이해 최강</td><td style="padding:6px;border:1px solid var(--color-border)">요소 밀도 약간 상승</td></tr>
+</table>
+</div>
+
+</body>
+</html>

@@ -9,6 +9,7 @@
 - `.reindex-compare` + `.rc-arrow`, `.rc-badge-full`, `.rc-badge-inc` (전체 vs 증분 재인덱싱, CH03)
 - `.cache-diff` (캐시 전후 시간선, CH07)
 - `.dual-image` + `figure`/`figcaption` (2분할 이미지, CH04)
+- `.proc-compare` + `.pc-*` (프로세스 경계 비교: @tool vs MCP, CH06)
 
 ## 속하지 않음
 
@@ -222,3 +223,68 @@
 - 의미 비교(A가 맞고 B가 틀림)에 사용 금지. 대조 의도가 있으면 `.annotated-compare` 또는 `.reindex-compare`를 쓴다
 - 3장 이상 배치 금지. `grid-template-columns: 1fr 1fr` 고정이며 셋 이상은 레이아웃이 깨진다
 - 개념도(gemini)를 두 장 넣지 말 것. 이미지 배경이 다크톤이라 개념도의 밝은 배경과 충돌한다. 터미널/스크린샷 전용
+
+---
+
+### .proc-compare
+
+**언제 쓰는가**: **"하나의 프로세스 안 vs 여러 프로세스 사이" 같은 시스템 경계 차이**를 위아래 카드 두 장으로 보여줄 때. 위 카드는 `.pc-tool`(에이전트-도구가 한 점선 박스에 들어감), 아래 카드는 `.pc-mcp`(에이전트와 서버가 두 점선 박스로 분리되고 `.pc-bridge`로 통신 프로토콜을 중간에 표시). "@tool vs MCP", "모놀리식 vs 마이크로서비스"처럼 **프로세스/네트워크 경계가 주제**일 때 쓴다.
+
+**사용 챕터**: CH06
+
+**HTML 사용 예** (`projects/사내AI비서_v2/chapters/06-연차도-규정도-한번에.md` §6.5):
+
+```html
+<div class="proc-compare">
+  <div class="pc-case pc-tool">
+    <div class="pc-header">
+      <span class="pc-badge pc-badge-tool">@tool</span>
+      같은 프로세스 — 에이전트와 함수가 한 경계 안
+    </div>
+    <div class="pc-boundary">
+      <div class="pc-node">에이전트</div>
+      <div class="pc-arrow">→</div>
+      <div class="pc-node">@tool 함수</div>
+      <div class="pc-arrow">→</div>
+      <div class="pc-node pc-store">DB · 문서</div>
+    </div>
+  </div>
+
+  <div class="pc-case pc-mcp">
+    <div class="pc-header">
+      <span class="pc-badge pc-badge-mcp">MCP</span>
+      별도 프로세스 — 에이전트와 서버가 다른 경계
+    </div>
+    <div class="pc-layout">
+      <div class="pc-boundary pc-left">
+        <div class="pc-node">에이전트</div>
+      </div>
+      <span class="pc-bridge">stdio · HTTP</span>
+      <div class="pc-boundary pc-right">
+        <div class="pc-node">MCP 서버</div>
+        <div class="pc-arrow">→</div>
+        <div class="pc-node pc-store">DB · 문서</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pc-caption">그림 N-N. 프로세스 경계 비교 캡션</div>
+</div>
+```
+
+**렌더 CSS**: `styles/diagrams.css` — 외곽 `.proc-compare`(세로 grid, gap = `--space-lg`), 각 `.pc-case`는 `--color-surface` 배경. `.pc-boundary`는 점선 테두리(`--color-accent-border` for `.pc-tool`, `--color-danger-bg` for `.pc-mcp`) + `--color-X-bg` 배경으로 **연한 톤** 유지. 배지는 solid 대신 tinted(`--color-X-bg` 배경 + `--color-X-text` 글자 + 얇은 border)로 가독성 확보.
+
+**변형**:
+- `.pc-case` 상위 modifier: `.pc-tool`(info 블루 톤), `.pc-mcp`(danger 핑크 톤)
+- `.pc-badge` modifier: `.pc-badge-tool` / `.pc-badge-mcp` — tinted 스타일, 배경이 옅어 본문 흐름을 방해하지 않음
+- `.pc-node` modifier: `.pc-store`(디스크/DB 표현, 회색 대시 테두리) — 그 외는 기본 흰 배경 박스
+- `.pc-layout`은 MCP 카드처럼 **두 boundary + bridge** 구성일 때만 사용. `.pc-tool` 카드는 `.pc-boundary` 하나만 써도 됨
+- `.pc-bridge`: 프로토콜·네트워크 경계 표시(`stdio · HTTP`, `gRPC`, `REST` 등). `--color-warning-bg` 배경으로 "중간 전이 구간"임을 표시
+- `.pc-caption`은 컴포넌트 하단 캡션 (`--color-text-secondary` 이탤릭). 마크다운 `*…*`를 바깥에 두지 말고 내부 `<div class="pc-caption">`으로
+
+**피해야 할 것**
+- 3개 이상 카드 비교 금지. 프로세스 경계 대비는 **두 가지 전략**(단일 vs 분리) 전제. 셋 이상이면 `.reindex-compare` 또는 `.cache-diff`를 고려
+- solid 배경 배지(예: `background: var(--color-info)` + 흰 글자) 사용 금지. 본문 톤과 대비가 너무 강해 시선을 빼앗음. 반드시 **tinted**(light bg + dark text) 유지
+- `.pc-boundary` 점선 대신 실선 사용 금지. 점선은 "소속 경계"를 은유하는 핵심 시각 언어
+- `.pc-node`를 3~4개 이상 연속 나열 금지. 이 컴포넌트는 **경계 표시가 주제**이므로 노드가 많으면 파이프라인(`../pipelines/`의 `.rag-pipeline-box`)이 더 적합
+- 마크다운 이탤릭 캡션(`*그림 ...*`)을 컴포넌트 바깥에 배치 금지. `.pc-caption`을 컴포넌트 내부 마지막 자식으로 넣어 간격·스타일 통일

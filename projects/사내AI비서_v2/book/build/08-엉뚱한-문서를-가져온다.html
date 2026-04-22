@@ -3,63 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>챕터 8 엉뚱한 문서를 가져온다. 청킹, 리랭킹, 하이브리드</title>
+<title>챕터 8. 엉뚱한 문서를 가져온다. 청킹, 리랭킹, 하이브리드</title>
 
 <link rel="stylesheet" href="./styles/fonts.css">
-<link rel="stylesheet" href="./styles/book.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
 <link rel="stylesheet" href="./styles/print.css" media="print">
 
-
-<script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
 
 </head>
 <body>
 <div class="container">
-<h1>챕터 8 엉뚱한 문서를 가져온다. 청킹, 리랭킹, 하이브리드</h1>
+<h1>챕터 8. 엉뚱한 문서를 가져온다. 청킹, 리랭킹, 하이브리드</h1>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
 <li><strong>Fixed, Recursive, Semantic</strong> 세 가지 청킹 전략을 비교 실험합니다</li>
 <li><strong>Cross-Encoder Reranker</strong>로 Top-K 검색 결과를 재정렬해 정확도를 끌어올립니다</li>
-<li><strong>BM25 + Vector</strong> 하이브리드 검색과 <strong>랭크 퓨전(RRF)</strong> 으로 키워드와 의미 검색을 결합합니다</li>
+<li><strong>BM25 + Vector</strong> 하이브리드 검색과 <strong>alpha 가중합</strong>으로 키워드와 의미 검색을 결합합니다</li>
 <li>&quot;병가를 물었는데 출장이 나오는&quot; 현상이 왜 생기는지, 어떻게 잡는지 손으로 확인합니다</li>
 </ul>
 </div>
 <div class="prep-section-md">
 <p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
 <h3>1. 실습 폴더 이동</h3>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div>cd rag-start/ex08</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div><span class="nb">cd</span><span class="w"> </span>rag-start/ex08</div>
 <p>파일 구조는 다음과 같습니다.</p>
-<div class="code-block" data-lang="text"><div class="cb-title">ex08 디렉토리</div>ex08/
+<div class="code-block highlight" data-lang="text"><div class="cb-title">ex08 디렉토리</div>ex08/
 ├── docker-compose.yml
 ├── requirements.txt
 ├── data/                         # [참고] 문서·마크다운·ChromaDB
 └── tuning/
     ├── step1_chunk_experiment/   # [실습] 청킹 전략 비교
-    │   ├── run.py
-    │   ├── fixed.py
-    │   ├── recursive.py
-    │   └── semantic.py
+    │   ├── __main__.py           # [참고] CLI 진입점
+    │   ├── strategies.py         # [실습] Fixed·Recursive·Semantic 3전략
+    │   ├── experiments.py        # [참고] 실험 실행기 (step 1-1~1-5)
+    │   └── display.py            # [참고] Rich 출력
     ├── step2_reranker/           # [실습] Cross-Encoder 리랭커
-    │   ├── run.py
-    │   └── reranker.py
-    └── step3_hybrid_search/      # [실습] BM25 + Vector + RRF
-        ├── run.py
-        ├── bm25_retriever.py
-        └── rrf.py</div>
+    │   ├── __main__.py           # [참고] CLI 진입점
+    │   ├── reranker.py           # [실습] CrossEncoderReranker
+    │   └── experiments.py        # [참고] 리랭킹 실험 실행기
+    └── step3_hybrid_search/      # [실습] BM25 + Vector 하이브리드
+        ├── __main__.py           # [참고] CLI 진입점
+        ├── retrievers.py         # [실습] BM25·Vector·Ensemble 검색기
+        └── experiments.py        # [참고] alpha 파라미터 실험</div>
 <h3>2. 실습 환경 구축</h3>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div>cd ex08
-cp .env.example .env
-python3.12 -m venv .venv
-source .venv/bin/activate
-docker compose up -d
-pip install -r requirements.txt</div>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div>cd ex08
-copy .env.example .env
-py -3.12 -m venv .venv
-.venv\Scripts\activate
-docker compose up -d
-pip install -r requirements.txt</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div><span class="nb">cd</span><span class="w"> </span>ex08
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div><span class="nb">cd</span><span class="w"> </span>ex08
+copy<span class="w"> </span>.env.example<span class="w"> </span>.env
+py<span class="w"> </span>-3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
 <h3>3. 사용할 라이브러리</h3>
 <table>
 <thead>
@@ -94,165 +97,769 @@ pip install -r requirements.txt</div>
 <h3>4. 실습 순서</h3>
 <p>이번 챕터는 <strong>만들기</strong>가 아니라 <strong>실험, 비교</strong>입니다.</p>
 <ol>
-<li><code>python -m tuning.step1_chunk_experiment.run</code>. 청킹 전략 비교</li>
-<li><code>python -m tuning.step2_reranker.run</code>. Cross-Encoder 리랭커</li>
-<li><code>python -m tuning.step3_hybrid_search.run</code>. BM25 + Vector 하이브리드</li>
+<li><code>python -m tuning.step1_chunk_experiment --step 1-3</code>. 청킹 전략 비교</li>
+<li><code>python -m tuning.step2_reranker</code>. Cross-Encoder 리랭커</li>
+<li><code>python -m tuning.step3_hybrid_search</code>. BM25 + Vector 하이브리드</li>
 </ol>
 </div>
 <h2>8.1 &quot;병가를 물었는데 출장 규정이 나왔다&quot;</h2>
-<div class="chapter-image gemini"><img src="./assets/CH08/gemini/08_chapter-opening.png" alt="" /><div class="caption">그림 8-1. 검색 품질 튜닝. 청킹, 리랭킹, 하이브리드의 세 축</div></div>
-<p>챕터 7에서 운영까지 안정화했습니다. 캐시도 돌고 토큰도 추적합니다. 그런데 동료가 이상한 걸 발견했습니다.</p>
-<p><strong>동료 C</strong>: &quot;병가 규정이 뭔지 물었는데, 출장 규정을 가져와서 답하던데요?&quot;</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px;margin:var(--space-xl) 0">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:24px;text-align:center">그림 8-1. 검색 품질 튜닝. 세 가지 도구로 엉뚱한 검색을 고칩니다</div>
+<div style="display:flex;align-items:stretch;gap:16px">
+<div style="flex:1;background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-danger);margin-top:8px">Before</div>
+<div style="margin-top:8px;font-size:13px;color:var(--color-text-muted)">"병가 신청 절차"</div>
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
+<span style="background:white;border:1px solid #fca5a5;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-danger)">1위 출장 규정</span>
+<span style="background:white;border:1px solid #fca5a5;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-danger)">2위 출장 경비</span>
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">3위 병가</span>
+</div>
+<div style="font-size:11px;color:var(--color-danger);margin-top:8px">상위 3건 중 2건이 출장</div>
+</div>
+<div style="flex:2;display:flex;flex-direction:column;gap:10px;justify-content:center">
+<div style="display:flex;align-items:center;gap:12px;background:var(--color-info-bg);border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-info);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-info-text)">1. 청킹(Chunking)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">자르는 법을 바꾼다 — 가위 → 돋보기</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:var(--color-success-bg);border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-success);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-success-text)">2. 리랭킹(ReRanking)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">가져온 뒤 면접관이 재확인 — 서류 → 면접</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:#fff7ed;border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-accent-warm);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-accent-warm-text)">3. 하이브리드(Hybrid)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">두 검색을 합친다 — 의미 + 키워드</div>
+</div>
+</div>
+</div>
+<div style="flex:1;background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-success);margin-top:8px">After</div>
+<div style="margin-top:8px;font-size:13px;color:var(--color-text-muted)">"병가 신청 절차"</div>
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">1위 병가 신청</span>
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">2위 병가 증빙</span>
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">3위 병가 기간</span>
+</div>
+<div style="font-size:11px;color:var(--color-success);margin-top:8px">상위 3건 모두 병가</div>
+</div>
+</div>
+</div>
+<p>챕터 7에서 운영까지 안정화한 뒤 이틀이 지났습니다. 캐시도 돌고 토큰도 추적합니다. 슬랙 채널에 &quot;고장났어요&quot; 메시지가 뜸해진 걸 보며 오픈이는 커피잔에 손을 감쌌습니다. 형광등이 윙 하고 한 번 깜빡이더니 다시 안정됐습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "이거 좀 봐요."</div>
+<p>동료가 의자를 끌고 왔습니다. 노트북 화면에 커넥트HR 채팅창이 떠 있었습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "병가 규정이 뭔지 물었는데, 출장 규정을 가져와서 답하더라고요."</div>
 <p class="thought">뭐라고?</p>
-<p>검색 결과 로그를 열어 봤습니다. 정말 그랬습니다. &quot;병가 신청 절차&quot;라는 질문에 상위 3건 중 2건이 출장 규정 문서였어요. 챕터 4에서 500자마다 기계적으로 잘라 둔 청크에서 <strong>병가 규정 뒷부분과 출장 규정 앞부분이 한 덩어리</strong>로 섞여 있었습니다.</p>
-<p><strong>LLM은 받은 문서로 성실하게 답했을 뿐</strong>입니다. 잘못된 문서를 가져다 준 건 검색 단계예요. 챕터 6, 챕터 7에서 에이전트, 운영을 다듬었지만, <strong>검색의 뿌리가 약하면</strong> 그 위에 뭘 얹어도 품질이 안 올라옵니다.</p>
-<h2>8.2 사서가 성장하는 세 단계</h2>
-<p>챕터 4에서 만든 사서는 아직 초보입니다. 사서를 더 똑똑하게 만드는 방법은 세 가지입니다.</p>
-<p><strong>제목만 보고 찾는 사서</strong>. 챕터 4에서 우리가 만든 사서. 문서를 500자 단위로 기계적으로 잘라 둡니다. &quot;병가&quot;와 &quot;출장&quot;이 같은 문서에 있으면 한 청크에 두 내용이 섞여요.</p>
-<p><strong>문단을 보고 찾는 사서</strong>. 문서에는 보통 빈 줄이 있습니다. &quot;제1조&quot;와 &quot;제2조&quot; 사이, 단락 전환 지점이요. 이 사서는 빈 줄이 보이면 먼저 거기서 끊습니다. 주제가 섞일 확률이 줄어요. 이것이 <strong>Recursive Character Chunking</strong>입니다.</p>
-<p><strong>목차를 보고 찾는 사서</strong>. 더 꼼꼼한 사서. 문서를 자를 때 &quot;여기서 주제가 바뀌네?&quot;를 감지합니다. 연차 이야기 → 출장 이야기로 넘어가는 지점을 알아채고 거기서 끊어요. 빈 줄이 없어도 내용 흐름을 읽습니다. <strong>Semantic Chunking</strong>입니다.</p>
-<div class="chapter-image gemini"><img src="./assets/CH08/gemini/08_search-evolution.png" alt="" /><div class="caption">그림 8-2. 사서가 성장하는 과정. 가위로 자르던 사서가 문단을 보고, 의미를 읽고, 두 검색을 섞어 씁니다</div></div>
-<p><strong>내용까지 훑고 다시 확인하는 사서</strong>. 상위 10개를 가져왔다고 합시다. 진짜 관련 있는 건 3~4개, 나머지는 비슷해 보이지만 사실 관련 없어요. 사서가 10개를 펼쳐 놓고 질문을 다시 읽으며 하나하나 확인합니다. <strong>리랭킹(ReRanking)</strong> 입니다.</p>
-<p><strong>두 방법을 섞어 쓰는 사서</strong>. 벡터 검색은 &quot;휴가 사용&quot;처럼 의미가 비슷한 문서를, BM25는 &quot;연차 신청&quot;이라는 단어가 정확히 들어간 문서를 찾습니다. 둘을 합치면 의미도 맞고 키워드도 맞는 문서가 상위에 올라옵니다. <strong>하이브리드 검색</strong>입니다.</p>
-<h2>8.3 이 챕터의 세 실험</h2>
-<p>새 기능을 &quot;만드는&quot; 게 아니라 기존 검색 파이프라인을 &quot;실험, 개선&quot;합니다. 세 실험을 순서대로 진행합니다.</p>
+<p>오픈이가 동료의 노트북을 당겨 봤습니다. 화면에는 &quot;병가 신청 절차를 알려줘&quot;라는 질문 아래 출장 규정이 장황하게 달려 있었습니다. 터미널을 열어 검색 로그를 확인했습니다.</p>
+<div class="search-results">
+  <div class="sr-title">검색 결과 — "병가 신청 절차"</div>
+  <div class="sr-item">
+    <div class="sr-head">
+      <span class="sr-rank">1</span>
+      <span class="sr-source">HR_취업규칙_v1.0 (p.3)</span>
+      <span class="sr-sim">유사도 85.1%</span>
+    </div>
+    <div class="sr-body">"제14조(출장) 업무상 출장 시 소요 경비는 실비로 정산하며…<b>제15조(병가) 질병이나 부상으로</b>"</div>
+  </div>
+  <div class="sr-item">
+    <div class="sr-head">
+      <span class="sr-rank">2</span>
+      <span class="sr-source">HR_취업규칙_v1.0 (p.4)</span>
+      <span class="sr-sim">유사도 82.3%</span>
+    </div>
+    <div class="sr-body">"출장 기간 중 질병이 발생한 경우 해당 기간은 병가로 전환할 수 있으며…"</div>
+  </div>
+  <div class="sr-item">
+    <div class="sr-head">
+      <span class="sr-rank">3</span>
+      <span class="sr-source">HR_출장규정_v2.0 (p.1)</span>
+      <span class="sr-sim">유사도 79.8%</span>
+    </div>
+    <div class="sr-body">"국내 출장은 당일 및 숙박 출장으로 구분하며…"</div>
+  </div>
+</div>
+<p>상위 3건 중 2건이 출장 규정이었습니다. 1위 문서를 자세히 보니 이유가 보였습니다. 챕터 4에서 500자마다 기계적으로 잘라 둔 청크에서 <strong>병가 규정 뒷부분과 출장 규정 앞부분이 한 덩어리</strong>로 섞여 있었습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "에이전트가 멍청한 건가요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "아니요, LLM은 받은 문서로 성실하게 답한 거예요. 엉뚱한 문서를 가져다 준 건 검색 단계입니다."</div>
+<p class="thought">에이전트도 다듬고, 캐시도 붙이고, 모니터링까지 달았는데. 검색의 뿌리가 썩어 있으면 그 위에 뭘 얹어도 소용없다.</p>
+<p>건너편 자리에서 팀장이 모니터에서 눈을 떼지 않은 채 한마디를 던졌습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "사서가 책을 잘 찾아주냐, 책장을 잘 정리했냐. 뭐가 먼저겠어요?"</div>
+<h2>8.2 이 챕터의 세 실험</h2>
+<p>책장 정리. 팀장의 한마디가 머릿속에 걸렸습니다. 검색 결과 로그를 다시 열어 보니 문제가 하나가 아니었습니다. 서랍에서 수첩을 꺼내 펼쳤습니다.</p>
+<div class="memo-box">
+<p><strong>— 문제 정리 —</strong></p>
+<ol>
+<li><strong>자르는 방식</strong>
+<ul>
+<li>500자 고정이라 병가 규정 뒷부분과 출장 규정 앞부분이 한 덩어리</li>
+<li>글자 수가 아니라 의미 단위로 잘라야 함</li>
+</ul>
+</li>
+<li><strong>가져온 뒤 확인</strong>
+<ul>
+<li>유사도 순위 그대로 믿고 있음</li>
+<li>진짜 답과 먼 문서도 상위에 섞여 올라옴</li>
+</ul>
+</li>
+<li><strong>검색 방법 자체</strong>
+<ul>
+<li>벡터 검색 하나만 쓰고 있음</li>
+<li>키워드가 정확히 맞는 경우도 놓칠 수 있음</li>
+</ul>
+</li>
+</ol>
+</div>
+<p>수첩을 덮고 화이트보드 앞으로 걸어갔습니다. 마커 뚜껑을 딸깍 열고 세 칸을 그렸습니다.</p>
+<p>이번 챕터는 새 기능을 만들지 않습니다. 챕터 4부터 쌓아 온 검색 파이프라인을 세 방향에서 실험하고 개선합니다.</p>
+<div class="rag-pipeline-box">
+  <div class="rag-pipeline-title" style="text-align:center">그림 8-2. 챕터 8의 세 실험. 청킹(Chunking) → 리랭킹(ReRanking) → 하이브리드 검색(Hybrid Search)</div>
+  <div class="rag-pipeline">
+    <div class="rag-step">
+      <div class="s-num">1</div>
+      <div class="s-title">청킹 전략</div>
+      <div class="s-desc">Fixed · Recursive · Semantic<br>세 가지 자르기 비교</div>
+      <div class="s-meta">가위 → 돋보기</div>
+    </div>
+    <div class="rag-arrow">→</div>
+    <div class="rag-step">
+      <div class="s-num">2</div>
+      <div class="s-title">리랭킹</div>
+      <div class="s-desc">Cross-Encoder로<br>Top-K 재정렬</div>
+      <div class="s-meta">면접관 붙이기</div>
+    </div>
+    <div class="rag-arrow">→</div>
+    <div class="rag-step">
+      <div class="s-num">3</div>
+      <div class="s-title">하이브리드</div>
+      <div class="s-desc">BM25 + Vector<br>alpha 가중합</div>
+      <div class="s-meta">두 사서 합치기</div>
+    </div>
+  </div>
+</div>
+<h2>8.3 가위 대신 돋보기를 쥐어 주자 — 청킹(Chunking)</h2>
+<div class="dialogue"><span class="speaker">오픈이</span>: "지금 사서는 책을 500자씩 가위로 잘라서 서랍에 넣어 둔 거거든요. 가위가 병가 조항 중간을 지나가면서 출장 규정이랑 한 조각이 된 거예요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "그럼 가위 대신 뭘 쥐어 줄 수 있을까요?"</div>
+<p>잠시 생각했습니다. 문서에는 구조가 있습니다. 빈 줄, 제목, 주제 전환. 그걸 읽을 줄 아는 사서라면 엉뚱한 곳에서 자르지 않을 겁니다.</p>
+<p class="thought">가위가 아니라 돋보기를 줘야 한다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "자르는 방법부터 바꿔야 할 것 같아요. 세 가지 방법을 보여 드릴게요."</div>
+<p>오픈이가 화이트보드에 사내 규정 텍스트를 적었습니다. &quot;제15조 병가... 제16조 출장... 제17조 연차...&quot; 마커 세 자루를 꺼내 놓았습니다.</p>
+<div class="prep-note">
+<p><strong>실습 흐름</strong></p>
+<ol>
+<li><code>tuning/step1_chunk_experiment/strategies.py</code>의 TODO를 채웁니다</li>
+<li><code>fixed_size_chunking()</code> 작성 → <code>--step 1-1</code>로 크기×오버랩 조합 실험</li>
+<li><code>recursive_character_chunking()</code> 작성</li>
+<li><code>semantic_chunking()</code> 작성</li>
+<li><code>--step 1-2</code>로 세 전략을 같은 문서에 돌려 한 번에 비교</li>
+</ol>
+</div>
+<h3>전략 1. 고정 청킹(Fixed Chunking)</h3>
+<p>오픈이가 빨간 마커를 집었습니다. 자를 꺼내 화이트보드에 대고 500자마다 줄을 그었습니다. 병가 규정 뒤쪽과 출장 규정 앞쪽이 한 칸에 들어갔습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "이러니까 섞이죠."</div>
+<p><strong>제목만 보고 찾는 사서</strong>. 챕터 4에서 우리가 만든 사서입니다. 문서를 500자 단위로 기계적으로 잘라 둡니다. &quot;병가&quot;와 &quot;출장&quot;이 같은 문서에 있으면 한 청크에 두 내용이 섞여요.</p>
+<p><code>tuning/step1_chunk_experiment/strategies.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_chunk_experiment/strategies.py. 고정 크기 청킹</div><span class="k">def</span><span class="w"> </span><span class="nf">fixed_size_chunking</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="n">overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="cb-todo"># TODO: text를 chunk_size 단위로 잘라 리스트에 추가합니다.</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># 1. start부터 chunk_size만큼 잘라냄</span>
+    <span class="k">while</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+        <span class="c1"># 2. 공백만 있는 청크는 건너뜀</span>
+        <span class="k">if</span> <span class="n">chunk</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="c1"># 3. 다음 시작 위치는 end - overlap (겹침 구간)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">overlap</span>
+    <span class="k">return</span> <span class="n">chunks</span></div>
+<p><code>chunk_size</code>는 한 조각의 최대 글자 수, <code>overlap</code>은 조각과 조각이 겹치는 글자 수입니다. 겹침 구간을 두는 이유는 경계에서 잘린 문장이 양쪽 조각에 모두 포함되게 하려는 것입니다. 챕터 4에서 <code>chunk_size=500</code>, <code>overlap=100</code>으로 설정했던 함수를 크기와 오버랩을 바꿔 가며 실험해 봅니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Fixed 청킹 크기 × 오버랩 조합 비교 (9개 조합)</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_chunk_experiment<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-1</div>
+<div class="tip">
+<p><strong>이 실험에서 알아야 할 것</strong></p>
+<ul>
+<li><strong>크기가 크면(1000자)</strong>: 정보가 많아 LLM이 답하기 좋지만, 관련 없는 내용도 섞이고 토큰도 많이 씁니다.</li>
+<li><strong>크기가 작으면(300자)</strong>: 주제가 깔끔하지만, 맥락이 잘려서 &quot;이게 무슨 말이지?&quot; 하는 청크가 생깁니다.</li>
+<li><strong>오버랩이 크면(30%)</strong>: 경계에서 문맥이 끊기지 않지만, 같은 내용이 여러 청크에 중복됩니다.</li>
+<li><strong>오버랩이 작으면(10%)</strong>: 중복이 적지만, 경계에서 잘린 문장이 검색에 안 걸릴 수 있습니다.</li>
+</ul>
+<p>사내 규정처럼 조항이 짧은 문서는 300~500자, 매뉴얼처럼 한 주제가 긴 문서는 800~1000자가 적합합니다.</p>
+</div>
+<h3>전략 2. 재귀 청킹(Recursive Chunking)</h3>
+<p>오픈이가 파란 마커로 바꿨습니다. 이번에는 자를 치우고, 텍스트를 읽으며 빈 줄이 있는 곳에 줄을 그었습니다. 제15조, 제16조, 제17조가 각각 한 칸씩 분리됐습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "그런데 빈 줄이 없는 문서도 있잖아요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "그래서 빈 줄 → 줄바꿈 → 마침표 → 공백 순서로 찾아요. 가장 자연스러운 경계부터 시도합니다."</div>
+<p><strong>문단을 보고 찾는 사서</strong>. 문서에는 보통 빈 줄이 있습니다. &quot;제1조&quot;와 &quot;제2조&quot; 사이, 단락 전환 지점이요. 이 사서는 빈 줄이 보이면 먼저 거기서 끊습니다. 주제가 섞일 확률이 줄어요.</p>
+<p><code>tuning/step1_chunk_experiment/strategies.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_chunk_experiment/strategies.py. 재귀 문자 분할</div><span class="k">def</span><span class="w"> </span><span class="nf">recursive_character_chunking</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="n">overlap</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="cb-todo"># TODO: RecursiveCharacterTextSplitter로 문단·문장 경계를 우선 분할합니다.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">langchain_text_splitters</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecursiveCharacterTextSplitter</span>
+
+    <span class="c1"># 1. 분할 기준 우선순위: 빈 줄 → 줄바꿈 → 마침표 → 공백</span>
+    <span class="n">splitter</span> <span class="o">=</span> <span class="n">RecursiveCharacterTextSplitter</span><span class="p">(</span>
+        <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span>
+        <span class="n">chunk_overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+        <span class="n">separators</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;。&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="c1"># 2. 가장 자연스러운 경계부터 시도하며 분할</span>
+    <span class="k">return</span> <span class="n">splitter</span><span class="o">.</span><span class="n">split_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+<p><code>RecursiveCharacterTextSplitter</code>는 <code>langchain-text-splitters</code> 패키지가 제공하는 스플리터입니다. <code>separators</code>가 핵심인데, &quot;자를 수 있는 가장 자연스러운 경계&quot;를 우선순위대로 찾습니다. 같은 500자라도 문단이나 문장 경계에서 끊기니 주제 혼입이 줄어듭니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 8-3. Recursive Separators 탐색 순서</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:var(--space-md);align-items:center">
+<div style="text-align:center;background:var(--color-success-bg);border:2px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:700;color:var(--color-success-text);font-family:var(--font-mono);margin-bottom:var(--space-xs)">\\n\\n</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);font-weight:500">빈 줄 (문단)</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-xs)">가장 자연스러운 경계</div>
+</div>
+<div style="font-size:var(--fs-2xl);color:var(--color-text-subtle);font-weight:300">→</div>
+<div style="text-align:center;background:var(--color-info-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:700;color:var(--color-info-text);font-family:var(--font-mono);margin-bottom:var(--space-xs)">\\n</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);font-weight:500">줄바꿈</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-xs)">문단 내 줄 구분</div>
+</div>
+<div style="font-size:var(--fs-2xl);color:var(--color-text-subtle);font-weight:300">→</div>
+<div style="text-align:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-md);padding:var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:700;color:var(--color-warning-text);font-family:var(--font-mono);margin-bottom:var(--space-xs)">.</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);font-weight:500">마침표 (문장)</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-xs)">문장 단위 분할</div>
+</div>
+<div style="font-size:var(--fs-2xl);color:var(--color-text-subtle);font-weight:300">→</div>
+<div style="text-align:center;background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:700;color:var(--color-danger-text);font-family:var(--font-mono);margin-bottom:var(--space-xs)">" "</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);font-weight:500">공백 (단어)</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-xs)">최후 수단</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:var(--space-md);font-size:var(--fs-sm);color:var(--color-text-subtle)">← 자연스러운 경계부터 먼저 시도 · 못 찾으면 다음 단계로 →</div>
+</div>
+<p>Fixed와 같은 <code>chunk_size</code>, <code>overlap</code> 파라미터를 쓰지만, 자르는 기준이 다릅니다. Fixed는 글자 수만 세지만 Recursive는 문단·문장 경계를 먼저 찾습니다.</p>
+<h3>전략 3. 의미 청킹(Semantic Chunking)</h3>
+<p>오픈이가 마지막으로 초록 마커를 꺼냈습니다. 이번에는 글자 수도, 빈 줄도 보지 않았습니다. 문장을 하나씩 읽으며 &quot;여기서 주제가 바뀐다&quot; 싶은 곳에 줄을 그었습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "사람이 읽는 것처럼 하네요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "임베딩으로 문장끼리 의미 거리를 재서, 거리가 확 벌어지는 곳에서 자르는 거예요."</div>
+<p><strong>목차를 보고 찾는 사서</strong>. 더 꼼꼼한 사서입니다. 문서를 자를 때 &quot;여기서 주제가 바뀌네?&quot;를 감지합니다. 연차 이야기에서 출장 이야기로 넘어가는 지점을 알아채고 거기서 끊어요. 빈 줄이 없어도 내용 흐름을 읽습니다.</p>
+<p><code>tuning/step1_chunk_experiment/strategies.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_chunk_experiment/strategies.py. 의미 기반 청킹</div><span class="k">def</span><span class="w"> </span><span class="nf">semantic_chunking</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">embedding_model</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;jhgan/ko-sroberta-multitask&quot;</span><span class="p">,</span>
+    <span class="n">percentile</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">70</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="cb-todo"># TODO: HuggingFaceEmbeddings + SemanticChunker로 의미 단위 청킹합니다.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">langchain_community.embeddings</span><span class="w"> </span><span class="kn">import</span> <span class="n">HuggingFaceEmbeddings</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">langchain_experimental.text_splitter</span><span class="w"> </span><span class="kn">import</span> <span class="n">SemanticChunker</span>
+
+    <span class="c1"># 1. 임베딩 모델 로드</span>
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">HuggingFaceEmbeddings</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="n">embedding_model</span><span class="p">)</span>
+    <span class="c1"># 2. percentile 기준선으로 의미 전환 감지</span>
+    <span class="n">chunker</span> <span class="o">=</span> <span class="n">SemanticChunker</span><span class="p">(</span>
+        <span class="n">embeddings</span><span class="p">,</span>
+        <span class="n">breakpoint_threshold_type</span><span class="o">=</span><span class="s2">&quot;percentile&quot;</span><span class="p">,</span>
+        <span class="n">breakpoint_threshold_amount</span><span class="o">=</span><span class="n">percentile</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># 3. 의미가 크게 달라지는 곳에서 분할</span>
+    <span class="k">return</span> <span class="n">chunker</span><span class="o">.</span><span class="n">split_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+<p><code>HuggingFaceEmbeddings</code>는 문장을 벡터로 바꿔 주는 래퍼이고, <code>SemanticChunker</code>는 문장 벡터 사이의 거리를 계산해 분할 지점을 결정합니다. <code>embedding_model</code>에 한국어 임베딩 모델(<code>jhgan/ko-sroberta-multitask</code>)을 넘기면 한국어 문맥을 이해합니다.</p>
+<p><code>percentile=70</code>은 검문소의 민감도입니다. 문장과 문장 사이에는 &quot;의미 거리&quot;가 있습니다. 같은 주제를 이어가면 울타리가 낮고, 주제가 바뀌면 울타리가 높아집니다. <code>percentile</code>은 &quot;얼마나 높은 울타리에서 자를까&quot;를 정하는 기준선입니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-lg);text-align:center">그림 8-4. 울타리 비유. 기준선 위로 튀어나온 곳에서 자릅니다</div>
+<div style="position:relative;height:200px;margin:0 var(--space-xl)">
+<div style="position:absolute;left:0;right:0;bottom:40px;border-bottom:2px dashed var(--color-danger);z-index:1"></div>
+<div style="position:absolute;right:0;bottom:36px;font-size:var(--fs-xs);color:var(--color-danger);font-weight:600">← 기준선 (percentile=70)</div>
+<div style="position:absolute;bottom:0;left:0;right:0;display:flex;align-items:flex-end;justify-content:space-around;height:100%">
+<div style="text-align:center;flex:1">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-accent-border);width:40px;height:30px;margin:0 auto;border-radius:3px 3px 0 0"></div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:4px">병가①↔병가②</div>
+<div style="font-size:9px;color:var(--color-text-subtle)">거리 0.1 (낮음)</div>
+</div>
+<div style="text-align:center;flex:1">
+<div style="background:var(--color-danger);width:40px;height:140px;margin:0 auto;border-radius:3px 3px 0 0;position:relative">
+<div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:var(--fs-xs);color:var(--color-danger);font-weight:700;white-space:nowrap">여기서 자름!</div>
+</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:4px">병가↔출장</div>
+<div style="font-size:9px;color:var(--color-text-subtle)">거리 0.8 (높음)</div>
+</div>
+<div style="text-align:center;flex:1">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-accent-border);width:40px;height:45px;margin:0 auto;border-radius:3px 3px 0 0"></div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:4px">출장①↔출장②</div>
+<div style="font-size:9px;color:var(--color-text-subtle)">거리 0.2 (낮음)</div>
+</div>
+<div style="text-align:center;flex:1">
+<div style="background:var(--color-warning);width:40px;height:100px;margin:0 auto;border-radius:3px 3px 0 0;position:relative">
+<div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:var(--fs-xs);color:var(--color-warning);font-weight:700;white-space:nowrap">여기서 자름!</div>
+</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:4px">출장↔연차</div>
+<div style="font-size:9px;color:var(--color-text-subtle)">거리 0.6 (중간)</div>
+</div>
+<div style="text-align:center;flex:1">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-accent-border);width:40px;height:20px;margin:0 auto;border-radius:3px 3px 0 0"></div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:4px">연차①↔연차②</div>
+<div style="font-size:9px;color:var(--color-text-subtle)">거리 0.05 (낮음)</div>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-md);font-size:var(--fs-sm);color:var(--color-text-muted);line-height:1.7">울타리가 기준선 위로 튀어나온 곳이 "주제가 바뀌는 곳"입니다. <strong>기준선을 높이면(percentile=95)</strong> 아주 높은 울타리만 잡아서 덜 자르고, <strong>기준선을 낮추면(percentile=50)</strong> 중간 울타리도 잡아서 더 자릅니다.</div>
+</div>
+<p>이 기준선의 높이를 바꾸면 결과가 어떻게 달라지는지 봅니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-md);text-align:center">그림 8-5. 기준선 높이에 따른 청크 결과</div>
+<div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);margin-bottom:var(--space-sm);font-size:9px;color:var(--color-text-muted);line-height:1.6;font-family:var(--font-mono)">제15조(병가) 질병이나 부상으로 직무를 수행할 수 없을 때에는 병가를 신청할 수 있다. 병가 기간이 3일 이상인 경우 의사의 진단서를 첨부하여야 한다. 제16조(출장) 업무상 출장 시 소요 경비는 실비로 정산하며… 제17조(연차) 연차유급휴가는 근속연수에 따라 부여한다.</div>
+<div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);margin-bottom:var(--space-md)">↓ 이 텍스트를 어디서 자를까? ↓</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-md)">
+<div style="border:1px solid #bfdbfe;border-radius:var(--radius-md);overflow:hidden">
+<div style="background:var(--color-info);color:white;text-align:center;padding:var(--space-sm);font-weight:700;font-size:var(--fs-lg)">Percentile 95</div>
+<div style="padding:var(--space-md)">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-sm)">거의 자르지 않습니다</div>
+<div style="border:1px dashed #bfdbfe;border-radius:var(--radius-sm);padding:6px;margin-bottom:var(--space-xs);font-size:9px;line-height:1.5;color:var(--color-text)"><span style="color:var(--color-info-text)">병가</span> 질병이나… 진단서를 첨부. <span style="color:var(--color-danger);font-weight:600">출장</span> 업무상 출장 시…</div>
+<div style="border:1px dashed #bfdbfe;border-radius:var(--radius-sm);padding:6px;font-size:9px;line-height:1.5;color:var(--color-text)"><span style="color:var(--color-info-text)">연차</span> 연차유급휴가는…</div>
+<div style="text-align:center;margin:var(--space-sm) 0 2px;font-size:8px;color:var(--color-danger)">병가+출장이 한 청크에 섞임</div>
+<div style="text-align:center;margin-top:var(--space-xs)"><span style="font-size:var(--fs-footnote);background:#dbeafe;color:var(--color-info-text);padding:2px 8px;border-radius:10px">둔감</span></div>
+</div>
+</div>
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-md);overflow:hidden;position:relative">
+<div style="position:absolute;top:34px;right:6px;font-size:8px;background:var(--color-success);color:white;padding:1px 6px;border-radius:8px;font-weight:600">권장</div>
+<div style="background:var(--color-success);color:white;text-align:center;padding:var(--space-sm);font-weight:700;font-size:var(--fs-lg)">Percentile 70</div>
+<div style="padding:var(--space-md)">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-sm)">주제가 바뀌면 자릅니다</div>
+<div style="border:1px dashed #86efac;border-radius:var(--radius-sm);padding:6px;margin-bottom:3px;font-size:9px;line-height:1.5;color:var(--color-text)"><span style="color:var(--color-success-text)">병가</span> 질병이나… 진단서를 첨부.</div>
+<div style="border:1px dashed #86efac;border-radius:var(--radius-sm);padding:6px;margin-bottom:3px;font-size:9px;line-height:1.5;color:var(--color-text)"><span style="color:var(--color-success-text)">출장</span> 업무상 출장 시… 전환 가능.</div>
+<div style="border:1px dashed #86efac;border-radius:var(--radius-sm);padding:6px;font-size:9px;line-height:1.5;color:var(--color-text)"><span style="color:var(--color-success-text)">연차</span> 연차유급휴가는…</div>
+<div style="text-align:center;margin:var(--space-sm) 0 2px;font-size:8px;color:var(--color-success)">조항별로 깔끔하게 분리</div>
+<div style="text-align:center;margin-top:var(--space-xs)"><span style="font-size:var(--fs-footnote);background:#a7f3d0;color:var(--color-success-text);padding:2px 8px;border-radius:10px">균형</span></div>
+</div>
+</div>
+<div style="border:1px solid #fed7aa;border-radius:var(--radius-md);overflow:hidden">
+<div style="background:var(--color-warning);color:white;text-align:center;padding:var(--space-sm);font-weight:700;font-size:var(--fs-lg)">Percentile 50</div>
+<div style="padding:var(--space-md)">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-sm)">조금만 달라져도 자릅니다</div>
+<div style="border:1px dashed #fed7aa;border-radius:var(--radius-sm);padding:4px;margin-bottom:2px;font-size:9px;color:var(--color-text)"><span style="color:var(--color-warning-text)">병가①</span> 질병이나…</div>
+<div style="border:1px dashed #fed7aa;border-radius:var(--radius-sm);padding:4px;margin-bottom:2px;font-size:9px;color:var(--color-text)"><span style="color:var(--color-warning-text)">병가②</span> …진단서 첨부</div>
+<div style="border:1px dashed #fed7aa;border-radius:var(--radius-sm);padding:4px;margin-bottom:2px;font-size:9px;color:var(--color-text)"><span style="color:var(--color-warning-text)">출장</span> 업무상…</div>
+<div style="border:1px dashed #fed7aa;border-radius:var(--radius-sm);padding:4px;font-size:9px;color:var(--color-text)"><span style="color:var(--color-warning-text)">연차</span> 연차유급…</div>
+<div style="text-align:center;margin:var(--space-sm) 0 2px;font-size:8px;color:var(--color-warning)">같은 조항도 쪼개져 문맥 유실</div>
+<div style="text-align:center;margin-top:var(--space-xs)"><span style="font-size:var(--fs-footnote);background:var(--color-warning-bg);color:var(--color-warning-text);padding:2px 8px;border-radius:10px">예민</span></div>
+</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:var(--space-md);font-size:var(--fs-xs);color:var(--color-text-subtle)">← 숫자 클수록 둔감 (청크 큼)　·　숫자 작을수록 예민 (청크 작음) →</div>
+</div>
+<p>Recursive와 달리 <code>chunk_size</code> 파라미터가 없습니다. <code>percentile</code> 값 하나로 청크 크기가 자동으로 결정됩니다. 값을 낮추면 더 자주 자르고, 높이면 덜 자릅니다.</p>
+<h3>세 전략 비교</h3>
+<p>화이트보드에 빨간, 파란, 초록 줄이 나란히 그어져 있습니다. 같은 텍스트인데 자르는 방법에 따라 결과가 다릅니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "어떤 게 제일 나은지 숫자로 봐야죠."</div>
+<p>세 함수를 모두 채웠으면 한 번에 비교합니다. <code>--step 1-3</code>이 3전략 비교 실험입니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1 실행. Fixed vs Recursive vs Semantic</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_chunk_experiment<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-2</div>
+<div style="margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-sm);text-align:center">그림 8-6. 3전략 비교 결과 (같은 1098자 문서)</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)"><th style="padding:8px 12px;border:1px solid var(--color-border)">전략</th><th style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">청크 수</th><th style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">평균 크기</th><th style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">실행 시간</th><th style="padding:8px 12px;border:1px solid var(--color-border)">특징</th></tr>
+<tr><td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-danger)">Fixed (500자)</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">3</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">399자</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">0.000s</td><td style="padding:8px 12px;border:1px solid var(--color-border)">균일한 크기, 빠른 처리</td></tr>
+<tr><td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-info)">Recursive</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">3</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">365자</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">4.4s</td><td style="padding:8px 12px;border:1px solid var(--color-border)">문단/문장 경계 존중</td></tr>
+<tr style="background:var(--color-success-bg)"><td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-success);font-weight:700">Semantic (p=70)</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">7</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">155자</td><td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">7.0s</td><td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">의미 단위 분할, 최고 품질</td></tr>
+</table>
+</div>
+<p>같은 문서인데 결과가 다릅니다. Fixed는 글자 수만 세서 3조각(399자), Recursive는 문단 경계를 찾아서 3조각(365자)으로 비슷하지만 잘린 위치가 다릅니다. Semantic은 의미 전환을 감지해서 7조각(155자)으로 가장 잘게 나눴습니다.</p>
+<p>Fixed는 단순 문자열 연산이라 0초에 가깝고, Recursive와 Semantic은 임베딩 모델을 로드하느라 각각 4~7초가 걸립니다. 실서비스에서는 문서를 인덱싱할 때 한 번만 돌리므로 속도보다 품질이 중요합니다. 청크가 작아진 만큼 &quot;병가&quot;와 &quot;출장&quot;이 한 조각에 섞일 가능성이 줄어듭니다.</p>
+<h2>8.4 면접관을 붙여 다시 확인한다 — 리랭킹(ReRanking)</h2>
+<p>청킹 실험 결과를 보던 오픈이가 고개를 갸웃했습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "Semantic으로 잘라도 상위 10개 중에 관련 없는 문서가 섞여 들어올 수 있잖아요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "사람 뽑을 때 서류 심사만으로 뽑나요?"</div>
+<div class="dialogue"><span class="speaker">동료</span>: "면접을 보죠. 서류 통과한 후보를 다시 앉혀 놓고 하나씩 따져 보는 거잖아요."</div>
+<p>오픈이가 화이트보드에 서류 10장을 그렸습니다. 벡터 검색이 가져온 Top-10입니다. 그중 관련 있는 건 2~3장, 나머지는 비슷해 보이지만 엉뚱한 문서입니다. 오픈이가 한 장씩 질문과 대조하며 체크 표시를 했습니다. 10장이 3장으로 줄었습니다.</p>
+<p><strong>면접관을 붙이는 사서 — 리랭킹(ReRanking)</strong>. 벡터 검색(Bi-Encoder)은 서류 심사입니다. 질문과 문서를 따로 벡터로 만들어 거리를 잽니다. 빠르지만 대충 봅니다. 리랭커(Cross-Encoder)는 면접관입니다. 질문과 문서를 한 번에 모델에 넣어 직접 &quot;이 문서가 이 질문에 맞나?&quot;를 판단합니다. 느리지만 정확합니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "서류로 10명 뽑고, 면접으로 3명 추리는 거네요."</div>
+<div class="prep-note">
+<p><strong>실습 흐름</strong></p>
+<ol>
+<li><code>tuning/step2_reranker/reranker.py</code>의 TODO를 채웁니다</li>
+<li><code>python -m tuning.step2_reranker</code>로 기본 실험 (fetch_k=10, top_k=5)</li>
+<li><code>--fetch-k</code>, <code>--top-k</code>를 바꿔서 후보 수와 최종 수의 관계를 확인합니다</li>
+</ol>
+</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 8-7. 리랭킹 2단계 전략. Bi-Encoder(서류) → Cross-Encoder(면접)</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:var(--space-lg);margin-bottom:var(--space-lg)">
+<div style="text-align:center;flex-shrink:0">
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:var(--space-sm)">질문</div>
+<div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-md) var(--space-xl);font-size:var(--fs-lg);color:var(--color-accent-text);font-weight:600">"병가 신청 절차"</div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-lg);align-items:start">
+<div style="text-align:center;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-lg)">
+<div style="font-size:var(--fs-base);color:var(--color-info);font-weight:600;margin-bottom:var(--space-md)">1단계 · Bi-Encoder (서류 심사)</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:var(--space-sm)">
+<span style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-success-text)">병가</span>
+<span style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-warning-text)">출장</span>
+<span style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-warning-text)">보안</span>
+<span style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-success-text)">휴가</span>
+<span style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-warning-text)">급여</span>
+</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted)">빠르게 Top-20 (관련 없는 것도 섞임)</div>
+</div>
+<div style="font-size:var(--fs-3xl);color:var(--color-text-subtle);align-self:center;font-weight:300">→</div>
+<div style="text-align:center;border:2px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-lg)">
+<div style="font-size:var(--fs-base);color:var(--color-success);font-weight:600;margin-bottom:var(--space-md)">2단계 · Cross-Encoder (면접)</div>
+<div style="display:flex;gap:6px;justify-content:center;margin-bottom:var(--space-sm)">
+<span style="background:var(--color-success-bg);border:2px solid var(--color-success);border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-success-text);font-weight:700">병가 ①</span>
+<span style="background:var(--color-success-bg);border:2px solid var(--color-success);border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-success-text);font-weight:700">병가 ②</span>
+<span style="background:var(--color-success-bg);border:2px solid var(--color-success);border-radius:var(--radius-sm);padding:6px 14px;font-size:var(--fs-base);color:var(--color-success-text);font-weight:700">휴가</span>
+</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted)">정밀하게 Top-3 → LLM에 전달</div>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);padding:var(--space-md) var(--space-lg);background:var(--color-surface-alt);border-radius:var(--radius-md);font-size:var(--fs-sm);color:var(--color-text-muted);line-height:1.7"><strong style="color:var(--color-text-heading)">Bi-Encoder vs Cross-Encoder</strong>. Bi-Encoder는 서류만 보는 면접관입니다. 질문과 문서를 따로 벡터로 만들어 거리를 잽니다. 빠르지만 대충 봅니다. Cross-Encoder는 직접 대화하는 면접관입니다. 질문과 문서를 한 번에 모델에 넣어 "이 문서가 이 질문에 맞나?" 직접 판단합니다. 느리지만 정확합니다. 그래서 <strong>서류(Bi)로 많이 뽑고, 면접(Cross)으로 추리는</strong> 2단계 전략을 씁니다.</div>
+</div>
+<p>면접관이 후보를 한 명씩 앉혀 놓고 질문과 대조하는 코드를 작성합니다. <code>tuning/step2_reranker/reranker.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> tuning/step2_reranker/reranker.py. CrossEncoderReranker</div><span class="kn">from</span><span class="w"> </span><span class="nn">sentence_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">CrossEncoder</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CrossEncoderReranker</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;BAAI/bge-reranker-v2-m3&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">CrossEncoder</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rerank</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="cb-todo"># TODO: 질문과 문서를 쌍으로 만들어 관련성 점수를 매깁니다.</span>
+        <span class="c1"># 1. (질문, 문서내용) 쌍을 만듦</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">query</span><span class="p">,</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">documents</span><span class="p">]</span>
+        <span class="c1"># 2. Cross-Encoder로 관련성 점수 계산</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+        <span class="c1"># 3. 각 문서에 점수 추가</span>
+        <span class="k">for</span> <span class="n">doc</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">scores</span><span class="p">):</span>
+            <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;cross_encoder_score&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="c1"># 4. 점수 내림차순 정렬 → 상위 top_k개 반환</span>
+        <span class="n">ranked</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">documents</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;cross_encoder_score&quot;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ranked</span><span class="p">[:</span><span class="n">top_k</span><span class="p">]</span></div>
+<p><code>documents</code>는 <code>list[dict]</code> 형태입니다. 벡터 검색 결과가 <code>{&quot;content&quot;: &quot;...&quot;, &quot;score&quot;: 0.85}</code> 딕셔너리로 넘어옵니다. <code>rerank()</code>는 각 문서에 <code>cross_encoder_score</code> 키를 추가한 뒤 점수 순으로 정렬하고, 상위 <code>top_k</code>개만 반환합니다. <code>CrossEncoder</code>는 <code>sentence-transformers</code> 패키지가 제공하는 클래스이고, <code>BAAI/bge-reranker-v2-m3</code>는 한국어를 지원하는 Cross-Encoder 모델입니다. <code>predict()</code>에 (질문, 문서) 쌍을 넘기면 -10~10 범위의 관련성 점수를 돌려줍니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 기본 실험. 10개 가져와서 5개로 추림</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_reranker</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 넓게 가져와서 좁게 추리기. 20개 → 3개</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_reranker<span class="w"> </span>--fetch-k<span class="w"> </span><span class="m">20</span><span class="w"> </span>--top-k<span class="w"> </span><span class="m">3</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-lg);margin:var(--space-xl) 0">
+<div style="grid-column:1/-1;font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);text-align:center">그림 8-8. 리랭킹 전후 비교. 면접관(Cross-Encoder)이 순위를 바꿉니다</div>
+<div>
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-info);margin-bottom:var(--space-sm);text-align:center">리랭킹 전 (Vector Search 순위)</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)"><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">순위</th><th style="padding:6px 8px;border:1px solid var(--color-border)">문서</th><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">점수</th></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">1</td><td style="padding:6px 8px;border:1px solid var(--color-border)">연차 신청은 3일 전 서면 제출</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.470</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">2</td><td style="padding:6px 8px;border:1px solid var(--color-border)">연차유급휴가는 15일 부여</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.450</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">3</td><td style="padding:6px 8px;border:1px solid var(--color-border)">재택근무 신청 가능</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.400</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">4</td><td style="padding:6px 8px;border:1px solid var(--color-border)">휴가 시기 조정 가능</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.380</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">5</td><td style="padding:6px 8px;border:1px solid var(--color-border)">성과 평가 기준</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.320</td></tr>
+</table>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);text-align:center;margin-top:var(--space-xs)">1~5위 점수 차이가 작습니다 (0.470~0.320)</div>
+</div>
+<div>
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-success);margin-bottom:var(--space-sm);text-align:center">리랭킹 후 (Cross-Encoder 순위)</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)"><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">순위</th><th style="padding:6px 8px;border:1px solid var(--color-border)">문서</th><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">CE 점수</th></tr>
+<tr style="background:var(--color-success-bg)"><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center;font-weight:700">1</td><td style="padding:6px 8px;border:1px solid var(--color-border);font-weight:700">연차 신청은 3일 전 서면 제출</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center;font-weight:700">0.888</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">2</td><td style="padding:6px 8px;border:1px solid var(--color-border)">연차유급휴가는 15일 부여</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.009</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">3</td><td style="padding:6px 8px;border:1px solid var(--color-border)">재택근무 신청 가능</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.001</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">4</td><td style="padding:6px 8px;border:1px solid var(--color-border)">출장비 정산</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.000</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">5</td><td style="padding:6px 8px;border:1px solid var(--color-border)">육아휴직 신청</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.000</td></tr>
+</table>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);text-align:center;margin-top:var(--space-xs)">1위가 0.888로 압도적, 나머지는 0점대</div>
+</div>
+</div>
+<p>서류 심사(벡터 검색)에서는 1~5위 점수 차이가 0.15밖에 안 됐습니다. 누가 진짜 적격자인지 구분이 안 돼요. 면접관(Cross-Encoder)이 한 명씩 대화하자 1위(0.888)와 2위(0.009) 사이에 확연한 격차가 생겼습니다. &quot;연차 신청&quot;을 직접 다루는 d02만 0.888로 살아남고, 비슷해 보이지만 다른 주제인 문서들은 0점대로 떨어졌습니다.</p>
+<p><code>--fetch-k 20 --top-k 3</code>으로 바꿔 보면 후보를 넓게 잡을수록 면접관이 더 좋은 문서를 찾아낼 수 있지만, 처리 시간도 늘어나는 걸 확인할 수 있습니다.</p>
+<div class="tip">
+<p><strong>리랭킹 실험에서 생각해 볼 것들</strong></p>
+<ul>
+<li><strong>초기 검색 범위(fetch_k)</strong>: 10개를 가져와서 5개로 추리면 후보가 적고, 50개를 가져오면 정확도는 올라가지만 Cross-Encoder 추론 시간이 늘어납니다. 문서당 약 0.1초씩 걸립니다.</li>
+<li><strong>모델 선택</strong>: <code>bge-reranker-v2-m3</code>는 한국어 지원이 좋지만 용량이 큽니다. 영어 위주라면 <code>ms-marco-MiniLM</code>이 가볍습니다.</li>
+<li><strong>리랭킹 없이도 괜찮은 경우</strong>: 문서 수가 적거나(100건 이하) 검색 품질이 이미 충분하면 리랭킹 없이 벡터 검색만으로도 됩니다. 비용 대비 효과를 따져 보세요.</li>
+</ul>
+</div>
+<h2>8.5 두 검색을 섞는다 — 하이브리드 검색(Hybrid Search)</h2>
+<p>리랭킹 결과를 확인한 팀장이 한마디를 얹었습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "면접관도 만능은 아니에요. 벡터 검색이 애초에 놓친 문서는 면접 대상에도 못 올라오잖아요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "맞아요. 벡터 검색이 '휴가 사용' 같은 비슷한 의미는 잘 잡는데, '연차 신청'이라는 정확한 단어가 들어간 문서는 놓칠 때가 있거든요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "그럼 단어로 찾는 검색을 하나 더 돌려 봐요."</div>
+<p><strong>두 검색을 섞는 사서 — 하이브리드 검색(Hybrid Search)</strong>. 벡터 검색은 &quot;휴가 사용&quot;처럼 의미가 비슷한 문서를 잘 찾고, BM25는 &quot;연차 신청&quot;이라는 단어가 정확히 들어간 문서를 잘 찾습니다. 각자의 강점이 다르니 둘을 합치면 좋겠는데, 문제가 하나 있습니다.</p>
+<p>두 검색이 매기는 점수의 단위가 다릅니다. 시험 점수로 비유하면, 수학은 100점 만점이고 영어는 990점 만점인 셈이에요. 이걸 그냥 더하면 영어 점수가 압도적으로 커져서 수학은 의미가 없어집니다. 그래서 먼저 만점을 맞추고, 그 다음 어느 과목을 더 중요하게 볼지 정합니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 8-9. 정규화(Normalization). 만점을 맞춰야 합칠 수 있습니다</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-lg);align-items:start">
+<div>
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-danger);margin-bottom:var(--space-sm);text-align:center">정규화 전 (만점이 다름)</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)"><th style="padding:6px 10px;border:1px solid var(--color-border)">학생</th><th style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">수학 (100점)</th><th style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">영어 (990점)</th></tr>
+<tr><td style="padding:6px 10px;border:1px solid var(--color-border)">A</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">92</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center;font-weight:700;color:var(--color-danger)">880</td></tr>
+<tr><td style="padding:6px 10px;border:1px solid var(--color-border)">B</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">87</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center;color:var(--color-danger)">450</td></tr>
+<tr><td style="padding:6px 10px;border:1px solid var(--color-border)">C</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">12</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center;color:var(--color-danger)">990</td></tr>
+</table>
+<div style="font-size:var(--fs-xs);color:var(--color-danger);text-align:center;margin-top:var(--space-xs)">그냥 더하면? C가 1위 (12+990=1002)<br>수학 12점인데 총점 1위라니!</div>
+</div>
+<div style="font-size:var(--fs-3xl);color:var(--color-text-subtle);align-self:center;font-weight:300">→</div>
+<div>
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-success);margin-bottom:var(--space-sm);text-align:center">정규화 후 (둘 다 100점 만점)</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)"><th style="padding:6px 10px;border:1px solid var(--color-border)">학생</th><th style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">수학</th><th style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">영어</th></tr>
+<tr style="background:var(--color-success-bg)"><td style="padding:6px 10px;border:1px solid var(--color-border);font-weight:700">A</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center;font-weight:700">100</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center;font-weight:700">80</td></tr>
+<tr><td style="padding:6px 10px;border:1px solid var(--color-border)">B</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">94</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">0</td></tr>
+<tr><td style="padding:6px 10px;border:1px solid var(--color-border)">C</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">0</td><td style="padding:6px 10px;border:1px solid var(--color-border);text-align:center">100</td></tr>
+</table>
+<div style="font-size:var(--fs-xs);color:var(--color-success);text-align:center;margin-top:var(--space-xs)">이제 합산하면? A가 1위 (100+80=180)<br>두 과목 다 잘하는 학생이 올라옴</div>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);padding:var(--space-md);background:var(--color-surface-alt);border-radius:var(--radius-md);font-size:var(--fs-sm);color:var(--color-text-muted);line-height:1.7">검색도 똑같습니다. <strong>수학 = Vector 검색</strong>(만점 1.0), <strong>영어 = BM25 검색</strong>(만점 수십). 만점을 맞추지 않으면 BM25 점수가 압도해서 Vector는 의미가 없어집니다.</div>
+</div>
+<p>만점을 맞췄으면 이제 두 점수를 합칩니다. 이때 <strong>가중치(alpha)</strong> 로 비중을 조절합니다. &quot;어느 과목을 더 중요하게 볼까&quot;를 0~1 사이 숫자로 표현한 것입니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-sm);text-align:center">그림 8-10. 가중치(alpha). 어느 쪽을 더 믿을까?</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:var(--space-lg);text-align:center">총점 = alpha × 수학(Vector) + (1 - alpha) × 영어(BM25)</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:var(--space-md)">학생 A: 수학 100점, 영어 80점</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-md);margin-bottom:var(--space-xl)">
+<div style="border:1px solid #fed7aa;border-radius:var(--radius-md);padding:var(--space-lg);text-align:center">
+<div style="font-size:var(--fs-xl);font-weight:700;color:var(--color-warning)">alpha = 0.3</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-subtle)">0.3 × 100 + 0.7 × 80</div>
+<div style="font-size:var(--fs-2xl);font-weight:700;color:var(--color-warning);margin-top:var(--space-xs)">= 86점</div>
+</div>
+<div style="border:2px solid var(--color-text-heading);border-radius:var(--radius-md);padding:var(--space-lg);text-align:center;position:relative">
+<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:var(--fs-footnote);background:var(--color-text-heading);color:white;padding:2px 8px;border-radius:8px;font-weight:600">기본값</div>
+<div style="font-size:var(--fs-xl);font-weight:700;color:var(--color-text-heading)">alpha = 0.5</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-subtle)">0.5 × 100 + 0.5 × 80</div>
+<div style="font-size:var(--fs-2xl);font-weight:700;color:var(--color-text-heading);margin-top:var(--space-xs)">= 90점</div>
+</div>
+<div style="border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-lg);text-align:center">
+<div style="font-size:var(--fs-xl);font-weight:700;color:var(--color-accent)">alpha = 0.7</div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-subtle)">0.7 × 100 + 0.3 × 80</div>
+<div style="font-size:var(--fs-2xl);font-weight:700;color:var(--color-accent);margin-top:var(--space-xs)">= 94점</div>
+</div>
+</div>
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-md);text-align:center">실제 검색에서는 이렇게 비중이 바뀝니다</div>
+<div style="display:flex;flex-direction:column;gap:var(--space-md)">
+<div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:var(--space-xs)">alpha = 0.3 → 영어(BM25) 비중 높음. "제15조 병가"처럼 정확한 용어를 찾을 때</div>
+<div style="display:flex;height:24px;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-border)">
+<div style="width:70%;background:var(--color-success);display:flex;align-items:center;justify-content:center;color:white;font-size:var(--fs-xs);font-weight:600">영어(BM25) 70%</div>
+<div style="width:30%;background:var(--color-accent);display:flex;align-items:center;justify-content:center;color:white;font-size:var(--fs-xs);font-weight:600">수학(Vector) 30%</div>
+</div>
+</div>
+<div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:var(--space-xs)">alpha = 0.5 → 영어(BM25)와 수학(Vector) 반반 (기본값)</div>
+<div style="display:flex;height:24px;border-radius:var(--radius-md);overflow:hidden;border:2px solid var(--color-text-heading)">
+<div style="width:50%;background:var(--color-success);display:flex;align-items:center;justify-content:center;color:white;font-size:var(--fs-xs);font-weight:600">영어(BM25) 50%</div>
+<div style="width:50%;background:var(--color-accent);display:flex;align-items:center;justify-content:center;color:white;font-size:var(--fs-xs);font-weight:600">수학(Vector) 50%</div>
+</div>
+</div>
+<div>
+<div style="font-size:var(--fs-sm);color:var(--color-text-muted);margin-bottom:var(--space-xs)">alpha = 0.7 → 수학(Vector) 비중 높음. "휴가 규정 알려줘"처럼 의미 검색이 중요할 때</div>
+<div style="display:flex;height:24px;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-border)">
+<div style="width:30%;background:var(--color-success);display:flex;align-items:center;justify-content:center;color:white;font-size:var(--fs-xs);font-weight:600">영어(BM25) 30%</div>
+<div style="width:70%;background:var(--color-accent);display:flex;align-items:center;justify-content:center;color:white;font-size:var(--fs-xs);font-weight:600">수학(Vector) 70%</div>
+</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:var(--space-md);font-size:var(--fs-sm);color:var(--color-text-subtle)">← <span style="color:var(--color-success)">영어(BM25·키워드)</span> 비중　·　alpha가 클수록 <span style="color:var(--color-accent)">수학(Vector·의미)</span> 비중 →</div>
+</div>
+<div class="dialogue"><span class="speaker">동료</span>: "아, 의미를 더 믿을지 단어를 더 믿을지 비율을 정하는 거네요."</div>
+<p>이 구조를 코드로 만들어 봅니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-base);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 8-11. 하이브리드 검색. 벡터(의미) + BM25(키워드) → 가중치(alpha) 합산</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:var(--space-md);align-items:start">
+<div style="border:1px solid var(--color-accent-border);border-radius:var(--radius-md);overflow:hidden">
+<div style="background:var(--color-accent);color:white;text-align:center;padding:var(--space-sm);font-size:var(--fs-sm);font-weight:600">벡터 검색 (의미)</div>
+<div style="padding:var(--space-md)">
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-text)">1위 <span style="color:var(--color-accent-text);font-weight:600">휴가 규정</span></div>
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-text)">2위 <span style="color:var(--color-accent-text)">병가 규정</span></div>
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-text)">3위 <span style="color:var(--color-text-subtle)">출장 규정</span></div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-sm);border-top:1px dashed var(--color-border);padding-top:var(--space-xs)">"연차 신청"과 의미가 비슷한 순</div>
+</div>
+</div>
+<div style="font-size:var(--fs-3xl);color:var(--color-text-subtle);align-self:center;font-weight:300">+</div>
+<div style="border:1px solid #86efac;border-radius:var(--radius-md);overflow:hidden">
+<div style="background:var(--color-success);color:white;text-align:center;padding:var(--space-sm);font-size:var(--fs-sm);font-weight:600">BM25 (키워드)</div>
+<div style="padding:var(--space-md)">
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-text)">1위 <span style="color:var(--color-success-text);font-weight:600">"연차" 3회</span></div>
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-text)">2위 <span style="color:var(--color-success-text)">"신청" 2회</span></div>
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-text)">3위 <span style="color:var(--color-text-subtle)">"규정" 1회</span></div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-sm);border-top:1px dashed var(--color-border);padding-top:var(--space-xs)">"연차 신청" 단어가 많은 순</div>
+</div>
+</div>
+<div style="font-size:var(--fs-3xl);color:var(--color-text-subtle);align-self:center;font-weight:300">→</div>
+<div style="border:2px solid var(--color-accent-warm);border-radius:var(--radius-md);overflow:hidden">
+<div style="background:var(--color-accent-warm);color:white;text-align:center;padding:var(--space-sm);font-size:var(--fs-sm);font-weight:600">가중합 (alpha)</div>
+<div style="padding:var(--space-md)">
+<div style="margin-bottom:6px;font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-warm-text)">1위 연차 규정</div>
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-accent-warm-text)">2위 병가 규정</div>
+<div style="margin-bottom:6px;font-size:var(--fs-sm);color:var(--color-accent-warm-text)">3위 휴가 규정</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-sm);border-top:1px dashed var(--color-border);padding-top:var(--space-xs)">의미 + 키워드 모두 맞는 문서가 상위</div>
+</div>
+</div>
+</div>
+</div>
+<p><code>retrievers.py</code>에 세 클래스가 들어 있습니다. BM25와 Vector 각각의 검색기를 먼저 만들고, EnsembleRetriever가 둘을 합칩니다.</p>
+<h3>BM25Retriever — 키워드 검색</h3>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge explain">설명</span> tuning/step3_hybrid_search/retrievers.py. BM25 키워드 검색기</div><span class="k">class</span><span class="w"> </span><span class="nc">BM25Retriever</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">metadatas</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_index</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="cb-todo"># TODO: BM25Okapi 인덱스를 생성합니다.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">rank_bm25</span><span class="w"> </span><span class="kn">import</span> <span class="n">BM25Okapi</span>
+        <span class="c1"># 1. 각 문서를 소문자 변환 + 공백 기준 토큰화</span>
+        <span class="n">tokenized</span> <span class="o">=</span> <span class="p">[</span><span class="n">doc</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">documents</span><span class="p">]</span>
+        <span class="c1"># 2. BM25 인덱스 생성</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bm25</span> <span class="o">=</span> <span class="n">BM25Okapi</span><span class="p">(</span><span class="n">tokenized</span><span class="p">)</span></div>
+<p><code>BM25Okapi</code>는 <code>rank-bm25</code> 패키지가 제공하는 단어 빈도 기반 검색 알고리즘입니다. 각 문서를 소문자로 변환하고 공백 기준으로 잘라 토큰화한 뒤, 질문 토큰이 문서에 몇 번 등장하는지 세어 점수를 매깁니다. &quot;연차 신청&quot;이라는 단어가 정확히 들어간 문서를 잘 찾지만, &quot;휴가 사용&quot;처럼 다른 표현으로 된 문서는 놓칩니다.</p>
+<h3>EnsembleRetriever — 두 검색 합치기</h3>
+<p><code>tuning/step3_hybrid_search/retrievers.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> tuning/step3_hybrid_search/retrievers.py. EnsembleRetriever</div><span class="k">class</span><span class="w"> </span><span class="nc">EnsembleRetriever</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bm25_retriever</span><span class="p">,</span> <span class="n">vector_retriever</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bm25</span> <span class="o">=</span> <span class="n">bm25_retriever</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vector</span> <span class="o">=</span> <span class="n">vector_retriever</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">fetch_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="cb-todo"># TODO: 두 검색 결과를 정규화한 뒤 alpha 가중합으로 합칩니다.</span>
+        <span class="c1"># 1. BM25와 Vector 각각 fetch_k개씩 검색 후 0~1로 정규화</span>
+        <span class="n">bm25_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_scores</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bm25</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">fetch_k</span><span class="p">))</span>
+        <span class="n">vector_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_scores</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">fetch_k</span><span class="p">))</span>
+
+        <span class="c1"># 2. 두 결과를 content 기준으로 합침</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">bm25_results</span><span class="p">:</span>
+            <span class="n">scores</span><span class="p">[</span><span class="n">doc</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;bm25&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;normalized_score&quot;</span><span class="p">],</span> <span class="s2">&quot;vector&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">vector_results</span><span class="p">:</span>
+            <span class="n">scores</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">],</span> <span class="p">{</span><span class="s2">&quot;bm25&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;vector&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">})</span>
+            <span class="n">scores</span><span class="p">[</span><span class="n">doc</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]][</span><span class="s2">&quot;vector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;normalized_score&quot;</span><span class="p">]</span>
+
+        <span class="c1"># 3. alpha 가중합: hybrid = alpha × vector + (1 - alpha) × bm25</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">content</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">hybrid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;vector&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bm25&quot;</span><span class="p">]</span>
+            <span class="n">merged</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">content</span><span class="p">,</span> <span class="s2">&quot;hybrid_score&quot;</span><span class="p">:</span> <span class="n">hybrid</span><span class="p">})</span>
+
+        <span class="c1"># 4. hybrid_score 내림차순 정렬 → 상위 top_k개</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;hybrid_score&quot;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">top_k</span><span class="p">]</span></div>
+<p><code>search()</code>는 BM25와 Vector 각각에서 <code>fetch_k</code>개를 가져온 뒤 합쳐서 <code>top_k</code>개를 반환합니다. <code>_normalize_scores()</code>는 점수를 0~1 범위로 맞추는 보조 함수입니다. 만점이 다른 두 검색의 점수를 합치려면 반드시 정규화가 먼저 필요합니다(그림 8-9 참조). <code>alpha</code>는 두 검색의 비중을 조절하는 손잡이입니다. <code>hybrid_score = alpha × vector_score + (1 - alpha) × bm25_score</code> 공식으로 합산합니다.</p>
 <table>
 <thead>
 <tr>
-<th>순서</th>
-<th>실험</th>
-<th>무엇을 알아내나</th>
+<th>alpha</th>
+<th>의미</th>
+<th>적합한 경우</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Step 1</td>
-<td>청킹 전략 + Retriever 튜닝</td>
-<td>어떻게 자르고, Top-K를 몇으로 할지</td>
+<td><strong>0.0</strong></td>
+<td>BM25만 (키워드 100%)</td>
+<td>&quot;제15조 병가&quot;처럼 정확한 용어를 찾을 때</td>
 </tr>
 <tr>
-<td>Step 2</td>
-<td>리랭킹</td>
-<td>가져온 문서를 다시 정렬하면 정확도가 올라가는지</td>
+<td><strong>0.3</strong></td>
+<td>BM25 70% + Vector 30%</td>
+<td>한국어 특수용어, 약어가 많을 때</td>
 </tr>
 <tr>
-<td>Step 3</td>
-<td>하이브리드 검색</td>
-<td>BM25 + Vector를 섞으면 효과가 있는지</td>
+<td><strong>0.5</strong></td>
+<td>반반 (기본값)</td>
+<td>어떤 유형이 많을지 모를 때</td>
+</tr>
+<tr>
+<td><strong>0.7</strong></td>
+<td>Vector 70% + BM25 30%</td>
+<td>&quot;휴가 규정 알려줘&quot;처럼 의미 검색이 중요할 때</td>
+</tr>
+<tr>
+<td><strong>1.0</strong></td>
+<td>Vector만 (의미 100%)</td>
+<td>키워드가 중요하지 않을 때</td>
 </tr>
 </tbody>
 </table>
-<div class="chapter-image diagram"><img src="./assets/CH08/diagram/08_tuning-steps.png" alt="" /><div class="caption">그림 8-3. 챕터 8의 세 실험. 청킹 → 리랭킹 → 하이브리드 순서로 검색 품질을 올립니다</div></div>
-<h2>8.4 실험 1: 청킹 전략 비교 (step1)</h2>
-<p><code>tuning/step1_chunk_experiment/</code>에 세 가지 청킹 전략이 파일로 분리돼 있습니다. <code>run.py</code>가 같은 쿼리를 세 전략 각각으로 돌려 결과를 비교합니다.</p>
-<div class="code-block" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_chunk_experiment/semantic.py. 의미 기반 청킹</div>from langchain_experimental.text_splitter import SemanticChunker
-from langchain_huggingface import HuggingFaceEmbeddings
-
-def make_semantic_chunks(text: str, breakpoint_percentile: int = 95) -&gt; list[str]:
-    """의미가 바뀌는 지점을 감지해서 자른다."""
-    embeddings = HuggingFaceEmbeddings(model_name="jhgan/ko-sroberta-multitask")
-    splitter = SemanticChunker(
-        embeddings,
-        breakpoint_threshold_type="percentile",
-        breakpoint_threshold_amount=breakpoint_percentile,
-    )
-    return [doc.page_content for doc in splitter.create_documents([text])]</div>
-<p><code>breakpoint_percentile=95</code>는 &quot;임베딩 거리 상위 5% 지점에서 자른다&quot;는 뜻입니다. 주제 전환이 뚜렷한 곳을 경계로 삼는 셈이에요.</p>
-<div class="chapter-image gemini"><img src="./assets/CH08/gemini/08_semantic-Percentile.png" alt="" /><div class="caption">그림 8-4. Percentile 임계값에 따른 청크 경계. 값이 낮을수록 자주 자릅니다</div></div>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1 실행</div>python -m tuning.step1_chunk_experiment.run --query "병가 신청 절차"</div>
-<div class="chapter-image terminal"><img src="./assets/CH08/terminal/08_chunk-experiment-2.png" alt="" /><div class="caption">그림 8-5. 청킹 전략 비교. Recursive, Semantic으로 갈수록 상위 결과에서 &quot;출장 규정&quot; 혼입이 줄어듭니다</div></div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 3 실행. alpha 파라미터 비교 + 하이브리드 데모</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step3_hybrid_search</div>
+<div style="margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-accent-warm-text);margin-bottom:var(--space-sm);text-align:center">그림 8-12. 하이브리드 검색 결과 (alpha=0.5, 쿼리: "연차 신청 절차와 승인 방법")</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)"><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">순위</th><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">BM25</th><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">Vector</th><th style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">Hybrid</th><th style="padding:6px 8px;border:1px solid var(--color-border)">내용</th></tr>
+<tr style="background:var(--color-success-bg)"><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center;font-weight:700">1</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.896</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">1.000</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center;font-weight:700">0.948</td><td style="padding:6px 8px;border:1px solid var(--color-border)">연차 신청은 3일 전까지 서면 제출</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">2</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.838</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.581</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.709</td><td style="padding:6px 8px;border:1px solid var(--color-border)">재택근무 신청 가능</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">3</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">1.000</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.000</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.500</td><td style="padding:6px 8px;border:1px solid var(--color-border)">개인 USB 사용 금지 (IT보안팀 승인)</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">4</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.000</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.495</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.248</td><td style="padding:6px 8px;border:1px solid var(--color-border)">연차유급휴가 15일 부여</td></tr>
+<tr><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">5</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.000</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.490</td><td style="padding:6px 8px;border:1px solid var(--color-border);text-align:center">0.245</td><td style="padding:6px 8px;border:1px solid var(--color-border)">고충처리 서면 신청</td></tr>
+</table>
+</div>
+<p>1위 문서는 BM25(0.896)와 Vector(1.000) 모두 높아서 Hybrid 0.948로 확실한 1위입니다. 3위의 &quot;USB 사용&quot; 문서는 BM25가 1.000(키워드 &quot;신청&quot;이 정확히 매칭)이지만 Vector가 0.000(의미가 완전히 다름)이라 Hybrid 0.500에 머물렀습니다. BM25만 썼다면 이 문서가 1위로 올라왔을 거예요.</p>
 <div class="tip">
-<p><strong>청크 사이즈, 오버랩도 같이 실험</strong></p>
-<p><code>step1</code>의 <code>run.py</code>에는 <code>--chunk-size</code>, <code>--overlap</code> 옵션이 있습니다. 500/100 외에 300/50, 800/200 등을 돌려 보면 &quot;크게 자를수록 재현율 ↑ / 정확도 ↓&quot; 트레이드오프가 눈에 보입니다.</p>
+<p><strong>alpha를 바꿔서 실험해 보세요</strong></p>
+<p><code>--alpha</code> 옵션으로 비중을 조절할 수 있습니다. 위 다이어그램의 막대 비율이 바뀌는 걸 결과에서 확인할 수 있습니다.</p>
+<div class="code-block highlight" data-lang="bash">python<span class="w"> </span>-m<span class="w"> </span>tuning.step3_hybrid_search<span class="w"> </span>--alpha<span class="w"> </span><span class="m">0</span>.7<span class="w">  </span><span class="c1"># Vector 70%, BM25 30%</span>
+python<span class="w"> </span>-m<span class="w"> </span>tuning.step3_hybrid_search<span class="w"> </span>--alpha<span class="w"> </span><span class="m">0</span>.3<span class="w">  </span><span class="c1"># Vector 30%, BM25 70%</span></div>
 </div>
-<h2>8.5 실험 2: Cross-Encoder 리랭커 (step2)</h2>
-<p>벡터 검색은 <strong>질문과 문서를 따로따로 임베딩</strong>하고 거리를 잽니다(Bi-Encoder). 빠르지만 미세한 의미 차이는 놓치기 쉬워요. <strong>Cross-Encoder</strong>는 질문과 문서를 <strong>한 번에</strong> 모델에 넣어 직접 관련성을 점수화합니다. 느리지만 정확합니다.</p>
-<div class="dialogue"><span class="speaker">전략</span>: 1단계에서 벡터 검색으로 Top-20을 빠르게 가져온 뒤, 2단계에서 Cross-Encoder로 재정렬해 Top-3만 LLM에 넘깁니다.</div>
-<div class="code-block" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> tuning/step2_reranker/reranker.py. BGE Cross-Encoder</div>from sentence_transformers import CrossEncoder
-
-class Reranker:
-    def __init__(self, model_name: str = "BAAI/bge-reranker-v2-m3"):
-        self.model = CrossEncoder(model_name)
-
-    def rerank(self, query: str, docs: list[str], top_k: int = 3) -&gt; list[tuple[str, float]]:
-        # TODO: [query, doc] 쌍으로 점수 계산 → 내림차순 정렬 → top_k 반환
-        pairs = [(query, d) for d in docs]
-        scores = self.model.predict(pairs)
-        ranked = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
-        return ranked[:top_k]</div>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 2 실행</div>python -m tuning.step2_reranker.run --query "병가 신청 절차"</div>
-<div class="chapter-image terminal"><img src="./assets/CH08/terminal/08_step2_reranker.png" alt="" /><div class="caption">그림 8-6. 리랭킹 전/후 비교. 벡터만 썼을 때 3위 밖으로 밀려 있던 &quot;제15조 병가&quot; 조항이 1위로 올라왔습니다</div></div>
-<div class="term-box">
-<p><strong>Bi-Encoder vs Cross-Encoder</strong>. Bi-Encoder는 질문과 문서를 따로 벡터화해 유사도를 계산(빠름, 부정확). Cross-Encoder는 한 쌍씩 동시에 모델을 통과시켜 직접 관련성 점수를 산출(느림, 정확). 그래서 <strong>Bi로 많이 가져오고 Cross로 정렬</strong>하는 2단계 전략을 씁니다.</p>
-</div>
-<h2>8.6 실험 3: 하이브리드 검색 + 랭크 퓨전 (step3)</h2>
-<p>벡터 검색은 <strong>의미</strong>, BM25는 <strong>키워드</strong>. 각자의 강점이 다르니 <strong>둘을 섞습니다</strong>. 문제는 두 검색의 점수 스케일이 달라 단순 합산이 안 된다는 점이에요. 그래서 <strong>Reciprocal Rank Fusion(RRF)</strong> 으로 순위를 합칩니다.</p>
-<div class="code-block" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> tuning/step3_hybrid_search/rrf.py. 랭크 퓨전</div>def reciprocal_rank_fusion(rankings: list[list[str]], k: int = 60) -&gt; list[tuple[str, float]]:
-    """각 검색 결과의 순위를 1/(k+rank)로 변환해 합산한다."""
-    scores: dict[str, float] = {}
-    for ranking in rankings:
-        for rank, doc_id in enumerate(ranking, start=1):
-            scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank)
-    return sorted(scores.items(), key=lambda x: x[1], reverse=True)</div>
-<div class="chapter-image gemini"><img src="./assets/CH08/gemini/08_rerank-hybrid.png" alt="" /><div class="caption">그림 8-7. 하이브리드 = 벡터 검색(의미) + BM25(키워드) → RRF로 합친 최종 순위</div></div>
-<div class="code-block" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 3 실행</div>python -m tuning.step3_hybrid_search.run --query "연차 신청 절차"</div>
-<div class="chapter-image terminal"><img src="./assets/CH08/terminal/08_hybrid-search.png" alt="" /><div class="caption">그림 8-8. 하이브리드 결과. 벡터만 쓸 때 놓쳤던 정확 키워드 일치 조항이 상위로 올라왔습니다</div></div>
-<h2>8.7 세 실험 종합: 튜닝 전/후 비교</h2>
-<p>세 실험을 모두 적용한 파이프라인(Semantic 청킹 + Reranker + Hybrid)과 챕터 4 기본 파이프라인(Fixed 청킹 + Vector only)을 같은 쿼리 세트로 비교합니다.</p>
-<div class="chapter-image terminal"><img src="./assets/CH08/terminal/08_strategy-comparison.png" alt="" /><div class="caption">그림 8-9. 검색 전략 전체 비교. &quot;병가를 물었더니 출장이 나오는&quot; 현상이 사라졌습니다</div></div>
-<p>동료 C에게 다시 써 보라고 했습니다.</p>
-<p><strong>동료 C</strong>: &quot;이번엔 병가 규정이 제대로 나오네요.&quot;</p>
-<h2>8.8 전체 구성도에서 챕터 8의 자리</h2>
-<div class="arch-fullmap">
-  <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 8 튜닝 대상</div>
-  <div class="afm-row afm-user">
-    <div class="afm-box afm-faint afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 2</span>
-    <span class="afm-zone-label">대시보드</span>
-    <div class="afm-row">
-      <div class="afm-box afm-faint"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 6+7</span>
-    <span class="afm-zone-label">오케스트레이션 + 운영</span>
-    <div class="afm-row afm-three">
-      <div class="afm-box afm-faint"><div class="afm-label">Query Router</div><div class="afm-sub">규칙·스키마·LLM</div></div>
-      <div class="afm-box afm-faint"><div class="afm-label">ConnectHRAgent</div><div class="afm-sub">ReAct + 캐시</div></div>
-      <div class="afm-box afm-faint"><div class="afm-label">MCP Tools</div><div class="afm-sub">DB · 문서</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 5</span>
-    <span class="afm-zone-label">검색 (실시간)</span>
-    <div class="afm-row">
-      <div class="afm-box afm-on"><div class="afm-tag">오늘 튜닝한 부분</div><div class="afm-label">LCEL Chain</div><div class="afm-sub">Semantic 청킹 · Reranker · Hybrid(BM25+Vector)</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 4</span>
-    <span class="afm-zone-label">파싱·벡터화 (오프라인)</span>
-    <div class="afm-row afm-three">
-      <div class="afm-box afm-faint afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
-      <div class="afm-box afm-on"><div class="afm-tag">청킹 전략 교체</div><div class="afm-label">Doc Pipeline</div><div class="afm-sub">Fixed → Recursive → Semantic</div></div>
-      <div class="afm-box afm-faint"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
-    </div>
-  </div>
-  <div class="afm-zone">
-    <span class="afm-zone-ch">챕터 2</span>
-    <span class="afm-zone-label">데이터</span>
-    <div class="afm-row">
-      <div class="afm-box afm-faint"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
-    </div>
-  </div>
-  <div class="afm-row afm-ext">
-    <div class="afm-box afm-faint afm-dashed"><div class="afm-label">Ollama LLM (외부)</div></div>
-  </div>
-  <div class="afm-note">
-    챕터 8은 <b>Doc Pipeline(청킹 전략)</b> 과 <b>LCEL Chain(리랭커, 하이브리드)</b> 을 튜닝했습니다. 검색 단계의 품질이 올라가면 위의 에이전트, 운영 층은 그대로 두고도 답이 단단해집니다. 챕터 9에서는 **질문 자체**의 모호함을 잡습니다.
-  </div>
+<h2>8.6 세 실험을 마치며</h2>
+<p>오픈이가 화이트보드의 빨간, 파란, 초록 줄을 바라봤습니다. 실험 결과가 나란히 적혀 있습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "그런데 세 개 다 적용해야 하는 거예요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "아니요, 문서 성격에 따라 골라 쓰는 거예요. 사내 규정처럼 조항이 짧으면 Recursive 청킹만으로도 충분하고, 검색 결과가 애매하면 리랭커를 붙이고, 키워드와 의미 둘 다 중요하면 하이브리드를 쓰는 거죠."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "도구가 세 개 생긴 거죠, 세 개를 다 쓰라는 건 아니에요."</div>
+<p>이번 챕터에서 실험한 도구는 세 가지입니다. 청킹 전략, 리랭킹, 하이브리드 검색. 아직 실제 파이프라인에 적용한 건 아닙니다. 어떤 조합이 우리 문서에 맞는지 실험으로 확인한 거예요. 다음 챕터 9에서는 <strong>질문 자체</strong>의 모호함을 잡습니다. &quot;병가 어떻게 써?&quot;처럼 불완전한 질문을 다루는 쿼리 재작성입니다. 그리고 챕터 10에서 이 도구들 중 필요한 것만 골라 하나의 파이프라인으로 조립합니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "검색이 단단해졌으니까, 이번엔 질문 쪽도 들여다봐요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "질문이요?"</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "사람들이 항상 깔끔하게 질문하진 않잖아요."</div>
+<h2>8.7 튜닝 구성도</h2>
+<p>이번 챕터에서 실험한 세 가지 튜닝과, 앞으로 다룰 튜닝을 한 장으로 정리합니다. 모든 튜닝을 다 적용할 필요는 없습니다. 문서와 질문 성격에 맞춰 필요한 것만 골라 씁니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 8-13. RAG 튜닝 메뉴판. 필요한 것만 골라 씁니다</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)">
+<th style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;width:30px"></th>
+<th style="padding:8px 12px;border:1px solid var(--color-border)">튜닝</th>
+<th style="padding:8px 12px;border:1px solid var(--color-border)">무엇을 바꾸나</th>
+<th style="padding:8px 12px;border:1px solid var(--color-border)">언제 쓰나</th>
+<th style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">챕터</th>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">청킹 전략</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">문서를 자르는 방법 (Fixed → Recursive → Semantic)</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">주제가 섞이는 문제가 있을 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">8</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">리랭킹</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">가져온 문서를 Cross-Encoder로 재정렬</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">검색 결과 상위에 엉뚱한 문서가 섞일 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">8</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">하이브리드 검색</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">벡터 + BM25를 alpha 가중합으로 합침</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">의미 검색과 키워드 검색 둘 다 필요할 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">8</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-subtle)">-</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">쿼리 재작성</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">불완전한 질문을 LLM이 이해할 수 있는 형태로 변환</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">"병가 어떻게 써?"처럼 모호한 질문이 많을 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-muted)">9</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-subtle)">-</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">파이프라인 조립</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">위 튜닝 중 필요한 것만 골라 하나의 파이프라인으로 조립</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">실서비스에 적용할 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-muted)">10</td>
+</tr>
+</table>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-sm)">✓ 이번 챕터에서 실험한 항목 · - 다음 챕터에서 다룰 항목</div>
 </div>
 <h2>용어 정리</h2>
 <table>
@@ -290,9 +897,9 @@ class Reranker:
 <td>키워드 기반 BM25와 의미 기반 벡터 검색을 병행</td>
 </tr>
 <tr>
-<td>&quot;순위 합치기&quot;</td>
-<td><strong>Reciprocal Rank Fusion (RRF)</strong></td>
-<td>각 검색의 순위를 <code>1/(k+rank)</code>로 합산해 최종 순위 산출</td>
+<td>&quot;두 점수 합치기&quot;</td>
+<td><strong>Alpha 가중합 (Weighted Sum)</strong></td>
+<td>각 검색 점수를 0~1로 정규화한 뒤 <code>alpha * vector + (1-alpha) * bm25</code>로 합산</td>
 </tr>
 </tbody>
 </table>
@@ -300,8 +907,8 @@ class Reranker:
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
 <li><strong>검색이 바뀌면 답이 바뀝니다.</strong> RAG의 품질은 LLM이 아니라 Retriever가 결정합니다. 엉뚱한 문서가 들어가면 LLM은 성실히 엉뚱한 답을 합니다.</li>
-<li><strong>청킹은 주제 경계에서.</strong> Fixed → Recursive → Semantic으로 갈수록 주제 혼입이 줄어듭니다. 문서 성격에 맞춰 고르세요.</li>
-<li><strong>Reranker와 Hybrid는 싸게 얻는 품질 향상입니다.</strong> 인프라를 크게 바꾸지 않고 검색 정확도를 끌어올리는 코스트 대비 효율이 가장 높은 기법입니다. 다음 챕터 9에서는 <strong>질문 자체</strong>의 모호함을 해석하는 쿼리 재작성을 다룹니다.</li>
+<li><strong>세 도구를 다 쓸 필요는 없습니다.</strong> 청킹 전략, 리랭킹, 하이브리드 검색은 문서와 질문 성격에 맞춰 골라 씁니다.</li>
+<li><strong>다음 챕터에서는 질문을 다듬습니다.</strong> 챕터 9에서 쿼리 재작성, 챕터 10에서 원하는 튜닝만 골라 하나의 파이프라인으로 조립합니다.</li>
 </ul>
 </div>
 

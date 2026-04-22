@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 8-1 프리뷰 — 버전A 변형 3가지</title>
+<link rel="stylesheet" href="./styles/tokens.css">
+<style>
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #f8f9fa; padding: 40px; }
+.version { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 32px; margin-bottom: 40px; }
+.version-label { font-size: 14px; color: #64748b; margin-bottom: 16px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="version">
+<div class="version-label">변형 1 — Before/After 사람 SVG + 도구 카드 (세로 강조)</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:24px;text-align:center">검색 품질 튜닝. 세 가지 도구로 엉뚱한 검색을 고칩니다</div>
+<div style="display:flex;align-items:stretch;gap:16px">
+<!-- Before -->
+<div style="flex:1;background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-danger);margin-top:8px">Before</div>
+<div style="margin-top:8px;font-size:13px;color:var(--color-text-muted)">"병가 신청 절차"</div>
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
+<span style="background:white;border:1px solid #fca5a5;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-danger)">1위 출장 규정</span>
+<span style="background:white;border:1px solid #fca5a5;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-danger)">2위 출장 경비</span>
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">3위 병가</span>
+</div>
+<div style="font-size:11px;color:var(--color-danger);margin-top:8px">상위 3건 중 2건이 출장</div>
+</div>
+
+<!-- 도구 3개 — 세로 카드 -->
+<div style="flex:2;display:flex;flex-direction:column;gap:10px;justify-content:center">
+<div style="display:flex;align-items:center;gap:12px;background:var(--color-info-bg);border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-info);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-info-text)">1. 청킹(Chunking)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">자르는 법을 바꾼다 — 가위 → 돋보기</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:var(--color-success-bg);border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-success);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-success-text)">2. 리랭킹(ReRanking)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">가져온 뒤 면접관이 재확인 — 서류 → 면접</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:#fff7ed;border-radius:var(--radius-md);padding:14px 18px">
+<div style="width:36px;height:36px;background:var(--color-accent-warm);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>
+</div>
+<div>
+<div style="font-size:14px;font-weight:700;color:var(--color-accent-warm-text)">3. 하이브리드(Hybrid)</div>
+<div style="font-size:12px;color:var(--color-text-muted)">두 검색을 합친다 — 의미 + 키워드</div>
+</div>
+</div>
+</div>
+
+<!-- After -->
+<div style="flex:1;background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-success);margin-top:8px">After</div>
+<div style="margin-top:8px;font-size:13px;color:var(--color-text-muted)">"병가 신청 절차"</div>
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">1위 병가 신청</span>
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">2위 병가 증빙</span>
+<span style="background:white;border:1px solid #86efac;border-radius:4px;padding:3px 10px;font-size:11px;color:var(--color-success)">3위 병가 기간</span>
+</div>
+<div style="font-size:11px;color:var(--color-success);margin-top:8px">상위 3건 모두 병가</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="version">
+<div class="version-label">변형 2 — 동료 말풍선 시작 + 화살표 흐름</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:20px;text-align:center">검색 품질 튜닝. 세 가지 도구로 엉뚱한 검색을 고칩니다</div>
+<!-- 동료 말풍선 -->
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:0 12px 12px 12px;padding:8px 16px;font-size:13px;color:var(--color-danger-text)"><strong>동료</strong>: "병가 규정 물었는데 출장이 나와!"</div>
+<div style="display:flex;gap:4px;flex-wrap:wrap">
+<span style="background:var(--color-danger-bg);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--color-danger)">출장</span>
+<span style="background:var(--color-danger-bg);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--color-danger)">출장</span>
+<span style="background:var(--color-success-bg);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--color-success)">병가</span>
+</div>
+</div>
+<!-- 도구 흐름 -->
+<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:12px 16px;text-align:center">
+<div style="width:32px;height:32px;background:var(--color-info);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+</div>
+<div style="font-size:13px;font-weight:700;color:var(--color-info-text)">청킹</div>
+<div style="font-size:11px;color:var(--color-text-muted)">가위 → 돋보기</div>
+</div>
+<div style="font-size:20px;color:var(--color-text-subtle)">+</div>
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:12px 16px;text-align:center">
+<div style="width:32px;height:32px;background:var(--color-success);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9,11 12,14 22,4"/></svg>
+</div>
+<div style="font-size:13px;font-weight:700;color:var(--color-success-text)">리랭킹</div>
+<div style="font-size:11px;color:var(--color-text-muted)">서류 → 면접</div>
+</div>
+<div style="font-size:20px;color:var(--color-text-subtle)">+</div>
+<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-md);padding:12px 16px;text-align:center">
+<div style="width:32px;height:32px;background:var(--color-accent-warm);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>
+</div>
+<div style="font-size:13px;font-weight:700;color:var(--color-accent-warm-text)">하이브리드</div>
+<div style="font-size:11px;color:var(--color-text-muted)">의미 + 키워드</div>
+</div>
+</div>
+<!-- 오픈이 말풍선 -->
+<div style="display:flex;align-items:center;gap:12px;justify-content:flex-end">
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:12px 0 12px 12px;padding:8px 16px;font-size:13px;color:var(--color-success-text)"><strong>오픈이</strong>: "세 방향에서 실험해 볼게요."</div>
+<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="display:flex;gap:4px;flex-wrap:wrap">
+<span style="background:var(--color-success-bg);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--color-success)">병가</span>
+<span style="background:var(--color-success-bg);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--color-success)">병가</span>
+<span style="background:var(--color-success-bg);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--color-success)">병가</span>
+</div>
+</div>
+</div>
+</div>
+
+<div class="version">
+<div class="version-label">변형 3 — 깔끔한 수평 (Before → 도구 아이콘 → After)</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:24px;text-align:center">검색 품질 튜닝. 청킹, 리랭킹, 하이브리드</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:20px">
+<!-- Before -->
+<div style="text-align:center">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="background:white;border:2px solid var(--color-danger);border-radius:var(--radius-md);padding:6px 12px;font-size:12px;color:var(--color-danger-text);font-weight:600;margin-top:6px">"병가 절차"</div>
+<div style="margin-top:6px">
+<span style="background:var(--color-danger-bg);border-radius:3px;padding:2px 6px;font-size:10px;color:var(--color-danger)">출장</span>
+<span style="background:var(--color-danger-bg);border-radius:3px;padding:2px 6px;font-size:10px;color:var(--color-danger)">출장</span>
+</div>
+</div>
+<!-- 화살표 -->
+<div style="font-size:20px;color:var(--color-text-subtle)">→</div>
+<!-- 도구 3개 원형 -->
+<div style="display:flex;gap:10px">
+<div style="text-align:center">
+<div style="width:44px;height:44px;background:var(--color-info);border-radius:50%;display:flex;align-items:center;justify-content:center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+</div>
+<div style="font-size:11px;font-weight:600;color:var(--color-info-text);margin-top:4px">청킹</div>
+</div>
+<div style="text-align:center">
+<div style="width:44px;height:44px;background:var(--color-success);border-radius:50%;display:flex;align-items:center;justify-content:center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+</div>
+<div style="font-size:11px;font-weight:600;color:var(--color-success-text);margin-top:4px">리랭킹</div>
+</div>
+<div style="text-align:center">
+<div style="width:44px;height:44px;background:var(--color-accent-warm);border-radius:50%;display:flex;align-items:center;justify-content:center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg>
+</div>
+<div style="font-size:11px;font-weight:600;color:var(--color-accent-warm-text);margin-top:4px">하이브리드</div>
+</div>
+</div>
+<!-- 화살표 -->
+<div style="font-size:20px;color:var(--color-text-subtle)">→</div>
+<!-- After -->
+<div style="text-align:center">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="1.5"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="background:white;border:2px solid var(--color-success);border-radius:var(--radius-md);padding:6px 12px;font-size:12px;color:var(--color-success-text);font-weight:600;margin-top:6px">"병가 절차"</div>
+<div style="margin-top:6px">
+<span style="background:var(--color-success-bg);border-radius:3px;padding:2px 6px;font-size:10px;color:var(--color-success)">병가</span>
+<span style="background:var(--color-success-bg);border-radius:3px;padding:2px 6px;font-size:10px;color:var(--color-success)">병가</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>

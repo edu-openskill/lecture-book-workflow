@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 구성도 디자인 옵션 (CH02 시점)</title>
+<style>
+:root {
+  /* 기존 책 팔레트 */
+  --color-surface: #f8fafc;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #cbd5e1;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-heading: #0f172a;
+  --color-accent: #2563eb;
+  --color-accent-text: #1e40af;
+  --color-accent-bg: #eff6ff;
+  --color-info: #0284c7;
+  --color-info-bg: #e0f2fe;
+
+  /* diagram-design 레포 팔레트 (editorial) */
+  --ed-bg: #faf8f3;
+  --ed-ink: #1a1a1a;
+  --ed-line: #2a2a2a;
+  --ed-muted: #6b6456;
+  --ed-subtle: #9c9384;
+  --ed-faint: #d9d4c7;
+  --ed-oxide: #a8553a;
+  --ed-oxide-bg: #f4e7df;
+  --ed-paper: #ffffff;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --font-mono: "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--color-text); background: white; max-width: 1000px; margin: 32px auto; padding: 0 24px 64px; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--color-text-heading); padding-bottom: 8px; margin-bottom: 8px; }
+.intro { color: var(--color-text-muted); font-size: 14px; margin-bottom: 32px; }
+h2 { margin-top: 56px; font-size: 17px; color: var(--color-accent-text); border-bottom: 1px solid var(--color-border); padding-bottom: 6px; }
+.tag { display: inline-block; background: var(--color-accent-bg); color: var(--color-accent-text); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.tag.current { background: var(--color-surface-alt); color: var(--color-text-muted); }
+.note { color: var(--color-text-muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.6; }
+code { font-family: var(--font-mono); font-size: 0.92em; background: var(--color-surface-alt); padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<h1>전체 구성도 디자인 옵션 — CH02 시점 기준</h1>
+<p class="intro">챕터 2 끝에서 보여지는 구성도. "오늘 만든 FastAPI + PostgreSQL만 accent, 나머지(CH04·CH05·CH06)는 흐리게 표시해 앞으로 채워 갈 자리"를 전달. 구성도는 <strong>챕터 2부터</strong> 시작 (CH01 맛보기는 구성도에 포함하지 않음).</p>
+
+<!-- ============ V1 ============ -->
+<h2>V1. 현재 arch-fullmap <span class="tag current">BASELINE · 현재 CH02에 적용됨</span></h2>
+<p class="note">세로 zone 스택. 챕터 번호 태그 + 해당 챕터 박스. 이번 챕터 박스만 accent 배경, 나머지는 배경 없는 faint 박스.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:24px;margin:24px 0">
+<div style="font-size:14px;font-weight:700;color:var(--color-accent-text);margin-bottom:16px;text-align:center">전체 구성도. 짙은 박스가 챕터 2 범위</div>
+
+<div style="display:flex;justify-content:center;margin-bottom:12px"><div style="background:white;border:1px dashed var(--color-border);border-radius:100px;padding:6px 20px;font-size:12px;color:var(--color-text-muted)">사내 직원 · 관리자</div></div>
+
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px;margin-bottom:8px;background:white;position:relative">
+<div style="position:absolute;top:-9px;left:12px;background:white;padding:0 6px;font-size:11px;color:var(--color-text-muted);font-weight:700">챕터 2 · 대시보드</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-size:10px;color:var(--color-accent-text);font-weight:700;background:white;display:inline-block;padding:1px 6px;border-radius:3px;margin-bottom:3px;border:1px solid var(--color-accent)">오늘 만든 부분</div><div style="font-weight:700">FastAPI</div><div style="color:var(--color-text-muted)">REST API · 관리자 웹</div></div>
+</div>
+
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px;margin-bottom:8px;background:white;position:relative;opacity:0.55">
+<div style="position:absolute;top:-9px;left:12px;background:white;padding:0 6px;font-size:11px;color:var(--color-text-muted);font-weight:700">챕터 6 · 오케스트레이션</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">Tool Calling Agent</div><div style="color:var(--color-text-muted)">ReAct 패턴</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">MCP Tools</div><div style="color:var(--color-text-muted)">DB · 문서 검색</div></div>
+</div>
+</div>
+
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px;margin-bottom:8px;background:white;position:relative;opacity:0.55">
+<div style="position:absolute;top:-9px;left:12px;background:white;padding:0 6px;font-size:11px;color:var(--color-text-muted);font-weight:700">챕터 5 · 검색 (실시간)</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">LCEL Chain</div><div style="color:var(--color-text-muted)">Retriever → Prompt → LLM</div></div>
+</div>
+
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px;margin-bottom:8px;background:white;position:relative;opacity:0.55">
+<div style="position:absolute;top:-9px;left:12px;background:white;padding:0 6px;font-size:11px;color:var(--color-text-muted);font-weight:700">챕터 4 · 파싱·벡터화</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+<div style="background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">챕터 3 문서 규칙</div><div style="color:var(--color-text-muted)">PDF·Word·Excel</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">Doc Pipeline</div><div style="color:var(--color-text-muted)">파싱·청킹·임베딩</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">ChromaDB</div><div style="color:var(--color-text-muted)">벡터 저장소</div></div>
+</div>
+</div>
+
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:12px;margin-bottom:8px;background:white;position:relative">
+<div style="position:absolute;top:-9px;left:12px;background:white;padding:0 6px;font-size:11px;color:var(--color-text-muted);font-weight:700">챕터 2 · 데이터</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-size:10px;color:var(--color-accent-text);font-weight:700;background:white;display:inline-block;padding:1px 6px;border-radius:3px;margin-bottom:3px;border:1px solid var(--color-accent)">오늘 띄운 DB</div><div style="font-weight:700">PostgreSQL</div><div style="color:var(--color-text-muted)">직원 · 연차 · 매출</div></div>
+</div>
+
+<div style="display:flex;justify-content:center;opacity:0.5"><div style="background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:6px 16px;font-size:11px;color:var(--color-text-muted)">Ollama LLM (외부)</div></div>
+
+<div style="margin-top:16px;font-size:11px;color:var(--color-text-muted);line-height:1.6">오늘 띄운 건 <b>FastAPI + PostgreSQL</b> 두 박스입니다. 나머지는 챕터 3부터 하나씩 채워집니다.</div>
+</div>
+
+<!-- ============ V2 ============ -->
+<h2>V2. 누적 스택 (Before/After 그림과 언어 통일) <span class="tag">NEW · 추천</span></h2>
+<p class="note">Before/After 그림(5-4·6-4·7-2·10-2)과 <strong>같은 시각 언어</strong>: 부모 박스 + 상단 뱃지. 이번 챕터의 accent 뱃지 vs 앞으로 채울 회색 뱃지로 "어디까지 왔고 어디를 향하는지" 한눈에 전달.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:24px;margin:24px 0">
+<div style="font-size:14px;font-weight:700;color:var(--color-accent-text);margin-bottom:20px;text-align:center">그림 2-N. 전체 구성도 — 오늘 띄운 건 두 박스, 앞으로 채울 것들</div>
+
+<div style="display:flex;justify-content:center;margin-bottom:16px"><div style="background:white;border:1px dashed var(--color-border);border-radius:100px;padding:6px 20px;font-size:12px;color:var(--color-text-subtle)">▼ 사내 직원 · 관리자</div></div>
+
+<!-- CH02 대시보드 — accent -->
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:20px 12px 12px;background:var(--color-accent-bg);position:relative;margin-bottom:8px">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;letter-spacing:0.5px">CH02 · 대시보드 (이번 챕터)</div>
+<div style="background:white;border:1px solid var(--color-accent);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">FastAPI</div><div style="color:var(--color-text-muted);font-size:11px">REST API · 관리자 웹</div></div>
+</div>
+
+<div style="text-align:center;color:var(--color-text-subtle);font-size:14px;margin:4px 0">↓</div>
+
+<!-- CH06 오케스트레이션 — faint -->
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-md);padding:20px 12px 12px;background:white;position:relative;margin-bottom:8px;opacity:0.6">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;letter-spacing:0.5px">CH06 · 오케스트레이션 (앞으로)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="background:var(--color-surface-alt);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">Tool Calling Agent</div><div style="color:var(--color-text-muted);font-size:11px">ReAct 패턴</div></div>
+<div style="background:var(--color-surface-alt);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">MCP Tools</div><div style="color:var(--color-text-muted);font-size:11px">DB · 문서 검색</div></div>
+</div>
+</div>
+
+<div style="text-align:center;color:var(--color-text-subtle);font-size:14px;margin:4px 0;opacity:0.5">↓</div>
+
+<!-- CH05 검색 — faint -->
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-md);padding:20px 12px 12px;background:white;position:relative;margin-bottom:8px;opacity:0.6">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;letter-spacing:0.5px">CH05 · 검색 (앞으로)</div>
+<div style="background:var(--color-surface-alt);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">LCEL Chain</div><div style="color:var(--color-text-muted);font-size:11px">Retriever → Prompt → LLM</div></div>
+</div>
+
+<div style="text-align:center;color:var(--color-text-subtle);font-size:14px;margin:4px 0;opacity:0.5">↓</div>
+
+<!-- CH04 파싱·벡터화 — faint -->
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-md);padding:20px 12px 12px;background:white;position:relative;margin-bottom:8px;opacity:0.6">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;letter-spacing:0.5px">CH04 · 파싱·벡터화 (앞으로)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+<div style="background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">CH03 문서 규칙</div><div style="color:var(--color-text-muted);font-size:11px">PDF·Word·Excel</div></div>
+<div style="background:var(--color-surface-alt);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">Doc Pipeline</div><div style="color:var(--color-text-muted);font-size:11px">파싱·청킹·임베딩</div></div>
+<div style="background:var(--color-surface-alt);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">ChromaDB</div><div style="color:var(--color-text-muted);font-size:11px">벡터 저장소</div></div>
+</div>
+</div>
+
+<div style="text-align:center;color:var(--color-text-subtle);font-size:14px;margin:4px 0">↓</div>
+
+<!-- CH02 데이터 — accent -->
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:20px 12px 12px;background:var(--color-accent-bg);position:relative;margin-bottom:12px">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;letter-spacing:0.5px">CH02 · 데이터 (이번 챕터)</div>
+<div style="background:white;border:1px solid var(--color-accent);border-radius:var(--radius-sm);padding:8px;text-align:center;font-size:12px"><div style="font-weight:700">PostgreSQL</div><div style="color:var(--color-text-muted);font-size:11px">직원 · 연차 · 매출</div></div>
+</div>
+
+<div style="display:flex;justify-content:center;opacity:0.5"><div style="background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:6px 16px;font-size:11px;color:var(--color-text-muted)">외부 · Ollama LLM (앞으로)</div></div>
+
+<div style="margin-top:16px;font-size:11px;color:var(--color-text-muted);line-height:1.6;text-align:center;background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:12px"><strong>accent 뱃지 2개</strong>(CH02)가 오늘 띄운 부분. <strong>회색 뱃지 3개</strong>(CH04·CH05·CH06)는 앞으로 챕터 넘어가며 하나씩 accent로 바뀔 층.</div>
+</div>
+
+<!-- ============ V3 ============ -->
+<h2>V3. Editorial 스타일 (diagram-design 원칙) <span class="tag">NEW · 감성</span></h2>
+<p class="note">cathrynlavery/diagram-design 원칙: <strong>1px 헤어라인 · 그림자 없음 · 중성 석재 + 녹슨(oxide) accent · 4배수 spacing · 편집 품질 미니멀</strong>. 잡지·출판물 느낌. 이번 챕터 박스만 oxide, 나머지는 faint.</p>
+
+<div style="background:var(--ed-bg);border:1px solid var(--ed-line);border-radius:0;padding:32px 24px;margin:24px 0;font-family:Georgia,serif">
+<div style="font-family:Georgia,serif;font-style:italic;font-size:16px;color:var(--ed-ink);margin-bottom:4px;text-align:center;letter-spacing:-0.2px">전체 구성도</div>
+<div style="font-size:11px;color:var(--ed-muted);margin-bottom:32px;text-align:center;letter-spacing:2px;text-transform:uppercase;font-family:-apple-system,sans-serif">Chapter 2 · Foundation</div>
+
+<div style="display:flex;justify-content:center;margin-bottom:20px"><div style="border:1px dashed var(--ed-faint);padding:6px 20px;font-size:10px;color:var(--ed-muted);font-family:-apple-system,sans-serif;letter-spacing:2px;text-transform:uppercase">사내 직원 · 관리자</div></div>
+
+<!-- CH02 대시보드 — oxide (이번 챕터) -->
+<div style="border:1px solid var(--ed-oxide);border-radius:0;padding:24px 16px 16px;background:var(--ed-oxide-bg);position:relative;margin-bottom:8px">
+<div style="position:absolute;top:-8px;left:16px;background:var(--ed-oxide);color:var(--ed-paper);padding:2px 10px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:-apple-system,sans-serif">CH 02 · Dashboard · Today</div>
+<div style="border:1px solid var(--ed-oxide);background:var(--ed-paper);padding:10px;text-align:center;font-family:-apple-system,sans-serif"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">FastAPI</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">REST · Admin Web</div></div>
+</div>
+
+<div style="text-align:center;color:var(--ed-faint);font-size:14px;margin:8px 0;font-family:Georgia,serif">▽</div>
+
+<!-- CH06 오케스트레이션 — faint -->
+<div style="border:1px dashed var(--ed-faint);border-radius:0;padding:24px 16px 16px;background:var(--ed-paper);position:relative;margin-bottom:8px;opacity:0.55">
+<div style="position:absolute;top:-8px;left:16px;background:var(--ed-bg);padding:0 8px;font-size:9px;color:var(--ed-muted);font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:-apple-system,sans-serif">CH 06 · Orchestration · Later</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:-apple-system,sans-serif">
+<div style="border:1px solid var(--ed-faint);padding:10px;text-align:center"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">Tool Calling Agent</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">ReAct Pattern</div></div>
+<div style="border:1px solid var(--ed-faint);padding:10px;text-align:center"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">MCP Tools</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">DB · Documents</div></div>
+</div>
+</div>
+
+<div style="text-align:center;color:var(--ed-faint);font-size:14px;margin:8px 0;font-family:Georgia,serif;opacity:0.5">▽</div>
+
+<!-- CH05 검색 — faint -->
+<div style="border:1px dashed var(--ed-faint);border-radius:0;padding:24px 16px 16px;background:var(--ed-paper);position:relative;margin-bottom:8px;opacity:0.55">
+<div style="position:absolute;top:-8px;left:16px;background:var(--ed-bg);padding:0 8px;font-size:9px;color:var(--ed-muted);font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:-apple-system,sans-serif">CH 05 · Retrieval · Later</div>
+<div style="border:1px solid var(--ed-faint);padding:10px;text-align:center;font-family:-apple-system,sans-serif"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">LCEL Chain</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">Retriever → Prompt → LLM</div></div>
+</div>
+
+<div style="text-align:center;color:var(--ed-faint);font-size:14px;margin:8px 0;font-family:Georgia,serif;opacity:0.5">▽</div>
+
+<!-- CH04 파싱 — faint -->
+<div style="border:1px dashed var(--ed-faint);border-radius:0;padding:24px 16px 16px;background:var(--ed-paper);position:relative;margin-bottom:8px;opacity:0.55">
+<div style="position:absolute;top:-8px;left:16px;background:var(--ed-bg);padding:0 8px;font-size:9px;color:var(--ed-muted);font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:-apple-system,sans-serif">CH 04 · Parsing · Later</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-family:-apple-system,sans-serif">
+<div style="border:1px dashed var(--ed-faint);padding:10px;text-align:center"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">CH03 Rules</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">PDF·Word·Excel</div></div>
+<div style="border:1px solid var(--ed-faint);padding:10px;text-align:center"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">Doc Pipeline</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">Parse · Chunk · Embed</div></div>
+<div style="border:1px solid var(--ed-faint);padding:10px;text-align:center"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">ChromaDB</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">Vector Store</div></div>
+</div>
+</div>
+
+<div style="text-align:center;color:var(--ed-faint);font-size:14px;margin:8px 0;font-family:Georgia,serif">▽</div>
+
+<!-- CH02 데이터 — oxide (이번 챕터) -->
+<div style="border:1px solid var(--ed-oxide);border-radius:0;padding:24px 16px 16px;background:var(--ed-oxide-bg);position:relative;margin-bottom:16px">
+<div style="position:absolute;top:-8px;left:16px;background:var(--ed-oxide);color:var(--ed-paper);padding:2px 10px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-family:-apple-system,sans-serif">CH 02 · Data · Today</div>
+<div style="border:1px solid var(--ed-oxide);background:var(--ed-paper);padding:10px;text-align:center;font-family:-apple-system,sans-serif"><div style="font-size:13px;font-weight:600;color:var(--ed-ink)">PostgreSQL</div><div style="color:var(--ed-muted);font-size:11px;margin-top:2px">Employees · Leave · Sales</div></div>
+</div>
+
+<div style="display:flex;justify-content:center;opacity:0.5"><div style="border:1px dashed var(--ed-faint);padding:6px 16px;font-size:10px;color:var(--ed-muted);font-family:-apple-system,sans-serif;letter-spacing:1px;text-transform:uppercase">External · Ollama LLM · Later</div></div>
+
+<div style="margin-top:24px;font-family:Georgia,serif;font-style:italic;font-size:13px;color:var(--ed-muted);line-height:1.7;text-align:center;max-width:520px;margin-left:auto;margin-right:auto">
+오늘 띄운 건 FastAPI와 PostgreSQL. 나머지는 챕터 3부터 하나씩 채워집니다.
+</div>
+</div>
+
+<!-- ============ 결론 ============ -->
+<h2 style="margin-top:80px;border-bottom:2px solid var(--color-text-heading);padding-bottom:6px">세 버전 비교</h2>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px;font-size:13px;line-height:1.8">
+<p><strong>V1 — 현재 arch-fullmap</strong>: opacity로 앞으로의 챕터를 흐리게 처리. 기존 CSS 유지. Before/After 그림(5-4·6-4·7-2·10-2)과 <strong>시각 언어 불일치</strong>.</p>
+<p><strong>V2 — 누적 스택 (추천)</strong>: Before/After 그림과 <strong>같은 언어</strong>(부모 박스 + 상단 뱃지). 이번 챕터 = accent 뱃지 + accent-bg. 앞으로 = 회색 뱃지 + 점선 + opacity 0.6. 챕터가 넘어갈 때마다 점선→실선, 회색→accent로 바뀌며 <strong>진행감</strong>을 강하게 전달.</p>
+<p><strong>V3 — Editorial 스타일</strong>: diagram-design 레포의 편집 품질 (1px 헤어라인·그림자 없음·중성 + oxide accent·4배수 spacing·Georgia serif 캡션). 잡지 느낌. <strong>책 전체 팔레트와 달라서 이 그림만 떠 보일 위험</strong>이 있지만, <strong>마지막 §10.10</strong>에 쓰면 완성의 여운을 주는 효과.</p>
+</div>
+
+<h2 style="margin-top:48px">선택 가이드</h2>
+<ul style="font-size:13px;line-height:1.8">
+<li><strong>CH02~CH09 §N.last에 일괄 적용</strong> → V2 (시각 일관성)</li>
+<li><strong>§10.10 마지막만 특별하게</strong> → V3 (편집 품질 · 완성의 여운)</li>
+<li><strong>보수적으로 유지</strong> → V1 + opacity 처리만</li>
+<li><strong>혼합 (권장)</strong>: V2를 CH02~CH09에 적용 · §10.10만 V3로 마무리</li>
+</ul>
+
+</body>
+</html>

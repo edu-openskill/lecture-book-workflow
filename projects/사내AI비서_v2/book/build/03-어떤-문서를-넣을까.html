@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>챕터 3 어떤 문서를 넣을까. 문서 표준과 메타데이터</title>
+<title>챕터 3. 어떤 문서를 넣을까. 문서 표준과 메타데이터</title>
 
 <link rel="stylesheet" href="./styles/fonts.css">
 <link rel="stylesheet" href="./styles/tokens.css">
+
 <link rel="stylesheet" href="./styles/base.css">
 <link rel="stylesheet" href="./styles/components.css">
 <link rel="stylesheet" href="./styles/diagrams.css">
@@ -16,7 +17,7 @@
 </head>
 <body>
 <div class="container">
-<h1>챕터 3 어떤 문서를 넣을까. 문서 표준과 메타데이터</h1>
+<h1>챕터 3. 어떤 문서를 넣을까. 문서 표준과 메타데이터</h1>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
@@ -35,8 +36,8 @@
 <p class="thought">이건 금방이겠지.</p>
 <p>공유 드라이브를 열고 폴더 전체를 드래그. 300여 개 파일을 파이프라인에 그대로 밀어 넣었습니다. &quot;긁어서 넣고, 청킹하고, 임베딩&quot;까지 30분. 커피를 한 잔 새로 내리고 자리로 돌아왔습니다.</p>
 <p>다음 날 아침이었습니다. 옆자리 동료가 의자를 돌려 저를 봤습니다.</p>
-<div class="dialogue"><span class="speaker">동료</span>: "야, 어제 너 비서한테 연차 물어봤다 그랬지?"</div>
-<div class="dialogue"><span class="speaker">동료</span>: "15일이라고 했다며. 인사팀 가니까 20일이래. 혼났어."</div>
+<div class="dialogue"><span class="speaker">동료</span>: "어제 비서한테 연차 물어봤다고 했잖아요."</div>
+<div class="dialogue"><span class="speaker">동료</span>: "15일이라고 했다면서요. 인사팀 가니까 20일이래요. 혼났어요."</div>
 <p>손이 키보드에서 멈췄습니다.</p>
 <p class="thought">...어?</p>
 <p>검색 로그를 열어 봤습니다. 마우스 휠을 긁는 손끝에 식은 커피잔이 닿았습니다. 답변 상단 출처. <code>인사규정_2022_폐기본.pdf</code>. 2년 전 폐기된 문서였습니다. 그 밑에 <code>복지정책_v1.xlsx</code>, <code>업무가이드_초안.docx</code> 같은 이름이 줄지어 떴습니다.</p>
@@ -44,14 +45,14 @@
 <p>환각은 &quot;모르는데 지어낸&quot; 거라 의심이라도 하지만, 이건 <strong>출처까지 달려 있으니 사용자가 믿어 버립니다.</strong> 동료는 폐기본을 근거로 인사팀에 가서 혼났고, 커넥트HR 에이전트가 그 과정에 공범이 된 셈이었습니다.</p>
 <p>업계에서 이런 상황을 한 문장으로 부릅니다. <strong>Garbage In, Garbage Out</strong>.</p>
 <div class="term-box">
-<p><strong>Garbage In, Garbage Out (GIGO)</strong>. &quot;쓰레기를 넣으면 쓰레기가 나온다.&quot; 입력 데이터의 품질이 그대로 출력 품질을 결정한다는 컴퓨터 과학의 오래된 원칙입니다. 1950년대 메인프레임 시대부터 쓰인 말이고, 그대로 RAG에도 적용돼요. 폐기본, 초안, 중복본 같은 &quot;쓰레기&quot;가 벡터 DB에 들어가면 아무리 뛰어난 LLM이라도 그 쓰레기를 근거로 답합니다. 튜닝, 프롬프트, 리랭커 같은 고급 기법보다 <strong>앞에 놓이는 가장 기본적인 품질 조건</strong>이에요.</p>
+<p><strong>Garbage In, Garbage Out (GIGO)</strong>. &quot;쓰레기를 넣으면 쓰레기가 나온다.&quot; 입력 데이터의 품질이 그대로 출력 품질을 결정한다는 컴퓨터 과학의 오래된 원칙입니다. 1950년대 메인프레임 시대부터 쓰인 말이고, 그대로 RAG에도 적용됩니다. 폐기본, 초안, 중복본 같은 &quot;쓰레기&quot;가 벡터 DB에 들어가면 아무리 뛰어난 LLM이라도 그 쓰레기를 근거로 답합니다. 튜닝, 프롬프트, 리랭커 같은 고급 기법보다 <strong>앞에 놓이는 가장 기본적인 품질 조건입니다</strong>.</p>
 </div>
 <p>그제야 공유 드라이브를 다시 들여다봤습니다. 마우스 휠이 끝없이 내려갔습니다. <code>취업규칙.pdf</code>, <code>보안지침_v3_최종_진짜최종.docx</code>, <code>2024년_복지정책.xlsx</code>, <code>회의록_0301.hwp</code>, <code>프로젝트_보고서.pptx</code>…</p>
 <p class="thought">300개. 이걸 하나하나 다 열어봐야 하나?</p>
 <p>형식이 제각각이었습니다. PDF, DOCX, XLSX, HWP에 PPT까지. 최신본 옆에 2년 전 초안이 버젓이 섞여 있었습니다. <strong>정리하지 않고 통째로 넣은 것</strong>이 원인이었습니다.</p>
 <h2>3.2 사서처럼 정리부터</h2>
 <p>자리를 지나가던 팀장이 모니터를 흘끗 보더니 한마디 던졌습니다.</p>
-<div class="dialogue"><span class="speaker">팀장</span>: "도서관 가면 책 아무 데나 꽂아?"</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "도서관 가면 책 아무 데나 꽂아요?"</div>
 <p>한마디에 머리가 맑아졌습니다. 새 책이 기증되면 사서는 바로 서가에 꽂지 않습니다.</p>
 <ol>
 <li><strong>먼저 분류합니다</strong>. 이 책이 어느 분야인지, 대여 가능한지, 최신판인지 확인합니다.</li>
@@ -81,7 +82,7 @@
 <p>일반 텍스트(plain text)나 JSON으로 변환해도 벡터 DB에 넣을 수 있습니다. 다만 Markdown은 <strong>제목, 표, 목록 같은 문서 구조를 보존하면서도 가볍다</strong>는 점에서 RAG 파이프라인에 가장 널리 쓰입니다.</p>
 </div>
 <h2>3.5 메타데이터 태깅</h2>
-<p>도서관에서 책에 붙이는 정보. 청구기호, 저자, 분야, 출판년도. 를 문서 세계에서는 <strong>메타데이터</strong>라 부릅니다.</p>
+<p>도서관에서 책에 붙이는 정보(청구기호, 저자, 분야, 출판년도)를 문서 세계에서는 <strong>메타데이터</strong>라 부릅니다.</p>
 <p>왜 중요할까요? 에이전트에게 &quot;보안 관련 규정 알려줘&quot;라고 물었을 때 메타데이터에 <code>file_name: SEC_보안규정</code>이 있으면 보안 문서를 즉시 식별합니다. 없으면 모든 문서를 처음부터 뒤져야 합니다.</p>
 <p>어떤 메타데이터를 붙일지는 프로젝트마다 다릅니다. 우리는 최소한으로 가져갑니다. <strong>파서가 파일명과 경로에서 자동 추출할 수 있는 것</strong>만 사용합니다.</p>
 <table>
@@ -277,13 +278,13 @@
 <li>파일명 규칙을 지켰는가? (<code>분류_제목_버전.확장자</code>)</li>
 </ol>
 <p><strong>한국어 청킹의 특수성</strong>. 영어는 단어 사이에 공백이 있어 토큰 수 기반 청킹이 자연스럽습니다. 한국어는 띄어쓰기 단위가 영어보다 크고 조사가 붙어 같은 500자라도 정보 밀도가 다를 수 있습니다. 챕터 8에서 의미 기반 청킹(Semantic Chunking)과 비교 실험합니다.</p>
-<p><strong>메타데이터 필터링</strong>. 벡터DB는 저장할 때 메타데이터를 함께 넣어 두고, 검색할 때 <code>{&quot;file_type&quot;: &quot;pdf&quot;}</code>처럼 필터를 걸 수 있습니다. 지금은 메타데이터를 출처 표시용으로만 쓰지만, 문서가 많아지면 필터링으로 검색 범위를 좁힐 수 있어요. 구체적인 필터 문법은 다음 챕터에서 실제로 써 보면서 익힙니다.</p>
+<p><strong>메타데이터 필터링</strong>. 벡터DB는 저장할 때 메타데이터를 함께 넣어 두고, 검색할 때 <code>{&quot;file_type&quot;: &quot;pdf&quot;}</code>처럼 필터를 걸 수 있습니다. 지금은 메타데이터를 출처 표시용으로만 쓰지만, 문서가 많아지면 필터링으로 검색 범위를 좁힐 수 있습니다. 구체적인 필터 문법은 다음 챕터에서 실제로 써 보면서 익힙니다.</p>
 <h2>3.10 전체 구성도에서 챕터 3의 자리</h2>
 <p>이번 챕터가 설계한 &quot;문서 규칙&quot;은 챕터 4 파싱, 벡터화 파이프라인의 <strong>입구</strong>에 놓입니다. 다음 챕터에서 이 규칙에 맞춰 정리된 문서를 실제로 파싱하고 청킹해서 벡터DB에 저장합니다.</p>
 <div class="arch-fullmap">
   <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 3 범위</div>
   <div class="afm-row afm-user">
-    <div class="afm-box afm-faint afm-round">
+    <div class="afm-box afm-built afm-round">
       <div class="afm-label">사내 직원 · 관리자</div>
     </div>
   </div>
@@ -291,7 +292,7 @@
     <span class="afm-zone-ch">챕터 2</span>
     <span class="afm-zone-label">대시보드</span>
     <div class="afm-row">
-      <div class="afm-box afm-faint">
+      <div class="afm-box afm-built">
         <div class="afm-label">FastAPI</div>
         <div class="afm-sub">REST API · 관리자 웹</div>
       </div>
@@ -300,10 +301,9 @@
   <div class="afm-zone">
     <span class="afm-zone-ch">챕터 6</span>
     <span class="afm-zone-label">오케스트레이션</span>
-    <div class="afm-row afm-three">
-      <div class="afm-box afm-faint"><div class="afm-label">Query Router</div><div class="afm-sub">규칙·스키마·LLM</div></div>
-      <div class="afm-box afm-faint"><div class="afm-label">LCEL Agent Chain</div><div class="afm-sub">ReAct 패턴</div></div>
-      <div class="afm-box afm-faint"><div class="afm-label">MCP Tools</div><div class="afm-sub">DB 조회 도구</div></div>
+    <div class="afm-row afm-two">
+      <div class="afm-box afm-faint"><div class="afm-label">Tool Calling Agent</div><div class="afm-sub">ReAct 패턴 · 사후 분류</div></div>
+      <div class="afm-box afm-faint"><div class="afm-label">MCP Tools</div><div class="afm-sub">DB 조회 · 문서 검색</div></div>
     </div>
   </div>
   <div class="afm-zone">
@@ -330,7 +330,7 @@
     <span class="afm-zone-ch">챕터 2</span>
     <span class="afm-zone-label">데이터</span>
     <div class="afm-row">
-      <div class="afm-box afm-faint"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
     </div>
   </div>
   <div class="afm-row afm-ext">
