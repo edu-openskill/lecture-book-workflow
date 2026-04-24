@@ -41,7 +41,7 @@ project_name="$(basename "$project_root")"
 
 # 스킬 빌드 스크립트 경로
 repo_root="${CLAUDE_PROJECT_DIR:-$(pwd)}"
-build_script="$repo_root/.claude/skills/pub-html-build/build_pdf_html.py"
+build_script="$repo_root/.claude/skills/pub-html-build/build_html.py"
 
 if [[ ! -f "$build_script" ]]; then
   echo "⚠️  auto-rebuild: 빌드 스크립트를 찾지 못했습니다: $build_script" >&2
@@ -64,8 +64,7 @@ chapter_int="$((10#$chapter_num))"
   cd "$repo_root"
   "$py" "$build_script" \
     --project-root "$project_root" \
-    --chapter "$chapter_int" \
-    --html-only 2>&1 | tail -1
+    --chapter "$chapter_int" 2>&1 | tail -1
 ) &
 
 exit 0

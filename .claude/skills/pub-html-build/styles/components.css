@@ -42,7 +42,7 @@
   .speaker { color: #3182ce; font-weight: 700; margin-right: 4px; }
   /* 내면독백 — 차분한 슬레이트 이탤릭 */
   .thought { color: var(--color-text-muted); font-style: italic; margin: 16px 0; }
-  .term { color: var(--color-accent-warm); font-weight: 700; }
+  .term { color: var(--color-accent); font-weight: 700; }
 
   /* 결과 박스 */
   .result { background: #fff; border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-size: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--color-border-dashed); }
@@ -340,14 +340,14 @@
   .prep-note strong { color: var(--color-info-text); }
   .prep-note p { margin-bottom: 0; color: inherit; font-size: inherit; }
 
-  /* 용어 인라인 설명 */
+  /* 용어 인라인 설명 — Primary (accent) */
   .term-box {
-    background: #f8fafc; border-left: 3px solid #2563eb;
+    background: var(--color-surface); border-left: 3px solid var(--color-accent);
     padding: 10px 14px; margin: 10px 0;
     font-size: 13px; border-radius: 0 6px 6px 0;
   }
   .term-box .tb-name {
-    font-weight: 700; color: var(--color-info-text); margin-right: 6px;
+    font-weight: 700; color: var(--color-accent-text); margin-right: 6px;
   }
   .term-box .tb-desc {
     color: var(--color-text-muted);

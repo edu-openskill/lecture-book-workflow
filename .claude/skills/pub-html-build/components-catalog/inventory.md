@@ -42,6 +42,13 @@
 - `.afm-box` (+ `.afm-faint`, `.afm-on`, `.afm-dashed`, `.afm-round`)
 - `.afm-zone`, `.afm-zone-ch`, `.afm-zone-label`
 - `.afm-tag`, `.afm-label`, `.afm-sub`, `.afm-note`
+- `.arch11` — 최종 완성 구성도 (CH11 §11.5). 3행 2열 스택 + d1-tokens 에디토리얼 계승. 상세: [`fullmap/README.md`](fullmap/README.md)
+  - `.header > .sub/.title/.desc` (상단 제목)
+  - `.row-client` — 사용자·Gateway(col-c) · flow-arrows · Runtime(col-a)
+  - `.row-ext` — LLM(bracket box) · flow-arrows · Tools(col-t)
+  - `.lvl-lbl` — 행 사이 흐름 라벨
+  - `.col-a .core > .loop-inner + .engine-inner` — Executor 내부 ReAct + RAG 엔진 중첩
+  - `.stores .st` · `.caption`
 
 ### cards
 개별 카드 단위.
@@ -69,6 +76,15 @@
 - `.journey-forward`, `.jf-group`, `.jf-group-label`, `.jf-items`, `.jf-item`, `.jf-part-desc`, `.jf-ch`, `.jf-title`, `.jf-sub`, `.jf-hint`, `.jf-desc` (CH01 여정 맵)
 - `.journey-roadmap`, `.roadmap-line`, `.roadmap-part`, `.roadmap-node`, `.node-dot`, `.node-icon`, `.node-title`, `.node-story` (CH01)
 - `.qr-flow`, `.qr-pool`, `.qr-pool-label`, `.qr-out`, `.qr-up` (+ `.qr-up-1`/`.qr-up-2`), `.qr-up-stem`, `.qr-up-label`, `.qr-node` (+ `.qr-input`/`.qr-final`), `.qr-stage-num`, `.qr-arrow-h` (+ `.dashed`), `.qr-arrow-lbl`, `.qr-input-col`/`.qr-arrow-1~4`/`.qr-stage-1~3`/`.qr-final-col` (CH06 QueryRouter 3단계)
+- `.eng-pipe` + `.ep-head`, `.ep-tag`, `.ep-name`, `.ep-body`, `.ep-port` (+ `.in`/`.out`), `.ep-port-lbl`/`-rule`/`-name`/`-arrow`, `.ep-chambers`, `.ep-stages`, `.ep-stage` (+ `.ep-stage-num`/`-name`/`-fn`), `.ep-caption` (CH11 §11.2 6-stage 엔진 파이프라인)
+
+### terminals
+셸/서버 로그 창 재현.
+
+- `.terminal-log` (컨테이너) + `.tl-chrome` · `.tl-traffic` · `.tl-title` · `.tl-spacer` + `.tl-body` (CH11)
+- 색 유틸: `.tl-label` (magenta) · `.tl-key` (blue) · `.tl-val` (green) · `.tl-num` (navy) · `.tl-str` (brown) · `.tl-dim` (gray)
+- 구조 보조: `.tl-kv` · `.tl-kv-row` · `.tl-divider` · `.tl-section` · `.tl-cursor`
+- 상세: [`terminals/README.md`](terminals/README.md)
 
 ### captions
 인라인 라벨/캡션/태그.
@@ -83,7 +99,7 @@
 특정 카테고리에 속하지 않지만 전역 사용.
 
 - `.dialogue`, `.speaker`, `.thought` (대사·내면독백)
-- `.term` (용어 강조)
+- `.term` (용어 강조 · Primary 인디고) / `.term-box` (용어 인라인 설명 박스 · Primary border-left). 2026-04-23부터 둘 다 `--color-accent` 계열 사용 (이전: warm 오렌지 / info 블루)
 - `.chapter-minimap`, `.minimap-label`, `.minimap-boxes`, `.mm-box`, `.mm-arrow`, `.minimap-note` (챕터 미니맵)
 - `.arch-tree`, `.at-root`, `.at-root-icon/name/desc`, `.at-part`, `.at-branch`, `.at-line`, `.at-folder`, `.at-part-tag`, `.at-children`, `.at-leaf`, `.at-file`, `.at-file-desc`, `.at-ch` (아키텍처 트리)
 - `.api-tag`, `.rag-tag`, `.agent-tag`, `.tune-tag` (태그 뱃지)

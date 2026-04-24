@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CH11 11.4 엔진 파이프라인 v2 프리뷰</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  body {
+    max-width: 820px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 24px; font-weight: 800; color: var(--color-text-heading); margin-bottom: 4px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 40px; }
+  .variant { margin: 48px 0 24px; }
+  .variant-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-accent-text);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .variant-name {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--color-text-heading);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-border);
+    margin-bottom: 20px;
+  }
+  .variant-note {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+  .ch-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 1px;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* Variant B (stacked) 전용 */
+  .pipe-indexing-band {
+    background: #fff4ed;
+    border: 1.5px dashed var(--color-accent-warm);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .pipe-query-band {
+    background: var(--color-accent-bg);
+    border: 1.5px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+  }
+  .band-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .band-label.indexing { color: var(--color-accent-warm-text); }
+  .band-label.query { color: var(--color-accent-text); }
+  .band-flow {
+    display: grid;
+    gap: 6px;
+    align-items: center;
+  }
+  .band-flow.idx {
+    grid-template-columns: 1fr 18px 1fr 18px 1fr 18px 1fr;
+  }
+  .band-flow.qry {
+    grid-template-columns: 1fr 14px 1fr 14px 1fr 14px 1fr 14px 1fr 14px 1fr;
+  }
+  .band-arrow {
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .band-arrow.warm { color: var(--color-accent-warm); }
+  .band-arrow.call { color: var(--color-accent); }
+  .band-arrow.ret { color: var(--color-success); }
+  .mini-stage {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 7px 8px;
+    text-align: center;
+  }
+  .mini-stage .num {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-accent);
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .mini-stage.warm .num { color: var(--color-accent-warm-text); }
+  .mini-stage .name {
+    font-weight: 700;
+    color: var(--color-text-heading);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .mini-stage .fn {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--color-text-subtle);
+    margin-top: 1px;
+  }
+  .mini-stage.port {
+    background: var(--color-bg);
+    border-width: 1.5px;
+  }
+  .mini-stage.port.in { border-color: var(--color-accent-warm); }
+  .mini-stage.port.out { border-color: var(--color-success); }
+  .mini-stage.vecdb {
+    background: #fff4ed;
+    border: 1.5px solid var(--color-accent-warm);
+  }
+  .band-connector {
+    text-align: center;
+    margin: 4px 0 6px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-text-subtle);
+    letter-spacing: 2px;
+    font-weight: 700;
+  }
+
+  /* Variant C (side-by-side) 전용 */
+  .pipe-c {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 14px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .pipe-c .col {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-dashed);
+    border-radius: var(--radius-md);
+    padding: 16px 14px;
+  }
+  .pipe-c .col.idx { background: #fff4ed; border-color: var(--color-accent-warm); border-style: dashed; }
+  .pipe-c .col.qry { background: var(--color-accent-bg); border-color: var(--color-accent); }
+  .pipe-c .col-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .pipe-c .col.idx .col-label { color: var(--color-accent-warm-text); }
+  .pipe-c .col.qry .col-label { color: var(--color-accent-text); }
+  .pipe-c .col-stages {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pipe-c .col-stages .arr {
+    text-align: center;
+    color: var(--color-text-subtle);
+    font-size: 12px;
+    line-height: 1;
+  }
+  .pipe-c .bridge {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+  .pipe-c .bridge .db-box {
+    background: #fff4ed;
+    border: 1.5px solid var(--color-accent-warm);
+    border-radius: var(--radius-sm);
+    padding: 8px 6px;
+    text-align: center;
+    min-width: 56px;
+  }
+  .pipe-c .bridge .db-box .num {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--color-accent-warm-text);
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .pipe-c .bridge .db-box .name {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-heading);
+    margin-top: 2px;
+  }
+  .pipe-c .bridge .flow-in,
+  .pipe-c .bridge .flow-out {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--color-text-subtle);
+    font-weight: 700;
+  }
+  .pipe-c .bridge .flow-in::after { content: " →"; color: var(--color-accent-warm); }
+  .pipe-c .bridge .flow-out::before { content: "→ "; color: var(--color-accent); }
+</style>
+</head>
+<body>
+
+<h1>11.4 엔진 파이프라인 — 재설계 프리뷰</h1>
+<p class="lead">설명 흐름(01·02 인덱싱은 서버 기동 시 1회 / 03~06 질의는 질문마다 반복 / 챕터 8~10 부품이 각 단계에 박힘)에 맞춘 세 가지 변형. 세 개 다 보시고 어느 쪽 흐름이 가장 잘 읽히는지 골라 주세요.</p>
+
+<!-- ══════════════ Variant A — 최소 변경 ══════════════ -->
+<div class="variant">
+  <div class="variant-title">Variant A</div>
+  <div class="variant-name">현재 구조 유지 + 챕터 뱃지만 추가</div>
+  <div class="variant-note">
+    2×3 그리드는 그대로. 각 stage 하단에 <b>어느 챕터에서 만든 부품인지</b> 뱃지만 붙임. 구조 변경 없이 "챕터 8~10이 각 단계에 박혀 있다"는 설명을 시각적으로 회수. 시각적 단순함이 최고.
+  </div>
+
+  <div class="eng-pipe">
+    <div class="ep-head">
+      <span class="ep-tag">pipeline</span>
+      <span class="ep-name">커넥트HR 엔진</span>
+      <span class="ep-tag">6 stages</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-port in">
+        <div class="ep-port-lbl">INPUT</div>
+        <div class="ep-port-rule"></div>
+        <div class="ep-port-name">질문</div>
+        <div class="ep-port-arrow">▶</div>
+      </div>
+      <div class="ep-chambers">
+        <div class="ep-stages">
+          <div class="ep-stage"><span class="ep-stage-num">01</span><span class="ep-stage-name">파싱</span><div class="ep-stage-fn">parse_pdf_hybrid</div><span class="ch-badge">CH10</span></div>
+          <div class="ep-stage"><span class="ep-stage-num">02</span><span class="ep-stage-name">청킹</span><div class="ep-stage-fn">semantic_chunking</div><span class="ch-badge">CH8</span></div>
+          <div class="ep-stage"><span class="ep-stage-num">03</span><span class="ep-stage-name">쿼리 확장</span><div class="ep-stage-fn">QueryExpander</div><span class="ch-badge">CH9</span></div>
+          <div class="ep-stage"><span class="ep-stage-num">04</span><span class="ep-stage-name">검색</span><div class="ep-stage-fn">EnsembleRetriever</div><span class="ch-badge">CH8</span></div>
+          <div class="ep-stage"><span class="ep-stage-num">05</span><span class="ep-stage-name">리랭킹</span><div class="ep-stage-fn">CrossEncoderReranker</div><span class="ch-badge">CH8</span></div>
+          <div class="ep-stage"><span class="ep-stage-num">06</span><span class="ep-stage-name">부모·LLM</span><div class="ep-stage-fn">ParentDoc + Agent</div><span class="ch-badge">CH5·6</span></div>
+        </div>
+      </div>
+      <div class="ep-port out">
+        <div class="ep-port-lbl">OUTPUT</div>
+        <div class="ep-port-rule"></div>
+        <div class="ep-port-name">답변</div>
+        <div class="ep-port-arrow">▶</div>
+      </div>
+    </div>
+  </div>
+  <div class="caption">그림 11-10A. 각 단계에 박힌 부품의 출처 챕터</div>
+</div>
+
+<!-- ══════════════ Variant B — 상하 2단 ══════════════ -->
+<div class="variant">
+  <div class="variant-title">Variant B</div>
+  <div class="variant-name">상하 2단: 인덱싱(01·02) → VectorDB → 질의(03~06)</div>
+  <div class="variant-note">
+    시간 흐름에 충실: 상단 인덱싱 띠(주황 점선)는 서버 기동 시 1회, 그 결과가 VectorDB에 쌓이고, 하단 질의 띠(인디고)가 질문마다 반복. 독자가 <b>실습 1의 <code>run_pipeline</code>이 어디에 해당하는지</b>를 즉시 읽을 수 있음.
+  </div>
+
+  <div class="eng-pipe">
+    <div class="ep-head">
+      <span class="ep-tag">pipeline</span>
+      <span class="ep-name">커넥트HR 엔진</span>
+      <span class="ep-tag">indexing + query</span>
+    </div>
+
+    <div class="pipe-indexing-band">
+      <div class="band-label indexing">◉ Indexing · 서버 기동 시 1회</div>
+      <div class="band-flow idx">
+        <div class="mini-stage port in"><div class="num" style="color:var(--color-accent-warm-text)">IN</div><div class="name">문서</div><div class="fn">PDF·docx·xlsx</div></div>
+        <div class="band-arrow warm">→</div>
+        <div class="mini-stage warm"><div class="num">01</div><div class="name">파싱</div><div class="fn">parse_pdf_hybrid</div><span class="ch-badge">CH10</span></div>
+        <div class="band-arrow warm">→</div>
+        <div class="mini-stage warm"><div class="num">02</div><div class="name">청킹</div><div class="fn">semantic_chunking</div><span class="ch-badge">CH8</span></div>
+        <div class="band-arrow warm">→</div>
+        <div class="mini-stage vecdb"><div class="num">DB</div><div class="name">Vector DB</div><div class="fn">ChromaDB</div></div>
+      </div>
+    </div>
+
+    <div class="band-connector">↓ VectorDB 재사용 ↓</div>
+
+    <div class="pipe-query-band">
+      <div class="band-label query">◉ Query · 질문마다 반복 (<code>run_pipeline</code>)</div>
+      <div class="band-flow qry">
+        <div class="mini-stage port in"><div class="num" style="color:var(--color-accent-warm-text)">IN</div><div class="name">질문</div></div>
+        <div class="band-arrow call">→</div>
+        <div class="mini-stage"><div class="num">03</div><div class="name">확장</div><div class="fn">QueryExpander</div><span class="ch-badge">CH9</span></div>
+        <div class="band-arrow call">→</div>
+        <div class="mini-stage"><div class="num">04</div><div class="name">검색</div><div class="fn">Ensemble</div><span class="ch-badge">CH8</span></div>
+        <div class="band-arrow call">→</div>
+        <div class="mini-stage"><div class="num">05</div><div class="name">리랭킹</div><div class="fn">CrossEncoder</div><span class="ch-badge">CH8</span></div>
+        <div class="band-arrow call">→</div>
+        <div class="mini-stage"><div class="num">06</div><div class="name">부모·LLM</div><div class="fn">ParentDoc+Agent</div><span class="ch-badge">CH5·6</span></div>
+        <div class="band-arrow ret">→</div>
+        <div class="mini-stage port out"><div class="num" style="color:var(--color-success-text)">OUT</div><div class="name">답변</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption">그림 11-10B. 인덱싱 1회와 질의 반복이 VectorDB를 공유</div>
+</div>
+
+<!-- ══════════════ Variant C — 좌우 분리 ══════════════ -->
+<div class="variant">
+  <div class="variant-title">Variant C</div>
+  <div class="variant-name">좌우 분리: 인덱싱 │ VectorDB 공유 │ 질의</div>
+  <div class="variant-note">
+    구조적 분리에 충실: 왼쪽은 서버 기동 시 1회 도는 인덱싱 파이프라인, 오른쪽은 질문마다 도는 질의 파이프라인. 가운데 VectorDB가 두 파이프라인의 <b>접점</b>임을 시각적으로 강조. 인덱싱이 독립적으로 존재하는 구조라는 점을 가장 또렷하게 보여줌.
+  </div>
+
+  <div class="eng-pipe">
+    <div class="ep-head">
+      <span class="ep-tag">pipeline</span>
+      <span class="ep-name">커넥트HR 엔진</span>
+      <span class="ep-tag">shared vector db</span>
+    </div>
+
+    <div class="pipe-c">
+      <div class="col idx">
+        <div class="col-label">◉ Indexing · 1회</div>
+        <div class="col-stages">
+          <div class="mini-stage port in"><div class="num" style="color:var(--color-accent-warm-text)">IN</div><div class="name">문서</div></div>
+          <div class="arr">↓</div>
+          <div class="mini-stage warm"><div class="num">01</div><div class="name">파싱</div><div class="fn">parse_pdf_hybrid</div><span class="ch-badge">CH10</span></div>
+          <div class="arr">↓</div>
+          <div class="mini-stage warm"><div class="num">02</div><div class="name">청킹</div><div class="fn">semantic_chunking</div><span class="ch-badge">CH8</span></div>
+          <div class="arr">↓</div>
+        </div>
+      </div>
+
+      <div class="bridge">
+        <div class="flow-in">쓰기</div>
+        <div class="db-box">
+          <div class="num">VECTOR DB</div>
+          <div class="name">ChromaDB</div>
+        </div>
+        <div class="flow-out">읽기</div>
+      </div>
+
+      <div class="col qry">
+        <div class="col-label">◉ Query · 반복</div>
+        <div class="col-stages">
+          <div class="mini-stage port in"><div class="num" style="color:var(--color-accent-warm-text)">IN</div><div class="name">질문</div></div>
+          <div class="arr">↓</div>
+          <div class="mini-stage"><div class="num">03</div><div class="name">확장</div><div class="fn">QueryExpander</div><span class="ch-badge">CH9</span></div>
+          <div class="arr">↓</div>
+          <div class="mini-stage"><div class="num">04</div><div class="name">검색</div><div class="fn">Ensemble</div><span class="ch-badge">CH8</span></div>
+          <div class="arr">↓</div>
+          <div class="mini-stage"><div class="num">05</div><div class="name">리랭킹</div><div class="fn">CrossEncoder</div><span class="ch-badge">CH8</span></div>
+          <div class="arr">↓</div>
+          <div class="mini-stage"><div class="num">06</div><div class="name">부모·LLM</div><div class="fn">ParentDoc+Agent</div><span class="ch-badge">CH5·6</span></div>
+          <div class="arr">↓</div>
+          <div class="mini-stage port out"><div class="num" style="color:var(--color-success-text)">OUT</div><div class="name">답변</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caption">그림 11-10C. 왼쪽 인덱싱과 오른쪽 질의가 VectorDB를 접점으로 연결</div>
+</div>
+
+</body>
+</html>

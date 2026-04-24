@@ -130,7 +130,7 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <p>환각을 직접 체험하고(step1), 문서를 넣으면 달라지는 걸 확인한 뒤(step2), RAG로 조립합니다(step3). 그다음 청킹 없이 돌려서 차이를 체감하고(step4), 추론이 필요한 질문까지 던져봅니다(step5). <strong>step1부터 순서대로 실행하세요.</strong></p>
 </div>
 <h2>1.1 그럴듯한 거짓말: LLM 환각(Hallucination)</h2>
-<div class="chapter-image gemini"><img src="./assets/CH01/gemini/01_chapter-opening.png" alt="" /><div class="caption">그림 1-1. 입사 3일 차, 첫 번째 미션</div></div>
+<div class="chapter-image gemini"><img src="../assets/CH01/gemini/01_chapter-opening.png" alt="" /><div class="caption">그림 1-1. 입사 3일 차, 첫 번째 미션</div></div>
 <p>입사 3일 차.</p>
 <p>키보드 두드리는 소리만 또록또록 울리는 사무실. 모니터에는 사내 Wi-Fi 비밀번호가 적힌 포스트잇이 하나 붙어 있습니다. 오전 10시, 팀장이 커피잔을 들고 자리로 다가왔습니다. 잔에서 김이 올라오고 있었습니다.</p>
 <div class="dialogue"><span class="speaker">팀장</span>: "AI로 사내 문서 검색 시스템 만들어봐요. 직원들이 규정이나 정책 찾는 게 번거롭다고 해서."</div>
@@ -141,7 +141,7 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <p>팀장이 자리로 돌아간 뒤에도 한참 모니터를 쳐다봤습니다. 옆자리에서 동료가 의자를 돌려 저를 보더니 한마디 던졌습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "그거 왜 만들어요? ChatGPT한테 그냥 물어보면 되지 않나요."</div>
 <p class="thought">…그러게. 직접 물어보면 되는 거 아니야?</p>
-<p>마침 로컬에 <code>deepseek-r1</code> 모델을 올려두었습니다. 연차 규정부터 물어보기로 했습니다. <code>ex01/step1_fail.py</code>를 엽니다.</p>
+<p>마침 로컬에 <code>deepseek-r1</code> 모델을 올려두었습니다. 연차 규정부터 물어보기로 했습니다. <code>ex01/step1_fail.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex01/step1_fail.py. LLM에게 직접 물어보기</div><span class="cb-todo"># TODO: ChatOllama로 deepseek-r1:8b 모델 연결 (temperature=0)</span>
 <span class="c1"># 1. Ollama에서 deepseek-r1:8b 모델을 로드 (temperature=0: 가장 확률 높은 답변)</span>
 <span class="n">llm</span> <span class="o">=</span> <span class="n">ChatOllama</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s2">&quot;deepseek-r1:8b&quot;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -157,13 +157,27 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold]답변:[/bold]</span><span class="se">\n</span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 <p><code>ChatOllama</code>는 LangChain이 Ollama LLM을 호출할 때 쓰는 래퍼입니다. <code>temperature=0</code>은 LLM이 창의적 변형 없이 가장 확률 높은 답변을 내놓게 하는 설정입니다. 이제 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실행</div>python<span class="w"> </span>step1_fail.py</div>
-<div class="chapter-image terminal"><img src="./assets/CH01/terminal/01_step1-hallucination.png" alt="" /><div class="caption">그림 1-2. <code>step1_fail.py</code> 실행 결과. 자신감 있게 답하지만 실제 커넥트 규정과 다릅니다</div></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">ex01 — python step1_fail.py</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-label">질문</span> <span class="tl-str">우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?</span></div>
+    <div class="tl-section"><span class="tl-label">답변</span></div>
+    <div>우리 회사(커넥트)의 신입사원 연차 발생 규정은 <strong>회사의 정책 문서</strong>에 명시되어 있습니다. 일반적으로 신입사원의 연차는 근속 기간과 직무, 회사 정책에 따라 결정되며, 다음과 같은 일반적인 패턴을 따릅니다:</div>
+    <div class="tl-kv-row">1. <strong>초기 근속 기간</strong>: 신입사원(예: 입사 1년 이내)은 연차가 적게 부여되거나, 월별로 일정 비율로 발생합니다.</div>
+    <div class="tl-kv-row">2. <strong>연차 발생 방식</strong>: 1일당 ~0.1~0.2일 발생하거나, 연차가 매년 1일씩 증가하는 방식으로 시작됩니다.</div>
+    <div class="tl-kv-row"><span class="tl-dim">예시:</span> 입사 1년차 연차 1일 · 입사 2년차 연차 2일 · 입사 3년차 연차 3일 ...</div>
+  </div>
+</div>
+<div class="caption">그림 1-2. <code>step1_fail.py</code> 실행 결과. 자신감 있게 답하지만 실제 커넥트 규정과 다릅니다</div>
 <p>답변을 보면 &quot;근로기준법에 따라 1년 미만은 매월 1일...&quot; 같은 내용이 나옵니다. 공식적인 느낌도 나고 그럴듯합니다. 입사할 때 받은 규정집을 꺼내 비교해봤습니다. 커넥트의 실제 규정은 이랬습니다.</p>
 <p class="thought">신입사원은 입사 후 3년 동안은 연차가 없다. 대신 매월 1회 '리프레시 데이'를 유급으로 제공한다. 3년 근속 시 30일의 연차가 일시에 발생한다.</p>
 <p class="thought">잠깐, 뭐라고?</p>
 <p>다시 읽었습니다. 완전히 다른 내용이었습니다. LLM이 방금 그럴듯한 거짓말을 한 것입니다.</p>
 <div class="annotated-compare">
-  <div class="ac-heading">LLM 응답과 사내 규정</div>
   <div class="ac-block llm">
     <div class="ac-label">
       <span class="ac-name">LLM 응답</span>
@@ -184,17 +198,18 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
     </div>
   </div>
 </div>
+<div class="caption">그림 1-3. LLM 응답과 사내 규정을 나란히 비교한 모습입니다</div>
 <p>여기서 의문이 생깁니다. LLM은 왜 자신 있게 틀린 대답을 했을까요?</p>
 <p>LLM을 이렇게 가정해보겠습니다. 입사 면접을 보러 온 외부인이라고요. 이 외부인은 세상에 공개된 거의 모든 자료를 읽었습니다. 인터넷, 뉴스, 책, 논문까지. 공개된 텍스트라면 뭐든 섭렵했습니다. 그래서 근로기준법은 완벽하게 알고 일반적인 회사 연차 제도도 줄줄 외웁니다. 그런데 커넥트의 내부 규정집은 공개된 적이 없습니다. 이 외부인이 읽을 방법이 없었습니다.</p>
 <p>문제는 이 외부인이 &quot;모른다&quot;고 솔직히 말하지 못한다는 점입니다. 질문을 받으면 자기가 아는 것 중에서 가장 비슷해 보이는 걸 자신감 있게 말합니다. 마치 확실히 아는 것처럼 들립니다. 이게 <strong>LLM 환각(Hallucination)</strong> 입니다.</p>
-<div class="chapter-image gemini"><img src="./assets/CH01/gemini/01_hallucination-outsider.png" alt="" /><div class="caption">그림 1-3. LLM은 세상의 공개 데이터는 학습했지만, 우리 회사 내부 문서는 읽은 적이 없습니다</div></div>
+<div class="chapter-image gemini"><img src="../assets/CH01/gemini/01_hallucination-outsider.png" alt="" /><div class="caption">그림 1-4. LLM은 세상의 공개 데이터는 학습했지만, 우리 회사 내부 문서는 읽은 적이 없습니다</div></div>
 <h2>1.2 교재를 펼쳐놓으면: 컨텍스트 주입(Context Injection)</h2>
 <p>규정집을 덮고 잠시 생각했습니다. 모니터 옆 자리에서 팀장이 다시 지나가며 한 마디 던졌습니다.</p>
 <div class="dialogue"><span class="speaker">팀장</span>: "전부 외우게 하지 말고, 필요한 것만 찾아서 읽게 해요."</div>
 <p>그 말이 귀에 남았습니다.</p>
 <p class="thought">…외우게 하지 말고, 읽게 한다.</p>
 <p>학창 시절 오픈북 시험이 떠올랐습니다. 시험 범위를 전부 외우는 대신, 책을 책상 위에 펼쳐놓고 필요한 페이지만 찾아서 답을 쓰는 방식. AI한테도 규정집을 그대로 건네주면 어떻게 될까요?</p>
-<p>지금은 DB도 검색 시스템도 없으니, 우선은 단순하게 <strong>프롬프트에 규정 내용을 그대로 붙여 넣는</strong> 방법부터 시도합니다. <code>ex01/step2_context.py</code>를 엽니다.</p>
+<p>지금은 DB도 검색 시스템도 없으니, 우선은 단순하게 <strong>프롬프트에 규정 내용을 그대로 붙여 넣는</strong> 방법부터 시도합니다. <code>ex01/step2_context.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> ex01/step2_context.py. 문서를 직접 넣어보기</div><span class="c1"># 1. 규정 문서를 변수에 담습니다 (아직 DB 안 씀)</span>
 <span class="n">context_data</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">[커넥트 취업규칙]</span>
@@ -220,7 +235,23 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold]답변:[/bold]</span><span class="se">\n</span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 <p>step1과 달라진 부분은 <code>context_data</code>를 프롬프트에 직접 넣었다는 것뿐입니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실행</div>python<span class="w"> </span>step2_context.py</div>
-<div class="chapter-image terminal"><img src="./assets/CH01/terminal/01_step2-context.png" alt="" /><div class="caption">그림 1-4. <code>step2_context.py</code> 실행 결과. 문서를 직접 넣으니 정확하게 답합니다</div></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">ex01 — python step2_context.py</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-label">질문</span> <span class="tl-str">우리 회사(커넥트)의 신입사원 연차 발생 규정이 어떻게 돼?</span></div>
+    <div class="tl-section"><span class="tl-label">답변</span></div>
+    <div>[커넥트 취업규칙]에 따르면, 신입사원의 연차 발생 규정은 다음과 같습니다:</div>
+    <div class="tl-kv-row">1. <strong>신입사원은 입사 후 3년 동안 연차가 없다.</strong></div>
+    <div class="tl-kv-row">2. <strong>대신 매월 1회 '리프레시 데이'를 유급으로 제공한다.</strong></div>
+    <div class="tl-kv-row">3. <strong>3년 근속 시 30일의 연차가 일시에 발생한다.</strong></div>
+    <div>이러한 규정은 신입사원에게 유연한 근무 환경을 제공하고, 장기적으로는 경력 초기부터 회사에 대한 충성도를 높이는 방식으로 설계된 것으로 보입니다.</div>
+  </div>
+</div>
+<div class="caption">그림 1-5. <code>step2_context.py</code> 실행 결과. 문서를 직접 넣으니 정확하게 답합니다</div>
 <p>답변이 규정집과 한 글자도 다르지 않았습니다. 방금 전 거짓말하던 그 LLM이 맞나 싶을 정도였습니다. 코드가 바뀐 것도 아니고, 달라진 건 <code>context_data</code>를 프롬프트에 붙인 것 하나뿐. LLM에게 &quot;정답지&quot;를 건네준 셈입니다.</p>
 <p>이걸 <strong>Context Injection (컨텍스트 주입)</strong> 이라고 합니다.</p>
 <p class="thought">됐다. 이거면 끝난 거 아니야?</p>
@@ -228,13 +259,13 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <p>손으로 규정집 파일철을 들추다 보니 문서가 한두 개가 아니었습니다. 인사규정 옆에 복지 정책, 보안 지침, 업무 가이드, 출장 규정, 회의록, 프로젝트 문서…. 탭마다 제목이 달려 있고 어떤 건 수십 페이지짜리였습니다.</p>
 <p class="thought">이걸 매번 전부 복사해서 프롬프트에 붙인다고?</p>
 <p>LLM에는 한 번에 처리할 수 있는 텍스트 길이 한도(<strong>컨텍스트 윈도우</strong>)가 있습니다. 문서가 쌓일수록 한도를 넘깁니다. 무엇보다 연차 하나 물어보는데 보안 지침과 복지 정책까지 같이 보내면, LLM이 엉뚱한 조항을 들고 와서 답할 가능성이 커집니다.</p>
-<div class="chapter-image gemini"><img src="./assets/CH01/gemini/01_context-overflow.png" alt="" /><div class="caption">그림 1-5. 문서를 통째로 넣는 방식의 한계. 문서가 늘어나면 프롬프트 창이 넘칩니다</div></div>
+<div class="chapter-image gemini"><img src="../assets/CH01/gemini/01_context-overflow.png" alt="" /><div class="caption">그림 1-6. 문서를 통째로 넣는 방식의 한계. 문서가 늘어나면 프롬프트 창이 넘칩니다</div></div>
 <h2>1.3 사서가 필요합니다: RAG(Retrieval-Augmented Generation)</h2>
 <p>파일철을 다시 내려놓고 한숨을 쉬었습니다. 옆자리 동료가 노트북을 덮으며 말했습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "문서 찾아주는 사람이 있으면 좋겠네요. 도서관 사서처럼."</div>
 <p class="thought">사서…</p>
 <p>맞는 말이었습니다. 도서관에선 누군가 와서 질문하면 사서가 그 질문에 맞는 책을 서가에서 골라 건네줍니다. 방문자는 그 책만 읽으면 됩니다. 전부 외울 필요도, 서가를 통째로 옮길 필요도 없습니다.</p>
-<div class="chapter-image gemini"><img src="./assets/CH01/gemini/01_openbook-exam.png" alt="" /><div class="caption">그림 1-6. 클로즈드북 vs 오픈북. RAG는 LLM에게 오픈북 시험을 치르게 하는 것</div></div>
+<div class="chapter-image gemini"><img src="../assets/CH01/gemini/01_openbook-exam.png" alt="" /><div class="caption">그림 1-7. 클로즈드북 vs 오픈북. RAG는 LLM에게 오픈북 시험을 치르게 하는 것</div></div>
 <p>LLM도 같은 방식이면 됩니다. 사내 문서 전체를 외우게 할 필요가 없습니다. 질문이 들어왔을 때 <strong>그 질문에 해당하는 문서 조각만 찾아서 LLM에게 건네주면 됩니다.</strong></p>
 <p>이것이 <strong>RAG (Retrieval-Augmented Generation, 검색 증강 생성)</strong> 입니다. 이름은 거창하지만 하는 일은 단순합니다. 사서를 하나 앉히는 겁니다.</p>
 <div class="rag-pipeline-box">
@@ -262,9 +293,9 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
     </div>
   </div>
 </div>
-<div class="chapter-image diagram"><img src="./assets/CH01/diagram/01_llm-vs-rag.png" alt="" /><div class="caption">그림 1-7. LLM 단독 호출과 RAG의 차이. RAG는 질문마다 관련 문서를 찾아서 LLM에 건네줍니다.</div></div>
+<div class="chapter-image diagram"><img src="../assets/CH01/diagram/01_llm-vs-rag.png" alt="" /><div class="caption">그림 1-8. LLM 단독 호출과 RAG의 차이. RAG는 질문마다 관련 문서를 찾아서 LLM에 건네줍니다.</div></div>
 <h3>1.3.1 서가에 책 꽂기: 임베딩 + ChromaDB 인덱싱</h3>
-<p><code>ex01/step3_rag.py</code>에는 사내 규정 3개가 더미 데이터로 미리 준비되어 있습니다.</p>
+<p><code>ex01/step3_rag.py</code>에는 사내 규정 3개가 더미 데이터로 미리 준비되어 있습니다. 이 파일을 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> ex01/step3_rag.py. RAG 파이프라인 (1/2: 문서 저장)</div><span class="c1"># 1. 더미 데이터 준비</span>
 <span class="n">docs</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="s2">&quot;[인사규정] 신입사원 휴가 및 연차...&quot;</span><span class="p">,</span>
@@ -293,6 +324,7 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <p><code>nomic-embed-text</code>를 사용합니다. 챕터 4에서 한국어에 최적화된 <code>ko-sroberta-multitask</code>로 교체합니다.</p>
 </div>
 <h3>1.3.2 사서에게 질문하기: RetrievalQA 체인 조립</h3>
+<p>이어서 같은 <code>ex01/step3_rag.py</code> 파일의 다음 TODO를 찾아 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> ex01/step3_rag.py. RAG 파이프라인 (2/2: 체인 연결)</div><span class="c1"># 5. 프롬프트 템플릿 — LLM에게 &quot;참고 정보에서만 답해&quot;라고 제약을 걺</span>
 <span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;당신은 회사의 규정에 대해 설명해주는 AI 비서입니다.</span>
 <span class="s2">아래의 참고 정보를 바탕으로 질문에 답하세요. 반드시 한국어로 답변해야 합니다.</span>
@@ -327,12 +359,29 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <p><strong>RetrievalQA란?</strong> LangChain이 제공하는 RAG 전용 체인 클래스. &quot;질문 받기 → Retriever로 문서 검색 → LLM에 문서와 질문 함께 전달 → 답변 반환&quot; 이 전 과정을 한 줄 호출로 돌려줍니다. 수동으로 이어붙여야 할 코드를 내장 추상화로 대체한 셈입니다.</p>
 </div>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실행</div>python<span class="w"> </span>step3_rag.py</div>
-<div class="chapter-image terminal"><img src="./assets/CH01/terminal/01_step3-rag.png" alt="" /><div class="caption">그림 1-8. <code>step3_rag.py</code> 실행 결과. [인사규정] 문서를 찾아서 답변하고 출처까지 보여줍니다</div></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">ex01 — python step3_rag.py</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-dim">문서를 학습(임베딩) 중입니다...</span></div>
+    <div><span class="tl-label">질문</span> <span class="tl-str">신입사원 휴가 규정에 대해 알려줘.</span></div>
+    <div class="tl-section"><span class="tl-label">검색된 문서(근거)</span></div>
+    <div class="tl-kv-row"><span class="tl-key">[복지규정]</span> 점심 식사는 무제한 법인카드로 지원하며, 저녁 식사는 오후 9시 이후 야근 시에만 사용이 가능합니다.</div>
+    <div class="tl-kv-row"><span class="tl-key">[보안규정]</span> 모든 임직원은 회사에서 지급한 승인된 보안 USB만 사용해야 하며, 개인 USB나 외부 저장 매체 사용은 엄격히 금지됩니다.</div>
+    <div class="tl-kv-row"><span class="tl-key">[인사규정]</span> 신입사원은 입사 후 처음 3년 동안은 법정 연차가 발생하지 않습니다. 대신 매월 1회의 유급 '리프레시 데이'를 휴가로 사용할 수 있습니다.</div>
+    <div class="tl-section"><span class="tl-label">AI 답변</span></div>
+    <div>신입사원은 입사 후 처음 3년 동안 법정 연차가 발생하지 않습니다. 대신 매월 1회의 유급 '리프레시 데이'를 휴가로 사용할 수 있습니다. 이는 회사에서 제공하는 특별 휴가로, 사용 시에는 일반 연차와 마찬가지로 업무 일정 조정이 필요합니다.</div>
+  </div>
+</div>
+<div class="caption">그림 1-9. <code>step3_rag.py</code> 실행 결과. [인사규정] 문서를 찾아서 답변하고 출처까지 보여줍니다</div>
 <p>이제 답변과 함께 어느 문서를 참고했는지가 나옵니다. step2에서는 문서를 수동으로 넣어줬지만 이번에는 <strong>질문에 맞는 문서를 자동으로 찾아왔습니다.</strong> 환각이 사라지고 출처가 생겼습니다.</p>
 <h2>1.4 청킹, 있을 때와 없을 때: 청킹(Chunking)</h2>
 <p>옆자리 동료가 화면을 힐끗 보고 물었습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "근데 왜 문서 3개를 따로따로 넣어요? 하나로 합쳐서 넣으면 더 간단하지 않아요?"</div>
-<p>사실 그게 더 편해 보입니다. 인사규정, 보안규정, 복지규정을 한 개의 긴 문자열로 이어붙여 Document 하나로 저장하면 됩니다. <code>ex01/step4_no_chunking.py</code>에 그 버전이 준비돼 있습니다. step3과 달라진 점은 두 가지뿐.</p>
+<p>사실 그게 더 편해 보입니다. 인사규정, 보안규정, 복지규정을 한 개의 긴 문자열로 이어붙여 Document 하나로 저장하면 됩니다. <code>ex01/step4_no_chunking.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다. step3과 달라진 점은 두 가지뿐.</p>
 <div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 4</span> ex01/step4_no_chunking.py. 청킹 없이</div><span class="c1"># 1. docs_bad를 벡터DB에 저장 (세 규정을 하나로 이어붙인 거대한 Document)</span>
 <span class="n">vectorstore</span> <span class="o">=</span> <span class="n">Chroma</span><span class="o">.</span><span class="n">from_documents</span><span class="p">(</span><span class="n">documents</span><span class="o">=</span><span class="n">docs_bad</span><span class="p">,</span> <span class="n">embedding</span><span class="o">=</span><span class="n">embeddings</span><span class="p">)</span>
 
@@ -340,18 +389,54 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
 <span class="n">retriever</span> <span class="o">=</span> <span class="n">vectorstore</span><span class="o">.</span><span class="n">as_retriever</span><span class="p">(</span><span class="n">search_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span></div>
 <p>나머지 흐름(임베딩 생성 → 체인 조립 → 질문 실행)은 step3과 동일합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실행</div>python<span class="w"> </span>step4_no_chunking.py</div>
-<div class="chapter-image terminal"><img src="./assets/CH01/terminal/01_no-chunking-compare.png" alt="" /><div class="caption">그림 1-9. 청킹 여부에 따른 검색 결과 비교. 조각으로 나누면 관련 문서만 정확히 찾습니다</div></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">ex01 — python step4_no_chunking.py</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-dim">문서를 학습(임베딩) 중입니다... (청킹 미적용)</span></div>
+    <div><span class="tl-label">질문</span> <span class="tl-str">신입사원 휴가 규정에 대해 알려줘.</span></div>
+    <div class="tl-section"><span class="tl-label">검색된 문서(근거)</span></div>
+    <div class="tl-kv-row"><span class="tl-key">[전체규정]</span> [인사규정] 신입사원 휴가 및 연차 ··· [보안규정] 업무 보안 ··· [복지규정] 식대 지원 ···</div>
+    <div class="tl-kv-row"><span class="tl-dim">→ 세 규정이 한 덩어리로 섞여서 반환됨</span></div>
+    <div class="tl-section"><span class="tl-label">AI 답변</span></div>
+    <div class="tl-kv-row">1. 신입사원은 입사 후 3년 동안 법정 연차가 발생하지 않습니다.</div>
+    <div class="tl-kv-row">2. 대신 매월 1회 유급 '리프레시 데이' 휴가를 사용할 수 있습니다.</div>
+    <div class="tl-kv-row">3. 리프레시 데이는 유급 휴가로 제공됩니다.</div>
+  </div>
+</div>
+<div class="caption">그림 1-10. 청킹 없이 한 덩어리로 넣으면 관련 없는 규정까지 뭉쳐 딸려옵니다</div>
 <p>보시는 것처럼, 합쳐서 넣으니 &quot;신입사원 휴가 규정&quot;을 물어봐도 인사규정, 보안규정, 복지규정이 한 덩어리로 딸려옵니다. 관련 없는 내용이 섞이면 LLM이 정작 필요한 부분을 놓치기 쉽습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "아, 그래서 따로따로 잘라서 넣는 거였네요."</div>
 <p>문서를 의미 단위로 쪼개는 것을 <strong>청킹(Chunking)</strong> 이라고 합니다. 사서가 책 한 권을 통째로 건네지 않고, 필요한 페이지만 뜯어서 건네는 것과 같습니다. 지금은 &quot;규정별로 하나씩&quot; 정도로만 나눠 봤지만, 실제 사내 문서에서는 더 정교한 전략이 필요합니다. 청킹 전략 상세 비교는 <strong>챕터 8 (검색 품질 튜닝)</strong> 에서 다룹니다.</p>
 <h2>1.5 복잡한 질문 던져보기: 사슬 추론(Chain-of-Thought)</h2>
 <p>동료가 커피를 가지러 가며 물었습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "이제 진짜 질문 한번 던져볼까요. 사람들이 실제로 할 만한 거."</div>
-<p>좋은 도전입니다. step3까지는 &quot;규정이 뭐야?&quot; 수준의 단순 검색이었습니다. 이번엔 <strong>규정을 찾아서 읽고 계산까지 해야 하는 질문</strong>을 던져봅니다. <code>ex01/step5_rag.py</code>의 코드 구조는 step3과 동일하고, 달라진 건 파일에 준비된 <strong>질문</strong>뿐입니다.</p>
+<p>좋은 도전입니다. step3까지는 &quot;규정이 뭐야?&quot; 수준의 단순 검색이었습니다. 이번엔 <strong>규정을 찾아서 읽고 계산까지 해야 하는 질문</strong>을 던져봅니다. <code>ex01/step5_rag.py</code>의 코드 구조는 step3과 동일하고, 달라진 건 파일에 준비된 <strong>질문</strong>뿐입니다. 이 파일을 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 5</span> ex01/step5_rag.py. 추론 심화</div><span class="n">question</span> <span class="o">=</span> <span class="s2">&quot;입사 6개월차 신입인데 리프레시 데이 2번 썼어. 몇 번 남았는지 규정 기반으로 계산해줘.&quot;</span></div>
 <p>&quot;매월 1회 제공&quot; → &quot;6개월이면 6번&quot; → &quot;2번 썼으면 4번 남음&quot;까지, 규정을 읽고 계산해야 하는 질문입니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실행</div>python<span class="w"> </span>step5_rag.py</div>
-<div class="chapter-image terminal"><img src="./assets/CH01/terminal/01_step4-rag.png" alt="" /><div class="caption">그림 1-10. <code>step5_rag.py</code> 실행 결과. 규정을 바탕으로 연차를 스스로 계산하고 추론한 모습</div></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">ex01 — python step5_rag.py</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-dim">문서를 학습(임베딩) 중입니다...</span></div>
+    <div><span class="tl-label">질문</span> <span class="tl-str">입사 6개월차 신입인데 리프레시 데이 2번 썼어. 몇 번 남았는지 규정 기반으로 계산해줘.</span></div>
+    <div class="tl-section"><span class="tl-label">검색된 문서(근거)</span></div>
+    <div class="tl-kv-row"><span class="tl-key">[보안규정]</span> 승인된 보안 USB만 사용해야 하며, 개인 USB나 외부 저장 매체 사용은 엄격히 금지됩니다.</div>
+    <div class="tl-kv-row"><span class="tl-key">[복지규정]</span> 점심 식사는 무제한 법인카드로 지원하며, 저녁 식사는 야근 시에만 사용이 가능합니다.</div>
+    <div class="tl-kv-row"><span class="tl-key">[인사규정]</span> 신입사원은 입사 후 처음 3년 동안은 법정 연차가 발생하지 않습니다. 대신 매월 1회의 유급 '리프레시 데이'를 휴가로 사용할 수 있습니다.</div>
+    <div class="tl-section"><span class="tl-label">AI 답변</span></div>
+    <div>입사 6개월차 신입사원으로서 총 6개월 동안 매월 1회씩 리프레시 데이를 사용할 수 있습니다.</div>
+    <div>이미 2회 사용했으므로, 남은 리프레시 데이는 <strong>6 - 2 = 4회</strong>입니다.</div>
+  </div>
+</div>
+<div class="caption">그림 1-11. <code>step5_rag.py</code> 실행 결과. 규정을 바탕으로 연차를 스스로 계산하고 추론한 모습</div>
 <div class="term-box">
 <p><strong>사슬 추론(Chain-of-Thought)</strong> 이란? LLM이 최종 답을 곧바로 내놓지 않고, 먼저 문제를 작게 쪼개어 하나씩 따져본 뒤 답을 내놓게 하는 방식입니다. 생각의 고리가 사슬처럼 이어진다고 해서 &quot;사슬 추론&quot;이라 부릅니다. 연차 계산처럼 여러 단계가 필요한 질문에서 답의 정확도가 크게 올라갑니다.</p>
 </div>
@@ -416,7 +501,7 @@ ollama<span class="w"> </span>pull<span class="w"> </span>nomic-embed-text</div>
   <h2>본격 여정은 여기서부터</h2>
   <p class="jf-sub">챕터 1에서 맛본 RAG 원리를 기반으로, 챕터 2부터 <b>커넥트HR 에이전트</b>를 한 단계씩 쌓아갑니다. 4개 파트가 본문의 전체 구조입니다.</p>
   <div class="chapter-image journey-map">
-    <img src="./assets/CH01/gemini/01_journey-roadmap.png" alt="">
+    <img src="../assets/CH01/gemini/01_journey-roadmap.png" alt="">
     <div class="caption">앞으로의 여정. 10개 챕터를 4파트로 묶은 전체 로드맵</div>
   </div>
   <div class="jf-group">

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CH01 재디자인 매칭</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  body {
+    max-width: 1200px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 28px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 6px; letter-spacing: -0.3px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+  h2 {
+    margin-top: 48px;
+    padding: 6px 12px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: #fff;
+    color: var(--color-accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  h2 .chip.keep { background: var(--color-accent-warm); color: #fff; }
+
+  .sample-note {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 10px 0 14px;
+    line-height: 1.7;
+  }
+  .preview-wrap {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: var(--color-surface);
+  }
+  .spec {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-sm);
+    line-height: 1.7;
+  }
+  .spec b { color: var(--color-accent-text); font-weight: 700; }
+  .spec .kept { color: var(--color-accent-warm-text); font-weight: 700; }
+
+  .banner {
+    padding: 16px 20px;
+    background: var(--color-accent-bg);
+    border: 1px solid var(--color-accent-border);
+    color: var(--color-accent-text);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 12px 0 32px;
+  }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 32px; }
+  .toc a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    color: var(--color-accent-text);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .toc a:hover { background: var(--color-accent-bg); }
+</style>
+</head>
+<body>
+
+<h1>CH01 재디자인 매칭</h1>
+<p class="lead">
+  CH01이 실제 쓰는 주요 컴포넌트 7종. <strong>전부 현재 상태 유지</strong>로 정정됨.
+  이유는 아래 배너 참조.
+</p>
+
+<div class="banner">
+  <strong>CH01은 이번 리팩터 영향이 없습니다.</strong><br>
+  이번 정리의 축소 대상은 <code style="font-family:var(--font-mono);background:var(--color-surface);padding:1px 6px;border-radius:3px">success · warning · danger</code> 상태변수(Utility)뿐입니다.
+  Secondary(<code style="font-family:var(--font-mono);background:var(--color-surface);padding:1px 6px;border-radius:3px">accent-warm · 오렌지</code>)는 <strong>브랜드 보조 컬러로 승격</strong>되어 <code>:::remember · :::tip · .term</code>에서 그대로 유지됩니다.
+  CH01은 상태변수를 쓰지 않아 시각적 변화 0건.
+</div>
+
+<div class="toc">
+  <a href="#remember">:::remember</a>
+  <a href="#term-box">:::term-box / .term</a>
+  <a href="#tip">:::tip</a>
+  <a href="#goal">:::goal</a>
+  <a href="#rag-pipeline">.rag-pipeline</a>
+  <a href="#annotated-compare">.annotated-compare</a>
+  <a href="#journey">.journey-forward</a>
+</div>
+
+<!-- ══════ :::remember ══════ -->
+<h2 id="remember">1. :::remember <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">"이것만은 기억하자" 박스. 브랜드 Secondary(오렌지) 그대로 유지. 사용자 지정: "기존 컴포넌트를 사용하자".</p>
+<div class="preview-wrap">
+  <div class="remember">
+    <h2>이것만은 기억하자</h2>
+    <ul>
+      <li><strong>RAG는 오픈북 시험입니다.</strong> 외우지 말고 필요할 때 찾아보게 한다.</li>
+      <li><strong>환각의 원인은 기억에만 의존</strong>하는 구조입니다. 기억 + 근거로 바꾸면 해결.</li>
+    </ul>
+  </div>
+</div>
+<div class="spec">변경 없음 · h2/strong color: <span class="kept">--color-accent-warm-text (유지)</span></div>
+
+<!-- ══════ :::term-box ══════ -->
+<h2 id="term-box">2. :::term-box + .term <span class="chip" style="background:#fff;color:#be185d">CHANGED</span></h2>
+<p class="sample-note">용어 정의 박스와 본문 내 <code>.term</code> 강조를 <strong>Primary(인디고)</strong>로 통일. <code>.term-box</code>의 border-left·tb-name도 Info(블루)에서 Primary로 이동. 현재 실제 CSS가 이미 Primary 적용됨 — 아래는 새 스타일 렌더.</p>
+<div class="preview-wrap">
+  <p>사서가 해주는 건 <span class="term">환각(Hallucination)</span>을 막아 주는 일입니다. 정답을 모르니 지어내는 증상.</p>
+  <div class="term-box">
+    <table>
+      <thead><tr><th>비유</th><th>진짜 용어</th><th>정식 정의</th></tr></thead>
+      <tbody>
+        <tr><td>지어내는 증상</td><td>Hallucination (환각)</td><td>LLM이 학습 데이터에 없는 사실을 그럴듯하게 생성하는 현상</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="spec">
+  .term color: <s>--color-accent-warm (오렌지)</s> → <b>--color-accent (인디고)</b><br>
+  .term-box border-left: <s>#2563eb (Info)</s> → <b>var(--color-accent) (Primary)</b><br>
+  .term-box .tb-name color: <s>--color-info-text</s> → <b>--color-accent-text</b>
+</div>
+
+<!-- ══════ :::tip ══════ -->
+<h2 id="tip">3. :::tip <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">실험 해석 박스. Secondary 오렌지 배경·텍스트 유지.</p>
+<div class="preview-wrap">
+  <div class="tip">
+    <strong>RAG 첫 실험에서 생각해 볼 것들</strong>
+    <ul>
+      <li><strong>질문과 문서의 거리</strong>: 질문 어휘가 문서에 없으면 검색이 못 잡는다.</li>
+      <li><strong>청크 경계</strong>: 정답이 두 청크에 걸쳐 있으면 조각난다.</li>
+    </ul>
+  </div>
+</div>
+<div class="spec">변경 없음 · tip 본문 color: <span class="kept">--color-accent-warm-text (유지)</span></div>
+
+<!-- ══════ :::goal ══════ -->
+<h2 id="goal">4. :::goal <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">챕터 목표 박스. Primary만 사용. 변경 없음.</p>
+<div class="preview-wrap">
+  <div class="goal-box">
+    <strong>이번 챕터가 끝나면</strong>
+    <ul>
+      <li>왜 RAG가 필요한지 한 문장으로 설명할 수 있다</li>
+      <li>환각이 왜 발생하는지 구조를 이해한다</li>
+      <li>RAG 4단계 흐름이 머릿속에 그려진다</li>
+    </ul>
+  </div>
+</div>
+<div class="spec">변경 없음 · Primary(accent) 유지</div>
+
+<!-- ══════ rag-pipeline ══════ -->
+<h2 id="rag-pipeline">5. .rag-pipeline-box <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">RAG 4단계 흐름. Primary만 사용.</p>
+<div class="preview-wrap">
+  <div class="rag-pipeline-box">
+    <div class="rag-pipeline-title">RAG 4단계</div>
+    <div class="rag-pipeline">
+      <div class="rag-step"><div class="s-num">1</div><div class="s-title">질문</div><div class="s-desc">사용자가 물음</div></div>
+      <div class="rag-arrow">→</div>
+      <div class="rag-step"><div class="s-num">2</div><div class="s-title">검색</div><div class="s-desc">VectorDB에서 관련 청크</div></div>
+      <div class="rag-arrow">→</div>
+      <div class="rag-step"><div class="s-num">3</div><div class="s-title">합성</div><div class="s-desc">LLM에 청크 + 질문</div></div>
+      <div class="rag-arrow">→</div>
+      <div class="rag-step"><div class="s-num">4</div><div class="s-title">답변</div><div class="s-desc">근거 있는 답</div></div>
+    </div>
+  </div>
+</div>
+<div class="spec">변경 없음 · Primary(accent) 유지</div>
+
+<!-- ══════ annotated-compare ══════ -->
+<h2 id="annotated-compare">6. .annotated-compare <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">LLM 추정 vs 사내 문서. .llm 테두리만 accent, .truth는 무채색.</p>
+<div class="preview-wrap">
+  <div class="annotated-compare">
+    <div class="ac-heading">같은 질문, 다른 대답</div>
+    <div class="ac-block llm">
+      <div class="ac-label">LLM 추정</div>
+      <div class="ac-name">"저희 회사 재택근무는 주 3일입니다"</div>
+      <div class="ac-tech">근거 없음. 학습 데이터로 추측</div>
+      <div class="ac-content"><span class="ac-strike">주 3일</span></div>
+      <div class="ac-note">실제 규정과 다름</div>
+    </div>
+    <div class="ac-block truth">
+      <div class="ac-label">사내 문서</div>
+      <div class="ac-name">"주 2일, 화·목"</div>
+      <div class="ac-tech">취업규칙 제17조</div>
+      <div class="ac-content">주 <strong>2일</strong> · 화·목</div>
+    </div>
+  </div>
+</div>
+<div class="spec">변경 없음 · .llm accent / .truth 무채색</div>
+
+<!-- ══════ journey ══════ -->
+<h2 id="journey">7. .journey-forward <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">11챕터 여정 맵. Primary만 사용.</p>
+<div class="preview-wrap">
+  <div class="journey-forward">
+    <div class="jf-group">
+      <div class="jf-group-label">도입</div>
+      <div class="jf-items">
+        <div class="jf-item"><div class="jf-ch">CH01</div><div class="jf-title">환각과 RAG</div><div class="jf-desc">왜 필요한가</div></div>
+      </div>
+    </div>
+    <div class="jf-group">
+      <div class="jf-group-label">뼈대</div>
+      <div class="jf-items">
+        <div class="jf-item"><div class="jf-ch">CH02</div><div class="jf-title">사내 시스템</div></div>
+        <div class="jf-item"><div class="jf-ch">CH03</div><div class="jf-title">문서 규칙</div></div>
+        <div class="jf-item"><div class="jf-ch">CH04</div><div class="jf-title">벡터</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="spec">변경 없음</div>
+
+<!-- ══════ 요약 ══════ -->
+<h2 style="background:var(--color-text-heading)">CH01 리팩터 총 영향</h2>
+
+<div style="margin-top:12px;padding:16px 20px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:13px;line-height:1.8">
+  <strong style="color:var(--color-text-heading)">변경 없음 · 7/7 컴포넌트</strong><br>
+  <br>
+  CH01이 쓰는 컴포넌트는 전부 Primary(accent) · Secondary(accent-warm) · 무채색만 사용.<br>
+  축소 대상인 Utility(success·warning·danger)는 <strong>CH01에 0건</strong>.<br>
+  <br>
+  <span style="color:var(--color-text-secondary)">
+    다음 타깃 챕터 (Utility를 실제로 쓰는 곳):
+  </span><br>
+  <ul style="margin:6px 0 0;padding-left:20px;color:var(--color-text)">
+    <li><strong>CH03</strong> — reindex-compare(full·inc), overlap-text 형광펜</li>
+    <li><strong>CH04</strong> — embed good/bad 그룹</li>
+    <li><strong>CH06</strong> — proc-compare (@tool vs MCP 경계·ef-ok/fail)</li>
+    <li><strong>CH07</strong> — cache-diff, wrapper 성공/실패 타임라인</li>
+    <li><strong>CH08~10</strong> — 진단 결과 태그·그룹</li>
+    <li><strong>CH11</strong> — eng-pipe OUTPUT 포트, arch11 응답 화살표</li>
+  </ul>
+</div>
+
+</body>
+</html>

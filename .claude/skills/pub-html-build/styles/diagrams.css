@@ -17,27 +17,29 @@
   .flow-step.final.good { background: #c6f6d5; color: #2f855a; border-color: #68d391; }
 
   /* RAG 파이프라인 */
-  .rag-pipeline-box { background: #fff; border-radius: 12px; padding: 28px 24px; margin: 24px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--color-border-dashed); }
-  .rag-pipeline-title { color: var(--color-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 20px; letter-spacing: 0.5px; }
-  .rag-pipeline { display: flex; align-items: stretch; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .rag-step { flex: 1; min-width: 140px; max-width: 220px; background: linear-gradient(135deg, #ebf8ff, #e6f6ff); border: 1px solid #bee3f8; border-radius: 14px; padding: 20px 16px; text-align: center; }
-  .rag-step .s-num { color: #3182ce; font-size: 32px; font-weight: 800; display: inline-block; width: 48px; height: 48px; line-height: 46px; background: #fff; border-radius: 50%; box-shadow: 0 2px 8px rgba(49,130,206,0.15); border: 2px solid #bee3f8; }
-  .rag-step .s-title { color: #2c5282; font-size: 15px; font-weight: 700; margin: 10px 0 4px; }
-  .rag-step .s-desc { color: var(--color-text-muted); font-size: 12px; line-height: 1.6; }
-  .rag-step .s-meta { color: #3182ce; font-size: 11px; font-style: italic; margin-top: 6px; }
-  .rag-arrow { display: flex; align-items: center; color: var(--color-border-strong); font-size: 28px; padding: 0 4px; }
+  /* RAG 파이프라인 (CH01) — Primary(accent 인디고) + 비유(s-meta) Secondary(accent-warm 오렌지) */
+  .rag-pipeline-box { background: var(--color-surface); border: 1px solid var(--color-border-dashed); border-radius: 12px; padding: 24px; margin: 24px 0; }
+  .rag-pipeline-title { color: var(--color-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 18px; letter-spacing: 0.3px; }
+  .rag-pipeline { display: flex; align-items: stretch; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .rag-step { flex: 1; min-width: 140px; max-width: 220px; background: var(--color-accent-bg); border: 1px solid var(--color-accent-border); border-radius: 10px; padding: 20px 16px 18px; text-align: center; display: flex; flex-direction: column; }
+  .rag-step .s-num { color: #fff; background: var(--color-accent); font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 1px 3px rgba(55,48,163,0.2); }
+  .rag-step .s-title { color: var(--color-text-heading); font-size: 15px; font-weight: 700; margin: 2px 0 6px; }
+  .rag-step .s-desc { color: var(--color-text-secondary); font-size: 12px; line-height: 1.6; flex: 1; }
+  .rag-step .s-meta { color: var(--color-accent-warm-text); font-size: 11px; font-style: italic; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--color-accent-border); }
+  .rag-arrow { display: flex; align-items: center; color: var(--color-accent); font-size: 22px; font-weight: 300; padding: 0 2px; }
 
-  /* 주석형 비교 */
+  /* 주석형 비교 — LLM=Secondary(warm 주의), Truth=Primary(accent 신뢰) */
   .annotated-compare { margin: 24px 0; }
-  .ac-heading { font-size: 14px; font-weight: 700; color: var(--color-text-muted); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--color-border-dashed); }
   .ac-block { padding: 16px 20px; margin-bottom: 12px; border: 1px solid var(--color-border-dashed); border-radius: 8px; background: var(--color-surface); }
+  .ac-block.llm { border-color: var(--color-accent-warm-bg); background: var(--color-accent-warm-bg); }
+  .ac-block.truth { border-color: var(--color-accent-bg); background: var(--color-accent-bg); }
   .ac-block:last-child { margin-bottom: 0; }
   .ac-label { font-size: 12px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: baseline; gap: 8px; }
-  .ac-block.llm .ac-name { color: #9b2c2c; }
-  .ac-block.truth .ac-name { color: #276749; }
-  .ac-tech { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--color-text-subtle); letter-spacing: 0.5px; padding: 2px 6px; background: #edf2f7; border-radius: 4px; font-weight: 400; }
+  .ac-block.llm .ac-name { color: var(--color-accent-warm-text); }
+  .ac-block.truth .ac-name { color: var(--color-accent-text); }
+  .ac-tech { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--color-text-subtle); letter-spacing: 0.5px; padding: 2px 6px; background: var(--color-bg); border-radius: 4px; font-weight: 400; }
   .ac-content { color: var(--color-text-heading); font-size: 15px; line-height: 1.8; }
-  .ac-strike { text-decoration: line-through; text-decoration-color: rgba(197,48,48,0.6); color: var(--color-text-secondary); }
+  .ac-strike { text-decoration: line-through; text-decoration-color: var(--color-accent-warm); color: var(--color-text-secondary); }
   .ac-note { font-size: 13px; color: var(--color-text-secondary); margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--color-border-dashed); }
 
   /* 파트별 아키텍처 다이어그램 */
@@ -2365,4 +2367,439 @@
     font-style: italic;
     line-height: 1.6;
     word-break: keep-all;
+  }
+
+  /* ─────────────────── Engine Pipeline (CH11 §11.2) ───────────────────
+   * 6-stage RAG 파이프라인을 질문(입력) → 6 챔버 → 답변(출력) 구조로 표현.
+   * 블루프린트 스타일: 단일 선 테두리, 좌측 아웃라인(accent-warm) 입력,
+   * 우측 아웃라인(success) 출력, 중앙 2×3 그리드로 챔버.
+   */
+  .eng-pipe {
+    max-width: 620px;
+    margin: var(--space-2xl) auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-dashed);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl) var(--space-lg);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .eng-pipe .ep-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-lg);
+  }
+  .eng-pipe .ep-head .ep-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-subtle);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .eng-pipe .ep-head .ep-name {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: var(--fs-base);
+    color: var(--color-text-heading);
+  }
+  .eng-pipe .ep-body {
+    display: grid;
+    grid-template-columns: 76px 1fr 76px;
+    gap: var(--space-sm);
+    align-items: stretch;
+  }
+  /* Input · Output 포트 (아웃라인 박스) */
+  .eng-pipe .ep-port {
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-xs);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .eng-pipe .ep-port.in { border: 1.5px solid var(--color-accent-warm); }
+  .eng-pipe .ep-port.out { border: 1.5px solid var(--color-success); }
+  .eng-pipe .ep-port .ep-port-lbl {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    font-weight: 700;
+  }
+  .eng-pipe .ep-port.in .ep-port-lbl { color: var(--color-accent-warm-text); }
+  .eng-pipe .ep-port.out .ep-port-lbl { color: var(--color-success-text); }
+  .eng-pipe .ep-port .ep-port-rule {
+    width: 20px;
+    height: 1px;
+    margin: var(--space-xs) auto;
+  }
+  .eng-pipe .ep-port.in .ep-port-rule { background: var(--color-accent-warm); }
+  .eng-pipe .ep-port.out .ep-port-rule { background: var(--color-success); }
+  .eng-pipe .ep-port .ep-port-name {
+    font-family: var(--font-body);
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    color: var(--color-text-heading);
+    letter-spacing: -0.5px;
+  }
+  .eng-pipe .ep-port .ep-port-arrow {
+    font-size: 16px;
+    margin-top: var(--space-sm);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .eng-pipe .ep-port.in .ep-port-arrow { color: var(--color-accent-warm); }
+  .eng-pipe .ep-port.out .ep-port-arrow { color: var(--color-success); }
+  /* 챔버 컨테이너 (6 stage 2×3) */
+  .eng-pipe .ep-chambers {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+  }
+  .eng-pipe .ep-stages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .eng-pipe .ep-stage {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 7px 9px;
+  }
+  .eng-pipe .ep-stage .ep-stage-num {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-accent);
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .eng-pipe .ep-stage .ep-stage-name {
+    font-weight: 700;
+    color: var(--color-text-heading);
+    font-size: var(--fs-sm);
+    margin-left: 6px;
+  }
+  .eng-pipe .ep-stage .ep-stage-fn {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-text-subtle);
+    margin-top: 2px;
+  }
+  .eng-pipe .ep-caption {
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+
+  /* ─────────────────── System Architecture (arch11, CH11 §11.5) ───────────────────
+   * 3행 2열 스택으로 커넥트HR 에이전트 전체 구성도 표현.
+   * Row1: 사용자·Gateway ┃ Runtime / Row2: LLM(bracket) ┃ Tools / Row3: Vector ┃ PG
+   * d1-tokens 에디토리얼 스타일 계승 (bracket 장식 + flow-arrows)
+   */
+  .arch11 { background: var(--color-surface); padding: var(--space-2xl) var(--space-lg); margin: var(--space-2xl) 0; border-radius: var(--radius-xl); border: 1px solid var(--color-border-dashed); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .arch11 .header { text-align: center; margin-bottom: var(--space-xl); }
+  .arch11 .header .sub { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: var(--space-xs); font-weight: 700; }
+  .arch11 .header .title { font-family: var(--font-body); font-weight: 800; font-size: var(--fs-2xl); color: var(--color-text-heading); letter-spacing: -0.5px; }
+  .arch11 .header .desc { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs); }
+  .arch11 .flow-arrows { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--space-md); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; }
+  .arch11 .flow-arrows .fa-pair { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .arch11 .flow-arrows .fa-label { font-size: 8px; color: var(--color-text-subtle); font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .arch11 .flow-arrows .fa-arrow { font-size: var(--fs-lg); font-weight: 700; line-height: 1; }
+  .arch11 .flow-arrows .fa-arrow.call { color: var(--color-accent); }
+  .arch11 .flow-arrows .fa-arrow.ret { color: var(--color-success); }
+  .arch11 .row-client { display: grid; grid-template-columns: 180px 36px 1fr; gap: var(--space-sm); align-items: stretch; }
+  .arch11 .row-ext { display: grid; grid-template-columns: 280px 36px 1fr; gap: var(--space-sm); align-items: stretch; margin-top: var(--space-md); }
+  .arch11 .lvl-lbl { text-align: center; font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; padding: var(--space-md) 0; }
+  .arch11 .lvl-lbl .up { color: var(--color-accent); }
+  .arch11 .lvl-lbl .down { color: var(--color-success); }
+  /* col-c 사용자·Gateway */
+  .arch11 .col-c { background: var(--color-bg); border: 1px solid var(--color-border); padding: var(--space-lg) var(--space-md); display: flex; flex-direction: column; justify-content: space-between; }
+  .arch11 .col-c .user { text-align: center; padding: var(--space-md) var(--space-xs); border-bottom: 1px dashed var(--color-border); }
+  .arch11 .col-c .user .ico { font-size: var(--fs-2xl); color: var(--color-accent-warm); margin-bottom: var(--space-xs); }
+  .arch11 .col-c .user .n { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-xl); color: var(--color-text-heading); }
+  .arch11 .col-c .user .s { font-size: var(--fs-xs); color: var(--color-text-secondary); margin-top: 2px; }
+  .arch11 .col-c .flow { display: flex; justify-content: space-between; padding: var(--space-sm) var(--space-xs); font-family: var(--font-mono); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px; }
+  .arch11 .col-c .flow .d { color: var(--color-accent); font-weight: 700; }
+  .arch11 .col-c .flow .u { color: var(--color-success); font-weight: 700; }
+  .arch11 .col-c .api { text-align: center; padding: var(--space-md) var(--space-xs); border-top: 1px dashed var(--color-border); }
+  .arch11 .col-c .api .l { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs); }
+  .arch11 .col-c .api .n { font-size: var(--fs-xl); color: var(--color-text-heading); font-weight: 700; letter-spacing: -0.3px; }
+  .arch11 .col-c .api .s { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); margin-top: 2px; }
+  /* col-a Runtime (Executor 내부에 Loop + Engine 중첩) */
+  .arch11 .col-a { background: var(--color-bg); border: 1px solid var(--color-text-heading); padding: var(--space-2xl) var(--space-md) var(--space-md); position: relative; }
+  .arch11 .col-a > .title { position: absolute; top: -8px; left: var(--space-md); background: var(--color-surface); padding: 0 var(--space-sm); font-family: var(--font-body); font-weight: 700; font-size: var(--fs-sm); color: var(--color-text-heading); }
+  .arch11 .col-a .ops { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-sm); margin-bottom: var(--space-md); }
+  .arch11 .col-a .chip { background: var(--color-surface); padding: var(--space-sm) var(--space-xs); text-align: center; border-bottom: 2px solid var(--color-border); }
+  .arch11 .col-a .chip .l { font-family: var(--font-mono); font-size: 9px; color: var(--color-text-subtle); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; margin-bottom: 3px; }
+  .arch11 .col-a .chip .n { font-size: var(--fs-sm); color: var(--color-text-heading); font-weight: 700; }
+  .arch11 .col-a .chip .s { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); margin-top: 1px; }
+  .arch11 .col-a .core { text-align: center; padding: var(--space-md); background: var(--color-accent-bg); }
+  .arch11 .col-a .core > .l { font-family: var(--font-mono); font-size: 10px; color: var(--color-accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+  .arch11 .col-a .core > .n { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-lg); color: var(--color-text-heading); margin-top: 3px; }
+  .arch11 .col-a .core > .s { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); margin-top: 2px; }
+  .arch11 .col-a .core .loop-inner { background: var(--color-bg); padding: var(--space-sm); margin: var(--space-sm) 0 0; border: 1px solid var(--color-accent-border); border-radius: var(--radius-sm); }
+  .arch11 .col-a .core .loop-inner .loop-label { font-family: var(--font-mono); font-size: 9px; color: var(--color-accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs); }
+  .arch11 .col-a .core .loop-inner .stages { display: flex; align-items: center; justify-content: center; gap: var(--space-xs); }
+  .arch11 .col-a .core .loop-inner .st { font-family: var(--font-mono); font-size: 10px; padding: 3px 10px; background: var(--color-surface); border: 1px solid var(--color-border); letter-spacing: 1px; text-transform: uppercase; font-weight: 700; color: var(--color-text-heading); }
+  .arch11 .col-a .core .loop-inner .arr { color: var(--color-text-subtle); font-size: var(--fs-sm); }
+  .arch11 .col-a .core .engine-inner { background: var(--color-bg); padding: var(--space-sm); margin: var(--space-sm) 0 0; border: 1px solid var(--color-accent-border); border-radius: var(--radius-sm); }
+  .arch11 .col-a .core .engine-inner .engine-label { font-family: var(--font-mono); font-size: 9px; color: var(--color-accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs); }
+  .arch11 .col-a .core .engine-inner .engine-name { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-sm); color: var(--color-text-heading); margin-bottom: var(--space-xs); }
+  .arch11 .col-a .core .engine-inner .stages-6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-family: var(--font-mono); }
+  .arch11 .col-a .core .engine-inner .stages-6 .s { background: var(--color-surface); border: 1px solid var(--color-border); padding: 6px 4px; text-align: center; color: var(--color-text-heading); font-weight: 700; }
+  .arch11 .col-a .core .engine-inner .stages-6 .s .num { display: block; font-size: 8px; color: var(--color-accent); letter-spacing: 1px; margin-bottom: 2px; }
+  .arch11 .col-a .core .engine-inner .stages-6 .s .nm { display: block; font-size: 11px; color: var(--color-text-heading); }
+  /* llm (bracket box) */
+  .arch11 .llm { margin: 0; display: flex; align-items: stretch; }
+  .arch11 .llm .box { background: var(--color-bg); border: 1px solid var(--color-text-heading); padding: var(--space-md) var(--space-lg); text-align: center; position: relative; width: 100%; min-width: 0; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
+  .arch11 .llm .box::before, .arch11 .llm .box::after { content: ""; position: absolute; top: -4px; bottom: -4px; width: 5px; border: 1px solid var(--color-text-heading); }
+  .arch11 .llm .box::before { left: -4px; border-right: none; }
+  .arch11 .llm .box::after { right: -4px; border-left: none; }
+  .arch11 .llm .box .l { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+  .arch11 .llm .box .n { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-lg); color: var(--color-text-heading); margin: 2px 0; }
+  .arch11 .llm .box .models { display: flex; flex-direction: column; gap: 2px; margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px dashed var(--color-border); }
+  .arch11 .llm .box .m { display: grid; grid-template-columns: 120px 1fr; gap: var(--space-sm); align-items: baseline; font-family: var(--font-mono); font-size: 11px; text-align: left; }
+  .arch11 .llm .box .m .mn { color: var(--color-text-heading); font-weight: 700; }
+  .arch11 .llm .box .m .mu { color: var(--color-text-secondary); font-size: 10px; }
+  /* col-t Tools */
+  .arch11 .col-t { background: var(--color-bg); border: 1px solid var(--color-border); padding: var(--space-2xl) var(--space-md) var(--space-md); position: relative; }
+  .arch11 .col-t .title { position: absolute; top: -8px; left: var(--space-md); background: var(--color-surface); padding: 0 var(--space-sm); font-family: var(--font-body); font-weight: 700; font-size: var(--fs-sm); color: var(--color-text-heading); }
+  .arch11 .col-t .tool { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-sm); align-items: center; padding: var(--space-sm) var(--space-xs); border-bottom: 1px solid var(--color-border-dashed); }
+  .arch11 .col-t .tool:last-child { border-bottom: none; }
+  .arch11 .col-t .tool .no { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-subtle); letter-spacing: 1px; font-weight: 700; }
+  .arch11 .col-t .tool .n { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--color-text-heading); font-weight: 700; }
+  .arch11 .col-t .tool .s { font-size: var(--fs-xs); color: var(--color-text-secondary); margin-top: 1px; }
+  .arch11 .col-t .tool .b { font-family: var(--font-mono); font-size: 10px; color: var(--color-accent-warm-text); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; background: #fff4ed; padding: 2px var(--space-sm); border-radius: var(--radius-sm); }
+  .arch11 .col-t .tool .b.rag { color: var(--color-accent-text); background: var(--color-accent-bg); }
+  /* stores */
+  .arch11 .stores { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); margin-top: var(--space-md); align-items: stretch; }
+  .arch11 .stores .st { text-align: center; padding: var(--space-md) var(--space-lg); border: 1px solid var(--color-border); background: var(--color-bg); }
+  .arch11 .stores .st .l { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-secondary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+  .arch11 .stores .st .n { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-lg); color: var(--color-text-heading); margin: 3px 0; }
+  .arch11 .stores .st .s { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); }
+
+  /* ───────── arch11 · chap-view 확장 (챕터별 누적 미니맵) ─────────
+   * 각 챕터 끝에 arch11 골격을 재활용해 "이번 챕터까지 만든 것만" 표시.
+   * - .gap / .gap-col-a / .gap-llm / .gap-col-t : 아직 안 만든 자리 placeholder
+   * - .new / .new-badge : 이번 챕터에서 새로 만든 박스·stage·chip·model
+   * - .future : 아직 도입 전인 세부 요소 (stage·chip·model)
+   * - .row-ext.solo : MCP Tools 없을 때 LLM 박스가 row 전체 차지
+   * - .col-a > .loop-inner / .engine-inner : .core 래퍼 없이 직접 배치 (CH05~10)
+   */
+  .arch11 .gap {
+    border: 1.5px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 78px;
+    opacity: 0.35;
+  }
+  .arch11 .gap.gap-col-a { min-height: 230px; }
+  .arch11 .gap.gap-llm { min-height: 120px; }
+  .arch11 .gap.gap-col-t { min-height: 140px; }
+  .arch11 .flow-arrows.empty { opacity: 0.1; }
+  .arch11 .lvl-lbl.muted { opacity: 0.3; }
+
+  /* Row 2 단독 · LLM만 있고 Tools 없을 때 */
+  .arch11 .row-ext.solo { grid-template-columns: 1fr; }
+  .arch11 .row-ext.solo .llm .box { max-width: 640px; margin: 0 auto; }
+
+  /* .col-a > .loop-inner (core 없이 직접) */
+  .arch11 .col-a > .loop-inner {
+    background: var(--color-bg);
+    padding: var(--space-sm);
+    margin: 0;
+    border: 1px solid var(--color-accent-border);
+    border-radius: var(--radius-sm);
+  }
+  .arch11 .col-a > .loop-inner .loop-label {
+    font-family: var(--font-mono); font-size: 9px; color: var(--color-accent);
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+    margin-bottom: var(--space-xs);
+  }
+  .arch11 .col-a > .loop-inner .stages {
+    display: flex; align-items: center; justify-content: center; gap: var(--space-xs);
+  }
+  .arch11 .col-a > .loop-inner .st {
+    font-family: var(--font-mono); font-size: 10px; padding: 3px 10px;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+    color: var(--color-text-heading);
+  }
+  .arch11 .col-a > .loop-inner .arr { color: var(--color-text-subtle); font-size: var(--fs-sm); }
+
+  /* .col-a > .engine-inner (core 없이 직접) */
+  .arch11 .col-a > .engine-inner {
+    background: var(--color-bg); padding: var(--space-sm); margin: 0;
+    border: 1px solid var(--color-accent-border); border-radius: var(--radius-sm);
+  }
+  .arch11 .col-a > .loop-inner + .engine-inner,
+  .arch11 .col-a > .ops + .loop-inner,
+  .arch11 .col-a > .ops + .engine-inner { margin-top: var(--space-sm); }
+  .arch11 .col-a > .engine-inner .engine-label {
+    font-family: var(--font-mono); font-size: 9px; color: var(--color-accent);
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs);
+  }
+  .arch11 .col-a > .engine-inner .engine-name {
+    font-family: var(--font-body); font-weight: 700; font-size: var(--fs-sm);
+    color: var(--color-text-heading); margin-bottom: var(--space-xs);
+  }
+  .arch11 .col-a > .engine-inner .stages-6 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-family: var(--font-mono);
+  }
+  .arch11 .col-a > .engine-inner .stages-6 .s {
+    background: var(--color-surface); border: 1px solid var(--color-border); padding: 6px 4px;
+    text-align: center; color: var(--color-text-heading); font-weight: 700;
+  }
+  .arch11 .col-a > .engine-inner .stages-6 .s .num {
+    display: block; font-size: 8px; color: var(--color-accent); letter-spacing: 1px; margin-bottom: 2px;
+  }
+  .arch11 .col-a > .engine-inner .stages-6 .s .nm {
+    display: block; font-size: 11px; color: var(--color-text-heading);
+  }
+
+  /* 상태 3단계: done(기본) / new(강조) / future(점선·흐림) */
+  .arch11 .stages-6 .s.future,
+  .arch11 .col-a .stages-6 .s.future {
+    opacity: 0.3; border-style: dashed; background: transparent;
+  }
+  .arch11 .stages-6 .s.future .num,
+  .arch11 .col-a .stages-6 .s.future .num { color: var(--color-text-subtle); }
+  .arch11 .stages-6 .s.future .nm,
+  .arch11 .col-a .stages-6 .s.future .nm { color: var(--color-text-muted); }
+  .arch11 .llm .box .m.future { opacity: 0.3; font-style: italic; }
+  .arch11 .llm .box .m.future .mn { color: var(--color-text-muted); text-decoration: line-through; }
+  .arch11 .col-a .ops .chip.future { opacity: 0.3; border-bottom-style: dashed; }
+  .arch11 .col-a .ops .chip.future .n { color: var(--color-text-muted); }
+
+  /* NEW 뱃지 + 박스 강조 */
+  .arch11 .new {
+    border-color: var(--color-accent) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+    position: relative;
+  }
+  .arch11 .new-badge {
+    position: absolute;
+    top: -11px; right: 10px;
+    background: var(--color-accent); color: #fff;
+    font-family: var(--font-mono); font-size: 9px;
+    padding: 3px 9px; border-radius: 3px;
+    letter-spacing: 1.5px; font-weight: 800;
+    z-index: 10; white-space: nowrap; pointer-events: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .arch11 .stages-6 .s.new,
+  .arch11 .col-a .stages-6 .s.new {
+    border-color: var(--color-accent); border-width: 2px;
+    background: var(--color-accent-bg);
+  }
+  .arch11 .stages-6 .s.new .nm,
+  .arch11 .col-a .stages-6 .s.new .nm { color: var(--color-accent-text); font-weight: 800; }
+  .arch11 .col-a .ops .chip.new {
+    border-bottom: 2.5px solid var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  .arch11 .col-a .ops .chip.new .n { color: var(--color-accent-text); }
+  .arch11 .llm .box .m.new .mn { color: var(--color-accent); font-weight: 800; }
+  .arch11 .llm .box .m.new .mn::before {
+    content: '+ ';
+    color: var(--color-accent); font-weight: 800;
+    font-family: var(--font-mono);
+  }
+
+  /* 공통 다이어그램 캡션 — 모든 <div class="caption">에 일괄 적용.
+   * 어떤 컴포넌트(arch11·eng-pipe·terminal-log·annotated-compare·이후 신규) 다음에 오든
+   * 동일한 이탤릭·중앙정렬 톤. .chapter-image .caption (이미지 아래)과 통일. */
+  .caption {
+    margin-top: 10px;
+    margin-bottom: var(--space-xl);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* ─────────────────── Terminal Log (CH11~) ───────────────────
+   * macOS 스타일 터미널 창 안에 서버 로그·실시간 출력을 표현.
+   * 사용처: 서버 기동 로그, 요청 처리 로그(질문 수신·QueryExpander·TokenTracker·처리 완료).
+   * 구조: .terminal-log > .tl-chrome(.tl-traffic · .tl-title) + .tl-body
+   *      .tl-body 내부: .tl-label / .tl-kv / .tl-kv-row / .tl-end / .tl-cursor
+   */
+  .terminal-log {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: 1px solid var(--color-border-dashed);
+    margin: 24px 0;
+    font-family: var(--font-mono);
+  }
+  .terminal-log .tl-chrome {
+    background: #e7e9ec;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #d0d7de;
+  }
+  .terminal-log .tl-traffic { display: flex; gap: 6px; }
+  .terminal-log .tl-traffic span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .terminal-log .tl-traffic span:nth-child(1) { background: #ff5f57; }
+  .terminal-log .tl-traffic span:nth-child(2) { background: #febc2e; }
+  .terminal-log .tl-traffic span:nth-child(3) { background: #28c840; }
+  .terminal-log .tl-title {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    color: #5e6470;
+    font-weight: 500;
+  }
+  .terminal-log .tl-chrome .tl-spacer { width: 48px; }
+  .terminal-log .tl-body {
+    background: #ffffff;
+    padding: 16px 20px;
+    font-size: var(--fs-xs);
+    color: #24292f;
+    line-height: 1.75;
+  }
+  /* 색상 토큰 — Rich console 팔레트 대응 */
+  .terminal-log .tl-label { color: #8250df; font-weight: 700; } /* magenta · 섹션 라벨 */
+  .terminal-log .tl-key   { color: #0969da; font-weight: 700; } /* blue · 키 */
+  .terminal-log .tl-val   { color: #1a7f37; font-weight: 700; } /* green · 확장값·성공 */
+  .terminal-log .tl-num   { color: #0550ae; } /* navy · 수치 */
+  .terminal-log .tl-str   { color: #953800; } /* brown · 문자열·모델명 */
+  .terminal-log .tl-dim   { color: #5e6470; } /* gray · 보조 */
+  /* KV 표(모델 · 토큰 등) — label 들여쓰기 */
+  .terminal-log .tl-kv { padding-left: 1.5em; }
+  .terminal-log .tl-kv-row { color: #24292f; padding-left: 1.5em; }
+  /* 상·하 구분선 */
+  .terminal-log .tl-divider {
+    margin-top: var(--space-sm);
+    border-top: 1px dashed #d0d7de;
+    padding-top: var(--space-xs);
+    color: #5e6470;
+  }
+  .terminal-log .tl-section { margin-top: var(--space-sm); }
+  /* 커서 */
+  .terminal-log .tl-cursor {
+    background: #24292f;
+    color: #fff;
+    display: inline-block;
+    width: 7px;
+    height: 14px;
+    margin-left: 6px;
+    vertical-align: middle;
   }

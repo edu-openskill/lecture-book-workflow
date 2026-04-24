@@ -64,7 +64,7 @@ Phase 6 ── 출판 (인쇄소)
 | `이미지 분석`      | 5    | `[GEMINI PROMPT]` 플레이스홀더       | illustrator + image-analyzer 스킬                  |
 | `출판정보 생성`    | 출판 | `book/publish-info-*.md`             | publisher + pub-info 스킬                          |
 | `인쇄소`           | 출판 | `book/output/*.pdf`                  | Typst 파이프라인. 아래 "인쇄소 실행 흐름" 참조     |
-| `HTML 빌드`        | 출판 | `book/output/*.pdf`                  | `pub-html-build` 스킬. 아래 "HTML 파이프라인" 참조 |
+| `HTML 빌드`        | 집필 | `.build/*.html`                      | `pub-html-build` 스킬. 아래 "HTML 파이프라인" 참조. PDF가 필요하면 별도 스킬 `pub-html-to-pdf` |
 | `이어하기`         | —    | —                                    | `progress.json` + 최근 수정 파일로 상태 복구       |
 | `현재 상태`        | —    | 터미널 출력                          | progress.json 기반                                 |
 | `PM 전략 [서비스]` | —    | `docs/pm/[서비스]-전략.md`           | pm-strategist 에이전트                             |
@@ -82,7 +82,7 @@ Phase 6 ── 출판 (인쇄소)
 마크다운 → HTML → PDF 빌드. 상세: `.claude/skills/pub-html-build/SKILL.md`
 
 ```bash
-python .claude/skills/pub-html-build/build_pdf_html.py --project-root projects/<책이름> --chapter N
+python .claude/skills/pub-html-build/build_html.py --project-root projects/<책이름> --chapter N
 ```
 
 ### `새 책 만들기`
@@ -103,8 +103,8 @@ projects/[책이름]/
 ├── answers.md                  ← 모든 STEP 질문 답변 누적
 ├── planning/                   ← STEP 1~4 산출물
 ├── chapters/                   ← STEP 5 산출물 (원본, 에셋 경로 유지)
-├── book/                       ← 인쇄소 조립 폴더 (출판용 복사본)
-│   └── output/book.pdf
+├── book/                       ← 프롤로그·에필로그 등 저작물 (front/ back/)
+├── .build/                     ← HTML 빌드 산출물 + 저자 오버라이드 tokens.css
 ├── code/                       ← 원천 소스코드 (수정하지 않음)
 ├── [완성본 레포]/                ← 완성 코드 (code/에서 챕터별 분해)
 ├── [예제 레포]/                  ← 예제 스켈레톤 (완성본을 복사 → TODO+pass)

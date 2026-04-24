@@ -420,3 +420,62 @@
 - `.qr-up-label`에 긴 문장 금지. "명확"/"있음" 같은 2~4자 조건 라벨만. 더 길면 라벨이 넓어져 outputs pool 컬럼을 초과
 - `.qr-pool`을 비교(A vs B)에 사용 금지. 결과 **풀**(pool)을 표현하는 단일 목적지이며, 2분할이 필요하면 `../comparisons/`의 `.annotated-compare`나 `.reindex-compare`를 쓴다
 - 단계 내부에서 "여러 output 중 하나만 반환되는 경우"(예: CH06 STAGE 2 있음 → structured 단일)를 강조해야 하면 `.qr-pool` 옆에 별도 `.qr-out` 단일 칩을 배치하거나 본문으로 보충 설명. 단계마다 output 차이를 시각화하려면 수직 자기완결 레이아웃이 더 적합
+
+### .eng-pipe
+
+**언제 쓰는가**: **6개 단계의 파이프라인**을 입력·챔버·출력 블루프린트 스타일로 표현할 때. CH11 §11.2 "커넥트HR 엔진"처럼 RAG 파이프라인 6 스테이지(파싱·청킹·쿼리 확장·검색·리랭킹·부모/LLM)를 한 그림에 담음. 좌측 입력(accent-warm 아웃라인) · 중앙 2×3 챔버 그리드 · 우측 출력(success 아웃라인) 3-zone 구조.
+
+**사용 챕터**: CH11
+
+**HTML 사용 예**:
+```html
+<div class="eng-pipe">
+  <div class="ep-head">
+    <span class="ep-tag">pipeline</span>
+    <span class="ep-name">커넥트HR 엔진</span>
+    <span class="ep-tag">6 stages</span>
+  </div>
+
+  <div class="ep-body">
+    <div class="ep-port in">
+      <div class="ep-port-lbl">INPUT</div>
+      <div class="ep-port-rule"></div>
+      <div class="ep-port-name">질문</div>
+      <div class="ep-port-arrow">▶</div>
+    </div>
+
+    <div class="ep-chambers">
+      <div class="ep-stages">
+        <div class="ep-stage"><span class="ep-stage-num">01</span><span class="ep-stage-name">파싱</span><div class="ep-stage-fn">parse_pdf_hybrid</div></div>
+        <div class="ep-stage"><span class="ep-stage-num">02</span><span class="ep-stage-name">청킹</span><div class="ep-stage-fn">semantic_chunking</div></div>
+        <div class="ep-stage"><span class="ep-stage-num">03</span><span class="ep-stage-name">쿼리 확장</span><div class="ep-stage-fn">QueryExpander</div></div>
+        <div class="ep-stage"><span class="ep-stage-num">04</span><span class="ep-stage-name">검색</span><div class="ep-stage-fn">EnsembleRetriever</div></div>
+        <div class="ep-stage"><span class="ep-stage-num">05</span><span class="ep-stage-name">리랭킹</span><div class="ep-stage-fn">CrossEncoderReranker</div></div>
+        <div class="ep-stage"><span class="ep-stage-num">06</span><span class="ep-stage-name">부모·LLM</span><div class="ep-stage-fn">ParentDoc + Agent</div></div>
+      </div>
+    </div>
+
+    <div class="ep-port out">
+      <div class="ep-port-lbl">OUTPUT</div>
+      <div class="ep-port-rule"></div>
+      <div class="ep-port-name">답변</div>
+      <div class="ep-port-arrow">▶</div>
+    </div>
+  </div>
+
+  <div class="ep-caption">그림 11-10. 질문이 들어와 6단계 파이프라인을 지나 답변이 나가기까지</div>
+</div>
+```
+
+**렌더 CSS**: `styles/diagrams.css` 의 `/* Engine Pipeline (CH11 §11.2) */` 블록 (`.eng-pipe`, `.ep-head`, `.ep-tag`, `.ep-name`, `.ep-body`, `.ep-port`, `.ep-port.in/.out`, `.ep-port-lbl/-rule/-name/-arrow`, `.ep-chambers`, `.ep-stages`, `.ep-stage`, `.ep-stage-num/-name/-fn`, `.ep-caption`)
+
+**변형**: 스테이지 개수는 6개 기준(2×3 그리드). 5 이하면 `.ep-stages`의 grid-template-columns를 1fr·반복 개수로 조정. 7 이상은 세로가 길어져 `.rag-pipeline-box`를 쓰거나 새 컴포넌트로 분리. 포트 색:
+- `.ep-port.in` — `--color-accent-warm` 아웃라인 (INPUT, 질문)
+- `.ep-port.out` — `--color-success` 아웃라인 (OUTPUT, 답변)
+스테이지 번호 색은 `--color-accent` 인디고 고정.
+
+**피해야 할 것**
+- 스테이지 4개 이하: 6칸 그리드가 비게 되어 공백이 크다. 3~5단계는 `.rag-pipeline-box`(가로 flex) 사용
+- `.ep-port`를 3개 이상 두기 금지: INPUT · OUTPUT 두 쌍이 기본 구조. 제3의 포트가 필요하면 별도 컴포넌트
+- `.ep-stage-fn`에 2줄 이상 텍스트: 셀 높이가 부풀어 그리드 균형이 깨짐. 함수명 한 줄로
+- 입력·출력 포트를 같은 색으로 쓰기: 입력·출력 구분이 색으로 되어 있으므로 `.in`·`.out` modifier로 반드시 구분

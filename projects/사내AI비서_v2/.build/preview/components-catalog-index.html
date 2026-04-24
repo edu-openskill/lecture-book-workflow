@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>컴포넌트 카탈로그 인덱스 — 현황</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+  body {
+    max-width: 1100px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 28px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 6px; letter-spacing: -0.3px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 32px; line-height: 1.7; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 32px; }
+  .toc a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    color: var(--color-accent-text);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .toc a:hover { background: var(--color-accent-bg); border-color: var(--color-accent-border); }
+
+  h2 {
+    margin-top: 48px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--color-accent);
+    font-size: 18px;
+    color: var(--color-text-heading);
+    font-weight: 800;
+  }
+  h2 .cat-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--color-accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 10px;
+    letter-spacing: 1px;
+    vertical-align: 2px;
+  }
+
+  .card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin: 10px 0;
+    background: var(--color-surface);
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .card-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-heading);
+    font-weight: 700;
+  }
+  .card-usage {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-subtle);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+  }
+  .color-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .pill {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .pill.brand   { background: var(--color-accent-bg); color: var(--color-accent-text); border: 1px solid var(--color-accent-border); }
+  .pill.brand.secondary { background: var(--color-accent-warm-bg); color: var(--color-accent-warm-text); border: 1px solid var(--color-accent-warm-border); }
+  .pill.info    { background: var(--color-info-bg); color: var(--color-info-text); border: 1px solid var(--color-info-border); }
+  .pill.util    { background: var(--color-surface-alt); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+  .pill.util.changed { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 12px 0 16px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+  .legend .pill { margin-right: 4px; }
+
+  .note-box {
+    background: var(--color-accent-bg);
+    border: 1px solid var(--color-accent-border);
+    color: var(--color-accent-text);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 12px 0 24px;
+  }
+</style>
+</head>
+<body>
+
+<h1>컴포넌트 카탈로그 인덱스 · 현황</h1>
+<p class="lead">
+  <code style="font-family:var(--font-mono);background:var(--color-surface-alt);padding:1px 6px;border-radius:3px">pub-html-build/components-catalog/</code>에 정리된 **6 카테고리 · 주요 컴포넌트 목록**과 각 컴포넌트가 쓰는 색 변수 현황.
+  브랜드 컬러 리팩터(Primary·Info만 남기기)에서 어느 컴포넌트가 영향받는지 한눈에.
+</p>
+
+<div class="note-box">
+  <strong>색 변수 범례</strong><br>
+  <span class="pill brand">brand · Primary</span> — accent (인디고, 메인)<br>
+  <span class="pill brand secondary">brand · Secondary</span> — accent-warm (오렌지, 보조). remember·tip·term·h1 번호 등<br>
+  <span class="pill info">brand · Info</span> — info (블루, 정보)<br>
+  <span class="pill util">util</span> — 무채색 (유지)<br>
+  <span class="pill util changed">util · 상태변수 (축소 대상)</span> — success·warning·danger. 새 컴포넌트 사용 금지. Primary·무채색으로 점진 흡수
+</div>
+
+<div class="toc">
+  <a href="#boxes">01 boxes</a>
+  <a href="#cards">02 cards</a>
+  <a href="#comparisons">03 comparisons</a>
+  <a href="#pipelines">04 pipelines</a>
+  <a href="#fullmap">05 fullmap</a>
+  <a href="#terminals">06 terminals</a>
+  <a href="#captions">07 captions</a>
+</div>
+
+<!-- ══════ boxes ══════ -->
+<h2 id="boxes"><span class="cat-tag">01</span>boxes — 박스형 directive</h2>
+<p class="lead">챕터 목표·준비·팁·용어·기억 등 본문 박스. 대부분 <code>:::name</code> directive로 호출.</p>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">:::goal · .goal-box</div>
+    <div class="card-usage">10/11 챕터 · 챕터 최상단</div>
+  </div>
+  <div class="card-desc">"이번 챕터가 끝나면…" 목표 박스. 3~4줄 요약.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (테두리·체크)</span>
+    <span class="pill brand">--color-accent-bg (배경)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">::::prep</div>
+    <div class="card-usage">9/11 챕터 · 환경 준비 섹션</div>
+  </div>
+  <div class="card-desc">폴더 이동·파일 트리·환경 구축·라이브러리·실습 순서 준비 블록.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (헤더)</span>
+    <span class="pill util">--color-surface</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">:::term-box · .term</div>
+    <div class="card-usage">15곳 · 용어 정의</div>
+  </div>
+  <div class="card-desc">처음 등장하는 기술 용어의 비유·진짜 이름·정식 정의 3열 박스. 본문의 <code>.term</code> 단어가 이 박스에서 풀이됨.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (.term 색 · 2026-04-23 변경)</span>
+    <span class="pill brand">--color-accent (term-box border-left)</span>
+    <span class="pill brand">--color-accent-text (tb-name)</span>
+    <span class="pill util">--color-surface (bg)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">:::tip · .tip</div>
+    <div class="card-usage">13곳 · 실험 해석 박스</div>
+  </div>
+  <div class="card-desc">"실험에서 생각해 볼 것들" 팁 박스. 실습 후에 배치.</div>
+  <div class="color-pills">
+    <span class="pill brand secondary">--color-accent-warm-text (본문)</span>
+    <span class="pill util">#fef3c7 계열 배경</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">:::remember · .remember</div>
+    <div class="card-usage">10/11 챕터 · 챕터 닫기</div>
+  </div>
+  <div class="card-desc">"이것만은 기억하자" 3줄 정리 박스.</div>
+  <div class="color-pills">
+    <span class="pill brand secondary">--color-accent-warm-text (h2·strong)</span>
+    <span class="pill util">--color-border</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">:::note · :::memo</div>
+    <div class="card-usage">note 3곳 · memo 4곳</div>
+  </div>
+  <div class="card-desc">note는 보조 설명. memo는 캐릭터가 수첩에 적는 장면(아이보리 배경·포스트잇 그림자).</div>
+  <div class="color-pills">
+    <span class="pill util">무채색</span>
+  </div>
+</div>
+
+<!-- ══════ cards ══════ -->
+<h2 id="cards"><span class="cat-tag">02</span>cards — 청크·임베딩 카드</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.chunk-with-meta · .cwm-*</div>
+    <div class="card-usage">CH04 · 1곳</div>
+  </div>
+  <div class="card-desc">청크 1개를 메타데이터와 함께 보여주는 카드. 제목·본문·태그·노트.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (태그)</span>
+    <span class="pill util">--color-border</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.embed-example-row · .eer-*</div>
+    <div class="card-usage">CH04 · 임베딩 비교</div>
+  </div>
+  <div class="card-desc">"의미가 비슷한 예 vs 다른 예"를 벡터와 함께 좌우로 보여주는 행.</div>
+  <div class="color-pills">
+    <span class="pill util changed">--color-success-text (good 그룹)</span>
+    <span class="pill util changed">--color-danger-text (bad 그룹)</span>
+  </div>
+</div>
+
+<!-- ══════ comparisons ══════ -->
+<h2 id="comparisons"><span class="cat-tag">03</span>comparisons — 비교 다이어그램</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.annotated-compare · .ac-*</div>
+    <div class="card-usage">CH01 · LLM 추정 vs 정답</div>
+  </div>
+  <div class="card-desc">LLM이 지어낸 답 vs 실제 문서의 답을 나란히 놓고 취소선·주석으로 차이를 드러내는 비교 박스. CH01 핵심 다이어그램.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (.llm 테두리)</span>
+    <span class="pill util">무채색 (.truth)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.overlap-text-demo · .otd-*</div>
+    <div class="card-usage">CH03 · 청크 겹침 시연</div>
+  </div>
+  <div class="card-desc">긴 본문을 여러 청크로 겹치게 자르는 과정을 색 밑줄로 시각화.</div>
+  <div class="color-pills">
+    <span class="pill util changed">--color-warning-bg (형광펜 mark)</span>
+    <span class="pill util changed">--color-warning (mark 강조)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.reindex-compare · .rc-*</div>
+    <div class="card-usage">CH03 · 재인덱싱 비교</div>
+  </div>
+  <div class="card-desc">전체 재인덱싱 vs 증분 업데이트를 시간축으로 비교.</div>
+  <div class="color-pills">
+    <span class="pill util changed">--color-danger-bg (rc-badge-full)</span>
+    <span class="pill util changed">--color-success-text (rc-doc.rc-new)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.proc-compare · .pc-*</div>
+    <div class="card-usage">CH06 · @tool vs MCP</div>
+  </div>
+  <div class="card-desc">프로세스 경계를 기준으로 @tool과 MCP 호출 구조를 좌우 비교. ef-ok·ef-fail 박스로 "기대 동작 vs 실패 케이스" 같이 표현.</div>
+  <div class="color-pills">
+    <span class="pill util changed">--color-success-bg (ef-ok)</span>
+    <span class="pill util changed">--color-danger-bg (ef-fail, MCP 경계)</span>
+    <span class="pill util changed">--color-warning-bg (경고)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.cache-diff</div>
+    <div class="card-usage">CH07</div>
+  </div>
+  <div class="card-desc">캐시 히트/미스의 지연 시간 차이 시각화.</div>
+  <div class="color-pills">
+    <span class="pill util changed">--color-success-text (히트)</span>
+  </div>
+</div>
+
+<!-- ══════ pipelines ══════ -->
+<h2 id="pipelines"><span class="cat-tag">04</span>pipelines — 흐름·타임라인</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.rag-pipeline-box · .rag-step · .s-*</div>
+    <div class="card-usage">CH01 · RAG 4단계 흐름</div>
+  </div>
+  <div class="card-desc">RAG 파이프라인의 4 step(질문 → 검색 → 합성 → 답변)을 가로 카드로.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (s-num 동그라미)</span>
+    <span class="pill util">--color-border</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.journey-forward · .jf-*</div>
+    <div class="card-usage">CH01 · 11챕터 여정 맵</div>
+  </div>
+  <div class="card-desc">책 전체 챕터를 5개 그룹(도입·뼈대·RAG·운영·완성)으로 묶어 앞으로의 여정을 미리 보여주는 맵.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (그룹 라벨·제목)</span>
+    <span class="pill util">--color-surface</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.qr-flow · .qr-*</div>
+    <div class="card-usage">CH06 · QueryRouter 3단계</div>
+  </div>
+  <div class="card-desc">질문 라우팅의 "분기 → 도구 선택 → 실행" 흐름.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (분기선)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.rc-timeline · .ec-cabinet · .wrapper-arch</div>
+    <div class="card-usage">CH07 · 운영 안정화 다이어그램</div>
+  </div>
+  <div class="card-desc">재시도 타임라인 / 캐시 캐비닛 / 래퍼 아키텍처.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent</span>
+    <span class="pill util changed">--color-success (OUTPUT 포트)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.eng-pipe · .ep-*</div>
+    <div class="card-usage">CH11 · 엔진 파이프라인</div>
+  </div>
+  <div class="card-desc">6 stage를 INPUT/OUTPUT 포트로 감싼 블루프린트식 파이프라인.</div>
+  <div class="color-pills">
+    <span class="pill brand secondary">--color-accent-warm (ep-port.in)</span>
+    <span class="pill util changed">--color-success (ep-port.out)</span>
+    <span class="pill brand">--color-accent (stage num)</span>
+  </div>
+</div>
+
+<!-- ══════ fullmap ══════ -->
+<h2 id="fullmap"><span class="cat-tag">05</span>fullmap — 책 전체 구성도</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.arch-fullmap · .afm-*</div>
+    <div class="card-usage">CH02·03·04·05·07·10 · 챕터 끝 구성도</div>
+  </div>
+  <div class="card-desc">매 챕터 끝에 "전체 구성도에서 챕터 N의 자리"를 보여줌. afm-on(진함)과 afm-faint(흐림)로 현재 챕터 강조.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (afm-on)</span>
+    <span class="pill util">무채색 (afm-faint)</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.arch11 · .col-c/-a/-t · .row-client/-ext</div>
+    <div class="card-usage">CH11 · 최종 시스템 아키텍처</div>
+  </div>
+  <div class="card-desc">3행 2열 최종 구성도. 사용자·Gateway / Runtime · LLM bracket · Tools / Vector · PG.</div>
+  <div class="color-pills">
+    <span class="pill brand">--color-accent (call 화살표·col 라벨)</span>
+    <span class="pill util changed">--color-success (ret 화살표·flow.u·lvl.down)</span>
+    <span class="pill brand secondary">--color-accent-warm (user 아이콘·tool b 뱃지)</span>
+  </div>
+</div>
+
+<!-- ══════ terminals ══════ -->
+<h2 id="terminals"><span class="cat-tag">06</span>terminals — 터미널 로그</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.terminal-log · .tl-*</div>
+    <div class="card-usage">CH11 · 서버 로그 재현 4곳</div>
+  </div>
+  <div class="card-desc">macOS 스타일 터미널 창 + 6색 팔레트(Rich console 대응). label / key / val / num / str / dim.</div>
+  <div class="color-pills">
+    <span class="pill util">인라인 hex 6색 (#8250df/#0969da/#1a7f37/#0550ae/#953800/#5e6470)</span>
+    <span class="pill util">변수화 여부: ❌</span>
+  </div>
+</div>
+
+<!-- ══════ captions ══════ -->
+<h2 id="captions"><span class="cat-tag">07</span>captions — 캡션·라벨</h2>
+
+<div class="card">
+  <div class="card-head">
+    <div class="card-name">.caption (공통)</div>
+    <div class="card-usage">모든 다이어그램 · 이미지 아래</div>
+  </div>
+  <div class="card-desc">"그림 N-N. 설명" italic 캡션. arch11 · eng-pipe · terminal-log · chapter-image 공용.</div>
+  <div class="color-pills">
+    <span class="pill util">--color-text-secondary (본문)</span>
+    <span class="pill util">--color-border (divider)</span>
+  </div>
+</div>
+
+<!-- ══════ 요약 ══════ -->
+<h2>Summary — 축소 대상은 Utility(상태변수)만</h2>
+<p class="lead">
+  <strong>유지:</strong> Primary · Secondary(warm) · Info · 무채색 = 모든 브랜드 컬러 +.<br>
+  <code>.remember · .tip · .term · h1 .num · 미니맵 · arch11 user/tool 뱃지 · eng-pipe INPUT</code>은 그대로.<br>
+  <br>
+  <strong>축소 대상(점진):</strong> <code>success · warning · danger</code> 상태변수만. 의미 손실 없이 Primary·무채색으로 흡수 가능한 곳부터.
+</p>
+<ul style="font-family:var(--font-mono);font-size:12px;color:var(--color-text);line-height:2">
+  <li>comparisons — <code>.otd-*</code>(warning), <code>.rc-*</code>(danger·success), <code>.proc-compare ef-ok/fail</code>, <code>.cache-diff</code>, <code>.eer-group-label</code></li>
+  <li>pipelines — <code>.eng-pipe .ep-port.out</code> (OUT 포트만 success 사용 중)</li>
+  <li>fullmap — <code>.arch11 .fa-arrow.ret</code>, <code>.flow .u</code>, <code>.lvl-lbl .down</code> (응답 방향 표시)</li>
+  <li>components.css — <code>.api-tag</code>(warning), <code>.tune-tag</code>(danger), <code>.at-part.api/.tune</code> (분류 뱃지)</li>
+  <li>diagrams.css 기타 — <code>.oc-tag.good/.bad</code>, <code>.rc-badge-full</code>, <code>.rc-doc.rc-new</code>, <code>.ef-tag</code>, .proc-compare 경계 dashed</li>
+</ul>
+
+<p class="lead">총 49곳. 대부분 "좋음/나쁨·성공/실패" 의미가 아닌 장식으로 쓰이는 곳이라 Primary·무채색으로 흡수 시 의미 손실 없음. 실제 의미 구분이 필요한 부분(embed good/bad, proc-compare ef-ok/fail)은 별도 점검.</p>
+
+</body>
+</html>

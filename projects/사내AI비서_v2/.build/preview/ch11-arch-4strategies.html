@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>11.5 전체 구성도 — AI감 빼는 4가지 디자인 전략</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+body { font-family: var(--font-body); color: var(--color-text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 32px 96px; line-height: 1.6; }
+h1 { font-size: var(--fs-4xl); color: var(--color-text-heading); border-bottom: 2px solid var(--color-text-heading); padding-bottom: var(--space-sm); margin-bottom: var(--space-sm); letter-spacing: -0.3px; }
+.intro { color: var(--color-text-secondary); font-size: var(--fs-lg); margin-bottom: var(--space-3xl); line-height: 1.7; }
+h2 { margin-top: var(--space-3xl) * 2; font-size: var(--fs-2xl); color: var(--color-text-heading); letter-spacing: -0.3px; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-sm); }
+.strategy-note { background: var(--color-surface); border-left: 3px solid var(--color-text-heading); padding: var(--space-md) var(--space-xl); font-size: var(--fs-sm); color: var(--color-text-muted); margin: var(--space-lg) 0; line-height: 1.8; }
+.strategy-note strong { color: var(--color-text-heading); }
+.strategy-note code { background: white; padding: 1px 6px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.9em; }
+.ai-tells { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-sm); }
+.ai-tells .t { background: white; border: 1px solid var(--color-border); padding: 2px 10px; border-radius: 999px; font-family: var(--font-mono); font-size: 11px; color: var(--color-text-muted); }
+.ai-tells .t.x { background: var(--color-danger-bg); color: var(--color-danger-text); border-color: #fca5a5; }
+.ai-tells .t.o { background: var(--color-success-bg); color: var(--color-success-text); border-color: #86efac; }
+
+/* ═══════════════════════════════════════════════════════════
+   A. Editorial Paper — 잡지·책 완결 페이지
+   ═══════════════════════════════════════════════════════════ */
+.arch-a {
+  --paper: #faf8f3;
+  --ink: #1a1a1a;
+  --ink-soft: #3a352c;
+  --muted: #8a7f6d;
+  --faint: #d9cfba;
+  --oxide: #a8553a;
+  width:100%; background:var(--paper); padding:var(--space-3xl) var(--space-xl); margin:var(--space-xl) 0;
+  font-family: var(--font-body);
+}
+.arch-a .hd { text-align:center; margin-bottom:var(--space-2xl); }
+.arch-a .hd .sub { font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:4px; text-transform:uppercase; font-weight:700; margin-bottom:var(--space-sm); }
+.arch-a .hd .ti { font-size:28px; color:var(--ink); font-weight:700; font-style:italic; letter-spacing:-0.5px; }
+.arch-a .hd .ds { font-family:var(--font-mono); font-size:11px; color:var(--muted); margin-top:4px; font-style:italic; }
+.arch-a .llm { display:flex; justify-content:center; margin-bottom:var(--space-md); }
+.arch-a .llm .bx { background:white; border:1px solid var(--ink); padding:var(--space-md) var(--space-2xl); text-align:center; position:relative; min-width:360px; }
+.arch-a .llm .bx::before, .arch-a .llm .bx::after { content:""; position:absolute; top:-5px; bottom:-5px; width:6px; border:1px solid var(--ink); }
+.arch-a .llm .bx::before { left:-5px; border-right:none; }
+.arch-a .llm .bx::after { right:-5px; border-left:none; }
+.arch-a .llm .bx .l { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.arch-a .llm .bx .n { font-size:20px; color:var(--ink); font-style:italic; font-weight:500; margin:4px 0; letter-spacing:-0.3px; }
+.arch-a .llm .bx .ms { display:flex; flex-direction:column; gap:3px; margin-top:var(--space-sm); padding-top:var(--space-sm); border-top:1px dashed var(--faint); }
+.arch-a .llm .bx .m { display:grid; grid-template-columns:120px 1fr; gap:var(--space-md); font-family:var(--font-mono); font-size:11px; text-align:left; align-items:baseline; }
+.arch-a .llm .bx .m .mn { color:var(--ink); font-weight:700; }
+.arch-a .llm .bx .m .mu { color:var(--muted); font-size:10px; font-style:italic; }
+.arch-a .flow { display:flex; justify-content:center; gap:var(--space-3xl); margin:var(--space-sm) 0 var(--space-lg); font-family:var(--font-mono); font-size:10px; font-style:italic; letter-spacing:1px; text-transform:uppercase; }
+.arch-a .flow .u { color:var(--oxide); font-weight:700; }
+.arch-a .flow .d { color:var(--ink); font-weight:700; }
+.arch-a .grid { display:grid; grid-template-columns:170px 1fr 220px; gap:var(--space-lg); align-items:stretch; }
+.arch-a .col-c { background:white; border:1px solid var(--faint); padding:var(--space-lg) var(--space-md); display:flex; flex-direction:column; justify-content:space-between; min-height:320px; }
+.arch-a .col-c .us { text-align:center; padding:var(--space-md) 0; border-bottom:1px dashed var(--faint); }
+.arch-a .col-c .us .ic { font-size:22px; color:var(--oxide); }
+.arch-a .col-c .us .n { font-size:18px; color:var(--ink); font-style:italic; font-weight:500; margin-top:2px; }
+.arch-a .col-c .us .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; margin-top:2px; }
+.arch-a .col-c .fm { display:flex; justify-content:space-between; padding:var(--space-sm) 0; font-family:var(--font-mono); font-size:10px; font-style:italic; text-transform:uppercase; letter-spacing:1px; }
+.arch-a .col-c .fm .d { color:var(--oxide); font-weight:700; }
+.arch-a .col-c .fm .u { color:var(--ink); font-weight:700; }
+.arch-a .col-c .ap { text-align:center; padding:var(--space-md) 0; border-top:1px dashed var(--faint); }
+.arch-a .col-c .ap .l { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.arch-a .col-c .ap .n { font-size:18px; color:var(--ink); font-weight:700; letter-spacing:-0.2px; margin-top:3px; }
+.arch-a .col-c .ap .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; margin-top:2px; }
+.arch-a .col-a { background:white; border:1px solid var(--ink); padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.arch-a .col-a .ti { position:absolute; top:-10px; left:var(--space-md); background:var(--paper); padding:0 var(--space-sm); font-size:12px; font-style:italic; font-weight:600; color:var(--ink); letter-spacing:0.5px; }
+.arch-a .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.arch-a .col-a .chip { background:var(--paper); padding:var(--space-sm) var(--space-xs); text-align:center; border-bottom:2px solid var(--faint); }
+.arch-a .col-a .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.arch-a .col-a .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:2px; }
+.arch-a .col-a .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); font-style:italic; margin-top:1px; }
+.arch-a .col-a .sep { text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--ink); letter-spacing:3px; font-weight:700; text-transform:uppercase; margin:var(--space-md) 0 var(--space-sm); position:relative; }
+.arch-a .col-a .sep::before, .arch-a .col-a .sep::after { content:"——"; color:var(--faint); margin:0 var(--space-sm); }
+.arch-a .col-a .loop { border:1px dashed var(--ink); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.arch-a .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); font-family:var(--font-mono); }
+.arch-a .col-a .loop .st { font-size:10px; padding:4px 10px; border:1px solid var(--ink); background:var(--paper); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--ink); }
+.arch-a .col-a .loop .arr { color:var(--ink); font-size:12px; font-weight:700; }
+.arch-a .col-a .core { text-align:center; padding:var(--space-md) var(--space-sm); background:#f4e7df; border:1px solid var(--oxide); }
+.arch-a .col-a .core .l { font-family:var(--font-mono); font-size:9px; color:var(--oxide); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.arch-a .col-a .core .n { font-size:18px; color:var(--ink); font-style:italic; font-weight:500; margin-top:2px; letter-spacing:-0.2px; }
+.arch-a .col-a .core .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; margin-top:3px; }
+.arch-a .col-a .engine { background:var(--paper); border:1px solid var(--faint); padding:var(--space-sm); margin:var(--space-sm) 0; }
+.arch-a .col-a .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--oxide); letter-spacing:2px; text-transform:uppercase; font-weight:700; text-align:center; margin-bottom:4px; }
+.arch-a .col-a .engine .en { font-size:13px; font-style:italic; font-weight:600; color:var(--ink); text-align:center; margin-bottom:var(--space-xs); }
+.arch-a .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.arch-a .col-a .engine .es .s { background:white; border:1px solid var(--faint); padding:3px 2px; text-align:center; color:var(--ink); font-weight:700; letter-spacing:0.3px; }
+.arch-a .col-t { background:white; border:1px solid var(--faint); padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.arch-a .col-t .ti { position:absolute; top:-10px; left:var(--space-md); background:var(--paper); padding:0 var(--space-sm); font-size:12px; font-style:italic; font-weight:600; color:var(--ink); letter-spacing:0.5px; }
+.arch-a .col-t .tool { display:grid; grid-template-columns:24px 1fr auto; gap:var(--space-sm); align-items:center; padding:var(--space-sm) var(--space-xs); border-bottom:1px dashed var(--faint); }
+.arch-a .col-t .tool:last-child { border-bottom:none; }
+.arch-a .col-t .tool .no { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-weight:700; }
+.arch-a .col-t .tool .n { font-family:var(--font-mono); font-size:12px; color:var(--ink); font-weight:700; }
+.arch-a .col-t .tool .s { font-size:10px; color:var(--muted); font-style:italic; margin-top:1px; }
+.arch-a .col-t .tool .b { font-family:var(--font-mono); font-size:9px; color:var(--ink); letter-spacing:2px; text-transform:uppercase; font-weight:700; border:1px solid var(--ink); padding:2px 6px; }
+.arch-a .col-t .tool .b.rag { color:var(--oxide); border-color:var(--oxide); }
+.arch-a .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-lg); margin-top:var(--space-2xl); padding-top:var(--space-lg); border-top:1px solid var(--faint); }
+.arch-a .stores .st { background:white; border:1px solid var(--faint); padding:var(--space-md) var(--space-lg); text-align:center; }
+.arch-a .stores .st .l { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.arch-a .stores .st .n { font-size:18px; color:var(--ink); font-style:italic; font-weight:500; margin:4px 0; letter-spacing:-0.2px; }
+.arch-a .stores .st .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; }
+.arch-a .cap { margin-top:var(--space-2xl); font-size:13px; color:var(--muted); font-style:italic; text-align:center; max-width:560px; margin-left:auto; margin-right:auto; line-height:1.8; }
+
+/* ═══════════════════════════════════════════════════════════
+   B. Blueprint — 건축 도면
+   ═══════════════════════════════════════════════════════════ */
+.arch-b {
+  --paper: #fdfdfa;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --faint: #cbd5e0;
+  width:100%; background:var(--paper); border:1px solid var(--ink); padding:var(--space-3xl) var(--space-xl); margin:var(--space-xl) 0;
+  font-family: var(--font-mono);
+  position:relative;
+}
+.arch-b::before, .arch-b::after { content:""; position:absolute; width:18px; height:18px; border:1px solid var(--ink); }
+.arch-b::before { top:8px; left:8px; border-right:none; border-bottom:none; }
+.arch-b::after { bottom:8px; right:8px; border-left:none; border-top:none; }
+.arch-b .hd { text-align:center; margin-bottom:var(--space-2xl); border-bottom:1px solid var(--ink); padding-bottom:var(--space-md); }
+.arch-b .hd .ns { display:flex; justify-content:space-between; font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:var(--space-sm); }
+.arch-b .hd .ti { font-size:18px; color:var(--ink); font-weight:800; letter-spacing:4px; text-transform:uppercase; }
+.arch-b .hd .ds { font-size:10px; color:var(--muted); letter-spacing:1.5px; margin-top:var(--space-xs); }
+.arch-b .llm { display:flex; justify-content:center; margin-bottom:var(--space-sm); }
+.arch-b .llm .bx { border:1px dashed var(--ink); padding:var(--space-md) var(--space-2xl); text-align:center; min-width:360px; }
+.arch-b .llm .bx .l { font-size:9px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.arch-b .llm .bx .n { font-size:14px; color:var(--ink); font-weight:800; margin:4px 0; letter-spacing:2px; text-transform:uppercase; }
+.arch-b .llm .bx .ms { display:flex; flex-direction:column; gap:3px; margin-top:var(--space-sm); padding-top:var(--space-sm); border-top:1px dashed var(--faint); }
+.arch-b .llm .bx .m { display:grid; grid-template-columns:120px 1fr; gap:var(--space-md); font-size:11px; text-align:left; align-items:baseline; }
+.arch-b .llm .bx .m .mn { color:var(--ink); font-weight:700; }
+.arch-b .llm .bx .m .mu { color:var(--muted); font-size:10px; }
+.arch-b .flow { display:flex; justify-content:center; gap:var(--space-3xl); margin:var(--space-sm) 0 var(--space-lg); font-size:10px; color:var(--ink); letter-spacing:2px; text-transform:uppercase; font-weight:800; }
+.arch-b .grid { display:grid; grid-template-columns:170px 1fr 220px; gap:var(--space-md); align-items:stretch; }
+.arch-b .col-c { border:1px solid var(--ink); padding:var(--space-md); display:flex; flex-direction:column; justify-content:space-between; min-height:320px; position:relative; }
+.arch-b .col-c::before { content:""; position:absolute; top:4px; left:4px; right:4px; bottom:4px; border:1px solid var(--faint); pointer-events:none; }
+.arch-b .col-c .us { text-align:center; padding:var(--space-sm) 0; border-bottom:1px dashed var(--ink); position:relative; z-index:1; }
+.arch-b .col-c .us .n { font-size:13px; color:var(--ink); font-weight:800; letter-spacing:2px; text-transform:uppercase; }
+.arch-b .col-c .us .s { font-size:9px; color:var(--muted); letter-spacing:1px; margin-top:2px; }
+.arch-b .col-c .fm { display:flex; justify-content:space-between; padding:var(--space-sm) 2px; font-size:9px; letter-spacing:2px; text-transform:uppercase; font-weight:800; position:relative; z-index:1; }
+.arch-b .col-c .ap { text-align:center; padding:var(--space-sm) 0; border-top:1px dashed var(--ink); position:relative; z-index:1; }
+.arch-b .col-c .ap .l { font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+.arch-b .col-c .ap .n { font-size:14px; color:var(--ink); font-weight:800; letter-spacing:2px; margin-top:3px; }
+.arch-b .col-c .ap .s { font-size:10px; color:var(--muted); margin-top:2px; }
+.arch-b .col-a { border:2px solid var(--ink); padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.arch-b .col-a .ti { position:absolute; top:-10px; left:var(--space-md); background:var(--paper); padding:0 var(--space-sm); font-size:11px; letter-spacing:3px; font-weight:800; text-transform:uppercase; color:var(--ink); }
+.arch-b .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.arch-b .col-a .chip { border:1px solid var(--ink); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.arch-b .col-a .chip .l { font-size:8px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:800; }
+.arch-b .col-a .chip .n { font-size:11px; color:var(--ink); font-weight:800; margin-top:3px; letter-spacing:1px; text-transform:uppercase; }
+.arch-b .col-a .chip .s { font-size:9px; color:var(--muted); margin-top:2px; }
+.arch-b .col-a .loop { border:1px dashed var(--ink); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.arch-b .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.arch-b .col-a .loop .st { font-size:10px; padding:4px 10px; border:1px solid var(--ink); letter-spacing:1.5px; text-transform:uppercase; font-weight:800; }
+.arch-b .col-a .loop .arr { color:var(--ink); font-size:12px; font-weight:800; }
+.arch-b .col-a .core { border:1px solid var(--ink); padding:var(--space-md) var(--space-sm); text-align:center; background:#f6f4ec; }
+.arch-b .col-a .core .l { font-size:9px; color:var(--muted); letter-spacing:2px; font-weight:800; text-transform:uppercase; }
+.arch-b .col-a .core .n { font-size:14px; color:var(--ink); font-weight:800; margin-top:3px; letter-spacing:2px; text-transform:uppercase; }
+.arch-b .col-a .core .s { font-size:10px; color:var(--muted); margin-top:3px; }
+.arch-b .col-a .engine { border:1px dashed var(--ink); padding:var(--space-sm); margin:var(--space-sm) 0; text-align:center; }
+.arch-b .col-a .engine .el { font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:800; margin-bottom:3px; }
+.arch-b .col-a .engine .en { font-size:12px; color:var(--ink); font-weight:800; letter-spacing:2px; text-transform:uppercase; margin-bottom:var(--space-xs); }
+.arch-b .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-size:8px; }
+.arch-b .col-a .engine .es .s { border:1px solid var(--ink); padding:3px 2px; text-align:center; color:var(--ink); font-weight:800; letter-spacing:0.3px; text-transform:uppercase; }
+.arch-b .col-t { border:1px solid var(--ink); padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.arch-b .col-t .ti { position:absolute; top:-10px; left:var(--space-md); background:var(--paper); padding:0 var(--space-sm); font-size:11px; letter-spacing:3px; font-weight:800; text-transform:uppercase; color:var(--ink); }
+.arch-b .col-t .tool { display:grid; grid-template-columns:28px 1fr auto; align-items:center; gap:var(--space-sm); padding:var(--space-sm) 2px; border-bottom:1px dashed var(--faint); }
+.arch-b .col-t .tool:last-child { border-bottom:none; }
+.arch-b .col-t .tool .no { font-size:10px; color:var(--muted); font-weight:800; letter-spacing:1px; }
+.arch-b .col-t .tool .n { font-size:12px; color:var(--ink); font-weight:800; }
+.arch-b .col-t .tool .s { font-size:9px; color:var(--muted); margin-top:1px; }
+.arch-b .col-t .tool .b { font-size:9px; color:var(--ink); letter-spacing:2px; text-transform:uppercase; font-weight:800; border:1px solid var(--ink); padding:2px 6px; }
+.arch-b .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-md); margin-top:var(--space-2xl); padding-top:var(--space-lg); border-top:1px dashed var(--ink); }
+.arch-b .stores .st { border:1px solid var(--ink); padding:var(--space-md) var(--space-lg); text-align:center; }
+.arch-b .stores .st .l { font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:800; }
+.arch-b .stores .st .n { font-size:14px; color:var(--ink); font-weight:800; margin:4px 0; letter-spacing:2px; text-transform:uppercase; }
+.arch-b .stores .st .s { font-size:10px; color:var(--muted); }
+.arch-b .cap { margin-top:var(--space-2xl); padding-top:var(--space-md); border-top:1px dashed var(--ink); font-size:11px; color:var(--muted); text-align:center; letter-spacing:0.5px; line-height:1.7; }
+
+/* ═══════════════════════════════════════════════════════════
+   C. Brutalist Print — 흑백 대비
+   ═══════════════════════════════════════════════════════════ */
+.arch-c {
+  --ink: #000;
+  --bg: #fff;
+  width:100%; background:var(--bg); border:3px solid var(--ink); padding:var(--space-2xl); margin:var(--space-xl) 0;
+  font-family: var(--font-mono);
+}
+.arch-c .hd { text-align:center; margin-bottom:var(--space-2xl); border-bottom:3px solid var(--ink); padding-bottom:var(--space-md); }
+.arch-c .hd .sub { font-size:11px; color:var(--ink); letter-spacing:4px; text-transform:uppercase; font-weight:800; }
+.arch-c .hd .ti { font-family:var(--font-body); font-size:32px; color:var(--ink); font-weight:900; letter-spacing:-1px; margin-top:var(--space-xs); text-transform:uppercase; }
+.arch-c .hd .ds { font-size:11px; color:var(--ink); letter-spacing:2px; margin-top:var(--space-xs); text-transform:uppercase; font-weight:700; }
+.arch-c .llm { display:flex; justify-content:center; margin-bottom:var(--space-md); }
+.arch-c .llm .bx { background:var(--ink); color:var(--bg); padding:var(--space-md) var(--space-2xl); text-align:center; min-width:360px; }
+.arch-c .llm .bx .l { font-size:10px; letter-spacing:4px; text-transform:uppercase; font-weight:800; opacity:0.8; }
+.arch-c .llm .bx .n { font-family:var(--font-body); font-size:20px; font-weight:900; margin:4px 0; letter-spacing:-0.3px; text-transform:uppercase; }
+.arch-c .llm .bx .ms { display:flex; flex-direction:column; gap:3px; margin-top:var(--space-sm); padding-top:var(--space-sm); border-top:2px solid var(--bg); }
+.arch-c .llm .bx .m { display:grid; grid-template-columns:120px 1fr; gap:var(--space-md); font-size:11px; text-align:left; align-items:baseline; }
+.arch-c .llm .bx .m .mn { font-weight:800; }
+.arch-c .llm .bx .m .mu { opacity:0.75; font-size:10px; }
+.arch-c .flow { display:flex; justify-content:center; gap:var(--space-3xl); margin:var(--space-sm) 0 var(--space-lg); font-size:10px; color:var(--ink); letter-spacing:3px; text-transform:uppercase; font-weight:800; }
+.arch-c .grid { display:grid; grid-template-columns:170px 1fr 220px; gap:var(--space-md); align-items:stretch; }
+.arch-c .col-c { background:var(--bg); border:2px solid var(--ink); padding:var(--space-md); display:flex; flex-direction:column; justify-content:space-between; min-height:320px; }
+.arch-c .col-c .us { text-align:center; padding:var(--space-sm) 0; border-bottom:2px solid var(--ink); }
+.arch-c .col-c .us .n { font-family:var(--font-body); font-size:16px; font-weight:900; text-transform:uppercase; letter-spacing:-0.2px; color:var(--ink); }
+.arch-c .col-c .us .s { font-size:10px; color:var(--ink); letter-spacing:1px; text-transform:uppercase; font-weight:700; margin-top:2px; }
+.arch-c .col-c .fm { display:flex; justify-content:space-between; padding:var(--space-sm) 2px; font-size:10px; letter-spacing:2px; text-transform:uppercase; font-weight:800; color:var(--ink); }
+.arch-c .col-c .ap { text-align:center; padding:var(--space-sm) 0; border-top:2px solid var(--ink); }
+.arch-c .col-c .ap .l { font-size:9px; color:var(--ink); letter-spacing:3px; text-transform:uppercase; font-weight:800; }
+.arch-c .col-c .ap .n { font-family:var(--font-body); font-size:18px; font-weight:900; letter-spacing:-0.3px; text-transform:uppercase; margin-top:3px; }
+.arch-c .col-c .ap .s { font-size:10px; color:var(--ink); letter-spacing:1px; text-transform:uppercase; font-weight:700; margin-top:2px; }
+.arch-c .col-a { background:var(--ink); color:var(--bg); padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.arch-c .col-a .ti { position:absolute; top:-16px; left:var(--space-md); background:var(--bg); color:var(--ink); padding:4px 12px; font-size:11px; letter-spacing:3px; font-weight:800; text-transform:uppercase; border:2px solid var(--ink); }
+.arch-c .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.arch-c .col-a .chip { background:var(--bg); color:var(--ink); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.arch-c .col-a .chip .l { font-size:8px; letter-spacing:2px; text-transform:uppercase; font-weight:800; }
+.arch-c .col-a .chip .n { font-family:var(--font-body); font-size:12px; font-weight:900; margin-top:2px; letter-spacing:-0.1px; text-transform:uppercase; }
+.arch-c .col-a .chip .s { font-size:9px; margin-top:1px; letter-spacing:0.5px; }
+.arch-c .col-a .loop { background:var(--bg); color:var(--ink); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.arch-c .col-a .loop .ll { font-size:9px; letter-spacing:2px; font-weight:800; text-transform:uppercase; margin-bottom:5px; }
+.arch-c .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.arch-c .col-a .loop .st { font-size:10px; padding:4px 10px; border:2px solid var(--ink); letter-spacing:1px; text-transform:uppercase; font-weight:800; }
+.arch-c .col-a .loop .arr { font-size:12px; font-weight:800; }
+.arch-c .col-a .core { background:var(--bg); color:var(--ink); padding:var(--space-md); text-align:center; border:2px solid var(--bg); }
+.arch-c .col-a .core .l { font-size:9px; letter-spacing:3px; text-transform:uppercase; font-weight:800; }
+.arch-c .col-a .core .n { font-family:var(--font-body); font-size:16px; font-weight:900; margin-top:2px; letter-spacing:-0.3px; text-transform:uppercase; }
+.arch-c .col-a .core .s { font-size:10px; letter-spacing:0.5px; margin-top:2px; }
+.arch-c .col-a .engine { background:var(--bg); color:var(--ink); padding:var(--space-sm); margin:var(--space-sm) 0; text-align:center; border:2px solid var(--bg); }
+.arch-c .col-a .engine .el { font-size:9px; letter-spacing:3px; text-transform:uppercase; font-weight:800; margin-bottom:3px; }
+.arch-c .col-a .engine .en { font-family:var(--font-body); font-size:13px; font-weight:900; letter-spacing:-0.2px; text-transform:uppercase; margin-bottom:var(--space-xs); }
+.arch-c .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-size:8px; }
+.arch-c .col-a .engine .es .s { background:var(--ink); color:var(--bg); padding:3px 2px; text-align:center; font-weight:800; letter-spacing:0.3px; text-transform:uppercase; }
+.arch-c .col-t { background:var(--bg); border:2px solid var(--ink); padding:var(--space-2xl) var(--space-sm) var(--space-sm); position:relative; min-height:320px; }
+.arch-c .col-t .ti { position:absolute; top:-16px; left:var(--space-md); background:var(--bg); padding:4px 12px; font-size:11px; letter-spacing:3px; font-weight:800; text-transform:uppercase; border:2px solid var(--ink); color:var(--ink); }
+.arch-c .col-t .tool { display:grid; grid-template-columns:24px 1fr auto; align-items:center; gap:var(--space-sm); padding:var(--space-sm); border-bottom:2px solid var(--ink); }
+.arch-c .col-t .tool:last-child { border-bottom:none; }
+.arch-c .col-t .tool .no { font-size:10px; font-weight:800; letter-spacing:1px; }
+.arch-c .col-t .tool .n { font-size:12px; font-weight:800; }
+.arch-c .col-t .tool .s { font-size:9px; margin-top:1px; letter-spacing:0.5px; }
+.arch-c .col-t .tool .b { font-size:9px; letter-spacing:2px; text-transform:uppercase; font-weight:800; background:var(--ink); color:var(--bg); padding:3px 7px; }
+.arch-c .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-md); margin-top:var(--space-2xl); padding-top:var(--space-lg); border-top:3px solid var(--ink); }
+.arch-c .stores .st { background:var(--bg); border:2px solid var(--ink); padding:var(--space-md) var(--space-lg); text-align:center; }
+.arch-c .stores .st .l { font-size:9px; letter-spacing:3px; text-transform:uppercase; font-weight:800; }
+.arch-c .stores .st .n { font-family:var(--font-body); font-size:16px; font-weight:900; margin:4px 0; letter-spacing:-0.3px; text-transform:uppercase; }
+.arch-c .stores .st .s { font-size:10px; letter-spacing:1px; text-transform:uppercase; font-weight:700; }
+.arch-c .cap { margin-top:var(--space-2xl); padding-top:var(--space-md); border-top:2px solid var(--ink); font-size:11px; color:var(--ink); text-align:center; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; line-height:1.8; }
+
+/* ═══════════════════════════════════════════════════════════
+   D. Minimal Blue — 블루 톤 강화 미니멀
+   ═══════════════════════════════════════════════════════════ */
+.arch-d {
+  --accent: var(--color-accent);        /* indigo #4f46e5 */
+  --accent-bg: var(--color-accent-bg);  /* #eef2ff */
+  --accent-border: var(--color-accent-border); /* #c7d2fe */
+  --info: var(--color-info);            /* blue #3b82f6 */
+  --info-bg: var(--color-info-bg);      /* #eff6ff */
+  --info-text: var(--color-info-text);  /* blue 800 */
+  --ink: var(--color-text-heading);
+  --muted: var(--color-text-secondary);
+  --faint: #e2e8f0;
+  width:100%; background:white; padding:var(--space-3xl) var(--space-2xl); margin:var(--space-xl) 0;
+  font-family: var(--font-body);
+  border-top:3px solid var(--accent);
+  border-bottom:1px solid var(--faint);
+}
+.arch-d .hd { text-align:center; margin-bottom:var(--space-3xl); }
+.arch-d .hd .sub { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:4px; text-transform:uppercase; font-weight:700; margin-bottom:var(--space-sm); }
+.arch-d .hd .ti { font-size:28px; color:var(--ink); font-weight:800; letter-spacing:-0.5px; }
+.arch-d .hd .ds { font-family:var(--font-body); font-size:13px; color:var(--muted); margin-top:6px; }
+.arch-d .llm { display:flex; justify-content:center; margin-bottom:var(--space-md); }
+.arch-d .llm .bx { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-md) var(--space-2xl); text-align:center; min-width:360px; }
+.arch-d .llm .bx .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.arch-d .llm .bx .n { font-size:20px; color:var(--ink); font-weight:700; margin:4px 0; letter-spacing:-0.3px; }
+.arch-d .llm .bx .ms { display:flex; flex-direction:column; gap:3px; margin-top:var(--space-md); padding-top:var(--space-sm); border-top:1px dashed var(--info); }
+.arch-d .llm .bx .m { display:grid; grid-template-columns:120px 1fr; gap:var(--space-md); font-family:var(--font-mono); font-size:11px; text-align:left; align-items:baseline; }
+.arch-d .llm .bx .m .mn { color:var(--info-text); font-weight:700; }
+.arch-d .llm .bx .m .mu { color:var(--muted); font-size:10px; }
+.arch-d .flow { display:flex; justify-content:center; gap:var(--space-3xl); margin:var(--space-md) 0 var(--space-xl); font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.arch-d .flow span { border-bottom:1px solid var(--accent); padding-bottom:2px; }
+.arch-d .grid { display:grid; grid-template-columns:170px 1fr 220px; gap:var(--space-xl); align-items:stretch; }
+.arch-d .col-c { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-lg) var(--space-md); display:flex; flex-direction:column; justify-content:space-between; min-height:320px; }
+.arch-d .col-c .us { text-align:center; padding:var(--space-md) 0; border-bottom:1px dashed var(--info); }
+.arch-d .col-c .us .ic { width:34px; height:34px; background:var(--info); color:white; border-radius:50%; margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; }
+.arch-d .col-c .us .n { font-size:17px; color:var(--ink); font-weight:700; letter-spacing:-0.2px; }
+.arch-d .col-c .us .s { font-family:var(--font-mono); font-size:10px; color:var(--info-text); margin-top:3px; }
+.arch-d .col-c .fm { display:flex; justify-content:space-between; padding:var(--space-md) 0; font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--info-text); font-weight:700; }
+.arch-d .col-c .ap { text-align:center; padding:var(--space-md) 0; border-top:1px dashed var(--info); }
+.arch-d .col-c .ap .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.arch-d .col-c .ap .n { font-size:17px; color:var(--ink); font-weight:700; letter-spacing:-0.2px; margin-top:4px; }
+.arch-d .col-c .ap .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:2px; }
+.arch-d .col-a { border:1px solid var(--accent-border); background:white; padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.arch-d .col-a .ti { position:absolute; top:-10px; left:var(--space-md); background:white; padding:0 var(--space-sm); font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; color:var(--accent); }
+.arch-d .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.arch-d .col-a .chip { border:1px solid var(--faint); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.arch-d .col-a .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.arch-d .col-a .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:3px; }
+.arch-d .col-a .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); margin-top:1px; }
+.arch-d .col-a .loop { border:1px solid var(--faint); padding:var(--space-md) var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.arch-d .col-a .loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:var(--space-sm); }
+.arch-d .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.arch-d .col-a .loop .st { font-family:var(--font-mono); font-size:10px; padding:4px 12px; border:1px solid var(--faint); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--ink); }
+.arch-d .col-a .loop .arr { color:var(--muted); font-size:12px; font-weight:700; }
+.arch-d .col-a .core { border:1px solid var(--accent); background:var(--accent-bg); padding:var(--space-md); text-align:center; }
+.arch-d .col-a .core .l { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; text-transform:uppercase; }
+.arch-d .col-a .core .n { font-size:17px; color:var(--ink); font-weight:700; letter-spacing:-0.2px; margin-top:4px; }
+.arch-d .col-a .core .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:3px; }
+.arch-d .col-a .engine { border:1px solid var(--faint); border-left:3px solid var(--accent); padding:var(--space-sm); margin:var(--space-sm) 0; text-align:center; }
+.arch-d .col-a .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.arch-d .col-a .engine .en { font-size:13px; color:var(--ink); font-weight:700; letter-spacing:-0.2px; margin-bottom:var(--space-xs); }
+.arch-d .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.arch-d .col-a .engine .es .s { border:1px solid var(--faint); padding:3px 2px; text-align:center; color:var(--ink); font-weight:700; letter-spacing:0.3px; text-transform:uppercase; }
+.arch-d .col-t { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.arch-d .col-t .ti { position:absolute; top:-12px; left:var(--space-md); background:var(--info); color:white; padding:4px 12px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; }
+.arch-d .col-t .tool { background:white; display:grid; grid-template-columns:24px 1fr auto; align-items:center; gap:var(--space-sm); padding:var(--space-sm) var(--space-sm); border:1px solid var(--faint); margin-bottom:4px; }
+.arch-d .col-t .tool:last-child { margin-bottom:0; }
+.arch-d .col-t .tool .no { font-family:var(--font-mono); font-size:10px; color:var(--info); font-weight:700; }
+.arch-d .col-t .tool .n { font-family:var(--font-mono); font-size:12px; color:var(--ink); font-weight:700; }
+.arch-d .col-t .tool .s { font-size:10px; color:var(--muted); margin-top:1px; }
+.arch-d .col-t .tool .b { font-family:var(--font-mono); font-size:9px; color:var(--info-text); background:var(--info-bg); letter-spacing:2px; text-transform:uppercase; font-weight:700; border:1px solid var(--info); padding:2px 6px; }
+.arch-d .col-t .tool .b.rag { color:white; background:var(--accent); border-color:var(--accent); }
+.arch-d .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-xl); margin-top:var(--space-2xl); padding-top:var(--space-lg); border-top:2px dashed var(--accent-border); }
+.arch-d .stores .st { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-md) var(--space-lg); text-align:center; }
+.arch-d .stores .st .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.arch-d .stores .st .n { font-size:17px; color:var(--ink); font-weight:700; margin:4px 0; letter-spacing:-0.2px; }
+.arch-d .stores .st .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); }
+.arch-d .cap { margin-top:var(--space-2xl); padding-top:var(--space-md); border-top:1px solid var(--accent); font-size:12px; color:var(--muted); text-align:center; line-height:1.8; max-width:560px; margin-left:auto; margin-right:auto; }
+
+</style>
+</head>
+<body>
+
+<h1>11.5 전체 구성도 — AI감 빼는 4가지 디자인 전략</h1>
+<p class="intro">
+현재 디자인(그라데이션·컬러 뱃지·섀도우)에서 <strong>AI스러운 신호</strong>를 걷어낸 4가지 방향을 제시합니다. 각 전략은 같은 구조(LLM + User·API / Runtime / Tools + Stores)를 유지하되 <strong>배경·선·타이포·색</strong> 언어만 바꿉니다. 네 개 모두 훑어보고 하나 선택해 주세요.
+</p>
+
+<div class="strategy-note">
+<strong>AI스러운 디자인의 전형</strong>
+<div class="ai-tells">
+<span class="t x">linear-gradient 과다</span>
+<span class="t x">다색 뱃지(4색+)</span>
+<span class="t x">soft shadow 겹침</span>
+<span class="t x">둥근 12~14px 코너</span>
+<span class="t x">인디고 + 에메랄드 + 앰버 스팩트럼</span>
+<span class="t x">아이콘 배지 + 원형 아이콘</span>
+</div>
+<strong style="display:block;margin-top:12px">반대 방향</strong>
+<div class="ai-tells">
+<span class="t o">단일 종이 배경</span>
+<span class="t o">1~2색만 사용</span>
+<span class="t o">hairline 보더</span>
+<span class="t o">모노스페이스 + 이탤릭</span>
+<span class="t o">여백으로 호흡</span>
+<span class="t o">grid paper · 좌표</span>
+</div>
+</div>
+
+<!-- ═════════ A ═════════ -->
+<h2>A. Editorial Paper — 출판물 · 잡지 완결 페이지</h2>
+<div class="strategy-note">
+<strong>콘셉트</strong>: 책 마지막 장의 <strong>완결 요약 페이지</strong>. 아이보리 종이 위에 Serif Italic 헤더 + 모노 라벨. 장식은 hairline 보더와 코너 브래킷만. 색은 <strong>구리빛 산화동(oxide #a8553a)</strong> 단일 액센트로 <code>.core</code>와 사용자 아이콘만 포인트.<br>
+<strong>언제 어울리나</strong>: 책 전체 톤이 에디토리얼(출판물스러움)을 추구할 때. 잡지·단행본·학술서 마감 느낌.
+</div>
+
+<div class="arch-a">
+<div class="hd">
+<div class="sub">System Architecture</div>
+<div class="ti">커넥트HR 에이전트</div>
+<div class="ds">11개 챕터로 완성한 RAG 시스템</div>
+</div>
+
+<div class="llm"><div class="bx">
+<div class="l">External · LLM</div>
+<div class="n">Ollama</div>
+<div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div></div>
+<div class="flow"><span class="u">↑ 프롬프트</span><span class="d">↓ 응답</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="fm"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="sep">ReAct Loop</div>
+<div class="loop"><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine">
+<div class="el">RAG Engine</div>
+<div class="en">커넥트HR 엔진</div>
+<div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div>
+</div>
+<div class="core"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+</div>
+
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="cap">그림 11-11. 커넥트HR 에이전트의 시스템 아키텍처. 사용자부터 LLM, 에이전트 루프, 도구, 저장소까지 한 장에 담았습니다</div>
+</div>
+
+<!-- ═════════ B ═════════ -->
+<h2>B. Blueprint — 건축 도면</h2>
+<div class="strategy-note">
+<strong>콘셉트</strong>: <strong>기술 도면</strong> 스타일. 크림색 종이 + 전체 검정 외곽선 + 코너 브래킷. 모든 텍스트 모노스페이스 + 대문자. 색 완전 제거(검정만).<br>
+<strong>언제 어울리나</strong>: 기술서의 "전문 문서" 톤. 엔지니어링 다이어그램·P&ID 느낌이 책 정체성에 맞을 때.
+</div>
+
+<div class="arch-b">
+<div class="hd">
+<div class="ns"><span>DWG: CONNECTHR-ARCH-V11</span><span>SHEET 11.5</span></div>
+<div class="ti">System Architecture</div>
+<div class="ds">11 CHAPTERS · RAG PIPELINE · FINAL</div>
+</div>
+
+<div class="llm"><div class="bx">
+<div class="l">External · LLM</div>
+<div class="n">Ollama</div>
+<div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · Agent</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div></div>
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="n">User</div><div class="s">Chat Query</div></div>
+<div class="fm"><span>↓ Req</span><span>↑ Res</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · Session</div></div>
+</div>
+
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">token·log</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">x3</div></div>
+</div>
+<div class="loop"><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine">
+<div class="el">RAG Engine</div>
+<div class="en">커넥트HR 엔진</div>
+<div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div>
+</div>
+<div class="core"><div class="l">Executor</div><div class="n">IntegratedAgent</div><div class="s">Agent + Tools</div></div>
+</div>
+
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768 dim · metadata</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">employees · leave · sales</div></div>
+</div>
+
+<div class="cap">FIG. 11-11 · 커넥트HR 에이전트의 시스템 아키텍처. 사용자부터 LLM, 에이전트 루프, 도구, 저장소까지 한 장에 담았습니다</div>
+</div>
+
+<!-- ═════════ C ═════════ -->
+<h2>C. Brutalist Print — 흑백 대비</h2>
+<div class="strategy-note">
+<strong>콘셉트</strong>: <strong>0색</strong>. 검정·흰색만. 3px 두꺼운 외곽선, 대문자 타이포, 타이포그래피가 주인공. <code>.col-a</code>와 <code>.llm</code>은 검정 반전 블록으로 강조. 섀도우·그라데이션·둥근 코너 전부 제거.<br>
+<strong>언제 어울리나</strong>: "강하고 단순한" 인상이 필요한 대담한 기술서. 독자 시선을 구조 자체에 집중시키고 싶을 때.
+</div>
+
+<div class="arch-c">
+<div class="hd">
+<div class="sub">System Architecture</div>
+<div class="ti">CONNECTHR</div>
+<div class="ds">11 Chapters · Complete</div>
+</div>
+
+<div class="llm"><div class="bx">
+<div class="l">External · LLM</div>
+<div class="n">Ollama</div>
+<div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div></div>
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="n">User</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 요청</span><span>↑ 응답</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · Session</div></div>
+</div>
+
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">token·log</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">x3</div></div>
+</div>
+<div class="loop">
+<div class="ll">ReAct Loop</div>
+<div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div>
+</div>
+<div class="engine">
+<div class="el">RAG Engine</div>
+<div class="en">커넥트HR 엔진</div>
+<div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div>
+</div>
+<div class="core"><div class="l">Executor</div><div class="n">IntegratedAgent</div><div class="s">Agent + Tools</div></div>
+</div>
+
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768 dim · metadata</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">employees · leave · sales</div></div>
+</div>
+
+<div class="cap">그림 11-11 · 커넥트HR 에이전트의 시스템 아키텍처</div>
+</div>
+
+<!-- ═════════ D ═════════ -->
+<h2>D. Minimal Single-Tone — 인디고 1색 · 여백 중심</h2>
+<div class="strategy-note">
+<strong>콘셉트</strong>: 흰 배경 + 1px hairline 보더 + 브랜드 인디고 <strong>1색만</strong>. 섀도우·그라데이션·원형 아이콘 전부 제거. 넓은 여백(<code>gap: var(--space-xl)</code>)이 호흡을 만든다. Runtime 컬럼만 인디고 보더로 강조.<br>
+<strong>언제 어울리나</strong>: 현 디자인 시스템(인디고 브랜드)을 유지하면서 AI감을 뺄 때. 가장 보수적이고 안전한 선택.
+</div>
+
+<div class="arch-d">
+<div class="hd">
+<div class="sub">System Architecture</div>
+<div class="ti">커넥트HR 에이전트</div>
+<div class="ds">11개 챕터로 완성한 RAG 시스템</div>
+</div>
+
+<div class="llm"><div class="bx">
+<div class="l">External · LLM</div>
+<div class="n">Ollama</div>
+<div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div></div>
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="loop">
+<div class="ll">ReAct Loop</div>
+<div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div>
+</div>
+<div class="engine">
+<div class="el">RAG Engine</div>
+<div class="en">커넥트HR 엔진</div>
+<div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div>
+</div>
+<div class="core"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+</div>
+
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="cap">그림 11-11. 커넥트HR 에이전트의 시스템 아키텍처. 사용자부터 LLM, 에이전트 루프, 도구, 저장소까지 한 장에 담았습니다</div>
+</div>
+
+<h2 style="margin-top:96px">결정 가이드</h2>
+<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);margin-top:var(--space-lg)">
+<thead><tr style="background:var(--color-surface);border-bottom:2px solid var(--color-text-heading)">
+<th style="padding:var(--space-md) var(--space-sm);text-align:left;width:60px">전략</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">분위기</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">장점</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">단점 · 리스크</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-border)"><td style="padding:var(--space-md) var(--space-sm);font-weight:800">A</td><td style="padding:var(--space-md) var(--space-sm)">출판물 · 잡지</td><td style="padding:var(--space-md) var(--space-sm)">책 마지막 장답게 격조. 독자적 브랜드감</td><td style="padding:var(--space-md) var(--space-sm)">Italic serif가 기술서에 생소할 수 있음</td></tr>
+<tr style="border-bottom:1px solid var(--color-border)"><td style="padding:var(--space-md) var(--space-sm);font-weight:800">B</td><td style="padding:var(--space-md) var(--space-sm)">도면 · 기술 문서</td><td style="padding:var(--space-md) var(--space-sm)">엔지니어 정본 인상. 색 의존 0</td><td style="padding:var(--space-md) var(--space-sm)">모노 전용이라 한글 가독성 약간 낮음</td></tr>
+<tr style="border-bottom:1px solid var(--color-border)"><td style="padding:var(--space-md) var(--space-sm);font-weight:800">C</td><td style="padding:var(--space-md) var(--space-sm)">브루탈리스트 · 흑백</td><td style="padding:var(--space-md) var(--space-sm)">가장 강한 시각 인상. 결정적 마무리</td><td style="padding:var(--space-md) var(--space-sm)">책 전체 톤과 이질감 있을 수 있음</td></tr>
+<tr><td style="padding:var(--space-md) var(--space-sm);font-weight:800">D</td><td style="padding:var(--space-md) var(--space-sm)">미니멀 · 인디고</td><td style="padding:var(--space-md) var(--space-sm)">현 브랜드 유지 + AI감만 제거. 리스크 낮음</td><td style="padding:var(--space-md) var(--space-sm)">가장 밋밋. "특별함" 약함</td></tr>
+</tbody>
+</table>
+
+<p style="margin-top:var(--space-lg);font-size:var(--fs-md);color:var(--color-text-muted)">
+<strong>추천</strong>: 책의 에디토리얼 톤(캐릭터 대사·이야기 파트)과 궁합 좋은 <strong>A (Editorial Paper)</strong>. 가장 안전하게 가려면 <strong>D (Minimal)</strong>. 시각 충격이 필요하면 <strong>C (Brutalist)</strong>. <strong>B (Blueprint)</strong>는 엔지니어링 문서 정체성을 강하게 가져갈 때.
+</p>
+
+</body>
+</html>

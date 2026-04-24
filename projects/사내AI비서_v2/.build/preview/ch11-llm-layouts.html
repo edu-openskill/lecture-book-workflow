@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>11.5 LLM 배치 4가지 레이아웃 — 좌우 공백 제거 + 흐름 강화</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+body { font-family: var(--font-body); color: var(--color-text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 32px 96px; line-height: 1.6; }
+h1 { font-size: var(--fs-4xl); color: var(--color-text-heading); border-bottom: 2px solid var(--color-text-heading); padding-bottom: var(--space-sm); margin-bottom: var(--space-sm); }
+.intro { color: var(--color-text-secondary); font-size: var(--fs-lg); margin-bottom: var(--space-3xl); line-height: 1.7; }
+h2 { margin-top: var(--space-3xl); font-size: var(--fs-2xl); color: var(--color-text-heading); letter-spacing: -0.3px; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-sm); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 16px; }
+.tags .t { background: var(--color-surface); border: 1px solid var(--color-border); padding: 2px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; color: var(--color-text-muted); letter-spacing: 1px; }
+.note { color: var(--color-text-muted); font-size: var(--fs-sm); line-height: 1.7; }
+
+/* ───── 공통 베이스 (T3 스타일) ───── */
+.ax {
+  --ink: var(--color-text-heading);
+  --muted: var(--color-text-secondary);
+  --faint: #e2e8f0;
+  --accent: var(--color-accent);
+  --accent-bg: var(--color-accent-bg);
+  --accent-border: var(--color-accent-border);
+  --accent-text: var(--color-accent-text);
+  --info: var(--color-info);
+  --info-bg: var(--color-info-bg);
+  --info-text: var(--color-info-text);
+  width:100%; background:white; padding:var(--space-2xl) var(--space-xl); margin:var(--space-xl) 0;
+  font-family: var(--font-body);
+  border-top:3px solid var(--accent); border-bottom:1px solid var(--faint);
+}
+.ax .ahd { text-align:center; margin-bottom:var(--space-xl); }
+.ax .ahd .sub { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:4px; text-transform:uppercase; font-weight:700; margin-bottom:6px; }
+.ax .ahd .ti { font-size:22px; color:var(--ink); font-weight:800; letter-spacing:-0.5px; }
+.ax .ahd .ds { font-family:var(--font-body); font-size:13px; color:var(--muted); margin-top:3px; }
+
+/* 공통: col-c, col-a, col-t, stores (T3 스타일) */
+.ax .col-c { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-md) var(--space-sm); display:flex; flex-direction:column; justify-content:space-between; min-height:340px; }
+.ax .col-c .us { text-align:center; padding:var(--space-sm) 0; border-bottom:1px dashed var(--info); }
+.ax .col-c .us .ic { width:30px; height:30px; background:var(--info); color:white; border-radius:50%; margin:0 auto 4px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; }
+.ax .col-c .us .n { font-size:15px; color:var(--ink); font-weight:700; }
+.ax .col-c .us .s { font-family:var(--font-mono); font-size:10px; color:var(--info-text); margin-top:2px; }
+.ax .col-c .fm { display:flex; justify-content:space-between; padding:var(--space-sm) 0; font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--info-text); font-weight:700; }
+.ax .col-c .ap { text-align:center; padding:var(--space-sm) 0; border-top:1px dashed var(--info); }
+.ax .col-c .ap .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.ax .col-c .ap .n { font-size:15px; color:var(--ink); font-weight:700; margin-top:3px; }
+.ax .col-c .ap .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:2px; }
+
+.ax .col-a { border:1.5px solid var(--accent); background:white; padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:340px; }
+.ax .col-a::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background:var(--accent); }
+.ax .col-a .ti { position:absolute; top:-10px; left:var(--space-md); background:white; border:1px solid var(--accent); padding:3px 10px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; color:var(--accent); }
+.ax .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-sm); }
+.ax .col-a .chip { border:1px solid var(--accent-border); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.ax .col-a .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.ax .col-a .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:3px; }
+.ax .col-a .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); margin-top:1px; }
+/* core가 통합 에이전트 컨테이너. 내부에 loop + engine 포함 */
+.ax .col-a .core { background:#f8f9ff; border:1.5px solid var(--accent); padding:var(--space-sm); }
+.ax .col-a .core .core-hd { text-align:center; padding-bottom:var(--space-sm); border-bottom:1px dashed var(--accent-border); margin-bottom:var(--space-sm); }
+.ax .col-a .core .core-hd .l { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.ax .col-a .core .core-hd .n { font-size:15px; color:var(--ink); font-weight:700; margin-top:2px; }
+.ax .col-a .core .core-hd .s { font-family:var(--font-mono); font-size:10px; color:var(--accent-text); margin-top:2px; }
+.ax .col-a .core .loop { background:white; border:1px solid var(--accent-border); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-xs); }
+.ax .col-a .core .loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+.ax .col-a .core .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.ax .col-a .core .loop .st { font-family:var(--font-mono); font-size:10px; padding:3px 10px; border:1px solid var(--accent-border); background:var(--accent-bg); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--accent-text); }
+.ax .col-a .core .loop .arr { color:var(--accent); font-size:11px; }
+.ax .col-a .core .engine { background:white; border:1px solid var(--accent-border); padding:var(--space-sm); text-align:center; }
+.ax .col-a .core .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.ax .col-a .core .engine .en { font-size:12px; color:var(--ink); font-weight:700; margin-bottom:var(--space-xs); }
+.ax .col-a .core .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.ax .col-a .core .engine .es .s { background:var(--accent-bg); border:1px solid var(--accent-border); padding:3px 2px; text-align:center; color:var(--accent-text); font-weight:700; }
+
+.ax .col-t { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-lg) var(--space-sm) var(--space-sm); position:relative; min-height:340px; }
+.ax .col-t .ti { position:absolute; top:-11px; left:var(--space-md); background:var(--info); color:white; padding:3px 10px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; }
+.ax .col-t .tool { background:white; display:grid; grid-template-columns:20px 1fr auto; align-items:center; gap:var(--space-sm); padding:var(--space-sm); border:1px solid var(--faint); margin-bottom:4px; }
+.ax .col-t .tool:last-child { margin-bottom:0; }
+.ax .col-t .tool .no { font-family:var(--font-mono); font-size:9px; color:var(--info); font-weight:700; }
+.ax .col-t .tool .n { font-family:var(--font-mono); font-size:11px; color:var(--ink); font-weight:700; }
+.ax .col-t .tool .s { font-size:9px; color:var(--muted); margin-top:1px; }
+.ax .col-t .tool .b { font-family:var(--font-mono); font-size:9px; color:var(--info-text); background:var(--info-bg); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; border:1px solid var(--info); padding:2px 6px; }
+.ax .col-t .tool .b.rag { color:white; background:var(--accent); border-color:var(--accent); }
+
+.ax .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-lg); margin-top:var(--space-xl); padding-top:var(--space-md); border-top:2px dashed var(--accent-border); }
+.ax .stores .st { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-sm) var(--space-md); text-align:center; }
+.ax .stores .st .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.ax .stores .st .n { font-size:15px; color:var(--ink); font-weight:700; margin:3px 0; }
+.ax .stores .st .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); }
+.ax .cap { margin-top:var(--space-md); padding-top:var(--space-sm); border-top:1px solid var(--accent); font-size:11px; color:var(--muted); text-align:center; line-height:1.6; }
+
+/* ═══════════════════════════════════════════════════════════
+   L1. Full-width LLM Bar — LLM 가로 전체, 3 모델 나란히
+   ═══════════════════════════════════════════════════════════ */
+.l1 .llm { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-md) var(--space-lg); margin-bottom:var(--space-sm); }
+.l1 .llm .hd-row { display:flex; justify-content:space-between; align-items:baseline; padding-bottom:var(--space-sm); border-bottom:1px dashed var(--info); }
+.l1 .llm .hd-row .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.l1 .llm .hd-row .n { font-size:15px; color:var(--ink); font-weight:700; }
+.l1 .llm .hd-row .tag { font-family:var(--font-mono); font-size:9px; color:var(--info-text); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.l1 .llm .models { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-md); margin-top:var(--space-sm); }
+.l1 .llm .m { text-align:center; padding:var(--space-xs); }
+.l1 .llm .m .mn { font-family:var(--font-mono); font-size:13px; color:var(--info-text); font-weight:700; display:block; }
+.l1 .llm .m .mu { font-family:var(--font-body); font-size:10px; color:var(--muted); margin-top:2px; display:block; }
+.l1 .flow { display:flex; justify-content:center; gap:var(--space-3xl); margin:var(--space-xs) 0 var(--space-md); font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.l1 .flow span { border-bottom:1px solid var(--accent); padding-bottom:2px; }
+.l1 .grid { display:grid; grid-template-columns:170px 1fr 220px; gap:var(--space-lg); align-items:stretch; }
+
+/* ═══════════════════════════════════════════════════════════
+   L2. LLM + Side Flow Labels — 좌우 공백에 역할 라벨
+   ═══════════════════════════════════════════════════════════ */
+.l2 .llm-row { display:grid; grid-template-columns:1fr auto 1fr; gap:var(--space-lg); align-items:center; margin-bottom:var(--space-sm); }
+.l2 .llm-row .side-l, .l2 .llm-row .side-r { font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; line-height:1.7; }
+.l2 .llm-row .side-l { text-align:right; border-right:1px dashed var(--faint); padding-right:var(--space-lg); }
+.l2 .llm-row .side-r { text-align:left; border-left:1px dashed var(--faint); padding-left:var(--space-lg); }
+.l2 .llm-row .side-l .k, .l2 .llm-row .side-r .k { color:var(--accent); font-size:11px; letter-spacing:3px; margin-bottom:3px; display:block; }
+.l2 .llm-row .side-l .v, .l2 .llm-row .side-r .v { color:var(--ink); font-family:var(--font-body); font-size:12px; text-transform:none; letter-spacing:0; font-weight:600; }
+.l2 .llm-row .bx { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-sm) var(--space-xl); text-align:center; min-width:340px; }
+.l2 .llm-row .bx .l { font-family:var(--font-mono); font-size:9px; color:var(--info-text); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.l2 .llm-row .bx .n { font-size:16px; color:var(--ink); font-weight:700; margin:2px 0; }
+.l2 .llm-row .bx .ms { display:flex; flex-direction:column; gap:2px; margin-top:6px; padding-top:6px; border-top:1px dashed var(--info); font-family:var(--font-mono); font-size:10px; }
+.l2 .llm-row .bx .m { display:grid; grid-template-columns:120px 1fr; gap:var(--space-sm); text-align:left; align-items:baseline; }
+.l2 .llm-row .bx .m .mn { color:var(--info-text); font-weight:700; }
+.l2 .llm-row .bx .m .mu { color:var(--muted); font-size:10px; }
+.l2 .flow { display:flex; justify-content:center; gap:var(--space-3xl); margin:var(--space-xs) 0 var(--space-md); font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.l2 .flow span { border-bottom:1px solid var(--accent); padding-bottom:2px; }
+.l2 .grid { display:grid; grid-template-columns:170px 1fr 220px; gap:var(--space-lg); align-items:stretch; }
+
+/* ═══════════════════════════════════════════════════════════
+   L3. 세로 5행 스택 — 단일 컬럼 흐름
+   ═══════════════════════════════════════════════════════════ */
+.l3 .row { display:flex; justify-content:center; margin-bottom:var(--space-sm); }
+.l3 .row .bx { width:100%; }
+.l3 .llm-row { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-md) var(--space-lg); display:grid; grid-template-columns:auto 1fr; gap:var(--space-xl); align-items:center; }
+.l3 .llm-row .h { border-right:1px dashed var(--info); padding-right:var(--space-lg); }
+.l3 .llm-row .h .l { font-family:var(--font-mono); font-size:9px; color:var(--info-text); letter-spacing:2.5px; text-transform:uppercase; font-weight:700; }
+.l3 .llm-row .h .n { font-size:17px; color:var(--ink); font-weight:700; margin-top:2px; white-space:nowrap; }
+.l3 .llm-row .models { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-md); }
+.l3 .llm-row .m { text-align:center; }
+.l3 .llm-row .m .mn { font-family:var(--font-mono); font-size:12px; color:var(--info-text); font-weight:700; display:block; }
+.l3 .llm-row .m .mu { font-size:10px; color:var(--muted); margin-top:2px; display:block; }
+.l3 .lvl-arr { text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:3px; font-weight:700; text-transform:uppercase; padding:var(--space-xs) 0; }
+.l3 .lvl-arr::before { content:"↓ "; }
+.l3 .user-row { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-md) var(--space-lg); display:grid; grid-template-columns:1fr auto 1fr; gap:var(--space-lg); align-items:center; }
+.l3 .user-row .pane { text-align:center; }
+.l3 .user-row .pane .ic { width:30px; height:30px; background:var(--info); color:white; border-radius:50%; margin:0 auto 3px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; }
+.l3 .user-row .pane .n { font-size:15px; color:var(--ink); font-weight:700; }
+.l3 .user-row .pane .s { font-family:var(--font-mono); font-size:10px; color:var(--info-text); margin-top:2px; }
+.l3 .user-row .sep { font-family:var(--font-mono); font-size:9px; color:var(--info-text); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; padding:0 var(--space-sm); }
+.l3 .user-row .sep span { display:block; line-height:1.5; }
+.l3 .user-row .pane.api .ic { background:var(--ink); border-radius:6px; font-family:var(--font-mono); font-size:11px; }
+.l3 .runtime-row { border:1.5px solid var(--accent); background:white; padding:var(--space-lg) var(--space-md); position:relative; }
+.l3 .runtime-row::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; background:var(--accent); }
+.l3 .runtime-row .ti { position:absolute; top:-10px; left:var(--space-md); background:white; border:1px solid var(--accent); padding:3px 10px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; color:var(--accent); }
+.l3 .runtime-row .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-md); margin-top:var(--space-sm); }
+.l3 .runtime-row .chip { border:1px solid var(--accent-border); padding:var(--space-sm); text-align:center; }
+.l3 .runtime-row .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.l3 .runtime-row .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:2px; }
+.l3 .runtime-row .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); margin-top:1px; }
+.l3 .runtime-row .core-wrap { background:#f8f9ff; border:1.5px solid var(--accent); padding:var(--space-sm); margin-top:var(--space-sm); }
+.l3 .runtime-row .core-wrap .core-hd { text-align:center; padding-bottom:var(--space-sm); border-bottom:1px dashed var(--accent-border); margin-bottom:var(--space-sm); }
+.l3 .runtime-row .core-wrap .core-hd .l { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.l3 .runtime-row .core-wrap .core-hd .n { font-size:15px; color:var(--ink); font-weight:700; margin-top:3px; }
+.l3 .runtime-row .core-wrap .core-hd .s { font-family:var(--font-mono); font-size:10px; color:var(--accent-text); margin-top:2px; }
+.l3 .runtime-row .core-wrap .inner { display:grid; grid-template-columns:1fr 2fr; gap:var(--space-sm); }
+.l3 .runtime-row .core-wrap .loop { background:white; border:1px solid var(--accent-border); padding:var(--space-sm); text-align:center; }
+.l3 .runtime-row .core-wrap .loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+.l3 .runtime-row .core-wrap .loop .sts { display:flex; justify-content:center; gap:3px; font-family:var(--font-mono); flex-wrap:wrap; }
+.l3 .runtime-row .core-wrap .loop .st { font-size:9px; padding:2px 6px; border:1px solid var(--accent-border); background:var(--accent-bg); font-weight:700; color:var(--accent-text); letter-spacing:0.5px; }
+.l3 .runtime-row .core-wrap .engine { background:white; border:1px solid var(--accent-border); padding:var(--space-sm); text-align:center; }
+.l3 .runtime-row .core-wrap .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.l3 .runtime-row .core-wrap .engine .en { font-size:12px; color:var(--ink); font-weight:700; margin:3px 0; }
+.l3 .runtime-row .core-wrap .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; margin-top:3px; }
+.l3 .runtime-row .core-wrap .engine .es .s { background:var(--accent-bg); border:1px solid var(--accent-border); padding:2px; color:var(--accent-text); font-weight:700; }
+.l3 .tools-row { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-lg) var(--space-md) var(--space-md); position:relative; }
+.l3 .tools-row .ti { position:absolute; top:-11px; left:var(--space-md); background:var(--info); color:white; padding:3px 10px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; }
+.l3 .tools-row .tools-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--space-sm); }
+.l3 .tools-row .tool { background:white; border:1px solid var(--faint); padding:var(--space-sm); text-align:center; }
+.l3 .tools-row .tool .no { font-family:var(--font-mono); font-size:9px; color:var(--info); font-weight:700; }
+.l3 .tools-row .tool .n { font-family:var(--font-mono); font-size:11px; color:var(--ink); font-weight:700; margin:3px 0 2px; }
+.l3 .tools-row .tool .s { font-size:9px; color:var(--muted); margin-bottom:3px; }
+.l3 .tools-row .tool .b { display:inline-block; font-family:var(--font-mono); font-size:9px; color:var(--info-text); background:var(--info-bg); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; border:1px solid var(--info); padding:1px 6px; }
+.l3 .tools-row .tool .b.rag { color:white; background:var(--accent); border-color:var(--accent); }
+.l3 .stores { margin-top:var(--space-sm); }
+
+/* ═══════════════════════════════════════════════════════════
+   L4. 4-Column with LLM as right column — LLM을 우측 컬럼으로
+   ═══════════════════════════════════════════════════════════ */
+.l4 .grid4 { display:grid; grid-template-columns:150px 1fr 190px 170px; gap:var(--space-md); align-items:stretch; }
+.l4 .col-llm { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-lg) var(--space-sm); position:relative; min-height:340px; }
+.l4 .col-llm .ti { position:absolute; top:-11px; left:var(--space-sm); background:var(--info); color:white; padding:3px 10px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; }
+.l4 .col-llm .n { text-align:center; font-family:var(--font-body); font-size:14px; color:var(--ink); font-weight:700; margin-bottom:var(--space-sm); padding-bottom:var(--space-sm); border-bottom:1px dashed var(--info); }
+.l4 .col-llm .m { background:white; border:1px solid var(--faint); padding:var(--space-sm); margin-bottom:var(--space-xs); }
+.l4 .col-llm .m:last-child { margin-bottom:0; }
+.l4 .col-llm .m .mn { font-family:var(--font-mono); font-size:11px; color:var(--info-text); font-weight:700; display:block; }
+.l4 .col-llm .m .mu { font-family:var(--font-body); font-size:9px; color:var(--muted); margin-top:2px; display:block; line-height:1.4; }
+.l4 .flow { display:none; }
+.l4 .side-flow { position:absolute; top:var(--space-lg); right:-10px; font-family:var(--font-mono); font-size:8px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; writing-mode:vertical-rl; transform:rotate(180deg); line-height:1.2; }
+</style>
+</head>
+<body>
+
+<h1>11.5 LLM 배치 4가지 레이아웃 — 좌우 공백 제거 + 흐름 강화</h1>
+<p class="intro">
+현재 LLM 박스가 상단 중앙에 놓여 좌우에 큰 공백이 생기는 문제를 해결하는 4가지 접근. 동일 T3 스타일을 베이스로, LLM 박스 위치와 폭만 바꿉니다.
+</p>
+
+<!-- ═════════ L1 Full-width LLM ═════════ -->
+<h2>L1. Full-width LLM Bar — 3 모델 가로 나열</h2>
+<div class="tags">
+<span class="t">LLM 가로 폭 100%</span>
+<span class="t">3 모델 column grid</span>
+<span class="t">공백 제거</span>
+<span class="t">가장 단순</span>
+</div>
+<p class="note"><strong>장점</strong>: 구조 변경 최소. 좌우 공백 완전 제거. 3 모델 비교 시각. <strong>단점</strong>: LLM 박스가 길어져 내용 비중이 커 보일 수 있음.</p>
+
+<div class="ax l1">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">L1 · Full-width LLM Bar</div></div>
+
+<div class="llm">
+<div class="hd-row">
+<span class="l">External · Ollama</span>
+<span class="n">로컬 LLM 3종</span>
+<span class="tag">프롬프트 ↑  ↓ 응답</span>
+</div>
+<div class="models">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div>
+
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div>
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">L1 · LLM 풀와이드 바. 좌우 공백 없이 3 모델을 나란히 배치</div>
+</div>
+
+<!-- ═════════ L2 LLM + Side Flow ═════════ -->
+<h2>L2. LLM + Side Flow Labels — 좌우에 역할·컨텍스트</h2>
+<div class="tags">
+<span class="t">LLM 중앙 유지</span>
+<span class="t">좌우 공백에 역할 라벨</span>
+<span class="t">흐름 방향 시각화</span>
+</div>
+<p class="note"><strong>장점</strong>: LLM 박스 크기 유지. 좌우 공백을 "외부 의존"과 "로컬 실행" 컨텍스트로 채움. <strong>단점</strong>: 정보 밀도 살짝 증가.</p>
+
+<div class="ax l2">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">L2 · Side Flow Labels</div></div>
+
+<div class="llm-row">
+<div class="side-l">
+<span class="k">외부 의존</span>
+<span class="v">사내 네트워크 바깥의<br>로컬 Ollama 서버로 호출</span>
+</div>
+<div class="bx">
+<div class="l">External · Ollama</div>
+<div class="n">로컬 LLM 3종</div>
+<div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div>
+</div>
+<div class="side-r">
+<span class="k">응답 형태</span>
+<span class="v">프롬프트 → 추론 결과<br>토큰 단위로 스트리밍</span>
+</div>
+</div>
+
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div>
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">L2 · LLM 좌우 공백에 역할·컨텍스트 라벨 배치</div>
+</div>
+
+<!-- ═════════ L3 세로 5행 스택 ═════════ -->
+<h2>L3. 세로 5행 스택 — 단일 컬럼 흐름</h2>
+<div class="tags">
+<span class="t">모든 레이어가 가로 폭 100%</span>
+<span class="t">위→아래 흐름 명확</span>
+<span class="t">↓ 화살표로 계층 연결</span>
+</div>
+<p class="note"><strong>장점</strong>: 공백 zero. 흐름(LLM → Gateway → Runtime → Tools → Stores)이 계층적으로 아래로 흐르는 것이 즉시 이해됨. <strong>단점</strong>: 세로 길이가 길어짐. 3열 대비 컬럼별 차이 구분이 약함.</p>
+
+<div class="ax l3">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">L3 · Vertical 5-Layer Stack</div></div>
+
+<div class="llm-row">
+<div class="h">
+<div class="l">External · Ollama</div>
+<div class="n">로컬 LLM 3종</div>
+</div>
+<div class="models">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div>
+
+<div class="lvl-arr">프롬프트 · 응답</div>
+
+<div class="user-row">
+<div class="pane"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="sep"><span>↓ 요청</span><span>↑ 응답</span></div>
+<div class="pane api"><div class="ic">API</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+
+<div class="lvl-arr">요청 · 응답</div>
+
+<div class="runtime-row">
+<div class="ti">Runtime</div>
+<div class="grid3">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core-wrap">
+<div class="core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="inner">
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="st">Act</div><div class="st">Obs</div></div></div>
+<div class="engine"><div class="el">RAG Engine · 커넥트HR 엔진</div><div class="en">6 stages</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div>
+</div>
+
+<div class="lvl-arr">도구 · 결과</div>
+
+<div class="tools-row">
+<div class="ti">Tools · MCP</div>
+<div class="tools-grid">
+<div class="tool"><div class="no">01</div><div class="n">leave_balance</div><div class="s">연차 조회</div><span class="b">SQL</span></div>
+<div class="tool"><div class="no">02</div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div><span class="b">SQL</span></div>
+<div class="tool"><div class="no">03</div><div class="n">list_employees</div><div class="s">이름·부서</div><span class="b">SQL</span></div>
+<div class="tool"><div class="no">04</div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div><span class="b rag">RAG</span></div>
+</div>
+</div>
+
+<div class="lvl-arr">조회 · 결과</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">L3 · 5-레이어 세로 스택. 공백 zero, 위→아래 흐름이 즉시 읽힘</div>
+</div>
+
+<!-- ═════════ L4 4-Column (LLM 우측) ═════════ -->
+<h2>L4. 4-Column Grid — LLM을 우측 컬럼으로 이동</h2>
+<div class="tags">
+<span class="t">LLM을 우측에 세로 배치</span>
+<span class="t">User-Runtime-Tools-LLM 4열</span>
+<span class="t">상단 공백 완전 제거</span>
+</div>
+<p class="note"><strong>장점</strong>: LLM이 "외부 의존"이라는 점이 우측 배치로 명확. 상단 공백 zero. 세로 길이 절약. <strong>단점</strong>: "프롬프트 위에서 아래로 내려오는 흐름" 직관이 약해짐. 4 컬럼이라 각 컬럼 좁아짐.</p>
+
+<div class="ax l4">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">L4 · 4-Column Layout</div></div>
+
+<div class="grid4">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div>
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">직원</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">RAG</div></div><div class="b rag">RAG</div></div>
+</div>
+<div class="col-llm">
+<div class="ti">External · LLM</div>
+<div class="n">Ollama</div>
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">L4 · LLM을 우측 4번째 컬럼으로 이동. 상단 공백 완전 제거</div>
+</div>
+
+<h2 style="margin-top:96px">결정 가이드</h2>
+<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);margin-top:var(--space-lg)">
+<thead><tr style="background:var(--color-surface);border-bottom:2px solid var(--color-text-heading)">
+<th style="padding:var(--space-md) var(--space-sm);text-align:left;width:80px">레이아웃</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">공백 해결</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">흐름 가시성</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">추천 상황</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">L1 풀와이드</td>
+<td style="padding:var(--space-md) var(--space-sm)">✓ 완전 제거</td>
+<td style="padding:var(--space-md) var(--space-sm)">중: 위→아래 기본 구조</td>
+<td style="padding:var(--space-md) var(--space-sm)"><strong>가장 안전·단순</strong>. 구조 변경 최소</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">L2 사이드 라벨</td>
+<td style="padding:var(--space-md) var(--space-sm)">△ 일부 (라벨로 채움)</td>
+<td style="padding:var(--space-md) var(--space-sm)">중상: 외부 의존 문맥 추가</td>
+<td style="padding:var(--space-md) var(--space-sm)">LLM 위치 유지하면서 정보 밀도 올림</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border);background:var(--color-accent-bg)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">L3 세로 5행 ★</td>
+<td style="padding:var(--space-md) var(--space-sm)">✓ zero</td>
+<td style="padding:var(--space-md) var(--space-sm)"><strong>최고</strong>: 계층적 ↓ 흐름 즉시 읽힘</td>
+<td style="padding:var(--space-md) var(--space-sm)"><strong>흐름을 가장 강조</strong>하고 싶을 때</td>
+</tr>
+<tr>
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">L4 4-Column</td>
+<td style="padding:var(--space-md) var(--space-sm)">✓ 상단 공백 zero</td>
+<td style="padding:var(--space-md) var(--space-sm)">중하: 4열이라 직선 흐름 약함</td>
+<td style="padding:var(--space-md) var(--space-sm)">세로 길이 절약 원할 때</td>
+</tr>
+</tbody>
+</table>
+
+<p style="margin-top:var(--space-lg);font-size:var(--fs-md);color:var(--color-text-muted)">
+<strong>추천</strong>: <strong>L3 (세로 5행 스택)</strong>. "요청이 위에서 아래로 흐른다"는 데이터 플로우가 즉시 읽히고 공백도 전혀 없음. 안전한 옵션은 <strong>L1 (풀와이드)</strong> — 구조를 크게 바꾸지 않고 좌우 공백만 제거.
+</p>
+
+</body>
+</html>

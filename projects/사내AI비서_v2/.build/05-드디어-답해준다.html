@@ -146,7 +146,8 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </ol>
 </div>
 <h2>5.1 &quot;그냥 답을 알려줘&quot;</h2>
-<div class="chapter-image gemini"><img src="./assets/CH05/gemini/05_chapter-opening.png" alt="" /><div class="caption">그림 5-1. 사서가 답해준다. 책을 찾아서 읽고, 출처와 함께 답해 줍니다</div></div>
+<p>![](../assets/챕터 5/gemini/05_chapter-opening.png)
+<em>그림 5-1. 사서가 답해준다. 책을 찾아서 읽고, 출처와 함께 답해 줍니다</em></p>
 <p>수요일 점심 직후. 사무실 라디에이터가 한 번 울컥 소리를 내고 다시 잠잠해졌습니다.</p>
 <p>챕터 4에서 벡터 검색까지 돌렸고, 동료에게 CLI 사용법을 알려 줬습니다. 점심 먹고 돌아오니 그 동료가 또 의자를 돌려 제 쪽을 봤어요.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "병가 쓸 때 증빙 서류 필요해요?"</div>
@@ -348,7 +349,8 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <div class="dialogue"><span class="speaker">방문자</span>: "거기 세계사도 있어요?"</div>
 <p>여기서 &quot;거기&quot;는 <strong>2층 인문학 서가</strong>입니다. 사람 사서는 당연히 기억하지만 LLM은 기본적으로 <strong>기억력이 없습니다</strong>. 매 요청이 독립적이라 이전 질문을 모릅니다. 그래서 <strong>대화 히스토리</strong>를 직접 관리해야 합니다.</p>
 <p>모든 대화를 다 기억할 수는 없으니 <strong>최근 N턴만 유지</strong>하는 슬라이딩 윈도우 방식을 씁니다. 사서가 메모장을 들고 있다고 생각하시면 됩니다. 새 메모가 들어오면 가장 오래된 메모를 지우고 최근 5장만 남깁니다.</p>
-<div class="chapter-image gemini"><img src="./assets/CH05/gemini/05_sliding-window.png" alt="" /><div class="caption">그림 5-4. 6번째 메모가 들어오면 가장 오래된 1번째가 빠집니다. 항상 <code>maxlen = 5</code></div></div>
+<p>![](../assets/챕터 5/gemini/05_sliding-window.png)
+<em>그림 5-4. 6번째 메모가 들어오면 가장 오래된 1번째가 빠집니다. 항상 <code>maxlen = 5</code></em></p>
 <p>Python에서는 <code>collections.deque(maxlen=5)</code>를 쓰면 이 구조가 자동으로 구현됩니다.</p>
 <h3>실습(conversation.py)</h3>
 <p><code>ex05/src/conversation.py</code>는 <code>deque(maxlen=k)</code> 위에 얇은 래퍼를 씌워 &quot;이전 대화&quot;를 프롬프트에 넣을 형태로 바꿉니다. <code>save_turn</code>, <code>get_history</code>, <code>clear</code> 세 메서드에 TODO가 있습니다. TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
@@ -382,11 +384,14 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <p>두 파일의 TODO를 모두 채웠으면 서버를 띄워 브라우저에서 직접 대화해 봅니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 서버 실행</div>python<span class="w"> </span>run.py</div>
 <p>터미널에 <code>Uvicorn running on http://0.0.0.0:8000</code>이 찍히면 준비 완료입니다. 브라우저에서 <code>http://localhost:8000/chat</code>을 열면 채팅 UI가 나타납니다.</p>
-<div class="chapter-image terminal"><img src="./assets/CH05/terminal/05_chat-ui.png" alt="" /><div class="caption">그림 5-5. 커넥트HR 에이전트의 전신. RAG Q&amp;A 채팅 UI</div></div>
+<p>![](../assets/챕터 5/terminal/05_chat-ui.png)
+<em>그림 5-5. 커넥트HR 에이전트의 전신. RAG Q&amp;A 채팅 UI</em></p>
 <p>&quot;병가 쓸 때 증빙 서류 필요해요?&quot;라고 물어보면 사내 취업규칙을 근거로 답이 돌아오고, 답변 끝에 출처 파일명이 붙습니다.</p>
-<div class="chapter-image terminal"><img src="./assets/CH05/terminal/05_chat-response.png" alt="" /><div class="caption">그림 5-6. 답변이 자연어로 돌아오고, 출처까지 명시됩니다</div></div>
+<p>![](../assets/챕터 5/terminal/05_chat-response.png)
+<em>그림 5-6. 답변이 자연어로 돌아오고, 출처까지 명시됩니다</em></p>
 <p>이어서 &quot;그럼 며칠 이상일 때 진단서가 필요해?&quot;라고 물어보면 <strong>이전 대화의 &quot;병가&quot;를 기억</strong>해서 맥락을 이어 답합니다. WindowMemory가 동작한 결과입니다.</p>
-<div class="chapter-image terminal"><img src="./assets/CH05/terminal/05_chat-response-followup.png" alt="" /><div class="caption">그림 5-7. 멀티턴 대화. 이전 질문을 기억해 &quot;거기&quot;, &quot;그럼&quot;을 해석합니다</div></div>
+<p>![](../assets/챕터 5/terminal/05_chat-response-followup.png)
+<em>그림 5-7. 멀티턴 대화. 이전 질문을 기억해 &quot;거기&quot;, &quot;그럼&quot;을 해석합니다</em></p>
 <p>옆자리에서 동료가 화면을 넘겨다봤습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "아, 이제 답을 주네요. 아까는 문서 조각만 던지더니."</div>
 <p>오프닝에 &quot;이걸 내가 읽어?&quot; 하던 바로 그 사람입니다. 이번엔 읽을 것도, 해석할 것도 없이 답이 나왔습니다.</p>
@@ -397,7 +402,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 5-4. 이번 챕터의 LCEL 파이프라인은 다음 챕터에서 에이전트 도구가 됩니다</div>
 <div style="display:grid;grid-template-columns:1fr 40px 1.3fr;gap:var(--space-md);align-items:center">
 <div style="border:2px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:white;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center">
-<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">CH05. 지금</div>
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 5. 지금</div>
 <div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-bottom:var(--space-sm);text-align:center">LCEL 파이프라인 단독</div>
 <div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm);font-family:var(--font-mono);font-size:11px">
 <div style="display:flex;align-items:center;gap:4px;justify-content:center;flex-wrap:wrap">
@@ -414,7 +419,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </div>
 <div style="font-size:28px;color:var(--color-accent);text-align:center;font-weight:700">→</div>
 <div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:var(--color-accent-bg);position:relative">
-<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">CH06. 에이전트 도구로 감싸짐</div>
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 6. 에이전트 도구로 감싸짐</div>
 <div style="font-size:var(--fs-xs);color:var(--color-accent-text);margin-bottom:var(--space-sm);text-align:center;font-weight:600">ReAct 에이전트의 도구 상자 (4개)</div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:var(--space-xs)">
 <div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;text-align:center;font-size:10px"><div style="font-weight:700">leave_balance</div><div style="color:var(--color-text-muted)">SQL</div></div>
@@ -424,7 +429,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <div style="border:2px solid var(--color-success);border-radius:var(--radius-sm);padding:var(--space-sm);background:white">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
 <div style="font-weight:700;font-size:11px">search_documents</div>
-<div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);padding:1px 6px;border-radius:3px;font-weight:600">CH05 엔진 그대로</div>
+<div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);padding:1px 6px;border-radius:3px;font-weight:600">챕터 5 엔진 그대로</div>
 </div>
 <div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:3px;padding:4px;font-family:var(--font-mono);font-size:10px">
 <div style="display:flex;align-items:center;gap:3px;justify-content:center;flex-wrap:wrap">

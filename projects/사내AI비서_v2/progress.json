@@ -1,6 +1,7 @@
 {
   "project": "사내AI비서_v2",
   "title": "AI도 모르는 우리 회사 이야기",
+  "alias": "사내AI비서",
   "status": "in_progress",
   "current_step": "step_5_chapters",
   "book_version": "v6",
@@ -96,14 +97,15 @@
       }
     },
     "step_8_pdf_pipeline": {
-      "name": "HTML→PDF 파이프라인",
-      "status": "pending",
+      "name": "HTML 프리뷰 파이프라인",
+      "status": "done",
       "artifacts": {
-        "templates": "book/templates/",
-        "styles": "book/styles/",
-        "builder": "book/build_pdf_html.py"
+        "templates": ".claude/skills/pub-html-build/templates/",
+        "styles": ".claude/skills/pub-html-build/styles/",
+        "builder": ".claude/skills/pub-html-build/build_html.py",
+        "pdf_builder": ".claude/skills/pub-html-to-pdf/build_pdf.py"
       },
-      "_note": "Chromium 헤드리스 + Paged.js. Ch.1 빌드로 확정"
+      "_note": "HTML 프리뷰는 pub-html-build, 선택적 PDF는 pub-html-to-pdf (정식 전자책 PDF는 pub-build Typst 경로)"
     }
   },
 

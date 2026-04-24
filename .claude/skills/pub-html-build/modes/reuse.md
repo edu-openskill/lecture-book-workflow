@@ -21,12 +21,13 @@ bash .claude/skills/pub-html-build/scripts/init_book.sh projects/<새-책이름>
 스크립트가 생성하는 것:
 - `chapters/` — 챕터 마크다운 디렉토리
 - `assets/` — 이미지/다이어그램 에셋
-- `book/{front,back,build,output}` — 빌드 산출물 레이어
-- `book/tokens.css` — 브랜드 토큰 **오버라이드 템플릿** (이걸 수정하면 됨)
+- `book/{front,back}` — 프롤로그·에필로그 저작물
+- `.build/` — 빌드 산출물 폴더
+- `.build/tokens.css` — 브랜드 토큰 **오버라이드 템플릿** (이걸 수정하면 됨)
 
 ### 2. 브랜드 토큰 오버라이드
 
-`projects/<새-책이름>/book/tokens.css`를 연다.
+`projects/<새-책이름>/.build/tokens.css`를 연다.
 
 가능한 변수 (스킬 기본 토큰 `styles/tokens.css`에서 오버라이드):
 
@@ -45,7 +46,7 @@ bash .claude/skills/pub-html-build/scripts/init_book.sh projects/<새-책이름>
 | `--font-heading` | 제목 폰트 | `"Pretendard", ...` |
 | `--font-mono` | 코드/모노스페이스 | `"JetBrains Mono", ...` |
 
-**기본 토큰 파일 건드리지 않음**. 수정 대상은 오직 `<프로젝트>/book/tokens.css` 하나.
+**기본 토큰 파일 건드리지 않음**. 수정 대상은 오직 `<프로젝트>/.build/tokens.css` 하나.
 
 ### 3. 컴포넌트 조립 (카탈로그에서)
 
@@ -67,7 +68,7 @@ bash .claude/skills/pub-html-build/scripts/init_book.sh projects/<새-책이름>
 ### 4. 빌드
 
 ```bash
-python .claude/skills/pub-html-build/build_pdf_html.py \
+python .claude/skills/pub-html-build/build_html.py \
   --project-root projects/<새-책이름> \
   --chapter 1
 ```
@@ -75,22 +76,35 @@ python .claude/skills/pub-html-build/build_pdf_html.py \
 옵션:
 - `--project-root PATH` (필수)
 - `--chapter N` (선택, 특정 챕터만 빌드)
-- `--html-only` (PDF 생략, HTML 중간 산출물만)
-- `--no-pagedjs` (Chromium 기본 인쇄, 빠른 빌드)
+
+빌드가 끝나면 각 챕터별로 `🔗 열기: file://…/.build/NN-….html` URL이 출력된다.
 
 ### 5. 결과 확인
 
-- `projects/<책>/book/build/NN-제목.html` — HTML 중간 산출물
-- `projects/<책>/book/output/<책이름>_chNN.pdf` — 최종 PDF
+- `projects/<책>/.build/NN-제목.html` — 챕터 HTML 프리뷰
+- 빌드 로그에 출력된 `file://…` URL을 브라우저 주소창에 붙이거나 아래 옵션 사용
+- 첫 빌드 이후 레포 루트에 `<alias>` 심링크가 자동 생성되어 `file://…/<alias>/.build/NN.html` 로도 접근 가능
 
-브라우저에서 HTML을 열어 브랜드 토큰이 반영됐는지 눈으로 확인.
+브라우저 자동 열기(크로스 플랫폼, Python `webbrowser` 모듈):
+
+```bash
+# 빌드 + 브라우저 자동 열기
+python .claude/skills/pub-html-build/build_html.py \
+  --project-root projects/<책> --chapter 1 --open
+
+# 이미 빌드된 프리뷰 파일만 열기 (tokens-swatch 등)
+python .claude/skills/pub-html-build/build_html.py \
+  --project-root projects/<책> --preview tokens-swatch
+```
+
+macOS·Windows·Linux 공통으로 같은 명령이 동작. PDF가 필요하면 [`pub-html-to-pdf`](../../pub-html-to-pdf/SKILL.md) 스킬 호출.
 
 ## 체크리스트
 
 - [ ] `init_book.sh` 실행 → 프로젝트 디렉토리 생성됨
-- [ ] `book/tokens.css`에 오버라이드 적용됨 (기본 토큰 파일은 건드리지 않음)
+- [ ] `.build/tokens.css`에 오버라이드 적용됨 (기본 토큰 파일은 건드리지 않음)
 - [ ] 각 챕터가 카탈로그 컴포넌트로만 조립됨 (신규 CSS 추가 없음)
-- [ ] 빌드 성공 — PDF 생성 확인
+- [ ] 빌드 성공 — HTML 프리뷰가 `file://` URL로 열림
 - [ ] 브랜드 색상이 의도대로 반영됨
 
 ## 이 모드로 충분하지 않을 때
@@ -101,5 +115,5 @@ python .claude/skills/pub-html-build/build_pdf_html.py \
 
 ## 참고
 
-- 오버라이드 메커니즘: `build_pdf_html.py`는 프로젝트 `book/tokens.css`를 마지막에 삽입해 스킬 기본 토큰보다 우선순위가 높다. CSS cascade 원리.
+- 오버라이드 메커니즘: `build_html.py`는 프로젝트 `.build/tokens.css`를 `./styles/tokens.css` 뒤에 삽입해 스킬 기본 토큰보다 우선순위가 높다. CSS cascade 원리.
 - 기본 토큰 변경 원할 시: 스킬 자체 개선이므로 별도 PR (스킬 레벨 변경은 모든 책에 영향).

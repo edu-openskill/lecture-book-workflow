@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
 """
-build_pdf_html.py — 마크다운 챕터를 HTML → PDF로 빌드.
+build_html.py — 마크다운 챕터를 HTML 프리뷰로 빌드.
 
 흐름:
   chapters/NN-*.md
     → (커스텀 블록 + 코드블록 타이틀 전처리)
     → markdown-it-py
     → Jinja2 템플릿 병합
-    → Playwright + Chromium 헤드리스 → PDF
+    → <프로젝트루트>/.build/NN-*.html
+
+PDF 변환이 필요하면 별도 스킬 `pub-html-to-pdf`를 사용.
 
 의존성:
-  pip install markdown-it-py mdit-py-plugins jinja2 playwright
-  python -m playwright install chromium
+  pip install markdown-it-py mdit-py-plugins jinja2 pygments
 """
 
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import re
-import subprocess
 import sys
+import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote
@@ -35,20 +38,18 @@ PROJECT_ROOT: Path = None  # type: ignore[assignment]
 CHAPTERS_DIR: Path = None  # type: ignore[assignment]
 ASSETS_DIR: Path = None    # type: ignore[assignment]
 BUILD_DIR: Path = None     # type: ignore[assignment]
-OUTPUT_DIR: Path = None    # type: ignore[assignment]
 PROJECT_TOKENS_OVERRIDE: Path = None  # type: ignore[assignment]
 
 
 def configure_paths(project_root: Path) -> None:
     """CLI에서 --project-root 값이 확정된 뒤 전역 경로 변수를 설정."""
-    global PROJECT_ROOT, CHAPTERS_DIR, ASSETS_DIR, BUILD_DIR, OUTPUT_DIR, PROJECT_TOKENS_OVERRIDE
+    global PROJECT_ROOT, CHAPTERS_DIR, ASSETS_DIR, BUILD_DIR, PROJECT_TOKENS_OVERRIDE
     PROJECT_ROOT = project_root.resolve()
     CHAPTERS_DIR = PROJECT_ROOT / "chapters"
     ASSETS_DIR = PROJECT_ROOT / "assets"
-    BUILD_DIR = PROJECT_ROOT / "book" / "build"
-    OUTPUT_DIR = PROJECT_ROOT / "book" / "output"
-    # 프로젝트가 book/tokens.css로 브랜드 오버라이드를 제공할 수 있음
-    override = PROJECT_ROOT / "book" / "tokens.css"
+    BUILD_DIR = PROJECT_ROOT / ".build"
+    # tokens.css 오버라이드 파일도 .build/ 안에서 관리 (저작·산출 한 폴더)
+    override = BUILD_DIR / "tokens.css"
     PROJECT_TOKENS_OVERRIDE = override if override.exists() else None
 
 
@@ -308,24 +309,21 @@ IMG_RE = re.compile(r'<img\s+([^>]*?)src="([^"]+)"([^>]*)>', re.IGNORECASE)
 
 def resolve_image_paths(html: str, md_file: Path) -> str:
     """
-    마크다운의 이미지 경로(예: ../assets/CH01/...)를 build 폴더에서 접근 가능한
-    상대 경로(./assets/CH01/...)로 변환. build/에 심링크가 이미 있어야 한다.
+    마크다운의 이미지 경로(예: ../assets/CH01/...)를 빌드 HTML이 놓일
+    .build/ 기준 상대경로(../assets/CH01/...)로 재작성.
+    에셋 심링크 없이도 브라우저가 원본 에셋 파일에 접근할 수 있다.
     """
     def sub(m: re.Match) -> str:
         before, src, after = m.group(1), m.group(2), m.group(3)
         if src.startswith(("http://", "https://", "data:", "file://", "/")):
             return m.group(0)
-        # 마크다운 기준 상대경로를 프로젝트 루트 기준으로 해석
+        # 마크다운 기준 상대경로를 절대경로로 해석
         resolved = (md_file.parent / src).resolve()
-        try:
-            rel = resolved.relative_to(PROJECT_ROOT)
-        except ValueError:
-            # 프로젝트 바깥이면 file:// 로 폴백
-            return f'<img {before}src="file://{quote(str(resolved))}"{after}>'
         if not resolved.exists():
             print(f"  ⚠️  이미지 없음: {src} → {resolved}", file=sys.stderr)
-        # build/에서 프로젝트 루트의 자원으로 접근
-        return f'<img {before}src="./{rel.as_posix()}"{after}>'
+        # .build/NN.html 기준 상대경로 계산 — 심링크 불필요
+        target_rel = os.path.relpath(resolved, start=BUILD_DIR)
+        return f'<img {before}src="{target_rel}"{after}>'
 
     return IMG_RE.sub(sub, html)
 
@@ -411,39 +409,117 @@ def render_chapter(md_path: Path, md_renderer) -> Chapter:
     return Chapter(number=n, title=title, md_path=md_path, html=html)
 
 
+# ========== alias (레포 루트 심링크 이름) 결정 ==============================
+_VERSION_SUFFIX_RE = re.compile(r"_v\d+$", re.IGNORECASE)
+
+
+def _resolve_alias() -> str:
+    """
+    프로젝트의 레포 루트 심링크 이름을 결정한다.
+    우선순위:
+      1. progress.json["alias"] (비어 있지 않으면 사용)
+      2. progress.json["project"]에서 _vNN 접미어 제거
+      3. 폴더명에서 _vNN 접미어 제거
+    """
+    progress = PROJECT_ROOT / "progress.json"
+    project_field: str | None = None
+    if progress.exists():
+        try:
+            data = json.loads(progress.read_text(encoding="utf-8"))
+            alias = (data.get("alias") or "").strip()
+            if alias:
+                return alias
+            project_field = (data.get("project") or "").strip() or None
+        except (json.JSONDecodeError, OSError) as exc:
+            print(f"  ⚠️  progress.json 읽기 실패 ({exc}). 폴더명으로 alias 결정.",
+                  file=sys.stderr)
+
+    base = project_field or PROJECT_ROOT.name
+    return _VERSION_SUFFIX_RE.sub("", base)
+
+
+def _ensure_repo_root_symlink() -> None:
+    """레포 루트에 `<alias> → projects/<프로젝트폴더>` 심링크 자동 생성."""
+    # 레포 루트 = PROJECT_ROOT의 두 단 위 (projects/<name>/ → <repo>/)
+    repo_root = PROJECT_ROOT.parent.parent
+    # 안전장치: .claude 폴더가 있는 위치만 레포 루트로 간주
+    if not (repo_root / ".claude").is_dir():
+        return
+    alias = _resolve_alias()
+    if not alias:
+        return
+    link = repo_root / alias
+    target_rel = os.path.relpath(PROJECT_ROOT, start=repo_root)
+    if link.is_symlink():
+        current = os.readlink(link)
+        if current == target_rel:
+            return
+        try:
+            resolved_current = (repo_root / current).resolve()
+        except (OSError, RuntimeError):
+            resolved_current = None
+        if resolved_current == PROJECT_ROOT:
+            # 절대경로 등으로 박혀 있던 링크 → 상대경로로 갱신
+            link.unlink()
+            link.symlink_to(target_rel)
+            print(f"  🔗 레포 루트 심링크 갱신: {alias} → {target_rel}")
+            return
+        print(
+            f"  ⚠️  레포 루트 심링크 충돌: '{alias}'가 이미 {current}을(를) 가리킵니다.\n"
+            f"       progress.json의 'alias' 필드로 고유 이름을 지정하세요.",
+            file=sys.stderr,
+        )
+        return
+    if link.exists():
+        print(
+            f"  ⚠️  레포 루트에 동명의 파일·폴더 존재: {alias}. 심링크 생성 생략.",
+            file=sys.stderr,
+        )
+        return
+    try:
+        link.symlink_to(target_rel)
+        print(f"  🔗 레포 루트 심링크 생성: {alias} → {target_rel}")
+    except OSError as exc:
+        print(f"  ⚠️  심링크 생성 실패 ({alias}): {exc}", file=sys.stderr)
+
+
 # ========== Jinja2 템플릿 병합 =============================================
 def ensure_build_symlinks() -> None:
-    """build/에서 styles(스킬), assets(프로젝트), 선택적 tokens-override(프로젝트)를 상대 경로로 접근 가능하게 심볼릭 링크 생성."""
+    """
+    .build/에 styles(스킬 CSS) 상대 심링크를 생성한다.
+    에셋은 `resolve_image_paths`에서 ../assets/ 상대경로로 재작성되므로 심링크 불필요.
+    tokens.css는 .build/에 직접 저장(저작물)되므로 심링크 불필요.
+    """
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
     targets = {
         "styles": SKILL_STYLES,
-        "assets": ASSETS_DIR,
     }
-    if PROJECT_TOKENS_OVERRIDE is not None:
-        targets["tokens-override.css"] = PROJECT_TOKENS_OVERRIDE
 
     for name, src in targets.items():
         link = BUILD_DIR / name
+        rel = os.path.relpath(src, start=link.parent)
         if link.is_symlink():
-            # 기존 링크가 다른 곳을 가리키면 갱신
             try:
-                if link.resolve() == src.resolve():
+                if os.readlink(link) == rel:
                     continue
-            except FileNotFoundError:
+            except OSError:
                 pass
             link.unlink()
         elif link.exists():
             continue
         try:
-            link.symlink_to(src)
+            link.symlink_to(rel)
         except OSError as exc:
             print(f"  ⚠️  심링크 생성 실패 {name}: {exc}", file=sys.stderr)
+
+    # 레포 루트에 책 alias 심링크 자동 생성
+    _ensure_repo_root_symlink()
 
 
 def render_html_file(chapter: Chapter) -> Path:
     """
     HTML 프리뷰 파일 생성. 브라우저에서 한 장으로 흐르게 읽을 수 있도록
-    Paged.js는 항상 로드하지 않는다.
+    Paged.js는 로드하지 않는다.
     """
     from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -456,6 +532,9 @@ def render_html_file(chapter: Chapter) -> Path:
     ensure_build_symlinks()
     out_html = BUILD_DIR / f"{chapter.md_path.stem}.html"
 
+    # tokens.css 오버라이드 존재 여부 매 빌드마다 재확인 (저자가 지울 수도 있음)
+    has_override = (BUILD_DIR / "tokens.css").exists()
+
     html = tpl.render(
         chapter={"title": chapter.title, "html": chapter.html},
         fonts_css="./styles/fonts.css",
@@ -465,142 +544,47 @@ def render_html_file(chapter: Chapter) -> Path:
         diagrams_css="./styles/diagrams.css",
         print_css="./styles/print.css",
         pagedjs=False,
-        tokens_override=(PROJECT_TOKENS_OVERRIDE is not None),
+        tokens_override=has_override,
     )
     out_html.write_text(html, encoding="utf-8")
     return out_html
 
 
-# ========== PDF 렌더링 =====================================================
-PAGEDJS_CDN = "https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"
+# ========== 브라우저 열기 (크로스 플랫폼) ===================================
+def _file_url(path: Path) -> str:
+    """Path → file:// URL (한글 경로도 안전하게 인코딩)."""
+    return f"file://{quote(str(path.resolve()))}"
 
 
-def render_pdf(html_path: Path, pdf_path: Path, pagedjs: bool) -> None:
+def open_in_browser(path: Path) -> bool:
     """
-    Playwright로 HTML을 PDF로 렌더.
-    pagedjs=True면 page.goto 후 Paged.js 스크립트를 주입해 페이지 조판을 시킨다.
-    HTML 파일 자체엔 Paged.js가 들어 있지 않기 때문에 브라우저 프리뷰는
-    영향을 받지 않는다.
+    OS 기본 브라우저에서 file:// URL 열기.
+    webbrowser 모듈이 내부적으로 OS별 분기(macOS open / Windows start / Linux xdg-open).
     """
-    from playwright.sync_api import sync_playwright
-
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    url = "file://" + quote(str(html_path.resolve()))
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        # HiDPI 뷰포트로 이미지 리샘플링 화질 확보
-        context = browser.new_context(
-            viewport={"width": 1240, "height": 1754},
-            device_scale_factor=2,
-        )
-        page = context.new_page()
-        page.goto(url, wait_until="networkidle")
-        if pagedjs:
-            # PDF 렌더링 시에만 Paged.js 주입 — HTML 파일은 건드리지 않음
-            page.add_script_tag(url=PAGEDJS_CDN)
-            page.wait_for_function(
-                "() => window.PagedPolyfill && document.querySelector('.pagedjs_pages')",
-                timeout=60000,
-            )
-            page.wait_for_timeout(500)
-            page.pdf(
-                path=str(pdf_path),
-                prefer_css_page_size=True,
-                print_background=True,
-            )
-        else:
-            page.emulate_media(media="print")
-            page.pdf(
-                path=str(pdf_path),
-                format="A4",
-                margin={
-                    "top": "22mm",
-                    "bottom": "22mm",
-                    "left": "18mm",
-                    "right": "18mm",
-                },
-                print_background=True,
-            )
-        browser.close()
-
-
-# ========== 서버/브라우저 유틸 ===============================================
-def _server_cwd(port: int) -> Path | None:
-    """포트를 점유 중인 프로세스의 cwd를 반환. 없으면 None."""
+    if not path.exists():
+        print(f"  ⚠️  열 파일이 없음: {path}", file=sys.stderr)
+        return False
+    url = _file_url(path)
     try:
-        pids = subprocess.check_output(
-            ["lsof", "-ti", f":{port}", "-sTCP:LISTEN"],
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip().splitlines()
-    except subprocess.CalledProcessError:
-        return None
-    if not pids:
-        return None
-    try:
-        out = subprocess.check_output(
-            ["lsof", "-p", pids[0], "-a", "-d", "cwd", "-Fn"],
-            text=True,
-            stderr=subprocess.DEVNULL,
-        )
-        for line in out.splitlines():
-            if line.startswith("n"):
-                return Path(line[1:])
-    except subprocess.CalledProcessError:
-        pass
-    return None
+        webbrowser.open(url)
+        print(f"  🌐 브라우저에서 열림")
+        return True
+    except Exception as exc:
+        print(f"  ⚠️  브라우저 열기 실패: {exc}", file=sys.stderr)
+        print(f"      수동으로 열기: {url}")
+        return False
 
 
-def _kill_port(port: int) -> None:
-    """포트를 점유 중인 프로세스를 종료한다."""
-    try:
-        subprocess.run(
-            ["lsof", "-ti", f":{port}", "-sTCP:LISTEN"],
-            check=True, capture_output=True, text=True,
-        )
-        subprocess.run(["pkill", "-f", f"http.server {port}"], check=False)
-        import time; time.sleep(0.5)
-    except subprocess.CalledProcessError:
-        pass
-
-
-def serve_and_open(project_root: Path, chapter_files: list[Path], port: int = 8765) -> None:
-    """프로젝트 루트에서 HTTP 서버를 띄우고 첫 챕터 HTML을 브라우저로 연다."""
-    existing_cwd = _server_cwd(port)
-    target_cwd = project_root.resolve()
-    if existing_cwd and existing_cwd.resolve() != target_cwd:
-        print(f"  ⚠ 포트 {port}에 다른 cwd({existing_cwd}) 서버 감지. 종료 후 재시작.")
-        _kill_port(port)
-        existing_cwd = None
-
-    if not existing_cwd:
-        subprocess.Popen(
-            [sys.executable, "-m", "http.server", str(port)],
-            cwd=str(target_cwd),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-        import time; time.sleep(0.8)
-        print(f"  🌐 서버 시작: http://localhost:{port}  (cwd: {target_cwd.name})")
-    else:
-        print(f"  🌐 서버 재사용: http://localhost:{port}")
-
-    from urllib.parse import quote
-    for md_path in chapter_files:
-        html_name = f"{md_path.stem}.html"
-        url = f"http://localhost:{port}/book/build/{quote(html_name)}"
-        print(f"     → {url}")
-
-    if chapter_files:
-        first_url = f"http://localhost:{port}/book/build/{quote(chapter_files[0].stem + '.html')}"
-        subprocess.run(["open", first_url], check=False)
+def resolve_preview_target(name: str) -> Path:
+    """--preview NAME → .build/preview/NAME.html 경로. 확장자·슬래시 허용."""
+    if not name.endswith(".html"):
+        name = f"{name}.html"
+    return BUILD_DIR / "preview" / name
 
 
 # ========== 메인 ============================================================
 def main() -> int:
-    parser = argparse.ArgumentParser(description="HTML→PDF 챕터 빌더")
+    parser = argparse.ArgumentParser(description="마크다운 챕터 → HTML 프리뷰 빌더")
     parser.add_argument(
         "--project-root",
         type=Path,
@@ -614,32 +598,30 @@ def main() -> int:
         help="특정 챕터 번호만 빌드 (예: --chapter 1)",
     )
     parser.add_argument(
-        "--html-only",
+        "--open",
         action="store_true",
-        help="HTML 중간 산출물만 만들고 PDF는 생략",
+        help="빌드 후 OS 기본 브라우저에서 첫 챕터를 자동으로 연다 (file:// URL)",
     )
     parser.add_argument(
-        "--no-pagedjs",
-        action="store_true",
-        help="Paged.js 없이 Chromium 기본 인쇄로 PDF 생성 (빠름)",
-    )
-    parser.add_argument(
-        "--serve",
-        action="store_true",
-        help="빌드 후 HTTP 서버를 띄우고 브라우저로 열기 (file:// 대신)",
-    )
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8765,
-        help="--serve 시 HTTP 포트 (기본 8765)",
+        "--preview",
+        type=str,
+        default=None,
+        metavar="NAME",
+        help=(
+            "빌드 없이 .build/preview/<NAME>.html 을 브라우저로 연다. "
+            "예: --preview tokens-swatch (확장자 생략 가능)"
+        ),
     )
     args = parser.parse_args()
 
-    # 경로 설정 (CLI 인자 확정 후)
     configure_paths(args.project_root)
 
-    use_pagedjs = not args.no_pagedjs
+    # --preview: 빌드 건너뛰고 프리뷰 파일만 열기
+    if args.preview:
+        target = resolve_preview_target(args.preview)
+        print(f"👁  프리뷰: {target.relative_to(PROJECT_ROOT) if target.is_relative_to(PROJECT_ROOT) else target}")
+        return 0 if open_in_browser(target) else 1
+
     md = make_md()
 
     files = find_chapter_files(args.chapter)
@@ -647,22 +629,20 @@ def main() -> int:
         print("❌ 빌드할 챕터 파일을 찾지 못했습니다.", file=sys.stderr)
         return 1
 
+    first_html: Path | None = None
     for md_path in files:
         print(f"📖 {md_path.name}")
         chapter = render_chapter(md_path, md)
 
         html_path = render_html_file(chapter)
         print(f"  ✅ HTML: {html_path.relative_to(PROJECT_ROOT)}")
+        print(f"  🔗 열기: {_file_url(html_path)}")
+        if first_html is None:
+            first_html = html_path
 
-        if args.html_only:
-            continue
-
-        pdf_path = OUTPUT_DIR / f"{chapter.md_path.stem}.pdf"
-        render_pdf(html_path, pdf_path, use_pagedjs)
-        print(f"  ✅ PDF : {pdf_path.relative_to(PROJECT_ROOT)}")
-
-    if args.serve:
-        serve_and_open(args.project_root, files, port=args.port)
+    if args.open and first_html is not None:
+        print()
+        open_in_browser(first_html)
 
     return 0
 

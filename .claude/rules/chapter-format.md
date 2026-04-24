@@ -68,10 +68,18 @@ paths:
 
 ### 결과 다이어그램
 
-- HTML inline, `font-family:var(--font-mono)` 터미널 스타일
+실행 결과의 성격에 따라 두 방식 중 하나. 재사용 컴포넌트는 `pub-html-build` 스킬의 `components-catalog/`에서 관리하므로 여기서 반복 정의하지 않는다.
+
+| 결과 유형 | 표현 | 출처 |
+|----------|------|------|
+| **서버 로그·실시간 출력** (질문 수신 → 파이프라인 스텝 → TokenTracker → 처리 완료 같은 key/value + 섹션 라벨 구조) | `.terminal-log` 컴포넌트 | [`components-catalog/terminals/`](../skills/pub-html-build/components-catalog/terminals/README.md) |
+| **수치 결과·비교표·구조도** (Precision·Recall, 토큰 수, A/B 비교, 파이프라인·구성도 등) | HTML inline `<div>` + CSS 변수, 또는 카탈로그 컴포넌트 (`.eng-pipe`·`.arch11` 등) 재사용 | [`components-catalog/`](../skills/pub-html-build/components-catalog/) 6 카테고리 |
+
+공통 규칙:
 - **실제 실행 결과 값** 사용 (더미 금지)
 - 제목: `"그림 N-N. 실험 M-K. 제목"`
 - 하단 주석: 핵심 포인트 한 줄 (`color:var(--color-success-text)`)
+- 인라인 `font-family:var(--font-mono)`로 터미널 모양을 직접 그리지 않는다. 터미널 렌더는 `.terminal-log` 전담
 
 ### 결과 해석
 

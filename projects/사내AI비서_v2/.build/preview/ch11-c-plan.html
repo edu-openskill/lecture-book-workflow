@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CH11 C안 프리뷰 — 11.4 엔진(커스텀) + 11.5 D2 커스텀</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: white;
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 32px 64px;
+  line-height: 1.6;
+}
+h1 { font-size: var(--fs-4xl); color: var(--color-text-heading); border-bottom: 2px solid var(--color-text-heading); padding-bottom: var(--space-sm); }
+h2 { font-size: var(--fs-2xl); color: var(--color-text-heading); margin-top: var(--space-3xl); }
+.plan-note { background: var(--color-accent-bg); border-left: 3px solid var(--color-accent); padding: var(--space-md) var(--space-xl); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; font-size: var(--fs-md); color: var(--color-accent-text); margin: var(--space-xl) 0; line-height: 1.7; }
+.plan-note strong { color: var(--color-accent); }
+.plan-note code { background: white; padding: 1px 6px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.92em; color: var(--color-accent); }
+.source-tag { display: inline-block; background: var(--color-text-heading); color: white; padding: 2px 8px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: 1px; font-weight: 700; margin-right: var(--space-sm); }
+.source-tag.catalog { background: var(--color-success); }
+.source-tag.custom { background: var(--color-accent); }
+</style>
+</head>
+<body>
+
+<h1>CH11 C안 프리뷰</h1>
+<div class="plan-note">
+<strong>C안 요지</strong>: 11.5는 기존 <code>fig-arch-polish.html</code>의 D2 "Modern Tech"(그라데이션·그림자·컬러 블록)를 프로젝트 토큰으로 커스텀 + 620px 폭에 맞춤. 11.4 엔진은 CH11 고유 자산으로 유지하되, 둘 다 신규 컴포넌트(<code>.eng-pipe</code>·<code>.arch11</code>)로 카탈로그에 정식 등록.
+</div>
+
+<h2><span class="source-tag custom">CUSTOM</span>11.4 엔진 파이프라인 (현 디자인)</h2>
+<p>지금 상태 그대로. 카탈로그 등록 시 클래스 이름은 <code>.eng-pipe</code> / <code>.eng-port</code> / <code>.eng-stages</code> / <code>.eng-stage</code> 등으로 재네임스페이싱 예정.</p>
+
+<div style="max-width:620px;margin:var(--space-2xl) auto;background:var(--color-surface);border:1px solid var(--color-border-strong);border-radius:var(--radius-lg);padding:var(--space-xl) var(--space-lg)">
+
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:var(--space-sm);border-bottom:1px solid var(--color-border);margin-bottom:var(--space-lg)">
+<div style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-subtle);letter-spacing:3px;text-transform:uppercase;font-weight:700">pipeline</div>
+<div style="font-family:var(--font-body);font-weight:700;font-size:var(--fs-base);color:var(--color-text-heading)">커넥트HR 엔진</div>
+<div style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-subtle);letter-spacing:2px;text-transform:uppercase;font-weight:700">6 stages</div>
+</div>
+
+<div style="display:grid;grid-template-columns:76px 1fr 76px;gap:var(--space-sm);align-items:stretch">
+
+<div style="border:1.5px solid var(--color-accent-warm);background:var(--color-bg);border-radius:var(--radius-md);padding:var(--space-md) var(--space-xs);text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center">
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent-warm-text);letter-spacing:2.5px;font-weight:700">INPUT</div>
+<div style="width:20px;height:1px;background:var(--color-accent-warm);margin:var(--space-xs) auto"></div>
+<div style="font-family:var(--font-body);font-size:var(--fs-lg);font-weight:800;color:var(--color-text-heading);letter-spacing:-0.5px">질문</div>
+<div style="color:var(--color-accent-warm);font-size:16px;margin-top:var(--space-sm);font-weight:700;line-height:1">▶</div>
+</div>
+
+<div style="background:var(--color-bg);border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:var(--space-sm)">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:7px 9px">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);font-weight:800;letter-spacing:1px">01</span><span style="font-weight:700;color:var(--color-text-heading);font-size:var(--fs-sm)">파싱</span></div>
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-subtle);margin-top:2px">parse_pdf_hybrid</div>
+</div>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:7px 9px">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);font-weight:800;letter-spacing:1px">02</span><span style="font-weight:700;color:var(--color-text-heading);font-size:var(--fs-sm)">청킹</span></div>
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-subtle);margin-top:2px">semantic_chunking</div>
+</div>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:7px 9px">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);font-weight:800;letter-spacing:1px">03</span><span style="font-weight:700;color:var(--color-text-heading);font-size:var(--fs-sm)">쿼리 확장</span></div>
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-subtle);margin-top:2px">QueryExpander</div>
+</div>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:7px 9px">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);font-weight:800;letter-spacing:1px">04</span><span style="font-weight:700;color:var(--color-text-heading);font-size:var(--fs-sm)">검색</span></div>
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-subtle);margin-top:2px">EnsembleRetriever</div>
+</div>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:7px 9px">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);font-weight:800;letter-spacing:1px">05</span><span style="font-weight:700;color:var(--color-text-heading);font-size:var(--fs-sm)">리랭킹</span></div>
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-subtle);margin-top:2px">CrossEncoderReranker</div>
+</div>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:7px 9px">
+<div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);font-weight:800;letter-spacing:1px">06</span><span style="font-weight:700;color:var(--color-text-heading);font-size:var(--fs-sm)">부모·LLM</span></div>
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-subtle);margin-top:2px">ParentDoc + Agent</div>
+</div>
+
+</div>
+</div>
+
+<div style="border:1.5px solid var(--color-success);background:var(--color-bg);border-radius:var(--radius-md);padding:var(--space-md) var(--space-xs);text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center">
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-success-text);letter-spacing:2.5px;font-weight:700">OUTPUT</div>
+<div style="width:20px;height:1px;background:var(--color-success);margin:var(--space-xs) auto"></div>
+<div style="font-family:var(--font-body);font-size:var(--fs-lg);font-weight:800;color:var(--color-text-heading);letter-spacing:-0.5px">답변</div>
+<div style="color:var(--color-success);font-size:16px;margin-top:var(--space-sm);font-weight:700;line-height:1">▶</div>
+</div>
+
+</div>
+
+<div style="margin-top:var(--space-md);padding-top:var(--space-sm);border-top:1px solid var(--color-border);font-family:var(--font-body);font-weight:700;font-size:var(--fs-sm);color:var(--color-text-secondary);text-align:center">그림 11-10. 질문이 들어와 6단계 파이프라인을 지나 답변이 나가기까지</div>
+
+</div>
+
+<h2><span class="source-tag custom">D2 CUSTOM</span>11.5 전체 구성도 (D2 Modern Tech 커스텀)</h2>
+<p>D2 "Modern Tech" 구조(그라데이션 · 그림자 · 둥근 모서리 · 컬러 블록)를 프로젝트 디자인 토큰으로 재색칠 + 620px 폭에 맞춰 재배치. 챕터 뱃지는 제거하고 기능 축으로 정리.</p>
+
+<style>
+.arch11 { width:100%; margin:var(--space-2xl) auto; background:var(--color-bg); padding:var(--space-2xl) var(--space-xl); border-radius:var(--radius-xl); box-shadow:0 1px 3px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.04); }
+.arch11 .ahd { text-align:center; margin-bottom:var(--space-xl); }
+.arch11 .ahd .sub { font-family:var(--font-mono); font-size:11px; color:var(--color-text-secondary); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:4px; }
+.arch11 .ahd .ti { font-family:var(--font-body); font-weight:800; font-size:var(--fs-xl); color:var(--color-text-heading); letter-spacing:-0.5px; }
+.arch11 .ahd .ds { font-family:var(--font-body); font-size:var(--fs-xs); color:var(--color-text-secondary); margin-top:2px; font-weight:600; }
+
+.arch11 .llm { display:flex; justify-content:center; margin-bottom:var(--space-sm); }
+.arch11 .llm .bx { background:linear-gradient(180deg, #ecfdf5 0%, var(--color-success-bg) 100%); padding:var(--space-lg) var(--space-3xl); border-radius:14px; text-align:center; min-width:380px; box-shadow:0 1px 3px rgba(5,150,105,0.08); }
+.arch11 .llm .bx .ic { width:28px; height:28px; background:var(--color-success); border-radius:8px; margin:0 auto 4px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:12px; font-family:var(--font-mono); }
+.arch11 .llm .bx .l { font-family:var(--font-mono); font-size:9px; color:var(--color-success-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.arch11 .llm .bx .n { font-size:var(--fs-base); color:var(--color-text-heading); font-weight:800; margin:2px 0; letter-spacing:-0.3px; }
+.arch11 .llm .bx .ms { display:flex; flex-direction:column; gap:2px; margin-top:6px; padding-top:6px; border-top:1px dashed rgba(5,150,105,0.25); }
+.arch11 .llm .bx .m { display:grid; grid-template-columns:100px 1fr; gap:var(--space-sm); align-items:baseline; font-family:var(--font-mono); font-size:10px; text-align:left; }
+.arch11 .llm .bx .m .mn { color:var(--color-text-heading); font-weight:700; }
+.arch11 .llm .bx .m .mu { color:var(--color-text-secondary); font-size:9px; }
+
+.arch11 .flow { display:flex; justify-content:center; gap:var(--space-2xl); margin:var(--space-sm) 0 var(--space-lg); font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+.arch11 .flow .u { color:var(--color-accent); }
+.arch11 .flow .u::before { content:"↑ "; }
+.arch11 .flow .d { color:var(--color-success); }
+.arch11 .flow .d::before { content:"↓ "; }
+
+.arch11 .grid { display:grid; grid-template-columns:180px 1fr 260px; gap:var(--space-lg); align-items:stretch; }
+
+.arch11 .col-c { background:linear-gradient(180deg, white 0%, var(--color-surface) 100%); border-radius:12px; padding:var(--space-md) var(--space-sm); display:flex; flex-direction:column; justify-content:space-between; min-height:360px; box-shadow:0 1px 3px rgba(15,23,42,0.05); }
+.arch11 .col-c .us { background:linear-gradient(180deg, #fff7ed 0%, #ffede0 100%); border-radius:10px; padding:var(--space-sm) var(--space-xs); text-align:center; }
+.arch11 .col-c .us .ic { width:28px; height:28px; background:var(--color-accent-warm); border-radius:50%; margin:0 auto 3px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:14px; }
+.arch11 .col-c .us .n { font-size:var(--fs-sm); font-weight:800; color:var(--color-text-heading); }
+.arch11 .col-c .us .s { font-size:9px; color:var(--color-text-secondary); margin-top:1px; }
+.arch11 .col-c .fm { display:flex; justify-content:space-between; padding:var(--space-sm) var(--space-xs); font-family:var(--font-mono); font-size:9px; font-weight:700; }
+.arch11 .col-c .fm .d { color:var(--color-accent); }
+.arch11 .col-c .fm .u { color:var(--color-success); }
+.arch11 .col-c .ap { background:white; border-radius:10px; padding:var(--space-sm) var(--space-xs); text-align:center; border:1px solid var(--color-border); }
+.arch11 .col-c .ap .ic { width:26px; height:26px; background:var(--color-text-heading); border-radius:8px; margin:0 auto 3px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:11px; font-family:var(--font-mono); }
+.arch11 .col-c .ap .l { font-family:var(--font-mono); font-size:8px; color:var(--color-text-secondary); letter-spacing:1.5px; font-weight:700; text-transform:uppercase; }
+.arch11 .col-c .ap .n { font-size:var(--fs-sm); color:var(--color-text-heading); font-weight:800; margin-top:2px; }
+.arch11 .col-c .ap .s { font-size:9px; color:var(--color-text-secondary); margin-top:1px; }
+
+.arch11 .col-a { background:linear-gradient(180deg, #eff6ff 0%, var(--color-accent-bg) 100%); border-radius:12px; padding:var(--space-lg) var(--space-sm) var(--space-sm); position:relative; min-height:360px; box-shadow:0 1px 3px rgba(79,70,229,0.08); }
+.arch11 .col-a .ti { position:absolute; top:-9px; left:var(--space-md); background:var(--color-accent); color:white; padding:3px 10px; border-radius:6px; font-size:9px; letter-spacing:1.5px; font-weight:800; text-transform:uppercase; box-shadow:0 2px 6px rgba(79,70,229,0.3); font-family:var(--font-mono); }
+.arch11 .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:var(--space-sm); }
+.arch11 .col-a .chip { background:white; border-radius:8px; padding:6px var(--space-xs); text-align:center; box-shadow:0 1px 2px rgba(15,23,42,0.04); }
+.arch11 .col-a .chip .l { font-family:var(--font-mono); font-size:7px; color:var(--color-accent); letter-spacing:1px; font-weight:800; text-transform:uppercase; }
+.arch11 .col-a .chip .n { font-size:10px; color:var(--color-text-heading); font-weight:800; margin-top:1px; }
+.arch11 .col-a .chip .s { font-size:8px; color:var(--color-text-secondary); margin-top:1px; }
+.arch11 .col-a .loop { background:white; border-radius:8px; padding:var(--space-sm); text-align:center; margin-bottom:var(--space-xs); box-shadow:0 1px 2px rgba(15,23,42,0.04); }
+.arch11 .col-a .loop .ll { font-family:var(--font-mono); font-size:8px; color:var(--color-accent); letter-spacing:1.5px; font-weight:800; text-transform:uppercase; margin-bottom:4px; }
+.arch11 .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:3px; flex-wrap:wrap; }
+.arch11 .col-a .loop .st { font-size:9px; padding:3px 8px; background:var(--color-accent-bg); color:var(--color-accent-text); border-radius:12px; font-weight:800; font-family:var(--font-mono); letter-spacing:0.5px; text-transform:uppercase; }
+.arch11 .col-a .loop .arr { color:var(--color-accent); font-size:11px; font-weight:800; }
+.arch11 .col-a .core { background:var(--color-accent); color:white; border-radius:8px; padding:var(--space-sm); text-align:center; box-shadow:0 2px 6px rgba(79,70,229,0.2); }
+.arch11 .col-a .core .l { font-family:var(--font-mono); font-size:8px; color:white; opacity:0.75; letter-spacing:1.5px; font-weight:700; text-transform:uppercase; }
+.arch11 .col-a .core .n { font-size:var(--fs-sm); font-weight:800; margin-top:2px; letter-spacing:-0.2px; }
+.arch11 .col-a .core .s { font-family:var(--font-mono); font-size:9px; opacity:0.8; margin-top:2px; }
+
+.arch11 .col-t { background:linear-gradient(180deg, white 0%, var(--color-surface) 100%); border-radius:12px; padding:var(--space-lg) var(--space-sm) var(--space-sm); position:relative; min-height:360px; box-shadow:0 1px 3px rgba(15,23,42,0.05); }
+.arch11 .col-t .ti { position:absolute; top:-9px; left:var(--space-md); background:var(--color-text-heading); color:white; padding:3px 10px; border-radius:6px; font-size:9px; letter-spacing:1.5px; font-weight:800; text-transform:uppercase; font-family:var(--font-mono); }
+.arch11 .col-t .tool { background:white; border-radius:8px; padding:6px var(--space-sm); display:grid; grid-template-columns:18px 1fr auto; align-items:center; gap:6px; border:1px solid var(--color-border-dashed); margin-bottom:4px; }
+.arch11 .col-t .tool:last-child { margin-bottom:0; }
+.arch11 .col-t .tool .no { font-family:var(--font-mono); font-size:9px; color:var(--color-text-subtle); font-weight:800; }
+.arch11 .col-t .tool .n { font-family:var(--font-mono); font-size:10px; color:var(--color-text-heading); font-weight:800; letter-spacing:-0.1px; }
+.arch11 .col-t .tool .s { font-size:8px; color:var(--color-text-secondary); margin-top:1px; }
+.arch11 .col-t .tool .b { font-family:var(--font-mono); font-size:8px; padding:2px 6px; border-radius:4px; font-weight:800; letter-spacing:0.5px; }
+.arch11 .col-t .tool .b.sql { background:#fef3c7; color:var(--color-warning); }
+.arch11 .col-t .tool .b.rag { background:var(--color-accent-bg); color:var(--color-accent-text); }
+
+.arch11 .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-sm); margin-top:var(--space-lg); padding-top:var(--space-md); border-top:2px dashed var(--color-border); }
+.arch11 .stores .st { background:var(--color-surface-alt); border-radius:10px; padding:var(--space-sm) var(--space-md); display:grid; grid-template-columns:32px 1fr; gap:var(--space-sm); align-items:center; }
+.arch11 .stores .st .ic { width:32px; height:32px; border-radius:8px; background:var(--color-text-heading); color:white; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:800; font-size:10px; letter-spacing:0.5px; }
+.arch11 .stores .st .tx .l { font-family:var(--font-mono); font-size:8px; color:var(--color-text-secondary); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.arch11 .stores .st .tx .n { font-size:var(--fs-sm); color:var(--color-text-heading); font-weight:800; margin:2px 0 0; letter-spacing:-0.2px; }
+.arch11 .stores .st .tx .s { font-size:9px; color:var(--color-text-secondary); }
+
+.arch11 .cap { margin-top:var(--space-lg); padding-top:var(--space-md); border-top:1px solid var(--color-border); font-family:var(--font-body); font-weight:700; font-size:var(--fs-sm); color:var(--color-text-secondary); text-align:center; line-height:1.6; }
+</style>
+
+<div class="arch11">
+
+<div class="ahd">
+<div class="sub">System Architecture</div>
+<div class="ti">커넥트HR 에이전트</div>
+<div class="ds">11개 챕터로 완성한 RAG 시스템</div>
+</div>
+
+<div class="llm">
+<div class="bx">
+<div class="ic">LLM</div>
+<div class="l">External · Ollama</div>
+<div class="n">로컬 LLM 3종</div>
+<div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div>
+</div>
+
+<div class="flow">
+<span class="u">프롬프트</span>
+<span class="d">응답</span>
+</div>
+
+<div class="grid">
+
+<div class="col-c">
+<div class="us">
+<div class="ic">◉</div>
+<div class="n">사용자</div>
+<div class="s">채팅으로 질문</div>
+</div>
+<div class="fm"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="ap">
+<div class="ic">API</div>
+<div class="l">Gateway</div>
+<div class="n">FastAPI</div>
+<div class="s">REST · 세션</div>
+</div>
+</div>
+
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="loop">
+<div class="ll">ReAct Loop</div>
+<div class="sts">
+<div class="st">Reason</div><div class="arr">→</div>
+<div class="st">Act</div><div class="arr">→</div>
+<div class="st">Observe</div><div class="arr">↻</div>
+</div>
+</div>
+<div class="core">
+<div class="l">Executor</div>
+<div class="n">통합 에이전트</div>
+<div class="s">Agent + Tools</div>
+</div>
+</div>
+
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b sql">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b sql">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b sql">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+
+</div>
+
+<div class="stores">
+<div class="st"><div class="ic">VEC</div><div class="tx"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div></div>
+<div class="st"><div class="ic">SQL</div><div class="tx"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div></div>
+</div>
+
+<div class="cap">그림 11-11. 커넥트HR 에이전트의 시스템 아키텍처. 사용자부터 LLM, 에이전트 루프, 도구, 저장소까지 한 장에 담았습니다</div>
+
+</div>
+
+<h2 style="margin-top:var(--space-3xl)">변경 요약</h2>
+<ul style="font-size:var(--fs-md);line-height:1.8">
+<li><strong>11.4</strong> — 현 엔진 디자인 유지. 인라인 style을 <code>.eng-pipe</code> 계열 클래스로 승격 + <code>styles/diagrams.css</code> 추가 + <code>components-catalog/pipelines/engine.md</code> 문서화</li>
+<li><strong>11.5</strong> — D2 Modern Tech 디자인(그라데이션·그림자·컬러 블록) 기반. 프로젝트 디자인 토큰으로 재색칠, 620px 폭 맞춤, 챕터 뱃지 제거, 11개 챕터 반영. <code>.arch11</code> 네임스페이스로 신규 컴포넌트화</li>
+<li><strong>카탈로그 업데이트</strong> — <code>inventory.md</code>에 <code>.eng-pipe</code> · <code>.arch11</code> 2개 신규 등재</li>
+</ul>
+
+<h2>확정 필요 사항</h2>
+<ol style="font-size:var(--fs-md);line-height:1.8">
+<li>11.5 최상단 LLM 박스 색감 — 지금은 D2 원본대로 <strong>green(success 계열)</strong>. 프로젝트 메인 accent(indigo)로 바꾸면 <code>ConnectHR 에이전트</code>와 색이 겹침. 이 상태 유지 vs indigo 전환</li>
+<li>11.5 코어 블록(<code>.core</code>) 색 — 지금은 accent indigo 솔리드. 이게 강한 편이라 약한 accent(bg tint)로 다운할지</li>
+<li>11.4 엔진의 카탈로그 등록 이름 — 가안 <code>.eng-pipe</code>. 다른 접두어 선호 있으면 알려 주세요</li>
+</ol>
+
+</body>
+</html>

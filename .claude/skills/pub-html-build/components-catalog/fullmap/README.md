@@ -116,3 +116,76 @@
 - `.afm-box.afm-faint.afm-round`: 사용자 레이어에서 "아직 이 챕터 범위 아님"을 둥근 모양으로 표시
 - `.afm-box.afm-faint.afm-dashed`: 외부 의존 / 미구현 박스 (예: Ollama LLM, 다음 챕터에서 만들 컴포넌트)
 - `.afm-box.afm-on`에는 `.afm-faint` / `.afm-dashed` 조합 금지 (진함과 흐림이 충돌)
+
+### `.arch11` (최종 완성 구성도)
+
+**언제 쓰는가**: 책 **마지막 챕터의 완성 시스템 전체 구성도**를 한 장으로 선언할 때. `.arch-fullmap`이 "이 챕터가 전체에서 어디에 해당하는가"를 보여준다면, `.arch11`은 "11개 챕터 전체가 어떻게 한 시스템으로 조립됐는가"를 보여주는 **최종 조립도** 전용. 3행 2열 스택(사용자·Runtime / LLM·Tools / Vector·PG) 구조로 A4 세로 폭에 맞음. d1-tokens 에디토리얼 스타일 계승(LLM 박스 브라켓 장식 `::before/::after`, accent-bg 인디고 core, col-t 앰버/RAG 뱃지).
+
+**사용 챕터**: CH11
+
+**HTML 사용 예** (요약):
+
+```html
+<div class="arch11">
+  <div class="header">
+    <div class="sub">시스템 아키텍처 (System Architecture)</div>
+    <div class="title">커넥트HR 에이전트</div>
+    <div class="desc">11개 챕터에 걸쳐 완성한 RAG 시스템</div>
+  </div>
+
+  <!-- Row 1: 사용자·Gateway ┃ Runtime -->
+  <div class="row-client">
+    <div class="col-c">
+      <div class="user">…</div>
+      <div class="flow">…</div>
+      <div class="api">…</div>
+    </div>
+    <div class="flow-arrows">…</div>
+    <div class="col-a">
+      <div class="title">통합 에이전트 · 운영 (Runtime)</div>
+      <div class="ops">…</div>
+      <div class="core">
+        <div class="l">…</div><div class="n">…</div><div class="s">…</div>
+        <div class="loop-inner">…</div>
+        <div class="engine-inner">…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lvl-lbl">↑ 프롬프트·도구 호출 · ↓ 응답·결과</div>
+
+  <!-- Row 2: LLM ┃ Tools -->
+  <div class="row-ext">
+    <div class="llm"><div class="box">…</div></div>
+    <div class="flow-arrows">…</div>
+    <div class="col-t">…</div>
+  </div>
+
+  <div class="lvl-lbl">↑ 조회·도구 실행 · ↓ 레코드·문서</div>
+
+  <!-- Row 3: Stores -->
+  <div class="stores">
+    <div class="st">ChromaDB</div>
+    <div class="st">PostgreSQL</div>
+  </div>
+
+  <div class="caption">그림 11-11. 커넥트HR 에이전트의 시스템 아키텍처</div>
+</div>
+```
+
+전체 샘플은 `projects/사내AI비서_v2/chapters/11-커넥트HR-에이전트의-완성.md` §11.5 참조.
+
+**렌더 CSS**: `styles/diagrams.css` 의 `/* System Architecture (arch11, CH11 §11.5) */` 블록
+
+**변형**: Row별 grid-template-columns 비율은 콘텐츠 양에 맞게 고정:
+- `.row-client`: `180px 36px 1fr` (사용자 좁음 · 화살표 · Runtime 넓음)
+- `.row-ext`: `280px 36px 1fr` (LLM 중간 · 화살표 · Tools 넓음)
+- `.stores`: `1fr 1fr` (동일 저장소 2개)
+
+Runtime `.col-a` 내부는 `.core > .loop-inner + .engine-inner` 중첩 구조(통합 에이전트가 ReAct Loop와 RAG Engine을 부품으로 포함). `.engine-inner .stages-6`은 3×2 grid(6 stages).
+
+**피해야 할 것**
+- 행·열 개수 변경 금지 (3행 2열 고정 구조). 늘리려면 별도 컴포넌트
+- `.col-a .core` 내부에 `.loop-inner`·`.engine-inner` 외 다른 요소 추가 금지 (Executor 안 "부품"만)
+- Row별 `.flow-arrows` 누락: Row 1·Row 2는 요청/응답 화살표가 시각 흐름의 핵심. 생략하면 3행 2열이 단순 표처럼 보임
+- `.arch11`을 `.arch-fullmap`과 동일한 위치(각 챕터 끝)에 쓰기 금지: 최종 챕터 한 번만. 중간 챕터는 `.arch-fullmap`으로

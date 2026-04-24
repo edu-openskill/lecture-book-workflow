@@ -1,83 +1,111 @@
-/* projects/사내AI비서_v2/book/styles/tokens.css
+/* .claude/skills/pub-html-build/styles/tokens.css
  *
- * 디자인 토큰 — 색상·여백·반지름·폰트 크기의 중앙 정의
- * book.css와 기타 스타일 파일은 이 변수를 var(--...) 형태로 참조한다.
- * 프로젝트별 브랜드 교체 시 이 파일만 편집하면 된다.
+ * 오픈스킬북스 브랜드 디자인 토큰 · 단일 진실원(Single Source of Truth).
+ * 모든 스타일(base/components/diagrams/print)이 var(--...) 형태로 참조한다.
+ *
+ * 동기화 규칙: .claude/rules/brand-tokens.md
+ *   - 컴포넌트 CSS 수정 → 카탈로그(components-catalog) + 이 파일 함께 업데이트
+ *   - 특정 책만 변주 → projects/<책>/.build/tokens.css 에서 오버라이드 (스킬 기본은 건드리지 않음)
+ *
+ * 토큰 그룹:
+ *   1. 무채색 (Neutral) — 텍스트·배경·테두리
+ *   2. Primary  (accent)      — 브랜드 메인 (인디고). 링크·버튼·강조
+ *   3. Secondary(accent-warm) — 브랜드 보조 (오렌지). remember·tip·term·h1 번호·user 아이콘
+ *   4. Info     (info)        — 정보 블루
+ *   5. Utility  (상태변수)    — success·warning·danger. 브랜드 아님 · 축소 대상 · 새 컴포넌트 사용 금지
+ *   6. 여백·반지름·폰트 크기·패밀리
  */
 
 :root {
-  /* ===== 색상: 기본 ===== */
-  --color-text: #1e293b;          /* 본문 */
-  --color-text-heading: #2d3748;  /* 제목·강조 */
-  --color-text-secondary: #718096;/* 설명문·부가 정보 */
-  --color-text-muted: #64748b;    /* 보조 텍스트 */
-  --color-text-subtle: #94a3b8;   /* 캡션·힌트·비활성 */
-  --color-bg: #ffffff;
-  --color-surface: #fafbfc;       /* 카드 배경 */
-  --color-surface-alt: #f1f5f9;   /* 라벨 배경 */
+  /* ─────────────── 1. 무채색 · 텍스트 (단일 스케일) ─────────────── */
+  --color-text:           #1e293b;  /* 본문 */
+  --color-text-heading:   #0f172a;  /* 제목·강조 */
+  --color-text-secondary: #475569;  /* 부가 설명 */
+  --color-text-muted:     #64748b;  /* 보조 텍스트 */
+  --color-text-subtle:    #94a3b8;  /* 캡션·힌트·비활성 */
 
-  /* ===== 색상: 테두리 ===== */
-  --color-border: #e2e8f0;        /* 기본 테두리 */
-  --color-border-strong: #cbd5e0; /* 강조 테두리 */
-  --color-border-dashed: #edf0f5; /* 점선·구분선 */
+  /* ─────────────── 1. 무채색 · 배경 ─────────────── */
+  --color-bg:          #ffffff;  /* 페이지 배경 */
+  --color-surface:     #fafbfc;  /* 카드·박스 배경 */
+  --color-surface-alt: #f1f5f9;  /* 라벨·인라인 코드 배경 */
 
-  /* ===== 색상: 액센트 (브랜드 메인 인디고) ===== */
-  --color-accent: #4f46e5;        /* 인디고 메인 */
-  --color-accent-bg: #eef2ff;     /* 액센트 배경 */
-  --color-accent-border: #c7d2fe; /* 액센트 테두리 */
-  --color-accent-text: #3730a3;   /* 액센트 위 텍스트 */
+  /* ─────────────── 1. 무채색 · 테두리 ─────────────── */
+  --color-border:        #e2e8f0;  /* 기본 테두리 */
+  --color-border-strong: #cbd5e0;  /* 강조 테두리 */
+  --color-border-dashed: #edf0f5;  /* 점선·구분선 */
 
-  /* ===== 색상: 보조 액센트 (따뜻한 오렌지) ===== */
-  --color-accent-warm: #ff7849;   /* 하이라이트·태그 */
-  --color-accent-warm-text: #7b341e; /* 오렌지 900. accent-warm 배경 위 텍스트 */
+  /* ─────────────── 2. Primary · 브랜드 액센트 (인디고) ─────────────── */
+  --color-accent:        #4f46e5;
+  --color-accent-bg:     #eef2ff;
+  --color-accent-border: #c7d2fe;
+  --color-accent-text:   #3730a3;
 
-  /* ===== 색상: 정보 (블루 계열 보조 액센트) ===== */
-  --color-info: #3b82f6;           /* 블루 500. 밝은 정보 강조 */
-  --color-info-bg: #eff6ff;        /* 블루 50. 정보 박스 배경 */
-  --color-info-text: #1e40af;      /* 블루 800. 정보 배경 위 진한 텍스트 */
+  /* ─────────────── 3. Info · 정보 (블루) ─────────────── */
+  --color-info:        #3b82f6;
+  --color-info-bg:     #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text:   #1e40af;
 
-  /* ===== 색상: 시맨틱 ===== */
-  --color-success: #059669;
-  --color-success-bg: #d1fae5;
-  --color-success-text: #166534;  /* success-bg 위에 읽히는 진한 초록 */
-  --color-warning: #b45309;
-  --color-warning-bg: #fef08a;
-  --color-warning-text: #854d0e;  /* warning-bg 위 진한 호박 */
-  --color-danger: #dc2626;
-  --color-danger-bg: #fee2e2;
-  --color-danger-text: #991b1b;   /* danger-bg 위 진한 빨강 */
+  /* ─────────────── 4. Secondary · 브랜드 보조 액센트 (오렌지) ───────────────
+   * Primary와 한 세트로 움직이는 브랜드 보조 컬러.
+   * 사용처: :::remember · :::tip · .term · h1 .num · 미니맵 아이콘 ·
+   *         arch11 user 아이콘 · tool b 뱃지 · part-arch-box.new ·
+   *         eng-pipe ep-port.in
+   */
+  --color-accent-warm:        #ff7849;
+  --color-accent-warm-bg:     #fff4ed;
+  --color-accent-warm-border: #fcd4bf;
+  --color-accent-warm-text:   #7b341e;
 
-  /* ===== 여백 ===== */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 12px;
-  --space-lg: 16px;
-  --space-xl: 20px;
+  /* ─────────────── 5. Utility · 상태변수 — 축소 대상 ───────────────
+   * 진단 결과·성공/실패/경고 표시용 유틸리티. **브랜드 컬러가 아니다.**
+   * - 새 컴포넌트는 이 변수를 쓰지 않는다. Primary(accent)·Secondary(warm)·무채색으로 표현
+   * - 기존 컴포넌트에서 의미 손실 없이 축소 가능한지 점진적으로 검토
+   * - 브랜드 가이드(tokens-swatch)에는 노출하지 않는다
+   */
+  --color-success:      #059669;
+  --color-success-bg:   #d1fae5;
+  --color-success-text: #166534;
+
+  --color-warning:      #b45309;
+  --color-warning-bg:   #fef08a;
+  --color-warning-text: #854d0e;
+
+  --color-danger:       #dc2626;
+  --color-danger-bg:    #fee2e2;
+  --color-danger-text:  #991b1b;
+
+  /* ─────────────── 5. 여백 ─────────────── */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:  12px;
+  --space-lg:  16px;
+  --space-xl:  20px;
   --space-2xl: 24px;
   --space-3xl: 32px;
 
-  /* ===== 반지름 ===== */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  /* ─────────────── 5. 반지름 ─────────────── */
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
   --radius-xl: 10px;
 
-  /* ===== 폰트 크기. 본문 스케일 ===== */
-  --fs-footnote: 10px;            /* 각주·작은 배지 */
-  --fs-xs: 11px;
-  --fs-sm: 12px;
-  --fs-md: 13px;
-  --fs-base: 14px;
-  --fs-lg: 15px;
-  --fs-xl: 17px;
+  /* ─────────────── 5. 폰트 크기 · 본문 스케일 ─────────────── */
+  --fs-footnote: 10px;  /* 각주·작은 배지 */
+  --fs-xs:       11px;
+  --fs-sm:       12px;
+  --fs-md:       13px;
+  --fs-base:     14px;
+  --fs-lg:       15px;
+  --fs-xl:       17px;
 
-  /* ===== 폰트 크기. 제목 스케일 ===== */
-  --fs-2xl: 20px;                 /* h4 */
-  --fs-3xl: 24px;                 /* h3 */
-  --fs-4xl: 32px;                 /* h2 */
-  --fs-display: 48px;             /* h1, 챕터 제목 */
+  /* ─────────────── 5. 폰트 크기 · 제목 스케일 ─────────────── */
+  --fs-2xl:     20px;  /* h4 */
+  --fs-3xl:     24px;  /* h3 */
+  --fs-4xl:     32px;  /* h2 */
+  --fs-display: 48px;  /* h1·챕터 제목 */
 
-  /* ===== 폰트 패밀리 ===== */
+  /* ─────────────── 5. 폰트 패밀리 ─────────────── */
   --font-body: "Pretendard", "Apple SD Gothic Neo", sans-serif;
   --font-mono: "JetBrains Mono", Consolas, monospace;
 }

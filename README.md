@@ -24,7 +24,7 @@
 |------|----------|------|
 | **완전히 새 책** (0부터 기획·집필까지) | `새 책 만들기` 명령 → 7 STEP 워크플로우 | [워크플로우 (7 STEP)](#워크플로우-7-step) |
 | **이미 md가 있음** (빌드/디자인만 필요) | `init_book.sh` → 아래 1단계부터 | 이 섹션 계속 |
-| **기존 디자인 재사용** (브랜드 컬러만 바꾸기) | `init_book.sh` → `book/tokens.css` 오버라이드 | [`modes/reuse.md`](.claude/skills/pub-html-build/modes/reuse.md) |
+| **기존 디자인 재사용** (브랜드 컬러만 바꾸기) | `init_book.sh` → `.build/tokens.css` 오버라이드 | [`modes/reuse.md`](.claude/skills/pub-html-build/modes/reuse.md) |
 | **새 디자인 탐색** (새 컴포넌트·새 톤) | 내장 7 질문 → 강제 4축 변형(Editorial/Playful/Technical/Bold) → 카탈로그 등록 | [`modes/design-explore.md`](.claude/skills/pub-html-build/modes/design-explore.md) |
 
 **카탈로그 우선 원칙**: 챕터를 쓸 때 [`components-catalog/`](.claude/skills/pub-html-build/components-catalog/) 6 카테고리(boxes / fullmap / cards / comparisons / pipelines / captions)에서 컴포넌트를 먼저 조립하세요. 재사용률 80% 이상이면 `reuse.md`로, 미만이면 `design-explore.md`로 갑니다.
@@ -75,22 +75,30 @@ cd ../..
 ```bash
 # 레포 루트에서
 projects/새책이름/.venv/bin/python3 \
-  .claude/skills/pub-html-build/build_pdf_html.py \
-  --project-root projects/새책이름 --chapter 1 --html-only
+  .claude/skills/pub-html-build/build_html.py \
+  --project-root projects/새책이름 --chapter 1
 ```
 
-성공 시 `projects/새책이름/book/build/01-*.html` 생성.
+성공 시:
+- `projects/새책이름/.build/01-*.html` 생성
+- 레포 루트에 `새책이름` alias 심링크 자동 생성 (progress.json의 `alias` 또는 폴더명에서 `_vNN` 제거)
+- 빌드 로그 끝에 `🔗 열기: file://…` URL 출력
 
 ### 5단계. 브라우저로 미리보기
 
-별도 터미널에서 HTTP 서버를 띄우고 브라우저로 접속:
+빌드 로그에 나온 `file://…` URL을 브라우저 주소창에 붙여 넣거나, 터미널에서:
 
 ```bash
-projects/새책이름/.venv/bin/python3 -m http.server 8766 \
-  --bind 127.0.0.1 --directory projects/새책이름/book/build
+open "projects/새책이름/.build/01-*.html"
 ```
 
-브라우저에서 `http://127.0.0.1:8766/01-시작하기.html` 열기.
+혹은 레포 루트 alias 심링크 경유(짧은 경로):
+
+```bash
+open "새책이름/.build/01-*.html"
+```
+
+`file://` 단일 경로이므로 로컬 서버 필요 없음. 파일을 수정하면 브라우저만 새로고침하면 된다.
 
 ### 6단계. 편집 ↔ 자동 재빌드 루프
 
@@ -103,25 +111,22 @@ Claude Code 안에서 챕터 md를 Edit/Write로 수정하면 **자동으로 백
 - `projects/*/chapters/NN-*.md` 만 반응 (legacy 폴더 제외)
 - 다른 파일(코드·스타일 등)은 훅이 조용히 넘어감
 
-### 7단계. PDF 출력 (최종)
+### 7단계. PDF 출력 (선택)
+
+HTML 프리뷰 한 장을 PDF 파일로 공유할 필요가 있으면 별도 스킬 `pub-html-to-pdf`:
 
 ```bash
 projects/새책이름/.venv/bin/python3 \
-  .claude/skills/pub-html-build/build_pdf_html.py \
+  .claude/skills/pub-html-to-pdf/build_pdf.py \
   --project-root projects/새책이름 --chapter 1
-# → projects/새책이름/book/output/01-*.pdf
+# → projects/새책이름/.build/pdf/01-*.pdf
 ```
 
-모든 챕터 한 번에:
-```bash
-projects/새책이름/.venv/bin/python3 \
-  .claude/skills/pub-html-build/build_pdf_html.py \
-  --project-root projects/새책이름
-```
+정식 전자책 A4 PDF는 이 경로가 아니라 Typst 파이프라인(`pub-build`)이 담당한다. `pub-html-to-pdf`는 예비·공유용이다.
 
 ### 브랜드 색상 바꾸기
 
-프로젝트의 `book/tokens.css`만 편집하면 전체 디자인이 따라옵니다:
+프로젝트의 `.build/tokens.css`만 편집하면 전체 디자인이 따라옵니다:
 
 ```css
 :root {
@@ -138,15 +143,15 @@ projects/새책이름/.venv/bin/python3 \
 |--------|------|
 | `--project-root PATH` | 필수. 책 프로젝트 루트 |
 | `--chapter N` | 특정 챕터만 빌드 (생략 시 모든 챕터) |
-| `--html-only` | HTML만 생성, PDF 건너뛰기 |
-| `--no-pagedjs` | Chromium 기본 인쇄로 PDF 생성 (Paged.js 생략, 빠름) |
+
+PDF 변환 옵션(`--no-pagedjs` 등)은 별도 스킬 `pub-html-to-pdf`의 `build_pdf.py`에 있다.
 
 ### 스킬이 제공하는 자산
 
 ```
 .claude/skills/pub-html-build/
 ├── SKILL.md                      # 스킬 문서
-├── build_pdf_html.py             # 파이프라인 진입점
+├── build_html.py                 # 파이프라인 진입점 (HTML 전용)
 ├── templates/
 │   └── chapter-template.html     # Jinja2 템플릿
 ├── styles/

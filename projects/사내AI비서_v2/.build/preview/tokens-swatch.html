@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>오픈스킬북스 브랜드 토큰</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+  body {
+    max-width: 980px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  .brand-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-subtle);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  h1 { font-size: 28px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 8px; letter-spacing: -0.3px; }
+  .lead {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    margin-bottom: 36px;
+    line-height: 1.7;
+  }
+  h2 {
+    margin-top: 48px;
+    margin-bottom: 6px;
+    font-size: 18px;
+    color: var(--color-text-heading);
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+  h2 .num {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-accent);
+    font-weight: 700;
+    margin-right: 10px;
+    letter-spacing: 1px;
+  }
+  h2 + .section-note {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    line-height: 1.7;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 0 0 18px;
+  }
+  .sw {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+  .sw .chip {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .sw .chip.light { color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+  .sw .chip.dark  { color: var(--color-text-heading); }
+  .sw .meta {
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+  .sw .name { color: var(--color-text-heading); font-weight: 700; }
+  .sw .hex  { color: var(--color-text-subtle); }
+  .sw .role { color: var(--color-text-muted); font-size: 10px; margin-top: 2px; }
+
+  .combo {
+    padding: 14px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    background: var(--color-surface);
+  }
+  .combo-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-subtle);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--color-surface-alt);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--color-text);
+  }
+
+  /* 풀세트 조합 카드 (Primary · Secondary · Info) */
+  .kit {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .kit .demo {
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .kit .demo strong { font-weight: 800; }
+
+  /* 실제 본문 조합 */
+  .sample {
+    background: var(--color-surface);
+    padding: 20px 22px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+  }
+  .sample h3 {
+    margin: 0 0 10px;
+    color: var(--color-text-heading);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 16px;
+  }
+  .sample p { margin: 0 0 6px; }
+  .sample .s-body      { color: var(--color-text);           font-size: 14px; }
+  .sample .s-secondary { color: var(--color-text-secondary); font-size: 13px; }
+  .sample .s-muted     { color: var(--color-text-muted);     font-size: 13px; }
+  .sample .s-subtle    { color: var(--color-text-subtle);    font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="brand-sub">Openskillbooks · Brand Tokens</div>
+<h1>오픈스킬북스 브랜드 토큰</h1>
+<p class="lead">
+  출판사 모든 책이 공유하는 디자인 자산. 브랜드 컬러·무채색 스케일·의미론적 상태색·타이포 규칙을 한 파일로 관리한다.<br>
+  <strong>편집 대상</strong> — <code>.claude/skills/pub-html-build/styles/tokens.css</code><br>
+  <strong>책별 변주</strong> — <code>projects/&lt;책&gt;/.build/tokens.css</code> (있으면 자동 오버라이드)
+</p>
+
+<h2><span class="num">01</span>Primary · 브랜드 액센트</h2>
+<div class="section-note">
+  출판사 메인 컬러. 링크·버튼·강조·박스 테두리·아이콘에 사용. 4변수 풀세트 <code>(main · bg · border · text)</code>.
+</div>
+<div class="grid">
+  <div class="sw"><div class="chip light" style="background:var(--color-accent)">메인</div><div class="meta"><div class="name">--color-accent</div><div class="hex">#4f46e5</div><div class="role">링크·버튼·강조</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-accent-bg)">배경</div><div class="meta"><div class="name">--color-accent-bg</div><div class="hex">#eef2ff</div><div class="role">박스·알림 배경</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-accent-border)">테두리</div><div class="meta"><div class="name">--color-accent-border</div><div class="hex">#c7d2fe</div><div class="role">박스 테두리</div></div></div>
+  <div class="sw"><div class="chip light" style="background:var(--color-accent-text)">텍스트</div><div class="meta"><div class="name">--color-accent-text</div><div class="hex">#3730a3</div><div class="role">accent-bg 위 텍스트</div></div></div>
+</div>
+<div class="kit">
+  <div class="demo" style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);color:var(--color-accent-text)">
+    <strong>accent 풀세트 조합.</strong> accent-bg 배경 + accent-border 테두리 + accent-text 본문. 박스형 알림·용어 뱃지·"이것만은 기억하자" 영역에서 쓰는 기본 조합.
+  </div>
+  <div class="demo" style="background:var(--color-bg);border:1px solid var(--color-border)">
+    <strong style="color:var(--color-accent)">accent 단독 강조.</strong> 본문 안에서 <a href="#" style="color:var(--color-accent);text-decoration:underline;text-decoration-color:var(--color-accent-border)">링크</a>나 핵심어 1~2개에만 쓰고, 여러 군데 뿌리지 않는다.
+  </div>
+</div>
+
+<h2><span class="num">02</span>무채색 · 텍스트</h2>
+<div class="section-note">
+  단일 무채색 스케일. 진함 → 연함 순으로 5단계. 본문·제목·부가설명·캡션을 이 안에서 고른다.
+</div>
+<div class="grid">
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border-bottom:1px solid var(--color-border);color:var(--color-text-heading)">제목 Aa 가</div><div class="meta"><div class="name">--color-text-heading</div><div class="hex">#0f172a</div><div class="role">h1~h4</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border-bottom:1px solid var(--color-border);color:var(--color-text)">본문 Aa 가</div><div class="meta"><div class="name">--color-text</div><div class="hex">#1e293b</div><div class="role">단락</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border-bottom:1px solid var(--color-border);color:var(--color-text-secondary)">부가 Aa 가</div><div class="meta"><div class="name">--color-text-secondary</div><div class="hex">#475569</div><div class="role">부가 설명</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border-bottom:1px solid var(--color-border);color:var(--color-text-muted)">보조 Aa 가</div><div class="meta"><div class="name">--color-text-muted</div><div class="hex">#64748b</div><div class="role">메타 정보</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border-bottom:1px solid var(--color-border);color:var(--color-text-subtle)">캡션 Aa 가</div><div class="meta"><div class="name">--color-text-subtle</div><div class="hex">#94a3b8</div><div class="role">캡션·힌트</div></div></div>
+</div>
+
+<h2><span class="num">03</span>무채색 · 배경</h2>
+<div class="section-note">
+  페이지·카드·라벨 3단계 배경. 얕은 계단으로 깊이를 만든다.
+</div>
+<div class="grid">
+  <div class="sw"><div class="chip dark" style="background:var(--color-bg);border-bottom:1px solid var(--color-border)">페이지</div><div class="meta"><div class="name">--color-bg</div><div class="hex">#ffffff</div><div class="role">본문 배경</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-surface)">카드</div><div class="meta"><div class="name">--color-surface</div><div class="hex">#fafbfc</div><div class="role">박스·카드</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-surface-alt)">라벨</div><div class="meta"><div class="name">--color-surface-alt</div><div class="hex">#f1f5f9</div><div class="role">인라인 코드·칩</div></div></div>
+</div>
+
+<h2><span class="num">04</span>무채색 · 테두리</h2>
+<div class="section-note">
+  굵기·농도 3단계 테두리.
+</div>
+<div class="grid">
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border:4px solid var(--color-border)">기본</div><div class="meta"><div class="name">--color-border</div><div class="hex">#e2e8f0</div><div class="role">카드·박스</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border:4px solid var(--color-border-strong)">강조</div><div class="meta"><div class="name">--color-border-strong</div><div class="hex">#cbd5e0</div><div class="role">강조된 박스</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:#ffffff;border:4px dashed var(--color-border-dashed)">점선</div><div class="meta"><div class="name">--color-border-dashed</div><div class="hex">#edf0f5</div><div class="role">구분선</div></div></div>
+</div>
+
+<h2><span class="num">05</span>Secondary · 보조 액센트 (오렌지)</h2>
+<div class="section-note">
+  Primary와 다른 계열의 강조가 필요할 때. INPUT 포트·따뜻한 뱃지·하이라이트. 풀세트로 정리됨.
+</div>
+<div class="grid">
+  <div class="sw"><div class="chip light" style="background:var(--color-accent-warm)">메인</div><div class="meta"><div class="name">--color-accent-warm</div><div class="hex">#ff7849</div><div class="role">하이라이트·포트</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-accent-warm-bg)">배경</div><div class="meta"><div class="name">--color-accent-warm-bg</div><div class="hex">#fff4ed</div><div class="role">뱃지 배경</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-accent-warm-border)">테두리</div><div class="meta"><div class="name">--color-accent-warm-border</div><div class="hex">#fcd4bf</div><div class="role">박스 테두리</div></div></div>
+  <div class="sw"><div class="chip light" style="background:var(--color-accent-warm-text)">텍스트</div><div class="meta"><div class="name">--color-accent-warm-text</div><div class="hex">#7b341e</div><div class="role">warm-bg 위 텍스트</div></div></div>
+</div>
+<div class="demo" style="background:var(--color-accent-warm-bg);border:1px solid var(--color-accent-warm-border);color:var(--color-accent-warm-text);border-radius:var(--radius-md);padding:14px 18px;font-size:13px;line-height:1.7">
+  <strong>warm 풀세트 조합.</strong> 출발·원본·INPUT 같은 "들어오는" 블록 뱃지에 쓴다. Primary와 의미가 분명히 다를 때만 선택.
+</div>
+
+<h2><span class="num">06</span>Info · 정보 (블루)</h2>
+<div class="section-note">
+  Primary와 별개의 "정보 링크·참고" 색. 풀세트로 정리됨.
+</div>
+<div class="grid">
+  <div class="sw"><div class="chip light" style="background:var(--color-info)">메인</div><div class="meta"><div class="name">--color-info</div><div class="hex">#3b82f6</div><div class="role">정보 링크</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-info-bg)">배경</div><div class="meta"><div class="name">--color-info-bg</div><div class="hex">#eff6ff</div><div class="role">정보 박스 배경</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-info-border)">테두리</div><div class="meta"><div class="name">--color-info-border</div><div class="hex">#bfdbfe</div><div class="role">정보 박스 테두리</div></div></div>
+  <div class="sw"><div class="chip light" style="background:var(--color-info-text)">텍스트</div><div class="meta"><div class="name">--color-info-text</div><div class="hex">#1e40af</div><div class="role">info-bg 위 텍스트</div></div></div>
+</div>
+
+<h2><span class="num">07</span>Semantic · 상태색</h2>
+<div class="section-note">
+  실험 성공·경고·실패 상태. main·bg·text 3변수씩.
+</div>
+<div class="grid">
+  <div class="sw"><div class="chip light" style="background:var(--color-success)">Success</div><div class="meta"><div class="name">--color-success</div><div class="hex">#059669</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-success-bg)">배경</div><div class="meta"><div class="name">--color-success-bg</div><div class="hex">#d1fae5</div></div></div>
+  <div class="sw"><div class="chip light" style="background:var(--color-success-text)">텍스트</div><div class="meta"><div class="name">--color-success-text</div><div class="hex">#166534</div></div></div>
+
+  <div class="sw"><div class="chip light" style="background:var(--color-warning)">Warning</div><div class="meta"><div class="name">--color-warning</div><div class="hex">#b45309</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-warning-bg)">배경</div><div class="meta"><div class="name">--color-warning-bg</div><div class="hex">#fef08a</div></div></div>
+  <div class="sw"><div class="chip light" style="background:var(--color-warning-text)">텍스트</div><div class="meta"><div class="name">--color-warning-text</div><div class="hex">#854d0e</div></div></div>
+
+  <div class="sw"><div class="chip light" style="background:var(--color-danger)">Danger</div><div class="meta"><div class="name">--color-danger</div><div class="hex">#dc2626</div></div></div>
+  <div class="sw"><div class="chip dark" style="background:var(--color-danger-bg)">배경</div><div class="meta"><div class="name">--color-danger-bg</div><div class="hex">#fee2e2</div></div></div>
+  <div class="sw"><div class="chip light" style="background:var(--color-danger-text)">텍스트</div><div class="meta"><div class="name">--color-danger-text</div><div class="hex">#991b1b</div></div></div>
+</div>
+
+<h2><span class="num">08</span>실제 본문 조합 예</h2>
+<div class="sample">
+  <h3>제목이 이렇게 들어갑니다 — text-heading</h3>
+  <p class="s-body">본문은 이 톤으로 흐릅니다. 가장 진한 무채색이라 독서용으로 안정적입니다. <strong style="color:var(--color-accent)">accent</strong>는 핵심 키워드에만 쓰고 남발하지 않습니다.</p>
+  <p class="s-secondary">부가 설명은 한 톤 얇게 — text-secondary. 장면 묘사나 "여기서 잠깐" 류 멘트에.</p>
+  <p class="s-muted">메타 정보 — text-muted. "여기는 ex11 레포입니다" 같은 맥락 안내.</p>
+  <p class="s-subtle">캡션·힌트 — text-subtle. 그림 번호나 *그림 11-8. ...* 캡션.</p>
+</div>
+
+<h2><span class="num">09</span>바꾸려면</h2>
+<div class="combo">
+  <div class="combo-title">출판사 공통 (전 책)</div>
+  <code>.claude/skills/pub-html-build/styles/tokens.css</code>
+</div>
+<div class="combo">
+  <div class="combo-title">이 책만 (선택 오버라이드)</div>
+  <code>projects/사내AI비서_v2/.build/tokens.css</code>
+</div>
+
+</body>
+</html>

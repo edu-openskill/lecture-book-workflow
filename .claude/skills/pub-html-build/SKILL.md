@@ -1,11 +1,11 @@
 ---
 name: pub-html-build
-description: Use when building a book project from Markdown chapters to HTML/PDF. Owns templates, design tokens, custom markdown blocks, and the Playwright-based PDF pipeline. Self-contained — superpowers optional. Invoke with --project-root to point at the book source.
+description: Use when building a book project from Markdown chapters to HTML preview. Owns templates, design tokens, custom markdown blocks, and the HTML rendering pipeline. PDF conversion is handled by the separate `pub-html-to-pdf` skill. Self-contained — superpowers optional. Invoke with --project-root to point at the book source.
 ---
 
 # pub-html-build
 
-마크다운 챕터 → HTML → PDF(전자책) 파이프라인. 이 프로젝트의 **HTML 출판 경로 전담** 스킬이며, 디자인 컴포넌트 카탈로그·디자인 탐색 절차를 내장해 **superpowers 플러그인 없이도 자기완결적으로 동작**한다.
+마크다운 챕터 → HTML 프리뷰 파이프라인. 챕터마다 글 모양을 수정·검토할 때 쓰는 **HTML 뷰 전담** 스킬. PDF 변환이 필요하면 별도 스킬 [`pub-html-to-pdf`](../pub-html-to-pdf/SKILL.md)를 호출한다.
 
 ## 이 스킬을 언제 쓰는가 (2가지 모드)
 
@@ -34,18 +34,78 @@ description: Use when building a book project from Markdown chapters to HTML/PDF
 ## 빌드 실행
 
 ```bash
-python .claude/skills/pub-html-build/build_pdf_html.py \
+python .claude/skills/pub-html-build/build_html.py \
   --project-root projects/<책> \
   --chapter N
 ```
 
 옵션:
-- `--project-root PATH` (필수): 책 프로젝트 루트
-- `--chapter N` (선택): 특정 챕터만 빌드
-- `--html-only`: HTML 중간 산출물만 생성 (PDF 생략)
-- `--no-pagedjs`: Chromium 기본 인쇄 (빠른 빌드)
-- `--serve`: 빌드 후 HTTP 서버(`http://localhost:8765`) 자동 시작 + 첫 챕터 브라우저 열기. `file://` + NFD 인코딩 문제 회피
-- `--port N`: `--serve` 포트 변경 (기본 8765)
+
+| 옵션 | 설명 |
+|------|------|
+| `--project-root PATH` (필수) | 책 프로젝트 루트 |
+| `--chapter N` | 특정 챕터만 빌드. 생략 시 전체 챕터 |
+| `--open` | 빌드 끝나면 **OS 기본 브라우저에 첫 챕터 자동 열기** (file://) |
+| `--preview NAME` | 빌드 없이 `.build/preview/<NAME>.html`을 바로 브라우저로 열기. 스와치·재디자인 페이지 확인용 |
+
+빌드가 끝나면 각 챕터별로 `file://…/.build/NN-….html` URL이 출력된다. **항상 `file://` 단일 경로**이므로 로컬 서버 불필요.
+
+### 원칙 — HTTP 서버 기동 금지, `--preview` 로 브라우저 직접 열기
+
+사용자가 **"서버 띄워줘"·"웹에 띄워줘"·"브라우저에 올려줘"** 라고 말해도 `python -m http.server` 같은 로컬 서버를 기동하지 않는다. 이유:
+
+1. 빌드 산출물과 `file://` 로 한 경로만 남기자는 이 스킬의 리팩터 결정 (두 갈래 뷰 경로로 인한 캐시·상대경로 꼬임 방지)
+2. 로컬 서버는 브라우저 히스토리·캐시·확장프로그램을 통한 유출 경로
+3. 레포 루트에 `.claude`·비밀 파일 노출 위험
+4. Permission hook이 이 의도를 강제 — HTTP 서버 기동을 차단한다
+
+**항상 `--preview NAME` 또는 `--open`** 으로 Python `webbrowser` 모듈이 OS에 `file://` URL을 전달하게 한다. 이게 동일한 "브라우저에 띄운다" 효과를 낸다.
+
+### 브라우저로 자동 열기 (크로스 플랫폼)
+
+Python 내장 `webbrowser` 모듈이 OS별 기본 브라우저를 찾아 열어 준다 — **macOS·Windows·Linux 공통**으로 `--open` / `--preview` 옵션이 그대로 동작한다.
+
+```bash
+# 빌드 + 첫 챕터 자동 열기
+python .claude/skills/pub-html-build/build_html.py \
+  --project-root projects/사내AI비서_v2 --chapter 1 --open
+
+# 프리뷰만 열기 (빌드 안 함)
+python .claude/skills/pub-html-build/build_html.py \
+  --project-root projects/사내AI비서_v2 --preview tokens-swatch
+
+python .claude/skills/pub-html-build/build_html.py \
+  --project-root projects/사내AI비서_v2 --preview ch01-redesign
+```
+
+수동으로 여는 방법(OS별 명령)도 여전히 유효:
+
+| OS | 명령 |
+|----|------|
+| macOS | `open "projects/…/.build/01-….html"` |
+| Windows (PowerShell) | `Invoke-Item "projects\…\.build\01-….html"` 또는 `start "" "…"` |
+| Linux | `xdg-open "projects/…/.build/01-….html"` |
+
+또는 브라우저 주소창에 빌드 로그의 `file://…` URL을 그대로 붙여 넣어도 된다.
+
+## 산출 위치
+
+```
+projects/<책>/
+├── chapters/ assets/ book/    (저작)
+└── .build/                    (빌드 산출물 + 저자 오버라이드)
+    ├── NN-*.html              (챕터별 HTML, 한 파일 한 챕터)
+    ├── tokens.css             (프로젝트 브랜드 오버라이드 — 저자 편집)
+    └── styles/ → 스킬 CSS 심링크 (상대경로)
+
+레포 루트/
+└── <alias> → projects/<책>    (자동 생성되는 단축 심링크)
+```
+
+- **레포 루트 alias 심링크**: 빌드 시 자동. `projects/<책>` 한 단 건너뛰어 `file://…/<alias>/.build/NN.html` 로 짧게 접근.
+- alias 결정: `progress.json["alias"]` 우선 → 없으면 `progress.json["project"]` 또는 폴더명에서 `_vNN` 접미어 제거.
+- 책이 여러 개일 때 이름 충돌이 나면 빌드 중 경고가 뜬다. `progress.json`의 `alias` 필드로 고유 이름 지정.
+- 에셋(`../assets/CH_/*.png`)은 심링크 없이 상대경로로 직접 참조. 브라우저가 원본 `assets/`를 바로 연다.
 
 ## 새 책 초기화
 
@@ -56,8 +116,8 @@ bash .claude/skills/pub-html-build/scripts/init_book.sh projects/<새-책이름>
 생성되는 구조:
 - `chapters/` — 챕터 마크다운
 - `assets/` — 이미지·다이어그램
-- `book/{front,back,build,output}` — 빌드 산출물 레이어
-- `book/tokens.css` — 브랜드 토큰 **오버라이드 템플릿**
+- `book/{front,back}` — 프롤로그·에필로그 저작물
+- `.build/tokens.css` — 브랜드 토큰 **오버라이드 템플릿** (저자 편집)
 
 상세 절차는 [`modes/reuse.md`](modes/reuse.md) 참조.
 
@@ -66,7 +126,7 @@ bash .claude/skills/pub-html-build/scripts/init_book.sh projects/<새-책이름>
 ```
 pub-html-build/
 ├── SKILL.md                        # 이 문서 (진입점)
-├── build_pdf_html.py               # 파이프라인 진입점
+├── build_html.py                   # 파이프라인 진입점 (HTML 전용)
 ├── scripts/
 │   ├── init_book.sh                # 새 책 초기화
 │   └── component_variants.SPEC.md  # 4축 변형 프리뷰 도구 스펙
@@ -85,17 +145,14 @@ pub-html-build/
 └── components-catalog/             # 6 카테고리 카탈로그
     ├── README.md                   # 색인 + 추가 절차 + 접두어 규칙
     ├── inventory.md                # 전수 목록 + 네임스페이스
-    ├── boxes/
-    ├── fullmap/
-    ├── cards/
-    ├── comparisons/
-    ├── pipelines/
-    └── captions/
+    ├── boxes/ fullmap/ cards/
+    ├── comparisons/ pipelines/ captions/
+    └── terminals/
 ```
 
 ## 디자인 토큰
 
-브랜드 컬러·여백·반지름은 `styles/tokens.css`에서 CSS 변수로 관리. 프로젝트가 `<프로젝트>/book/tokens.css`를 두면 스킬 토큰을 선택적으로 덮어쓴다 (CSS cascade).
+브랜드 컬러·여백·반지름은 `styles/tokens.css`에서 CSS 변수로 관리. 프로젝트가 `<프로젝트>/.build/tokens.css`를 두면 스킬 토큰을 선택적으로 덮어쓴다 (CSS cascade). 이 파일은 **저자가 직접 편집**하는 저작물이지만 편의상 빌드 폴더에 같이 둔다.
 
 주요 토큰 그룹:
 - `--color-text` / `--color-text-muted` / `--color-text-subtle` / `--color-text-heading`
@@ -136,14 +193,10 @@ pub-html-build/
 ## 의존성
 
 ```
-playwright==1.48
 markdown-it-py==3.0
 mdit-py-plugins>=0.4
 jinja2==3.1
 pygments>=2.17
 ```
 
-Playwright Chromium 설치:
-```bash
-python -m playwright install chromium
-```
+PDF 변환이 필요하면 [`pub-html-to-pdf`](../pub-html-to-pdf/SKILL.md)를 사용. 이 스킬은 HTML만 생성한다.
