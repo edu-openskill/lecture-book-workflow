@@ -4,7 +4,7 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: var(--color-surface); color: var(--color-text-heading);
+    background: var(--color-bg); color: var(--color-text-heading);
     font-family: 'Pretendard', -apple-system, 'Segoe UI', sans-serif;
     line-height: 1.9; padding: 40px 20px;
   }
