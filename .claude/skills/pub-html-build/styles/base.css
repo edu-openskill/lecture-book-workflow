@@ -4,9 +4,16 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: var(--color-bg); color: var(--color-text-heading);
+    color: var(--color-text-heading);
     font-family: 'Pretendard', -apple-system, 'Segoe UI', sans-serif;
     line-height: 1.9; padding: 40px 20px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'liga' off;  /* 한글 ligature 해제 — Chromium PDF 글리프 겹침 방지 */
+    font-synthesis: none;  /* synthetic bold/italic 차단 — 굵은 글씨 렌더 시 글자 이중 그림 방지 */
+    word-break: keep-all;  /* 한글 단어 단위 줄바꿈 */
+    /* background 미지정 — Chromium PDF paper color(순백) 사용. sRGB 색 프로파일 warm-shift 회피. */
   }
   .container { max-width: 820px; margin: 0 auto; }
 
@@ -26,11 +33,11 @@
     max-width: 100%;
     height: auto;
     border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow-figure);
     border: 1px solid var(--color-border-dashed);
   }
   .chapter-image .caption {
-    margin-top: 10px;
+    margin-top: 4px;
     color: var(--color-text-secondary);
     font-size: 13px;
     font-style: italic;
@@ -90,9 +97,9 @@
   .code-block .cb-todo { color: #854d0e !important; font-style: normal !important; }
 
   /* 테이블 */
-  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; background: transparent; }
-  th { background: transparent; color: var(--color-text-heading); font-weight: 700; text-align: left; padding: 12px 16px; border-bottom: 2px solid #2d3748; /* 구조적 구분선, heading 텍스트 색과 분리 */ font-size: 13px; word-break: keep-all; }
-  td { padding: 12px 16px; border-bottom: 1px solid var(--color-border-dashed); color: var(--color-text-muted); word-break: keep-all; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 14px 0; font-size: 14px; background: transparent; }
+  th { background: transparent; color: var(--color-text-heading); font-weight: 700; text-align: left; padding: 9px 12px; border-bottom: 2px solid #2d3748; font-size: 13px; word-break: keep-all; line-height: 1.5; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--color-border-dashed); color: var(--color-text-muted); word-break: keep-all; line-height: 1.55; vertical-align: top; }
   tr:last-child td { border-bottom: none; }
 
   /* 본문 인라인 코드. 파일 경로·함수명·상수 등 */

@@ -17,6 +17,37 @@
 | **Neutral** | `--color-text*` / `--color-bg` / `--color-surface*` / `--color-border*` | 무채색 텍스트·배경·테두리 | ✅ swatch에 노출 |
 | **Utility · 상태변수** | `--color-success*` / `--color-warning*` / `--color-danger*` | 진단 상태 표시 | ❌ **swatch 노출 금지** · 축소 대상 |
 
+## 컴포넌트 배경 원칙 — 흰 배경 기본
+
+모든 HTML 컴포넌트(다이어그램·터미널·비교 박스 등)의 **본문 영역은 흰 배경(`#fff`)** 을 기본으로 한다. 이유:
+- **독서 가독성**: 본문 바탕(body)이 흰색이므로 컴포넌트도 흰색일 때 시선 흐름이 끊기지 않는다
+- **인쇄·PDF 일관성**: Chromium headless PDF 렌더에서 회색 배경 재현 차이 회피
+- **종이 독서 경험**: 전자책은 결국 종이처럼 읽힘 — 컴포넌트가 종이 위 "카드"로 보이게
+
+### 적용
+- `.terminal-log` (chrome + body), `.rag-pipeline-box` (컨테이너), `.figure-group` 래퍼, `.annotated-compare` 컨테이너, `.librarian-scene` 컨테이너 등 **컴포넌트의 최상위 배경은 `#fff`**
+- 내부 역할 분리는 **색이 아닌 테두리·그림자·악센트(heading·뱃지)** 로 표현
+- 색을 대량으로 채우지 않는다 — 시각 강조는 테두리 색·뱃지 색으로 충분
+
+### 예외 (허용)
+- `:::goal` / `:::tip` / `:::remember` / `:::note` / `:::term-box` / `:::prep` 등 **boxes 계열** directive — 약한 색 배경(`--color-accent-bg`·`--color-accent-warm-bg`·무채색 계열) 허용
+- 비교 강조: `.annotated-compare .ac-block.llm / .truth`처럼 **반드시 대비가 필요한 블록**만 약한 색 배경
+- 번호 뱃지·태그: 점·원·사각 뱃지는 진한 색 배경 OK
+
+**원칙 요약**: "흰 종이 위에 테두리만 그어 박스를 만든다"가 기본. 색은 포인트에만.
+
+## Elevation (그림자) — 이미지·다이어그램 공용
+
+HTML 다이어그램은 **이미지와 같은 시각 무게**를 갖도록 공용 그림자 토큰을 공유한다.
+
+- **단일 진실원**: `tokens.css`의 `--shadow-figure` (현재 `none` — 그림자 비활성화, 테두리만으로 경계 표시)
+- **적용 대상**:
+  - 이미지: `.chapter-image img`
+  - 단독 다이어그램: `.arch11`, `.terminal-log`, `.rag-pipeline-box`, `.llm-rag-split`, `.librarian-scene`, `.annotated-compare`
+  - 묶음 래퍼: `.figure-group` (여러 다이어그램을 하나의 "그림 N-N" 단위로 묶을 때)
+- **중첩 금지**: `.figure-group > *`는 `box-shadow: none !important`. 래퍼에만 그림자를 남긴다.
+- **신규 다이어그램 추가 시**: 단독 사용 컴포넌트는 `box-shadow: var(--shadow-figure)` 셀렉터 목록에 편입한다.
+
 ## Utility(상태변수) 축소 정책
 
 1. **새 컴포넌트는 사용 금지** — Primary·Secondary·Info·무채색으로 상태·좋음/나쁨을 표현한다

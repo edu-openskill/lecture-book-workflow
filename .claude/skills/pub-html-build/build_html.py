@@ -380,6 +380,15 @@ def find_chapter_files(which: int | None = None) -> list[Path]:
     return files
 
 
+def find_front_files() -> list[Path]:
+    """book/front/ 의 preface·prologue·github-source 등 front matter 파일 목록.
+    챕터와 같은 템플릿·CSS로 렌더된다."""
+    front_dir = PROJECT_ROOT / "book" / "front"
+    if not front_dir.exists():
+        return []
+    return sorted(f for f in front_dir.glob("*.md") if not f.name.endswith(".bak"))
+
+
 def render_chapter(md_path: Path, md_renderer) -> Chapter:
     raw = md_path.read_text(encoding="utf-8")
 
@@ -403,8 +412,11 @@ def render_chapter(md_path: Path, md_renderer) -> Chapter:
     m = re.search(r"^#\s+(.*)", raw, re.MULTILINE)
     title = (m.group(1) if m else md_path.stem).strip()
 
-    # 5. 챕터 번호
-    n = int(md_path.name[:2])
+    # 5. 챕터 번호 — NN-*.md 형식이면 파싱, front/ 문서(preface·prologue 등)는 0 고정
+    try:
+        n = int(md_path.name[:2])
+    except ValueError:
+        n = 0
 
     return Chapter(number=n, title=title, md_path=md_path, html=html)
 
@@ -612,6 +624,11 @@ def main() -> int:
             "예: --preview tokens-swatch (확장자 생략 가능)"
         ),
     )
+    parser.add_argument(
+        "--front",
+        action="store_true",
+        help="book/front/*.md (preface·prologue·github-source 등)만 빌드",
+    )
     args = parser.parse_args()
 
     configure_paths(args.project_root)
@@ -624,10 +641,16 @@ def main() -> int:
 
     md = make_md()
 
-    files = find_chapter_files(args.chapter)
-    if not files:
-        print("❌ 빌드할 챕터 파일을 찾지 못했습니다.", file=sys.stderr)
-        return 1
+    if args.front:
+        files = find_front_files()
+        if not files:
+            print("❌ book/front/*.md 가 없습니다.", file=sys.stderr)
+            return 1
+    else:
+        files = find_chapter_files(args.chapter)
+        if not files:
+            print("❌ 빌드할 챕터 파일을 찾지 못했습니다.", file=sys.stderr)
+            return 1
 
     first_html: Path | None = None
     for md_path in files:
