@@ -1,0 +1,13 @@
+/* 프로젝트별 디자인 토큰 오버라이드
+ *
+ * 스킬 기본 토큰(.claude/skills/pub-html-build/styles/tokens.css)을
+ * 덮어쓸 변수만 여기에 선언합니다. 비워 두면 스킬 기본값을 그대로 사용합니다.
+ *
+ * 예: 브랜드 액센트를 블루 계열로 바꾸기
+ *   :root {
+ *     --color-accent: #2563eb;
+ *     --color-accent-bg: #dbeafe;
+ *     --color-accent-border: #93c5fd;
+ *     --color-accent-text: #1e40af;
+ *   }
+ */

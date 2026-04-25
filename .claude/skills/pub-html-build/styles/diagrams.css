@@ -2925,3 +2925,169 @@
     margin-left: 6px;
     vertical-align: middle;
   }
+
+  /* ═════════════════ 스프링 시리즈 공통 컴포넌트 (sp-*) ═════════════════
+   * 스프링-레퍼런스-기술모음 책에서 반복 사용. 인라인 스타일 대신 클래스 호출.
+   * 기본은 무채색 + 테두리. 강조 변형(.accent / .warm / .info / .bad / .good)으로
+   * 브랜드 토큰을 자동 적용. brand-tokens.md의 Primary·Secondary·Info만 사용. */
+
+  /* 1. sp-figure: 다이어그램 외곽 (제목 + 본문) */
+  .sp-figure {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 18px;
+    margin: 18px 0;
+  }
+  .sp-figure-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--color-text-heading);
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  /* 2. sp-row: 라벨 + 값 한 줄 (비교표·실험 결과 행) */
+  .sp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #fff;
+  }
+  .sp-row-label { min-width: 130px; font-weight: 600; font-size: 13px; color: var(--color-text-heading); }
+  .sp-row-value { flex: 1; color: var(--color-text-muted); font-size: 13px; line-height: 1.55; }
+  .sp-row.accent { border-color: var(--color-accent); }
+  .sp-row.accent .sp-row-label { color: var(--color-accent-text); }
+  .sp-row.warm { border-color: var(--color-accent-warm); }
+  .sp-row.warm .sp-row-label { color: var(--color-accent-warm-text); }
+  .sp-row.info { border-color: var(--color-info); }
+  .sp-row.info .sp-row-label { color: var(--color-info-text); }
+
+  /* 3. sp-step: 번호+제목+설명 단계 카드 */
+  .sp-step {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: #fff;
+    flex: 1;
+    min-width: 130px;
+  }
+  .sp-step-num {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+  }
+  .sp-step-title { font-weight: 700; font-size: 14px; color: var(--color-text-heading); margin-bottom: 4px; }
+  .sp-step-desc { font-size: 12px; color: var(--color-text-muted); line-height: 1.55; }
+
+  /* 4. sp-flow: step 가로 흐름 (1→2→3) */
+  .sp-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .sp-flow-arrow {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    color: var(--color-accent);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* 5. sp-compare: A vs B 좌우 비교 (BAD/GOOD, before/after) */
+  .sp-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 12px 0;
+  }
+  .sp-compare-block {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: #fff;
+  }
+  .sp-compare-block.bad { border-color: var(--color-accent-warm); background: var(--color-accent-warm-bg); }
+  .sp-compare-block.good { border-color: var(--color-accent); background: var(--color-accent-bg); }
+  .sp-compare-label {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+  }
+  .sp-compare-block.bad .sp-compare-label { background: var(--color-accent-warm); }
+  .sp-compare-block.good .sp-compare-label { background: var(--color-accent); }
+  .sp-compare-content { font-size: 13px; color: var(--color-text-heading); line-height: 1.6; }
+
+  /* 6. sp-chip: 작은 태그/노드 (Spring·Lambda·S3 등) */
+  .sp-chip {
+    display: inline-block;
+    padding: 4px 10px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #fff;
+    color: var(--color-text-heading);
+    white-space: nowrap;
+  }
+  .sp-chip.accent { border-color: var(--color-accent); color: var(--color-accent-text); background: var(--color-accent-bg); }
+  .sp-chip.warm { border-color: var(--color-accent-warm); color: var(--color-accent-warm-text); background: var(--color-accent-warm-bg); }
+  .sp-chip.info { border-color: var(--color-info); color: var(--color-info-text); background: var(--color-info-bg); }
+
+  /* 7. sp-list: 번호 매기기 (인디고 동그라미) */
+  .sp-list { list-style: none; padding: 0; margin: 12px 0; counter-reset: sp-list-counter; }
+  .sp-list li {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--color-text-heading);
+    line-height: 1.55;
+  }
+  .sp-list li::before {
+    counter-increment: sp-list-counter;
+    content: counter(sp-list-counter);
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 8. sp-callout: 강조 인용 박스 (Info 또는 Warm) */
+  .sp-callout {
+    border-left: 3px solid var(--color-accent);
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 14px 0;
+  }
+  .sp-callout.warm { border-left-color: var(--color-accent-warm); background: var(--color-accent-warm-bg); color: var(--color-accent-warm-text); }
+  .sp-callout.info { border-left-color: var(--color-info); background: var(--color-info-bg); color: var(--color-info-text); }
+  .sp-callout strong { font-weight: 700; }

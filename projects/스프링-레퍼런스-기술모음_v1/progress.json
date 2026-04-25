@@ -1,0 +1,168 @@
+{
+  "project": "스프링-레퍼런스-기술모음_v1",
+  "title": "스프링과 함께 하는 레퍼런스 기술 모음",
+  "alias": "스프링레퍼런스",
+  "status": "in_progress",
+  "current_step": "step_5_chapters",
+  "created_at": "2026-04-24",
+  "updated_at": "2026-04-24",
+  "steps": {
+    "step_1_seed": {
+      "name": "씨앗",
+      "status": "pending",
+      "artifact": null,
+      "artifact_version": 0,
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_2_code": {
+      "name": "코드 해부",
+      "status": "pending",
+      "artifact": null,
+      "artifact_version": 0,
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_3_scenario": {
+      "name": "시나리오+버전",
+      "status": "pending",
+      "artifact": null,
+      "artifact_version": 0,
+      "versions_created": [],
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_4_outline": {
+      "name": "뼈대",
+      "status": "pending",
+      "artifact": null,
+      "artifact_version": 0,
+      "gap_analysis": null,
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_5_chapters": {
+      "name": "챕터 집필",
+      "status": "done",
+      "chapters": [
+        {
+          "number": 1,
+          "title": "내 로컬에선 되는데 (Docker)",
+          "file": "chapters/01-내-로컬에선-되는데.md",
+          "status": "draft"
+        },
+        {
+          "number": 2,
+          "title": "비밀번호를 맡기지 않는 로그인 (OAuth2/OIDC)",
+          "file": "chapters/02-비밀번호를-맡기지-않는-로그인.md",
+          "status": "draft"
+        },
+        {
+          "number": 3,
+          "title": "세션을 바깥에 둬라 (Redis)",
+          "file": "chapters/03-세션을-바깥에-둬라.md",
+          "status": "draft"
+        },
+        {
+          "number": 4,
+          "title": "사진을 글자로 바꿔서 보낸다 (Base64)",
+          "file": "chapters/04-사진을-글자로-바꿔서-보낸다.md",
+          "status": "draft"
+        },
+        {
+          "number": 5,
+          "title": "주소만 내주는 업로드 (Presigned URL + S3 + Lambda)",
+          "file": "chapters/05-주소만-내주는-업로드.md",
+          "status": "draft"
+        },
+        {
+          "number": 6,
+          "title": "전화·알림·인터폰 (Polling·SSE·WebSocket)",
+          "file": "chapters/06-전화_알림_인터폰.md",
+          "status": "draft"
+        },
+        {
+          "number": 7,
+          "title": "릴 필름처럼 나눠 틀기 (HLS 스트리밍)",
+          "file": "chapters/07-릴-필름처럼-나눠-틀기.md",
+          "status": "draft"
+        },
+        {
+          "number": 8,
+          "title": "책 뒤에 색인을 붙였다 (Elasticsearch)",
+          "file": "chapters/08-책-뒤에-색인을-붙였다.md",
+          "status": "draft"
+        },
+        {
+          "number": 9,
+          "title": "컨베이어 벨트 위에 올려 둔다 (RabbitMQ)",
+          "file": "chapters/09-컨베이어-벨트-위에-올려-둔다.md",
+          "status": "draft"
+        }
+      ]
+    },
+    "step_6_prologue": {
+      "name": "프롤로그",
+      "status": "pending",
+      "artifact": null,
+      "review": {
+        "audit": null
+      }
+    },
+    "step_7_finish": {
+      "name": "마무리",
+      "status": "pending",
+      "artifacts": {
+        "preface": null,
+        "afterword": null
+      },
+      "final_title": null,
+      "total_pages": null,
+      "review": {
+        "audit": null
+      }
+    }
+  },
+  "_chapter_template": {
+    "id": "CH01",
+    "title": "",
+    "version": "v0.1",
+    "status": "pending",
+    "artifact": null,
+    "images": {
+      "total_placeholders": 0,
+      "completed": 0,
+      "status": "pending"
+    },
+    "review": {
+      "insight": null,
+      "intent_watch": null,
+      "audit": null
+    },
+    "questions_pending": 0
+  },
+  "_status_values": [
+    "pending",
+    "in_progress",
+    "done",
+    "review"
+  ],
+  "_review_values": [
+    null,
+    "pass",
+    "conditional_pass",
+    "fail"
+  ]
+}

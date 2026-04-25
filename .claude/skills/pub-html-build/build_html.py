@@ -524,8 +524,10 @@ def ensure_build_symlinks() -> None:
         except OSError as exc:
             print(f"  ⚠️  심링크 생성 실패 {name}: {exc}", file=sys.stderr)
 
-    # 레포 루트에 책 alias 심링크 자동 생성
-    _ensure_repo_root_symlink()
+    # 레포 루트에 책 alias 심링크는 만들지 않는다.
+    # 챕터 md의 이미지 경로는 resolve_image_paths()가 .build/ 기준 상대경로로 재작성하므로
+    # 프로젝트 내부 ../assets/만 참조하면 충분. 레포 루트 alias는 어떤 빌드 단계도 사용 안 함.
+    # 필요 시 _ensure_repo_root_symlink()를 호출해 수동 활성화 가능 (함수 정의는 보존).
 
 
 def render_html_file(chapter: Chapter) -> Path:
