@@ -1,0 +1,15 @@
+/* ============================================================
+   fonts.css — 웹폰트 로딩 (Pretendard + JetBrains Mono)
+   ============================================================ */
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+               'Segoe UI', 'Noto Sans KR', sans-serif;
+}
+
+code, pre, .code-block, .arch-tree {
+  font-family: 'JetBrains Mono', Menlo, Consolas, monospace;
+}

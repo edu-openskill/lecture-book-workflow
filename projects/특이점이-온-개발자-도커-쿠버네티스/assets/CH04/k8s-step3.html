@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Service — 고정 접근 주소로 여러 Pod에 요청 분배</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 36px 24px 32px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 940px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    align-items: center;
+  }
+
+  .service-box {
+    border: 2.5px solid #1565c0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 18px 18px;
+    text-align: center;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.10);
+  }
+  .service-box .name {
+    font-size: 14px; font-weight: 800; color: #1565c0; margin-bottom: 4px;
+  }
+  .service-box .sub {
+    font-size: 11px; color: #555;
+  }
+
+  .pod-list {
+    display: flex; flex-direction: column;
+    gap: 14px;
+  }
+  .pod-box {
+    border: 2px solid #1565c0;
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .pod-box .name {
+    font-size: 13px; font-weight: 800; color: #1565c0;
+  }
+  .pod-box .ip {
+    font-family: 'Consolas', monospace;
+    font-size: 11px; color: #555;
+  }
+
+  .fan-svg {
+    height: 220px;
+    position: relative;
+  }
+  .fan-svg svg { width: 100%; height: 100%; }
+  .fan-label {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1565c0;
+    white-space: nowrap;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Service의 고정 주소가 여러 Pod에 요청을 분배하는 구조</div>
+
+  <div class="row">
+    <!-- Service -->
+    <div class="service-box">
+      <div class="name">Service</div>
+      <div class="sub">고정 접근 주소</div>
+    </div>
+
+    <!-- 분기 화살표 (3개) -->
+    <div class="fan-svg">
+      <svg viewBox="0 0 220 220" preserveAspectRatio="xMidYMid meet">
+        <!-- 위쪽 -->
+        <line x1="6" y1="110" x2="200" y2="32" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="196,28 212,32 198,42" fill="#1565c0"/>
+        <!-- 가운데 -->
+        <line x1="6" y1="110" x2="200" y2="110" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="200,104 214,110 200,116" fill="#1565c0"/>
+        <!-- 아래쪽 -->
+        <line x1="6" y1="110" x2="200" y2="188" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="196,192 212,188 198,178" fill="#1565c0"/>
+      </svg>
+      <div class="fan-label">요청 분배</div>
+    </div>
+
+    <!-- Pod 3개 -->
+    <div class="pod-list">
+      <div class="pod-box">
+        <div class="name">Pod</div>
+        <div class="ip">IP: 10.0.0.5</div>
+      </div>
+      <div class="pod-box">
+        <div class="name">Pod</div>
+        <div class="ip">IP: 10.0.0.9</div>
+      </div>
+      <div class="pod-box">
+        <div class="name">Pod</div>
+        <div class="ip">IP: 10.0.0.12</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

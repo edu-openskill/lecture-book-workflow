@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>캐시 히트</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 36px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #1565c0;
+    border-radius: 12px;
+    padding: 30px 30px 26px;
+    width: 940px;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+  }
+  .scene {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 노드 공통 */
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .node-svg { width: 60px; height: 60px; }
+  .node-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+  .node.faded .node-label { color: #999; }
+
+  /* NGINX 박스 (가운데, 캐시 저장됨 강조) */
+  .nginx-box {
+    width: 220px;
+    border: 2.5px solid #1565c0;
+    border-radius: 10px;
+    background: #f5faff;
+    padding: 14px 16px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.08);
+  }
+  .nginx-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .cache-hit {
+    border: 2px solid #c62828;
+    border-radius: 6px;
+    background: #fff3e0;
+    padding: 10px 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #c62828;
+    box-shadow: 0 0 0 2px rgba(198,40,40,0.10);
+  }
+
+  /* 화살표 영역 */
+  .arrow-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+    padding: 0 4px;
+  }
+  .arrow-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1565c0;
+    margin-bottom: 4px;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .arrow-area svg {
+    width: 100%;
+    height: 14px;
+  }
+  .arrow-area.bypass .arrow-label { color: #999; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <div class="scene">
+    <!-- 클라이언트 -->
+    <div class="node">
+      <svg class="node-svg" viewBox="0 0 60 60">
+        <circle cx="30" cy="20" r="11" fill="#fff" stroke="#1565c0" stroke-width="2.5"/>
+        <path d="M 10 56 Q 10 36 30 36 Q 50 36 50 56 Z"
+              fill="#f5faff" stroke="#1565c0" stroke-width="2.5"/>
+      </svg>
+      <div class="node-label">클라이언트</div>
+    </div>
+
+    <!-- 화살표 1 -->
+    <div class="arrow-area">
+      <span class="arrow-label">GET /image.png</span>
+      <svg viewBox="0 0 100 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="86" y2="7" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="86,2 100,7 86,12" fill="#1565c0"/>
+      </svg>
+    </div>
+
+    <!-- NGINX (가운데) -->
+    <div class="nginx-box">
+      <div class="nginx-title">NGINX</div>
+      <div class="cache-hit">캐시 저장됨</div>
+    </div>
+
+    <!-- 화살표 2: 캐시 히트 — 백엔드까지 안 간다 -->
+    <div class="arrow-area bypass">
+      <span class="arrow-label">백엔드<br>가지 않음</span>
+      <svg viewBox="0 0 100 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="86" y2="7" stroke="#bbb" stroke-width="2" stroke-dasharray="4 3"/>
+        <polygon points="86,2 100,7 86,12" fill="#bbb"/>
+      </svg>
+    </div>
+
+    <!-- 백엔드 서버 (faded) -->
+    <div class="node faded">
+      <svg class="node-svg" viewBox="0 0 60 60">
+        <rect x="14" y="10" width="32" height="10" rx="2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+        <circle cx="20" cy="15" r="1.2" fill="#bbb"/>
+        <rect x="14" y="22" width="32" height="10" rx="2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+        <circle cx="20" cy="27" r="1.2" fill="#bbb"/>
+        <rect x="14" y="34" width="32" height="10" rx="2" fill="#fff" stroke="#bbb" stroke-width="2"/>
+        <circle cx="20" cy="39" r="1.2" fill="#bbb"/>
+      </svg>
+      <div class="node-label">백엔드 서버</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

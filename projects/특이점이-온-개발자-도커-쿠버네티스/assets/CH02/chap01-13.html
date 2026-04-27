@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이미지에서 여러 컨테이너 생성</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 36px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #1565c0;
+    border-radius: 12px;
+    padding: 30px 40px 26px;
+    width: 720px;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+  }
+  .scene {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  /* 이미지(틀) — 핵심: 빨강·주황 강조 */
+  .image-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .image-svg {
+    width: 130px;
+    height: 110px;
+  }
+  .image-label {
+    font-size: 15px;
+    font-weight: 800;
+    color: #c62828;
+  }
+
+  /* 화살표 영역 */
+  .fan {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 130px;
+    align-items: stretch;
+  }
+  .fan-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .fan-arrow {
+    flex: 1;
+    height: 16px;
+  }
+
+  /* 컨테이너 */
+  .containers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .container-box {
+    width: 150px;
+    border: 2px solid #1565c0;
+    border-radius: 8px;
+    background: #f5faff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.08);
+  }
+  .container-svg {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+  .container-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <div class="scene">
+    <!-- 이미지(틀) - 핵심 -->
+    <div class="image-stack">
+      <svg class="image-svg" viewBox="0 0 130 110">
+        <!-- 4겹 레이어 (위에서 아래로) -->
+        <polygon points="22,30 108,30 90,46 4,46" fill="#fff3e0" stroke="#c62828" stroke-width="2.2"/>
+        <polygon points="22,50 108,50 90,66 4,66" fill="#fff" stroke="#c62828" stroke-width="2.2"/>
+        <polygon points="22,70 108,70 90,86 4,86" fill="#fff3e0" stroke="#c62828" stroke-width="2.2"/>
+      </svg>
+      <div class="image-label">이미지(틀)</div>
+    </div>
+
+    <!-- 화살표 3개 -->
+    <div class="fan">
+      <svg class="fan-arrow" viewBox="0 0 140 16" preserveAspectRatio="none">
+        <line x1="0" y1="14" x2="124" y2="2" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="120,0 138,2 124,12" fill="#1565c0"/>
+      </svg>
+      <svg class="fan-arrow" viewBox="0 0 140 16" preserveAspectRatio="none">
+        <line x1="0" y1="8" x2="124" y2="8" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="124,3 138,8 124,13" fill="#1565c0"/>
+      </svg>
+      <svg class="fan-arrow" viewBox="0 0 140 16" preserveAspectRatio="none">
+        <line x1="0" y1="2" x2="124" y2="14" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="120,16 138,14 124,4" fill="#1565c0"/>
+      </svg>
+    </div>
+
+    <!-- 컨테이너 1, 2, 3 -->
+    <div class="containers">
+      <div class="container-box">
+        <svg class="container-svg" viewBox="0 0 38 38">
+          <rect x="4" y="6" width="30" height="26" rx="2" fill="#fff" stroke="#1565c0" stroke-width="2"/>
+          <line x1="12" y1="6" x2="12" y2="32" stroke="#1565c0" stroke-width="1"/>
+          <line x1="20" y1="6" x2="20" y2="32" stroke="#1565c0" stroke-width="1"/>
+          <line x1="28" y1="6" x2="28" y2="32" stroke="#1565c0" stroke-width="1"/>
+        </svg>
+        <span class="container-label">컨테이너 1</span>
+      </div>
+      <div class="container-box">
+        <svg class="container-svg" viewBox="0 0 38 38">
+          <rect x="4" y="6" width="30" height="26" rx="2" fill="#fff" stroke="#1565c0" stroke-width="2"/>
+          <line x1="12" y1="6" x2="12" y2="32" stroke="#1565c0" stroke-width="1"/>
+          <line x1="20" y1="6" x2="20" y2="32" stroke="#1565c0" stroke-width="1"/>
+          <line x1="28" y1="6" x2="28" y2="32" stroke="#1565c0" stroke-width="1"/>
+        </svg>
+        <span class="container-label">컨테이너 2</span>
+      </div>
+      <div class="container-box">
+        <svg class="container-svg" viewBox="0 0 38 38">
+          <rect x="4" y="6" width="30" height="26" rx="2" fill="#fff" stroke="#1565c0" stroke-width="2"/>
+          <line x1="12" y1="6" x2="12" y2="32" stroke="#1565c0" stroke-width="1"/>
+          <line x1="20" y1="6" x2="20" y2="32" stroke="#1565c0" stroke-width="1"/>
+          <line x1="28" y1="6" x2="28" y2="32" stroke="#1565c0" stroke-width="1"/>
+        </svg>
+        <span class="container-label">컨테이너 3</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

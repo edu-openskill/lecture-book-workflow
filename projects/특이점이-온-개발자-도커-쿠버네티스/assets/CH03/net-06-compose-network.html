@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Compose 네트워크</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        .diagram-container {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: #fff;
+            padding: 40px;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.08);
+            max-width: 1000px;
+        }
+
+        .box {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 30px;
+            min-width: 140px;
+            border: 2.5px solid #1565c0;
+            border-radius: 6px;
+            background: #fff;
+            text-align: center;
+        }
+
+        .box.dns {
+            border: 2.5px solid #c62828;
+            background: #fff3e0;
+            min-width: 160px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #000;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+
+        .address {
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            color: #1565c0;
+            margin-top: 5px;
+        }
+
+        .box.dns .address {
+            color: #c62828;
+        }
+
+        .arrow-line {
+            width: 50px;
+            height: 2.5px;
+            background: #1565c0;
+            position: relative;
+        }
+
+        .arrow-line::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid #1565c0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+
+        .arrow-label {
+            font-size: 12px;
+            color: #000;
+            white-space: nowrap;
+        }
+
+        .flow-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram-container">
+        <!-- LB (NGINX) -->
+        <div class="box">
+            <div style="font-size: 22px;">⚙️</div>
+            <div class="label">lb (NGINX)</div>
+        </div>
+
+        <!-- Arrow with label -->
+        <div class="flow-item">
+            <div class="arrow-line"></div>
+            <div class="arrow-label">app1의 IP?</div>
+        </div>
+
+        <!-- DNS (emphasized) -->
+        <div class="box dns">
+            <div style="font-size: 22px;">🔍</div>
+            <div class="label">Docker DNS<br/>(자동 생성)</div>
+        </div>
+
+        <!-- Arrow with result -->
+        <div class="flow-item">
+            <div class="arrow-line"></div>
+            <div class="arrow-label">172.18.0.3</div>
+        </div>
+
+        <!-- App1 -->
+        <div class="box">
+            <div style="font-size: 22px;">📱</div>
+            <div class="label">app1 컨테이너<br/>:80</div>
+            <div class="address">172.18.0.3</div>
+        </div>
+    </div>
+</body>
+</html>

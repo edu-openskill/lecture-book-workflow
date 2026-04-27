@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python .claude/skills/pub-html-build/build_html.py --project-root projects/특이점이-온-개발자-도커-쿠버네티스 --open)",
+      "Bash(py --version)",
+      "PowerShell(Get-Command *)",
+      "Read(//c/Users/BJ/AppData/Local/Programs/**)",
+      "Bash(ls /c/Python*)",
+      "Read(//c/Users/BJ/anaconda3/**)",
+      "Read(//c/Users/BJ/**)",
+      "Bash(where.exe python *)",
+      "Bash(where.exe python3 *)",
+      "Bash(where.exe py *)",
+      "PowerShell(winget install *)",
+      "Bash(/c/Users/BJ/AppData/Local/Programs/Python/Python312/python.exe -m pip install --quiet markdown-it-py mdit-py-plugins jinja2 pygments)",
+      "Bash(/c/Users/BJ/AppData/Local/Programs/Python/Python312/python.exe .claude/skills/pub-html-build/build_html.py --project-root projects/특이점이-온-개발자-도커-쿠버네티스 --open)",
+      "Bash(PYTHONIOENCODING=utf-8 PYTHONUTF8=1 /c/Users/BJ/AppData/Local/Programs/Python/Python312/python.exe .claude/skills/pub-html-build/build_html.py --project-root projects/특이점이-온-개발자-도커-쿠버네티스 --open)",
+      "PowerShell(Start-Process \"C:\\\\work_삭제용\\\\book-workflow\\\\projects\\\\특이점이-온-개발자-도커-쿠버네티스\\\\.build\\\\01-왜-컨테이너인가.html\")"
+    ]
+  }
+}

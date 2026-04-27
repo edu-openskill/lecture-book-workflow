@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Docker DNS — 이름을 IP로</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 40px 24px 32px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1080px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 220px 1fr 240px 1fr 220px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .node {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 16px 14px;
+    text-align: center;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+  }
+  .node .label {
+    font-size: 14px; font-weight: 800; color: #1565c0; margin-bottom: 4px;
+  }
+  .node .sub {
+    font-family: 'Consolas', monospace;
+    font-size: 11px; color: #555;
+  }
+  .node.dns {
+    border-color: #c62828;
+    box-shadow: 0 0 0 3px rgba(198,40,40,0.10);
+    background: #fff3e0;
+  }
+  .node.dns .label { color: #c62828; }
+
+  /* 화살표 영역 (위·아래 두 줄) */
+  .arrow-stack {
+    display: flex; flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    height: 100px;
+    justify-content: center;
+  }
+  .arrow {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%;
+  }
+  .arrow svg { width: 100%; height: 12px; }
+  .arrow-label {
+    font-size: 11px;
+    color: #1565c0;
+    font-weight: 700;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .arrow.dashed svg line { stroke-dasharray: 6 4; }
+  .arrow.dashed .arrow-label { color: #c62828; }
+
+  .step-num {
+    display: inline-block;
+    background: #1565c0;
+    color: #fff;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    text-align: center;
+    line-height: 18px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .step-num.red { background: #c62828; }
+
+  .direct-row {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 220px 1fr 220px;
+    align-items: center;
+  }
+  .direct-arrow {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .direct-arrow svg { width: 100%; height: 14px; }
+  .direct-label {
+    font-size: 11px;
+    color: #1565c0;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Docker DNS가 이름을 IP로 변환하는 흐름</div>
+
+  <!-- 위 줄: app → DNS → DNS → app, db는 옆에 -->
+  <div class="row">
+    <!-- app 컨테이너 -->
+    <div class="node">
+      <div class="label">app 컨테이너</div>
+      <div class="sub">172.17.0.2</div>
+    </div>
+
+    <!-- 1·2 화살표 두 줄 -->
+    <div class="arrow-stack">
+      <div class="arrow">
+        <svg viewBox="0 0 200 12" preserveAspectRatio="none">
+          <line x1="0" y1="6" x2="186" y2="6" stroke="#1565c0" stroke-width="2"/>
+          <polygon points="186,2 200,6 186,10" fill="#1565c0"/>
+        </svg>
+        <div class="arrow-label"><span class="step-num">1</span>db 의 IP는?</div>
+      </div>
+      <div class="arrow dashed">
+        <svg viewBox="0 0 200 12" preserveAspectRatio="none">
+          <line x1="14" y1="6" x2="200" y2="6" stroke="#c62828" stroke-width="2"/>
+          <polygon points="14,2 0,6 14,10" fill="#c62828"/>
+        </svg>
+        <div class="arrow-label"><span class="step-num red">2</span>172.17.0.3</div>
+      </div>
+    </div>
+
+    <!-- DNS 컨테이너 -->
+    <div class="node dns">
+      <div class="label">Docker DNS</div>
+      <div class="sub">127.0.0.11</div>
+    </div>
+
+    <!-- 빈 칸 (3번 흐름은 아래 직선) -->
+    <div></div>
+
+    <!-- db 컨테이너 -->
+    <div class="node">
+      <div class="label">db 컨테이너</div>
+      <div class="sub">172.17.0.3</div>
+    </div>
+  </div>
+
+  <!-- 아래 줄: app → db 직접 -->
+  <div class="direct-row" style="grid-template-columns: 220px 1fr 240px 1fr 220px;">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div class="direct-arrow">
+      <svg viewBox="0 0 200 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="186" y2="7" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="186,2 200,7 186,12" fill="#1565c0"/>
+      </svg>
+      <div class="direct-label"><span class="step-num">3</span>172.17.0.3 으로 요청</div>
+    </div>
+    <div></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConfigMap 수정 후 Pod 재시작 흐름</title>
+    <style>
+        :root {
+            --color-accent: #1565c0;
+            --color-accent-warm: #c62828;
+            --color-accent-warm-bg: #fff3e0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px 15px;
+            background: white;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        .diagram {
+            background: white;
+            padding: 20px 15px;
+            border: 2.5px solid var(--color-accent);
+            border-radius: 8px;
+            box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.08);
+        }
+
+        .flow {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .component {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .step-label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .box {
+            min-width: 85px;
+            padding: 10px 8px;
+            border: 2.5px solid var(--color-accent);
+            border-radius: 6px;
+            background: white;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .box-label {
+            font-size: 9px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .pod {
+            min-width: 85px;
+            padding: 10px 8px;
+            border: 2.5px solid var(--color-accent);
+            border-radius: 50%;
+            background: white;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #333;
+            width: 85px;
+            height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+        }
+
+        .pod-label {
+            font-size: 8px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .old-pod {
+            background: #f5f5f5;
+            border-color: #999;
+            opacity: 0.6;
+        }
+
+        .new-pod {
+            background: var(--color-accent-warm-bg);
+            border-color: var(--color-accent-warm);
+            opacity: 1;
+        }
+
+        .arrow {
+            font-size: 16px;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .arrow-warm {
+            color: var(--color-accent-warm);
+        }
+
+        .label-box {
+            padding: 4px 6px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 8px;
+            color: #666;
+            text-align: center;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .label-warm {
+            border-color: var(--color-accent-warm);
+            color: var(--color-accent-warm);
+        }
+
+        .divider {
+            border-top: 2px solid #ddd;
+            margin: 15px 0;
+        }
+
+        .phase {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <!-- Phase 1: ConfigMap 수정 → API 갱신 -->
+        <div class="phase">
+            <!-- Step 1: ConfigMap -->
+            <div class="component">
+                <div class="step-label">Step 1</div>
+                <div class="box">
+                    ConfigMap<br/>
+                    <div class="box-label">포트: 80→90</div>
+                </div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <!-- Label: kubectl apply -->
+            <div class="label-box">kubectl<br/>apply</div>
+
+            <div class="arrow">→</div>
+
+            <!-- Step 2: API Server -->
+            <div class="component">
+                <div class="step-label">Step 2</div>
+                <div class="box">
+                    Kube API<br/>Server<br/>
+                    <div class="box-label">설정 저장됨</div>
+                </div>
+            </div>
+
+            <div class="arrow">⇢</div>
+
+            <!-- Label: 반영 안 됨 -->
+            <div class="label-box label-warm">반영 안 됨<br/>(Pod 유지)</div>
+
+            <div class="arrow">⇢</div>
+
+            <!-- Step 3: Old Pod -->
+            <div class="component">
+                <div class="step-label">Step 3</div>
+                <div class="pod old-pod">
+                    실행 중<br/>Pod<br/>
+                    <div class="pod-label">포트: 80</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="divider"></div>
+
+        <!-- Phase 2: Pod 재시작 → 새 Pod -->
+        <div class="phase">
+            <!-- Old Pod (visual reference) -->
+            <div class="component">
+                <div class="step-label">Step 3</div>
+                <div class="pod old-pod" style="width: 70px; height: 70px; font-size: 9px;">
+                    기존 Pod<br/>
+                    <div class="pod-label">(옛 값)</div>
+                </div>
+            </div>
+
+            <div class="arrow arrow-warm">→</div>
+
+            <!-- Label: rollout restart -->
+            <div class="label-box label-warm">kubectl<br/>rollout<br/>restart</div>
+
+            <div class="arrow arrow-warm">→</div>
+
+            <!-- Step 4: New Pod Created -->
+            <div class="component">
+                <div class="step-label">Step 4</div>
+                <div class="box" style="background: var(--color-accent-warm-bg); border-color: var(--color-accent-warm);">
+                    새 Pod<br/>생성<br/>
+                    <div class="box-label" style="color: var(--color-accent-warm);">시작</div>
+                </div>
+            </div>
+
+            <div class="arrow arrow-warm">→</div>
+
+            <!-- Label: 새 값 반영 -->
+            <div class="label-box label-warm">새 값<br/>반영됨</div>
+
+            <div class="arrow arrow-warm">→</div>
+
+            <!-- Step 5: New Pod -->
+            <div class="component">
+                <div class="step-label">Step 5</div>
+                <div class="pod new-pod">
+                    새 Pod<br/>
+                    <div class="pod-label">포트: 90</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

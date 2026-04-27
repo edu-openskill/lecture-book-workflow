@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>볼륨 마운트 — Docker가 관리하는 영역</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 36px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #1565c0;
+    border-radius: 12px;
+    padding: 28px 30px 24px;
+    width: 880px;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+  }
+  .scene {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  /* 호스트 PC / 컨테이너 외부 박스 (점선 블루) */
+  .outer {
+    flex: 1;
+    border: 2.2px dashed #1565c0;
+    border-radius: 10px;
+    padding: 18px 14px 16px;
+    background: #fff;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .outer-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+
+  /* Docker 내부 저장소 (빨강·주황 강조) */
+  .docker-store {
+    width: 100%;
+    border: 2px solid #c62828;
+    border-radius: 8px;
+    padding: 14px 12px 12px;
+    background: #fff3e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 0 2px rgba(198,40,40,0.10);
+  }
+  .store-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c62828;
+    text-align: center;
+  }
+  .store-path {
+    font-size: 11px;
+    font-family: 'Consolas', monospace;
+    color: #c62828;
+  }
+  .volume-name {
+    border: 2px solid #c62828;
+    border-radius: 6px;
+    background: #fff;
+    padding: 10px 16px;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 800;
+    color: #c62828;
+    margin-top: 4px;
+  }
+
+  /* 컨테이너 안쪽 (블루 톤) */
+  .inner {
+    width: 100%;
+    border: 1.5px dashed #1565c0;
+    border-radius: 8px;
+    padding: 14px 12px 12px;
+    background: #f5faff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .file-box {
+    border: 2px solid #1565c0;
+    border-radius: 6px;
+    background: #fff;
+    padding: 8px 16px;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+  .file-box.path {
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+
+  /* 가운데 화살표 영역 (빨강 강조) */
+  .center {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0 6px;
+  }
+  .center-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #c62828;
+    text-align: center;
+    line-height: 1.4;
+    background: #fff3e0;
+    border: 1.5px solid #c62828;
+    border-radius: 6px;
+    padding: 6px 12px;
+    box-shadow: 0 0 0 2px rgba(198,40,40,0.10);
+  }
+  .center-sub {
+    font-size: 11px;
+    color: #c62828;
+    font-weight: 600;
+    font-style: italic;
+  }
+  .center svg {
+    width: 130px;
+    height: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <div class="scene">
+    <!-- 호스트 PC: Docker 내부 저장소 (빨강 강조) -->
+    <div class="outer">
+      <div class="outer-label">호스트 PC</div>
+      <div class="docker-store">
+        <div class="store-label">Docker 내부 저장소</div>
+        <div class="store-path">/var/lib/docker/volumes/</div>
+        <div class="volume-name">metacoding-volume</div>
+      </div>
+    </div>
+
+    <!-- 가운데: 볼륨 마운트 (빨강 강조) -->
+    <div class="center">
+      <svg viewBox="0 0 130 14" preserveAspectRatio="none">
+        <line x1="130" y1="7" x2="14" y2="7" stroke="#c62828" stroke-width="2"/>
+        <polygon points="14,2 0,7 14,12" fill="#c62828"/>
+      </svg>
+      <div class="center-label">볼륨 마운트</div>
+      <div class="center-sub">(Docker가 관리)</div>
+      <svg viewBox="0 0 130 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="116" y2="7" stroke="#c62828" stroke-width="2"/>
+        <polygon points="116,2 130,7 116,12" fill="#c62828"/>
+      </svg>
+    </div>
+
+    <!-- 컨테이너 -->
+    <div class="outer">
+      <div class="outer-label">컨테이너 (Ubuntu)</div>
+      <div class="inner">
+        <div class="file-box path">/app/volume</div>
+        <div class="file-box" style="font-size:12px; padding:6px 14px;">b.txt</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

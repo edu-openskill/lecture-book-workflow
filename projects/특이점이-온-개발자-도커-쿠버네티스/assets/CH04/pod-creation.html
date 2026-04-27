@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pod Creation Flow</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #fff;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .diagram {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+        }
+        .flow-section {
+            display: flex;
+            align-items: flex-start;
+            gap: 25px;
+        }
+        .kubelet-box {
+            flex: 0 0 auto;
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            min-width: 90px;
+        }
+        .arrow {
+            font-size: 22px;
+            color: #1565c0;
+            font-weight: bold;
+        }
+        .pod-container {
+            flex: 1;
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 18px;
+        }
+        .pod-label {
+            background-color: #1565c0;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .namespace-box {
+            background-color: #f5faff;
+            border: 2px dashed #1565c0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .namespace-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .namespace-label {
+            font-size: 10px;
+            color: #999;
+            text-align: right;
+        }
+        .containers-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .pause-container {
+            background-color: #fff3e0;
+            border: 2.5px solid #c62828;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 0 0 2px rgba(198,40,40,0.1);
+            text-align: center;
+        }
+        .pause-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #c62828;
+            margin-bottom: 4px;
+        }
+        .pause-desc {
+            font-size: 10px;
+            color: #c62828;
+            font-weight: 500;
+        }
+        .app-container {
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+        .app-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+        }
+        .hierarchy-note {
+            background-color: #fff3e0;
+            border: 1.5px solid #c62828;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 10px;
+            color: #c62828;
+            font-weight: 500;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <div class="flow-section">
+            <div class="kubelet-box">kubelet</div>
+
+            <div class="arrow">→</div>
+
+            <div class="pod-container">
+                <div class="pod-label">Pod</div>
+
+                <div class="namespace-box">
+                    <div class="namespace-title">Network Namespace</div>
+                    <div class="namespace-label">(IP: 10.10.10.10)</div>
+
+                    <div class="containers-section" style="margin-top: 10px;">
+                        <div class="pause-container">
+                            <div class="pause-name">pause</div>
+                            <div class="pause-desc">모든 컨테이너의 부모</div>
+                        </div>
+                        <div class="app-container">
+                            <div class="app-name">App Container</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hierarchy-note">
+                    pause 컨테이너가 Network Namespace를 유지합니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s Architecture</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #fff;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .diagram {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+        .client-icon {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #1565c0;
+            border-radius: 50%;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1565c0;
+            font-size: 18px;
+        }
+        .arrow-right {
+            font-size: 20px;
+            color: #1565c0;
+            font-weight: bold;
+        }
+        .client-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        .flow-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+        .flow-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .box {
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            min-width: 90px;
+        }
+        .box.service {
+            background-color: #e3f2fd;
+            border-color: #1565c0;
+        }
+        .box.deployment {
+            background-color: #e3f2fd;
+            border-color: #1565c0;
+        }
+        .box.pod {
+            background-color: #fff3e0;
+            border: 2.5px solid #c62828;
+            font-weight: 700;
+            color: #c62828;
+        }
+        .box.configmap {
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            font-size: 12px;
+        }
+        .label {
+            font-size: 11px;
+            color: #666;
+            font-weight: 400;
+            text-align: center;
+            max-width: 80px;
+        }
+        .arrow {
+            font-size: 18px;
+            color: #1565c0;
+            font-weight: bold;
+        }
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .cluster-label {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        .config-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            font-size: 11px;
+            margin-top: 15px;
+        }
+        .config-box {
+            background-color: #fff;
+            border: 1.5px solid #1565c0;
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <div class="header">
+            <div class="client-icon">⭕</div>
+            <div class="client-label">clients</div>
+            <div class="arrow-right">→</div>
+            <div class="client-label">ingress</div>
+        </div>
+
+        <div class="row">
+            <div class="flow-item">
+                <div class="box service">Ingress</div>
+                <div class="label">entry point</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="flow-item">
+                <div class="box service">Service</div>
+                <div class="label">pod 연결</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="flow-item">
+                <div class="box deployment">Deployment</div>
+                <div class="label">pod 관리</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="flow-item">
+                <div class="box pod">Pod ①</div>
+                <div class="label">컨테이너</div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 12px;">
+            <div style="flex-basis: 100%; display: flex; justify-content: space-around; margin-top: 10px;">
+                <div class="flow-item">
+                    <div class="box pod">Pod ②</div>
+                    <div class="label">컨테이너</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-row">
+            <div class="config-box">ConfigMap</div>
+            <div style="color: #666; font-weight: 500;">|</div>
+            <div class="config-box">Secret</div>
+        </div>
+
+        <div class="cluster-label">cluster</div>
+    </div>
+</body>
+</html>

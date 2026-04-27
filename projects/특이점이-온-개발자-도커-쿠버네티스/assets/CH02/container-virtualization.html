@@ -10,34 +10,37 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    padding: 36px 24px;
     background: #fff;
     font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
   }
   .diagram {
     background: #fff;
-    border: 2px solid #333;
+    border: 2.5px solid #1565c0;
     border-radius: 12px;
-    padding: 30px 30px 20px;
-    width: 520px;
+    padding: 30px 30px 24px;
+    width: 580px;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
   }
   .containers {
     display: flex;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
   .container-box {
     flex: 1;
-    border: 2px solid #555;
+    border: 2px solid #1565c0;
     border-radius: 8px;
     padding: 12px 8px 10px;
-    background: #fafafa;
+    background: #f5faff;
     text-align: center;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.08);
   }
   .container-label {
     font-size: 13px;
-    font-weight: 700;
-    color: #333;
+    font-weight: 800;
+    color: #1565c0;
     margin-bottom: 10px;
   }
   .icons {
@@ -47,68 +50,67 @@
     margin-bottom: 8px;
   }
   .icon {
-    width: 36px;
-    height: 36px;
-    border: 1.5px solid #888;
+    width: 36px; height: 36px;
+    border: 1.5px solid #1565c0;
     border-radius: 6px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: center; justify-content: center;
     background: #fff;
   }
   .icon svg {
-    width: 20px;
-    height: 20px;
+    width: 20px; height: 20px;
     fill: none;
-    stroke: #555;
+    stroke: #1565c0;
     stroke-width: 1.5;
   }
   .lib-bar {
-    background: #e8e8e8;
-    border: 1.5px solid #888;
+    background: #fff;
+    border: 1.5px solid #1565c0;
     border-radius: 4px;
-    padding: 4px 0;
+    padding: 5px 0;
     font-size: 11px;
-    color: #555;
-    font-weight: 600;
+    color: #1565c0;
+    font-weight: 700;
   }
   .layer {
-    border: 2px solid #555;
+    border: 2px solid #1565c0;
     border-radius: 8px;
-    padding: 10px 0;
+    padding: 12px 0;
     text-align: center;
     font-size: 14px;
-    font-weight: 700;
-    color: #333;
+    font-weight: 800;
+    color: #1565c0;
     margin-bottom: 12px;
-    background: #f0f0f0;
+    background: #fff;
   }
   .layer:last-child {
     margin-bottom: 0;
   }
   .host-os {
-    padding: 10px 12px;
+    padding: 12px 14px;
   }
   .host-os-label {
     font-size: 14px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 8px;
+    font-weight: 800;
+    color: #1565c0;
+    margin-bottom: 9px;
   }
+  /* 커널 — 핵심: 빨강·주황 강조 */
   .kernel-box {
-    border: 1.5px solid #333;
+    border: 2px solid #c62828;
     border-radius: 6px;
-    padding: 6px 0;
-    background: #d9e4f0;
-    font-size: 12px;
-    font-weight: 700;
-    color: #222;
+    padding: 8px 6px;
+    background: #fff3e0;
+    font-size: 13px;
+    font-weight: 800;
+    color: #c62828;
+    box-shadow: 0 0 0 2px rgba(198,40,40,0.10);
   }
   .kernel-sub {
     font-size: 11px;
     font-weight: 500;
-    color: #444;
-    margin-top: 2px;
+    color: #6d4c41;
+    margin-top: 3px;
   }
 </style>
 </head>
@@ -122,7 +124,7 @@
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
         </div>
         <div class="icon">
-          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="9" fill="#555" stroke="none" font-weight="bold">App</text></svg>
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="9" fill="#1565c0" stroke="none" font-weight="bold">App</text></svg>
         </div>
         <div class="icon">
           <svg viewBox="0 0 24 24"><polyline points="7 8 3 12 7 16"/><polyline points="17 8 21 12 17 16"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
@@ -137,7 +139,7 @@
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
         </div>
         <div class="icon">
-          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="9" fill="#555" stroke="none" font-weight="bold">App</text></svg>
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="9" fill="#1565c0" stroke="none" font-weight="bold">App</text></svg>
         </div>
         <div class="icon">
           <svg viewBox="0 0 24 24"><polyline points="7 8 3 12 7 16"/><polyline points="17 8 21 12 17 16"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
@@ -152,7 +154,7 @@
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
         </div>
         <div class="icon">
-          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="9" fill="#555" stroke="none" font-weight="bold">App</text></svg>
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><text x="12" y="15" text-anchor="middle" font-size="9" fill="#1565c0" stroke="none" font-weight="bold">App</text></svg>
         </div>
         <div class="icon">
           <svg viewBox="0 0 24 24"><polyline points="7 8 3 12 7 16"/><polyline points="17 8 21 12 17 16"/><line x1="14" y1="4" x2="10" y2="20"/></svg>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Flow</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #fff;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .diagram {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+        }
+        .control-plane-section {
+            margin-bottom: 30px;
+        }
+        .control-plane-label {
+            background-color: #c62828;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+            letter-spacing: 0.3px;
+        }
+        .api-server-box {
+            background-color: #fff;
+            border: 2.5px solid #c62828;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #c62828;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 0 2px rgba(198,40,40,0.1);
+        }
+        .flow-label {
+            font-size: 12px;
+            color: #666;
+            margin: 12px 0 12px 0;
+            font-weight: 500;
+            text-align: center;
+        }
+        .worker-nodes-section {
+            display: flex;
+            gap: 30px;
+            justify-content: space-around;
+            margin-top: 25px;
+        }
+        .worker-node {
+            flex: 1;
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .worker-label {
+            background-color: #1565c0;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .component-box {
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .component-box.sub {
+            font-size: 11px;
+            color: #c62828;
+            border-color: #1565c0;
+        }
+        .arrow-down {
+            text-align: center;
+            font-size: 18px;
+            color: #1565c0;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        .divider {
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #1565c0 0px, #1565c0 8px, transparent 8px, transparent 16px);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <div class="control-plane-section">
+            <div class="control-plane-label">컨트롤 플레인</div>
+            <div class="api-server-box">Kube API Server</div>
+        </div>
+
+        <div class="flow-label">명령 전달</div>
+
+        <div class="divider"></div>
+
+        <div class="worker-nodes-section">
+            <div class="worker-node">
+                <div class="worker-label">워커 노드</div>
+                <div class="component-box">kubelet</div>
+                <div class="component-box sub">컨테이너 생성/관리</div>
+            </div>
+            <div class="worker-node">
+                <div class="worker-label">워커 노드</div>
+                <div class="component-box">kube-proxy</div>
+                <div class="component-box sub">네트워크 라우팅</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

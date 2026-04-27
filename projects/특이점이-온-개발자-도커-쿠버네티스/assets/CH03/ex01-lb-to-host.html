@@ -9,8 +9,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    padding: 40px 20px;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   }
 
   .diagram {
@@ -42,25 +42,25 @@
     position: absolute;
     top: 24px; left: 24px; right: 24px;
     height: 140px;
-    border: 2px solid #2496ED;
+    border: 2px solid #1565c0;
     border-radius: 12px;
-    background: #f7fbff;
+    background: #f5faff;
   }
   .docker-label {
     position: absolute;
     top: -11px;
     left: 14px;
-    background: #f7fbff;
+    background: #f5faff;
     padding: 0 8px;
     font-size: 11px;
-    color: #2496ED;
+    color: #1565c0;
     font-weight: 700;
   }
 
   /* 컨테이너 공통 */
   .container {
     position: absolute;
-    border: 2px solid #2496ED;
+    border: 2px solid #1565c0;
     border-radius: 10px;
     padding: 14px 20px;
     background: #fff;
@@ -101,7 +101,7 @@
   }
   .blocked-label {
     font-size: 11px;
-    color: #e74c3c;
+    color: #c62828;
     font-weight: 600;
   }
 
@@ -204,10 +204,10 @@
   <!-- SVG: 선과 화살표 -->
   <svg class="svg-overlay" viewBox="0 0 480 280">
     <!-- 직접 통신 불가 선 (빨간 점선 + X) -->
-    <line x1="170" y1="78" x2="310" y2="78" stroke="#e74c3c" stroke-width="2" stroke-dasharray="6,4"/>
+    <line x1="170" y1="78" x2="310" y2="78" stroke="#c62828" stroke-width="2" stroke-dasharray="6,4"/>
     <!-- X 표시 -->
-    <line x1="233" y1="68" x2="247" y2="88" stroke="#e74c3c" stroke-width="2.5"/>
-    <line x1="247" y1="68" x2="233" y2="88" stroke="#e74c3c" stroke-width="2.5"/>
+    <line x1="233" y1="68" x2="247" y2="88" stroke="#c62828" stroke-width="2.5"/>
+    <line x1="247" y1="68" x2="233" y2="88" stroke="#c62828" stroke-width="2.5"/>
 
     <!-- 우회 경로: lb 하단 → 호스트 포트 왼쪽으로 -->
     <path d="M 100 95 Q 100 210 200 220" fill="none" stroke="#E67E22" stroke-width="2"/>

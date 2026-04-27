@@ -4,13 +4,20 @@
 <meta charset="utf-8">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
-  html, body { margin: 0; padding: 0; background: transparent; height: auto; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    height: auto;
+  }
   body {
     padding: 20px;
     display: inline-block;
     width: 100%;
     box-sizing: border-box;
-    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
+                 'Menlo', 'Monaco', 'Courier New', monospace;
   }
   .terminal {
     width: 860px;
@@ -29,7 +36,11 @@
     gap: 8px;
     border-bottom: 1px solid #c8c8c8;
   }
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
   .dot.red { background: #ff5f57; }
   .dot.yellow { background: #ffbd2e; }
   .dot.green { background: #28c940; }
@@ -41,7 +52,9 @@
     text-align: center;
     font-weight: 500;
   }
-  .body { padding: 20px 24px; }
+  .body {
+    padding: 20px 24px;
+  }
   .prompt {
     color: #0066cc;
     font-size: 13px;
@@ -57,12 +70,23 @@
   .output {
     color: #222222;
     font-size: 13px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    word-break: break-all;
-    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Menlo', 'Monaco', 'Courier New', monospace;
-    margin-bottom: 16px;
+    line-height: 1.5;
+    white-space: pre;
+    word-break: normal;
+    overflow-x: auto;
+    font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
   }
+  .output pre {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  .output code {
+    font-family: inherit;
+  }
+  .output .err { color: #cc0000; font-weight: 500; }
+  .output .ok  { color: #2a9d2a; font-weight: 500; }
 </style>
 </head>
 <body>

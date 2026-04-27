@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector Labels Matching</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #fff;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .diagram {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+        }
+        .flow-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .deployment-section {
+            flex: 0 0 auto;
+        }
+        .pods-section {
+            flex: 1;
+        }
+        .deployment-box {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 200px;
+            text-align: center;
+        }
+        .deployment-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .selector-label {
+            background-color: #fff3e0;
+            border: 2px solid #c62828;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #c62828;
+        }
+        .arrow-right {
+            font-size: 24px;
+            color: #1565c0;
+            font-weight: bold;
+            margin: 0 20px;
+        }
+        .pods-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .pod {
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .pod.matched {
+            background-color: #fff3e0;
+            border: 2.5px solid #c62828;
+            box-shadow: 0 0 0 2px rgba(198,40,40,0.1);
+        }
+        .pod-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .pod-name.matched {
+            color: #c62828;
+        }
+        .pod-labels {
+            font-size: 11px;
+            color: #666;
+        }
+        .pod-labels.matched {
+            color: #c62828;
+            font-weight: 500;
+        }
+        .match-indicator {
+            font-size: 10px;
+            color: #c62828;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .unmatched-section {
+            opacity: 0.5;
+        }
+        .nomatch-label {
+            font-size: 11px;
+            color: #999;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        .matching-guide {
+            background-color: #f5faff;
+            border: 1px solid #90caf9;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <div class="flow-container">
+            <div class="deployment-section">
+                <div class="deployment-box">
+                    <div class="deployment-title">Deployment</div>
+                    <div class="selector-label">selector:<br>{ app: web }</div>
+                </div>
+            </div>
+
+            <div class="arrow-right">→</div>
+
+            <div class="pods-section">
+                <div class="pods-grid">
+                    <div class="pod matched">
+                        <div class="pod-name matched">Pod 1</div>
+                        <div class="pod-labels matched">labels:<br>{ app: web }</div>
+                        <div class="match-indicator">일치</div>
+                    </div>
+                    <div class="pod matched">
+                        <div class="pod-name matched">Pod 2</div>
+                        <div class="pod-labels matched">labels:<br>{ app: web }</div>
+                        <div class="match-indicator">일치</div>
+                    </div>
+                    <div class="pod">
+                        <div class="pod-name">Pod 3</div>
+                        <div class="pod-labels">labels:<br>{ app: db }</div>
+                        <div class="nomatch-label">불일치</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="matching-guide">
+            Deployment의 selector가 Pod의 labels과 일치하는 경우만 관리됩니다.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Deployment → ReplicaSet → Pod 선언적 흐름</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 40px 24px 32px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1040px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 32px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 220px 90px 220px 90px 1fr;
+    align-items: center;
+  }
+
+  .node {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 14px 14px;
+    text-align: center;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+  }
+  .node .label {
+    font-size: 14px; font-weight: 800; color: #1565c0; margin-bottom: 4px;
+  }
+  .node .sub {
+    font-size: 11px; color: #555;
+  }
+
+  .pod-list {
+    display: flex; flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .pod-box {
+    border: 2px solid #1565c0;
+    border-radius: 8px;
+    background: #fff;
+    padding: 9px 22px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+    min-width: 140px;
+    text-align: center;
+  }
+
+  .arrow {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .arrow svg { width: 100%; height: 14px; }
+  .arrow-label {
+    font-size: 11px;
+    color: #1565c0;
+    font-weight: 700;
+    margin-top: 5px;
+    white-space: nowrap;
+  }
+
+  .fan {
+    position: relative;
+    height: 180px;
+  }
+  .fan svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .fan-pods {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    padding-left: 70px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Deployment가 ReplicaSet을 통해 Pod 수를 자동으로 맞추는 구조</div>
+
+  <div class="row">
+    <!-- Deployment -->
+    <div class="node">
+      <div class="label">Deployment</div>
+      <div class="sub">"Pod 3개 유지하라"</div>
+    </div>
+
+    <!-- 화살표 1: Deployment → ReplicaSet -->
+    <div class="arrow">
+      <svg viewBox="0 0 80 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="68" y2="7" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="68,2 80,7 68,12" fill="#1565c0"/>
+      </svg>
+      <div class="arrow-label">생성</div>
+    </div>
+
+    <!-- ReplicaSet -->
+    <div class="node">
+      <div class="label">ReplicaSet</div>
+      <div class="sub">Pod 수 조절</div>
+    </div>
+
+    <!-- 화살표 2: ReplicaSet → Pods (분기) -->
+    <div class="arrow" style="align-self: center;">
+      <svg viewBox="0 0 80 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="68" y2="7" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="68,2 80,7 68,12" fill="#1565c0"/>
+      </svg>
+    </div>
+
+    <!-- Pods 3개 -->
+    <div class="pod-list">
+      <div class="pod-box">Pod ①</div>
+      <div class="pod-box">Pod ②</div>
+      <div class="pod-box">Pod ③</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
