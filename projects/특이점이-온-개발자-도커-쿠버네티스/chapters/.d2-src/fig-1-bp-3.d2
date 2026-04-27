@@ -1,0 +1,22 @@
+direction: right
+
+container: 컨테이너\n(휘발성) {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+mount: 마운트 {
+  shape: rectangle
+  style.fill: "#f8f8f8"
+  style.stroke: "#333333"
+}
+
+volume: 볼륨\n(영구 저장) {
+  shape: cylinder
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+container -> mount -> volume {
+  style.stroke: "#333333"
+}

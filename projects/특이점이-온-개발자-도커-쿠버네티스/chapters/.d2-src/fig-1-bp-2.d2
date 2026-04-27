@@ -1,0 +1,22 @@
+direction: right
+
+image: 이미지 {
+  shape: package
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+run: docker run {
+  shape: rectangle
+  style.fill: "#f8f8f8"
+  style.stroke: "#333333"
+}
+
+container: 컨테이너\n(격리된 프로세스) {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+image -> run -> container {
+  style.stroke: "#333333"
+}

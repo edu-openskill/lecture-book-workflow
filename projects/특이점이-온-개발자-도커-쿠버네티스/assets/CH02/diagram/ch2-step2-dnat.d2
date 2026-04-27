@@ -1,0 +1,35 @@
+direction: right
+
+client: 외부\n클라이언트 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+  style.font-size: 14
+}
+
+host: 호스트 {
+  style.fill: "#f0f0f0"
+  style.stroke: "#333333"
+
+  iptables: iptables\nDNAT 규칙 {
+    shape: rectangle
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.stroke-dash: 3
+    style.font-size: 12
+  }
+}
+
+container: 컨테이너\n(nginx) {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+  style.font-size: 14
+}
+
+client -> host.iptables: ":8080 으로 요청" {
+  style.stroke: "#333333"
+}
+host.iptables -> container: ":80 으로 변환" {
+  style.stroke: "#333333"
+}

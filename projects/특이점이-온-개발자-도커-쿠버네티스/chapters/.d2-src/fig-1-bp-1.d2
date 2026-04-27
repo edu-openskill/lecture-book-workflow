@@ -1,0 +1,23 @@
+direction: right
+
+hub: Docker Hub {
+  shape: cloud
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+pull: docker pull {
+  shape: rectangle
+  style.fill: "#f8f8f8"
+  style.stroke: "#333333"
+}
+
+image: 이미지 {
+  shape: package
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+hub -> pull -> image {
+  style.stroke: "#333333"
+}

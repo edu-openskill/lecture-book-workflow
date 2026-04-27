@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  }
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 48px;
+    gap: 0;
+  }
+
+  /* NGINX 컨테이너 전체 */
+  .nginx-container {
+    border: 2px solid #009639;
+    border-radius: 14px;
+    padding: 24px 32px;
+    position: relative;
+    background: #f6fdf8;
+  }
+  .nginx-container-label {
+    position: absolute;
+    top: -11px;
+    left: 14px;
+    background: #f6fdf8;
+    padding: 0 8px;
+    font-size: 12px;
+    color: #009639;
+    font-weight: 700;
+  }
+
+  /* 내부 레이아웃 */
+  .nginx-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  /* 요청 경로 */
+  .request-path {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .request-url {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    background: #fff;
+    border: 1.5px solid #333;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: 'Consolas', 'Monaco', monospace;
+  }
+  .request-url-label {
+    font-size: 10px;
+    color: #888;
+    font-weight: 500;
+  }
+
+  /* 블록 박스 */
+  .config-block {
+    border: 2px solid #555;
+    border-radius: 8px;
+    padding: 12px 18px;
+    background: #fff;
+    text-align: center;
+  }
+  .config-block-title {
+    font-size: 10px;
+    color: #888;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .config-block-code {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    font-family: 'Consolas', 'Monaco', monospace;
+  }
+  .config-block.orange {
+    border-color: #E67E22;
+  }
+  .config-block.green {
+    border-color: #009639;
+  }
+
+  /* 화살표 */
+  .arrow-h {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin: 0 14px;
+    align-self: center;
+  }
+  .arrow-h-label {
+    font-size: 10px;
+    color: #666;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* 흐름 설명 */
+  .flow-desc {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-step {
+    font-size: 11px;
+    color: #666;
+    line-height: 1.5;
+    max-width: 420px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="nginx-container">
+    <div class="nginx-container-label">NGINX (lb 컨테이너)</div>
+
+    <div class="nginx-inner">
+      <!-- 요청 경로 -->
+      <div class="request-path" style="align-self: center;">
+        <div class="request-url">/app1</div>
+        <div class="request-url-label">요청 경로</div>
+      </div>
+
+      <!-- 화살표: 경로 매칭 -->
+      <div class="arrow-h">
+        <div class="arrow-h-label">경로 매칭</div>
+        <svg width="50" height="12" viewBox="0 0 50 12">
+          <line x1="0" y1="6" x2="40" y2="6" stroke="#333" stroke-width="2"/>
+          <polygon points="40,1 50,6 40,11" fill="#333"/>
+        </svg>
+      </div>
+
+      <!-- location 블록 -->
+      <div class="config-block">
+        <div class="config-block-title">location</div>
+        <div class="config-block-code">location /app1</div>
+      </div>
+
+      <!-- 화살표: proxy_pass -->
+      <div class="arrow-h">
+        <div class="arrow-h-label" style="color: #E67E22;">proxy_pass</div>
+        <svg width="50" height="12" viewBox="0 0 50 12">
+          <line x1="0" y1="6" x2="40" y2="6" stroke="#E67E22" stroke-width="2"/>
+          <polygon points="40,1 50,6 40,11" fill="#E67E22"/>
+        </svg>
+      </div>
+
+      <!-- upstream 블록 -->
+      <div class="config-block green">
+        <div class="config-block-title">upstream</div>
+        <div class="config-block-code">upstream app1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

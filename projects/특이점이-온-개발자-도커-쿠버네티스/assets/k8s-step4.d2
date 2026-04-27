@@ -1,0 +1,26 @@
+direction: right
+
+configmap: ConfigMap\nDB_HOST=db\nDB_PORT=3306 {
+  style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+secret: Secret\nDB_PASSWORD=**** {
+  style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+pod: Pod {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+pvc: PVC\n"10Gi 요청" {
+  style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+pv: PV\n실제 디스크 {
+  style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+configmap -> pod: 설정 주입 { style: { stroke: "#333"; stroke-dash: 3 } }
+secret -> pod: 비밀 주입 { style: { stroke: "#333"; stroke-dash: 3 } }
+pv -> pvc: 바인딩 { style: { stroke: "#333" } }
+pvc -> pod: 저장소 연결 { style: { stroke: "#333"; stroke-dash: 3 } }

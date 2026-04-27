@@ -1,0 +1,36 @@
+direction: right
+
+cmd: docker run 명령어 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+engine: Docker 엔진 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+kernel: OS 커널 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+container: 컨테이너 생성 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+  style.stroke-dash: 5
+}
+
+cmd -> engine: 요청 {
+  style.stroke: "#333333"
+}
+engine -> kernel: 프로세스 생성 요청 {
+  style.stroke: "#333333"
+}
+kernel -> container: 격리된 프로세스 {
+  style.stroke: "#333333"
+}

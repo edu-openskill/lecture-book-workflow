@@ -1,0 +1,33 @@
+direction: right
+
+app: app 컨테이너\n172.17.0.2 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+  style.font-size: 14
+}
+
+dns: Docker DNS\n127.0.0.11 {
+  shape: rectangle
+  style.fill: "#f0f0f0"
+  style.stroke: "#333333"
+  style.font-size: 14
+}
+
+db: db 컨테이너\n172.17.0.3 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+  style.font-size: 14
+}
+
+app -> dns: "1. db 의 IP는?" {
+  style.stroke: "#333333"
+}
+dns -> app: "2. 172.17.0.3" {
+  style.stroke: "#333333"
+  style.stroke-dash: 3
+}
+app -> db: "3. 172.17.0.3 으로 요청" {
+  style.stroke: "#333333"
+}

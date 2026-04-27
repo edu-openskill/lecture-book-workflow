@@ -1,0 +1,54 @@
+direction: right
+
+hw: 하드웨어 계층 {
+  style.fill: "#e8e8e8"
+  style.stroke: "#333333"
+  style.border-radius: 0
+
+  hardware: 하드웨어 (CPU, 메모리, 디스크) {
+    style.fill: "#e0e0e0"
+    style.stroke: "#333333"
+  }
+}
+
+os: OS 계층 {
+  style.fill: "#f0f0f0"
+  style.stroke: "#333333"
+  style.border-radius: 0
+
+  kernel: 호스트 OS 커널 {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  engine: 컨테이너 엔진 (Docker) {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+}
+
+app: 앱 계층 {
+  direction: right
+  style.fill: "#f8f8f8"
+  style.stroke: "#333333"
+  style.border-radius: 0
+
+  c1: "컨테이너\n(앱 + 라이브러리)" {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  c2: "컨테이너\n(앱 + 라이브러리)" {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  c3: "컨테이너\n(앱 + 라이브러리)" {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+}
+
+hw -> os {
+  style.stroke: "#333333"
+}
+os -> app {
+  style.stroke: "#333333"
+}

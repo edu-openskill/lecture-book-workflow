@@ -1,0 +1,34 @@
+direction: right
+
+code: 코드 + 설정 파일 {
+  shape: page
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+dockerfile: Dockerfile 작성 {
+  shape: page
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+image: 이미지 {
+  shape: package
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+container: 컨테이너\n(환경 자동 구성 완료) {
+  style.fill: "#f8f8f8"
+  style.stroke: "#333333"
+}
+
+code -> dockerfile: 포함 {
+  style.stroke: "#333333"
+}
+dockerfile -> image: docker build {
+  style.stroke: "#333333"
+}
+image -> container: docker run {
+  style.stroke: "#333333"
+}

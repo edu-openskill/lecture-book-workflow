@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>kube-proxy는 규칙만 관리, 라우팅은 커널이 한다</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 28px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1080px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  /* 메인 가로 흐름: ClusterIP → 커널 → Pod */
+  .main-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .box {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 14px 20px;
+    background: #fff;
+    text-align: center;
+    min-width: 160px;
+  }
+  .box .label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+  .box .sub {
+    font-size: 12px;
+    color: #555;
+    margin-top: 4px;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+  }
+
+  /* 커널 박스 — 강조 (실제 라우팅을 하는 곳) */
+  .kernel {
+    border: 2px solid #2e7d32;
+    background: #e8f5e9;
+    min-width: 240px;
+    padding: 16px 22px;
+  }
+  .kernel .label { color: #2e7d32; }
+  .kernel .sub { color: #2e7d32; font-weight: 600; }
+
+  /* Pod 묶음 — 세로로 두 개 */
+  .pods-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pod-box {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 8px 18px;
+    background: #fff;
+    text-align: center;
+    min-width: 140px;
+  }
+  .pod-box .label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+  .pod-box .sub {
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+  }
+
+  /* 화살표 */
+  .arrow-h {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 40px;
+    color: #1565c0;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 4px;
+  }
+  .arrow-h.fork {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 18px;
+  }
+
+  /* 아래쪽 kube-proxy 사이드 라인 */
+  .side-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .side-spacer-left {
+    flex: 0 0 auto;
+    min-width: 200px;
+  }
+  .side-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .side-arrow-up {
+    color: #c62828;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .side-arrow-label {
+    font-size: 11px;
+    color: #c62828;
+    font-weight: 700;
+    margin: 2px 0 6px;
+  }
+  .kube-proxy-box {
+    border: 2px solid #c62828;
+    border-radius: 10px;
+    padding: 10px 18px;
+    background: #fff3e0;
+    color: #c62828;
+    text-align: center;
+    min-width: 220px;
+  }
+  .kube-proxy-box .label {
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .kube-proxy-box .sub {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 3px;
+  }
+
+  .side-spacer-right {
+    flex: 1;
+  }
+
+  /* 하단 캡션 */
+  .footnote {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">패킷은 커널이 처리하고, kube-proxy는 옆에서 규칙만 관리한다</div>
+
+  <!-- 메인 가로 흐름 -->
+  <div class="main-row">
+    <div class="box">
+      <div class="label">Service 주소</div>
+      <div class="sub">ClusterIP (가상)</div>
+    </div>
+    <div class="arrow-h">→</div>
+    <div class="box kernel">
+      <div class="label">Linux 커널 (netfilter)</div>
+      <div class="sub">iptables 항목 대조 → DNAT</div>
+    </div>
+    <div class="arrow-h fork">
+      <span>↗</span>
+      <span>↘</span>
+    </div>
+    <div class="pods-col">
+      <div class="pod-box">
+        <div class="label">Pod A</div>
+        <div class="sub">Pod IP</div>
+      </div>
+      <div class="pod-box">
+        <div class="label">Pod B</div>
+        <div class="sub">Pod IP</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- kube-proxy 사이드 -->
+  <div class="side-row">
+    <div class="side-spacer-left"></div>
+    <div class="side-stack">
+      <div class="side-arrow-up">↑</div>
+      <div class="side-arrow-label">규칙 등록·갱신</div>
+      <div class="kube-proxy-box">
+        <div class="label">kube-proxy</div>
+        <div class="sub">패킷에 손대지 않음 · 규칙 관리만</div>
+      </div>
+    </div>
+    <div class="side-spacer-right"></div>
+  </div>
+
+  <div class="footnote">
+    Service 변동을 보고 kube-proxy가 iptables 항목을 갱신하면, 그 다음부터의 패킷은 커널이 그 항목대로 자동 처리한다
+  </div>
+</div>
+
+</body>
+</html>

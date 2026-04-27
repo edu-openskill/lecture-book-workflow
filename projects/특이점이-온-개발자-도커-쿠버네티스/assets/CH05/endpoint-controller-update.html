@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Endpoint Controller가 Pod IP 목록을 갱신한다</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1080px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  /* 가로 흐름 */
+  .main-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  /* 컬럼 헤더 */
+  .col-header {
+    font-size: 13px;
+    font-weight: 800;
+    color: #555;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  /* 좌측 Pod 박스 묶음 */
+  .pods-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .pods-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pod-item {
+    border: 2px solid #1565c0;
+    border-radius: 8px;
+    padding: 10px 18px;
+    text-align: center;
+    min-width: 170px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .pod-item .state {
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .pod-running { color: #2e7d32; border-color: #2e7d32; }
+  .pod-running .state { color: #2e7d32; }
+  .pod-gone {
+    color: #999;
+    border-color: #ccc;
+    background: #f5f5f5;
+    text-decoration: line-through;
+  }
+  .pod-gone .state { color: #999; text-decoration: none; }
+  .pod-new {
+    color: #c62828;
+    border-color: #c62828;
+    background: #fff3e0;
+  }
+  .pod-new .state { color: #c62828; }
+
+  /* 가운데 EC 화살표 */
+  .ec-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 18px;
+    padding-top: 30px;
+  }
+  .ec-box {
+    border: 2px solid #c62828;
+    border-radius: 10px;
+    padding: 8px 14px;
+    background: #fff3e0;
+    color: #c62828;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .ec-arrow .arrow-line {
+    color: #c62828;
+    font-size: 26px;
+    font-weight: 800;
+  }
+  .ec-arrow .arrow-label {
+    font-size: 11px;
+    color: #c62828;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* 우측 Pod IP 목록 */
+  .endpoint-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .endpoint-list {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    background: #e3f2fd;
+    min-width: 220px;
+  }
+  .list-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 0;
+  }
+  .list-row .mark {
+    font-size: 16px;
+    font-weight: 800;
+    width: 18px;
+    text-align: center;
+  }
+  .list-row.keep { color: #2e7d32; }
+  .list-row.remove {
+    color: #999;
+    text-decoration: line-through;
+  }
+  .list-row.add { color: #c62828; }
+
+  /* 아래 kube-proxy 흐름 */
+  .down-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 26px;
+  }
+  .down-flow .v-arrow {
+    color: #1565c0;
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .down-flow .v-label {
+    font-size: 12px;
+    color: #1565c0;
+    font-weight: 700;
+    margin: 2px 0 6px;
+  }
+  .kp-box {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 12px 22px;
+    background: #fff;
+    text-align: center;
+    min-width: 320px;
+  }
+  .kp-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+    margin-bottom: 4px;
+  }
+  .kp-sub {
+    font-size: 12px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Endpoint Controller가 Pod 변동을 감시해 Pod IP 목록을 갱신한다</div>
+
+  <div class="main-row">
+    <!-- 좌측: 실제 Pod 상태 -->
+    <div class="pods-col">
+      <div class="col-header">실제 Pod 상태</div>
+      <div class="pods-list">
+        <div class="pod-item pod-running">Pod A<span class="state">✓</span></div>
+        <div class="pod-item pod-gone">Pod B<span class="state">✗</span></div>
+        <div class="pod-item pod-new">Pod C<span class="state">+</span></div>
+      </div>
+    </div>
+
+    <!-- 가운데: Endpoint Controller 화살표 -->
+    <div class="ec-arrow">
+      <div class="ec-box">Endpoint<br>Controller</div>
+      <div class="arrow-line">→</div>
+      <div class="arrow-label">감시 후 갱신</div>
+    </div>
+
+    <!-- 우측: Pod IP 목록 -->
+    <div class="endpoint-col">
+      <div class="col-header">Pod IP 목록</div>
+      <div class="endpoint-list">
+        <div class="list-row keep"><span class="mark">✓</span>Pod A · 유지</div>
+        <div class="list-row remove"><span class="mark">✗</span>Pod B · 제거됨</div>
+        <div class="list-row add"><span class="mark">+</span>Pod C · 추가됨</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 아래로 kube-proxy 흐름 -->
+  <div class="down-flow">
+    <div class="v-arrow">↓</div>
+    <div class="v-label">최신 목록 전달</div>
+    <div class="kp-box">
+      <div class="kp-title">kube-proxy</div>
+      <div class="kp-sub">목록대로 가로채기 규칙(iptables) 갱신</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pod 네트워크 — 안 2: 공유기 비유</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pod-box {
+    border: 1.5px solid #222;
+    border-radius: 12px;
+    padding: 28px 40px 28px;
+    background: #fff;
+    position: relative;
+    min-width: 460px;
+  }
+  .pod-label {
+    position: absolute;
+    top: -14px;
+    left: 24px;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 3px 16px;
+    border-radius: 5px;
+  }
+
+  .pod-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+  }
+
+  /* 공유기(pause) */
+  .router {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    border: 1.5px dashed #222;
+    border-radius: 10px;
+    background: #f5f5f5;
+    width: 100%;
+  }
+  .router-icon {
+    font-size: 28px;
+  }
+  .router-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .router-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+  }
+  .router-desc {
+    font-size: 10px;
+    color: #666;
+  }
+
+  /* 연결선 */
+  .wifi-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    color: #555;
+    width: 100%;
+  }
+  .wifi-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .wifi-signal {
+    font-size: 14px;
+    color: #888;
+  }
+  .wifi-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #888;
+  }
+
+  /* 기기들 */
+  .devices {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+  }
+  .device {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border: 1.5px solid #222;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .device-icon {
+    font-size: 22px;
+  }
+  .device-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .device-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #222;
+  }
+  .device-desc {
+    font-size: 10px;
+    color: #666;
+  }
+
+  /* localhost 통신 */
+  .localhost-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 0;
+  }
+  .localhost-arrow {
+    font-size: 16px;
+    color: #222;
+  }
+  .localhost-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #555;
+    background: #f0f0f0;
+    padding: 2px 10px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="pod-box">
+    <div class="pod-label">Pod (IP: 10.244.0.5)</div>
+
+    <div class="pod-body">
+
+      <div class="router">
+        <div class="router-icon">📡</div>
+        <div class="router-info">
+          <div class="router-title">pause 컨테이너 (공유기)</div>
+          <div class="router-desc">IP: 10.244.0.5 / 포트 공간을 만들고 유지</div>
+        </div>
+      </div>
+
+      <div class="wifi-line">
+        <div class="wifi-branch">
+          <div class="wifi-signal">|</div>
+          <div class="wifi-label">접속</div>
+        </div>
+        <div class="wifi-branch">
+          <div class="wifi-signal">|</div>
+          <div class="wifi-label">접속</div>
+        </div>
+      </div>
+
+      <div class="devices">
+        <div class="device">
+          <div class="device-icon">💻</div>
+          <div class="device-info">
+            <div class="device-title">nginx</div>
+            <div class="device-desc">:80</div>
+          </div>
+        </div>
+        <div class="device">
+          <div class="device-icon">💻</div>
+          <div class="device-info">
+            <div class="device-title">redis</div>
+            <div class="device-desc">:6379</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="localhost-bar">
+        <div class="localhost-arrow">←</div>
+        <div class="localhost-label">localhost로 통신</div>
+        <div class="localhost-arrow">→</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

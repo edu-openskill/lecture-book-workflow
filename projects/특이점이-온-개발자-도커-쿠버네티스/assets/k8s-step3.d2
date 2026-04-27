@@ -1,0 +1,19 @@
+direction: right
+
+service: Service\n고정 접근 주소 {
+  style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+pod1: Pod\nIP: 10.0.0.5 {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+pod2: Pod\nIP: 10.0.0.9 {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+pod3: Pod\nIP: 10.0.0.12 {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+service -> pod1: 요청 분배 { style: { stroke: "#333" } }
+service -> pod2: 요청 분배 { style: { stroke: "#333" } }
+service -> pod3: 요청 분배 { style: { stroke: "#333" } }

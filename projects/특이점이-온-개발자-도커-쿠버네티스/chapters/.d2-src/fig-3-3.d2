@@ -1,0 +1,36 @@
+direction: right
+
+master: 컨트롤 플레인 {
+  style.border-radius: 8
+  style.stroke-dash: 5
+  style.stroke: "#333333"
+  style.fill: "#f8f8f8"
+
+  api: Kube API Server {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  etcd: etcd {
+    shape: cylinder
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  ctrl: Controller {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  sched: Scheduler {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+
+  api <-> etcd: 상태 저장/조회 {
+    style.stroke: "#333333"
+  }
+  api <-> ctrl: 상태 비교 및 작업 생성 {
+    style.stroke: "#333333"
+  }
+  api <-> sched: 실행 노드 선택 {
+    style.stroke: "#333333"
+  }
+}

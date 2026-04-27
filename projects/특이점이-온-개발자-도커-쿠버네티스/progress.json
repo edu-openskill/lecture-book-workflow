@@ -1,0 +1,124 @@
+{
+  "project": "특이점이-온-개발자-도커-쿠버네티스",
+  "title": "처음 만나는 도커 쿠버네티스",
+  "status": "done",
+  "current_step": "step_7_finish",
+  "created_at": "2026-04-07",
+  "updated_at": "2026-04-12",
+
+  "steps": {
+    "step_1_seed": {
+      "name": "씨앗",
+      "status": "done",
+      "artifact": "answers.md",
+      "artifact_version": 1,
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_2_code": {
+      "name": "코드 해부",
+      "status": "done",
+      "artifact": null,
+      "artifact_version": 0,
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_3_scenario": {
+      "name": "시나리오+버전",
+      "status": "done",
+      "artifact": "answers.md",
+      "artifact_version": 1,
+      "versions_created": ["code/ex00", "code/ex01", "code/ex02", "code/ex03", "code/ex04", "code/ex05", "code/ex06", "code/ex07", "code/ex08"],
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_4_outline": {
+      "name": "뼈대",
+      "status": "done",
+      "artifact": "answers.md",
+      "artifact_version": 1,
+      "gap_analysis": "done",
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_5_chapters": {
+      "name": "챕터 집필",
+      "status": "done",
+      "chapters": [
+        {
+          "id": "CH01",
+          "title": "왜 컨테이너인가",
+          "status": "done",
+          "artifact": "chapters/01-왜-컨테이너인가.md",
+          "images": { "total_placeholders": 7, "completed": 7, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" }
+        },
+        {
+          "id": "CH02",
+          "title": "Docker 이해하기",
+          "status": "done",
+          "artifact": "chapters/02-Docker-이해하기.md",
+          "images": { "total_placeholders": 57, "completed": 57, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" }
+        },
+        {
+          "id": "CH03",
+          "title": "Docker 다루기",
+          "status": "done",
+          "artifact": "chapters/03-Docker-다루기.md",
+          "images": { "total_placeholders": 48, "completed": 48, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" }
+        },
+        {
+          "id": "CH04",
+          "title": "Kubernetes 시작하기",
+          "status": "done",
+          "artifact": "chapters/04-Kubernetes-시작하기.md",
+          "images": { "total_placeholders": 36, "completed": 36, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" }
+        },
+        {
+          "id": "CH05",
+          "title": "Kubernetes 운영하기",
+          "status": "done",
+          "artifact": "chapters/05-Kubernetes-운영하기.md",
+          "images": { "total_placeholders": 30, "completed": 30, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" }
+        }
+      ]
+    },
+    "step_6_prologue": {
+      "name": "프롤로그",
+      "status": "done",
+      "artifact": "book/front/prologue.md",
+      "review": {
+        "audit": "pass"
+      }
+    },
+    "step_7_finish": {
+      "name": "마무리",
+      "status": "done",
+      "artifacts": {
+        "preface": null,
+        "afterword": "book/back/afterword.md"
+      },
+      "final_title": "처음 만나는 도커 쿠버네티스",
+      "total_pages": 156,
+      "review": {
+        "audit": "pass"
+      }
+    }
+  }
+}

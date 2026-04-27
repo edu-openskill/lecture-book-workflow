@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>미니큐브 단일 노드 구조</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .outer {
+    display: flex;
+    gap: 6px;
+  }
+
+  /* 왼쪽 브래킷 */
+  .brackets {
+    display: flex;
+    flex-direction: column;
+  }
+  .bracket {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bracket-line {
+    width: 8px;
+    border-left: 1.5px solid #222;
+    border-top: 1.5px solid #222;
+    border-bottom: 1.5px solid #222;
+    align-self: stretch;
+  }
+  .bracket-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #222;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  /* 스택 */
+  .stack {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .layer {
+    border: 1.5px solid #222;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  /* ===== 애플리케이션 계층 영역 ===== */
+  .app-area {
+    border: 1.5px solid #222;
+    border-radius: 12px 12px 0 0;
+    padding: 24px 28px;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* 미니큐브 박스 */
+  .minikube-box {
+    border: 1.5px solid #222;
+    border-radius: 10px;
+    padding: 22px 24px 24px;
+    background: #fff;
+    position: relative;
+  }
+  .minikube-label {
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: #fff;
+    color: #222;
+    border: 1.5px solid #222;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 3px 16px;
+    border-radius: 5px;
+  }
+
+  .single-node-text {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-top: 12px;
+  }
+
+  .minikube-body {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  /* 내부 박스 (컨트롤 플레인 / 워커 노드) */
+  .inner-box {
+    border: 1.5px solid #222;
+    border-radius: 10px;
+    padding: 18px 20px 20px;
+    background: #fff;
+    min-width: 200px;
+    position: relative;
+  }
+  .inner-label {
+    position: absolute;
+    top: -12px;
+    left: 14px;
+    background: #444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+  }
+  .cp-box {
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    background: #fff;
+    color: #222;
+    margin-top: 6px;
+  }
+  .agent-layer {
+    display: flex;
+    gap: 0;
+    border: 1.5px solid #222;
+    border-radius: 8px;
+    margin-top: 6px;
+  }
+  .agent-box {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #222;
+    background: #fff;
+    white-space: nowrap;
+  }
+  .agent-box.kubelet {
+    border-right: 1px solid #222;
+  }
+  .agent-box.kube-proxy {
+    border-left: 1px solid #222;
+  }
+
+  /* 하단 레이어 */
+  .layer-engine { background: #e8e8e8; padding: 16px; border-top: 3px dotted #666; }
+  .layer-os { background: #d9d9d9; padding: 16px; border-top: none; }
+  .layer-hw { background: #f5f5f5; padding: 16px; border-top: 3px dotted #666; border-radius: 0 0 12px 12px; }
+</style>
+</head>
+<body>
+
+<div class="outer">
+
+  <!-- 왼쪽 브래킷 -->
+  <div class="brackets">
+    <div class="bracket" id="b-app">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">애플리케이션 계층</span>
+    </div>
+    <div class="bracket" id="b-os">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">OS 계층</span>
+    </div>
+    <div class="bracket" id="b-hw">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">하드웨어 계층</span>
+    </div>
+  </div>
+
+  <!-- 스택 -->
+  <div class="stack">
+
+    <!-- 애플리케이션 계층 -->
+    <div class="app-area" id="s-node">
+
+      <!-- 미니큐브 박스 -->
+      <div class="minikube-box">
+        <div class="minikube-label">Minikube</div>
+
+        <div class="minikube-body">
+
+          <!-- 컨트롤 플레인 -->
+          <div class="inner-box">
+            <div class="inner-label">컨트롤 플레인</div>
+            <div class="cp-box">Kube API Server</div>
+          </div>
+
+          <!-- 워커 노드 -->
+          <div class="inner-box">
+            <div class="inner-label">워커 노드</div>
+            <div class="agent-layer">
+              <div class="agent-box kubelet">kubelet</div>
+              <div class="agent-box kube-proxy">kube-proxy</div>
+            </div>
+          </div>
+
+        </div>
+        <div class="single-node-text">단일 노드</div>
+      </div>
+
+    </div>
+
+    <div class="layer layer-engine" id="s-engine">컨테이너 엔진</div>
+    <div class="layer layer-os" id="s-os">호스트 OS</div>
+    <div class="layer layer-hw" id="s-hw">하드웨어</div>
+  </div>
+
+</div>
+
+<script>
+  function sync() {
+    const nH = document.getElementById('s-node').offsetHeight;
+    const eH = document.getElementById('s-engine').offsetHeight;
+    const oH = document.getElementById('s-os').offsetHeight;
+    const hH = document.getElementById('s-hw').offsetHeight;
+
+    document.getElementById('b-app').style.height = nH + 'px';
+    document.getElementById('b-os').style.height = (eH + oH) + 'px';
+    document.getElementById('b-hw').style.height = hH + 'px';
+  }
+  window.addEventListener('load', sync);
+  window.addEventListener('resize', sync);
+</script>
+
+</body>
+</html>

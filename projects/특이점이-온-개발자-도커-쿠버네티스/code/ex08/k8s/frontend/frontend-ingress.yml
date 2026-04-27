@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: metacoding
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /                       # 모든 경로
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service    # 프론트엔드 Service로 연결
+                port:
+                  number: 80

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Service 뒤에서 일하는 두 손</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1140px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  /* 두 의문 영역 */
+  .question {
+    background: #fff3e0;
+    border: 2px solid #c62828;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 0 80px;
+    text-align: center;
+    font-size: 13px;
+    color: #c62828;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .question .qlabel {
+    display: inline-block;
+    background: #c62828;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 6px;
+    font-weight: 800;
+  }
+
+  /* 화살표 (위/아래) */
+  .arrow-vertical {
+    text-align: center;
+    color: #c62828;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 6px 0;
+  }
+
+  /* kube-proxy / Endpoint Controller 손 */
+  .hand {
+    display: flex;
+    justify-content: center;
+    margin: 6px 0;
+  }
+  .hand-box {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 12px 22px;
+    background: #e3f2fd;
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+    text-align: center;
+    min-width: 240px;
+  }
+  .hand-box small {
+    display: block;
+    font-size: 11px;
+    color: #555;
+    margin-top: 4px;
+    font-weight: normal;
+  }
+
+  /* 가운데 길 */
+  .road {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 14px 0;
+  }
+  .road-node {
+    flex: 0 0 auto;
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 16px 24px;
+    background: #fff;
+    text-align: center;
+    min-width: 180px;
+  }
+  .road-node-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 4px;
+  }
+  .road-node-sub {
+    font-size: 11px;
+    color: #666;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+  }
+  .road-line {
+    flex: 0 0 320px;
+    height: 0;
+    border-top: 3px dashed #1565c0;
+    margin: 0 8px;
+    position: relative;
+  }
+  .road-line .road-arrow {
+    position: absolute;
+    right: -4px;
+    top: -14px;
+    color: #1565c0;
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .road-line .road-label {
+    position: absolute;
+    left: 50%;
+    top: -32px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #1565c0;
+    font-weight: 700;
+    background: #fff;
+    padding: 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Service 뒤에서 일하는 두 손 — 두 의문이 가리키는 같은 길</div>
+
+  <!-- 의문 1 -->
+  <div class="question">
+    <span class="qlabel">의문 1</span>
+    인그레스 YAML에 이름만 적었는데 어떻게 진짜 Pod에 닿았지?
+  </div>
+  <div class="arrow-vertical">↓</div>
+
+  <!-- kube-proxy 손 -->
+  <div class="hand">
+    <div class="hand-box">
+      kube-proxy
+      <small>이 길을 깐다</small>
+    </div>
+  </div>
+
+  <!-- 가운데 길 -->
+  <div class="road">
+    <div class="road-node">
+      <div class="road-node-title">Service 주소</div>
+      <div class="road-node-sub">ClusterIP</div>
+    </div>
+    <div class="road-line">
+      <span class="road-label">길</span>
+      <span class="road-arrow">▶</span>
+    </div>
+    <div class="road-node">
+      <div class="road-node-title">실제 Pod</div>
+      <div class="road-node-sub">Pod IP</div>
+    </div>
+  </div>
+
+  <!-- Endpoint Controller 손 -->
+  <div class="hand">
+    <div class="hand-box">
+      Endpoint Controller
+      <small>이 길을 갱신한다</small>
+    </div>
+  </div>
+  <div class="arrow-vertical">↑</div>
+
+  <!-- 의문 2 -->
+  <div class="question">
+    <span class="qlabel">의문 2</span>
+    Pod가 다시 태어나도 어떻게 연결이 끊기지 않았지?
+  </div>
+</div>
+
+</body>
+</html>

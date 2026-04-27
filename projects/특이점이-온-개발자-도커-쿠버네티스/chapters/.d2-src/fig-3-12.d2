@@ -1,0 +1,76 @@
+direction: right
+
+frame: "" {
+  style.fill: "#ffffff"
+  style.stroke: "#4a90d9"
+  style.stroke-dash: 5
+  style.border-radius: 8
+
+  deployment: Deployment {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.border-radius: 8
+
+    selector: |md
+      selector:
+      { app: web }
+    | {
+      shape: text
+    }
+  }
+
+  pod1: Pod 1 {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.border-radius: 8
+
+    labels: |md
+      Labels
+      { app: web }
+    | {
+      shape: text
+    }
+  }
+
+  pod2: Pod 2 {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.border-radius: 8
+
+    labels: |md
+      Labels
+      { app: web }
+    | {
+      shape: text
+    }
+  }
+
+  pod3: Pod 3 {
+    style.fill: "#e8e8e8"
+    style.stroke: "#999999"
+    style.border-radius: 8
+
+    labels: |md
+      Labels
+      { app: db }
+    | {
+      shape: text
+    }
+  }
+
+  deployment -> pod1: match {
+    style.stroke: "#333333"
+    style.stroke-dash: 3
+  }
+
+  deployment -> pod2: match {
+    style.stroke: "#333333"
+    style.stroke-dash: 3
+  }
+
+  deployment -> pod3: ✗ {
+    style.stroke: "#cc0000"
+    style.stroke-dash: 5
+    style.font-color: "#cc0000"
+  }
+}

@@ -1,0 +1,45 @@
+direction: right
+
+cm: ConfigMap {
+  shape: page
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+secret: Secret {
+  shape: page
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+pod: Pod {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+pvc: PVC {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+pv: PV (영구 저장소) {
+  shape: cylinder
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+cm -> pod: 환경변수 주입 {
+  style.stroke: "#333333"
+  style.stroke-dash: 3
+}
+secret -> pod: 비밀 정보 주입 {
+  style.stroke: "#333333"
+  style.stroke-dash: 3
+}
+pod -> pvc: volumeMount {
+  style.stroke: "#333333"
+}
+pvc -> pv: 바인딩 {
+  style.stroke: "#333333"
+}

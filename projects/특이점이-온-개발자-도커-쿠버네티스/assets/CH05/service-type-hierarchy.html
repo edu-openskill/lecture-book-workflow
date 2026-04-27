@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Service 타입 계층구조</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { display: flex; justify-content: center; padding: 40px 20px; background: #fff; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
+  .diagram { width: 1000px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 26px; }
+
+  .canvas { display: grid; grid-template-columns: 150px 70px 1fr; align-items: center; }
+
+  /* Host */
+  .host-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .host-label { font-size: 11px; font-weight: 700; color: #555; }
+  .host-box { width: 120px; height: 56px; border: 2.5px solid #222; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #fff; }
+
+  /* Host → LB 화살표 */
+  .outer-arrow { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .outer-arrow .lbl { font-size: 10px; color: #2e7d32; font-weight: 700; font-family: 'Consolas', monospace; }
+  .outer-arrow svg { width: 60px; height: 18px; }
+
+  /* LoadBalancer (가장 바깥) */
+  .lb-layer {
+    border: 2.5px solid #2e7d32;
+    border-radius: 16px;
+    padding: 36px 30px 28px;
+    background: #f1faf2;
+    position: relative;
+  }
+  .lb-title {
+    position: absolute; top: -11px; left: 22px;
+    background: #f1faf2; padding: 0 10px;
+    font-size: 12px; font-weight: 800; color: #2e7d32;
+  }
+  .lb-badge {
+    position: absolute; top: 10px; right: 14px;
+    background: #2e7d32; color: #fff; padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 700;
+  }
+
+  /* NodePort (중간) */
+  .np-layer {
+    border: 2.5px solid #c62828;
+    border-radius: 14px;
+    padding: 32px 26px 24px;
+    background: #fff5f5;
+    position: relative;
+  }
+  .np-title {
+    position: absolute; top: -10px; left: 20px;
+    background: #fff5f5; padding: 0 10px;
+    font-size: 12px; font-weight: 800; color: #c62828;
+  }
+  .np-badge {
+    position: absolute; top: 8px; right: 12px;
+    background: #c62828; color: #fff; padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 700;
+  }
+
+  /* ClusterIP (가장 안쪽) */
+  .cip-layer {
+    border: 2.5px solid #1565c0;
+    border-radius: 12px;
+    padding: 28px 22px 20px;
+    background: #eff6fd;
+    position: relative;
+  }
+  .cip-title {
+    position: absolute; top: -10px; left: 18px;
+    background: #eff6fd; padding: 0 10px;
+    font-size: 12px; font-weight: 800; color: #1565c0;
+  }
+  .cip-badge {
+    position: absolute; top: 6px; right: 10px;
+    background: #1565c0; color: #fff; padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 700;
+  }
+
+  /* Service + Pods */
+  .inner-flow { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .service-box { border: 2px solid #1565c0; border-radius: 8px; padding: 10px 14px; background: #fff; text-align: center; }
+  .service-box .name { font-size: 12px; font-weight: 800; color: #1565c0; }
+  .service-box .sub { font-size: 9.5px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+  .pod-stack { display: flex; flex-direction: column; gap: 5px; }
+  .pod { border: 1.5px solid #666; border-radius: 14px; padding: 5px 12px; background: #fff; font-size: 10.5px; font-weight: 700; color: #333; min-width: 52px; text-align: center; }
+  .arrow-sm { width: 26px; height: 10px; }
+
+  /* NodePort 경계 걸침 표시 */
+  .np-port-marker {
+    position: absolute; top: 30px; left: -32px;
+    background: #fff8d6; border: 2px solid #d4b94a; border-radius: 8px;
+    padding: 6px 10px; text-align: center; z-index: 3;
+  }
+  .np-port-marker .txt { font-size: 10px; font-weight: 800; color: #c62828; }
+  .np-port-marker .sub { font-size: 9px; color: #555; font-family: 'Consolas', monospace; margin-top: 1px; }
+
+  /* LB 경계 걸침 표시 */
+  .lb-port-marker {
+    position: absolute; top: 44px; left: -40px;
+    background: #e8f5e9; border: 2px solid #66bb6a; border-radius: 8px;
+    padding: 6px 10px; text-align: center; z-index: 3;
+  }
+  .lb-port-marker .txt { font-size: 10px; font-weight: 800; color: #2e7d32; }
+  .lb-port-marker .sub { font-size: 9px; color: #555; font-family: 'Consolas', monospace; margin-top: 1px; }
+
+  /* 설명 라벨 */
+  .layer-caption {
+    font-size: 10.5px; color: #555; margin-top: 10px;
+    text-align: right; font-weight: 500; line-height: 1.5;
+  }
+  .layer-caption strong { color: #222; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Service 타입 — 접근 범위가 안쪽에서 바깥으로 넓어지는 계층구조</div>
+
+  <div class="canvas">
+    <div class="host-col">
+      <div class="host-label">외부 사용자</div>
+      <div class="host-box">Host</div>
+    </div>
+
+    <div class="outer-arrow">
+      <div class="lbl">공인 IP</div>
+      <svg viewBox="0 0 60 18"><line x1="0" y1="9" x2="48" y2="9" stroke="#2e7d32" stroke-width="2.5"/><polygon points="48,2 60,9 48,16" fill="#2e7d32"/></svg>
+    </div>
+
+    <!-- 가장 바깥: LoadBalancer -->
+    <div class="lb-layer">
+      <div class="lb-title">LoadBalancer</div>
+      <div class="lb-badge">가장 바깥</div>
+
+      <!-- LB 진입점 (경계 걸침) -->
+      <div class="lb-port-marker">
+        <div class="txt">LB IP</div>
+        <div class="sub">공인</div>
+      </div>
+
+      <!-- 중간: NodePort -->
+      <div class="np-layer">
+        <div class="np-title">NodePort</div>
+        <div class="np-badge">한 단계 바깥</div>
+
+        <!-- NodePort 진입점 (경계 걸침) -->
+        <div class="np-port-marker">
+          <div class="txt">:30001</div>
+          <div class="sub">30000~32767</div>
+        </div>
+
+        <!-- 가장 안쪽: ClusterIP -->
+        <div class="cip-layer">
+          <div class="cip-title">ClusterIP</div>
+          <div class="cip-badge">가장 안쪽</div>
+
+          <div class="inner-flow">
+            <div class="service-box">
+              <div class="name">Service</div>
+              <div class="sub">ClusterIP</div>
+            </div>
+            <svg class="arrow-sm" viewBox="0 0 26 10"><line x1="0" y1="5" x2="18" y2="5" stroke="#1565c0" stroke-width="2"/><polygon points="18,1 26,5 18,9" fill="#1565c0"/></svg>
+            <div class="pod-stack">
+              <div class="pod">Pod A</div>
+              <div class="pod">Pod B</div>
+              <div class="pod">Pod C</div>
+            </div>
+          </div>
+
+          <div class="layer-caption">클러스터 내부 통신 — <strong>내부 Pod만 이 Service를 부를 수 있음</strong></div>
+        </div>
+
+        <div class="layer-caption">노드의 포트(30000~32767)를 열어 <strong>외부 접근을 허용</strong> — 개발/테스트용</div>
+      </div>
+
+      <div class="layer-caption">클라우드가 공인 IP를 붙여 <strong>여러 노드에 트래픽을 분산</strong> — 운영 환경</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

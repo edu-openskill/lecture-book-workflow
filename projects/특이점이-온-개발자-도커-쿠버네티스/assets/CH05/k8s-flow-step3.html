@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 3 — Ingress Controller가 URL 보고 Service 선택</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { display: flex; justify-content: center; padding: 40px 20px; background: #fff; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
+  .diagram { width: 1080px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 24px; }
+  .step-badge { display: inline-block; background: #c62828; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+  .canvas { display: grid; grid-template-columns: 200px 100px 1fr; align-items: start; }
+
+  .host-col { display: flex; flex-direction: column; align-items: center; padding-top: 40px; }
+  .host-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 8px; }
+  .host-box { width: 140px; height: 60px; border: 2.5px solid #222; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; background: #fff; }
+
+  .host-arrow { padding-top: 55px; padding-right: 56px; display: flex; flex-direction: column; align-items: flex-end; position: relative; z-index: 3; }
+  .host-arrow .arrow-label { font-size: 10px; color: #888; font-weight: 700; font-family: 'Consolas', monospace; margin-bottom: 4px; }
+  .host-arrow svg { width: 60px; height: 18px; }
+
+  .cluster { border: 2px dashed #888; border-radius: 14px; padding: 24px 16px 22px 76px; background: #fdfdfd; position: relative; }
+  .cluster-title { position: absolute; top: -10px; left: 100px; background: #fff; padding: 0 8px; font-size: 12px; font-weight: 700; color: #555; }
+
+  .entry-zone { position: absolute; top: 32px; left: -48px; background: #fff8d6; border: 2px solid #d4b94a; border-radius: 10px; padding: 16px 14px 12px; z-index: 2; }
+  .entry-zone-label { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); background: #fff8d6; padding: 0 8px; white-space: nowrap; font-size: 10px; color: #8a6d00; font-weight: 700; }
+  .entry-zone-sub { text-align: center; font-size: 10px; color: #8a6d00; margin-top: 6px; }
+  .nodeport { border: 2.5px solid #888; border-radius: 6px; padding: 10px 14px; background: #fff; text-align: center; }
+  .nodeport .name { font-size: 13px; font-weight: 800; color: #888; }
+  .nodeport .port { font-size: 11px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+
+  .row-entry { display: flex; align-items: center; justify-content: flex-start; gap: 12px; margin: 0 auto 14px; max-width: 420px; padding-left: 0; padding-top: 30px; min-height: 60px; }
+  .box-past { border: 2px solid #888; border-radius: 6px; padding: 8px 12px; background: #fff; font-size: 10.5px; font-weight: 700; color: #555; text-align: center; line-height: 1.25; }
+
+  .l7-zone { background: #e3f2fd; border: 1.5px solid #1565c0; border-radius: 6px; padding: 16px 14px 14px; margin: 0 auto 10px; position: relative; max-width: 420px; box-shadow: 0 0 0 3px rgba(220,0,0,0.12); }
+  .l7-zone::before { content: 'L7'; position: absolute; top: -7px; right: 10px; background: #e3f2fd; padding: 0 5px; font-size: 9px; color: #1565c0; font-weight: 700; }
+  .services { display: flex; justify-content: space-around; }
+  .service-active { border: 2.5px solid #c62828; border-radius: 18px; padding: 8px 18px; background: #fff; font-size: 11px; font-weight: 800; color: #c62828; min-width: 100px; text-align: center; }
+
+  .l4-zone { background: #ffebee; border: 1.5px solid #ef9a9a; border-radius: 6px; padding: 16px 14px 14px; margin: 0 auto 10px; position: relative; opacity: 0.45; max-width: 420px; }
+  .l4-zone::before { content: 'L4'; position: absolute; top: -7px; right: 10px; background: #ffebee; padding: 0 5px; font-size: 9px; color: #c62828; font-weight: 700; }
+  .nodes { display: flex; justify-content: space-around; }
+  .node { border: 2px solid #888; border-radius: 5px; padding: 8px 10px; background: #fff; text-align: center; min-width: 120px; }
+  .node-head { font-size: 9.5px; color: #777; font-weight: 700; display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .node-head .port { font-family: 'Consolas', monospace; color: #aaa; }
+  .kube-proxy-inner { border: 1.5px solid #888; border-radius: 3px; padding: 3px 8px; font-size: 10px; font-weight: 700; color: #777; display: inline-block; }
+
+  .pods-row { display: flex; justify-content: space-around; margin: 0 auto 10px; opacity: 0.45; max-width: 420px; padding: 4px 0; }
+  .pod-group { display: flex; gap: 6px; border: 2px dashed #bbb; border-radius: 5px; padding: 6px 10px; background: #fff; }
+  .pod { border: 1.5px solid #888; border-radius: 12px; padding: 4px 10px; background: #fff; font-size: 9.5px; font-weight: 700; color: #777; text-align: center; min-width: 44px; }
+
+  .deployment-zone { background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 6px; padding: 10px 8px; text-align: center; position: relative; opacity: 0.45; max-width: 300px; margin: 0 auto; }
+  .deployment { display: inline-block; border: 2px dashed #66bb6a; border-radius: 5px; padding: 4px 14px; background: #fff; font-size: 10px; font-weight: 700; color: #777; }
+
+  .endpoint-controller { position: absolute; left: 22px; top: 260px; border: 2px solid #888; border-radius: 6px; padding: 10px 12px; background: #fff; text-align: center; opacity: 0.45; width: 90px; z-index: 3; }
+  .endpoint-controller .ec-title { font-size: 11px; font-weight: 700; color: #777; line-height: 1.25; }
+
+  .dns-box { position: absolute; right: 18px; top: 48px; border: 2px solid #c62828; border-radius: 6px; padding: 8px 10px; background: #fff3e0; text-align: center; width: 96px; z-index: 3; }
+  .dns-box .dns-title { font-size: 11px; font-weight: 800; color: #c62828; line-height: 1.25; }
+  .dns-box .dns-sub { font-size: 9px; font-weight: 700; color: #c62828; margin-top: 4px; line-height: 1.25; }
+
+  .connector-muted { display: block; margin: -1px auto; max-width: 420px; width: 100%; opacity: 0.4; }
+  .connector-past { display: block; margin: -1px auto; max-width: 420px; width: 100%; }
+  .connector-active { display: block; margin: -1px auto; max-width: 420px; width: 100%; }
+  .connector-dep { display: block; margin: -1px auto; max-width: 420px; width: 100%; opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">
+    <span class="step-badge">STEP 3</span>
+    Ingress Controller가 URL을 읽고 Service를 선택 (L7 라우팅)
+  </div>
+
+  <div class="canvas">
+    <div class="host-col">
+      <div class="host-label">로컬호스트</div>
+      <div class="host-box">Host</div>
+    </div>
+
+    <div class="host-arrow">
+      <div class="arrow-label">localhost:9000</div>
+      <svg viewBox="0 0 60 18"><line x1="0" y1="9" x2="48" y2="9" stroke="#888" stroke-width="2"/><polygon points="48,2 60,9 48,16" fill="#888"/></svg>
+    </div>
+
+    <div class="cluster">
+      <div class="cluster-title">쿠버네티스 가상세계 (클러스터)</div>
+
+      <div class="entry-zone">
+        <div class="entry-zone-label">클러스터 입구</div>
+        <div class="nodeport"><div class="name">NodePort</div><div class="port">:9000</div></div>
+        <div class="entry-zone-sub">NodePort Service</div>
+      </div>
+
+      <svg preserveAspectRatio="none" viewBox="0 0 140 14" style="position:absolute; left:72px; top:62px; width:140px; height:14px; z-index:2;">
+        <line x1="0" y1="7" x2="130" y2="7" stroke="#888" stroke-width="2"/>
+        <polygon points="130,2 140,7 130,12" fill="#888"/>
+      </svg>
+
+      <div class="row-entry">
+        <div class="box-past">Kube Proxy</div>
+        <svg width="36" height="14"><line x1="0" y1="7" x2="26" y2="7" stroke="#888" stroke-width="2"/><polygon points="26,2 36,7 26,12" fill="#888"/></svg>
+        <div class="box-past">Ingress Controller Pod</div>
+      </div>
+
+      <!-- Ingress → Services 분기 (ACTIVE) -->
+      <svg class="connector-active" viewBox="0 0 420 32" preserveAspectRatio="none" style="height:32px;">
+        <path d="M 210 0 L 210 10 L 105 22 L 105 30" stroke="#c62828" stroke-width="2.5" fill="none"/>
+        <polygon points="100,23 105,32 110,23" fill="#c62828"/>
+        <path d="M 210 0 L 210 10 L 315 22 L 315 30" stroke="#c62828" stroke-width="2.5" fill="none"/>
+        <polygon points="310,23 315,32 320,23" fill="#c62828"/>
+      </svg>
+
+      <div class="l7-zone">
+        <div class="services">
+          <div class="service-active">Service A</div>
+          <div class="service-active">Service B</div>
+        </div>
+      </div>
+
+      <svg class="connector-muted" viewBox="0 0 420 28" preserveAspectRatio="none" style="height:28px;">
+        <line x1="105" y1="0" x2="105" y2="22" stroke="#888" stroke-width="1.5"/>
+        <polygon points="101,18 105,28 109,18" fill="#888"/>
+        <line x1="315" y1="0" x2="315" y2="22" stroke="#888" stroke-width="1.5"/>
+        <polygon points="311,18 315,28 319,18" fill="#888"/>
+      </svg>
+
+      <div class="l4-zone">
+        <div class="nodes">
+          <div class="node">
+            <div class="node-head"><span>Node1</span><span class="port">port: 9000</span></div>
+            <div class="kube-proxy-inner">Kube Proxy</div>
+          </div>
+          <div class="node">
+            <div class="node-head"><span>Node2</span><span class="port">port: 9000</span></div>
+            <div class="kube-proxy-inner">Kube Proxy</div>
+          </div>
+        </div>
+      </div>
+
+      <svg class="connector-muted" viewBox="0 0 420 32" preserveAspectRatio="none" style="height:32px;">
+        <path d="M 105 0 L 105 10 L 80 22 L 80 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="76,24 80,32 84,24" fill="#888"/>
+        <path d="M 105 0 L 105 10 L 135 22 L 135 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="131,24 135,32 139,24" fill="#888"/>
+        <path d="M 315 0 L 315 10 L 285 22 L 285 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="281,24 285,32 289,24" fill="#888"/>
+        <path d="M 315 0 L 315 10 L 340 22 L 340 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="336,24 340,32 344,24" fill="#888"/>
+      </svg>
+
+      <div class="pods-row">
+        <div class="pod-group"><div class="pod">Pod A</div><div class="pod">Pod A</div></div>
+        <div class="pod-group"><div class="pod">Pod A</div><div class="pod">Pod B</div></div>
+      </div>
+
+      <svg class="connector-dep" viewBox="0 0 420 28" preserveAspectRatio="none" style="height:28px;">
+        <line x1="80" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <line x1="135" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <line x1="285" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <line x1="340" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+      </svg>
+
+      <div class="deployment-zone"><div class="deployment">Deployment</div></div>
+
+      <div class="dns-box">
+        <div class="dns-title">클러스터<br>DNS</div>
+        <div class="dns-sub">이름 → ClusterIP</div>
+      </div>
+
+      <!-- IC Pod ↔ DNS 점선 화살표 (질의 / 응답) -->
+      <svg width="780" height="200" style="position:absolute; left:0; top:0; pointer-events:none; z-index:4;">
+        <!-- 질의: IC → DNS (빨강) -->
+        <line x1="490" y1="72" x2="660" y2="72" stroke="#c62828" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <polygon points="655,68 666,72 655,76" fill="#c62828"/>
+        <text x="510" y="64" font-size="10.5" fill="#c62828" font-weight="700" font-style="italic">"order-service?"</text>
+
+        <!-- 응답: DNS → IC (초록) -->
+        <line x1="660" y1="94" x2="495" y2="94" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <polygon points="500,90 489,94 500,98" fill="#2e7d32"/>
+        <text x="510" y="108" font-size="10.5" fill="#2e7d32" font-weight="700" font-style="italic">"10.96.0.20"</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

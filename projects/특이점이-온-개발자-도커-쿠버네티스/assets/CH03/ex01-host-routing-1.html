@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  }
+  .diagram {
+    display: flex;
+    align-items: center;
+    padding: 48px 40px;
+    gap: 0;
+  }
+
+  /* 노드 */
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .node-box {
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 16px 24px;
+    text-align: center;
+    background: #fff;
+  }
+  .node-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  /* 브라우저 아이콘 */
+  .browser-icon {
+    width: 44px;
+    height: 32px;
+    border: 2px solid #333;
+    border-radius: 5px 5px 0 0;
+    position: relative;
+    margin-bottom: 4px;
+  }
+  .browser-icon::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 9px;
+    border-bottom: 1.5px solid #333;
+    background: #f5f5f5;
+    border-radius: 3px 3px 0 0;
+  }
+
+  /* 호스트+도커를 감싸는 영역 */
+  .host-wrapper {
+    display: flex;
+    align-items: center;
+    border: 2px dashed #aaa;
+    border-radius: 14px;
+    padding: 16px 20px;
+    position: relative;
+    gap: 0;
+  }
+  .host-wrapper-label {
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: #fff;
+    padding: 0 8px;
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+  }
+
+  /* 호스트 포트 노드 */
+  .host-port {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .port-circle {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    background: #fff;
+  }
+  .port-label {
+    font-size: 10px;
+    color: #888;
+    font-weight: 500;
+  }
+
+  /* 도커 영역 */
+  .docker-area {
+    border: 2px solid #2496ED;
+    border-radius: 10px;
+    padding: 14px 20px;
+    position: relative;
+    background: #f7fbff;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .docker-label {
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    background: #f7fbff;
+    padding: 0 6px;
+    font-size: 11px;
+    color: #2496ED;
+    font-weight: 700;
+  }
+
+  /* 컨테이너 포트 */
+  .container-port {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .port-circle.blue {
+    border-color: #2496ED;
+    color: #2496ED;
+  }
+
+  /* 컨테이너 박스 */
+  .container-box {
+    border: 2px solid #2496ED;
+    border-radius: 10px;
+    padding: 14px 22px;
+    text-align: center;
+    background: #fff;
+  }
+  .container-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+  }
+  .nginx-badge {
+    display: inline-block;
+    background: #009639;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 3px;
+    margin-top: 5px;
+    letter-spacing: 0.5px;
+  }
+
+  /* SVG 화살표 */
+  .arrow {
+    flex-shrink: 0;
+  }
+  .arrow-with-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .arrow-label {
+    font-size: 10px;
+    color: #E67E22;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .arrow-top-label {
+    font-size: 10px;
+    color: #666;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <!-- 1. 브라우저 -->
+  <div class="node">
+    <div class="browser-icon"></div>
+    <div class="node-label">브라우저</div>
+  </div>
+
+  <!-- 화살표: 브라우저 → 호스트 -->
+  <div class="arrow-with-label" style="margin: 0 12px;">
+    <div class="arrow-top-label">localhost/app1</div>
+    <svg width="60" height="12" viewBox="0 0 60 12">
+      <line x1="0" y1="6" x2="50" y2="6" stroke="#333" stroke-width="2"/>
+      <polygon points="50,1 60,6 50,11" fill="#333"/>
+    </svg>
+  </div>
+
+  <!-- 2. 호스트 PC 영역 -->
+  <div class="host-wrapper">
+    <div class="host-wrapper-label">호스트 PC</div>
+
+    <!-- 호스트 포트 -->
+    <div class="host-port">
+      <div class="port-circle">80</div>
+      <div class="port-label">호스트 포트</div>
+    </div>
+
+    <!-- 화살표: 포트포워딩 -->
+    <div class="arrow-with-label" style="margin: 0 12px;">
+      <div class="arrow-label">포트 포워딩</div>
+      <svg width="50" height="12" viewBox="0 0 50 12">
+        <line x1="0" y1="6" x2="40" y2="6" stroke="#E67E22" stroke-width="2" stroke-dasharray="4,3"/>
+        <polygon points="40,1 50,6 40,11" fill="#E67E22"/>
+      </svg>
+    </div>
+
+    <!-- 도커 영역 -->
+    <div class="docker-area">
+      <div class="docker-label">Docker</div>
+
+      <!-- 컨테이너 포트 -->
+      <div class="container-port">
+        <div class="port-circle blue">80</div>
+        <div class="port-label">컨테이너 포트</div>
+      </div>
+
+      <!-- 화살표: 포트 → 컨테이너 -->
+      <div class="arrow" style="margin: 0 10px;">
+        <svg width="36" height="12" viewBox="0 0 36 12">
+          <line x1="0" y1="6" x2="26" y2="6" stroke="#2496ED" stroke-width="2"/>
+          <polygon points="26,1 36,6 26,11" fill="#2496ED"/>
+        </svg>
+      </div>
+
+      <!-- 컨테이너 -->
+      <div class="node">
+        <div class="container-box">
+          <div class="container-name">lb 컨테이너</div>
+          <div><span class="nginx-badge">NGINX</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

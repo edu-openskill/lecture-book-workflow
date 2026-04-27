@@ -1,0 +1,51 @@
+direction: right
+
+manual: 개별 실행 {
+  style.border-radius: 8
+  style.stroke: "#333333"
+  style.fill: "#f8f8f8"
+
+  s1: docker run A {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  s2: docker run B {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  s3: docker run C {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  s4: docker network 연결 {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  s5: 포트 설정... {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+
+  s1 -> s2 -> s3 -> s4 -> s5 {
+    style.stroke: "#333333"
+  }
+}
+
+compose: Compose 실행 {
+  style.border-radius: 8
+  style.stroke: "#333333"
+  style.fill: "#f8f8f8"
+
+  d1: docker compose up {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+  d2: 전부 한 번에 {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+
+  d1 -> d2 {
+    style.stroke: "#333333"
+  }
+}

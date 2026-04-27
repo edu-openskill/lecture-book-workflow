@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>푸드코트 키오스크 포트포워딩 비유</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    padding: 24px 28px 20px;
+    width: 560px;
+  }
+  .scene {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  /* 외부 — 손님 */
+  .outside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    gap: 8px;
+  }
+  .outside-label {
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+  }
+  .customer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .c-head {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #555;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .c-body {
+    width: 30px;
+    height: 20px;
+    border: 2px solid #555;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: #e8e8e8;
+    margin-top: -1px;
+  }
+  .c-label {
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .mid-arrow {
+    display: flex;
+    align-items: center;
+    align-self: center;
+  }
+  .mid-arrow svg {
+    width: 60px;
+    height: 20px;
+  }
+
+  /* 키오스크 */
+  .kiosk {
+    width: 110px;
+    border: 2.5px solid #555;
+    border-radius: 6px;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 8px;
+    position: relative;
+  }
+  .kiosk-label {
+    font-size: 12px;
+    color: #333;
+    font-weight: 700;
+  }
+  .kiosk-screen {
+    width: 90px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    background: #fff;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .kiosk-btn {
+    width: 100%;
+    height: 28px;
+    border: 1.5px solid #555;
+    border-radius: 4px;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #333;
+  }
+  .kiosk-stand {
+    width: 20px;
+    height: 12px;
+    border-left: 2px solid #555;
+    border-right: 2px solid #555;
+    border-bottom: 2px solid #555;
+    border-radius: 0 0 4px 4px;
+  }
+
+  /* 푸드코트 내부 */
+  .building {
+    width: 180px;
+    border: 2.5px solid #333;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    background: #fafafa;
+  }
+  .building-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    padding: 8px 0 6px;
+    border-bottom: 2px solid #ddd;
+  }
+  .shops {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .shop {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .shop:first-child {
+    border-bottom: 2px solid #ccc;
+  }
+  .shop-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .shop-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #333;
+  }
+  .chef {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .ch-hat {
+    width: 12px;
+    height: 6px;
+    border: 1.5px solid #555;
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+    background: #fff;
+    margin-bottom: -2px;
+  }
+  .ch-head {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #555;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .ch-body {
+    width: 22px;
+    height: 12px;
+    border: 2px solid #555;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: #fff;
+    margin-top: -1px;
+  }
+  .shop-type {
+    font-size: 10px;
+    color: #888;
+  }
+  .shop-arrow {
+    width: 30px;
+    height: 16px;
+  }
+
+  /* 범례 */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1.5px dashed #ccc;
+  }
+  .legend-item {
+    font-size: 11px;
+    color: #666;
+    font-weight: 600;
+  }
+  .legend-item span {
+    color: #333;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <div class="scene">
+    <!-- 외부 -->
+    <div class="outside">
+      <div class="outside-label">외부</div>
+      <div class="customer">
+        <div class="c-head"></div>
+        <div class="c-body"></div>
+      </div>
+      <div class="c-label">손님</div>
+    </div>
+
+    <!-- 화살표 -->
+    <div class="mid-arrow">
+      <svg viewBox="0 0 60 20">
+        <line x1="0" y1="10" x2="48" y2="10" stroke="#555" stroke-width="2"/>
+        <polygon points="48,5 60,10 48,15" fill="#555"/>
+      </svg>
+    </div>
+
+    <!-- 키오스크 -->
+    <div class="kiosk">
+      <div class="kiosk-label">키오스크</div>
+      <div class="kiosk-screen">
+        <div class="kiosk-btn">짜장면 → A식당</div>
+        <div class="kiosk-btn">돈까스 → B식당</div>
+        <div class="kiosk-btn">라면 → C식당</div>
+      </div>
+      <div class="kiosk-stand"></div>
+    </div>
+
+    <!-- 푸드코트 내부 -->
+    <div class="building">
+      <div class="building-title">푸드코트</div>
+      <div class="shops">
+        <div class="shop">
+          <svg class="shop-arrow" viewBox="0 0 30 16">
+            <line x1="0" y1="8" x2="22" y2="8" stroke="#555" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <polygon points="22,4 30,8 22,12" fill="#555"/>
+          </svg>
+          <div class="shop-info">
+            <div class="shop-name">A식당</div>
+            <div class="chef">
+              <div class="ch-hat"></div>
+              <div class="ch-head"></div>
+              <div class="ch-body"></div>
+            </div>
+            <div class="shop-type">짜장면</div>
+          </div>
+        </div>
+        <div class="shop">
+          <svg class="shop-arrow" viewBox="0 0 30 16">
+            <line x1="0" y1="8" x2="22" y2="8" stroke="#555" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <polygon points="22,4 30,8 22,12" fill="#555"/>
+          </svg>
+          <div class="shop-info">
+            <div class="shop-name">B식당</div>
+            <div class="chef">
+              <div class="ch-hat"></div>
+              <div class="ch-head"></div>
+              <div class="ch-body"></div>
+            </div>
+            <div class="shop-type">돈까스</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span>키오스크</span> = 포트포워딩</div>
+    <div class="legend-item"><span>번호</span> = 포트</div>
+    <div class="legend-item"><span>식당</span> = 컨테이너</div>
+  </div>
+</div>
+</body>
+</html>

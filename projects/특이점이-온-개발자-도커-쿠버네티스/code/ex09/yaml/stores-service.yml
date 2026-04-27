@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stores-service
+spec:
+  type: ClusterIP
+  selector:
+    app: stores
+  ports:
+    - port: 5678

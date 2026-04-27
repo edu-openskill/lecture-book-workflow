@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 1 — ClusterIP</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { display: flex; justify-content: center; padding: 40px 20px; background: #fff; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
+  .diagram { width: 820px; position: relative; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 26px; }
+  .step-badge { display: inline-block; background: #1565c0; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+
+  .stage { position: relative; min-height: 240px; }
+
+  /* Cluster (위쪽, 오른쪽에 치우치게) */
+  .cluster {
+    position: relative;
+    margin-left: 160px; margin-right: 20px;
+    border: 2.5px solid #1565c0; border-radius: 14px;
+    padding: 30px 28px 24px; background: #eff6fd;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.15);
+    width: fit-content;
+    z-index: 1;
+  }
+  .cluster-title {
+    position: absolute; top: -11px; left: 24px;
+    background: #eff6fd; padding: 0 10px;
+    font-size: 12px; font-weight: 800; color: #1565c0;
+  }
+
+  .inner-flow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px;
+  }
+  .caller {
+    border: 2px solid #1565c0; border-radius: 14px;
+    padding: 8px 14px; background: #fff;
+    font-size: 11px; font-weight: 700; color: #1565c0;
+    text-align: center; line-height: 1.3;
+  }
+  .caller .sub { font-size: 9px; color: #777; font-weight: 500; margin-top: 2px; }
+  .service-box {
+    border: 2.5px solid #1565c0; border-radius: 8px;
+    padding: 14px 18px; background: #fff; text-align: center;
+  }
+  .service-box .name { font-size: 13px; font-weight: 800; color: #1565c0; }
+  .service-box .sub { font-size: 10px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+  .pod-stack { display: flex; flex-direction: column; gap: 6px; }
+  .pod {
+    border: 1.5px solid #666; border-radius: 14px;
+    padding: 6px 12px; background: #fff;
+    font-size: 10.5px; font-weight: 700; color: #333;
+    min-width: 56px; text-align: center;
+  }
+  .arrow { width: 28px; height: 12px; }
+
+  .note {
+    margin-top: 16px; text-align: center;
+    font-size: 11px; color: #1565c0; font-weight: 700;
+  }
+  .note .sub { font-size: 10px; color: #555; font-weight: 500; display: block; margin-top: 2px; }
+
+  /* 외부 Host — 클러스터 아래, 왼쪽 편 */
+  .ext-host {
+    position: absolute; left: 40px; bottom: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    z-index: 3;
+  }
+  .ext-label { font-size: 11px; font-weight: 700; color: #888; }
+  .host-box {
+    width: 120px; height: 50px;
+    border: 2.5px solid #888; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; background: #fafafa; color: #666;
+  }
+
+  /* 점선 차단 화살표 오버레이 */
+  .block-overlay {
+    position: absolute;
+    left: 0; top: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 2;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="stage">
+    <!-- Cluster (위) -->
+    <div class="cluster">
+      <div class="cluster-title">클러스터</div>
+
+      <div class="inner-flow">
+        <div class="caller">내부 Pod</div>
+        <svg class="arrow" viewBox="0 0 28 12">
+          <line x1="0" y1="6" x2="20" y2="6" stroke="#1565c0" stroke-width="2.5"/>
+          <polygon points="20,2 28,6 20,10" fill="#1565c0"/>
+        </svg>
+        <div class="service-box">
+          <div class="name">Service</div>
+          <div class="sub">ClusterIP</div>
+        </div>
+        <svg class="arrow" viewBox="0 0 28 12">
+          <line x1="0" y1="6" x2="20" y2="6" stroke="#1565c0" stroke-width="2.5"/>
+          <polygon points="20,2 28,6 20,10" fill="#1565c0"/>
+        </svg>
+        <div class="pod-stack">
+          <div class="pod">Pod A</div>
+          <div class="pod">Pod B</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 외부 Host (아래 왼쪽) -->
+    <div class="ext-host">
+      <div class="host-box">Host</div>
+    </div>
+
+    <!-- 점선 차단 화살표: Host(아래 왼쪽) → Service(위 중앙) -->
+    <svg class="block-overlay" viewBox="0 0 820 240" preserveAspectRatio="none">
+      <path d="M 100 180 Q 220 140 360 90" stroke="#c62828" stroke-width="2" fill="none" stroke-dasharray="6,4"/>
+      <polygon points="356,84 370,88 358,98" fill="#c62828"/>
+      <!-- 중앙 X 마커 -->
+      <circle cx="228" cy="132" r="16" fill="#fff" stroke="#c62828" stroke-width="2.5"/>
+      <line x1="219" y1="123" x2="237" y2="141" stroke="#c62828" stroke-width="3.5" stroke-linecap="round"/>
+      <line x1="237" y1="123" x2="219" y2="141" stroke="#c62828" stroke-width="3.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 5 — Pod 도달, 전체 경로 정리</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    padding: 28px 32px 24px;
+    width: 860px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .full-chain {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 16px 8px;
+    background: #fafafa;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .step-box {
+    border: 2.5px solid #555;
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px 12px;
+    text-align: center;
+    min-width: 88px;
+  }
+  .step-box.highlight {
+    background: #e8e8e8;
+    border-color: #333;
+  }
+  .step-box.proxy {
+    background: #f0f0f0;
+    border-color: #333;
+  }
+  .step-name {
+    font-size: 11px;
+    font-weight: 800;
+    color: #222;
+  }
+  .step-detail {
+    font-size: 9px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .step-analogy {
+    font-size: 9px;
+    color: #aaa;
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  .arr {
+    margin: 0 3px;
+    flex-shrink: 0;
+  }
+  .arr svg { width: 24px; height: 12px; }
+
+  .step-num {
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    background: #555;
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-bottom: 4px;
+    display: inline-block;
+  }
+
+  .summary {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .summary-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #fafafa;
+    border-radius: 6px;
+    border-left: 3px solid #ccc;
+  }
+  .summary-row.proxy-row {
+    border-left-color: #333;
+  }
+  .summary-num {
+    font-size: 12px;
+    font-weight: 800;
+    color: #555;
+    min-width: 14px;
+  }
+  .summary-text {
+    font-size: 12px;
+    color: #444;
+    line-height: 1.6;
+  }
+  .summary-text strong { color: #222; }
+
+  .bottom-note {
+    margin-top: 18px;
+    padding: 12px 16px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .bottom-note p {
+    font-size: 12px;
+    color: #444;
+    line-height: 1.7;
+  }
+  .bottom-note strong { color: #222; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Step 5 — Pod 도달: 외부 요청의 전체 여정</div>
+
+  <div class="full-chain">
+    <div class="step-box">
+      <div class="step-num">1</div>
+      <div class="step-name">외부 사용자</div>
+      <div class="step-detail">myapp.com/api</div>
+    </div>
+    <div class="arr"><svg viewBox="0 0 24 12"><line x1="0" y1="6" x2="16" y2="6" stroke="#333" stroke-width="1.5"/><polygon points="16,2 24,6 16,10" fill="#333"/></svg></div>
+    <div class="step-box">
+      <div class="step-num">1</div>
+      <div class="step-name">NodePort</div>
+      <div class="step-detail">:31000</div>
+      <div class="step-analogy">정문</div>
+    </div>
+    <div class="arr"><svg viewBox="0 0 24 12"><line x1="0" y1="6" x2="16" y2="6" stroke="#333" stroke-width="1.5"/><polygon points="16,2 24,6 16,10" fill="#333"/></svg></div>
+    <div class="step-box proxy">
+      <div class="step-num">2</div>
+      <div class="step-name">kube-proxy</div>
+      <div class="step-detail">1차 변환</div>
+      <div class="step-analogy">안내 데스크</div>
+    </div>
+    <div class="arr"><svg viewBox="0 0 24 12"><line x1="0" y1="6" x2="16" y2="6" stroke="#333" stroke-width="1.5"/><polygon points="16,2 24,6 16,10" fill="#333"/></svg></div>
+    <div class="step-box highlight">
+      <div class="step-num">3</div>
+      <div class="step-name">Ingress</div>
+      <div class="step-detail">URL 라우팅</div>
+      <div class="step-analogy">공식 앱</div>
+    </div>
+    <div class="arr"><svg viewBox="0 0 24 12"><line x1="0" y1="6" x2="16" y2="6" stroke="#333" stroke-width="1.5"/><polygon points="16,2 24,6 16,10" fill="#333"/></svg></div>
+    <div class="step-box">
+      <div class="step-num">3</div>
+      <div class="step-name">Service</div>
+      <div class="step-detail">ClusterIP</div>
+      <div class="step-analogy">대표 번호</div>
+    </div>
+    <div class="arr"><svg viewBox="0 0 24 12"><line x1="0" y1="6" x2="16" y2="6" stroke="#333" stroke-width="1.5"/><polygon points="16,2 24,6 16,10" fill="#333"/></svg></div>
+    <div class="step-box proxy">
+      <div class="step-num">4</div>
+      <div class="step-name">kube-proxy</div>
+      <div class="step-detail">2차 변환</div>
+      <div class="step-analogy">배달 담당</div>
+    </div>
+    <div class="arr"><svg viewBox="0 0 24 12"><line x1="0" y1="6" x2="16" y2="6" stroke="#333" stroke-width="1.5"/><polygon points="16,2 24,6 16,10" fill="#333"/></svg></div>
+    <div class="step-box highlight">
+      <div class="step-num">5</div>
+      <div class="step-name">Pod</div>
+      <div class="step-detail">172.17.0.5</div>
+      <div class="step-analogy">주방</div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-row">
+      <div class="summary-num">1</div>
+      <div class="summary-text"><strong>NodePort</strong> — 클러스터 입구. 외부 요청이 노드의 열린 포트로 들어옵니다.</div>
+    </div>
+    <div class="summary-row proxy-row">
+      <div class="summary-num">2</div>
+      <div class="summary-text"><strong>kube-proxy (1차)</strong> — NodePort 요청을 Ingress Controller Pod의 실제 IP로 변환합니다.</div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-num">3</div>
+      <div class="summary-text"><strong>Ingress Controller</strong> — URL 경로(/api, /)를 읽고 해당 Service로 라우팅합니다.</div>
+    </div>
+    <div class="summary-row proxy-row">
+      <div class="summary-num">4</div>
+      <div class="summary-text"><strong>kube-proxy (2차)</strong> — Service의 가상 IP를 실제 Pod IP로 변환합니다.</div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-num">5</div>
+      <div class="summary-text"><strong>Pod</strong> — 요청을 최종 처리합니다. 여기가 실제 컨테이너가 돌아가는 곳입니다.</div>
+    </div>
+  </div>
+
+  <div class="bottom-note">
+    <p><strong>kube-proxy</strong>가 두 번 등장합니다.</p>
+    <p>1차: NodePort → Ingress Controller Pod (누구한테 보낼지)</p>
+    <p>2차: Service → Backend Pod (실제 어디로 보낼지)</p>
+    <p>같은 역할(IP 변환)이지만, <strong>처리 대상이 다릅니다.</strong></p>
+  </div>
+</div>
+
+</body>
+</html>

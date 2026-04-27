@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 3 — LoadBalancer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { display: flex; justify-content: center; padding: 40px 20px; background: #fff; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
+  .diagram { width: 1080px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 26px; }
+  .step-badge { display: inline-block; background: #2e7d32; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+
+  .canvas { display: grid; grid-template-columns: 150px 80px 200px 90px 1fr; align-items: center; }
+
+  /* Multiple external users */
+  .users-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .users-label { font-size: 11px; font-weight: 700; color: #555; margin-bottom: 2px; }
+  .user { width: 110px; height: 34px; border: 2px solid #222; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #fff; }
+  .domain-label { font-size: 10px; color: #2e7d32; font-weight: 800; font-family: 'Consolas', monospace; margin-top: 4px; }
+
+  /* Arrow to LB */
+  .to-lb-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .to-lb-col svg { width: 70px; height: 18px; }
+  .to-lb-col .lbl { font-size: 10px; color: #2e7d32; font-weight: 700; font-family: 'Consolas', monospace; }
+
+  /* Cloud + LB */
+  .cloud-col { display: flex; flex-direction: column; align-items: center; }
+  .cloud-wrap {
+    border: 2px dashed #888; border-radius: 60px 60px 16px 16px / 40px 40px 16px 16px;
+    padding: 22px 20px 18px; background: #fafbfc; position: relative;
+    width: 100%;
+  }
+  .cloud-label {
+    position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+    background: #fff; padding: 0 8px; white-space: nowrap;
+    font-size: 11px; font-weight: 700; color: #666;
+  }
+  .lb-box {
+    border: 2.5px solid #2e7d32; border-radius: 10px;
+    padding: 14px 16px; background: #fff; text-align: center;
+    box-shadow: 0 0 0 4px rgba(46,125,50,0.15);
+  }
+  .lb-box .name { font-size: 13px; font-weight: 800; color: #2e7d32; }
+  .lb-box .sub { font-size: 10px; color: #555; margin-top: 3px; font-family: 'Consolas', monospace; }
+
+  /* Fan-out arrows */
+  .fan-col { display: flex; flex-direction: column; align-items: center; padding: 4px 0; }
+  .fan-col svg { width: 80px; height: 150px; }
+  .fan-label { font-size: 10px; color: #2e7d32; font-weight: 700; margin-top: 4px; text-align: center; line-height: 1.3; }
+
+  /* Cluster wrapper */
+  .cluster {
+    border: 2.5px solid #2e7d32; border-radius: 14px;
+    padding: 28px 18px 22px;
+    background: #f1faf2; position: relative;
+    box-shadow: 0 0 0 4px rgba(46,125,50,0.15);
+    width: fit-content;
+  }
+  .cluster-title {
+    position: absolute; top: -11px; left: 22px;
+    background: #f1faf2; padding: 0 10px;
+    font-size: 12px; font-weight: 800; color: #2e7d32;
+  }
+
+  /* Nodes */
+  .nodes-col { display: flex; flex-direction: column; gap: 8px; }
+  .node-box {
+    border: 2px solid #666; border-radius: 6px;
+    padding: 6px 8px; background: #fff;
+    display: flex; flex-direction: column; align-items: stretch;
+    min-width: 150px;
+  }
+  .node-head { font-size: 10px; font-weight: 700; color: #333; margin-bottom: 4px; text-align: left; }
+  .node-inner { display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .mini-svc { border: 1.5px solid #1565c0; border-radius: 4px; padding: 3px 6px; background: #eff6fd; font-size: 9px; font-weight: 700; color: #1565c0; }
+  .mini-pods { display: flex; gap: 3px; }
+  .mini-pod { border: 1.5px solid #666; border-radius: 9px; padding: 2px 6px; background: #fff; font-size: 8.5px; font-weight: 700; color: #333; }
+  .arrow-tiny { width: 14px; height: 8px; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="canvas">
+    <div class="users-col">
+      <div class="users-label">다수 외부 사용자</div>
+      <div class="user">User 1</div>
+      <div class="user">User 2</div>
+      <div class="user">User 3</div>
+      <div class="domain-label">myapp.com</div>
+    </div>
+
+    <div class="to-lb-col">
+      <div class="lbl">공인 IP</div>
+      <svg viewBox="0 0 70 18"><line x1="0" y1="9" x2="58" y2="9" stroke="#2e7d32" stroke-width="3"/><polygon points="58,2 70,9 58,16" fill="#2e7d32"/></svg>
+    </div>
+
+    <div class="cloud-col">
+      <div class="cloud-wrap">
+        <div class="cloud-label">클라우드 제공자 (AWS / GCP / Azure 등)</div>
+        <div class="lb-box">
+          <div class="name">Load Balancer</div>
+          <div class="sub">xx.xx.xx.xx</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fan-col">
+      <svg viewBox="0 0 80 150" preserveAspectRatio="none">
+        <line x1="0" y1="75" x2="68" y2="18" stroke="#2e7d32" stroke-width="2.5"/>
+        <polygon points="64,12 76,18 64,24" fill="#2e7d32"/>
+        <line x1="0" y1="75" x2="68" y2="75" stroke="#2e7d32" stroke-width="2.5"/>
+        <polygon points="66,69 76,75 66,81" fill="#2e7d32"/>
+        <line x1="0" y1="75" x2="68" y2="132" stroke="#2e7d32" stroke-width="2.5"/>
+        <polygon points="64,126 76,132 64,138" fill="#2e7d32"/>
+      </svg>
+      <div class="fan-label">트래픽 분산</div>
+    </div>
+
+    <div class="cluster">
+      <div class="cluster-title">클러스터</div>
+      <div class="nodes-col">
+        <div class="node-box">
+          <div class="node-head">Node 1</div>
+          <div class="node-inner">
+            <div class="mini-svc">Service</div>
+            <svg class="arrow-tiny" viewBox="0 0 14 8"><line x1="0" y1="4" x2="8" y2="4" stroke="#666" stroke-width="1.5"/><polygon points="8,1 14,4 8,7" fill="#666"/></svg>
+            <div class="mini-pods">
+              <div class="mini-pod">Pod</div>
+              <div class="mini-pod">Pod</div>
+            </div>
+          </div>
+        </div>
+        <div class="node-box">
+          <div class="node-head">Node 2</div>
+          <div class="node-inner">
+            <div class="mini-svc">Service</div>
+            <svg class="arrow-tiny" viewBox="0 0 14 8"><line x1="0" y1="4" x2="8" y2="4" stroke="#666" stroke-width="1.5"/><polygon points="8,1 14,4 8,7" fill="#666"/></svg>
+            <div class="mini-pods">
+              <div class="mini-pod">Pod</div>
+              <div class="mini-pod">Pod</div>
+            </div>
+          </div>
+        </div>
+        <div class="node-box">
+          <div class="node-head">Node 3</div>
+          <div class="node-inner">
+            <div class="mini-svc">Service</div>
+            <svg class="arrow-tiny" viewBox="0 0 14 8"><line x1="0" y1="4" x2="8" y2="4" stroke="#666" stroke-width="1.5"/><polygon points="8,1 14,4 8,7" fill="#666"/></svg>
+            <div class="mini-pods">
+              <div class="mini-pod">Pod</div>
+              <div class="mini-pod">Pod</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>공식 앱과 라우팅 규칙</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 44px 24px 28px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1020px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 34px;
+  }
+
+  .canvas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  /* 모든 컬럼 동일 구조: element(중심) + gap(14) + label(14px 1줄) */
+  .col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .col-label {
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .col-label.dark { color: #333; }
+  .col-label.red { color: #c62828; }
+  .col-label.blue { color: #1565c0; }
+  .col-label.gray { color: #555; font-weight: 700; font-size: 12px; }
+
+  /* Customer */
+  .customer-icon {
+    width: 66px; height: 66px;
+    border: 2.5px solid #222;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff;
+  }
+  .customer-icon svg { width: 38px; height: 38px; }
+
+  /* Phone (공식 앱) */
+  .phone {
+    width: 200px;
+    border: 3px solid #222;
+    border-radius: 22px;
+    padding: 26px 14px 22px;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(198,40,40,0.1);
+    position: relative;
+  }
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 9px; left: 50%; transform: translateX(-50%);
+    width: 50px; height: 5px;
+    background: #ddd; border-radius: 3px;
+  }
+  .phone-btns {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .phone-btn {
+    padding: 12px 14px;
+    border: 1.5px solid #c62828;
+    border-radius: 8px;
+    background: #fff3e0;
+    font-size: 12.5px; font-weight: 800;
+    color: #c62828;
+    text-align: center;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+  }
+
+  /* Arrows */
+  .order-arrow-svg { width: 70px; height: 20px; display: block; }
+  .read-arrow-svg { width: 100px; height: 22px; display: block; }
+
+  /* Rules document (라우팅 규칙) */
+  .rules-doc {
+    width: 240px;
+    border: 2.5px solid #1565c0;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.1);
+    padding: 20px 18px;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+    font-size: 13px;
+    line-height: 2.1;
+    color: #222;
+  }
+  .rules-doc .arrow-inline { color: #888; padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">공식 앱 = 라우팅 규칙 + 규칙을 실행하는 앱</div>
+
+  <div class="canvas">
+    <!-- 고객 -->
+    <div class="col">
+      <div class="customer-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="8" r="4" stroke="#222" stroke-width="2"/>
+          <path d="M4 21c0-4 4-7 8-7s8 3 8 7" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="col-label dark">고객</div>
+    </div>
+
+    <!-- 주문 화살표 -->
+    <div class="col">
+      <svg class="order-arrow-svg" viewBox="0 0 70 20">
+        <line x1="2" y1="10" x2="56" y2="10" stroke="#c62828" stroke-width="2.5"/>
+        <polygon points="56,3 68,10 56,17" fill="#c62828"/>
+      </svg>
+      <div class="col-label red">주문</div>
+    </div>
+
+    <!-- 공식 앱 -->
+    <div class="col">
+      <div class="phone">
+        <div class="phone-btns">
+          <div class="phone-btn">/order</div>
+          <div class="phone-btn">/stores</div>
+        </div>
+      </div>
+      <div class="col-label red">공식 앱</div>
+    </div>
+
+    <!-- 규칙 읽음 화살표 -->
+    <div class="col">
+      <svg class="read-arrow-svg" viewBox="0 0 100 22">
+        <line x1="96" y1="11" x2="14" y2="11" stroke="#666" stroke-width="2" stroke-dasharray="6,4"/>
+        <polygon points="14,4 2,11 14,18" fill="#666"/>
+      </svg>
+      <div class="col-label gray">앱이 규칙을 읽음</div>
+    </div>
+
+    <!-- 라우팅 규칙 -->
+    <div class="col">
+      <div class="rules-doc">
+/order<span class="arrow-inline">→</span>주문 지점<br>
+/stores<span class="arrow-inline">→</span>매장 지점
+      </div>
+      <div class="col-label blue">라우팅 규칙</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

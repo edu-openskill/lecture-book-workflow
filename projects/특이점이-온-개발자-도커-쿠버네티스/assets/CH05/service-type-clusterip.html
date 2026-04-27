@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ClusterIP — 클러스터 내부만</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { display: flex; justify-content: center; padding: 40px 20px; background: #fff; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
+  .diagram { width: 960px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 26px; }
+  .badge { display: inline-block; background: #1565c0; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+
+  .canvas { display: grid; grid-template-columns: 180px 140px 1fr; align-items: center; }
+
+  .host-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .host-label { font-size: 11px; font-weight: 700; color: #555; }
+  .host-box { width: 130px; height: 60px; border: 2.5px solid #222; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #fff; }
+
+  .block-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .x-line { position: relative; width: 100px; height: 2px; background: #bbb; }
+  .x-line::before, .x-line::after { content: ''; position: absolute; left: 42px; top: -14px; width: 3px; height: 30px; background: #c62828; border-radius: 2px; }
+  .x-line::before { transform: rotate(45deg); }
+  .x-line::after { transform: rotate(-45deg); }
+  .block-label { font-size: 10.5px; color: #c62828; font-weight: 700; }
+
+  .cluster { border: 2px dashed #888; border-radius: 14px; padding: 28px 22px 24px; background: #f5faff; position: relative; }
+  .cluster-title { position: absolute; top: -10px; left: 22px; background: #fff; padding: 0 8px; font-size: 12px; font-weight: 700; color: #555; }
+
+  .inner-flow { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .pod { border: 1.5px solid #666; border-radius: 14px; padding: 8px 14px; background: #fff; font-size: 11px; font-weight: 700; color: #333; min-width: 56px; text-align: center; }
+  .service-box { border: 2.5px solid #1565c0; border-radius: 8px; padding: 10px 16px; background: #fff; text-align: center; box-shadow: 0 0 0 3px rgba(21,101,192,0.12); }
+  .service-box .name { font-size: 13px; font-weight: 800; color: #1565c0; }
+  .service-box .sub { font-size: 10px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+
+  .pod-stack { display: flex; flex-direction: column; gap: 6px; }
+
+  .arrow-sm { width: 30px; height: 12px; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">
+    <span class="badge">ClusterIP</span>
+    클러스터 내부에서만 접근 가능 (기본값)
+  </div>
+
+  <div class="canvas">
+    <div class="host-col">
+      <div class="host-label">외부</div>
+      <div class="host-box">Host</div>
+    </div>
+
+    <div class="block-col">
+      <div class="x-line"></div>
+      <div class="block-label">접근 불가</div>
+    </div>
+
+    <div class="cluster">
+      <div class="cluster-title">클러스터 (내부망)</div>
+      <div class="inner-flow">
+        <div class="pod">Pod X<br><span style="font-size:9px;color:#888;font-weight:500;">내부 호출자</span></div>
+        <svg class="arrow-sm" viewBox="0 0 30 12"><line x1="0" y1="6" x2="22" y2="6" stroke="#1565c0" stroke-width="2"/><polygon points="22,2 30,6 22,10" fill="#1565c0"/></svg>
+        <div class="service-box">
+          <div class="name">Service</div>
+          <div class="sub">ClusterIP</div>
+        </div>
+        <svg class="arrow-sm" viewBox="0 0 30 12"><line x1="0" y1="6" x2="22" y2="6" stroke="#1565c0" stroke-width="2"/><polygon points="22,2 30,6 22,10" fill="#1565c0"/></svg>
+        <div class="pod-stack">
+          <div class="pod">Pod A</div>
+          <div class="pod">Pod B</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

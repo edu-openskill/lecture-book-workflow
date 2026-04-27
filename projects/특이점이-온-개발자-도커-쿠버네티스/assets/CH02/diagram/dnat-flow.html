@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>호스트 포트 → 컨테이너 포트 DNAT 흐름</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    padding: 28px 30px 24px;
+    width: 760px;
+  }
+  .scene {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  /* 공통 박스 */
+  .node {
+    border: 2.5px solid #555;
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 12px;
+    min-width: 120px;
+  }
+  .node-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 6px;
+  }
+  .node-sub {
+    font-size: 11px;
+    color: #777;
+    font-weight: 600;
+  }
+
+  /* 클라이언트/컨테이너 사람 아이콘 */
+  .figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .f-head {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #555;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .f-body {
+    width: 30px;
+    height: 20px;
+    border: 2px solid #555;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: #e8e8e8;
+    margin-top: -1px;
+  }
+
+  /* 컨테이너 박스 */
+  .container-box {
+    border: 2.5px solid #333;
+    border-radius: 6px;
+    background: #f5f5f5;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 130px;
+  }
+
+  /* 호스트 */
+  .host {
+    flex: 1;
+    border: 2.5px solid #333;
+    border-radius: 8px;
+    background: #fafafa;
+    padding: 16px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .host-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+    letter-spacing: 1px;
+  }
+
+  /* iptables 박스 */
+  .iptables {
+    width: 100%;
+    border: 2px dashed #555;
+    border-radius: 6px;
+    background: #fff;
+    padding: 10px 12px 12px;
+  }
+  .iptables-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .rule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  .rule-table th,
+  .rule-table td {
+    border: 1px solid #888;
+    padding: 5px 8px;
+    text-align: center;
+  }
+  .rule-table th {
+    background: #eee;
+    color: #333;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .rule-table .arrow-cell {
+    width: 22px;
+    border: none;
+    color: #555;
+    font-weight: 700;
+  }
+  code {
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-size: 11px;
+    color: #222;
+  }
+
+  /* 가운데 화살표 */
+  .mid-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+  }
+  .mid-arrow .label {
+    font-size: 11px;
+    color: #555;
+    font-style: italic;
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+  .mid-arrow svg {
+    width: 70px;
+    height: 14px;
+  }
+
+  /* 하단 설명 */
+  .legend {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed #aaa;
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .legend strong { color: #222; }
+</style>
+</head>
+<body>
+  <div class="diagram">
+    <div class="scene">
+      <!-- 외부 클라이언트 -->
+      <div class="node">
+        <div class="figure">
+          <div class="f-head"></div>
+          <div class="f-body"></div>
+        </div>
+        <div class="node-title">외부 클라이언트</div>
+        <div class="node-sub">브라우저</div>
+      </div>
+
+      <!-- 요청 화살표 -->
+      <div class="mid-arrow">
+        <div class="label">:8080 요청</div>
+        <svg viewBox="0 0 70 14">
+          <line x1="0" y1="7" x2="60" y2="7" stroke="#333" stroke-width="2"/>
+          <polygon points="60,3 70,7 60,11" fill="#333"/>
+        </svg>
+      </div>
+
+      <!-- 호스트 -->
+      <div class="host">
+        <div class="host-label">호스트</div>
+        <div class="iptables">
+          <div class="iptables-title">iptables 규칙 테이블</div>
+          <table class="rule-table">
+            <thead>
+              <tr>
+                <th>조건</th>
+                <th class="arrow-cell"></th>
+                <th>처리</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>:8080</code> 포트로 들어온 요청</td>
+                <td class="arrow-cell">→</td>
+                <td>컨테이너 <code>:80</code>으로 전달</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 변환 화살표 -->
+      <div class="mid-arrow">
+        <div class="label">:80 으로 변환</div>
+        <svg viewBox="0 0 70 14">
+          <line x1="0" y1="7" x2="60" y2="7" stroke="#333" stroke-width="2"/>
+          <polygon points="60,3 70,7 60,11" fill="#333"/>
+        </svg>
+      </div>
+
+      <!-- 컨테이너 -->
+      <div class="container-box">
+        <div class="node-title">컨테이너</div>
+        <div class="node-sub">nginx</div>
+        <div style="margin-top:8px; font-size:11px; color:#333;"><code>:80</code>에서 대기</div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <strong>-p 8080:80</strong> 옵션이 위 규칙 한 줄을 iptables 테이블에 심어둡니다.
+    </div>
+  </div>
+</body>
+</html>

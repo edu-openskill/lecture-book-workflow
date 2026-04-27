@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>NodePort — 노드 IP + 포트</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { display: flex; justify-content: center; padding: 40px 20px; background: #fff; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
+  .diagram { width: 960px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 26px; }
+  .badge { display: inline-block; background: #c62828; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+
+  .canvas { display: grid; grid-template-columns: 180px 140px 1fr; align-items: center; }
+
+  .host-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .host-label { font-size: 11px; font-weight: 700; color: #555; }
+  .host-box { width: 130px; height: 60px; border: 2.5px solid #222; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #fff; }
+
+  .arrow-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .arrow-label { font-size: 10.5px; color: #c62828; font-weight: 700; font-family: 'Consolas', monospace; }
+  .arrow-col svg { width: 110px; height: 18px; }
+
+  .cluster { border: 2px dashed #888; border-radius: 14px; padding: 28px 22px 24px 56px; background: #fff8f6; position: relative; }
+  .cluster-title { position: absolute; top: -10px; left: 62px; background: #fff; padding: 0 8px; font-size: 12px; font-weight: 700; color: #555; }
+
+  /* NodePort 걸침 */
+  .nodeport-zone {
+    position: absolute; top: 28px; left: -34px;
+    background: #fff8d6; border: 2px solid #d4b94a; border-radius: 8px;
+    padding: 10px 10px; z-index: 2;
+    box-shadow: 0 0 0 3px rgba(220,0,0,0.15);
+  }
+  .nodeport-zone .np { border: 2.5px solid #c62828; border-radius: 5px; padding: 6px 10px; background: #fff; text-align: center; }
+  .nodeport-zone .np .name { font-size: 11px; font-weight: 800; color: #c62828; }
+  .nodeport-zone .np .port { font-size: 10px; color: #555; font-family: 'Consolas', monospace; margin-top: 1px; }
+
+  .inner-flow { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .pod { border: 1.5px solid #666; border-radius: 14px; padding: 8px 14px; background: #fff; font-size: 11px; font-weight: 700; color: #333; min-width: 56px; text-align: center; }
+  .service-box { border: 2px solid #666; border-radius: 8px; padding: 10px 16px; background: #fff; text-align: center; }
+  .service-box .name { font-size: 13px; font-weight: 800; color: #333; }
+  .service-box .sub { font-size: 10px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+  .pod-stack { display: flex; flex-direction: column; gap: 6px; }
+  .arrow-sm { width: 30px; height: 12px; }
+
+  .connect-arrow { position: absolute; top: 48px; left: 4px; width: 60px; height: 14px; z-index: 3; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">
+    <span class="badge">NodePort</span>
+    노드 IP + 포트(30000~32767)로 외부 접근 가능
+  </div>
+
+  <div class="canvas">
+    <div class="host-col">
+      <div class="host-label">외부</div>
+      <div class="host-box">Host</div>
+    </div>
+
+    <div class="arrow-col">
+      <div class="arrow-label">노드IP:30001</div>
+      <svg viewBox="0 0 110 18"><line x1="0" y1="9" x2="98" y2="9" stroke="#c62828" stroke-width="3"/><polygon points="98,2 110,9 98,16" fill="#c62828"/></svg>
+    </div>
+
+    <div class="cluster">
+      <div class="cluster-title">클러스터</div>
+
+      <div class="nodeport-zone">
+        <div class="np">
+          <div class="name">NodePort</div>
+          <div class="port">:30001</div>
+        </div>
+      </div>
+
+      <!-- NodePort → Service 짧은 화살표 -->
+      <svg class="connect-arrow" viewBox="0 0 60 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="48" y2="7" stroke="#c62828" stroke-width="2"/>
+        <polygon points="48,2 60,7 48,12" fill="#c62828"/>
+      </svg>
+
+      <div class="inner-flow">
+        <div class="service-box">
+          <div class="name">Service</div>
+          <div class="sub">ClusterIP</div>
+        </div>
+        <svg class="arrow-sm" viewBox="0 0 30 12"><line x1="0" y1="6" x2="22" y2="6" stroke="#666" stroke-width="2"/><polygon points="22,2 30,6 22,10" fill="#666"/></svg>
+        <div class="pod-stack">
+          <div class="pod">Pod A</div>
+          <div class="pod">Pod B</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

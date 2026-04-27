@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>브라우저에서 Pod까지 — 6단계 전체 흐름</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 40px 24px 28px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1240px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  /* 메인 흐름 */
+  .flow {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 0;
+  }
+  .step {
+    flex: 1;
+    min-width: 150px;
+    max-width: 180px;
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 14px 10px 12px;
+    background: #fff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .step-badge {
+    width: 28px; height: 28px; line-height: 24px;
+    border-radius: 50%;
+    background: #1565c0; color: #fff;
+    font-size: 13px; font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .step-title {
+    font-size: 13px; font-weight: 800; color: #222;
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+  }
+  .step-name {
+    font-size: 12px; color: #1565c0; font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .step-sub {
+    font-size: 11px; color: #666; line-height: 1.5;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+  }
+
+  .arrow {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 22px;
+    color: #1565c0; font-size: 22px; font-weight: 700;
+  }
+
+  /* L7 강조 (Ingress Controller, DNS) — 결정을 내리는 단계 */
+  .step.l7 {
+    background: #fff3e0;
+    border-color: #ef6c00;
+  }
+  .step.l7 .step-badge { background: #ef6c00; }
+  .step.l7 .step-name { color: #ef6c00; }
+
+  /* 최종 도착 — 초록 */
+  .step.dest {
+    background: #e8f5e9;
+    border-color: #2e7d32;
+  }
+  .step.dest .step-badge { background: #2e7d32; }
+  .step.dest .step-name { color: #2e7d32; }
+
+  /* Endpoint Controller 사이드 — kube-proxy(1차/2차) 위에서 명부 공급 */
+  .ec-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    margin-top: 20px;
+    margin-bottom: 4px;
+  }
+  .ec-spacer {
+    flex: 1;
+    min-width: 150px;
+    max-width: 180px;
+  }
+  .ec-spacer.arrow-spacer {
+    min-width: 22px;
+    flex: 0 0 22px;
+  }
+  .ec-up {
+    color: #c62828;
+    font-size: 18px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1;
+  }
+  .ec-line {
+    flex: 1;
+    min-width: 150px;
+    max-width: 180px;
+    text-align: center;
+  }
+  .ec-line .v {
+    color: #c62828;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .ec-box-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .ec-box {
+    border: 2px solid #c62828;
+    border-radius: 10px;
+    padding: 10px 18px;
+    background: #fff3e0;
+    color: #c62828;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+    min-width: 280px;
+  }
+  .ec-box .ec-sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: #c62828;
+    margin-top: 2px;
+  }
+
+  /* CNI 배경 라벨 */
+  .cni-bg {
+    margin-top: 24px;
+    border: 1.5px dashed #888;
+    border-radius: 10px;
+    padding: 10px 16px;
+    background: #fafafa;
+    color: #555;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .cni-bg .cni-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: #777;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">브라우저에서 Pod까지 — 6단계 전체 흐름</div>
+
+  <!-- 메인 6단계 흐름 -->
+  <div class="flow">
+    <div class="step">
+      <div class="step-badge">1</div>
+      <div class="step-title">외부 입구</div>
+      <div class="step-name">NodePort</div>
+      <div class="step-sub">노드 IP·Port로<br>클러스터 안으로</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-badge">2</div>
+      <div class="step-title">길 잇기 (1차)</div>
+      <div class="step-name">kube-proxy</div>
+      <div class="step-sub">Ingress Controller<br>Pod로 배달</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step l7">
+      <div class="step-badge">3</div>
+      <div class="step-title">HTTP 읽기</div>
+      <div class="step-name">Ingress Controller</div>
+      <div class="step-sub">URL·Host 읽고<br>백엔드 결정</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step l7">
+      <div class="step-badge">4</div>
+      <div class="step-title">이름 풀기</div>
+      <div class="step-name">DNS</div>
+      <div class="step-sub">order-service<br>→ ClusterIP</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-badge">5</div>
+      <div class="step-title">길 잇기 (2차)</div>
+      <div class="step-name">kube-proxy</div>
+      <div class="step-sub">ClusterIP<br>→ Pod IP</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step dest">
+      <div class="step-badge">6</div>
+      <div class="step-title">도달</div>
+      <div class="step-name">Pod</div>
+      <div class="step-sub">애플리케이션<br>응답 반환</div>
+    </div>
+  </div>
+
+  <!-- Endpoint Controller가 kube-proxy 1차/2차에 명부 공급 -->
+  <div class="ec-row">
+    <div class="ec-spacer"></div>
+    <div class="ec-spacer arrow-spacer"></div>
+    <div class="ec-line"><span class="v">↑</span></div>
+    <div class="ec-spacer arrow-spacer"></div>
+    <div class="ec-spacer"></div>
+    <div class="ec-spacer arrow-spacer"></div>
+    <div class="ec-spacer"></div>
+    <div class="ec-spacer arrow-spacer"></div>
+    <div class="ec-line"><span class="v">↑</span></div>
+    <div class="ec-spacer arrow-spacer"></div>
+    <div class="ec-spacer"></div>
+  </div>
+
+  <div class="ec-box-row">
+    <div class="ec-box">
+      Endpoint Controller
+      <div class="ec-sub">살아있는 Pod 명부를 kube-proxy에 공급</div>
+    </div>
+  </div>
+
+  <!-- CNI 배경 -->
+  <div class="cni-bg">
+    CNI · Pod 네트워크
+    <div class="cni-sub">모든 Pod이 노드 경계와 무관하게 IP로 직접 통하는 평면 네트워크가 아래에 깔려 있다</div>
+  </div>
+</div>
+
+</body>
+</html>

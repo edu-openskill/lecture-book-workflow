@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>호스트 OS 위의 쿠버네티스 클러스터</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .outer {
+    display: flex;
+    gap: 6px;
+  }
+
+  /* 왼쪽 브래킷 */
+  .brackets {
+    display: flex;
+    flex-direction: column;
+  }
+  .bracket {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bracket-line {
+    width: 8px;
+    border-left: 1.5px solid #222;
+    border-top: 1.5px solid #222;
+    border-bottom: 1.5px solid #222;
+    align-self: stretch;
+  }
+  .bracket-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #222;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  /* 스택 */
+  .stack {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .layer {
+    border: 1.5px solid #222;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  /* ===== 클러스터 영역 ===== */
+  .cluster-area {
+    border: 1.5px solid #222;
+    border-radius: 12px 12px 0 0;
+    padding: 20px 24px 24px;
+    background: #fff;
+    position: relative;
+  }
+  .cluster-label {
+    position: absolute;
+    top: -16px;
+    left: 32px;
+    background: #222;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 4px 18px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .cluster-body {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 12px;
+  }
+
+  /* ===== 컨트롤 플레인 ===== */
+  .control-plane {
+    border: 1.5px dashed #222;
+    border-radius: 12px;
+    padding: 20px 24px 24px;
+    background: #fff;
+    min-width: 180px;
+    position: relative;
+  }
+  .cp-label {
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: #555;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: 5px;
+  }
+  .cp-components {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .cp-box {
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    background: #fff;
+    color: #222;
+  }
+  .cp-box.api {
+    background: #fff;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .cp-box-row {
+    display: flex;
+    gap: 8px;
+  }
+  .cp-box-row .cp-box {
+    flex: 1;
+    font-size: 12px;
+    padding: 8px 8px;
+  }
+
+  /* ===== 화살표 영역 ===== */
+  .arrow-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    min-width: 50px;
+    align-self: center;
+  }
+  .arrow-line {
+    font-size: 36px;
+    color: #222;
+    letter-spacing: 0;
+  }
+  .arrow-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+
+  /* ===== 워커 노드 그룹 ===== */
+  .worker-group {
+    display: flex;
+    gap: 16px;
+  }
+
+  /* ===== 워커 노드 ===== */
+  .worker-node {
+    border: 1.5px solid #222;
+    border-radius: 12px;
+    padding: 20px 20px 24px;
+    background: #fff;
+    min-width: 200px;
+    position: relative;
+  }
+  .worker-label {
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: #444;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: 5px;
+  }
+
+  /* 노드 내부 스택 */
+  .node-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 8px;
+  }
+
+  /* Pod 영역 */
+  .pod-area {
+    display: flex;
+    gap: 10px;
+    padding: 14px 12px;
+    border: 1.5px solid #222;
+    border-radius: 8px 8px 0 0;
+    background: #fff;
+    justify-content: center;
+  }
+  .pod {
+    border: 1.5px solid #222;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    min-width: 95px;
+  }
+  .pod-header {
+    background: #e0e0e0;
+    padding: 5px 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    border-bottom: 1.5px solid #222;
+    color: #222;
+  }
+  .pod-body {
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+  }
+  .container-box {
+    border: 1.5px solid #222;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    width: 100%;
+    text-align: center;
+    background: #f5f5f5;
+    color: #222;
+  }
+
+  /* kubelet + kube-proxy 레이어 */
+  .agent-layer {
+    display: flex;
+    gap: 0;
+    border: 1.5px solid #222;
+    border-top: none;
+  }
+  .agent-layer.agent-layer-top {
+    border-top: 1.5px solid #222;
+    border-radius: 8px;
+  }
+  .agent-box {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #222;
+    background: #fff;
+    white-space: nowrap;
+  }
+  .agent-box.kubelet {
+    border-right: 1px solid #222;
+  }
+  .agent-box.kube-proxy {
+    border-left: 1px solid #222;
+  }
+  .agent-sub {
+    font-size: 10px;
+    font-weight: 400;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  /* 컨테이너 런타임 레이어 */
+  .runtime-layer {
+    border: 1.5px solid #222;
+    border-top: none;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    background: #e8e8e8;
+    color: #222;
+    border-radius: 0 0 8px 8px;
+  }
+
+  /* 하단 레이어 */
+  .layer-engine { background: #e8e8e8; padding: 16px; border-top: 3px dotted #666; }
+  .layer-os { background: #d9d9d9; padding: 16px; border-top: none; }
+  .layer-hw { background: #f5f5f5; padding: 16px; border-top: 3px dotted #666; border-radius: 0 0 12px 12px; }
+</style>
+</head>
+<body>
+
+<div class="outer">
+
+  <!-- 왼쪽 브래킷 -->
+  <div class="brackets">
+    <div class="bracket" id="b-app">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">애플리케이션 계층</span>
+    </div>
+    <div class="bracket" id="b-os">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">OS 계층</span>
+    </div>
+    <div class="bracket" id="b-hw">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">하드웨어 계층</span>
+    </div>
+  </div>
+
+  <!-- 스택 -->
+  <div class="stack">
+
+    <!-- 애플리케이션 계층: 쿠버네티스 클러스터 -->
+    <div class="cluster-area" id="s-cluster">
+      <div class="cluster-body">
+
+        <!-- 컨트롤 플레인 -->
+        <div class="control-plane">
+          <div class="cp-label">컨트롤 플레인</div>
+          <div class="cp-components">
+            <div class="cp-box api">Kube API Server</div>
+          </div>
+        </div>
+
+        <!-- 화살표 -->
+        <div class="arrow-area">
+          <div class="arrow-line">→</div>
+          <div class="arrow-label">명령 전달</div>
+        </div>
+
+        <!-- 워커 노드들 -->
+        <div class="worker-group">
+
+          <!-- 워커 노드 1 -->
+          <div class="worker-node">
+            <div class="worker-label">워커 노드 1</div>
+            <div class="node-stack">
+              <div class="agent-layer agent-layer-top">
+                <div class="agent-box kubelet">
+                  kubelet
+                </div>
+                <div class="agent-box kube-proxy">
+                  kube-proxy
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 워커 노드 2 -->
+          <div class="worker-node">
+            <div class="worker-label">워커 노드 2</div>
+            <div class="node-stack">
+              <div class="agent-layer agent-layer-top">
+                <div class="agent-box kubelet">
+                  kubelet
+                </div>
+                <div class="agent-box kube-proxy">
+                  kube-proxy
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /worker-group -->
+      </div><!-- /cluster-body -->
+    </div><!-- /cluster-area -->
+
+    <div class="layer layer-engine" id="s-engine">컨테이너 엔진</div>
+    <div class="layer layer-os" id="s-os">호스트 OS</div>
+    <div class="layer layer-hw" id="s-hw">하드웨어</div>
+  </div>
+
+</div>
+
+<script>
+  function sync() {
+    const cH = document.getElementById('s-cluster').offsetHeight;
+    const eH = document.getElementById('s-engine').offsetHeight;
+    const oH = document.getElementById('s-os').offsetHeight;
+    const hH = document.getElementById('s-hw').offsetHeight;
+
+    document.getElementById('b-app').style.height = cH + 'px';
+    document.getElementById('b-os').style.height = (eH + oH) + 'px';
+    document.getElementById('b-hw').style.height = hH + 'px';
+  }
+  window.addEventListener('load', sync);
+  window.addEventListener('resize', sync);
+</script>
+
+</body>
+</html>

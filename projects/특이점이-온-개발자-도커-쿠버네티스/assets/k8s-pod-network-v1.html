@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pod 네트워크 — 안 1: 레이어 구조</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pod-box {
+    border: 1.5px solid #222;
+    border-radius: 12px;
+    padding: 28px 32px 24px;
+    background: #fff;
+    position: relative;
+    min-width: 420px;
+  }
+  .pod-label {
+    position: absolute;
+    top: -14px;
+    left: 24px;
+    background: #222;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 3px 16px;
+    border-radius: 5px;
+  }
+  .pod-ip {
+    position: absolute;
+    top: -14px;
+    right: 24px;
+    background: #fff;
+    border: 1.5px solid #222;
+    color: #222;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 5px;
+  }
+
+  .pod-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 8px;
+  }
+
+  /* 앱 컨테이너 영역 */
+  .layer-apps {
+    border: 1.5px solid #222;
+    border-radius: 8px 8px 0 0;
+    padding: 16px 20px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .app-box {
+    text-align: center;
+    padding: 10px 20px;
+    min-width: 120px;
+  }
+  .app-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+  }
+  .app-port {
+    font-size: 10px;
+    color: #666;
+    margin-top: 3px;
+  }
+
+  .localhost-conn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 12px;
+    gap: 2px;
+  }
+  .localhost-arrow {
+    font-size: 18px;
+    color: #222;
+  }
+  .localhost-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #555;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  .arrow-up {
+    text-align: center;
+    font-size: 11px;
+    color: #555;
+    padding: 4px 0;
+    font-weight: 600;
+    border-left: 1.5px solid #222;
+    border-right: 1.5px solid #222;
+    background: #fafafa;
+  }
+
+  .layer-pause {
+    border: 1.5px solid #222;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 14px 24px;
+    background: #e8e8e8;
+    text-align: center;
+  }
+  .layer-pause-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+  }
+  .layer-pause-desc {
+    font-size: 10px;
+    color: #555;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="pod-box">
+    <div class="pod-label">Pod</div>
+    <div class="pod-ip">IP: 10.244.0.5</div>
+
+    <div class="pod-stack">
+      <div class="layer-apps">
+        <div class="app-box">
+          <div class="app-name">nginx</div>
+          <div class="app-port">:80</div>
+        </div>
+        <div class="localhost-conn">
+          <div class="localhost-arrow">←→</div>
+          <div class="localhost-label">localhost</div>
+        </div>
+        <div class="app-box">
+          <div class="app-name">redis</div>
+          <div class="app-port">:6379</div>
+        </div>
+      </div>
+      <div class="arrow-up">↑ 네트워크를 빌려 씀</div>
+      <div class="layer-pause">
+        <div class="layer-pause-title">pause 컨테이너</div>
+        <div class="layer-pause-desc">네트워크 소유 (IP: 10.244.0.5, 포트 공간)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

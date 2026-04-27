@@ -1,0 +1,103 @@
+direction: right
+
+namespace: Namespace {
+  style: {
+    stroke: "#999"
+    stroke-dash: 4
+    fill: "#fafafa"
+    border-radius: 12
+  }
+
+  ingress: Ingress\n외부 요청을 내부로 연결 {
+    style: {
+      fill: "#e8f5e9"
+      border-radius: 8
+    }
+  }
+
+  service: Service\n고정 접근 주소 {
+    style: {
+      fill: "#e3f2fd"
+      border-radius: 8
+    }
+  }
+
+  deployment: Deployment\n"Pod N개 유지하라" {
+    style: {
+      fill: "#fff3e0"
+      border-radius: 8
+    }
+  }
+
+  replicaset: ReplicaSet\nPod 수 조절 {
+    style: {
+      fill: "#fff8e1"
+      border-radius: 8
+    }
+  }
+
+  pod1: Pod ① {
+    style: {
+      fill: "#fce4ec"
+      border-radius: 8
+    }
+  }
+  pod2: Pod ② {
+    style: {
+      fill: "#fce4ec"
+      border-radius: 8
+    }
+  }
+  pod3: Pod ③ {
+    style: {
+      fill: "#fce4ec"
+      border-radius: 8
+    }
+  }
+
+  configmap: ConfigMap\n설정값 {
+    style: {
+      fill: "#f3e5f5"
+      border-radius: 8
+    }
+  }
+
+  secret: Secret\n민감 정보 {
+    style: {
+      fill: "#ede7f6"
+      border-radius: 8
+    }
+  }
+
+  pv: PV\n저장 공간 {
+    style: {
+      fill: "#e0f2f1"
+      border-radius: 8
+    }
+  }
+
+  pvc: PVC\n공간 요청 {
+    style: {
+      fill: "#e0f7fa"
+      border-radius: 8
+    }
+  }
+
+  # 메인 흐름
+  ingress -> service: 요청 전달
+  deployment -> replicaset: 생성
+  replicaset -> pod1
+  replicaset -> pod2
+  replicaset -> pod3
+  service -> pod1
+  service -> pod2
+  service -> pod3
+
+  # 설정 주입 (대표로 pod2에만 표시)
+  configmap -> pod2: 설정 주입 {style.stroke-dash: 3}
+  secret -> pod2: 비밀 주입 {style.stroke-dash: 3}
+
+  # 저장소 (대표로 pod3에만 표시)
+  pv -> pvc: 바인딩
+  pvc -> pod3: 저장소 연결 {style.stroke-dash: 3}
+}

@@ -1,0 +1,24 @@
+direction: right
+
+deployment: Deployment\n"Pod 3개 유지하라" {
+  style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+replicaset: ReplicaSet\nPod 수 조절 {
+  style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+pod1: Pod ① {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+pod2: Pod ② {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+pod3: Pod ③ {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+deployment -> replicaset: 생성 { style: { stroke: "#333" } }
+replicaset -> pod1 { style: { stroke: "#333" } }
+replicaset -> pod2 { style: { stroke: "#333" } }
+replicaset -> pod3 { style: { stroke: "#333" } }

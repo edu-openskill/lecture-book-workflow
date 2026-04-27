@@ -1,0 +1,39 @@
+direction: right
+
+dev: 개발자 {
+  shape: person
+  style.stroke: "#333333"
+  style.fill: "#f0f0f0"
+}
+
+kubectl: kubectl 명령 {
+  shape: rectangle
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+cp: 컨트롤 플레인 {
+  style.border-radius: 8
+  style.stroke-dash: 5
+  style.stroke: "#333333"
+  style.fill: "#f8f8f8"
+  api: API Server {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+}
+
+worker: 워커 노드 {
+  style.border-radius: 8
+  style.stroke-dash: 5
+  style.stroke: "#333333"
+  style.fill: "#f8f8f8"
+  pod: Pod (컨테이너) {
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+  }
+}
+
+dev -> kubectl -> cp.api -> worker.pod {
+  style.stroke: "#333333"
+}

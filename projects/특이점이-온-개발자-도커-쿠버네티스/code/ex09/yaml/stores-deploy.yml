@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stores-deploy
+spec:
+  selector:
+    matchLabels:
+      app: stores
+  template:
+    metadata:
+      labels:
+        app: stores
+    spec:
+      containers:
+        - name: stores
+          image: hashicorp/http-echo:latest
+          args:
+            - "-text=매장 안내 — 강남점 · 홍대점 · 판교점"
