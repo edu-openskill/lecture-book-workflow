@@ -2,10 +2,10 @@
 
 ### 컨테이너 빌드 및 실행
 
-- docker-compose up
+- docker-compose -f ex07/docker-compose.yml up
 
 ### 실행
 - http://localhost:80/
 
 ### db store 삭제
-- rm -rf db/store
+- rm -rf ex07/db/store

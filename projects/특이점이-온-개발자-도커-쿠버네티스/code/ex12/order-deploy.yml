@@ -15,4 +15,4 @@ spec:
         - name: order
           image: hashicorp/http-echo:latest
           args:
-            - "-text=주문 접수 완료 — 치킨버거 1개"
+            - "-text=주문 접수 완료"

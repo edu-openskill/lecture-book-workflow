@@ -2,6 +2,6 @@
 
 ### DB 빌드 및 실행
 
-- docker build -t db .
+- docker build -t db ex05
 - docker run -dit -p 3306:3306 db
 

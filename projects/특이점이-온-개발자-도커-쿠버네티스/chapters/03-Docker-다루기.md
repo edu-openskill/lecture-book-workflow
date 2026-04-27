@@ -274,12 +274,12 @@ server {
 }
 ```
 
-설정을 마친 오픈이는 터미널을 열고 실습 파일들이 모여 있는 ex01 폴더로 이동했습니다. 그러고 나서 세 컨테이너를 순서대로 빌드하고 실행했습니다.
+설정을 마친 오픈이는 ex01 폴더 안의 실습 파일들로 세 컨테이너를 순서대로 빌드하고 실행했습니다.
 
 ```bash
-docker build -t app1 ./app1 && docker run -dit -p 8000:80 app1
-docker build -t app2 ./app2 && docker run -dit -p 9000:80 app2
-docker build -t lb ./lb && docker run -dit -p 80:80 lb
+docker build -t app1 ex01/app1 && docker run -dit -p 8000:80 app1
+docker build -t app2 ex01/app2 && docker run -dit -p 9000:80 app2
+docker build -t lb ex01/lb && docker run -dit -p 80:80 lb
 ```
 
 준비가 끝나고 브라우저 주소창에 localhost:80/app1을 입력하자 app1 서버가 응답했습니다. 이어서 /app2로 주소를 바꾸자 이번에는 app2 서버의 화면이 떴습니다.
@@ -324,7 +324,7 @@ nginx.conf를 작성하던 오픈이의 눈에 계속 걸리는 지점이 하나
 
 > 실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex02
 
-오픈이는 실습을 위해 ex02 폴더로 이동했습니다. 이전 실습과 달라진 점은 크게 세 가지였습니다. 똑같은 앱을 여러 대 띄울 것이라 app2 폴더가 사라졌고, nginx.conf에서 app1 그룹에 서버 줄이 늘어났으며, 불필요해진 app2 관련 설정들은 모두 빠졌습니다.
+이번 실습은 ex02 폴더에 들어 있습니다. 이전 실습과 달라진 점은 크게 세 가지였습니다. 똑같은 앱을 여러 대 띄울 것이라 app2 폴더가 사라졌고, nginx.conf에서 app1 그룹에 서버 줄이 늘어났으며, 불필요해진 app2 관련 설정들은 모두 빠졌습니다.
 
 **ex02/lb/nginx.conf** (달라진 블록)
 ```nginx
@@ -344,11 +344,11 @@ server {
 오픈이는 같은 이미지를 사용해 컨테이너를 두 번 띄우기로 했습니다. 이때 호스트의 포트만 다르게 지정하여 서로 충돌하지 않게 설정했습니다.
 
 ```bash
-docker build -t app1 ./app1
+docker build -t app1 ex02/app1
 docker run -dit -p 8000:80 app1   # 서버 1
 docker run -dit -p 8001:80 app1   # 서버 2 (같은 이미지, 다른 포트)
 
-docker build -t lb ./lb
+docker build -t lb ex02/lb
 docker run -dit -p 80:80 lb
 ```
 
@@ -390,7 +390,7 @@ docker run -dit -p 80:80 lb
 
 > 실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex03
 
-오픈이는 캐싱 실습을 위해 ex03 폴더로 이동했습니다. 이번 실습은 이미지 파일을 응답으로 내려주는 간단한 파이썬 Flask 기반 API 서버를 활용합니다.
+이번 캐싱 실습은 ex03 폴더에 준비되어 있습니다. 이미지 파일을 응답으로 내려주는 간단한 파이썬 Flask 기반 API 서버를 활용합니다.
 
 ```text
 ex03/
@@ -434,11 +434,11 @@ server {
 
 ```bash
 # api 서버 실행 (Flask — 5000번 포트)
-docker build -t api ./api
+docker build -t api ex03/api
 docker run -dit -p 5000:5000 api
 
 # nginx 실행
-docker build -t nginx-cache ./nginx
+docker build -t nginx-cache ex03/nginx
 docker run -dit -p 80:80 nginx-cache
 ```
 
@@ -530,7 +530,7 @@ Redis 컨테이너와 API 컨테이너를 띄우고 나면, 두 컨테이너가 
 
 > 실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex04
 
-오픈이는 이어서 Redis를 이용해 세션을 공유하는 실습에 들어갔습니다. 실습을 위해 우선 ex04 폴더로 이동했습니다. 폴더 구조는 API 서버가 담긴 폴더 하나로 간단하며, Redis는 별도의 빌드 없이 공식 이미지를 그대로 사용했습니다.
+오픈이는 이어서 Redis를 이용해 세션을 공유하는 실습에 들어갔습니다. 실습은 ex04 폴더에 들어 있고, 폴더 구조는 API 서버가 담긴 폴더 하나로 간단하며, Redis는 별도의 빌드 없이 공식 이미지를 그대로 사용했습니다.
 
 ```text
 ex04/
@@ -559,7 +559,7 @@ docker network create myNetwork
 docker run -d --name redis --network myNetwork -p 6379:6379 redis
 
 # 3. API 서버 두 대 실행 (같은 이미지, 다른 포트)
-docker build -t api ./api
+docker build -t api ex04/api
 docker run -d --name api1 --network myNetwork -p 5001:5000 api
 docker run -d --name api2 --network myNetwork -p 5002:5000 api
 ```
@@ -612,10 +612,10 @@ Dockerfile에서 눈여겨볼 지점은 두 가지였습니다.
 이번 실습에서는 과정을 단순하게 보여드리기 위해 비밀번호를 Dockerfile에 직접 적었습니다. 하지만 실무에서 이런 방식은 매우 위험합니다. 이미지를 빌드하는 순간 이미지를 가진 사람 누구나 비밀번호를 볼 수 있기 때문입니다. 그래서 실제 서비스를 운영할 때는 비밀번호 같은 민감한 정보를 이미지 내부에 기록하지 않고 외부에 따로 보관해 두었다가, 컨테이너가 실행되는 시점에만 살짝 건네주는 방식을 사용합니다. 이 방식은 쿠버네티스에서 사용해보겠습니다.
 :::
 
-오픈이는 실습 폴더로 이동해 이미지를 빌드하고 컨테이너를 실행했습니다.
+오픈이는 ex05 폴더의 파일로 이미지를 빌드하고 컨테이너를 실행했습니다.
 
 ```bash
-docker build -t db ./db
+docker build -t db ex05/db
 docker run -dit -p 3306:3306 db
 ```
 
@@ -775,10 +775,10 @@ networks:
 
 *그림 3-33. Compose가 자동 생성한 네트워크에서 서비스 이름으로 통신*
 
-이제 실행을 위해 터미널을 열고 실습 폴더로 이동해 명령어를 실행합니다.
+이제 터미널을 열고 ex06의 docker-compose.yml로 명령어를 실행합니다.
 
 ```bash
-docker compose up        # 모든 컨테이너 한 번에 실행
+docker compose -f ex06/docker-compose.yml up   # 모든 컨테이너 한 번에 실행
 ```
 
 ![](../assets/CH03/chap02-52.png)
@@ -820,7 +820,7 @@ docker compose up        # 모든 컨테이너 한 번에 실행
 
 *'하나씩 떼어서 연습했던 것들을 이제 하나의 서비스로 합쳐보는 과정이네.'*
 
-오픈이는 ex07 폴더로 이동해 준비된 파일들을 살폈습니다. 백엔드, DB, 프론트엔드가 각자의 폴더에 담겨 있고, 이를 docker-compose.yml이 감싸고 있는 구조입니다.
+오픈이는 ex07 폴더에 준비된 파일들을 살폈습니다. 백엔드, DB, 프론트엔드가 각자의 폴더에 담겨 있고, 이를 docker-compose.yml이 감싸고 있는 구조입니다.
 
 ```text
 ex07/
@@ -904,10 +904,10 @@ backend의 `SPRING_DATASOURCE_URL`에 들어간 `jdbc:mysql://db:3306/...`이 DB
 
 ### 3.6.4 한 줄로 전체 띄우기
 
-오픈이는 터미널에서 ex07 폴더로 이동한 뒤 서비스를 실행했습니다.
+오픈이는 터미널에서 ex07의 docker-compose.yml로 서비스를 실행했습니다.
 
 ```bash
-docker compose up
+docker compose -f ex07/docker-compose.yml up
 ```
 
 ![](../assets/CH03/chap02-ex07-compose.png)

@@ -187,9 +187,6 @@ brew<span class="w"> </span>install<span class="w"> </span>minikube</div>
 </tbody>
 </table>
 <h2>4.3 첫 Pod 띄우기</h2>
-<blockquote>
-<p>실습 YAML: https://github.com/metacoding-10-linux-docker/docker/tree/master/yaml</p>
-</blockquote>
 <p>노트북에 Minikube 환경을 구성했으니 이제 실제 쿠버네티스의 리소스를 하나씩 띄워볼 차례입니다. 도커만 쓸 때와는 무엇이 다른지, 쿠버네티스라는 시스템이 컨테이너를 다루는 최소 단위부터 확인해 볼 차례입니다.</p>
 <h3>4.3.1 kubectl과 Pod</h3>
 <p>클러스터에 명령을 내릴 때 사용하는 도구는 kubectl입니다. 쿠버네티스에게 &quot;이런 상태를 만들어줘&quot;라고 요청하는 명령줄 도구입니다.</p>
@@ -213,7 +210,10 @@ brew<span class="w"> </span>install<span class="w"> </span>minikube</div>
 <p class="thought">'도커에서 docker run을 쓰던 것과 비슷하네. 명령을 내리면 본사(컨트롤 플레인)가 알아서 적절한 위치를 지정해주는군.'</p>
 <h3>4.3.3 YAML로 Pod 만들기</h3>
 <p>명령어 한 줄은 간편하지만, 실무에서는 설계도 역할을 하는 <strong>YAML 파일을</strong> 주로 사용합니다. 파일로 남겨두면 나중에 똑같은 설정을 재현하거나 팀원들과 공유하기가 훨씬 수월하기 때문입니다.</p>
-<p><strong>yaml/hello-pod2.yml</strong></p>
+<blockquote>
+<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex08</p>
+</blockquote>
+<p><strong>ex08/hello-pod2.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span><span class="w">                 </span><span class="c1"># 리소스 종류</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -223,7 +223,7 @@ brew<span class="w"> </span>install<span class="w"> </span>minikube</div>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-container</span>
 <span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:1.20</span><span class="w">        </span><span class="c1"># 이미지</span></div>
 <p>이렇게 작성한 파일을 클러스터에 적용할 때는 <strong>kubectl apply</strong> 명령어를 사용합니다.</p>
-<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>hello-pod2.yml<span class="w">   </span><span class="c1"># YAML로 Pod 생성</span></div>
+<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex08/hello-pod2.yml<span class="w">   </span><span class="c1"># YAML로 Pod 생성</span></div>
 <div class="chapter-image"><img src="..\assets\CH04\chap03-21.png" alt="" /></div><p class="thought">그림 4-9. kubectl apply로 Pod 생성</p>
 <p class="thought">'명령어 한 줄보다는 이렇게 파일로 관리하는 쪽이 나중에 다시 보기에도, 팀에 공유하기에도 편하겠다.'</p>
 <h3>4.3.4 Pod 조회</h3>
@@ -288,7 +288,10 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod</div>
 </div>
 <h3>4.4.2 Deployment — 본사의 지침서</h3>
 <p>Deployment는 &quot;Pod를 몇 개 유지할지, 문제가 생기면 어떻게 교체할지&quot;를 적어두는 매뉴얼과 같습니다.</p>
-<p><strong>yaml/deploy-ex01.yml</strong></p>
+<blockquote>
+<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex09</p>
+</blockquote>
+<p><strong>ex09/deploy-ex01.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -310,7 +313,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod</div>
 Deployment의 selector에 <strong>app: nginx</strong> 라고 적어두면, 쿠버네티스는 해당 라벨을 가진 Pod들만 골라 관리합니다. 본사가 <strong>&quot;우리 브랜드 간판(Label)을 단 가맹점만 책임진다&quot;고</strong> 선언하는 방식과 같습니다. 이 라벨 매칭 방식은 Deployment만 쓰는 게 아닙니다. 다음 챕터에서 만날 <strong>Service</strong>도 같은 라벨로 Pod를 찾습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH04\selector-labels.png" alt="" /></div><p class="thought">그림 4-13. selector가 지정한 라벨(app: nginx)을 가진 Pod만 골라 관리, 다른 라벨은 건드리지 않음</p>
 <p>작성한 파일을 적용해 보겠습니다.</p>
-<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>deploy-ex01.yml<span class="w">   </span><span class="c1"># Deployment 생성</span>
+<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex09/deploy-ex01.yml<span class="w">   </span><span class="c1"># Deployment 생성</span>
 kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                    </span><span class="c1"># Pod 목록</span></div>
 <div class="chapter-image"><img src="..\assets\CH04\03_kubectl-get-pod-deploy.png" alt="" /></div><p class="thought">그림 4-14. Deployment가 만든 Pod가 뜬 모습</p>
 <p>이제 Deployment가 정말로 지침을 지키는지 확인하기 위해, 현재 떠 있는 Pod를 전부 강제로 지워보았습니다.</p>
@@ -330,7 +333,10 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 </div>
 <div class="chapter-image"><img src="..\assets\CH04\replicaset.png" alt="" /></div><p class="thought">그림 4-16. Pod 하나가 종료되면 ReplicaSet이 설정 개수를 맞추기 위해 새 Pod를 자동 생성</p>
 <p>replicas를 4로 설정해 실행될 Pod의 개수를 지정했습니다.</p>
-<p><strong>yaml/deploy-ex02.yml</strong></p>
+<blockquote>
+<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex10</p>
+</blockquote>
+<p><strong>ex10/deploy-ex02.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -356,7 +362,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-container</span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:1.20</span></div>
 <p>이 YAML 파일을 클러스터에 적용하고, 설정한 대로 4개의 Pod가 생성되는지 확인했습니다.</p>
-<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>deploy-ex02.yml
+<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex10/deploy-ex02.yml
 kubectl<span class="w"> </span>get<span class="w"> </span>pod</div>
 <div class="chapter-image"><img src="..\assets\CH04\07_kubectl-get-pods-replicas.png" alt="" /></div><p class="thought">그림 4-17. replicas 설정대로 Pod 4개가 생성</p>
 <p class="thought">'replicas 설정값만 바꿨는데 자리가 4개나 생기네. 서버도 쉽게 늘릴 수 있으니 서버 부하는 괜찮겠어.'</p>

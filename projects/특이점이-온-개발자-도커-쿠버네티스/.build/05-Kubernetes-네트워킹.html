@@ -35,10 +35,13 @@
 <p><strong>Service</strong>: Pod 앞단의 고정 접근점입니다. Pod가 삭제되고 다시 생성되어 IP가 바뀌어도 Service 주소는 바뀌지 않습니다. 뒤에 여러 Pod가 연결되어 있으면 요청을 골고루 나누어 주는 로드밸런싱 기능을 수행합니다.</p>
 </div>
 <h3>5.1.2 Service 생성</h3>
+<blockquote>
+<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex11</p>
+</blockquote>
 <p>Service를 실습하려면 대상이 되는 Pod들이 먼저 준비되어야 합니다. 오픈이는 어제 연습하며 작성했던 deploy-ex02.yml을 다시 실행하여 Pod 네 개를 복구했습니다.</p>
-<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>deploy-ex02.yml<span class="w">   </span><span class="c1">#  Pod 4개 생성</span></div>
+<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/deploy-ex02.yml<span class="w">   </span><span class="c1">#  Pod 4개 생성</span></div>
 <p>이제 그 앞에 세울 Service YAML로 넘어갑니다.</p>
-<p><strong>yaml/service-ex01.yml</strong></p>
+<p><strong>ex11/service-ex01.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -128,7 +131,7 @@
 </table>
 <h3>5.1.4 외부에서 Service 접속해 보기</h3>
 <p>오픈이는 작성한 YAML을 적용했습니다.</p>
-<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>service-ex01.yml</div>
+<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/service-ex01.yml</div>
 <div class="chapter-image"><img src="..\assets\CH04\10_kubectl-apply-service.png" alt="" /></div><p class="thought">그림 5-5. Service 생성</p>
 <p class="thought">'아, 그러니까 이 Service가 NGINX처럼 고정된 입구 역할을 해준다는 거지?'</p>
 <p>하지만 여기서 오픈이는 부딪힙니다.</p>
@@ -196,6 +199,9 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <p class="thought">'아, 이게 팀장님이 말한 "경로별로 갈라 주는 친구"구나. 가맹점 번호를 일일이 알려주는 대신, 공식 앱 하나로 다 연결하는 거네.'</p>
 <p>비유만으로는 실감이 오지 않았습니다. 오픈이는 바로 Minikube에 인그레스를 실행 해보기로 했습니다.</p>
+<blockquote>
+<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex12</p>
+</blockquote>
 <h3>5.2.3 공식 앱 실행하기</h3>
 <p>공식 문서의 인그레스 페이지를 펼쳐 읽어 내려가려던 중, 문서 첫 줄이 오픈이의 눈에 걸렸습니다.</p>
 <blockquote>
@@ -243,7 +249,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <h4>두 서비스 준비</h4>
 <p>공식 앱이 경로별로 어떻게 갈라 주는지를 눈으로 보려면 백엔드가 최소 둘은 필요했습니다. 5.2.2에서 비유로 들었던 <code>/order</code> 와 <code>/stores</code> 를 그대로 가져와, 주문과 매장을 담당할 두 Service를 만들었습니다. 두 Pod 모두 같은 <code>hashicorp/http-echo</code> 이미지를 공유하고, <code>-text</code> 인자로 넘긴 응답 문구만 다릅니다.</p>
-<p><code>ex09/yaml/</code> 안에는 주문과 매장 각각 <strong>Pod를 띄우는 Deployment</strong> 와 그 Pod를 묶는 <strong>ClusterIP Service</strong> 가 한 쌍씩, 총 네 파일이 들어 있습니다.</p>
+<p><code>ex12/</code> 안에는 주문과 매장 각각 <strong>Pod를 띄우는 Deployment</strong> 와 그 Pod를 묶는 <strong>ClusterIP Service</strong> 가 한 쌍씩 들어 있습니다. 잠시 뒤에 작성할 Ingress 규칙도 같은 폴더에 두고, 마지막에 한 번에 적용할 예정입니다.</p>
 <table>
 <thead>
 <tr>
@@ -256,7 +262,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <tr>
 <td><code>order-deploy.yml</code></td>
 <td>Deployment</td>
-<td>주문 응답 Pod — <code>-text=주문 접수 완료 — 치킨버거 1개</code></td>
+<td>주문 응답 Pod — <code>-text=주문 접수 완료</code></td>
 </tr>
 <tr>
 <td><code>order-service.yml</code></td>
@@ -266,7 +272,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <tr>
 <td><code>stores-deploy.yml</code></td>
 <td>Deployment</td>
-<td>매장 응답 Pod — <code>-text=매장 안내 — 강남점 · 홍대점 · 판교점</code></td>
+<td>매장 응답 Pod — <code>-text=매장 선택</code></td>
 </tr>
 <tr>
 <td><code>stores-service.yml</code></td>
@@ -275,16 +281,14 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </tr>
 </tbody>
 </table>
-<p>네 파일을 한 번에 올려 두 서비스를 클러스터 안에 띄웠습니다.</p>
-<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex09/yaml/</div>
-<p>두 서비스는 <strong>ClusterIP</strong> 타입이라 클러스터 바깥에서는 직접 부를 수 없는 내부 전용 창구입니다. 바깥 요청을 이 둘로 갈라 보낼 공식 앱, 즉 Ingress 규칙이 필요했습니다.</p>
+<p>두 서비스는 모두 <strong>ClusterIP</strong> 타입이라 클러스터 바깥에서는 직접 부를 수 없는 내부 전용 창구입니다. 바깥 요청을 이 둘로 갈라 보낼 공식 앱, 즉 Ingress 규칙이 필요했습니다.</p>
 <h4>규칙 문서 작성</h4>
 <p>이제 남은 건 앞서 실행해 둔 컨트롤러에게 &quot;어떤 도메인 어떤 경로를 어디로 보내라&quot; 고 적어 둘 규칙 문서입니다.</p>
-<p><strong>ex09/yaml/ingress-ex01.yml</strong></p>
+<p><strong>ex12/ingress-ex01.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
 <span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shop-ingress</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex12-ingress</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w">           </span><span class="c1"># 어느 Controller가 이 규칙을 집행할지 지정</span>
 <span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
@@ -305,20 +309,20 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <span class="w">                </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5678</span></div>
 <p>오픈이가 적어 내려간 이 YAML이 아까 문서가 말하던 <strong>규칙 문서</strong> 쪽이었습니다. <strong>rules</strong> 아래 두 개의 <strong>path</strong> 가 있고, 각 경로가 서로 다른 Service를 가리킵니다. 규칙을 문서로 선언해 두면, 앞서 실행한 컨트롤러 Pod가 그 규칙을 읽고 실제 요청을 갈라 줍니다.</p>
-<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex09/yaml/ingress-ex01.yml<span class="w">       </span><span class="c1"># 규칙 등록</span>
+<p>이제 <code>ex12/</code> 안의 모든 파일을 한 번에 올려 두 서비스와 Ingress 규칙을 함께 등록했습니다.</p>
+<div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex12/
 kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w">                               </span><span class="c1"># 등록된 Ingress 확인</span></div>
-<!-- MOCK: 실제 환경에서 재캡처 후 교체 필요 -->
-<div class="chapter-image"><img src="..\assets\CH05\mock-ingress-get.png" alt="" /></div><p class="thought">그림 5-14. Ingress 리소스 등록 확인 — shop-ingress</p>
+<div class="chapter-image"><img src="..\assets\CH05\mock-ingress-get.png" alt="" /></div><p class="thought">그림 5-14. Ingress 리소스 등록 확인 — ex12-ingress</p>
 <h4>브라우저로 접속</h4>
 <p>Docker 드라이버로 Minikube를 띄운 환경에서는 클러스터가 컨테이너 안에 있어 호스트에서 직접 닿지 않습니다. 이 통로를 뚫어 주는 <code>minikube tunnel</code> 을 별도 터미널에서 띄워 두면, 호스트의 <code>localhost</code> 로 들어온 요청이 Ingress Controller까지 이어집니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>tunnel<span class="w">                         </span><span class="c1"># 별도 터미널에서 실행</span></div>
 <div class="chapter-image"><img src="..\assets\CH05\chap03-ingress-tunnel.png" alt="" /></div><p class="thought">그림 5-15. minikube tunnel 실행으로 외부 접근 경로 확보</p>
 <p>준비가 끝났으니 브라우저를 열어 두 경로를 차례로 들어가 봤습니다. 먼저 <code>http://localhost/order</code> 를 주소창에 입력하자 주문 페이지 응답이 돌아왔습니다.</p>
 <!-- MOCK: 실제 환경에서 재캡처 후 교체 필요 -->
-<div class="chapter-image"><img src="..\assets\CH05\mock-order-page.png" alt="" /></div><p class="thought">그림 5-16. `/order` 접속 결과 — "주문 접수 완료 — 치킨버거 1개"</p>
-<p>이어서 <code>http://localhost/stores</code> 로 이동하자 이번에는 매장 안내 응답이 떴습니다.</p>
+<div class="chapter-image"><img src="..\assets\CH05\mock-order-page.png" alt="" /></div><p class="thought">그림 5-16. `/order` 접속 결과 — "주문 접수 완료"</p>
+<p>이어서 <code>http://localhost/stores</code> 로 이동하자 이번에는 매장 선택 응답이 떴습니다.</p>
 <!-- MOCK: 실제 환경에서 재캡처 후 교체 필요 -->
-<div class="chapter-image"><img src="..\assets\CH05\mock-stores-page.png" alt="" /></div><p class="thought">그림 5-17. `/stores` 접속 결과 — "매장 안내 — 강남점 · 홍대점 · 판교점"</p>
+<div class="chapter-image"><img src="..\assets\CH05\mock-stores-page.png" alt="" /></div><p class="thought">그림 5-17. `/stores` 접속 결과 — "매장 선택"</p>
 <p>같은 호스트에 붙였는데 뒤의 경로 한 글자에 따라 응답이 완전히 달라졌습니다. 공식 앱이 고객의 용건을 보고 알맞은 가맹점으로 연결해 줬습니다.</p>
 <p>규칙(YAML)에 적어 둔 경로만 연결되고, 그 외의 요청은 컨트롤러가 그대로 돌려보냅니다. 공식 앱 메뉴판에 없는 버튼을 눌렀을 때 화면이 먹통이 됩니다.</p>
 <p>겉으로 보이는 결과는 매끄러웠지만, 그 사이에서 누가 무엇을 하고 있는지는 아직 손에 잡히지 않았습니다.</p>

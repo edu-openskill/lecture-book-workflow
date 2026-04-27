@@ -4,68 +4,71 @@
 <meta charset="utf-8">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: transparent;
-  }
+  html, body { margin: 0; padding: 0; background: transparent; height: auto; }
   body {
     padding: 20px;
     display: inline-block;
     width: 100%;
     box-sizing: border-box;
-    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
+                 'Menlo', 'Monaco', 'Courier New', monospace;
   }
   .terminal {
     width: 860px;
     margin: 0 auto;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
-    border: 1px solid #d8d2c5;
-    background: #faf6ef;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #d0d0d0;
+    background: #ffffff;
   }
   .titlebar {
-    background: #ece6d8;
-    padding: 8px 14px;
+    background: #e0e0e0;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    border-bottom: 1px solid #d8d2c5;
+    gap: 8px;
+    border-bottom: 1px solid #c8c8c8;
   }
-  .dot { width: 11px; height: 11px; border-radius: 50%; }
-  .dot.red    { background: #ff5f57; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
   .dot.yellow { background: #ffbd2e; }
-  .dot.green  { background: #28c940; }
+  .dot.green { background: #28c940; }
   .title {
-    color: #6b6258;
+    color: #555;
     font-size: 12px;
+    margin-left: 8px;
     flex: 1;
     text-align: center;
+    font-weight: 500;
   }
-  .body {
-    padding: 18px 22px;
-    font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
-    font-size: 13px;
-    line-height: 1.7;
-    color: #333;
-  }
+  .body { padding: 20px 24px; }
   .prompt {
-    color: #1f5fb7;
+    color: #0066cc;
+    font-size: 13px;
+    margin-bottom: 10px;
+    word-break: break-all;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   }
   .prompt::before {
     content: '$ ';
-    color: #1f5fb7;
+    color: #2a9d2a;
+    font-weight: bold;
   }
-  pre {
-    margin: 4px 0 12px 0;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    color: #333;
+  .output {
+    color: #222222;
+    font-size: 13px;
+    line-height: 1.5;
     white-space: pre;
+    word-break: normal;
+    overflow-x: auto;
+    font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+    margin-bottom: 14px;
   }
+  .output:last-child { margin-bottom: 0; }
+  .output pre { margin: 0; font-family: inherit; font-size: inherit; line-height: inherit; }
+  .name { color: #28c940; }
+  .running { color: #28c940; }
 </style>
 </head>
 <body>
@@ -77,11 +80,15 @@
     <div class="title">실행결과</div>
   </div>
   <div class="body">
-    <div class="prompt">kubectl apply -f ex09/yaml/ingress-ex01.yml</div>
-    <pre>ingress.networking.k8s.io/shop-ingress created</pre>
+    <div class="prompt">kubectl apply -f ex12/</div>
+    <div class="output">ingress.networking.k8s.io/<span class="name">ex12-ingress</span> created
+deployment.apps/<span class="name">order-deploy</span> created
+service/<span class="name">order-service</span> created
+deployment.apps/<span class="name">stores-deploy</span> created
+service/<span class="name">stores-service</span> created</div>
     <div class="prompt">kubectl get ingress</div>
-<pre>NAME           CLASS   HOSTS   ADDRESS        PORTS   AGE
-shop-ingress   nginx   *       192.168.49.2   80      12s</pre>
+    <div class="output">NAME           CLASS   HOSTS   ADDRESS   PORTS   AGE
+<span class="name">ex12-ingress</span>   nginx   *                 80      37s</div>
   </div>
 </div>
 </body>

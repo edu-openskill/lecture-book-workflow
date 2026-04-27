@@ -31,7 +31,7 @@ if [ ! -f "$PNG_PATH" ]; then
 fi
 
 # 흰 여백 자동 트림 (Pillow)
-PYTHON="/c/Users/BJ/AppData/Local/Programs/Python/Python312/python.exe"
+PYTHON="python"
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 "$PYTHON" "$SCRIPT_DIR/trim-png.py" "$PNG_PATH" 12 2>&1 | head -3
 

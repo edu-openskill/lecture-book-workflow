@@ -1,33 +1,16 @@
+# ex08 — Pod YAML 첫 적용
 
-#### 미니큐브 실행
+CH04 §4.3.3에서 사용. nginx 컨테이너 한 개를 가진 Pod 정의.
 
-- minikube start
+## 적용
 
-#### 이미지 빌드
+```bash
+kubectl apply -f ex08/hello-pod2.yml
+kubectl get pod
+```
 
-- minikube image build -t metacoding/db:1 ./db
-- minikube image build -t metacoding/backend:1 ./backend
-- minikube image build -t metacoding/frontend:1 ./frontend
-- minikube image build -t metacoding/redis:1 ./redis
+## 정리
 
-#### namespase 적용
-
-- kubectl apply -f k8s/namespace.yml
-
-#### pod 생성
-
-- kubectl apply -f k8s/ --recursive
-
-### 결과 확인
-
-- kubectl get deploy,pod,service -n metacoding
-
-### 로그 확인
-
- - kubectl logs deploy/db-deploy -n metacoding --tail=100
- - kubectl logs deploy/frontend-deploy -n metacoding --tail=100
- - kubectl logs -l app=backend -n metacoding --tail=100 --prefix
-
-### 연결
-
-- minikube service frontend-service -n metacoding --url
+```bash
+kubectl delete -f ex08/hello-pod2.yml
+```

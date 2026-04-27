@@ -15,4 +15,4 @@ spec:
         - name: stores
           image: hashicorp/http-echo:latest
           args:
-            - "-text=매장 안내 — 강남점 · 홍대점 · 판교점"
+            - "-text=매장 선택"

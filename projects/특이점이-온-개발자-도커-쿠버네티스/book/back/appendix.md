@@ -46,13 +46,19 @@
 각 장별 예제 폴더 구조:
 
 ```
-ex01~ex03/  →  2장 NGINX 실습
-ex04/       →  2장 Redis 실습
-ex05/       →  2장 DB Server 실습
-ex06/       →  2장 Docker Compose 실습
-ex07/       →  2장 풀스택 웹사이트
-ex08/       →  3장 K8s 풀스택 웹사이트
-yaml/       →  3장 K8s 리소스 실습
+ex01~ex03/  →  3장 NGINX 경로 라우팅 실습
+ex04/       →  3장 Redis 실습
+ex05/       →  3장 DB Server 실습
+ex06/       →  3장 Docker Compose 실습
+ex07/       →  3장 풀스택 웹사이트
+ex08/       →  4장 Pod YAML 첫 적용
+ex09/       →  4장 Deployment 기본
+ex10/       →  4장 Deployment 롤링 업데이트
+ex11/       →  5장 Service (NodePort)
+ex12/       →  5장 Ingress 경로 라우팅
+ex13/       →  6장 ConfigMap + Secret
+ex14/       →  6장 Volume (PV / PVC / Pod)
+ex15/       →  6장 K8s 풀스택 웹사이트
 ```
 
 ---
