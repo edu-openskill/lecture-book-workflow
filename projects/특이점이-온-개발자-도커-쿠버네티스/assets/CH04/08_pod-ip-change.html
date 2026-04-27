@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
+  html, body { margin: 0; padding: 0; background: transparent; height: auto; }
+  body {
+    padding: 20px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
+                 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+  .terminal {
+    width: 860px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #d0d0d0;
+    background: #ffffff;
+  }
+  .titlebar {
+    background: #e0e0e0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #c8c8c8;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green { background: #28c940; }
+  .title {
+    color: #555;
+    font-size: 12px;
+    margin-left: 8px;
+    flex: 1;
+    text-align: center;
+    font-weight: 500;
+  }
+  .body { padding: 20px 24px; }
+  .prompt {
+    color: #0066cc;
+    font-size: 12px;
+    margin-bottom: 10px;
+    word-break: break-all;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+  .prompt::before {
+    content: '$ ';
+    color: #2a9d2a;
+    font-weight: bold;
+  }
+  .output {
+    color: #222222;
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre;
+    word-break: normal;
+    overflow-x: auto;
+    font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+    margin-bottom: 12px;
+  }
+  .output pre { margin: 0; font-family: inherit; font-size: inherit; line-height: inherit; }
+  .output code { font-family: inherit; }
+  .output .err { color: #cc0000; font-weight: 500; }
+  .output .ok  { color: #2a9d2a; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="titlebar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <div class="title">실행결과</div>
+  </div>
+  <div class="body">
+    <div class="prompt">kubectl get pod -o wide</div>
+    <div class="output">NAME                                READY   STATUS    RESTARTS   AGE   IP           NODE      NOMINATED NODE   READINESS GATES
+nginx-replica-756b46b54c-4nlvw 1/1     Running   0          30s  10.244.0.38  minikube   <none>        <none>
+nginx-replica-756b46b54c-dxmzk 1/1     Running   0          30s  10.244.0.39  minikube   <none>        <none>
+nginx-replica-756b46b54c-ghlzw 1/1     Running   0          30s  10.244.0.37  minikube   <none>        <none>
+nginx-replica-756b46b54c-nrbgp 1/1     Running   0          30s  10.244.0.36  minikube   <none>        <none></div>
+    <div class="prompt" style="margin-top: 12px;">kubectl delete pod --all</div>
+    <div class="output">pod "nginx-replica-756b46b54c-4nlvw" deleted from default namespace
+pod "nginx-replica-756b46b54c-dxmzk" deleted from default namespace
+pod "nginx-replica-756b46b54c-ghlzw" deleted from default namespace
+pod "nginx-replica-756b46b54c-nrbgp" deleted from default namespace</div>
+    <div class="prompt" style="margin-top: 12px;">kubectl get pod -o wide</div>
+    <div class="output">NAME                                READY   STATUS    RESTARTS   AGE   IP          NODE      NOMINATED NODE   READINESS GATES
+nginx-replica-756b46b54c-7qztnx 1/1     Running   0          12s  10.244.0.41  minikube   <none>        <none>
+nginx-replica-756b46b54c-cb592 1/1     Running   0          12s  10.244.0.42  minikube   <none>        <none>
+nginx-replica-756b46b54c-ff5dt   1/1     Running   0          12s  10.244.0.43  minikube   <none>        <none>
+nginx-replica-756b46b54c-hpnzm 1/1     Running   0          12s  10.244.0.40  minikube   <none>        <none></div>
+  </div>
+</div>
+</body>
+</html>

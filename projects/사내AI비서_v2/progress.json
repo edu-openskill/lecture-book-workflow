@@ -1,10 +1,14 @@
 {
   "project": "사내AI비서_v2",
-  "title": "사내 AI 비서 만들기",
+  "title": "AI도 모르는 우리 회사 이야기",
+  "alias": "사내AI비서",
   "status": "in_progress",
-  "current_step": "step_4_outline",
+  "current_step": "step_5_chapters",
+  "book_version": "v6",
   "created_at": "2026-03-04",
-  "updated_at": "2026-03-04",
+  "updated_at": "2026-04-21",
+  "milestone": "ch11_split",
+  "_milestone_note": "CH10 §10.7~§10.10을 CH11(커넥트HR 에이전트의 완성)로 분리. ex11 레포 신설 + PDF 캡처 근거 + 카테고리 분기 추가",
 
   "steps": {
     "step_1_seed": {
@@ -16,7 +20,7 @@
         "insight": "pass",
         "audit": "pass"
       },
-      "questions_pending": 2
+      "questions_pending": 0
     },
     "step_2_code": {
       "name": "코드 해부",
@@ -31,57 +35,77 @@
     },
     "step_3_scenario": {
       "name": "시나리오+버전",
-      "status": "done",
-      "artifact": "planning/scenario-v1.md",
-      "artifact_version": 1,
-      "versions_created": ["v0.1", "v0.2", "v0.3", "v0.4", "v0.5", "v0.6", "v0.7"],
+      "status": "pending",
+      "artifact": null,
+      "artifact_version": null,
+      "versions_created": [],
       "review": {
-        "insight": "pass",
-        "audit": "pass"
+        "insight": null,
+        "audit": null
       },
-      "questions_pending": 0
+      "questions_pending": 0,
+      "_note": "v2는 통합흐름 뼈대만. planning/scenario-v2.md로 재작성 예정"
     },
     "step_4_outline": {
       "name": "뼈대",
       "status": "pending",
       "artifact": null,
       "artifact_version": null,
-      "gap_analysis": null,
       "review": {
         "insight": null,
         "audit": null
       },
-      "questions_pending": 0
+      "questions_pending": 0,
+      "_note": "planning/outline-v3.md로 재작성 예정"
     },
     "step_5_chapters": {
       "name": "챕터 집필",
-      "status": "pending",
-      "chapters": []
+      "status": "in_progress",
+      "chapters": [
+        {
+          "id": "CH10",
+          "title": "PDF 이미지까지 잡아라",
+          "artifact": "chapters/10-PDF-이미지까지-잡아라.md",
+          "status": "in_progress",
+          "_note": "§10.7~§10.10을 CH11로 분리. §10.1~§10.6 + 닫기 블록만 남음"
+        },
+        {
+          "id": "CH11",
+          "title": "커넥트HR 에이전트의 완성",
+          "artifact": "chapters/11-커넥트HR-에이전트의-완성.md",
+          "status": "in_progress",
+          "_note": "§11.1 파이프라인 조립 + §11.2 웹 UI + §11.3 PDF 캡처 근거 + §11.4 카테고리 분기 + §11.5 마지막 여정 + §11.6 전체 구성도. 코드 레포: code/rag-end/ex11/"
+        }
+      ],
+      "_note": "CH01~CH11 총 11장으로 재편(원래 10장 계획에서 CH11 분리). Ch.1~11 차례로 폴리싱 진행"
     },
     "step_6_prologue": {
       "name": "프롤로그+로드맵",
       "status": "pending",
-      "artifacts": {
-        "prologue": null,
-        "roadmap": null
-      },
+      "artifacts": {},
       "review": {
         "audit": null
-      }
+      },
+      "_note": "Ch.1 PDF 확정 후 착수"
     },
     "step_7_finish": {
       "name": "마무리",
       "status": "pending",
-      "artifacts": {
-        "preface": null,
-        "afterword": null,
-        "appendix": null
-      },
-      "final_title": null,
-      "total_pages": null,
+      "artifacts": {},
       "review": {
         "audit": null
       }
+    },
+    "step_8_pdf_pipeline": {
+      "name": "HTML 프리뷰 파이프라인",
+      "status": "done",
+      "artifacts": {
+        "templates": ".claude/skills/pub-html-build/templates/",
+        "styles": ".claude/skills/pub-html-build/styles/",
+        "builder": ".claude/skills/pub-html-build/build_html.py",
+        "pdf_builder": ".claude/skills/pub-html-to-pdf/build_pdf.py"
+      },
+      "_note": "HTML 프리뷰는 pub-html-build, 선택적 PDF는 pub-html-to-pdf (정식 전자책 PDF는 pub-build Typst 경로)"
     }
   },
 

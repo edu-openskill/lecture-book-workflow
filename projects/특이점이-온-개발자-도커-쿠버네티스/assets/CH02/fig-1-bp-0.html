@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Hub - 이미지 - 컨테이너 사이클</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 36px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #1565c0;
+    border-radius: 12px;
+    padding: 30px 36px 26px;
+    width: 880px;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+  }
+  .scene {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .node-svg {
+    width: 110px;
+    height: 90px;
+  }
+  .node-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+  /* 이미지 — 핵심: 빨강·주황 강조 */
+  .image-node .node-label {
+    color: #c62828;
+    font-weight: 800;
+  }
+  .arrows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 130px;
+    padding: 0 6px;
+  }
+  .arrow-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .arrow-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1565c0;
+    margin-bottom: 2px;
+  }
+  .arrow-row svg {
+    width: 100%;
+    height: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <div class="scene">
+    <!-- Docker Hub -->
+    <div class="node">
+      <svg class="node-svg" viewBox="0 0 110 90">
+        <path d="M 14 70 Q 4 70 4 58 Q 4 42 22 42 Q 24 24 44 22 Q 56 8 72 16 Q 88 12 96 28 Q 108 32 108 50 Q 108 70 92 70 Z"
+              fill="#f5faff" stroke="#1565c0" stroke-width="2.5"/>
+      </svg>
+      <div class="node-label">Docker Hub</div>
+    </div>
+
+    <!-- 화살표: Hub ↔ 이미지 -->
+    <div class="arrows">
+      <div class="arrow-row">
+        <span class="arrow-label">내려받기</span>
+        <svg viewBox="0 0 130 14" preserveAspectRatio="none">
+          <line x1="0" y1="7" x2="116" y2="7" stroke="#1565c0" stroke-width="2"/>
+          <polygon points="116,2 130,7 116,12" fill="#1565c0"/>
+        </svg>
+      </div>
+      <div class="arrow-row">
+        <span class="arrow-label">올리기</span>
+        <svg viewBox="0 0 130 14" preserveAspectRatio="none">
+          <line x1="130" y1="7" x2="14" y2="7" stroke="#1565c0" stroke-width="2"/>
+          <polygon points="14,2 0,7 14,12" fill="#1565c0"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 이미지 (핵심) -->
+    <div class="node image-node">
+      <svg class="node-svg" viewBox="0 0 110 90">
+        <path d="M 14 26 L 46 26 L 56 18 L 96 18 L 96 78 L 14 78 Z"
+              fill="#fff3e0" stroke="#c62828" stroke-width="2.5"/>
+        <line x1="14" y1="38" x2="96" y2="38" stroke="#c62828" stroke-width="1.5"/>
+        <line x1="22" y1="50" x2="86" y2="50" stroke="#c62828" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="22" y1="60" x2="86" y2="60" stroke="#c62828" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="22" y1="70" x2="68" y2="70" stroke="#c62828" stroke-width="1" stroke-dasharray="4 3"/>
+      </svg>
+      <div class="node-label">이미지</div>
+    </div>
+
+    <!-- 화살표: 이미지 ↔ 컨테이너 -->
+    <div class="arrows">
+      <div class="arrow-row">
+        <span class="arrow-label">실행</span>
+        <svg viewBox="0 0 130 14" preserveAspectRatio="none">
+          <line x1="0" y1="7" x2="116" y2="7" stroke="#1565c0" stroke-width="2"/>
+          <polygon points="116,2 130,7 116,12" fill="#1565c0"/>
+        </svg>
+      </div>
+      <div class="arrow-row">
+        <span class="arrow-label">저장</span>
+        <svg viewBox="0 0 130 14" preserveAspectRatio="none">
+          <line x1="130" y1="7" x2="14" y2="7" stroke="#1565c0" stroke-width="2"/>
+          <polygon points="14,2 0,7 14,12" fill="#1565c0"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 컨테이너 -->
+    <div class="node">
+      <svg class="node-svg" viewBox="0 0 110 90">
+        <rect x="10" y="18" width="90" height="60" rx="4" fill="#f5faff" stroke="#1565c0" stroke-width="2.5"/>
+        <line x1="28" y1="18" x2="28" y2="78" stroke="#1565c0" stroke-width="1.2"/>
+        <line x1="46" y1="18" x2="46" y2="78" stroke="#1565c0" stroke-width="1.2"/>
+        <line x1="64" y1="18" x2="64" y2="78" stroke="#1565c0" stroke-width="1.2"/>
+        <line x1="82" y1="18" x2="82" y2="78" stroke="#1565c0" stroke-width="1.2"/>
+      </svg>
+      <div class="node-label">컨테이너</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

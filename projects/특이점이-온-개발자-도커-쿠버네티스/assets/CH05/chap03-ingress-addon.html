@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
+  html, body { margin: 0; padding: 0; background: transparent; height: auto; }
+  body {
+    padding: 20px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
+                 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+  .terminal {
+    width: 860px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #d0d0d0;
+    background: #ffffff;
+  }
+  .titlebar {
+    background: #e0e0e0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #c8c8c8;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green { background: #28c940; }
+  .title {
+    color: #555;
+    font-size: 12px;
+    margin-left: 8px;
+    flex: 1;
+    text-align: center;
+    font-weight: 500;
+  }
+  .body { padding: 20px 24px; }
+  .prompt {
+    color: #0066cc;
+    font-size: 13px;
+    margin-bottom: 10px;
+    word-break: break-all;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+  .prompt::before {
+    content: '$ ';
+    color: #2a9d2a;
+    font-weight: bold;
+  }
+  .output {
+    color: #222222;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: normal;
+    overflow-x: auto;
+    font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+  }
+  .output pre { margin: 0; font-family: inherit; font-size: inherit; line-height: inherit; }
+  .output code { font-family: inherit; }
+  .icon { display: inline-block; margin-right: 4px; }
+  .info { color: #0066cc; }
+  .warn { color: #ff9900; }
+  .success { color: #28c940; }
+  .link { color: #0066cc; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="titlebar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <div class="title">실행결과</div>
+  </div>
+  <div class="body">
+    <div class="prompt">minikube addons enable ingress</div>
+    <div class="output"><span class="icon">💡</span> ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+<span class="icon">💡</span> After the addon is enabled, please run "minikube tunnel" and your ingress resources would be available at "127.0.0.1"
+    - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.2
+    - Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.2
+    - Using image registry.k8s.io/ingress-nginx/controller:v1.13.2
+🔍 Verifying ingress addon...
+<span class="icon">⭐</span> The 'ingress' addon is enabled</div>
+  </div>
+</div>
+</body>
+</html>

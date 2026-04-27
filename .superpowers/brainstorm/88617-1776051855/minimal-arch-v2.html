@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ConnectHR 아키텍처 — 미니멀 v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.7; }
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+.design-block { background: #fff; border-radius: 12px; padding: 28px; margin: 32px 0; border: 1px solid #edf0f5; }
+.design-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 24px; }
+.arch-canvas { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; overflow-x: auto; }
+.arch-canvas svg { width: 100%; height: auto; min-width: 1100px; display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>ConnectHR 아키텍처 — 미니멀 v2 (겹침 정리)</h1>
+<p class="subtitle">왼쪽 복도: 응답 반환 / 오른쪽 복도: 인제스천 · 외부 · 각 연결선이 박스를 통과하지 않도록 라우팅 재설계</p>
+
+<div class="design-block">
+  <div class="design-title">단순화 + 겹침 제거</div>
+  <div class="design-desc">
+    • <b>왼쪽 복도(80px)</b>: 응답 반환용 전용 통로<br>
+    • <b>오른쪽 복도(80px)</b>: 외부·인제스천 전용 통로<br>
+    • <b>중앙 영역(900px)</b>: 메인 흐름 — 박스 간 직각 선이 다른 박스를 통과하지 않음
+  </div>
+
+  <div class="arch-canvas">
+    <svg viewBox="0 0 1100 780" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="v2-arr" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#111827"/>
+        </marker>
+        <marker id="v2-arr-blue" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+        </marker>
+        <marker id="v2-arr-gray" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+        </marker>
+      </defs>
+
+      <!-- ============== 좌/우 복도 가이드 (아주 연한 색) ============== -->
+      <rect x="20" y="80" width="80" height="600" fill="#f9fafb" stroke="none"/>
+      <rect x="1000" y="80" width="80" height="600" fill="#f9fafb" stroke="none"/>
+      <text x="60" y="75" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#d1d5db" letter-spacing="1">응답 복도</text>
+      <text x="1040" y="75" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#d1d5db" letter-spacing="1">외부·인제스천</text>
+
+      <!-- ============== 배경 영역 (Ch 워터마크) ============== -->
+      <!-- Ch.2 -->
+      <rect x="110" y="80" width="880" height="90" fill="#fafafa" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+      <text x="130" y="140" font-family="Gaegu, sans-serif" font-size="50" font-weight="700" fill="#e5e7eb" letter-spacing="3">Ch.2</text>
+      <text x="980" y="98" text-anchor="end" font-family="sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">GATEWAY</text>
+
+      <!-- Ch.6 -->
+      <rect x="110" y="190" width="880" height="100" fill="#fafafa" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+      <text x="130" y="255" font-family="Gaegu, sans-serif" font-size="50" font-weight="700" fill="#e5e7eb" letter-spacing="3">Ch.6</text>
+      <text x="980" y="208" text-anchor="end" font-family="sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">ORCHESTRATION</text>
+
+      <!-- Ch.4~5 -->
+      <rect x="110" y="310" width="880" height="110" fill="#fafafa" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+      <text x="130" y="380" font-family="Gaegu, sans-serif" font-size="50" font-weight="700" fill="#e5e7eb" letter-spacing="3">Ch.4~5</text>
+      <text x="980" y="328" text-anchor="end" font-family="sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">RETRIEVAL</text>
+
+      <!-- 데이터 영역 (Ch.2 DATA + Ch.3) -->
+      <rect x="110" y="440" width="880" height="100" fill="#fafafa" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+      <text x="130" y="500" font-family="Gaegu, sans-serif" font-size="44" font-weight="700" fill="#e5e7eb" letter-spacing="3">Ch.2·3</text>
+      <text x="980" y="458" text-anchor="end" font-family="sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">DATA</text>
+
+      <!-- Ch.8~10 -->
+      <rect x="110" y="560" width="880" height="90" fill="#fafafa" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+      <text x="130" y="615" font-family="Gaegu, sans-serif" font-size="44" font-weight="700" fill="#e5e7eb" letter-spacing="3">Ch.8~10</text>
+      <text x="980" y="578" text-anchor="end" font-family="sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">TUNING · EVAL</text>
+
+      <!-- Ch.7 -->
+      <rect x="110" y="670" width="580" height="80" fill="#fafafa" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+      <text x="130" y="720" font-family="Gaegu, sans-serif" font-size="40" font-weight="700" fill="#e5e7eb" letter-spacing="3">Ch.7</text>
+      <text x="680" y="688" text-anchor="end" font-family="sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">OPS</text>
+
+      <!-- External Ch.1 -->
+      <rect x="710" y="670" width="280" height="80" fill="#fafafa" stroke="#d1d5db" stroke-width="1" stroke-dasharray="4,4" rx="6"/>
+      <text x="730" y="720" font-family="Gaegu, sans-serif" font-size="40" font-weight="700" fill="#e5e7eb" letter-spacing="3">Ch.1</text>
+      <text x="980" y="688" text-anchor="end" font-family="sans-serif" font-size="10" font-weight="700" fill="#6b7280" letter-spacing="1.5">EXTERNAL</text>
+
+      <!-- ============== User (최상단) ============== -->
+      <rect x="330" y="25" width="160" height="36" rx="18" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="410" y="48" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">사내 직원</text>
+
+      <!-- ============== Ch.2: GATEWAY ============== -->
+      <rect x="330" y="100" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="410" y="122" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">FastAPI</text>
+      <text x="410" y="139" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">REST API Gateway</text>
+
+      <!-- ============== Ch.6: ORCHESTRATION ============== -->
+      <!-- Query Router -->
+      <rect x="160" y="215" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="240" y="237" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">Query Router</text>
+      <text x="240" y="254" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">rule · schema · LLM</text>
+
+      <!-- ReAct Agent (primary blue) -->
+      <rect x="420" y="215" width="160" height="54" rx="4" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+      <text x="500" y="237" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#fff">ReAct Agent</text>
+      <text x="500" y="254" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#bfdbfe">Think · Act · Observe</text>
+
+      <!-- MCP Tools -->
+      <rect x="680" y="215" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="760" y="237" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">MCP Tools</text>
+      <text x="760" y="254" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">DB 조회 함수</text>
+
+      <!-- ============== Ch.4~5: RETRIEVAL ============== -->
+      <!-- Doc Pipeline -->
+      <rect x="160" y="335" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="240" y="357" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">Doc Pipeline</text>
+      <text x="240" y="374" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">파싱 · 청킹 · 임베딩</text>
+
+      <!-- LCEL Chain (center) -->
+      <rect x="420" y="335" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="500" y="357" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">LCEL Chain</text>
+      <text x="500" y="374" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">Retriever → Prompt → LLM</text>
+
+      <!-- ============== Ch.2·3: DATA ============== -->
+      <!-- PostgreSQL -->
+      <rect x="160" y="465" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="240" y="487" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">PostgreSQL</text>
+      <text x="240" y="504" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">직원 · 연차 · 매출</text>
+
+      <!-- ChromaDB -->
+      <rect x="420" y="465" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="500" y="487" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">ChromaDB</text>
+      <text x="500" y="504" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">벡터 저장소</text>
+
+      <!-- 문서 저장소 -->
+      <rect x="680" y="465" width="160" height="54" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="760" y="487" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">문서 저장소</text>
+      <text x="760" y="504" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">PDF · DOCX · XLSX</text>
+
+      <!-- ============== Ch.8~10: TUNING ============== -->
+      <rect x="140" y="580" width="180" height="50" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="230" y="600" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">Hybrid+Rerank</text>
+      <text x="230" y="615" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">Ch.8 · BM25 · X-Enc</text>
+
+      <rect x="350" y="580" width="180" height="50" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="440" y="600" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">Query Rewrite</text>
+      <text x="440" y="615" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">Ch.9 · HyDE · MQ</text>
+
+      <rect x="560" y="580" width="180" height="50" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="650" y="600" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">Vision · OCR</text>
+      <text x="650" y="615" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">Ch.10 · 이미지</text>
+
+      <rect x="770" y="580" width="180" height="50" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="860" y="600" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#111827">Eval Framework</text>
+      <text x="860" y="615" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#6b7280">Ch.10 · P@k · Halluc</text>
+
+      <!-- ============== Ch.7: OPS ============== -->
+      <rect x="210" y="695" width="220" height="40" rx="4" fill="#fff" stroke="#111827" stroke-width="2"/>
+      <text x="320" y="720" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#111827">ResponseCache · TokenTracker</text>
+
+      <!-- ============== Ch.1: EXTERNAL (점선) ============== -->
+      <rect x="750" y="695" width="220" height="40" rx="4" fill="#fff" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5,3"/>
+      <text x="860" y="720" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#6b7280">Ollama LLM (External)</text>
+
+      <!-- ================================================= -->
+      <!-- ============== 직각 화살표 (겹침 없음) ============== -->
+      <!-- ================================================= -->
+
+      <!-- User → FastAPI -->
+      <path d="M 410 61 L 410 98" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#v2-arr)"/>
+
+      <!-- FastAPI → Query Router (중앙 아래로 내려가서 왼쪽 Query Router로) -->
+      <path d="M 410 154 L 410 190 L 240 190 L 240 213" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#v2-arr)"/>
+
+      <!-- Query Router → ReAct Agent -->
+      <path d="M 320 242 L 418 242" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#v2-arr)"/>
+
+      <!-- ReAct Agent → MCP Tools -->
+      <path d="M 580 242 L 678 242" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#v2-arr)"/>
+
+      <!-- ReAct Agent → LCEL Chain -->
+      <path d="M 500 269 L 500 333" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#v2-arr)"/>
+
+      <!-- MCP Tools → PostgreSQL (오른쪽 복도 우회) -->
+      <path d="M 760 269 L 760 295 L 1020 295 L 1020 492 L 322 492" fill="none" stroke="#2563eb" stroke-width="1.5" marker-end="url(#v2-arr-blue)"/>
+
+      <!-- LCEL Chain → ChromaDB -->
+      <path d="M 500 389 L 500 463" fill="none" stroke="#2563eb" stroke-width="1.5" marker-end="url(#v2-arr-blue)"/>
+
+      <!-- Doc Pipeline → ChromaDB (인제스천) -->
+      <path d="M 320 362 L 380 362 L 380 492 L 418 492" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#v2-arr-gray)"/>
+
+      <!-- 문서 저장소 → Doc Pipeline (오른쪽 복도 → 왼쪽으로 상단 우회) -->
+      <path d="M 840 492 L 890 492 L 890 432 L 240 432 L 240 333" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#v2-arr-gray)"/>
+
+      <!-- LCEL Chain → Tuning (Hybrid+Rerank) -->
+      <path d="M 500 389 L 500 410 L 230 410 L 230 578" fill="none" stroke="#9ca3af" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#v2-arr-gray)" opacity="0.7"/>
+
+      <!-- ReAct Agent → Ollama LLM (오른쪽 복도로) -->
+      <path d="M 500 269 L 500 290 L 1050 290 L 1050 715 L 972 715" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#v2-arr-gray)"/>
+
+      <!-- ReAct Agent → 응답 (왼쪽 복도로) -->
+      <path d="M 420 242 L 60 242 L 60 43 L 328 43" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#v2-arr-blue)"/>
+      <text x="40" y="160" font-family="sans-serif" font-size="11" fill="#2563eb" font-weight="600" font-style="italic" transform="rotate(-90 40 160)">응답 반환</text>
+
+      <!-- ============== 범례 ============== -->
+      <g transform="translate(130, 760)">
+        <line x1="0" y1="0" x2="30" y2="0" stroke="#111827" stroke-width="1.5"/>
+        <text x="38" y="4" font-family="sans-serif" font-size="11" fill="#4b5563">주 흐름 (쿼리)</text>
+
+        <line x1="150" y1="0" x2="180" y2="0" stroke="#2563eb" stroke-width="1.5"/>
+        <text x="188" y="4" font-family="sans-serif" font-size="11" fill="#4b5563">데이터 / 응답</text>
+
+        <line x1="300" y1="0" x2="330" y2="0" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="338" y="4" font-family="sans-serif" font-size="11" fill="#4b5563">인제스천 · 외부</text>
+      </g>
+    </svg>
+  </div>
+
+  <p style="font-size:13px; color:#718096; margin-top:14px;">
+    <strong>정리 포인트</strong>:<br>
+    • 좌측 80px 복도 = 응답 반환 전용 (파란 선이 박스 안 통과)<br>
+    • 우측 80px 복도 = 인제스천 · 외부 LLM 전용 (회색 점선이 박스 안 통과)<br>
+    • 중앙 각 영역이 세로로 분리되어 줄이 다른 영역을 통과 안 함<br>
+    • PostgreSQL · ChromaDB · 문서 저장소를 별도 DATA 영역으로 분리 (Ch.2·3) → Ch.2 Gateway 영역엔 FastAPI만
+  </p>
+</div>
+
+</div>
+</body>
+</html>

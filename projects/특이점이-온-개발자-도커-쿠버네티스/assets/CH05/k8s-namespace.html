@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Namespace — 클러스터 안의 가상 공간 분리</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 36px 24px 32px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 940px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; }
+
+  .cluster {
+    border: 2.5px solid #1565c0;
+    border-radius: 14px;
+    background: #f5faff;
+    padding: 32px 26px 24px;
+    position: relative;
+  }
+  .cluster-label {
+    position: absolute;
+    top: -12px; left: 24px;
+    background: #fff;
+    padding: 0 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+
+  .ns-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .ns-box {
+    border: 2px dashed #888;
+    border-radius: 10px;
+    background: #fff;
+    padding: 28px 18px 18px;
+    position: relative;
+  }
+  .ns-label {
+    position: absolute;
+    top: -10px; left: 16px;
+    background: #fff;
+    padding: 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+  }
+  .ns-box.prod .ns-label { color: #c62828; }
+  .ns-box.prod {
+    border-color: #c62828;
+    background: #fff3e0;
+  }
+
+  .resources {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .res {
+    border: 2px solid #1565c0;
+    border-radius: 6px;
+    background: #fff;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1565c0;
+    text-align: center;
+  }
+  .ns-box.prod .res {
+    border-color: #c62828;
+    color: #c62828;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Cluster 안에 Namespace로 리소스가 논리적으로 분리되는 구조</div>
+
+  <div class="cluster">
+    <div class="cluster-label">Cluster</div>
+
+    <div class="ns-grid">
+      <!-- dev namespace -->
+      <div class="ns-box">
+        <div class="ns-label">Namespace: dev</div>
+        <div class="resources">
+          <div class="res">Pod</div>
+          <div class="res">Service</div>
+          <div class="res">Deployment</div>
+        </div>
+      </div>
+
+      <!-- prod namespace -->
+      <div class="ns-box prod">
+        <div class="ns-label">Namespace: prod</div>
+        <div class="resources">
+          <div class="res">Pod</div>
+          <div class="res">Service</div>
+          <div class="res">Deployment</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

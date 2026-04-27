@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CH02 · .arch-fullmap vs .arch11 비교</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  body {
+    max-width: 1080px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 28px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 6px; letter-spacing: -0.3px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 32px; line-height: 1.7; }
+
+  h2 {
+    margin-top: 56px;
+    padding: 6px 12px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: #fff;
+    color: var(--color-accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  .preview-wrap {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    background: var(--color-surface);
+    margin-top: 12px;
+  }
+
+  /* 성격 비교 표 */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px;
+    font-size: 13px;
+  }
+  .compare-table th, .compare-table td {
+    padding: 10px 14px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .compare-table thead th {
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--color-accent);
+  }
+  .compare-table th:first-child { width: 140px; background: var(--color-surface); color: var(--color-text-heading); }
+  .compare-table td:first-child {
+    background: var(--color-surface-alt);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+  }
+  .compare-table tbody tr:hover { background: var(--color-surface); }
+  .compare-table code { font-family: var(--font-mono); font-size: 12px; background: var(--color-surface-alt); padding: 1px 5px; border-radius: 3px; color: var(--color-accent-text); }
+
+  /* arch11 교체안 highlight */
+  .arch11-with-active .col-c .api,
+  .arch11-with-active .stores .st.active {
+    border: 2px solid var(--color-accent);
+    background: var(--color-accent-bg);
+    position: relative;
+  }
+  .arch11-with-active .col-c .api::after,
+  .arch11-with-active .stores .st.active::after {
+    content: '오늘 만든 부분';
+    position: absolute;
+    top: -10px; right: 6px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: #fff;
+    background: var(--color-accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .spec {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-sm);
+    line-height: 1.8;
+  }
+  .spec b { color: var(--color-accent-text); }
+
+  .verdict {
+    margin-top: 24px;
+    padding: 18px 22px;
+    background: var(--color-accent-bg);
+    border: 1px solid var(--color-accent-border);
+    color: var(--color-accent-text);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .verdict strong { color: var(--color-text-heading); }
+
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .pros-cons .box {
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .pros-cons .pros { background: var(--color-surface); border: 1px solid var(--color-border); }
+  .pros-cons .cons { background: #fff7ed; border: 1px solid #fed7aa; color: #7c2d12; }
+  .pros-cons h3 {
+    margin: 0 0 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .pros-cons .pros h3 { color: var(--color-accent-text); }
+  .pros-cons .cons h3 { color: #9a3412; }
+</style>
+</head>
+<body>
+
+<h1>CH02 · <code style="font-family:var(--font-mono);font-size:20px;background:var(--color-surface-alt);padding:2px 8px;border-radius:4px">.arch-fullmap</code> vs <code style="font-family:var(--font-mono);font-size:20px;background:var(--color-surface-alt);padding:2px 8px;border-radius:4px">.arch11</code></h1>
+<p class="lead">
+  CH02의 책 진행도 구성도(<code>.arch-fullmap</code>)를 CH11의 최종 시스템 구성도(<code>.arch11</code>)로 <strong>교체하면 어떻게 되는지</strong>.
+  아래에 성격 비교 → 두 렌더 → 장단점 → 권장.
+</p>
+
+<!-- ══════ 성격 비교 ══════ -->
+<h2>1. 성격 비교 <span class="sub">spec</span></h2>
+
+<table class="compare-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>.arch-fullmap (CH02 현재)</th>
+      <th>.arch11 (CH11 마지막)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>목적</td>
+      <td><strong>책 진행도</strong>. "지금 이 챕터가 책 전체에서 어디에 해당하는가"를 매 챕터 끝에서 상기</td>
+      <td><strong>완성 시스템 구조도</strong>. 11개 챕터가 엮여 만든 한 시스템을 한 장에 담음</td>
+    </tr>
+    <tr>
+      <td>레이아웃</td>
+      <td>여러 <code>.afm-zone</code>을 <strong>챕터별로 묶어</strong> 세로 배치 (챕터 2 / 챕터 3~10 / ...)</td>
+      <td><strong>3행 2열 스택</strong>: 사용자·Gateway ┃ Runtime / LLM·Tools / Vector·PG</td>
+    </tr>
+    <tr>
+      <td>강조 방식</td>
+      <td><code>.afm-on</code> (진함 · accent) ↔ <code>.afm-faint</code> (연함 · 무채색)으로 "이번 챕터 범위" 표시</td>
+      <td>강조 기능 없음. 전체가 동등하게 "완성본"으로 보임</td>
+    </tr>
+    <tr>
+      <td>상태 표시</td>
+      <td><code>.afm-on</code>, <code>.afm-faint</code>, <code>.afm-dashed</code> (미구현/외부), <code>.afm-round</code> (사용자) 4종 modifier</td>
+      <td>modifier 없음. 채우기만 보여줌</td>
+    </tr>
+    <tr>
+      <td>책 내 위치</td>
+      <td>CH02·03·04·05·07·10 — <strong>재사용 6회</strong>, 매번 다른 afm-on 위치</td>
+      <td>CH11 한 번만 등장</td>
+    </tr>
+    <tr>
+      <td>정보 밀도</td>
+      <td>높음 · 박스 10여 개 + 챕터 번호 라벨</td>
+      <td>매우 높음 · 사용자·FastAPI·캐시·관찰·재시도·Executor(ReAct+6 엔진)·Ollama(3 모델)·4 도구·2 DB</td>
+    </tr>
+    <tr>
+      <td>난이도</td>
+      <td>CH02 시점의 독자가 이해 가능 (아직 안 배운 건 <code>.afm-faint</code>로 흐려짐)</td>
+      <td>CH02 시점 독자는 <strong>ReAct·MCP Tools·Executor를 아직 모름</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════ 현재: arch-fullmap ══════ -->
+<h2>2. 현재 · <code style="font-family:var(--font-mono);font-size:12px;background:#fff;color:var(--color-accent);padding:1px 6px;border-radius:3px">.arch-fullmap</code></h2>
+<p class="lead">CH02가 현재 쓰는 구성도. FastAPI·PostgreSQL 두 박스를 <code>.afm-on</code>으로 "오늘 만든 부분"으로 표시하고, 챕터 3~10은 <code>.afm-faint</code>로 흐리게 예고.</p>
+
+<div class="preview-wrap">
+  <div class="arch-fullmap">
+    <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 2 범위</div>
+
+    <div class="afm-row afm-user">
+      <div class="afm-box afm-faint afm-round">
+        <div class="afm-label">사내 직원 · 관리자</div>
+      </div>
+    </div>
+
+    <div class="afm-zone">
+      <span class="afm-zone-ch">챕터 2</span>
+      <span class="afm-zone-label">사내 시스템</span>
+      <div class="afm-row afm-two">
+        <div class="afm-box afm-on">
+          <div class="afm-tag">오늘 만든 부분</div>
+          <div class="afm-label">FastAPI</div>
+          <div class="afm-sub">REST 엔드포인트</div>
+        </div>
+        <div class="afm-box afm-on">
+          <div class="afm-tag">오늘 만든 부분</div>
+          <div class="afm-label">PostgreSQL</div>
+          <div class="afm-sub">직원·연차·매출</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="afm-zone">
+      <span class="afm-zone-ch">챕터 3~10</span>
+      <span class="afm-zone-label">RAG + 에이전트</span>
+      <div class="afm-row afm-three">
+        <div class="afm-box afm-faint"><div class="afm-label">청크·벡터</div></div>
+        <div class="afm-box afm-faint"><div class="afm-label">검색·엔진</div></div>
+        <div class="afm-box afm-faint afm-dashed"><div class="afm-label">통합 에이전트</div></div>
+      </div>
+    </div>
+
+    <div class="afm-row afm-ext">
+      <div class="afm-box afm-faint afm-dashed">
+        <div class="afm-label">Ollama LLM (외부)</div>
+      </div>
+    </div>
+
+    <div class="afm-note">
+      오늘 띄운 건 <b>FastAPI · PostgreSQL</b>. 챕터 3부터는 이 엔드포인트가 AI의 입구가 됩니다.
+    </div>
+  </div>
+</div>
+<div class="spec">
+  쓰이는 챕터: <b>CH02 · 03 · 04 · 05 · 07 · 10</b> · 매번 다른 afm-on 위치<br>
+  핵심 역할: "책 진행도" · 챕터마다 현재 범위만 진하게
+</div>
+
+<!-- ══════ 교체안: arch11 ══════ -->
+<h2>3. 교체안 · <code style="font-family:var(--font-mono);font-size:12px;background:#fff;color:var(--color-accent);padding:1px 6px;border-radius:3px">.arch11</code> (CH02용으로 하이라이트 주입)</h2>
+<p class="lead">
+  CH11의 최종 시스템 구성도를 CH02 자리에 이식한 상태. arch11에는 원래 "현재 챕터" 강조 기능이 없으므로,
+  <strong>CH02가 만든 박스(FastAPI · PostgreSQL)만 수동 Override</strong>로 두꺼운 테두리 + "오늘 만든 부분" 뱃지를 얹음.
+</p>
+
+<div class="preview-wrap">
+  <div class="arch11 arch11-with-active">
+
+    <div class="header">
+      <div class="sub">시스템 아키텍처 (System Architecture)</div>
+      <div class="title">커넥트HR 에이전트</div>
+      <div class="desc">11개 챕터에 걸쳐 완성 예정인 RAG 시스템</div>
+    </div>
+
+    <div class="row-client">
+      <div class="col-c">
+        <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+        <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+        <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+      </div>
+      <div class="flow-arrows">
+        <div class="fa-pair"><div class="fa-label">요청</div><div class="fa-arrow call">→</div></div>
+        <div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+      </div>
+      <div class="col-a">
+        <div class="title">통합 에이전트 · 운영 (Runtime)</div>
+        <div class="ops">
+          <div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+          <div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+          <div class="chip"><div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div></div>
+        </div>
+        <div class="core">
+          <div class="l">실행기 (Executor)</div>
+          <div class="n">통합 에이전트</div>
+          <div class="loop-inner"><div class="loop-label">ReAct 루프</div><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+          <div class="engine-inner"><div class="engine-label">RAG Engine</div><div class="engine-name">커넥트HR 엔진</div><div class="stages-6"><div class="s"><span class="num">01</span><span class="nm">파싱</span></div><div class="s"><span class="num">02</span><span class="nm">청킹</span></div><div class="s"><span class="num">03</span><span class="nm">확장</span></div><div class="s"><span class="num">04</span><span class="nm">검색</span></div><div class="s"><span class="num">05</span><span class="nm">리랭크</span></div><div class="s"><span class="num">06</span><span class="nm">LLM</span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lvl-lbl"><span class="up">↑ 프롬프트 · 도구 호출</span> &nbsp;·&nbsp; <span class="down">↓ 응답 · 결과</span></div>
+
+    <div class="row-ext">
+      <div class="llm"><div class="box">
+        <div class="l">외부 · LLM (External)</div>
+        <div class="n">Ollama</div>
+        <div class="models">
+          <div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+          <div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+          <div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+        </div>
+      </div></div>
+      <div class="flow-arrows">
+        <div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+        <div class="fa-pair"><div class="fa-label">호출</div><div class="fa-arrow call">→</div></div>
+      </div>
+      <div class="col-t">
+        <div class="title">도구 호출 · MCP Tools</div>
+        <div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+        <div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+        <div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+        <div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+      </div>
+    </div>
+
+    <div class="lvl-lbl"><span class="up">↑ 조회 · 도구 실행</span> &nbsp;·&nbsp; <span class="down">↓ 레코드 · 문서</span></div>
+
+    <div class="stores">
+      <div class="st"><div class="l">벡터 저장소 (Vector Store)</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+      <div class="st active"><div class="l">관계형 DB (Relational)</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+    </div>
+
+  </div>
+</div>
+<div class="spec">
+  <b>수동 override만 들어감</b> · <code>.arch11-with-active .col-c .api</code> / <code>.arch11-with-active .stores .st.active</code>에만 border + 뱃지.<br>
+  나머지 박스(Executor·ReAct·RAG Engine·MCP Tools·Ollama·ChromaDB)는 CH02 시점엔 <b>아직 만들지 않은 것</b>이지만 그대로 전체 노출됨.
+</div>
+
+<!-- ══════ 장단점 ══════ -->
+<h2>4. 교체 시 장단점 <span class="sub">trade-off</span></h2>
+
+<div class="pros-cons">
+  <div class="box pros">
+    <h3>Pros · 얻는 것</h3>
+    <ul>
+      <li>매 챕터 끝에 <strong>최종 목표</strong>가 보임 → 독자 동기 부여</li>
+      <li>책 전체가 하나의 시스템이라는 일관성 강조</li>
+      <li>CH11까지 수렴될 지점이 시각적으로 고정됨</li>
+    </ul>
+  </div>
+  <div class="box cons">
+    <h3>Cons · 잃는 것</h3>
+    <ul>
+      <li>CH02 시점 독자가 <strong>아직 모르는 박스</strong>(ReAct, MCP Tools, Executor)가 전면 노출 → 혼란·진입 장벽</li>
+      <li>"챕터 진행도" 기능 상실 · 다음 챕터가 <em>어느 박스를 건드릴지</em>가 안 보임</li>
+      <li>6 챕터에서 같은 구성도를 반복 → <strong>반복 피로</strong>. 현재는 chaapter별로 afm-on이 바뀌며 변화</li>
+      <li>arch11은 <strong>완성</strong>의 상징. 완성 전에 등장시키면 마지막 챕터의 감동이 소모됨</li>
+      <li>정보 밀도가 너무 높아 CH02 페이지 하단이 무거움</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════ 권장 ══════ -->
+<h2 style="background:var(--color-text-heading)">5. 권장 · 두 컴포넌트는 교체하지 말고 역할 유지</h2>
+
+<div class="verdict">
+  <strong>현 구조 유지를 권장합니다.</strong>
+  두 컴포넌트는 <strong>이름이 비슷해도 역할이 반대</strong>입니다.<br><br>
+
+  <code>.arch-fullmap</code>은 <strong>"여정의 현재 좌표"</strong>를 보여주는 네비게이션.
+  각 챕터 끝에서 "지금 책의 어디에 있는지"를 반복 확인시켜 주는 도구이고, <code>.afm-on</code>/<code>.afm-faint</code>로 진행도를 표현하는 것이 핵심.<br><br>
+
+  <code>.arch11</code>은 <strong>"여정의 종착점"</strong>을 한 장에 응축한 기념품.
+  마지막 챕터에 단 한 번 등장해 "우리가 11챕터에 걸쳐 이걸 만들었다"는 선언을 한다는 게 연출 효과.<br><br>
+
+  교체하면 <strong>진행도 상실 + 완성의 클라이맥스 소모</strong> 두 손실이 동시에 발생합니다.<br><br>
+
+  <strong>대신 개선이 필요하면:</strong> arch11의 디테일 밀도(ReAct loop·RAG engine 6 stage)가 복잡해서 "마지막 챕터의 기념품"으로 쓰기에 무겁다고 느끼면,
+  <strong>arch11 자체를 단순화</strong>하거나 <strong>arch-fullmap의 시각 톤만 arch11과 맞추는</strong>(예: 테두리·폰트·여백) 방향이 더 안전합니다. 교체는 아님.
+</div>
+
+</body>
+</html>

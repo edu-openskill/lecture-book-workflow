@@ -1,0 +1,55 @@
+direction: right
+
+classes: {
+  phase: {
+    shape: rectangle
+    style: {
+      fill: transparent
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      stroke-dash: 5
+      font-size: 16
+      font-color: "#1e40af"
+      bold: true
+    }
+  }
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 14
+      font-color: "#1e40af"
+      bold: true
+    }
+  }
+}
+
+ch09-pre: "CH09: 질의 전략 (검색 전)" {
+  class: phase
+  a1: "약어 확장\nWFH → 재택근무" { class: process }
+  a2: "HyDE / Multi-Query\n질문 변환" { class: process }
+  a1 -> a2: { style.stroke: "#2563eb"; style.stroke-width: 2 }
+}
+
+ch08: "CH08: 검색 엔진" {
+  class: phase
+  b1: "시맨틱 청킹" { class: process }
+  b2: "하이브리드 검색\nBM25 + Vector" { class: process }
+  b3: "리랭커" { class: process }
+  b1 -> b2: { style.stroke: "#2563eb"; style.stroke-width: 2 }
+  b2 -> b3: { style.stroke: "#2563eb"; style.stroke-width: 2 }
+}
+
+ch09-post: "CH09: 결과 전략 (검색 후)" {
+  class: phase
+  c1: "ParentDoc\n조각 → 원본 반환" { class: process }
+  c2: "Compression\n핵심 문장만 추출" { class: process }
+  c1 -> c2: { style.stroke: "#2563eb"; style.stroke-width: 2 }
+}
+
+ch09-pre.a2 -> ch08.b1: { style.stroke: "#2563eb"; style.stroke-width: 2 }
+ch08.b3 -> ch09-post.c1: { style.stroke: "#2563eb"; style.stroke-width: 2 }

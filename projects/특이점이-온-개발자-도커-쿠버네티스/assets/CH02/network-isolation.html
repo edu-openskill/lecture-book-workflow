@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>푸드코트 네트워크 격리 비유</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 36px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #1565c0;
+    border-radius: 12px;
+    padding: 26px 30px 22px;
+    width: 540px;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+  }
+  .title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #1565c0;
+    margin-bottom: 18px;
+  }
+
+  /* 푸드코트 전체 */
+  .foodcourt {
+    border: 2px solid #1565c0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* 식당 줄 */
+  .shop-row {
+    display: flex;
+    background: #f5faff;
+  }
+  .shop {
+    flex: 1;
+    padding: 18px 8px 16px;
+    text-align: center;
+    position: relative;
+  }
+  .shop:not(:last-child) {
+    border-right: 3px solid #1565c0;
+  }
+  .shop-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+    margin-bottom: 8px;
+  }
+  .shop-inside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 요리사 */
+  .chef {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .chef-hat {
+    width: 13px;
+    height: 7px;
+    border: 1.5px solid #555;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: #fff;
+    margin-bottom: -2px;
+  }
+  .chef-head {
+    width: 15px;
+    height: 15px;
+    border: 2px solid #555;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .chef-body {
+    width: 22px;
+    height: 13px;
+    border: 2px solid #555;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: #fff;
+    margin-top: -1px;
+  }
+  .shop-menu {
+    font-size: 10px;
+    color: #666;
+    font-weight: 600;
+  }
+
+  /* 픽업 창구 바 — veth pair 강조 (주황) */
+  .pickup-bar {
+    display: flex;
+    border-top: 2.5px solid #c62828;
+    border-bottom: 2.5px solid #c62828;
+    background: #fff3e0;
+  }
+  .pickup {
+    flex: 1;
+    text-align: center;
+    padding: 7px 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #c62828;
+    position: relative;
+  }
+  .pickup:not(:last-child) {
+    border-right: 1px dashed #c62828;
+  }
+  .pickup-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border: 1.5px solid #c62828;
+    border-radius: 50%;
+    background: #fff;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* 홀 — docker0 (라이트 블루) */
+  .hall {
+    background: #fff;
+    padding: 18px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 22px;
+  }
+  .hall-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+  /* 테이블 */
+  .tables {
+    display: flex;
+    gap: 16px;
+  }
+  .table {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .table-top {
+    width: 30px;
+    height: 18px;
+    border: 2px solid #1565c0;
+    border-radius: 4px;
+    background: #f5faff;
+  }
+  .chairs {
+    display: flex;
+    gap: 4px;
+  }
+  .chair {
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid #1565c0;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  /* 범례 */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1.5px dashed #cfcfcf;
+  }
+  .legend-item {
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+  }
+  .legend-item span {
+    color: #1565c0;
+    font-weight: 800;
+  }
+  .legend-item.warm span { color: #c62828; }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <div class="title">푸드코트 평면도</div>
+
+  <div class="foodcourt">
+    <!-- 식당들 -->
+    <div class="shop-row">
+      <div class="shop">
+        <div class="shop-name">A식당</div>
+        <div class="shop-inside">
+          <div class="chef">
+            <div class="chef-hat"></div>
+            <div class="chef-head"></div>
+            <div class="chef-body"></div>
+          </div>
+          <div class="shop-menu">짜장면</div>
+        </div>
+      </div>
+      <div class="shop">
+        <div class="shop-name">B식당</div>
+        <div class="shop-inside">
+          <div class="chef">
+            <div class="chef-hat"></div>
+            <div class="chef-head"></div>
+            <div class="chef-body"></div>
+          </div>
+          <div class="shop-menu">돈까스</div>
+        </div>
+      </div>
+      <div class="shop">
+        <div class="shop-name">C식당</div>
+        <div class="shop-inside">
+          <div class="chef">
+            <div class="chef-hat"></div>
+            <div class="chef-head"></div>
+            <div class="chef-body"></div>
+          </div>
+          <div class="shop-menu">라면</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 픽업 창구 -->
+    <div class="pickup-bar">
+      <div class="pickup"><span class="pickup-dot"></span>픽업</div>
+      <div class="pickup"><span class="pickup-dot"></span>픽업</div>
+      <div class="pickup"><span class="pickup-dot"></span>픽업</div>
+    </div>
+
+    <!-- 홀 -->
+    <div class="hall">
+      <div class="hall-label">홀</div>
+      <div class="tables">
+        <div class="table">
+          <div class="table-top"></div>
+          <div class="chairs">
+            <div class="chair"></div>
+            <div class="chair"></div>
+          </div>
+        </div>
+        <div class="table">
+          <div class="table-top"></div>
+          <div class="chairs">
+            <div class="chair"></div>
+            <div class="chair"></div>
+          </div>
+        </div>
+        <div class="table">
+          <div class="table-top"></div>
+          <div class="chairs">
+            <div class="chair"></div>
+            <div class="chair"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span>식당</span> = 컨테이너</div>
+    <div class="legend-item warm"><span>픽업 창구</span> = veth pair</div>
+    <div class="legend-item"><span>홀</span> = docker0</div>
+  </div>
+</div>
+</body>
+</html>

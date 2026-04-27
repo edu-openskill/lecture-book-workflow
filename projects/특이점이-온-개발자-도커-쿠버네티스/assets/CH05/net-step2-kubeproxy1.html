@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 2 — kube-proxy가 Ingress Controller로 전달</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    padding: 28px 32px 24px;
+    width: 820px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .scene {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .box {
+    border: 2.5px solid #555;
+    border-radius: 10px;
+    background: #fff;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .box.port {
+    border-style: dashed;
+    border-color: #333;
+    background: #f5f5f5;
+  }
+  .box.proxy {
+    border-color: #333;
+    background: #f0f0f0;
+  }
+  .box.ingress {
+    border-color: #333;
+    background: #e8e8e8;
+  }
+  .box-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 3px;
+  }
+  .box-sub {
+    font-size: 10px;
+    color: #888;
+    font-weight: 500;
+  }
+  .box-detail {
+    font-size: 11px;
+    color: #555;
+    margin-top: 4px;
+    font-family: 'Consolas', 'Menlo', monospace;
+  }
+  .box-analogy {
+    font-size: 10px;
+    color: #999;
+    margin-top: 5px;
+    font-style: italic;
+  }
+
+  .arrow-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+  }
+  .arrow-label {
+    font-size: 10px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 3px;
+    white-space: nowrap;
+  }
+  .arrow-block svg { width: 56px; height: 14px; }
+
+  .node-box {
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    background: #fafafa;
+    padding: 18px 16px 14px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .node-label {
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: #fafafa;
+    padding: 0 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #555;
+  }
+
+  .transform {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  .transform-box {
+    font-size: 11px;
+    font-family: 'Consolas', 'Menlo', monospace;
+    padding: 5px 10px;
+    border: 1.5px solid #aaa;
+    border-radius: 6px;
+    background: #fafafa;
+    color: #555;
+  }
+  .transform-box.before { text-decoration: line-through; color: #bbb; }
+  .transform-box.after { border-color: #333; color: #222; font-weight: 600; }
+  .transform-arrow { font-size: 16px; color: #333; }
+
+  .explain {
+    margin-top: 18px;
+    padding: 16px 18px;
+    background: #fafafa;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    line-height: 1.8;
+  }
+  .explain p {
+    font-size: 12px;
+    color: #444;
+    margin-bottom: 6px;
+  }
+  .explain p:last-child { margin-bottom: 0; }
+  .explain strong { color: #222; }
+  .explain .highlight { background: #eee; padding: 1px 4px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Step 2 — kube-proxy가 Ingress Controller Pod로 전달</div>
+
+  <div class="node-box">
+    <div class="node-label">워커 노드</div>
+
+    <div class="box port">
+      <div class="box-title">NodePort</div>
+      <div class="box-detail">:31000</div>
+      <div class="box-analogy">정문</div>
+    </div>
+
+    <div class="arrow-block">
+      <div class="arrow-label">iptables</div>
+      <svg viewBox="0 0 56 14">
+        <line x1="0" y1="7" x2="44" y2="7" stroke="#333" stroke-width="2"/>
+        <polygon points="44,3 56,7 44,11" fill="#333"/>
+      </svg>
+    </div>
+
+    <div class="box proxy">
+      <div class="box-title">kube-proxy</div>
+      <div class="box-sub">1차 — IP 변환</div>
+      <div class="box-analogy">안내 데스크</div>
+    </div>
+
+    <div class="arrow-block">
+      <div class="arrow-label">Pod IP로 변환</div>
+      <svg viewBox="0 0 56 14">
+        <line x1="0" y1="7" x2="44" y2="7" stroke="#333" stroke-width="2"/>
+        <polygon points="44,3 56,7 44,11" fill="#333"/>
+      </svg>
+    </div>
+
+    <div class="box ingress">
+      <div class="box-title">Ingress Controller</div>
+      <div class="box-sub">이것도 Pod입니다</div>
+      <div class="box-detail">172.17.0.2:80</div>
+      <div class="box-analogy">공식 앱 서버</div>
+    </div>
+  </div>
+
+  <div class="transform">
+    <div class="transform-box before">192.168.1.10:31000</div>
+    <div class="transform-arrow">→</div>
+    <div class="transform-box after">172.17.0.2:80</div>
+  </div>
+
+  <div class="explain">
+    <p>NodePort로 들어온 요청을 <strong>kube-proxy</strong>가 받습니다. kube-proxy는 노드의 iptables 규칙을 관리하는 네트워크 관문입니다.</p>
+    <p>kube-proxy는 NodePort <span class="highlight">:31000</span>에 연결된 Service를 찾고, 그 Service의 엔드포인트인 <strong>Ingress Controller Pod</strong>의 실제 IP로 변환합니다.</p>
+    <p>여기서 중요한 점 — <strong>Ingress Controller도 Pod</strong>입니다. 클러스터 안에서 돌아가는 프로그램이고, kube-proxy가 그 Pod까지 요청을 보내줍니다.</p>
+    <p>정문을 지나면 안내 데스크 직원(kube-proxy)이 "공식 앱 담당 부서(Ingress Controller)로 가세요"라고 안내하는 것과 같습니다.</p>
+  </div>
+</div>
+
+</body>
+</html>

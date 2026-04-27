@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>챕터 9. 질문을 제대로 이해 못한다. HyDE와 Multi-Query</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+
+
+</head>
+<body>
+<div class="container">
+<h1>챕터 9. 질문을 제대로 이해 못한다. HyDE와 Multi-Query</h1>
+<div class="goal-box">
+<p><strong>이번 챕터가 끝나면</strong></p>
+<ul>
+<li><strong>Parent Document Retriever</strong>로 조각이 아닌 원본 문서 전체를 참고하게 합니다</li>
+<li><strong>Contextual Compression</strong>으로 검색 결과에서 핵심 문장만 압축합니다</li>
+<li><strong>HyDE(Hypothetical Document Embeddings)</strong> 로 &quot;상상 답변을 먼저 만들어 검색&quot;합니다</li>
+<li><strong>Multi-Query</strong>로 하나의 질문을 여러 관점으로 풀어 재현율을 올립니다</li>
+<li><strong>약어, 동의어 확장</strong>으로 &quot;WFH&quot; ↔ &quot;재택근무&quot; 같은 단어 차이를 흡수합니다</li>
+</ul>
+</div>
+<div class="prep-section-md">
+<p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
+<h3>1. 실습 폴더 이동</h3>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div><span class="nb">cd</span><span class="w"> </span>rag-start/ex09</div>
+<p>파일 구조는 다음과 같습니다.</p>
+<div class="code-block highlight" data-lang="text"><div class="cb-title">ex09 디렉토리</div>ex09/
+└── tuning/
+    ├── step1_query_rewrite/        # [실습] HyDE / Multi-Query / 약어 확장
+    │   ├── __main__.py
+    │   ├── hyde.py                 # 실험 1-1
+    │   ├── multi_query.py          # 실험 1-2
+    │   ├── abbreviation.py         # 실험 1-3
+    │   ├── experiments.py
+    │   └── data.py
+    └── step2_advanced_retriever/   # [실습] Parent Doc / Compression
+        ├── __main__.py
+        ├── parent_doc.py           # 실험 2-1
+        ├── compression.py          # 실험 2-2
+        ├── self_query.py           # 실험 2-3
+        ├── experiments.py
+        └── data.py</div>
+<h3>2. 실습 환경 구축</h3>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div><span class="nb">cd</span><span class="w"> </span>ex09
+python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+ollama<span class="w"> </span>pull<span class="w"> </span>llama3.1:8b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div><span class="nb">cd</span><span class="w"> </span>ex09
+py<span class="w"> </span>-3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+copy<span class="w"> </span>.env.example<span class="w"> </span>.env
+ollama<span class="w"> </span>pull<span class="w"> </span>llama3.1:8b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<h3>3. 사용할 라이브러리</h3>
+<table>
+<thead>
+<tr>
+<th>패키지</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>langchain</code></td>
+<td>Retriever 인터페이스·LCEL</td>
+</tr>
+<tr>
+<td><code>langchain-community</code></td>
+<td>ParentDocumentRetriever, MultiQueryRetriever</td>
+</tr>
+<tr>
+<td><code>langchain-ollama</code></td>
+<td>LLM 연결 (쿼리 재작성용)</td>
+</tr>
+<tr>
+<td><code>langchain-chroma</code> · <code>chromadb</code></td>
+<td>벡터 DB</td>
+</tr>
+</tbody>
+</table>
+<h3>4. 실습 순서</h3>
+<ol>
+<li><code>python -m tuning.step1_query_rewrite</code>. HyDE, Multi-Query, 약어 확장</li>
+<li><code>python -m tuning.step2_advanced_retriever</code>. Parent Doc, Compression</li>
+</ol>
+</div>
+<h2>9.1 &quot;휴가&quot;라고 물었는데 &quot;연차유급휴가&quot;를 못 찾는다</h2>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-1. 같은 뜻인데 못 찾는다</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:var(--space-xl)">
+<!-- 회사원 SVG -->
+<div style="text-align:center;flex-shrink:0">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-heading)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+<div style="font-size:var(--fs-sm);font-weight:600;margin-top:var(--space-xs)">회사원</div>
+</div>
+<!-- 질문 말풍선들 -->
+<div style="display:flex;flex-direction:column;gap:var(--space-md)">
+<div style="display:flex;align-items:center;gap:var(--space-md)">
+<div style="background:white;border:2px solid var(--color-danger);border-radius:var(--radius-lg);padding:var(--space-sm) var(--space-lg);font-size:var(--fs-sm);font-weight:600;color:var(--color-danger-text);white-space:nowrap">"휴가 규정 알려줘"</div>
+<div style="font-size:var(--fs-xl);color:var(--color-danger)">✗</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">복리후생 안내가 나옴</div>
+</div>
+<div style="display:flex;align-items:center;gap:var(--space-md)">
+<div style="background:white;border:2px solid var(--color-success);border-radius:var(--radius-lg);padding:var(--space-sm) var(--space-lg);font-size:var(--fs-sm);font-weight:600;color:var(--color-success-text);white-space:nowrap">"연차유급휴가 알려줘"</div>
+<div style="font-size:var(--fs-xl);color:var(--color-success)">✓</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">취업규칙 제15조 정확히 검색</div>
+</div>
+<div style="display:flex;align-items:center;gap:var(--space-md)">
+<div style="background:white;border:2px solid var(--color-danger);border-radius:var(--radius-lg);padding:var(--space-sm) var(--space-lg);font-size:var(--fs-sm);font-weight:600;color:var(--color-danger-text);white-space:nowrap">"WFH 정책이 뭐야?"</div>
+<div style="font-size:var(--fs-xl);color:var(--color-danger)">✗</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">관련 문서를 찾지 못했습니다</div>
+</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:var(--space-lg);padding:var(--space-md);background:var(--color-surface-alt);border-radius:var(--radius-md);font-size:var(--fs-sm);color:var(--color-text-muted)">검색 엔진은 잘 돌아갑니다. <strong style="color:var(--color-danger-text)">질문을 이해 못 하는 게 문제입니다.</strong></div>
+</div>
+<p>청킹을 바꾸고 리랭커를 붙이고 하이브리드까지 적용했습니다. 일주일이 지났죠. 동료가 &quot;병가 규정&quot;을 물으면 출장 규정이 나오던 시절은 끝났다고 생각했습니다. 모니터에 찍히는 검색 로그는 깔끔했고, 오픈이는 의자에 등을 기대며 커피잔을 들었습니다.</p>
+<p class="thought">검색 엔진은 손댈 데가 없다.</p>
+<p>슬랙 알림이 울렸습니다. 동료가 테스트 결과를 스프레드시트로 정리해 올린 겁니다. &quot;질문 20개 테스트&quot; 제목 아래 빨간 셀이 네 개. 오픈이가 커피잔을 내려놓고 몸을 일으켰습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "질문 20개 돌려 봤는데, 네 개가 이상해요."</div>
+<p>스프레드시트를 열었습니다. 첫 번째 빨간 셀. &quot;휴가 규정 알려줘.&quot;</p>
+<p>직접 쳐 봤습니다. 커넥트HR 채팅창에 &quot;휴가 규정 알려줘&quot;를 입력하고 엔터를 눌렀더니 &quot;복리후생 안내&quot;가 돌아옵니다. 정작 찾고 싶던 <strong>취업규칙 제15조 연차유급휴가</strong>는 빠져 있었습니다.</p>
+<p class="thought">잠깐.</p>
+<p>&quot;연차유급휴가&quot;를 정확히 쳐 봤습니다. 바로 뜹니다. 15일 부여, 3일 전 서면 신청, 팀장 승인. 원하는 내용이 전부 들어 있었습니다.</p>
+<p>같은 뜻인데 단어가 달랐습니다. 문서에는 &quot;연차유급휴가&quot;라고 적혀 있고 동료는 &quot;휴가&quot;라고 물었습니다. 검색 엔진은 &quot;휴가&quot;와 &quot;연차유급휴가&quot;가 같은 뜻이라는 걸 모릅니다.</p>
+<p>두 번째 빨간 셀. &quot;WFH 정책이 뭐야?&quot;</p>
+<p class="thought">"관련 문서를 찾지 못했습니다."</p>
+<p>문서에는 &quot;재택근무&quot;라고 적혀 있습니다. WFH가 Work From Home이라는 걸 검색 엔진은 모릅니다. 세 번째 빨간 셀도, 네 번째도 비슷한 패턴이었습니다. 단어가 다르거나, 약어를 쓰거나, 질문이 모호하거나.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-2. 사용자의 단어와 문서의 단어가 다릅니다</div>
+<div style="display:flex;flex-direction:column;gap:var(--space-lg);max-width:520px;margin:0 auto">
+<!-- 행 1 -->
+<div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:var(--space-md);align-items:center">
+<div style="background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">사용자가 말한 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-danger-text)">"휴가"</div>
+</div>
+<div style="font-size:var(--fs-xl);color:var(--color-danger)">≠</div>
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">문서에 적힌 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-success-text)">"연차유급휴가"</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-danger)">✗</div>
+</div>
+<!-- 행 2 -->
+<div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:var(--space-md);align-items:center">
+<div style="background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">사용자가 말한 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-danger-text)">"WFH"</div>
+</div>
+<div style="font-size:var(--fs-xl);color:var(--color-danger)">≠</div>
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">문서에 적힌 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-success-text)">"재택근무"</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-danger)">✗</div>
+</div>
+<!-- 행 3 -->
+<div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:var(--space-md);align-items:center">
+<div style="background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">사용자가 말한 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-danger-text)">"쉬는 날"</div>
+</div>
+<div style="font-size:var(--fs-xl);color:var(--color-danger)">≠</div>
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">문서에 적힌 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-success-text)">"연차유급휴가"</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-danger)">✗</div>
+</div>
+<!-- 행 4 (성공) -->
+<div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:var(--space-md);align-items:center">
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">사용자가 말한 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-success-text)">"연차유급휴가"</div>
+</div>
+<div style="font-size:var(--fs-xl);color:var(--color-success)">=</div>
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">문서에 적힌 단어</div>
+<div style="font-size:var(--fs-base);font-weight:700;color:var(--color-success-text)">"연차유급휴가"</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-success)">✓</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:var(--space-lg);font-size:var(--fs-sm);color:var(--color-text-muted)">정확히 같은 단어를 써야만 찾습니다. <strong style="color:var(--color-danger-text)">검색 엔진이 아니라 질문이 문제입니다.</strong></div>
+</div>
+<p class="thought">챕터 8에서 검색 엔진 자체를 다 고쳤다고 생각했는데. 엔진이 아무리 좋아도 질문을 이해 못 하면 소용이 없다.</p>
+<p>건너편 자리에서 팀장이 모니터를 보며 한마디를 던졌습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "사서 귀가 안 열린 거 아닌가요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "네?"</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "서가 정리는 잘 해놨잖아요. 그런데 손님이 '쉬는 날'이라고 말하면, 그게 '연차유급휴가' 서랍이란 걸 알아들어야 할 거 아니겠어요."</div>
+<p>키보드 위에 올려놓은 손가락이 멈췄습니다. 챕터 8에서 고친 건 서가 정리였습니다. 책장을 다시 짜고 면접관을 붙이고 두 가지 검색을 섞었습니다. 그런데 사서의 <strong>귀</strong>, 그러니까 질문을 알아듣는 능력은 건드리지 않았습니다.</p>
+<p>서랍에서 수첩을 꺼냈습니다. 화이트보드 앞에 서기 전에 무엇이 문제였는지부터 다시 적어야 했습니다.</p>
+<div class="memo-box">
+<p><strong>— 문제 정리 —</strong></p>
+<ol>
+<li><strong>&quot;휴가&quot; ≠ &quot;연차유급휴가&quot;</strong>
+<ul>
+<li>문서 단어와 사용자 단어가 다르면 검색 실패</li>
+<li>같은 뜻이라는 걸 기계는 모름</li>
+</ul>
+</li>
+<li><strong>&quot;WFH&quot; ≠ &quot;재택근무&quot;</strong>
+<ul>
+<li>영문 약어는 한글 문서에 안 걸림</li>
+<li>사내 용어 사전이 없으면 그냥 놓침</li>
+</ul>
+</li>
+</ol>
+<p><strong>→ 엔진 문제가 아님. 질문 이해 능력의 문제</strong></p>
+</div>
+<h2>9.2 사서의 언어 능력을 키운다</h2>
+<p>오픈이가 화이트보드 앞으로 걸어갔습니다. 마커 뚜껑을 딸깍 열고 왼쪽 끝에 &quot;사서의 언어 능력&quot;이라고 적었습니다. 팀장이 의자를 돌려 팔짱을 꼈습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "사서가 똑똑해지려면 뭘 배워야 할까요?"</div>
+<p>오픈이가 &quot;휴가 → 연차유급휴가&quot;를 화이트보드에 적고 잠시 마커를 들고 서 있었습니다. 그러다 하나씩 적어 내려가기 시작했습니다.</p>
+<p><strong>첫째, 단어를 번역합니다.</strong> &quot;WFH&quot; → &quot;재택근무(Work From Home)&quot;. &quot;OT&quot; → &quot;초과근무&quot;. 사서가 약어 사전을 가지고 있으면 모르는 단어가 들어와도 원래 뜻으로 바꿔 놓을 수 있습니다.</p>
+<p><strong>둘째, 답을 먼저 상상합니다.</strong> &quot;쉬는 날 규정이라면... 1년 근속 시 15일 유급휴가 같은 내용이겠지.&quot; 그 상상한 답과 비슷한 실제 문서를 찾습니다. 질문으로 검색하는 것보다 답변끼리 비교하는 게 거리가 가까운 경우가 많습니다.</p>
+<p><strong>셋째, 질문을 여러 갈래로 바꿉니다.</strong> &quot;휴가 규정&quot; 하나로 검색하면 한 방향만 봅니다. &quot;연차 사용 방법&quot;, &quot;유급휴가 일수&quot;, &quot;휴가 신청 절차&quot;로 펼쳐 놓고 각각 검색하면 놓치는 문서가 줄어듭니다.</p>
+<p><strong>넷째, 찾은 조각의 원본 전체를 꺼냅니다.</strong> &quot;연차 신청은 3일 전 서면&quot;이라는 짧은 청크가 걸리면, 그 청크가 속한 원 문서(제15~16조) 전체를 반환합니다. 맥락이 살아납니다.</p>
+<p><strong>다섯째, 긴 결과를 압축합니다.</strong> 부모 문서를 통째로 가져오면 쓸데없는 문장이 섞입니다. 질문과 관련된 문장만 추려서 LLM에 넘깁니다.</p>
+<p>다섯 줄을 적고 나서 한 발 물러나 화이트보드를 바라봤습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "전부 다 켜면 느려져요. 어디가 아픈지 보고 약을 골라야죠."</div>
+<p>도구 상자입니다. 다섯 가지를 전부 쓰는 게 아니라, 어떤 질문이 실패하는지 보고 필요한 도구만 꺼내면 됩니다.</p>
+<div style="background:white;border:2px solid #94a3b8;border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0;box-shadow:0 2px 8px rgba(0,0,0,0.06)">
+<div style="display:flex;align-items:center;gap:var(--space-md);margin-bottom:var(--space-xl)">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+<div style="font-size:var(--fs-lg);font-weight:700;color:var(--color-text-heading);text-align:center">그림 9-3. 사서의 언어 능력 다섯 가지</div>
+</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:var(--space-xl)">
+<!-- 귀 섹션 -->
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-xs)">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6.5 6.5 0 0 1 13 0c0 3-2 5.5-3.5 7.5"/><path d="M15.5 16a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2"/><path d="M10 13a2 2 0 0 0 3.5 1.5"/></svg>
+<div style="writing-mode:vertical-rl;font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);letter-spacing:0.1em">질문을 알아듣는 귀</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:var(--space-md)">
+<!-- 1. 약어 번역 -->
+<div style="display:grid;grid-template-columns:auto 1fr;gap:var(--space-md);align-items:center;background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-md) var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:800;color:var(--color-accent);font-family:var(--font-mono)">1</div>
+<div>
+<div style="font-weight:600;color:var(--color-text-heading);font-size:var(--fs-sm)">단어를 번역한다 — 약어·동의어 확장</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:2px"><span style="background:#dbeafe;padding:1px 6px;border-radius:4px;font-weight:600;color:var(--color-accent-text)">WFH</span> → <span style="background:#dbeafe;padding:1px 6px;border-radius:4px;font-weight:600;color:var(--color-accent-text)">재택근무</span> &nbsp; <span style="background:#dbeafe;padding:1px 6px;border-radius:4px;font-weight:600;color:var(--color-accent-text)">OT</span> → <span style="background:#dbeafe;padding:1px 6px;border-radius:4px;font-weight:600;color:var(--color-accent-text)">초과근무</span></div>
+</div>
+</div>
+<!-- 2. HyDE -->
+<div style="display:grid;grid-template-columns:auto 1fr;gap:var(--space-md);align-items:center;background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-md) var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:800;color:var(--color-accent);font-family:var(--font-mono)">2</div>
+<div>
+<div style="font-weight:600;color:var(--color-text-heading);font-size:var(--fs-sm)">답을 먼저 상상한다 — HyDE</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:2px">"쉬는 날 규정" → <em>"1년 근속 시 15일 유급휴가..."</em> → 상상 답변으로 검색</div>
+</div>
+</div>
+<!-- 3. Multi-Query -->
+<div style="display:grid;grid-template-columns:auto 1fr;gap:var(--space-md);align-items:center;background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-md) var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:800;color:var(--color-accent);font-family:var(--font-mono)">3</div>
+<div>
+<div style="font-weight:600;color:var(--color-text-heading);font-size:var(--fs-sm)">질문을 여러 갈래로 — Multi-Query</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:2px">"휴가 규정" → "연차 사용 방법" + "유급휴가 일수" + "휴가 신청 절차"</div>
+</div>
+</div>
+</div>
+<!-- 손·입 섹션 -->
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-xs)">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v1"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2a8 8 0 0 1-6-2.7"/></svg>
+<div style="writing-mode:vertical-rl;font-size:var(--fs-sm);font-weight:700;color:var(--color-success-text);letter-spacing:0.1em">결과를 정리하는 손</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:var(--space-md)">
+<!-- 4. Parent Doc -->
+<div style="display:grid;grid-template-columns:auto 1fr;gap:var(--space-md);align-items:center;background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:var(--space-md) var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:800;color:var(--color-success);font-family:var(--font-mono)">4</div>
+<div>
+<div style="font-weight:600;color:var(--color-text-heading);font-size:var(--fs-sm)">조각의 원본 전체를 꺼낸다 — Parent Doc</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:2px">"연차 신청은 3일 전 서면" 조각 → 제15~16조 원문 전체 반환</div>
+</div>
+</div>
+<!-- 5. Compression -->
+<div style="display:grid;grid-template-columns:auto 1fr;gap:var(--space-md);align-items:center;background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:var(--space-md) var(--space-lg)">
+<div style="font-size:var(--fs-xl);font-weight:800;color:var(--color-success);font-family:var(--font-mono)">5</div>
+<div>
+<div style="font-weight:600;color:var(--color-text-heading);font-size:var(--fs-sm)">핵심 문장만 압축한다 — Compression</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:2px">부모 문서에서 질문과 관련된 문장만 남기고 나머지 제거</div>
+</div>
+</div>
+</div>
+</div>
+<div style="text-align:center;margin-top:var(--space-xl);padding:var(--space-md);background:var(--color-surface-alt);border-radius:var(--radius-md);font-size:var(--fs-sm);color:var(--color-text-muted)"><span style="color:var(--color-accent-text);font-weight:600">1~3(파란색)</span> = 검색 전 질문 가공 &nbsp;·&nbsp; <span style="color:var(--color-success-text);font-weight:600">4~5(초록색)</span> = 검색 후 결과 가공</div>
+</div>
+<h2>9.3 이번 챕터의 두 묶음</h2>
+<p>다섯 가지 기법이 두 묶음으로 나뉩니다.</p>
+<p><strong>검색 전 질의 변환</strong> (Step 1). HyDE, Multi-Query, 약어 확장. 검색 전에 질문 자체를 가공합니다.</p>
+<p><strong>검색 후 결과 가공</strong> (Step 2). Parent Doc, Compression. 검색된 결과를 넓히거나 줄여서 LLM에 넘기기 좋은 형태로 만듭니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-4. RAG 파이프라인에서 챕터 8과 챕터 9의 위치</div>
+<div style="display:flex;align-items:stretch;justify-content:center;gap:0;font-size:var(--fs-sm)">
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-md) 0 0 var(--radius-md);padding:var(--space-lg);text-align:center;flex:1;background:var(--color-success-bg)">
+<div style="font-weight:700;color:var(--color-success-text);margin-bottom:var(--space-xs)">Step 1. 질의 변환</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">약어 확장 · HyDE · Multi-Query</div>
+<div style="margin-top:var(--space-sm)"><span style="font-size:var(--fs-footnote);background:var(--color-success);color:white;padding:2px 8px;border-radius:10px;font-weight:600">챕터 9</span></div>
+</div>
+<div style="border-top:2px solid var(--color-border);border-bottom:2px solid var(--color-border);padding:var(--space-lg);text-align:center;flex:1;background:var(--color-surface-alt);opacity:0.5">
+<div style="font-weight:700;color:var(--color-text-heading);margin-bottom:var(--space-xs)">검색 엔진</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">Semantic 청킹 · Reranker · Hybrid</div>
+<div style="margin-top:var(--space-sm)"><span style="font-size:var(--fs-footnote);background:var(--color-text-subtle);color:white;padding:2px 8px;border-radius:10px">챕터 8</span></div>
+</div>
+<div style="border:2px solid var(--color-success);border-radius:0 var(--radius-md) var(--radius-md) 0;padding:var(--space-lg);text-align:center;flex:1;background:var(--color-success-bg)">
+<div style="font-weight:700;color:var(--color-success-text);margin-bottom:var(--space-xs)">Step 2. 결과 가공</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted)">Parent Doc · Compression</div>
+<div style="margin-top:var(--space-sm)"><span style="font-size:var(--fs-footnote);background:var(--color-success);color:white;padding:2px 8px;border-radius:10px;font-weight:600">챕터 9</span></div>
+</div>
+</div>
+<div style="text-align:center;margin-top:var(--space-md);font-size:var(--fs-xs);color:var(--color-text-subtle)">← 질문 입력　·　검색 엔진 (챕터 8)　·　결과 출력 →</div>
+</div>
+<h2>9.4 사서의 귀를 열어 주자 — 질의 변환 (step1)</h2>
+<p>서가는 정리했습니다. 이번에는 <strong>질문 쪽</strong>을 손봅니다. 검색 엔진에 질문을 넘기기 <strong>전</strong>에 질문 자체를 가공하는 도구 세 가지를 하나씩 실험합니다. 실험 결과를 보고 우리 시스템에 필요한 것만 골라 적용할 겁니다.</p>
+<div class="prep-note">
+<p><strong>실습 흐름</strong></p>
+<ol>
+<li>가상 답변으로 검색한 결과와 직접 검색 결과를 비교합니다 (<code>--step 1-1</code>)</li>
+<li>하나의 질문을 여러 표현으로 재작성합니다 (<code>--step 1-2</code>)</li>
+<li>쿼리의 약어와 동의어를 확장합니다 (<code>--step 1-3</code>)</li>
+</ol>
+</div>
+<h3>9.4.1 답을 먼저 상상한다 — HyDE</h3>
+<p class="thought">답을 먼저 상상해 보면 어떨까.</p>
+<p>사서가 &quot;쉬는 날 규정&quot;이라는 질문을 받으면, 서가로 달려가기 전에 먼저 &quot;1년 근속 시 15일 유급휴가...&quot;라는 답을 상상합니다. 그 상상한 답과 비슷한 문서를 찾으면, 질문과 문서 사이의 어휘 차이를 건너뛸 수 있습니다.</p>
+<p>질문 대신 <strong>&quot;이 질문에 어울릴 법한 답변&quot;</strong> 을 LLM에 먼저 생성시키고, 그 가상 답변을 임베딩해 검색합니다. 답변과 답변 간 거리가 질문-답변 거리보다 가까운 경우가 많기 때문입니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-5. 직접 검색과 HyDE 검색의 차이</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl)">
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);margin-bottom:var(--space-xs)">직접 검색</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs)">"쉬는 날 규정"</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ 임베딩</div>
+<div style="background:var(--color-surface-alt);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs);font-family:var(--font-mono)">질문 벡터</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ 문서 벡터와 비교</div>
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);text-align:center;width:90%">
+<div style="color:var(--color-text-muted)">문서: "연차유급휴가는..."</div>
+<div style="color:var(--color-warning-text);font-weight:600;margin-top:var(--space-xs)">어휘가 다르면 거리가 멀다</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-success-text);margin-bottom:var(--space-xs)">HyDE 검색</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs)">"쉬는 날 규정"</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ LLM 호출</div>
+<div style="background:var(--color-success-bg);border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs)">"연차유급휴가는 1년 근속 시 15일..."</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ 가상 답변을 임베딩</div>
+<div style="background:var(--color-success-bg);border:1px solid var(--color-success);border-radius:var(--radius-sm);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs);font-family:var(--font-mono)">답변 벡터</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ 문서 벡터와 비교</div>
+<div style="border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);text-align:center;width:90%;background:var(--color-success-bg)">
+<div style="color:var(--color-text-muted)">문서: "연차유급휴가는..."</div>
+<div style="color:var(--color-success-text);font-weight:600;margin-top:var(--space-xs)">답변끼리는 거리가 가깝다</div>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);padding:var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-md)">핵심: <b>답변 ↔ 문서</b> 거리 &lt; <b>질문 ↔ 문서</b> 거리. 가상 답변이 어휘 차이를 메워 줍니다.</div>
+</div>
+<p>이 흐름을 코드로 구현합니다. 질문 벡터와 가상 답변 벡터를 각각 만들고, 문서 벡터와의 유사도를 나란히 비교하는 함수입니다.</p>
+<p><code>tuning/step1_query_rewrite/hyde.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_query_rewrite/hyde.py. HyDE vs 직접 검색 비교</div><span class="k">def</span><span class="w"> </span><span class="nf">compare_hyde_vs_direct</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="cb-todo"># TODO: 가상 답변으로 검색한 결과와 직접 검색 결과를 비교합니다.</span>
+    <span class="c1"># 1. LLM에 가상 답변 생성 요청</span>
+    <span class="n">hypo_doc</span> <span class="o">=</span> <span class="n">_generate_hypothetical_doc_llm</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+    <span class="n">doc_contents</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">documents</span><span class="p">]</span>
+
+    <span class="c1"># 2. 질문 벡터와 가상 답변 벡터를 각각 생성</span>
+    <span class="n">query_vec</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">embed_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+    <span class="n">hyde_vec</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">embed_query</span><span class="p">(</span><span class="n">hypo_doc</span><span class="p">)</span>
+    <span class="n">doc_vecs</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">embed_documents</span><span class="p">(</span><span class="n">doc_contents</span><span class="p">)</span>
+
+    <span class="c1"># 3. 직접 검색: 질문 ↔ 문서 유사도</span>
+    <span class="n">direct_scores</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">_cosine_similarity</span><span class="p">(</span><span class="n">query_vec</span><span class="p">,</span> <span class="n">dv</span><span class="p">),</span> <span class="n">doc</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dv</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">doc_vecs</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="c1"># 4. HyDE 검색: 가상 답변 ↔ 문서 유사도</span>
+    <span class="n">hyde_scores</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">_cosine_similarity</span><span class="p">(</span><span class="n">hyde_vec</span><span class="p">,</span> <span class="n">dv</span><span class="p">),</span> <span class="n">doc</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dv</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">doc_vecs</span><span class="p">,</span> <span class="n">documents</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">direct_scores</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">hyde_scores</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+        <span class="s2">&quot;hypothetical_doc&quot;</span><span class="p">:</span> <span class="n">hypo_doc</span><span class="p">,</span>
+        <span class="s2">&quot;direct_results&quot;</span><span class="p">:</span> <span class="n">_to_results</span><span class="p">(</span><span class="n">direct_scores</span><span class="p">),</span>
+        <span class="s2">&quot;hyde_results&quot;</span><span class="p">:</span> <span class="n">_to_results</span><span class="p">(</span><span class="n">hyde_scores</span><span class="p">),</span>
+    <span class="p">}</span></div>
+<p>질문 벡터로 검색한 <code>direct_results</code>와 가상 답변 벡터로 검색한 <code>hyde_results</code>가 나란히 반환됩니다. <code>embeddings</code>는 <code>experiments.py</code>가 <code>jhgan/ko-sroberta-multitask</code> 모델을 로드해서 넘겨주고, <code>documents</code>는 <code>data.py</code>의 <code>SEARCH_DOCUMENTS</code>(사내 규정 10건)입니다. 코드에 등장하는 보조 함수는 같은 파일 위쪽에 미리 정의되어 있습니다.</p>
+<table>
+<thead>
+<tr>
+<th>함수</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_generate_hypothetical_doc_llm(query)</code></td>
+<td>LLM에 가상 답변 문서 생성을 요청합니다</td>
+</tr>
+<tr>
+<td><code>_cosine_similarity(a, b)</code></td>
+<td>두 벡터의 코사인 유사도를 계산합니다</td>
+</tr>
+<tr>
+<td><code>_to_results(scored)</code></td>
+<td>(점수, 문서) 리스트를 상위 3개로 잘라 반환합니다</td>
+</tr>
+</tbody>
+</table>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1-1 실행. HyDE 검색 vs 직접 검색</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_query_rewrite<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-1</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 9-6. 실험 1-1. HyDE (Hypothetical Document Embeddings)</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-xs)">원리: 가상 답변 문서 생성 → 그 문서와 유사한 실제 문서 검색</div>
+<div style="font-size:var(--fs-xs);margin-bottom:var(--space-xs)"><span style="color:var(--color-text-muted)">쿼리: </span><span style="color:var(--color-text)">연차 신청 절차는 어떻게 됩니까?</span></div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-bottom:var(--space-lg);padding:var(--space-xs) var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-sm)">가상 문서: 연차 신청에 관한 사내 규정에 따르면, 직원은 사용 예정일 3일 전까지 팀장 승인을 받아야 하며, 1년 근속 시 15일의 유급휴가가 부여됩니다...</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl)">
+<div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-heading);border-bottom:1px solid var(--color-border);padding-bottom:var(--space-xs);margin-bottom:var(--space-sm)">직접 검색 결과</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse">
+<tr style="color:var(--color-text-muted)"><th style="text-align:center;width:28px;padding:2px 6px">순위</th><th style="padding:2px 6px">내용</th><th style="text-align:right;padding:2px 6px">유사도</th></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">1</td><td style="padding:4px 6px">연차 신청은 3일 전 서면 제출...</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.5917</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">2</td><td style="padding:4px 6px">연차유급휴가는 1년 근속 시 15일...</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.5276</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">3</td><td style="padding:4px 6px">재택근무 입사 6개월 이상 신청...</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.4455</td></tr>
+</table>
+<div style="margin-top:var(--space-xs);font-size:var(--fs-xs);color:var(--color-text-subtle)">3위가 재택근무 문서로, 연차와 무관합니다.</div>
+</div>
+<div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-success-text);border-bottom:1px solid var(--color-success);padding-bottom:var(--space-xs);margin-bottom:var(--space-sm)">HyDE 검색 결과</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse">
+<tr style="color:var(--color-text-muted)"><th style="text-align:center;width:28px;padding:2px 6px">순위</th><th style="padding:2px 6px">내용</th><th style="text-align:right;padding:2px 6px">유사도</th></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-success-bg)"><td style="text-align:center;padding:4px 6px;font-weight:700">1</td><td style="padding:4px 6px;font-weight:700">연차 신청은 3일 전 서면 제출...</td><td style="text-align:right;padding:4px 6px;font-weight:700;color:var(--color-success-text)">0.6691</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">2</td><td style="padding:4px 6px">연차유급휴가는 1년 근속 시 15일...</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.6237</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">3</td><td style="padding:4px 6px">재택근무 입사 6개월 이상 신청...</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.5888</td></tr>
+</table>
+<div style="margin-top:var(--space-xs);font-size:var(--fs-xs);color:var(--color-success-text)">모든 점수가 올랐습니다. 1위: 0.5917 → 0.6691</div>
+</div>
+</div>
+</div>
+<p>직접 검색에서는 1위(0.5917)와 3위(0.4455) 사이 점수 차이가 0.15에 불과해 순위 구분이 어렵습니다. HyDE에서는 가상 답변이 &quot;연차유급휴가&quot;라는 단어를 직접 포함하기 때문에 관련 문서의 유사도가 전반적으로 올랐습니다. 1위 점수가 0.5917 → 0.6691로 상승했고, 상위 문서 간 격차도 뚜렷해졌습니다.</p>
+<p>질문을 바꿔서도 실험해 보세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 커스텀 쿼리로 HyDE 실험</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_query_rewrite<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-1<span class="w"> </span>--query<span class="w"> </span><span class="s2">&quot;쉬는 날 규정&quot;</span></div>
+<div class="tip">
+<p><strong>HyDE 실험에서 생각해 볼 것들</strong></p>
+<ul>
+<li><strong>유사도 점수 차이</strong>: 직접 검색(Direct)과 HyDE 검색의 상위 3개 점수를 비교해 보세요. HyDE 쪽이 전반적으로 높다면, 가상 답변이 질문과 문서 사이의 어휘 차이를 잘 메워 준 겁니다.</li>
+<li><strong>가상 답변의 품질</strong>: hypothetical_doc 항목을 읽어 보세요. LLM이 만든 가상 답변이 실제 규정과 비슷할수록 검색 정확도가 올라갑니다. 엉뚱한 답변이 나오면 프롬프트를 다듬어야 합니다.</li>
+<li><strong>순위 변화</strong>: HyDE 검색에서 1위로 올라온 문서가 직접 검색의 1위와 다른지 확인해 보세요. 다르다면 어휘 차이 때문에 직접 검색에서 놓쳤던 문서를 HyDE가 잡아낸 겁니다.</li>
+</ul>
+</div>
+<p><em>됐다.</em> 오픈이가 터미널을 내려다봤습니다. 유사도가 0.59에서 0.67로 올랐습니다. HyDE는 &quot;쉬는 날&quot;처럼 어휘 차이가 큰 질문에 효과적입니다.</p>
+<p>그런데 &quot;복리후생&quot;처럼 의미가 넓은 질문은 어떨까요? 연차도, 재택도, 출장비도 다 걸립니다. 가상 답변 하나로는 한 방향밖에 못 봅니다. 다른 도구를 꺼내 봅니다.</p>
+<h3>9.4.2 질문을 여러 갈래로 — Multi-Query</h3>
+<div class="dialogue"><span class="speaker">동료</span>: "하나로만 물으면 한 방향밖에 못 보잖아요?"</div>
+<p>사서가 서가를 한 방향에서만 훑지 않고 세 갈래로 나눠 찾는 겁니다. LLM에게 &quot;이 질문을 다른 표현으로 3가지 만들어 줘&quot;라고 시키고, 원본 포함 4개 질문으로 각각 검색한 뒤 합집합을 만듭니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-7. Multi-Query 검색 흐름</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs)">"휴가 규정 알려주세요"</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ LLM 재작성</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-sm);width:100%">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center"><div style="color:var(--color-info-text);font-weight:600;margin-bottom:2px">원본</div>"휴가 규정"</div>
+<div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center"><div style="color:var(--color-accent-text);font-weight:600;margin-bottom:2px">재작성 1</div>"연차 사용 방법"</div>
+<div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center"><div style="color:var(--color-accent-text);font-weight:600;margin-bottom:2px">재작성 2</div>"유급휴가 일수"</div>
+<div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center"><div style="color:var(--color-accent-text);font-weight:600;margin-bottom:2px">재작성 3</div>"휴가 신청 절차"</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-sm);width:100%;text-align:center;color:var(--color-text-muted);font-size:var(--fs-xs)">
+<div>↓ 검색</div><div>↓ 검색</div><div>↓ 검색</div><div>↓ 검색</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-sm);width:100%">
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center;color:var(--color-text-muted)">문서 A, B</div>
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center;color:var(--color-text-muted)">문서 A, C</div>
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center;color:var(--color-text-muted)">문서 B, D</div>
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs);font-size:var(--fs-footnote);text-align:center;color:var(--color-text-muted)">문서 C, E</div>
+</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ 합집합 (중복 제거, 최고 점수 유지)</div>
+<div style="background:var(--color-success-bg);border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);font-size:var(--fs-xs);text-align:center">
+<span style="font-weight:600;color:var(--color-success-text)">최종 결과: A, B, C, D, E</span>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);padding:var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-md)">핵심: 질문 하나를 여러 표현으로 바꾸면 <b>각 표현이 잡아오는 문서가 다릅니다</b>. 합집합으로 검색 범위를 넓힙니다.</div>
+</div>
+<p>이 흐름을 코드로 구현합니다. LLM에 프롬프트를 보내 재작성 질문을 받고, 원본 질문과 합쳐 반환하는 함수입니다.</p>
+<p><code>tuning/step1_query_rewrite/multi_query.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_query_rewrite/multi_query.py. 다양한 관점의 쿼리 생성</div><span class="k">def</span><span class="w"> </span><span class="nf">generate_multi_queries</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">num_queries</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;다음 질문을 </span><span class="si">{</span><span class="n">num_queries</span><span class="si">}</span><span class="s2">가지 다른 방식으로 재표현하십시오.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;각 질문은 같은 정보를 구하지만 다른 표현 방식을 사용해야 합니다.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;번호 없이 각 질문을 한 줄씩 출력하십시오.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;원본 질문: </span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;재표현된 질문들:&quot;</span>
+    <span class="p">)</span>
+    <span class="cb-todo"># TODO: LLM을 호출하고 결과를 줄 단위로 파싱합니다.</span>
+    <span class="n">llm_result</span> <span class="o">=</span> <span class="n">_call_llm</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+
+    <span class="c1"># 2. 줄 단위로 파싱, 원본 포함 리스트 구성</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">llm_result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">queries</span> <span class="o">=</span> <span class="p">[</span><span class="n">query</span><span class="p">]</span> <span class="o">+</span> <span class="n">lines</span><span class="p">[:</span><span class="n">num_queries</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">queries</span></div>
+<p>원본 질문 1개에 재작성 3개를 합쳐 총 4개 질문이 반환됩니다. <code>num_queries</code>(기본값 3)가 생성할 재작성 수이고, <code>_call_llm(prompt)</code>은 같은 파일에 정의된 보조 함수로 환경변수 <code>LLM_PROVIDER</code>에 따라 Ollama 또는 OpenAI를 호출합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1-2 실행. Multi-Query 재작성</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_query_rewrite<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-2</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 9-8. 실험 1-2. Multi-Query</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-xs)">원리: 1개 질문 → N개 다양한 표현으로 검색 결과 다양화</div>
+<div style="font-size:var(--fs-xs);margin-bottom:var(--space-lg)"><span style="color:var(--color-text-muted)">원본 쿼리: </span><span style="color:var(--color-text)">재택근무 조건과 신청 방법</span></div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-heading);border-bottom:1px solid var(--color-border);padding-bottom:var(--space-xs);margin-bottom:var(--space-sm)">생성된 쿼리</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse;margin-bottom:var(--space-lg)">
+<tr style="color:var(--color-text-muted)"><th style="text-align:center;width:28px;padding:2px 6px">번호</th><th style="padding:2px 6px">쿼리</th><th style="text-align:right;padding:2px 6px;width:50px">유형</th></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-info-bg)"><td style="text-align:center;padding:4px 6px;font-weight:700">1</td><td style="padding:4px 6px;font-weight:700">재택근무 조건과 신청 방법</td><td style="text-align:right;padding:4px 6px;color:var(--color-info-text);font-weight:600">원본</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">2</td><td style="padding:4px 6px">원격 근무에 관련된 규정 및 절차는?</td><td style="text-align:right;padding:4px 6px;color:var(--color-accent-text)">변형 1</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">3</td><td style="padding:4px 6px">원격 근무 신청 방법과 필요한 정보는?</td><td style="text-align:right;padding:4px 6px;color:var(--color-accent-text)">변형 2</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">4</td><td style="padding:4px 6px">집으로 출근 조건과 신청 방법은?</td><td style="text-align:right;padding:4px 6px;color:var(--color-accent-text)">변형 3</td></tr>
+</table>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-success-text);border-bottom:1px solid var(--color-success);padding-bottom:var(--space-xs);margin-bottom:var(--space-sm)">병합 검색 결과</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse">
+<tr style="color:var(--color-text-muted)"><th style="text-align:center;width:28px;padding:2px 6px">순위</th><th style="padding:2px 6px">내용</th><th style="text-align:right;padding:2px 6px">최고 유사도</th></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-success-bg)"><td style="text-align:center;padding:4px 6px;font-weight:700">1</td><td style="padding:4px 6px;font-weight:700">재택근무는 입사 6개월 이상 정규직에 한해 신청 가능...</td><td style="text-align:right;padding:4px 6px;font-weight:700;color:var(--color-success-text)">0.7355</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">2</td><td style="padding:4px 6px">재택근무 중에는 정규 근무시간 준수...</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.6053</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">3</td><td style="padding:4px 6px">연차 신청은 3일 전 서면 제출...</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.4531</td></tr>
+</table>
+<div style="margin-top:var(--space-xs);font-size:var(--fs-xs);color:var(--color-success-text)">"재택근무"를 "원격 근무", "집으로 출근" 등으로 바꿔 검색 범위를 넓혔습니다.</div>
+</div>
+<p>&quot;재택근무 조건&quot;이라는 질문 하나를 &quot;원격 근무 규정&quot;, &quot;집으로 출근 조건&quot; 같은 다른 표현으로 바꿔 각각 검색합니다. 4개 질문이 잡아온 문서를 합치면 원본만으로 놓쳤을 문서까지 포함됩니다. 1위 문서(0.7355)는 &quot;재택근무&quot;라는 단어가 직접 들어 있어 원본 질문과 강하게 매칭됐고, 변형 질문들이 같은 문서를 다른 방향에서 보강해 점수가 더 올랐습니다.</p>
+<p>재작성 개수를 바꿔서 확장 효과를 비교해 보세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 쿼리 수를 5개로 늘려 실험</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_query_rewrite<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-2<span class="w"> </span>--num_queries<span class="w"> </span><span class="m">5</span></div>
+<div class="tip">
+<p><strong>Multi-Query 실험에서 생각해 볼 것들</strong></p>
+<ul>
+<li><strong>재작성 품질</strong>: LLM이 만든 재작성 질문들을 읽어 보세요. 원본과 같은 의도지만 다른 표현을 쓰고 있어야 합니다. 너무 비슷하면 효과가 떨어집니다.</li>
+<li><strong>검색 범위 확장</strong>: 합집합 결과에 원본 질문만으로는 못 찾았을 문서가 포함됐는지 확인해 보세요. 새로 들어온 문서가 있다면 Multi-Query의 효과입니다.</li>
+<li><strong>쿼리 수 조절</strong>: <code>--num_queries 5</code>로 늘리면 검색 범위가 넓어지지만, LLM 호출 횟수도 늘어납니다. 3개면 충분한 경우가 많습니다.</li>
+</ul>
+</div>
+<div class="tip">
+<p><strong>HyDE vs Multi-Query 선택 기준</strong>. HyDE는 질문과 문서의 <strong>어휘 차이</strong>가 클 때 효과적입니다. &quot;쉬는 날&quot; → &quot;연차유급휴가&quot;처럼 질문에 쓰는 단어와 문서에 적힌 단어가 다를 때 가상 답변이 다리 역할을 합니다. Multi-Query는 질문의 <strong>의미가 넓을 때</strong> 효과적입니다. &quot;복리후생&quot;처럼 여러 규정에 걸치는 질문을 갈래로 쪼개야 할 때 씁니다. 둘 다 LLM을 호출하므로 응답 시간이 늘어나는 점은 같습니다.</p>
+</div>
+<p>Multi-Query는 넓은 질문에 효과적입니다. 네 갈래로 검색하니 한 방향에서 놓쳤던 문서가 합집합에 올라왔습니다. 오픈이가 팀장에게 화면을 보여주려고 고개를 돌렸습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "그거 좋은데요. 근데 제가 아까 'WFH 신청'이라고 물어봤거든요? 아무것도 안 나오더라고요."</div>
+<p>이건 다른 종류의 문제입니다. 질문의 넓이가 아니라 <strong>단어 자체</strong>를 모르는 겁니다. 사서는 &quot;재택근무&quot;라는 단어만 알고 있었습니다.</p>
+<h3>9.4.3 약어를 번역한다 — 약어·동의어 확장</h3>
+<p>사내에서 흔히 쓰는 약어와 줄임말을 사전으로 만들어 두고, 질문에 포함되면 원래 뜻으로 치환합니다.</p>
+<p><code>data.py</code>에 두 종류의 사전이 들어 있습니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge reference">참고</span> tuning/step1_query_rewrite/data.py. 약어·동의어 사전</div><span class="n">ABBREVIATION_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;WFH&quot;</span><span class="p">:</span> <span class="s2">&quot;재택근무(Work From Home)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;OT&quot;</span><span class="p">:</span> <span class="s2">&quot;초과근무(Overtime)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PIP&quot;</span><span class="p">:</span> <span class="s2">&quot;성과개선계획(Performance Improvement Plan)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HR&quot;</span><span class="p">:</span> <span class="s2">&quot;인사부서(Human Resources)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;4대보험&quot;</span><span class="p">:</span> <span class="s2">&quot;국민연금, 건강보험, 고용보험, 산재보험&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;반차&quot;</span><span class="p">:</span> <span class="s2">&quot;반일 연차&quot;</span><span class="p">,</span>
+    <span class="c1"># ... 외 6개</span>
+<span class="p">}</span>
+
+<span class="n">SYNONYM_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;연차&quot;</span><span class="p">:</span> <span class="s2">&quot;연차유급휴가&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;휴가&quot;</span><span class="p">:</span> <span class="s2">&quot;연차유급휴가&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;재택&quot;</span><span class="p">:</span> <span class="s2">&quot;재택근무&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;원격근무&quot;</span><span class="p">:</span> <span class="s2">&quot;재택근무&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;퇴직금&quot;</span><span class="p">:</span> <span class="s2">&quot;퇴직급여&quot;</span><span class="p">,</span>
+    <span class="c1"># ... 외 5개</span>
+<span class="p">}</span></div>
+<p><code>ABBREVIATION_MAP</code>은 영문 약어를 한글 풀네임으로, <code>SYNONYM_MAP</code>은 구어 표현을 규정집 정식 명칭으로 바꿉니다. 질문에 &quot;WFH&quot;가 들어오면 &quot;재택근무(Work From Home)&quot;로, &quot;연차&quot;가 들어오면 &quot;연차유급휴가&quot;로 치환됩니다.</p>
+<p>이 사전을 순회하며 문자열을 치환하는 함수를 작성합니다. <code>tuning/step1_query_rewrite/abbreviation.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> tuning/step1_query_rewrite/abbreviation.py. 약어·동의어 확장</div><span class="k">def</span><span class="w"> </span><span class="nf">expand_abbreviations</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+    <span class="cb-todo"># TODO: 쿼리의 약어와 동의어를 확장합니다.</span>
+    <span class="n">expanded</span> <span class="o">=</span> <span class="n">query</span>
+    <span class="n">applied</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># 1. 약어 확장: &quot;WFH&quot; → &quot;재택근무(Work From Home)&quot;</span>
+    <span class="k">for</span> <span class="n">abbrev</span><span class="p">,</span> <span class="n">full_form</span> <span class="ow">in</span> <span class="n">ABBREVIATION_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">abbrev</span> <span class="ow">in</span> <span class="n">expanded</span><span class="p">:</span>
+            <span class="n">expanded</span> <span class="o">=</span> <span class="n">expanded</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">abbrev</span><span class="p">,</span> <span class="n">full_form</span><span class="p">)</span>
+            <span class="n">applied</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;약어 &#39;</span><span class="si">{</span><span class="n">abbrev</span><span class="si">}</span><span class="s2">&#39; -&gt; &#39;</span><span class="si">{</span><span class="n">full_form</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 2. 동의어 확장: &quot;휴가&quot; → &quot;연차유급휴가&quot;</span>
+    <span class="k">for</span> <span class="n">term</span><span class="p">,</span> <span class="n">synonym</span> <span class="ow">in</span> <span class="n">SYNONYM_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">expanded</span> <span class="ow">and</span> <span class="n">synonym</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expanded</span><span class="p">:</span>
+            <span class="n">expanded</span> <span class="o">=</span> <span class="n">expanded</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">synonym</span><span class="p">)</span>
+            <span class="n">applied</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;동의어 &#39;</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">&#39; -&gt; &#39;</span><span class="si">{</span><span class="n">synonym</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;original&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span> <span class="s2">&quot;expanded&quot;</span><span class="p">:</span> <span class="n">expanded</span><span class="p">,</span> <span class="s2">&quot;applied&quot;</span><span class="p">:</span> <span class="n">applied</span><span class="p">}</span></div>
+<p><code>ABBREVIATION_MAP</code>과 <code>SYNONYM_MAP</code>을 순회하며 문자열 치환을 수행합니다. <code>applied</code> 리스트에 어떤 변환이 적용됐는지 기록하므로, &quot;WFH 신청 방법&quot;이 &quot;재택근무(Work From Home) 신청 방법&quot;으로 바뀌는 과정을 터미널에서 확인할 수 있습니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 1-3 실행. 약어·동의어 확장</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_query_rewrite<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-3</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 9-9. 실험 1-3. 약어/동의어 확장</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-lg)">원리: 사전 기반 매핑으로 약어와 동의어를 정규 표현으로 치환</div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse">
+<tr style="color:var(--color-text-muted)"><th style="padding:2px 6px;text-align:left">원본 쿼리</th><th style="padding:2px 6px;text-align:left">확장된 쿼리</th><th style="padding:2px 6px;text-align:left">적용 규칙</th></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-success-bg)"><td style="padding:4px 6px;font-weight:700">WFH 정책이 어떻게 됩니까?</td><td style="padding:4px 6px;font-weight:700">재택근무(Work From Home) 정책이...</td><td style="padding:4px 6px;color:var(--color-success-text)">약어 WFH → 재택근무</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 6px">OT 신청 절차를 알려주십시오</td><td style="padding:4px 6px">초과근무(Overtime) 신청 절차를...</td><td style="padding:4px 6px;color:var(--color-text-muted)">약어 OT → 초과근무</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 6px">연차 신청 방법</td><td style="padding:4px 6px">연차유급휴가 신청 방법</td><td style="padding:4px 6px;color:var(--color-text-muted)">동의어 연차 → 연차유급휴가</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="padding:4px 6px">4대보험 가입 시기</td><td style="padding:4px 6px">국민연금, 건강보험, 고용보험, 산재보험...</td><td style="padding:4px 6px;color:var(--color-text-muted)">약어 4대보험 → 풀네임</td></tr>
+</table>
+<div style="margin-top:var(--space-xs);font-size:var(--fs-xs);color:var(--color-success-text)">사전에 등록된 약어와 동의어가 자동으로 치환됩니다.</div>
+</div>
+<p>&quot;WFH&quot;라고 물었는데 문서에는 &quot;재택근무&quot;라고 적혀 있으면 벡터 검색에서도 놓칠 수 있습니다. 사전이 이 간극을 메워 줍니다. LLM 호출 없이 단순 문자열 치환이라 응답 지연이 없습니다.</p>
+<p>약어가 포함된 질문을 직접 넣어 보세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 커스텀 쿼리로 약어 확장 실험</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step1_query_rewrite<span class="w"> </span>--step<span class="w"> </span><span class="m">1</span>-3<span class="w"> </span>--query<span class="w"> </span><span class="s2">&quot;OT 신청 절차&quot;</span></div>
+<div class="tip">
+<p><strong>약어 확장 실험에서 생각해 볼 것들</strong></p>
+<ul>
+<li><strong>적용된 변환</strong>: applied 목록에 어떤 규칙이 적용됐는지 확인해 보세요. 약어(<code>WFH</code> → <code>재택근무</code>)와 동의어(<code>휴가</code> → <code>연차유급휴가</code>) 두 종류가 있습니다.</li>
+<li><strong>검색 결과 변화</strong>: 확장 전후로 검색 결과가 달라지는지 비교해 보세요. 문서에 &quot;재택근무&quot;라고 적혀 있는데 질문에 &quot;WFH&quot;를 쓰면 벡터 검색에서도 놓칠 수 있습니다.</li>
+<li><strong>사전 관리</strong>: <code>data.py</code>에 없는 약어를 넣으면 그대로 통과합니다. 사내에서 자주 쓰는 약어를 사전에 추가하면 바로 효과가 나옵니다. 슬랙에서 검색 실패 로그를 모니터링하면 &quot;이 단어가 빠져 있구나&quot;를 알 수 있습니다. 사전이 커질수록 검색 실패율이 떨어집니다.</li>
+</ul>
+</div>
+<p>질의 변환 도구 세 가지를 실험했습니다. 질문을 바꾸는 쪽은 여기까지입니다. 그런데 오픈이가 검색 결과 자체를 살펴봤습니다. 가져온 청크 3개를 나란히 놓으니 &quot;연차 신청은 3일 전 서면으로&quot;, &quot;팀장 승인이 필요합니다&quot;, &quot;긴급한 경우 구두 신청 가능&quot;. 각각은 맞는 말인데, 조각조각 끊겨 있습니다.</p>
+<p class="thought">질문을 잘 바꿔서 찾았는데, 찾아온 결과를 다듬는 도구도 필요하겠는데.</p>
+<h2>9.5 쪽지가 아니라 규정집을 펼친다 — 결과 가공 (step2)</h2>
+<div class="dialogue"><span class="speaker">동료</span>: "조각 3개 가져왔는데, 각각 한두 줄이면 LLM이 전체 맥락을 알 수 있어요?"</div>
+<p>청크 여러 개를 가져와도 각 청크가 짧은 조각이면 LLM은 규정의 전체 흐름을 볼 수 없습니다. 질의 변환이 질문을 다듬는 작업이었다면, 결과 가공은 LLM에 넘기는 문서를 다듬는 작업입니다.</p>
+<div class="prep-note">
+<p><strong>실습 흐름</strong></p>
+<ol>
+<li>자식 청크로 검색하고 부모 문서 전체를 반환합니다 (<code>--step 2-1</code>)</li>
+<li>검색 후 관련 문장만 압축해서 반환합니다 (<code>--step 2-2</code>)</li>
+<li>질문에서 메타데이터 조건을 추출해 검색 대상을 좁힙니다 (<code>--step 2-3</code>)</li>
+</ol>
+</div>
+<h3>9.5.1 원본 문서 꺼내기 — Parent Document Retriever</h3>
+<p>작은 청크로 검색하되, LLM에게는 그 청크가 속한 <strong>부모 문서 전체</strong>를 넘깁니다. 정확도(작은 청크)와 맥락(큰 문서)을 동시에 취하는 방식입니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-10. Parent Document Retriever 동작 원리</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-md);align-items:center">
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);margin-bottom:var(--space-xs)">검색에 사용</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);text-align:center;width:100%">
+<div style="font-weight:600;color:var(--color-info-text);margin-bottom:var(--space-xs)">child chunk</div>
+"연차 신청은 3일 전 서면으로 하며 팀장 승인이 필요합니다."
+<div style="margin-top:var(--space-xs);color:var(--color-text-muted);font-size:var(--fs-footnote)">약 40자</div>
+</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-success-text);font-weight:700">→</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-success-text);margin-bottom:var(--space-xs)">반환하는 것</div>
+<div style="background:var(--color-success-bg);border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);text-align:center;width:100%">
+<div style="font-weight:600;color:var(--color-success-text);margin-bottom:var(--space-xs)">parent document</div>
+취업규칙 제15조~16조 연차유급휴가 전문
+<div style="margin-top:var(--space-xs);color:var(--color-text-muted);font-size:var(--fs-footnote)">약 359자</div>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);padding:var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-md)">핵심: <b>작은 조각</b>으로 정확히 찾고, <b>원본 전체</b>로 맥락을 보존합니다.</div>
+</div>
+<p>이 흐름을 코드로 구현합니다. 자식 청크별 유사도를 계산하고, 매칭된 조각이 속한 부모 문서 전체를 반환하는 클래스입니다.</p>
+<p><code>tuning/step2_advanced_retriever/parent_doc.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> tuning/step2_advanced_retriever/parent_doc.py. Parent Document Retriever</div><span class="k">class</span><span class="w"> </span><span class="nc">ParentDocumentRetriever</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_docs</span><span class="p">,</span> <span class="n">child_chunks</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_docs</span> <span class="o">=</span> <span class="p">{</span><span class="n">doc</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">parent_docs</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">child_chunks</span> <span class="o">=</span> <span class="n">child_chunks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">embeddings</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="cb-todo"># TODO: 자식 청크로 검색하고 부모 문서를 반환합니다.</span>
+        <span class="c1"># 1. 자식 청크별 유사도 계산</span>
+        <span class="n">query_vec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embeddings</span><span class="o">.</span><span class="n">embed_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">scored_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">vec</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_child_vectors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_chunks</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">_cosine_similarity</span><span class="p">(</span><span class="n">query_vec</span><span class="p">,</span> <span class="n">vec</span><span class="p">)</span>
+            <span class="n">scored_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">score</span><span class="p">,</span> <span class="n">chunk</span><span class="p">))</span>
+
+        <span class="n">scored_chunks</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># 2. 중복 제거: 같은 부모는 한 번만</span>
+        <span class="n">seen_parents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">score</span><span class="p">,</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">scored_chunks</span><span class="p">:</span>
+            <span class="n">parent_id</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;parent_id&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">parent_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_parents</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">top_k</span><span class="p">:</span>
+                <span class="n">seen_parents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parent_id</span><span class="p">)</span>
+                <span class="n">parent_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_docs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent_id</span><span class="p">)</span>
+                <span class="c1"># 3. 자식 청크 + 부모 문서 전체를 함께 반환</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s2">&quot;parent_content&quot;</span><span class="p">:</span> <span class="n">parent_doc</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;child_chunk&quot;</span><span class="p">:</span> <span class="n">chunk</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                <span class="p">})</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+<p>작은 <code>child_chunk</code>로 유사도를 계산하되, 결과에는 <code>parent_content</code> 전체가 담깁니다. <code>parent_docs</code>는 <code>data.py</code>의 원본 문서 리스트(ID, 제목, 전체 내용 포함)이고, <code>child_chunks</code>는 원본을 잘게 쪼갠 조각 리스트입니다. 각 조각에는 자신이 속한 부모의 ID(<code>parent_id</code>)가 들어 있습니다. <code>self._child_vectors</code>는 <code>__init__</code>에서 모든 자식 청크를 미리 임베딩해 둔 벡터입니다. 같은 부모가 중복 반환되지 않도록 이미 꺼낸 부모는 건너뜁니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 2-1 실행. Parent Document Retriever</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_advanced_retriever<span class="w"> </span>--step<span class="w"> </span><span class="m">2</span>-1</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 9-11. 실험 2-1. ParentDocumentRetriever</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-xs)">원리: 작은 청크로 검색 → 원본 전체 문서 반환 (컨텍스트 풍부)</div>
+<div style="font-size:var(--fs-xs);margin-bottom:var(--space-lg)"><span style="color:var(--color-text-muted)">쿼리: </span><span style="color:var(--color-text)">연차 신청 절차</span></div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse">
+<tr style="color:var(--color-text-muted)"><th style="text-align:center;width:28px;padding:2px 6px">순위</th><th style="padding:2px 6px">매칭 청크</th><th style="padding:2px 6px">부모 문서</th><th style="text-align:right;padding:2px 6px">부모 길이</th><th style="text-align:right;padding:2px 6px">유사도</th></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-success-bg)"><td style="text-align:center;padding:4px 6px;font-weight:700">1</td><td style="padding:4px 6px;font-weight:700">연차 신청은 3일 전 서면으로...</td><td style="padding:4px 6px">취업규칙 제15조~16조 연차유급휴가</td><td style="text-align:right;padding:4px 6px;font-weight:700;color:var(--color-success-text)">359자</td><td style="text-align:right;padding:4px 6px;color:var(--color-success-text)">0.6272</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">2</td><td style="padding:4px 6px">재택근무는 입사 6개월 이상...</td><td style="padding:4px 6px">재택근무 운영지침</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">269자</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">0.4314</td></tr>
+</table>
+<div style="margin-top:var(--space-xs);font-size:var(--fs-xs);color:var(--color-success-text)">매칭 청크는 한 문장이지만, 반환된 부모 문서는 359자 전문입니다.</div>
+</div>
+<p>&quot;연차 신청은 3일 전 서면으로&quot;라는 짧은 조각이 매칭됐지만, 실제로 반환된 건 취업규칙 제15조~16조 전문(359자)입니다. LLM이 &quot;3일 전까지 뭘 해야 하는지&quot; 앞뒤 맥락까지 볼 수 있습니다.</p>
+<p>검색 결과 수를 바꿔서 맥락의 양을 조절해 보세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 커스텀 쿼리 + top_k 변경</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_advanced_retriever<span class="w"> </span>--step<span class="w"> </span><span class="m">2</span>-1<span class="w"> </span>--query<span class="w"> </span><span class="s2">&quot;병가 규정&quot;</span><span class="w"> </span>--top_k<span class="w"> </span><span class="m">3</span></div>
+<div class="tip">
+<p><strong>부모 문서 검색 실험에서 생각해 볼 것들</strong></p>
+<ul>
+<li><strong>크기 차이</strong>: child_chunk(매칭된 작은 조각)와 parent_content(반환된 원본)의 길이를 비교해 보세요. 조각은 100~200자인데 원본은 500자 이상일 겁니다. 이 차이만큼 LLM이 더 넓은 맥락을 볼 수 있습니다.</li>
+<li><strong>맥락 복원</strong>: 작은 조각만 읽었을 때 의미가 불완전하지 않은지 확인해 보세요. &quot;3일 전까지&quot;라는 조각만으로는 뭘 3일 전까지 해야 하는지 모르지만, 원본에는 앞뒤 문맥이 있습니다.</li>
+<li><strong>top_k 조절</strong>: <code>--top_k 5</code>로 늘리면 더 많은 부모 문서를 가져오지만, LLM에 넘기는 컨텍스트가 길어집니다. 문서 3개면 대부분 충분합니다.</li>
+</ul>
+</div>
+<p>맥락이 살아났습니다. 359자짜리 규정 전문이 LLM에 들어가니 &quot;3일 전까지 뭘 해야 하는지&quot; 앞뒤가 보입니다. 그런데 오픈이가 토큰 사용량을 확인했습니다. 부모 문서를 통째로 넣으니 프롬프트가 눈에 띄게 길어졌습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "규정 전문이 다 필요해요? 질문이랑 관련 없는 조항도 섞여 있잖아요."</div>
+<h3>9.5.2 핵심 문장만 남기기 — Contextual Compression</h3>
+<p>부모 문서를 통째로 가져오면 맥락은 살지만 쓸데없는 문장이 섞입니다. 사서가 규정집을 펼쳐 보여주되, 형광펜으로 질문과 관련된 문장만 밑줄 긋고 나머지는 접어 버리는 겁니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-12. Contextual Compression 동작 원리</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-md);align-items:center">
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);margin-bottom:var(--space-xs)">원본 문서 (269자)</div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);width:100%">
+<div style="color:var(--color-text-muted);text-decoration:line-through">제4조 (재택근무 신청 자격)</div>
+<div style="color:var(--color-text-muted);text-decoration:line-through">재택근무는 입사 후 6개월이 경과한...</div>
+<div style="font-weight:700;color:var(--color-text)">재택근무 신청은 팀장 사전 승인 후...</div>
+<div style="color:var(--color-text-muted);text-decoration:line-through">재택근무 중에는 정규 근무시간을...</div>
+<div style="color:var(--color-text-muted);text-decoration:line-through">업무 연락에 1시간 내 응답해야...</div>
+</div>
+</div>
+<div style="font-size:var(--fs-lg);color:var(--color-success-text);font-weight:700">→</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-success-text);margin-bottom:var(--space-xs)">압축 결과 (16자)</div>
+<div style="background:var(--color-success-bg);border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);width:100%">
+<div style="font-weight:700;color:var(--color-success-text)">재택근무 신청은 팀장 사전 승인 후...</div>
+</div>
+<div style="font-size:var(--fs-footnote);color:var(--color-success-text);font-weight:600">compression_ratio: 6%</div>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);padding:var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-md)">핵심: 질문과 <b>관련 없는 문장은 취소선</b>으로 걸러내고, 관련된 문장만 남깁니다.</div>
+</div>
+<p>이 흐름을 코드로 구현합니다. 문서를 문장 단위로 쪼개고, 질문 단어와 겹치는 문장만 골라내는 클래스입니다.</p>
+<p><code>tuning/step2_advanced_retriever/compression.py</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> tuning/step2_advanced_retriever/compression.py. Contextual Compression</div><span class="k">class</span><span class="w"> </span><span class="nc">ContextualCompressionRetriever</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">documents</span> <span class="o">=</span> <span class="n">documents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">embeddings</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="cb-todo"># TODO: 검색 결과에서 질문과 관련된 문장만 압축합니다.</span>
+        <span class="c1"># 1. 유사도 기준으로 문서 정렬</span>
+        <span class="n">query_vec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embeddings</span><span class="o">.</span><span class="n">embed_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">doc_vecs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embeddings</span><span class="o">.</span><span class="n">embed_documents</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">documents</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">scored</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">_cosine_similarity</span><span class="p">(</span><span class="n">query_vec</span><span class="p">,</span> <span class="n">dv</span><span class="p">),</span> <span class="n">doc</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dv</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">doc_vecs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">documents</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">scored</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">score</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">scored</span><span class="p">[:</span><span class="n">top_k</span><span class="p">]:</span>
+            <span class="n">original</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">]</span>
+            <span class="c1"># 2. 핵심 문장만 추출 (최대 3문장)</span>
+            <span class="n">compressed</span> <span class="o">=</span> <span class="n">_compress</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">original</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;original_content&quot;</span><span class="p">:</span> <span class="n">original</span><span class="p">,</span>
+                <span class="s2">&quot;compressed_content&quot;</span><span class="p">:</span> <span class="n">compressed</span><span class="p">,</span>
+                <span class="s2">&quot;compression_ratio&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">original</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="p">})</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+<p><code>_compress()</code> 함수가 문서를 문장 단위로 쪼갠 뒤 질문 단어와 겹치는 문장만 골라냅니다. <code>compression_ratio</code>가 0.3이면 원본의 70%를 덜어낸 것이니, 부모 문서를 통째로 가져와도 프롬프트 토큰을 크게 절약할 수 있습니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 2-2 실행. Contextual Compression</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_advanced_retriever<span class="w"> </span>--step<span class="w"> </span><span class="m">2</span>-2</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 9-13. 실험 2-2. ContextualCompressionRetriever</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-xs)">원리: 검색된 문서에서 쿼리 관련 부분만 추출 → LLM 토큰 절약</div>
+<div style="font-size:var(--fs-xs);margin-bottom:var(--space-lg)"><span style="color:var(--color-text-muted)">쿼리: </span><span style="color:var(--color-text)">연차 신청 절차</span></div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse">
+<tr style="color:var(--color-text-muted)"><th style="text-align:center;width:28px;padding:2px 6px">순위</th><th style="text-align:right;padding:2px 6px">원본 길이</th><th style="text-align:right;padding:2px 6px">압축 길이</th><th style="text-align:right;padding:2px 6px">압축률</th><th style="padding:2px 6px">압축된 내용</th></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-success-bg)"><td style="text-align:center;padding:4px 6px;font-weight:700">1</td><td style="text-align:right;padding:4px 6px">269자</td><td style="text-align:right;padding:4px 6px;font-weight:700;color:var(--color-success-text)">16자</td><td style="text-align:right;padding:4px 6px;font-weight:700;color:var(--color-success-text)">6%</td><td style="padding:4px 6px">제4조 (재택근무 신청 자격)...</td></tr>
+<tr style="border-top:1px solid var(--color-border)"><td style="text-align:center;padding:4px 6px;color:var(--color-text-muted)">2</td><td style="text-align:right;padding:4px 6px">359자</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">34자</td><td style="text-align:right;padding:4px 6px;color:var(--color-text-muted)">9%</td><td style="padding:4px 6px">긴급한 경우에는 구두 신청 후 사후 서면 제출...</td></tr>
+</table>
+<div style="margin-top:var(--space-xs);font-size:var(--fs-xs);color:var(--color-success-text)">269자 문서가 16자로 줄었습니다. 질문과 관련된 문장만 남깁니다.</div>
+</div>
+<p>359자짜리 연차 규정 문서가 34자로 줄었습니다. &quot;연차 신청 절차&quot;와 관련된 문장만 남기고 나머지는 잘라낸 겁니다. LLM에 넘기는 컨텍스트가 짧아지니 토큰 비용이 줄고 답변 정확도도 올라갑니다.</p>
+<div class="tip">
+<p><strong>압축 검색 실험에서 생각해 볼 것들</strong></p>
+<ul>
+<li><strong>압축률</strong>: compression_ratio 수치를 확인해 보세요. 0.3이면 원본의 30%만 남긴 겁니다. 질문과 무관한 부분을 70% 덜어낸 셈입니다.</li>
+<li><strong>정보 보존</strong>: compressed_content를 읽어 보세요. 질문에 답하는 데 필요한 핵심 정보가 남아 있어야 합니다. 너무 짧으면 중요한 내용이 잘려 나갔을 수 있습니다.</li>
+<li><strong>LLM 부담 감소</strong>: 원본 500자를 150자로 줄이면 LLM이 읽을 양이 줄어듭니다. 문서 10개를 넘기는 상황에서 효과가 두드러집니다.</li>
+</ul>
+</div>
+<div class="tip">
+<p><strong>Parent Doc + Compression 조합</strong>. 이 둘은 세트로 쓸 때 효과가 큽니다. Parent Doc이 넓은 맥락을 가져오고 Compression이 핵심만 남기는 구조입니다. Parent Doc 단독 사용 시 부모 문서가 길어 토큰 비용이 늘어나는 문제를 Compression이 해결합니다.</p>
+</div>
+<p>Parent Doc과 Compression은 검색 결과의 양과 질을 조절하는 도구입니다. 마지막으로 하나 더. 오픈이가 동료의 질문 하나를 떠올렸습니다. &quot;인사팀 관련 규정만 보고 싶은데.&quot; 이 질문에는 <strong>부서명</strong>이라는 조건이 섞여 있습니다. 벡터 유사도만으로는 &quot;인사팀&quot;이라는 조건을 걸 수 없습니다. 이런 유형의 질문이 들어온다면 쓸 수 있는 도구가 있습니다.</p>
+<h3>9.5.3 조건이 섞인 질문 — Self-Query Retriever</h3>
+<p>&quot;2025년 인사팀 문서만&quot; 같은 조건이 섞인 질문에서 <strong>메타데이터 필터</strong>를 자동으로 추출할 수 있습니다. 질문에 포함된 키워드를 감지해 <code>topic=인사팀</code>, <code>year=2025</code> 같은 조건을 만들고, 전체 문서 중 조건에 맞는 문서만 남긴 뒤 유사도 검색을 수행합니다.</p>
+<p>&quot;인사팀 관련 규정&quot;이라는 질문이 들어오면 <code>{&quot;topic&quot;: &quot;인사&quot;}</code> 필터가 자동으로 만들어지고, 수백 건의 문서 중 인사 관련 문서만 추려서 검색 대상으로 삼습니다. <code>topic_keywords</code>는 <code>data.py</code>에 정의된 토픽-키워드 매핑 딕셔너리로, <code>{&quot;인사&quot;: [&quot;인사&quot;, &quot;인사팀&quot;, &quot;hr&quot;], &quot;보안&quot;: [&quot;보안&quot;, &quot;정보보호&quot;]}</code> 같은 구조입니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-14. Self-Query Retriever 동작 원리</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs)">"인사팀 관련 규정"</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ 키워드 감지</div>
+<div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-md);font-size:var(--fs-xs);font-family:var(--font-mono);color:var(--color-accent-text);font-weight:600">{"topic": "인사"}</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-xs)">↓ 필터 적용</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-md);width:100%;align-items:center">
+<div style="border:1px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);text-align:center;color:var(--color-text-muted)">전체 문서 20건</div>
+<div style="font-size:var(--fs-lg);color:var(--color-success-text);font-weight:700">→</div>
+<div style="background:var(--color-success-bg);border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-sm);font-size:var(--fs-xs);text-align:center;font-weight:600;color:var(--color-success-text)">인사 관련 5건만 검색</div>
+</div>
+</div>
+<div style="margin-top:var(--space-lg);text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);padding:var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-md)">핵심: 질문에서 <b>메타데이터 조건을 자동 추출</b>하여 검색 대상을 좁힙니다.</div>
+</div>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge explain">설명</span> tuning/step2_advanced_retriever/self_query.py. Self-Query 필터 추출 + 검색</div><span class="c1"># self_query.py — 쿼리에서 메타데이터 조건을 자동 추출합니다</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SelfQueryRetriever</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">,</span> <span class="n">topic_keywords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">embeddings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">documents</span> <span class="o">=</span> <span class="n">documents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">topic_keywords</span> <span class="o">=</span> <span class="n">topic_keywords</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
+        <span class="c1"># 1. 질문에서 키워드를 감지해 메타데이터 필터 생성</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">query_lower</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">topic</span><span class="p">,</span> <span class="n">keywords</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">topic_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">kw</span> <span class="ow">in</span> <span class="n">query_lower</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">):</span>
+                <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;topic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">topic</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">filters</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_filter</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="c1"># 2. 필터에 맞는 문서만 남김</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">documents</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">filtered</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">filtered</span>
+                <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span>
+            <span class="p">]</span>
+        <span class="c1"># 3. 남은 문서에서 유사도 검색</span>
+        <span class="n">scored</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">filtered</span><span class="p">:</span>
+            <span class="c1"># ... 유사도 계산 (생략)</span>
+            <span class="n">scored</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">score</span><span class="p">,</span> <span class="n">doc</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">],</span> <span class="s2">&quot;applied_filter&quot;</span><span class="p">:</span> <span class="n">filters</span><span class="p">}</span>
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">scored</span><span class="p">[:</span><span class="n">top_k</span><span class="p">]]</span></div>
+<p><code>extract_filter()</code>가 질문에서 부서명이나 연도 같은 조건을 뽑아내고, <code>search()</code>가 그 조건에 맞는 문서만 추려서 유사도 검색을 수행합니다. 전체 코드는 완성본 레포(ai-qa-lag)를 참고하세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 2-3 실행. Self-Query Retriever</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_advanced_retriever<span class="w"> </span>--step<span class="w"> </span><span class="m">2</span>-3</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0;font-family:var(--font-mono)">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-xs);text-align:center">그림 9-15. 실험 2-3. SelfQueryRetriever</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-xs)">원리: 질문에서 메타데이터 필터 자동 추출 → 정확한 필터링</div>
+<div style="font-size:var(--fs-xs);margin-bottom:var(--space-xs)"><span style="color:var(--color-text-muted)">쿼리: </span><span style="color:var(--color-text)">재택근무 조건</span></div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-bottom:var(--space-lg);padding:var(--space-xs) var(--space-sm);background:var(--color-surface-alt);border-radius:var(--radius-sm)">자동 추출된 필터: <span style="font-weight:600;color:var(--color-accent-text)">topic: 재택근무</span></div>
+<table style="width:100%;font-size:var(--fs-xs);border-collapse:collapse">
+<tr style="color:var(--color-text-muted)"><th style="text-align:center;width:28px;padding:2px 6px">순위</th><th style="padding:2px 6px">내용</th><th style="padding:2px 6px">토픽</th><th style="text-align:right;padding:2px 6px">유사도</th></tr>
+<tr style="border-top:1px solid var(--color-border);background:var(--color-success-bg)"><td style="text-align:center;padding:4px 6px;font-weight:700">1</td><td style="padding:4px 6px;font-weight:700">제4조 (재택근무 신청 자격) 입사 후 6개월이 경과한 정규직...</td><td style="padding:4px 6px;color:var(--color-accent-text);font-weight:600">재택근무</td><td style="text-align:right;padding:4px 6px;font-weight:700;color:var(--color-success-text)">0.7136</td></tr>
+</table>
+<div style="margin-top:var(--space-xs);font-size:var(--fs-xs);color:var(--color-success-text)">topic: 재택근무 필터가 자동 추출되어 해당 문서만 검색됩니다.</div>
+</div>
+<p>&quot;재택근무 조건&quot;이라는 질문에서 <code>topic: 재택근무</code> 필터가 자동으로 추출됐습니다. 전체 문서를 벡터 검색하는 대신 재택근무 관련 문서만 대상으로 좁혀 검색하니 무관한 문서가 섞이지 않습니다.</p>
+<p>부서명이 포함된 질문을 넣어서 필터가 정확히 잡히는지 확인해 보세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 커스텀 쿼리로 필터 추출 실험</div>python<span class="w"> </span>-m<span class="w"> </span>tuning.step2_advanced_retriever<span class="w"> </span>--step<span class="w"> </span><span class="m">2</span>-3<span class="w"> </span>--query<span class="w"> </span><span class="s2">&quot;인사팀 관련 규정&quot;</span></div>
+<div class="tip">
+<p><strong>Self-Query 실험에서 생각해 볼 것들</strong></p>
+<ul>
+<li><strong>필터 추출</strong>: applied_filter에 어떤 메타데이터 조건이 추출됐는지 확인해 보세요. &quot;인사팀 관련 규정&quot;이라고 물으면 <code>topic: 인사</code>처럼 부서명이 필터로 잡혀야 합니다.</li>
+<li><strong>검색 범위 축소</strong>: 필터 적용 전후로 검색 대상 문서 수가 줄어드는지 비교해 보세요. 전체 20건에서 5건으로 줄어들면 그만큼 정확도가 올라갑니다.</li>
+<li><strong>필터가 안 잡히는 경우</strong>: 질문에 메타데이터 단서가 없으면 필터 없이 일반 검색으로 넘어갑니다. &quot;연차 신청 방법&quot;처럼 부서나 카테고리 힌트가 없는 질문이 이 경우입니다.</li>
+</ul>
+</div>
+<p>다섯 가지 도구를 실험했습니다. 오픈이가 동료들의 질문 패턴을 다시 펼쳐 봤습니다. 약어를 많이 쓰고, 근거로 규정 전문을 보고 싶어합니다. 약어 사전과 Parent Doc — 이 두 개면 충분합니다.</p>
+<p class="thought">전부 켤 필요 없어. 아픈 데만 약을 바르면 돼.</p>
+<h2>9.6 사서가 달라졌다</h2>
+<p>![](../assets/챕터 9/diagram/09_sequence-pipeline.png)
+<em>그림 9-16. 챕터 9 파이프라인. 질문을 변환(확장, 재작성, HyDE)한 뒤 검색하고, 결과를 가공(Parent, Compression)해 LLM에 넘깁니다</em></p>
+<p>동료에게 다시 써 보라고 했습니다. 동료가 키보드를 두드렸습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "WFH 정책이 뭐야?"</div>
+<p>&quot;재택근무&quot; 문서를 정확히 가져와 답변을 내놓습니다. 약어 사전이 &quot;WFH&quot;를 &quot;재택근무(Work From Home)&quot;로 바꿔 놓은 덕이었습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "쉬는 날 규정 알려줘."</div>
+<p>취업규칙 제15조 연차유급휴가 원본 문서 전체가 근거로 올라옵니다. 동의어 확장이 &quot;휴가&quot;를 &quot;연차유급휴가&quot;로 연결하고, Parent Doc이 원본 문서를 통째로 꺼내 왔습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "...이번엔 진짜 되네요."</div>
+<p>오픈이가 의자를 돌려 동료를 봤습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "약어 사전이랑 Parent Doc만 켰거든요. 우리 동료들이 약어를 많이 쓰고, 근거로 규정 전문을 보고 싶어하니까요. 나머지는 필요할 때 켜면 돼요."</div>
+<p class="thought">다섯 개 중 두 개. 검색 엔진은 안 건드렸는데 이렇게 달라진다.</p>
+<p>의자가 삐걱거렸습니다. 팀장이 자리에서 일어나며 화이트보드를 흘끗 봤습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "텍스트는 됐는데요. PDF 속 표랑 이미지는?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "표요?"</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "규정집에 표가 있잖아요. 그건 텍스트 검색으로 잡히나요?"</div>
+<h2>9.7 전체 구성도에서 챕터 9의 자리</h2>
+<div class="arch-fullmap">
+  <div class="arch-fullmap-title" style="text-align:center">그림 9-17. 전체 구성도. 짙은 박스가 챕터 9 튜닝 대상</div>
+  <div class="afm-row afm-user">
+    <div class="afm-box afm-built afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">대시보드</span>
+    <div class="afm-row">
+      <div class="afm-box afm-built"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 6+7</span>
+    <span class="afm-zone-label">오케스트레이션 + 운영</span>
+    <div class="afm-row afm-two">
+      <div class="afm-box afm-built"><div class="afm-label">ConnectHRAgent</div><div class="afm-sub">ReAct · 사후 분류 + 캐시</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">MCP Tools</div><div class="afm-sub">DB · 문서</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 5</span>
+    <span class="afm-zone-label">검색 (실시간)</span>
+    <div class="afm-row">
+      <div class="afm-box afm-on"><div class="afm-tag">챕터 9 질의/결과 튜닝</div><div class="afm-label">LCEL Chain</div><div class="afm-sub">HyDE · Multi-Query · Parent Doc · Compression</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 4</span>
+    <span class="afm-zone-label">파싱·벡터화 (오프라인)</span>
+    <div class="afm-row afm-three">
+      <div class="afm-box afm-built afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">Doc Pipeline</div><div class="afm-sub">파싱·청킹·임베딩</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">데이터</span>
+    <div class="afm-row">
+      <div class="afm-box afm-built"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
+    </div>
+  </div>
+  <div class="afm-row afm-ext">
+    <div class="afm-box afm-faint afm-dashed"><div class="afm-label">Ollama LLM (외부)</div></div>
+  </div>
+  <div class="afm-note">
+    챕터 9는 LCEL Chain의 <b>입구(쿼리 변환)</b> 와 <b>출구(결과 가공)</b> 를 다듬었습니다. 같은 ChromaDB, 같은 문서인데 질문 해석력이 올라가 체감 품질이 크게 개선됩니다. 챕터 10에서는 텍스트로 못 잡는 <b>이미지, 표</b> 영역을 Vision LLM으로 공략합니다.
+  </div>
+</div>
+<h2>9.8 튜닝 구성도</h2>
+<p>챕터 8에서 검색 엔진 자체를 손봤고, 이번 챕터에서는 검색의 앞뒤를 다듬었습니다. 지금까지 실험한 튜닝과 앞으로 다룰 튜닝을 한 장으로 정리합니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-lg);font-weight:600;color:var(--color-text-heading);margin-bottom:var(--space-xl);text-align:center">그림 9-18. RAG 튜닝 메뉴판. 필요한 것만 골라 씁니다</div>
+<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)">
+<tr style="background:var(--color-surface-alt)">
+<th style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;width:30px"></th>
+<th style="padding:8px 12px;border:1px solid var(--color-border)">튜닝</th>
+<th style="padding:8px 12px;border:1px solid var(--color-border)">무엇을 바꾸나</th>
+<th style="padding:8px 12px;border:1px solid var(--color-border)">언제 쓰나</th>
+<th style="padding:8px 12px;border:1px solid var(--color-border);text-align:center">챕터</th>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">청킹 전략</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">문서를 자르는 방법 (Fixed → Recursive → Semantic)</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">주제가 섞이는 문제가 있을 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">8</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">리랭킹</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">가져온 문서를 Cross-Encoder로 재정렬</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">검색 결과 상위에 엉뚱한 문서가 섞일 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">8</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">하이브리드 검색</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">벡터 + BM25를 alpha 가중합으로 합침</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">의미 검색과 키워드 검색 둘 다 필요할 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">8</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">HyDE</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">가상 답변을 먼저 생성해 답변-문서 유사도로 검색</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">질문과 문서의 어휘 차이가 클 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">9</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">Multi-Query</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">한 질문을 여러 표현으로 재작성해 합집합 검색</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">질문의 의미가 넓어 한 방향만으로 부족할 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">9</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">약어·동의어 확장</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">사내 용어 사전으로 약어를 원 표현으로 치환</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">사내 약어, 줄임말 검색 실패가 잦을 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">9</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">Parent Document</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">작은 청크로 검색하되 부모 문서 단위로 반환</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">조각만 보면 맥락이 부족할 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">9</td>
+</tr>
+<tr style="background:var(--color-success-bg)">
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-size:var(--fs-lg)">✓</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);font-weight:700">Contextual Compression</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">검색된 문서에서 질문과 무관한 부분 제거</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border)">부모 문서가 길어 토큰 비용이 부담될 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;font-weight:700">9</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-subtle)">-</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">Vision LLM</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">이미지, 표를 Vision 모델로 읽어 텍스트 변환</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">PDF 속 표, 차트, 이미지가 검색에 빠질 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-muted)">10</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-subtle)">-</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">하이브리드 파서</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">텍스트 + 시각 요소를 함께 파싱하는 파이프라인</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">복합 문서(텍스트+표+이미지)를 처리할 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-muted)">10</td>
+</tr>
+<tr>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-subtle)">-</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">RAG 평가 프레임워크</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">검색 정확도, 답변 충실도를 숫자로 측정</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);color:var(--color-text-muted)">튜닝 전후 품질을 객관적으로 비교할 때</td>
+<td style="padding:8px 12px;border:1px solid var(--color-border);text-align:center;color:var(--color-text-muted)">10</td>
+</tr>
+</table>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-sm)">✓ 챕터 8~9에서 실험한 항목 · - 챕터 10에서 다룰 항목</div>
+</div>
+<h2>용어 정리</h2>
+<table>
+<thead>
+<tr>
+<th>본문 속 표현</th>
+<th>진짜 용어</th>
+<th>정식 정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;단어를 번역&quot;</td>
+<td><strong>약어·동의어 확장</strong></td>
+<td>사내 용어 사전을 이용해 약어를 원 표현으로 치환</td>
+</tr>
+<tr>
+<td>&quot;답을 먼저 상상&quot;</td>
+<td><strong>HyDE</strong></td>
+<td>질문에 대한 가상 답변을 LLM이 먼저 생성하고, 그 답변으로 검색</td>
+</tr>
+<tr>
+<td>&quot;여러 갈래로 물어보기&quot;</td>
+<td><strong>Multi-Query</strong></td>
+<td>한 질문을 LLM이 여러 표현으로 재작성해 각각 검색 후 합집합</td>
+</tr>
+<tr>
+<td>&quot;원본 문서 전체 꺼내기&quot;</td>
+<td><strong>Parent Document Retriever</strong></td>
+<td>작은 청크로 검색하되 반환은 큰 부모 문서 단위</td>
+</tr>
+<tr>
+<td>&quot;핵심 문장만 추리기&quot;</td>
+<td><strong>Contextual Compression</strong></td>
+<td>검색된 문서에서 질문과 무관한 부분을 LLM이 제거</td>
+</tr>
+<tr>
+<td>&quot;조건을 필터로 변환&quot;</td>
+<td><strong>Self-Query Retriever</strong></td>
+<td>LLM이 질문에서 메타데이터 조건을 뽑아 <code>where</code> 필터로 심음</td>
+</tr>
+</tbody>
+</table>
+<div class="remember">
+<p><strong>이것만은 기억하자</strong></p>
+<ul>
+<li><strong>검색의 앞뒤를 다듬으면 같은 엔진이 더 똑똑해집니다.</strong> 챕터 8이 엔진 자체를 바꿨다면 챕터 9는 입력(쿼리)과 출력(결과)을 가공합니다. 인프라 변경 없이 체감 품질이 가장 크게 오르는 구간입니다.</li>
+<li><strong>약어, 동의어 사전은 무조건 만드세요.</strong> 사내 용어는 공식 문서와 일상 표현이 다릅니다. &quot;WFH ↔ 재택근무&quot; 같은 매핑 한 줄이 실패 질문을 크게 줄여 줍니다.</li>
+<li><strong>Parent Doc + Compression 조합이 안정적입니다.</strong> 정확도는 작은 청크, 맥락은 부모 문서, 프롬프트 비용은 압축으로 잡는 전략입니다.</li>
+<li>챕터 10에서는 텍스트로 못 잡는 이미지와 표를 Vision LLM으로 읽고, RAG 전체 품질을 숫자로 측정합니다.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

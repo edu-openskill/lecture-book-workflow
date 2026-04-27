@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 구성도 — 가로 흐름 심플 3종</title>
+<style>
+:root {
+  --ink: #0f172a;
+  --text: #334155;
+  --muted: #64748b;
+  --subtle: #94a3b8;
+  --line: #cbd5e1;
+  --line-soft: #e2e8f0;
+  --bg: #ffffff;
+  --bg-soft: #f8fafc;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --accent-ink: #1e40af;
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+  --success-ink: #166534;
+  --radius: 8px;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 24px 64px; line-height: 1.5; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 8px; color: var(--ink); }
+.intro { color: var(--muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
+h2 { margin-top: 56px; font-size: 17px; color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.tag { display: inline-block; background: var(--accent-soft); color: var(--accent-ink); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.note { color: var(--muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.6; }
+code { font-family: "SF Mono", Menlo, monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 5px; border-radius: 3px; }
+
+/* ========= 공통 ========= */
+.board { background: white; padding: 40px 24px; margin: 24px 0; overflow-x: auto; }
+
+/* ========= S1 Linear ========= */
+.s1-flow { display: flex; align-items: center; justify-content: center; gap: 0; min-width: 1000px; }
+.s1-step { text-align: center; flex: 0 0 auto; min-width: 110px; padding: 12px 8px; }
+.s1-step .num { font-size: 10px; color: var(--subtle); letter-spacing: 2px; margin-bottom: 6px; }
+.s1-step .name { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.s1-step .desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.s1-step .chip { display: inline-block; font-size: 9px; color: var(--muted); margin-top: 4px; }
+.s1-step.on .name { color: var(--accent-ink); }
+.s1-step.on { background: var(--accent-soft); border-radius: var(--radius); }
+.s1-line { flex: 1 1 40px; height: 1px; background: var(--line); min-width: 40px; position: relative; }
+.s1-line.on { background: var(--accent); height: 2px; }
+.s1-line::after { content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 6px solid var(--line); border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.s1-line.on::after { border-left-color: var(--accent); }
+
+/* 상/하 지원 브랜치 */
+.s1-branches { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; min-width: 1000px; margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line-soft); }
+.s1-branch { text-align: center; padding: 8px; }
+.s1-branch .bn { font-size: 9px; color: var(--subtle); letter-spacing: 1.5px; margin-bottom: 3px; }
+.s1-branch .bt { font-size: 12px; color: var(--text); font-weight: 600; }
+.s1-branch.on .bt { color: var(--accent-ink); }
+.s1-branch.on { background: var(--accent-soft); border-radius: var(--radius); }
+
+/* ========= S2 Step Blocks ========= */
+.s2-flow { display: flex; align-items: stretch; gap: 10px; min-width: 1100px; }
+.s2-block { flex: 1 1 0; min-width: 130px; background: var(--bg-soft); border-radius: var(--radius); padding: 14px 14px 12px; position: relative; }
+.s2-block.on { background: var(--accent-soft); }
+.s2-block .step-no { position: absolute; top: -9px; left: 12px; background: white; font-family: "SF Mono", Menlo, monospace; font-size: 10px; color: var(--subtle); padding: 0 6px; letter-spacing: 1px; font-weight: 700; }
+.s2-block.on .step-no { color: var(--accent); }
+.s2-block .ch { font-size: 9px; color: var(--muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
+.s2-block.on .ch { color: var(--accent-ink); }
+.s2-block .nm { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.s2-block .ds { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.s2-arrow { display: flex; align-items: center; justify-content: center; color: var(--subtle); font-size: 18px; flex: 0 0 12px; }
+
+/* S2 하단 보조 */
+.s2-support { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line-soft); }
+.s2-s { padding: 8px 12px; background: var(--bg-soft); border-radius: var(--radius); }
+.s2-s.on { background: var(--accent-soft); }
+.s2-s .l { font-size: 9px; color: var(--subtle); letter-spacing: 1px; font-weight: 700; margin-bottom: 2px; }
+.s2-s .n { font-size: 13px; font-weight: 700; color: var(--ink); }
+.s2-s .d { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* ========= S3 Backbone ========= */
+.s3-wrap { min-width: 1050px; padding: 20px 0; }
+.s3-top { display: grid; grid-template-columns: 110px 140px 240px 180px 140px 110px; gap: 0; align-items: end; margin-bottom: 4px; }
+.s3-top > div { text-align: center; }
+.s3-top .sup { background: var(--bg-soft); border-radius: var(--radius); padding: 8px 10px; font-size: 11px; color: var(--text); line-height: 1.3; margin: 0 6px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; }
+.s3-top .sup .b { font-weight: 700; font-size: 12px; color: var(--ink); }
+.s3-top .sup .s { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.s3-top .conn { font-size: 14px; color: var(--subtle); margin-top: 4px; }
+
+.s3-main { display: grid; grid-template-columns: 110px 140px 240px 180px 140px 110px; gap: 0; align-items: center; }
+.s3-main > div { text-align: center; padding: 0 6px; }
+.s3-main .nd { background: white; border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); padding: 14px 10px; }
+.s3-main .nd.on { border-top-color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-soft); }
+.s3-main .nd .ch { font-size: 9px; color: var(--muted); letter-spacing: 1px; font-weight: 700; }
+.s3-main .nd.on .ch { color: var(--accent-ink); }
+.s3-main .nd .n { font-size: 14px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+
+.s3-bot { display: grid; grid-template-columns: 110px 140px 240px 180px 140px 110px; gap: 0; align-items: start; margin-top: 4px; }
+.s3-bot > div { text-align: center; }
+.s3-bot .sup { background: var(--bg-soft); border-radius: var(--radius); padding: 8px 10px; font-size: 11px; color: var(--text); margin: 0 6px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; }
+.s3-bot .sup.on { background: var(--accent-soft); }
+.s3-bot .sup .b { font-weight: 700; font-size: 12px; color: var(--ink); }
+.s3-bot .sup.on .b { color: var(--accent-ink); }
+.s3-bot .sup .s { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+/* 평가 뒷단 */
+.tail { display: flex; justify-content: center; margin-top: 28px; padding-top: 18px; border-top: 1px dashed var(--line-soft); }
+.tail .box { background: var(--accent-soft); padding: 12px 20px; border-radius: var(--radius); text-align: center; max-width: 500px; }
+.tail .box .l { font-size: 9px; color: var(--accent); letter-spacing: 1.5px; font-weight: 700; margin-bottom: 2px; }
+.tail .box .n { font-size: 14px; font-weight: 700; color: var(--accent-ink); }
+.tail .box .d { font-size: 11px; color: var(--muted); margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<h1>전체 구성도 — 가로 흐름 심플 3종</h1>
+<p class="intro">
+<strong>가로 한 줄</strong>로 읽히는 3가지 스타일. 테두리 최소, 타이포그래피 위주, 넓은 여백. 상단/하단에 보조 요소(저장소·외부·이번 챕터 추가분)만 따로 배치.
+</p>
+
+<!-- ============ S1. Linear Typo ============ -->
+<h2>S1. 리니어 타이포 <span class="tag">가장 심플</span></h2>
+<p class="note">텍스트만. 얇은 선 + 작은 화살표. 박스·배경 최소. 하단에 보조 요소 7개를 열로 정리. CH10 이번 챕터 추가분(Vision · 평가)만 파란 배경.</p>
+
+<div class="board">
+<div class="s1-flow">
+<div class="s1-step"><div class="num">01</div><div class="name">사용자</div><div class="desc">질문 입력</div></div>
+<div class="s1-line"></div>
+<div class="s1-step"><div class="num">02</div><div class="name">FastAPI</div><div class="desc">CH02</div></div>
+<div class="s1-line"></div>
+<div class="s1-step"><div class="num">03</div><div class="name">Agent</div><div class="desc">CH06 · ReAct</div></div>
+<div class="s1-line"></div>
+<div class="s1-step"><div class="num">04</div><div class="name">검색</div><div class="desc">CH05 · 튜닝</div></div>
+<div class="s1-line"></div>
+<div class="s1-step"><div class="num">05</div><div class="name">LLM</div><div class="desc">외부 · Ollama</div></div>
+<div class="s1-line on"></div>
+<div class="s1-step on"><div class="num">06</div><div class="name">평가</div><div class="desc">CH10 · NEW</div></div>
+</div>
+
+<div class="s1-branches">
+<div class="s1-branch"><div class="bn">INPUT</div><div class="bt">사용자 질문</div></div>
+<div class="s1-branch"><div class="bn">CH02</div><div class="bt">PostgreSQL</div></div>
+<div class="s1-branch"><div class="bn">CH07</div><div class="bt">Cache · Tracker · Retry</div></div>
+<div class="s1-branch on"><div class="bn">CH04 + CH10</div><div class="bt">Doc Pipeline + Vision</div></div>
+<div class="s1-branch"><div class="bn">CH04</div><div class="bt">ChromaDB</div></div>
+<div class="s1-branch"><div class="bn">CH10</div><div class="bt">llama3.1 + minicpm-v</div></div>
+<div class="s1-branch on"><div class="bn">CH10 NEW</div><div class="bt">Precision · Hallucination</div></div>
+</div>
+</div>
+
+<!-- ============ S2. Step Blocks ============ -->
+<h2>S2. 스텝 블록 <span class="tag">번호 + 이름 중심</span></h2>
+<p class="note">각 단계가 작은 블록. <code>01 02 03</code> 스텝 번호 + 챕터 태그 + 이름. 블록 사이 얇은 삼각 화살표. 하단 4칸에 저장소·외부·평가.</p>
+
+<div class="board">
+<div class="s2-flow">
+<div class="s2-block"><span class="step-no">01</span><div class="ch">INPUT</div><div class="nm">사용자</div><div class="ds">채팅 질문 입력</div></div>
+<div class="s2-arrow">▸</div>
+<div class="s2-block"><span class="step-no">02</span><div class="ch">CH02</div><div class="nm">FastAPI</div><div class="ds">REST · 채팅 UI</div></div>
+<div class="s2-arrow">▸</div>
+<div class="s2-block"><span class="step-no">03</span><div class="ch">CH06 + CH07</div><div class="nm">Agent</div><div class="ds">ReAct 루프 · 운영 래퍼</div></div>
+<div class="s2-arrow">▸</div>
+<div class="s2-block"><span class="step-no">04</span><div class="ch">CH05 + 8 + 9</div><div class="nm">검색</div><div class="ds">LCEL 튜닝 완료</div></div>
+<div class="s2-arrow">▸</div>
+<div class="s2-block"><span class="step-no">05</span><div class="ch">외부</div><div class="nm">Ollama LLM</div><div class="ds">llama3.1 + Vision</div></div>
+<div class="s2-arrow">▸</div>
+<div class="s2-block on"><span class="step-no">06</span><div class="ch">CH10 NEW</div><div class="nm">평가</div><div class="ds">Precision · Hallucination</div></div>
+</div>
+
+<div class="s2-support">
+<div class="s2-s"><div class="l">CH02</div><div class="n">PostgreSQL</div><div class="d">직원·연차·매출</div></div>
+<div class="s2-s on"><div class="l">CH04 + CH10</div><div class="n">Doc Pipeline</div><div class="d">pypdf → Vision</div></div>
+<div class="s2-s"><div class="l">CH04</div><div class="n">ChromaDB</div><div class="d">벡터 저장소</div></div>
+<div class="s2-s"><div class="l">CH07</div><div class="n">Cache · Tracker · Retry</div><div class="d">운영 3종</div></div>
+</div>
+</div>
+
+<!-- ============ S3. Backbone ============ -->
+<h2>S3. 백본 (중앙 흐름 + 상하 보조) <span class="tag">가독성 최강</span></h2>
+<p class="note">가운데 가로 백본에 메인 흐름 5단계. 위쪽은 <strong>운영·보조 레이어</strong>(Cache · Retry 등), 아래쪽은 <strong>데이터 저장소·외부</strong>(PG · Chroma · LLM · 파싱). 각 메인 노드 바로 위·아래에 관련 요소가 붙어 한눈에 관계 보임.</p>
+
+<div class="board">
+<div class="s3-wrap">
+
+<!-- 위: 보조/운영 레이어 -->
+<div class="s3-top">
+<div></div>
+<div></div>
+<div><div class="sup"><div class="b">Cache · Tracker · Retry</div><div class="s">CH07 운영 래퍼</div></div><div class="conn">│</div></div>
+<div></div>
+<div></div>
+<div></div>
+</div>
+
+<!-- 중앙 백본 -->
+<div class="s3-main">
+<div class="nd"><div class="ch">INPUT</div><div class="n">사용자</div></div>
+<div class="nd"><div class="ch">CH02</div><div class="n">FastAPI</div></div>
+<div class="nd"><div class="ch">CH06</div><div class="n">Agent (ReAct)</div></div>
+<div class="nd"><div class="ch">CH05 + 8 + 9</div><div class="n">검색 (LCEL)</div></div>
+<div class="nd"><div class="ch">외부</div><div class="n">LLM</div></div>
+<div class="nd on"><div class="ch">CH10 NEW</div><div class="n">답변 + 평가</div></div>
+</div>
+
+<!-- 아래: 저장소 / 외부 / 파싱 -->
+<div class="s3-bot">
+<div></div>
+<div><div class="conn" style="font-size:14px;color:var(--subtle)">│</div><div class="sup"><div class="b">PostgreSQL</div><div class="s">CH02 · 직원·연차·매출</div></div></div>
+<div><div class="conn" style="font-size:14px;color:var(--subtle)">│</div><div class="sup"><div class="b">MCP Tools</div><div class="s">CH06 · 4개 도구</div></div></div>
+<div><div class="conn" style="font-size:14px;color:var(--subtle)">│</div><div class="sup on"><div class="b">Doc Pipeline + Vision</div><div class="s">CH04 + CH10 · pypdf → Vision</div></div></div>
+<div><div class="conn" style="font-size:14px;color:var(--subtle)">│</div><div class="sup"><div class="b">ChromaDB</div><div class="s">CH04 · 벡터</div></div></div>
+<div><div class="conn" style="font-size:14px;color:var(--subtle)">│</div><div class="sup"><div class="b">Ollama</div><div class="s">llama3.1 + Vision</div></div></div>
+</div>
+
+<!-- 평가 뒷단 -->
+<div class="tail">
+<div class="box">
+<div class="l">CH10 · NEW · 뒷단</div>
+<div class="n">RAG 평가 프레임워크</div>
+<div class="d">Precision@k · Recall · Hallucination · Latency</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ 비교 ============ -->
+<h2 style="margin-top:80px">3개 비교</h2>
+<div style="background:var(--bg-soft);padding:16px;border-radius:var(--radius);font-size:13px;line-height:1.8">
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+<tr style="background:white;color:var(--ink);font-weight:700"><th style="padding:8px;text-align:left">스타일</th><th style="padding:8px;text-align:left">시각 밀도</th><th style="padding:8px;text-align:left">흐름 가독성</th><th style="padding:8px;text-align:left">적합</th></tr>
+<tr><td style="padding:6px"><b>S1 · 리니어 타이포</b></td><td style="padding:6px">가장 낮음 (텍스트+선)</td><td style="padding:6px">직관적 왼→오</td><td style="padding:6px">간결한 조망 · 마무리 요약</td></tr>
+<tr><td style="padding:6px"><b>S2 · 스텝 블록</b></td><td style="padding:6px">중간 (블록+아이콘)</td><td style="padding:6px">번호 + 삼각 화살표</td><td style="padding:6px">챕터 §N.last 기본 · 스텝이 명확</td></tr>
+<tr><td style="padding:6px"><b>S3 · 백본</b></td><td style="padding:6px">중간</td><td style="padding:6px">중앙 백본 + 상하 관계까지 한눈</td><td style="padding:6px">완성본 § 10.10 · 구조 전체를 한 장에</td></tr>
+</table>
+</div>
+
+<h2 style="margin-top:48px">권장</h2>
+<ul style="font-size:13px;line-height:1.8">
+<li><strong>CH02~CH07 §N.last</strong>: <b>S2 (스텝 블록)</b>. 챕터가 진행될 때마다 accent 블록이 하나씩 늘어나는 progression.</li>
+<li><strong>CH10 §10.10 완성본</strong>: <b>S3 (백본)</b>. 구조·보조·저장소를 한 장에. 마지막의 조망감.</li>
+<li><strong>대안</strong>: S1을 각 챕터 prep 요약용으로도 쓸 수 있음 (이야기 파트에서 "전체 지도" 잠깐 보여주기).</li>
+</ul>
+
+</body>
+</html>

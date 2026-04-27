@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+  body { margin: 0; padding: 20px; background: #fff; font-family: 'Noto Sans KR', sans-serif; }
+  #paper { display: inline-block; }
+</style>
+</head>
+<body>
+<div id="paper"></div>
+<script src="https://cdn.jsdelivr.net/npm/jointjs@3.7.7/dist/joint.min.js"></script>
+<script>
+const { dia, shapes, util } = joint;
+
+// === D2 디자인 승계 스타일 ===
+const STYLE = {
+  participant: {
+    fill: '#eef2ff', stroke: '#2563eb', strokeWidth: 2, rx: 8, ry: 8,
+    fontColor: '#1e40af', fontSize: 14, fontWeight: 'bold', fontFamily: 'Noto Sans KR'
+  },
+  participantAlt: {
+    fill: '#f8fafc', stroke: '#94a3b8', strokeWidth: 2, rx: 8, ry: 8,
+    fontColor: '#374151', fontSize: 14, fontWeight: 'bold', fontFamily: 'Noto Sans KR'
+  },
+  arrow: { stroke: '#2563eb', strokeWidth: 2 },
+  arrowDash: { stroke: '#2563eb', strokeWidth: 2, strokeDasharray: '8,4' },
+  selfNote: {
+    fill: '#ffffff', stroke: '#1e3a5f', strokeWidth: 1.5, rx: 4, ry: 4,
+    fontColor: '#1e3a5f', fontSize: 13, fontWeight: 'bold', fontFamily: 'Noto Sans KR'
+  },
+  lifeline: { stroke: '#93a3b8', strokeWidth: 1.5, strokeDasharray: '6,4' }
+};
+
+// === 다이어그램 데이터 ===
+const participants = [
+  { name: '사용자', style: 'participant' },
+  { name: 'QueryRouter\n(안내데스크)', style: 'participant' },
+  { name: '통합 에이전트\n(ReAct 패턴)', style: 'participant' },
+  { name: 'PostgreSQL', style: 'participantAlt' }
+];
+
+const messages = [
+  { from: 0, to: 1, label: '홍길동 입사일 언제야?' },
+  { self: 1, label: '1단계: 키워드 매칭' },
+  { from: 1, to: 2, label: 'structured (정형)' },
+  { self: 2, label: '생각: list_employees 써야지' },
+  { from: 2, to: 3, label: 'list_employees(홍길동)' },
+  { from: 3, to: 2, label: '{name: 홍길동, hire_date: 2026-01-01}', dash: true },
+  { self: 2, label: '관찰: 입사일 찾았다' },
+  { from: 2, to: 0, label: '홍길동 사원의 입사일은\n2026년 1월 1일입니다.', dash: true }
+];
+
+// === 레이아웃 설정 (자유 조절!) ===
+const LAYOUT = {
+  participantGap: 180,    // 참가자 간 가로 간격
+  messageGap: 50,         // 메시지 간 세로 간격
+  selfNoteGap: 45,        // self-note 세로 간격
+  headerHeight: 50,       // 참가자 박스 높이
+  headerWidth: 140,       // 참가자 박스 너비
+  startY: 80,             // 첫 메시지 시작 Y
+  padding: 30             // 전체 패딩
+};
+
+// === 렌더링 ===
+const graph = new dia.Graph();
+const paper = new dia.Paper({
+  el: document.getElementById('paper'),
+  model: graph,
+  width: 900,
+  height: 800,
+  background: { color: '#ffffff' },
+  interactive: false
+});
+
+// 참가자 X 좌표 계산
+const pX = participants.map((_, i) => LAYOUT.padding + i * LAYOUT.participantGap);
+
+// 참가자 헤더 박스
+participants.forEach((p, i) => {
+  const s = STYLE[p.style];
+  const lines = p.name.split('\n');
+  const w = Math.max(LAYOUT.headerWidth, lines.reduce((max, l) => Math.max(max, l.length * 11), 0));
+
+  const rect = new shapes.standard.Rectangle({
+    position: { x: pX[i] - w/2, y: LAYOUT.padding },
+    size: { width: w, height: lines.length > 1 ? 55 : LAYOUT.headerHeight },
+    attrs: {
+      body: { fill: s.fill, stroke: s.stroke, strokeWidth: s.strokeWidth, rx: s.rx, ry: s.ry },
+      label: { text: p.name, fill: s.fontColor, fontSize: s.fontSize, fontWeight: s.fontWeight, fontFamily: s.fontFamily }
+    }
+  });
+  graph.addCell(rect);
+});
+
+// 라이프라인 (점선 세로줄)
+let maxY = LAYOUT.startY + messages.length * LAYOUT.messageGap + 40;
+participants.forEach((_, i) => {
+  const line = new shapes.standard.Link({
+    source: { x: pX[i], y: LAYOUT.startY },
+    target: { x: pX[i], y: maxY },
+    attrs: {
+      line: { stroke: STYLE.lifeline.stroke, strokeWidth: STYLE.lifeline.strokeWidth, strokeDasharray: STYLE.lifeline.strokeDasharray, targetMarker: { type: 'none' }, sourceMarker: { type: 'none' } }
+    }
+  });
+  graph.addCell(line);
+});
+
+// 메시지 화살표
+let currentY = LAYOUT.startY + 20;
+
+messages.forEach(msg => {
+  if (msg.self !== undefined) {
+    // Self-note (접힌 메모)
+    const x = pX[msg.self];
+    const noteW = Math.max(msg.label.length * 10 + 30, 180);
+    const s = STYLE.selfNote;
+
+    const note = new shapes.standard.Rectangle({
+      position: { x: x + 10, y: currentY - 5 },
+      size: { width: noteW, height: 32 },
+      attrs: {
+        body: { fill: s.fill, stroke: s.stroke, strokeWidth: s.strokeWidth, rx: s.rx, ry: s.ry },
+        label: { text: msg.label, fill: s.fontColor, fontSize: s.fontSize, fontWeight: s.fontWeight, fontFamily: s.fontFamily }
+      }
+    });
+    graph.addCell(note);
+
+    // 접힌 모서리 효과 (작은 삼각형)
+    const corner = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+    currentY += LAYOUT.selfNoteGap;
+  } else {
+    // 일반 메시지 화살표
+    const fromX = pX[msg.from];
+    const toX = pX[msg.to];
+    const arrowStyle = msg.dash ? STYLE.arrowDash : STYLE.arrow;
+
+    const link = new shapes.standard.Link({
+      source: { x: fromX, y: currentY },
+      target: { x: toX, y: currentY },
+      attrs: {
+        line: {
+          stroke: arrowStyle.stroke,
+          strokeWidth: arrowStyle.strokeWidth,
+          strokeDasharray: arrowStyle.strokeDasharray || '0',
+          targetMarker: { type: 'path', d: 'M 10 -5 0 0 10 5 z', fill: arrowStyle.stroke }
+        }
+      },
+      labels: [{
+        position: 0.5,
+        attrs: {
+          text: { text: msg.label, fill: '#374151', fontSize: 12, fontFamily: 'Noto Sans KR', fontWeight: '400' },
+          rect: { fill: '#ffffff', rx: 3, ry: 3 }
+        }
+      }]
+    });
+    graph.addCell(link);
+
+    currentY += LAYOUT.messageGap;
+  }
+});
+
+// 페이퍼 크기 자동 조정
+paper.setDimensions(
+  pX[pX.length - 1] + LAYOUT.headerWidth/2 + LAYOUT.padding * 2,
+  currentY + 40
+);
+</script>
+</body>
+</html>

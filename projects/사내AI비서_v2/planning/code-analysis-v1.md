@@ -1,189 +1,252 @@
 # 코드 분석
 
 ## 완성 코드 정보
-- 경로: `projects/사내AI비서/code/`
-- 언어: Python 3.x
-- 프레임워크: FastAPI + LangChain + ChromaDB
+- **경로**: `projects/사내AI비서_v2/code/`
+- **언어/프레임워크**: Python 3.10+ / FastAPI + LangChain 0.3.x + Ollama + ChromaDB + PostgreSQL
+- **챕터**: CH01~CH08 (9개)
+- **참고**: CH03은 개념 챕터 (코드 없음, 기획서 ai-list.pdf PART 2 참조)
+- **참고**: CH01은 기획서에 없던 신규 추가 챕터
 
 ## 전체 구조
 
 ```
 code/
-├── CH03_LLM의_한계와_RAG의_필요성/  ← LLM 실패 체험 + RAG 발견
-│   ├── step1_fail.py              ← LLM에게 사내 질문 → 환각 확인
-│   ├── step2_context.py           ← 문서를 통째로 넣기 → 토큰 한계
-│   ├── step3_rag.py               ← RAG로 해결
-│   ├── step3_rag_no_chunking.py   ← 청킹 없는 RAG (비교)
-│   ├── step4_rag.py               ← 개선된 RAG
+├── CH01_LLM의_한계와_RAG의_필요성/
+│   ├── step1_fail.py              # LLM 단독 → 환각
+│   ├── step2_context.py           # Context Injection → 임시 해결
+│   ├── step3_rag.py               # RAG + 청킹 → 성공
+│   ├── step3_rag_no_chunking.py   # RAG 미청킹 → 비교
+│   ├── step4_rag.py               # RAG + 추론 → 심화
 │   └── requirements.txt
 │
-├── CH04_FastAPI_기본_시스템/       ← 정형 데이터 CRUD + Admin UI
+├── CH02_FastAPI_기본_시스템/
 │   ├── app/
-│   │   ├── main.py               ← FastAPI 진입점
-│   │   ├── database.py           ← psycopg2 PostgreSQL 연결
-│   │   ├── models.py             ← Employee, LeaveBalance, Sale dataclass
-│   │   ├── schemas.py            ← Pydantic 요청/응답 모델
-│   │   ├── crud.py               ← SQL CRUD 함수 (직원/휴가/매출)
-│   │   ├── views.py              ← Jinja2 Admin UI 라우터
-│   │   └── api.py                ← REST JSON API 라우터
-│   ├── templates/                 ← Admin 대시보드 HTML
-│   ├── static/css/               ← 스타일
-│   ├── docker-compose.yml         ← PostgreSQL 16 컨테이너
+│   │   ├── main.py        # FastAPI 앱 + 라우터 등록
+│   │   ├── models.py      # dataclass (Employee, LeaveBalance, Sale)
+│   │   ├── schemas.py     # Pydantic 요청/응답 스키마
+│   │   ├── database.py    # psycopg2 연결 (Context Manager)
+│   │   ├── crud.py        # DB CRUD 함수
+│   │   ├── views.py       # [제외] Jinja2 Admin UI
+│   │   └── api.py         # REST API 라우터
+│   ├── templates/          # [제외] HTML 템플릿
+│   ├── static/             # [제외] CSS
+│   ├── docker-compose.yml  # [간략] PostgreSQL 16
 │   └── requirements.txt
 │
-├── CH06_VectorDB_구축/            ← 문서 파싱 + 청킹 + 벡터DB
+├── CH03_사내문서_수집전략/          # [개념 챕터 — 코드 없음]
+│   └── (기획서 ai-list.pdf PART 2 참조)
+│       # 문서 종류, 형식 지원, 표준 규칙, 메타데이터, 수집 파이프라인
+│
+├── CH04_VectorDB_구축/
 │   ├── src/
-│   │   ├── main.py               ← 파이프라인 오케스트레이션
-│   │   ├── extractor.py          ← PDF/DOCX/XLSX 파싱 공통
-│   │   ├── extract_pdf.py        ← pypdf PDF 파싱
-│   │   ├── extract_docx.py       ← python-docx DOCX 파싱
-│   │   ├── extract_xlsx.py       ← openpyxl XLSX 파싱
-│   │   ├── chunker.py            ← 500자 청킹 + 100자 오버랩
-│   │   ├── store.py              ← ko-sroberta 임베딩 + ChromaDB
-│   │   └── cli_search.py         ← CLI 검색 도구
+│   │   ├── main.py         # 파이프라인 오케스트레이션
+│   │   ├── extractor.py    # PDF/DOCX/XLSX 통합 파서
+│   │   ├── extract_pdf.py  # PDF 파싱 (pypdf)
+│   │   ├── extract_docx.py # DOCX 파싱 (python-docx)
+│   │   ├── extract_xlsx.py # XLSX 파싱 (openpyxl)
+│   │   ├── chunker.py      # Fixed-size 청킹 (500자+100오버랩)
+│   │   ├── store.py        # ko-sroberta 임베딩 + ChromaDB
+│   │   └── cli_search.py   # CLI 검색 (유사도 시각화)
 │   ├── data/
-│   │   ├── docs/                  ← HR/FIN/OPS/SEC 원본 문서 6개
-│   │   ├── markdown/              ← 파싱 결과
-│   │   └── chroma_db/             ← ChromaDB 저장소
+│   │   ├── docs/           # 원본 문서 (HR/Finance/Ops/Security)
+│   │   ├── markdown/       # 파싱 결과
+│   │   └── chroma_db/      # 벡터 저장소
 │   └── requirements.txt
 │
-├── CH07_RAG_QA_엔진/              ← LLM + RAG 체인 + 채팅 UI
+├── CH05_RAG_QA_엔진/
+│   ├── src/
+│   │   ├── rag_chain.py       # LCEL 파이프라인 (Retriever|Prompt|LLM|Parser)
+│   │   ├── response_parser.py # 답변 파싱 + 출처 추출
+│   │   └── conversation.py    # WindowMemory 멀티턴 (최근 5턴)
 │   ├── app/
-│   │   ├── main.py               ← FastAPI 웹 앱
-│   │   ├── chat_api.py           ← POST /api/chat 엔드포인트
-│   │   └── session.py            ← 세션 관리
-│   ├── src/
-│   │   ├── rag_chain.py          ← LCEL 파이프라인 + 프롬프트
-│   │   ├── response_parser.py    ← 답변 + 출처 파싱
-│   │   └── conversation.py       ← 멀티턴 히스토리
-│   ├── templates/                 ← 채팅 UI
-│   ├── static/                    ← CSS + JS
+│   │   ├── main.py        # FastAPI 앱
+│   │   ├── chat_api.py    # POST /api/chat
+│   │   └── session.py     # 세션 쿠키 관리
+│   ├── templates/          # [제외] 채팅 UI
+│   ├── static/             # [제외] CSS
 │   └── requirements.txt
 │
-├── CH08_통합_에이전트_설계/        ← 정형+비정형 라우팅
+├── CH06_통합_에이전트_설계/
 │   ├── src/
-│   │   ├── router.py             ← 3단계 QueryRouter (규칙→스키마→LLM)
-│   │   ├── mcp_tools.py          ← 4개 도구 (DB 쿼리 + 문서 검색)
-│   │   └── agent.py              ← ReAct 에이전트
-│   ├── app/                       ← 채팅 UI (에이전트 모드)
-│   ├── tests/test_scenarios.py    ← 18개 테스트
-│   ├── data/schema.sql            ← DDL + 샘플 데이터
-│   └── docker-compose.yml
-│
-├── CH09_LangChain_연결/           ← 에이전트 프레임워크 표준화
-│   ├── src/
-│   │   ├── main.py               ← CLI 진입점 (대화형 + 데모)
-│   │   ├── agent_config.py       ← LLM + Router + AgentExecutor
-│   │   ├── monitoring.py         ← JSON 로깅 + Langfuse
-│   │   ├── cache.py              ← TTL 응답 캐시
-│   │   ├── router.py             ← QueryRouter
-│   │   └── tools/                 ← @tool 데코레이터 4개
+│   │   ├── router.py      # 3단계 QueryRouter (규칙→스키마→LLM)
+│   │   ├── mcp_tools.py   # @tool 4개 (leave_balance, sales_sum, list_employees, search_documents)
+│   │   └── agent.py       # ReAct Agent (create_tool_calling_agent)
+│   ├── app/
+│   │   ├── main.py        # FastAPI 앱
+│   │   ├── chat_api.py    # 에이전트/RAG 모드 선택
+│   │   └── database.py    # [간략] PostgreSQL 연결
+│   ├── tests/
+│   │   └── test_scenarios.py  # 18개 시나리오 테스트
+│   ├── templates/          # [제외]
+│   ├── docker-compose.yml  # [간략]
 │   └── requirements.txt
 │
-└── CH10_RAG_튜닝/                 ← 성능 최적화 10개 실험
-    ├── src/                        ← 에이전트 (CH09 기반)
-    ├── tuning/
-    │   ├── chunk_experiment.py    ← Fixed vs Semantic 청킹
-    │   ├── retriever_experiment.py ← k값, threshold 튜닝
-    │   ├── reranker.py            ← Cross-Encoder 재정렬
-    │   ├── hybrid_search.py       ← BM25 + Vector 앙상블
-    │   ├── advanced_retriever.py  ← Parent/SelfQuery
-    │   ├── query_rewrite.py       ← HyDE, Multi-Query
-    │   ├── document_parser.py     ← 라이브러리 vs vLLM 비교
-    │   ├── document_capture.py    ← PDF→PNG→LLaVA 파이프라인
-    │   └── evidence_pipeline.py   ← 근거 추적
-    ├── data/test_questions.json   ← 평가 질문 30개
-    └── outputs/                    ← 실험 결과 + 평가 보고서
+├── CH07_LangChain_연결/
+│   ├── src/
+│   │   ├── main.py          # CLI 대화형 + 데모 모드
+│   │   ├── agent_config.py  # ConnectHRAgent (LCEL RAG Chain + AgentExecutor)
+│   │   ├── monitoring.py    # JSON 로깅 + TokenTracker + [간략]Langfuse
+│   │   ├── cache.py         # ResponseCache(TTL) + EmbeddingCache(파일)
+│   │   └── tools/
+│   │       ├── leave_balance.py
+│   │       ├── sales_sum.py
+│   │       ├── list_employees.py
+│   │       └── search_documents.py
+│   ├── app/                 # FastAPI 웹 앱
+│   ├── templates/           # [제외]
+│   └── requirements.txt
+│
+├── CH08_RAG_튜닝/
+│   ├── src/
+│   │   ├── main.py            # 듀얼모드 CLI (에이전트+실험)
+│   │   ├── agent_config.py    # CH07 기반 Agent
+│   │   ├── router.py          # 3단계 QueryRouter
+│   │   └── eval_framework.py  # Precision@k, Recall@k, Hallucination Rate
+│   ├── tuning/
+│   │   ├── chunk_experiment.py      # 실험1: Fixed vs Semantic 청킹
+│   │   ├── retriever_experiment.py  # 실험2: k값, threshold
+│   │   ├── reranker.py             # 실험3: Cross-Encoder 리랭킹
+│   │   ├── hybrid_search.py        # 실험4: BM25+Vector (alpha)
+│   │   ├── advanced_retriever.py   # 실험5: Parent/SelfQuery/Compression
+│   │   ├── query_rewrite.py        # 실험6: HyDE, Multi-Query, 약어
+│   │   ├── document_parser.py      # 실험7: 라이브러리 vs vLLM
+│   │   ├── document_capture.py     # 실험8: 문서 캡처+인제스천
+│   │   └── evidence_pipeline.py    # 실험9: 답변 근거 시스템
+│   ├── data/
+│   │   └── test_questions.json     # 30개 테스트 질문
+│   └── requirements.txt
+│
+└── README.md
 ```
 
 ## 핵심 기능 (의도 안)
 
-| # | 기능 | 관련 코드 | 주요 기술 | 비유 소재 |
-|---|------|----------|----------|----------|
-| 0a | LLM 환각 체험 | CH03/step1_fail.py | OpenAI API 직접 호출 | 똑똑하지만 우리 회사를 모르는 외부 컨설턴트 |
-| 0b | 컨텍스트 스터핑 한계 | CH03/step2_context.py | 토큰 한도 실험 | 편지봉투에 백과사전을 넣으려는 것 |
-| 0c | RAG 기초 체험 | CH03/step3_rag.py, step4_rag.py | RAG 파이프라인 기초 | 필요한 페이지만 찾아서 건네주기 |
-| 0d | 청킹 유무 비교 | CH03/step3_rag_no_chunking.py | 청킹 없는 RAG | 책 통째로 vs 색인 카드 |
-| 1 | 정형 데이터 CRUD | CH04/app/crud.py, api.py | FastAPI, PostgreSQL, Pydantic | 회사 인사/매출 장부 |
-| 2 | Admin 대시보드 | CH04/app/views.py, templates/ | Jinja2, HTML/CSS | 관리자 사무실 |
-| 3 | 문서 텍스트 추출 | CH06/src/extractor.py, extract_*.py | pypdf, python-docx, openpyxl | 서류함에서 문서 꺼내기 |
-| 4 | 텍스트 청킹 | CH06/src/chunker.py | Fixed-size 500자 + 오버랩 100자 | 책을 색인 카드로 잘라내기 |
-| 5 | 벡터 임베딩 + DB 저장 | CH06/src/store.py | ko-sroberta, ChromaDB | 도서관 분류 번호 붙이기 |
-| 6 | CLI 검색 | CH06/src/cli_search.py | ChromaDB retriever | 도서관에서 책 찾기 |
-| 7 | RAG 체인 | CH07/src/rag_chain.py | LCEL, 프롬프트 엔지니어링 | 비서가 자료 찾아서 대답 |
-| 8 | 답변 + 출처 파싱 | CH07/src/response_parser.py | OutputParser | 비서가 근거 문서도 같이 제출 |
-| 9 | 멀티턴 대화 | CH07/src/conversation.py | WindowMemory | 비서가 이전 대화 기억 |
-| 10 | 채팅 웹 UI | CH07/app/, templates/, static/ | FastAPI, Jinja2, Fetch API | 비서와 대화하는 창구 |
-| 11 | 질문 라우팅 | CH08/src/router.py | 3단계 (규칙→스키마→LLM) | 안내데스크 — 어디로 보낼지 |
-| 12 | MCP 도구 4개 | CH08/src/mcp_tools.py | DB 쿼리 + 문서 검색 | 비서의 연장통 |
-| 13 | ReAct 에이전트 | CH08/src/agent.py | LangChain Agent | 비서가 스스로 판단하고 행동 |
-| 14 | 에이전트 표준 구성 | CH09/src/agent_config.py | AgentExecutor, Router | 비서 매뉴얼 완성 |
-| 15 | 캐시 + 모니터링 | CH09/src/cache.py, monitoring.py | TTL 캐시, Langfuse | 비서 업무 일지 + 빠른 응답 |
-| 16 | 청킹 실험 | CH10/tuning/chunk_experiment.py | Fixed vs Semantic | 색인 카드 크기 실험 |
-| 17 | Retriever 튜닝 | CH10/tuning/retriever_experiment.py | k값, threshold | 검색 범위 조절 |
-| 18 | ReRanker | CH10/tuning/reranker.py | Cross-Encoder | 검색 결과 재정렬 |
-| 19 | Hybrid Search | CH10/tuning/hybrid_search.py | BM25 + Vector | 키워드 + 의미 동시 검색 |
-| 20 | Query Rewrite | CH10/tuning/query_rewrite.py | HyDE, Multi-Query | 질문을 다시 써보기 |
-| 21 | 문서 캡처 파이프라인 | CH10/tuning/document_capture.py | PyMuPDF, OCR, LLaVA | 사진 찍어서 읽기 |
-| 22 | 평가 프레임워크 | CH10/src/eval_framework.py | Precision@k, RAGAS | 비서 성적표 |
+| # | 기능 | 챕터 | 관련 코드 | 주요 기술 |
+|---|------|------|----------|----------|
+| 1 | LLM 환각 체험 | CH01 | step1_fail.py | ChatOllama, deepseek-r1:8b |
+| 2 | Context Injection | CH01 | step2_context.py | f-string 프롬프트 |
+| 3 | RAG 기본 파이프라인 | CH01 | step3_rag.py | RetrievalQA, OllamaEmbeddings, Chroma |
+| 4 | 청킹 효과 비교 | CH01 | step3_rag_no_chunking.py | 청킹 유무 비교 |
+| 5 | RAG + 추론 | CH01 | step4_rag.py | Chain-of-Thought 질문 |
+| 6 | 데이터 모델 | CH02 | models.py | dataclass (Employee, LeaveBalance, Sale) |
+| 7 | 데이터 검증 | CH02 | schemas.py | Pydantic Field() 검증 |
+| 8 | DB 연결 패턴 | CH02 | database.py | Context Manager, psycopg2 |
+| 9 | CRUD 함수 | CH02 | crud.py | 매개변수화 쿼리, RETURNING |
+| 10 | REST API | CH02 | api.py | FastAPI Router, HTTPException |
+| 11 | 문서 수집 전략 | CH03 | (개념) | 문서 종류, 형식별 지원, 교재용 추천 세트 |
+| 12 | 문서 표준 규칙 | CH03 | (개념) | 파일명 규칙, 메타데이터, 섹션 헤더, 개정 이력 |
+| 13 | 문서 파싱 | CH04 | extractor.py | pypdf, python-docx, openpyxl |
+| 14 | Fixed-size 청킹 | CH04 | chunker.py | 500자, 100자 오버랩, 메타데이터 |
+| 15 | 한국어 임베딩+저장 | CH04 | store.py | ko-sroberta-multitask, ChromaDB upsert |
+| 16 | CLI 벡터 검색 | CH04 | cli_search.py | 코사인 유사도, 시각화 |
+| 17 | LCEL RAG 파이프라인 | CH05 | rag_chain.py | Retriever\|Prompt\|LLM\|Parser |
+| 18 | 출처 강제 프롬프트 | CH05 | rag_chain.py | "[출처: 문서명]" 형식 강제 |
+| 19 | 응답 파싱 | CH05 | response_parser.py | DeepSeek `<think>` 제거, 출처 추출 |
+| 20 | 멀티턴 대화 | CH05 | conversation.py | WindowMemory(k=5), 세션 TTL |
+| 21 | 채팅 API | CH05 | chat_api.py | POST /api/chat, 세션 쿠키 |
+| 22 | 3단계 QueryRouter | CH06 | router.py | 규칙→스키마→LLM 폴백 |
+| 23 | MCP 도구 4개 | CH06 | mcp_tools.py | @tool: leave_balance, sales_sum, list_employees, search_documents |
+| 24 | ReAct Agent | CH06 | agent.py | create_tool_calling_agent, AgentExecutor |
+| 25 | Agent 표준 구성 | CH07 | agent_config.py | ConnectHRAgent, LCEL RAG Chain |
+| 26 | @tool 모듈화 | CH07 | tools/*.py | 도구별 파일 분리, 에러 핸들링 |
+| 27 | 응답 캐시 | CH07 | cache.py | ResponseCache(TTL), EmbeddingCache(파일) |
+| 28 | 토큰 추적 | CH07 | monitoring.py | TokenTracker, 비용 계산 |
+| 29 | CLI 대화형+데모 | CH07 | main.py | 멀티턴, stats, demo 모드 |
+| 30 | 청킹 실험 | CH08 | chunk_experiment.py | Fixed vs Semantic, 크기/오버랩 |
+| 31 | Retriever 튜닝 | CH08 | retriever_experiment.py | k값, threshold |
+| 32 | 리랭킹 | CH08 | reranker.py | Cross-Encoder 재정렬 |
+| 33 | 하이브리드 검색 | CH08 | hybrid_search.py | BM25+Vector, alpha |
+| 34 | 고급 Retriever | CH08 | advanced_retriever.py | Parent, SelfQuery, Compression |
+| 35 | Query Rewrite | CH08 | query_rewrite.py | HyDE, Multi-Query, 약어 확장 |
+| 36 | 답변 근거 시스템 | CH08 | evidence_pipeline.py | 이미지+DB 근거 동시 제공 |
+| 37 | 평가 프레임워크 | CH08 | eval_framework.py | Precision@k, Recall@k, Hallucination Rate |
+| 38 | 고급 문서 파싱 | CH08 | document_parser.py | 라이브러리 비교, vLLM 멀티모달 |
+| 39 | 문서 캡처+인제스천 | CH08 | document_capture.py | OCR 캡처, 자동 인제스천 파이프라인 |
 
 ## 의도 밖 기능 (제외)
 
 | 기능 | 관련 코드 | 제외 이유 |
 |------|----------|----------|
-| 파인튜닝 | (코드 없음) | seed.md 의도 밖 |
-| 자체 LLM 학습 | (코드 없음) | seed.md 의도 밖 |
-| 프로덕션 배포/운영 | (코드 없음) | seed.md 의도 밖 |
+| Admin UI (Jinja2+CSS) | CH02 views.py, templates/, static/ | 프론트엔드 UI 제외 |
+| 채팅 UI (HTML+JS) | CH05~08 templates/, static/ | 프론트엔드 UI 제외 |
+| Docker/PostgreSQL 세팅 | CH02,06~08 docker-compose.yml | 간략 안내만 |
+| Langfuse 연동 상세 | CH07 monitoring.py 일부 | 존재 언급만, 설정 제외 |
+| RAGAS 자동 평가 | CH08 eval_framework.py 일부 | 더 알아보기 수준 |
 
 ## 기술 스택 정리
 
-| 분류 | 기술 | 버전 | 용도 |
+### 핵심 (의도 안)
+
+| 계층 | 기술 | 역할 | 챕터 |
 |------|------|------|------|
-| **웹** | FastAPI | 0.115+ | REST API + 웹 UI |
-| **DB** | PostgreSQL | 16 | 정형 데이터 (직원/휴가/매출) |
-| **DB 드라이버** | psycopg2-binary | 2.9.9+ | PostgreSQL 연결 |
-| **템플릿** | Jinja2 | 3.1+ | Admin/채팅 UI |
-| **검증** | Pydantic | 2.10+ | 요청/응답 스키마 |
-| **문서 파싱** | pypdf, python-docx, openpyxl | 각 최신 | PDF/DOCX/XLSX 텍스트 추출 |
-| **임베딩** | sentence-transformers (ko-sroberta) | 3.3+ | 768차원 벡터 변환 |
-| **벡터DB** | ChromaDB | 1.5+ | 벡터 저장/검색 |
-| **LLM 프레임워크** | LangChain | 0.3+ | RAG 체인, 에이전트, 도구 |
-| **LLM** | Ollama / OpenAI | - | 텍스트 생성 (선택) |
-| **검색 보조** | rank-bm25 | 0.2+ | 키워드 기반 검색 (Hybrid) |
-| **ReRanker** | BAAI/bge-reranker-v2-m3 | - | 검색 결과 재정렬 |
-| **OCR** | easyocr | 1.7+ | 이미지 텍스트 추출 |
-| **PDF 이미지화** | PyMuPDF | 1.24+ | 페이지별 PNG 변환 |
-| **모니터링** | Langfuse (선택) | 2.60+ | LLM 호출 추적 |
+| LLM | Ollama + deepseek-r1:8b | 로컬 LLM 추론 | CH01~08 |
+| LLM 대안 | OpenAI gpt-4o-mini | 클라우드 LLM (선택) | CH05~08 |
+| 프레임워크 | LangChain 0.3.x | RAG/Agent 프레임워크 | CH01~08 |
+| 벡터DB | ChromaDB 1.5 | 임베딩 저장/검색 | CH01,04~08 |
+| 임베딩 | ko-sroberta-multitask | 한국어 임베딩 (768d) | CH04~08 |
+| 웹 | FastAPI 0.115+ | REST API | CH02,05~08 |
+| DB | PostgreSQL 16 | 정형 데이터 (직원/연차/매출) | CH02,06~08 |
+| DB 드라이버 | psycopg2 | SQL 직접 실행 | CH02,06~08 |
+| 검증 | Pydantic 2.10+ | 요청/응답 스키마 | CH02,05~08 |
+| 문서 파싱 | pypdf, python-docx, openpyxl | PDF/DOCX/XLSX 텍스트 추출 | CH04~08 |
+| 키워드 검색 | rank-bm25 | BM25 하이브리드 검색 | CH08 |
+| 리랭킹 | Cross-Encoder | 검색 결과 재정렬 | CH08 |
+| Vision LLM | LLaVA / Qwen2-VL (Ollama) | 이미지 캡션 생성 (인덱싱) | CH08 |
+| OCR | EasyOCR | 이미지 텍스트 추출 | CH08 |
+| 문서 파싱 고급 | PyMuPDF | 고급 PDF 파싱 | CH08 |
+
+### 간략/제외 (의도 밖)
+
+| 기술 | 역할 | 수준 |
+|------|------|------|
+| Docker Compose | PostgreSQL 컨테이너 | 간략 (docker-compose up만) |
+| Jinja2 | HTML 템플릿 | 제외 |
+| Langfuse | LLM 모니터링 | 언급만 |
+| RAGAS | RAG 자동 평가 | 더 알아보기 |
 
 ## 기술 의존성 메모
 
+| 선행 개념 | 필요한 챕터 | 비고 |
+|----------|-----------|------|
+| Python 기초 | 전체 | 독자 배경지식 (가정) |
+| REST API 개념 | CH02~ | HTTP 메서드, JSON |
+| SQL 기초 | CH02,06~08 | SELECT, INSERT, JOIN |
+| 벡터/임베딩 개념 | CH04~ | 코사인 유사도 — 비유로 설명 |
+| LangChain LCEL | CH05~ | 파이프 연산자 `|` — CH05에서 도입 |
+| Agent/Tool Calling | CH06~ | ReAct 패턴 — CH06에서 도입 |
+
+## 챕터 간 코드 진화 흐름
+
 ```
-LLM 한계 + RAG 필요성 (CH03) ← 왜 RAG가 필요한지 체험
-  ↓ RAG 동기부여
-FastAPI (CH04)
-  ↓ 웹 프레임워크 기반
-문서 파싱 + 청킹 + ChromaDB (CH06)
-  ↓ 벡터DB가 준비되어야
-RAG 체인 (CH07) ← LCEL, 프롬프트 엔지니어링 이해 필요
-  ↓ RAG가 있어야
-라우팅 + 에이전트 (CH08) ← 정형(CH04) + 비정형(CH06~07) 통합
-  ↓ 에이전트 구조가 잡혀야
-LangChain 표준 (CH09) ← 도구, 캐시, 모니터링 추가
-  ↓ 표준 구성이 있어야
-RAG 튜닝 (CH10) ← 기존 파이프라인 위에서 실험
+CH01: LLM 단독 → Context Injection → RAG (개념 증명) [신규]
+  ↓
+CH02: FastAPI + PostgreSQL CRUD (정형 데이터 기반)
+  ↓
+CH03: 사내 문서 수집 전략 + 문서 표준 (개념 챕터, 코드 없음)
+  ↓
+CH04: 문서 파싱 → 청킹 → 임베딩 → ChromaDB (비정형 데이터 기반)
+  ↓
+CH05: LCEL 파이프라인 + 출처 강제 + 멀티턴 (RAG 엔진)
+  ↓
+CH06: QueryRouter + MCP 도구 + ReAct Agent (정형+비정형 통합)
+  ↓
+CH07: Agent 표준화 + 캐시 + 로깅 + 토큰 추적 (운영 안정화)
+  ↓
+CH08: 11개 튜닝 실험 + 평가 프레임워크 (성능 최적화)
 ```
 
-**선행 개념 (독자가 알아야 할 것)**:
-- Python 기초 (함수, 클래스, 데코레이터)
-- 터미널/CLI 사용
-- Docker 기본 (docker-compose up 수준)
-- REST API 개념 (GET/POST 수준)
+## 기획서 매핑
 
-**책에서 설명해야 할 개념** (독자가 모를 것):
-- LLM의 한계 (환각, 토큰 한도, 보안) — CH03에서 실패 체험으로
-- RAG가 뭔지 (왜 LLM만으로 안 되는지) — CH03에서 해결 과정으로
-- 임베딩이 뭔지 (벡터가 뭔지)
-- 청킹이 뭔지 (왜 잘라야 하는지)
-- 프롬프트 엔지니어링 기초
-- 에이전트/도구 패턴
-- 벡터 유사도 검색 원리
+| 코드 챕터 | 기획서 PART | 비고 |
+|---------|----------|------|
+| CH01 (신규) | — | 기획서에 없음. LLM 환각 체험 → RAG 필요성 도입 |
+| CH02 | PART 1 | FastAPI CRUD 사내 시스템 |
+| CH03 | PART 2 | 문서 수집 전략 + 표준 (코드 없음) |
+| CH04 | PART 3 | VectorDB 구축 |
+| CH05 | PART 4 | RAG Q&A 엔진 |
+| CH06 | PART 5 | 통합 에이전트 (MCP + RAG) |
+| CH07 | PART 6 | LangChain 연결 + 운영 |
+| CH08 | PART 7 | RAG 튜닝 (11개 실험) |
+| — | PART 0 | 미리보기 → 반영 (프롤로그 또는 별도 챕터, STEP 3에서 확정) |
+| — | PART 0.5 | 환경 설정 → 반영 (부록 또는 별도 챕터, STEP 3에서 확정) |
+| — | PART 8 | 배포/운영 → **제외** |

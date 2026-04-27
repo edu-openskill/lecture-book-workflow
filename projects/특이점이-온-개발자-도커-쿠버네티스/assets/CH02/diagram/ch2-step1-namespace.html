@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>컨테이너 네트워크 격리 구조</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 36px 24px 28px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1040px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; }
+
+  .canvas {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  /* 좌·우 Namespace 박스 */
+  .ns-box {
+    border: 2px dashed #888;
+    border-radius: 14px;
+    padding: 26px 18px 20px;
+    background: #fff;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .ns-title {
+    position: absolute;
+    top: -10px; left: 22px;
+    background: #fff; padding: 0 8px;
+    font-size: 12px; font-weight: 700; color: #555;
+  }
+
+  .container-box {
+    border: 2px solid #1565c0;
+    border-radius: 8px;
+    background: #fff;
+    padding: 14px 18px;
+    text-align: center;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+  }
+  .container-name {
+    font-size: 14px; font-weight: 800; color: #1565c0; margin-bottom: 4px;
+  }
+  .container-ip {
+    font-family: 'Consolas', monospace;
+    font-size: 11px; color: #555;
+  }
+
+  /* 가운데 Host 박스 */
+  .host-box {
+    border: 2px solid #1565c0;
+    border-radius: 12px;
+    background: #f5faff;
+    padding: 28px 18px 18px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .host-title {
+    position: absolute;
+    top: -10px; left: 22px;
+    background: #fff; padding: 0 8px;
+    font-size: 12px; font-weight: 700; color: #1565c0;
+  }
+
+  .veth {
+    border: 1.5px dashed #777;
+    border-radius: 6px;
+    background: #fff;
+    padding: 7px 12px;
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    color: #444;
+    min-width: 130px;
+    text-align: center;
+  }
+  .docker0 {
+    border: 2px solid #c62828;
+    background: #fff3e0;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #c62828;
+    margin: 4px 0;
+    text-align: center;
+    min-width: 150px;
+  }
+
+  /* 외부 화살표 (veth pair) */
+  .edge-arrow {
+    align-self: center;
+    width: 100%;
+    position: relative;
+    height: 2px;
+    background: transparent;
+  }
+  .edge-row {
+    display: flex; align-items: center;
+    margin: 14px 0;
+  }
+
+  .arrow-h {
+    flex: 1; height: 14px;
+  }
+  .arrow-h svg { width: 100%; height: 100%; }
+  .arrow-label {
+    font-size: 11px; color: #555; font-style: italic; padding: 0 6px;
+    white-space: nowrap;
+  }
+
+  /* 외부 연결 묶음: 좌측 컨테이너 ↔ veth1, 우측 컨테이너 ↔ veth2 */
+  .cross-line {
+    position: absolute;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, #777 0 6px, transparent 6px 12px);
+  }
+
+  .legend {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 11px;
+    color: #666;
+  }
+  .legend .swatch {
+    display: inline-block;
+    width: 22px; height: 8px;
+    border: 1.5px dashed #777;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">컨테이너 네트워크 격리 구조 — Namespace · veth pair · docker0</div>
+
+  <div class="canvas">
+    <!-- 좌측: Namespace A -->
+    <div class="ns-box">
+      <div class="ns-title">Namespace A</div>
+      <div class="container-box">
+        <div class="container-name">컨테이너 A</div>
+        <div class="container-ip">172.17.0.2</div>
+      </div>
+    </div>
+
+    <!-- 가운데: Host -->
+    <div class="host-box">
+      <div class="host-title">호스트 (Host)</div>
+      <div class="veth">veth-host1</div>
+      <div class="docker0">docker0 브리지</div>
+      <div class="veth">veth-host2</div>
+    </div>
+
+    <!-- 우측: Namespace B -->
+    <div class="ns-box">
+      <div class="ns-title">Namespace B</div>
+      <div class="container-box">
+        <div class="container-name">컨테이너 B</div>
+        <div class="container-ip">172.17.0.3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- veth pair 라벨 -->
+  <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:#777; font-style:italic;">
+    <span style="margin-left:10%;">↔ veth pair</span>
+    <span style="margin-right:10%;">veth pair ↔</span>
+  </div>
+
+  <div class="legend">
+    <span class="swatch"></span>
+    점선 = 가상 케이블(veth pair) · 화이트 박스 = 실제 컨테이너 · 주황 박스 = docker0 가상 스위치
+  </div>
+</div>
+
+</body>
+</html>

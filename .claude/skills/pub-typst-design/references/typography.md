@@ -132,3 +132,41 @@ text(24pt, weight: "bold")[목차]
 | 캡션 형식 | "그림 N-M: 설명" |
 | auto-image 기본 max-width | 0.7 (70%) |
 | side-image 기본 img-width | 0.35 (35%) |
+
+## 이미지 테두리 프리셋
+
+`auto-image`의 `style` 파라미터로 이미지 테두리를 제어한다. 프로젝트 CONFIG의 `image_border_preset` 값에 따라 Python 빌드 스크립트가 경로 패턴별로 style을 자동 주입한다.
+
+### style 값
+
+| style | 시각 효과 | Typst 구현 |
+|-------|----------|-----------|
+| `"plain"` | 효과 없음 (기본값) | `image(path, width: ...)` |
+| `"bordered"` | 프라이머리 컬러 테두리 | `stroke: 2pt + #2563eb, radius: 4pt` |
+| `"shadow"` | 오른쪽/아래 그림자 | 비대칭 stroke (우/하 2pt #c0c0c0) |
+| `"bordered-shadow"` | 프라이머리 테두리 + 그림자 | 비대칭 stroke (우/하 3pt #1d4ed8) |
+| `"minimal"` | 얇은 회색 테두리 | `stroke: 0.5pt + #e5e7eb, radius: 2pt` |
+
+### 프리셋 (경로→style 매핑)
+
+| 프리셋 | 개념도 (gemini/) | 나머지 (terminal/diagram/) |
+|--------|-----------------|--------------------------|
+| `clean-border` | bordered | minimal |
+| `shadow` | shadow | shadow |
+| `primary-shadow` | bordered-shadow | shadow |
+| `minimal` | minimal | minimal |
+| `plain` | plain | plain |
+
+### 적용 방법
+
+프로젝트 `build_pdf_typst.py`의 CONFIG에 추가:
+```python
+CONFIG = {
+    ...
+    "image_border_preset": "clean-border",  # 프리셋명
+}
+```
+
+### 샘플
+
+프리셋 비교 샘플: `skills/pub-typst-design/references/samples/image-border-samples.typ`

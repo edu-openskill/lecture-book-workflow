@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>호스트 OS 위의 노드 구조</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .outer {
+    display: flex;
+    gap: 6px;
+  }
+
+  /* 왼쪽 브래킷 */
+  .brackets {
+    display: flex;
+    flex-direction: column;
+  }
+  .bracket {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .bracket-line {
+    width: 8px;
+    border-left: 1.5px solid #222;
+    border-top: 1.5px solid #222;
+    border-bottom: 1.5px solid #222;
+    align-self: stretch;
+  }
+  .bracket-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #222;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  /* 스택 */
+  .stack {
+    width: 460px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .layer {
+    border: 1.5px solid #222;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  /* 노드 영역 */
+  .node-area {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    padding: 20px 24px;
+    border: 1.5px solid #222;
+    border-radius: 12px 12px 0 0;
+    background: #fff;
+  }
+
+  /* 개별 노드 */
+  .node {
+    border: 1.5px solid #222;
+    border-radius: 8px;
+    width: 190px;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  .node-header {
+    background: #e0e0e0;
+    color: #222;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 1.5px solid #222;
+  }
+
+  /* 노드 내부: 프로세스 영역 */
+  .process-area {
+    display: flex;
+    gap: 6px;
+    padding: 10px 8px;
+    background: #fff;
+    justify-content: center;
+  }
+  .process-box {
+    border: 1.5px solid #222;
+    border-radius: 5px;
+    background: #f5f5f5;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    color: #222;
+  }
+
+  /* 노드 내부: OS */
+  .node-os {
+    border-top: 1.5px solid #222;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #222;
+    background: #e8e8e8;
+  }
+
+  /* 컨테이너 엔진 */
+  .layer-engine { background: #e8e8e8; padding: 16px; border-top: 3px dotted #666; }
+
+  /* 호스트 OS */
+  .layer-os { background: #d9d9d9; padding: 16px; border-top: none; }
+
+  /* 하드웨어 */
+  .layer-hw { background: #f5f5f5; padding: 16px; border-top: 3px dotted #666; border-radius: 0 0 12px 12px; }
+</style>
+</head>
+<body>
+
+<div class="outer">
+
+  <!-- 왼쪽 브래킷 -->
+  <div class="brackets">
+    <div class="bracket" id="b-app">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">애플리케이션 계층</span>
+    </div>
+    <div class="bracket" id="b-os">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">OS 계층</span>
+    </div>
+    <div class="bracket" id="b-hw">
+      <div class="bracket-line"></div>
+      <span class="bracket-label">하드웨어 계층</span>
+    </div>
+  </div>
+
+  <!-- 스택 -->
+  <div class="stack">
+    <div class="node-area" id="s-nodes">
+
+      <div class="node">
+        <div class="node-header">노드 1</div>
+        <div class="process-area">
+          <div class="process-box">프로세스</div>
+          <div class="process-box">프로세스</div>
+        </div>
+        <div class="node-os">OS</div>
+      </div>
+
+      <div class="node">
+        <div class="node-header">노드 2</div>
+        <div class="process-area">
+          <div class="process-box">프로세스</div>
+          <div class="process-box">프로세스</div>
+        </div>
+        <div class="node-os">OS</div>
+      </div>
+
+    </div>
+
+    <div class="layer layer-engine" id="s-engine">컨테이너 엔진</div>
+    <div class="layer layer-os" id="s-os">호스트 OS</div>
+    <div class="layer layer-hw" id="s-hw">하드웨어</div>
+  </div>
+
+</div>
+
+<script>
+  function sync() {
+    const nH = document.getElementById('s-nodes').offsetHeight;
+    const eH = document.getElementById('s-engine').offsetHeight;
+    const oH = document.getElementById('s-os').offsetHeight;
+    const hH = document.getElementById('s-hw').offsetHeight;
+
+    document.getElementById('b-app').style.height = nH + 'px';
+    document.getElementById('b-os').style.height = (eH + oH) + 'px';
+    document.getElementById('b-hw').style.height = hH + 'px';
+  }
+  window.addEventListener('load', sync);
+  window.addEventListener('resize', sync);
+</script>
+
+</body>
+</html>

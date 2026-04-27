@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pod → PVC → PV 저장소 바인딩</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 40px 24px 32px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1000px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 32px; }
+
+  .flow {
+    display: grid;
+    grid-template-columns: 200px 130px 220px 130px 220px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .node {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 16px 14px;
+    text-align: center;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+  }
+  .node .label {
+    font-size: 14px; font-weight: 800; color: #1565c0; margin-bottom: 4px;
+  }
+  .node .sub {
+    font-size: 11px; color: #555;
+  }
+  .node.pv {
+    border-color: #c62828;
+    box-shadow: 0 0 0 3px rgba(198,40,40,0.10);
+    background: #fff3e0;
+  }
+  .node.pv .label { color: #c62828; }
+
+  .arrow {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .arrow svg { width: 100%; height: 14px; }
+  .arrow-label {
+    font-size: 11px;
+    color: #1565c0;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .arrow.dashed svg line { stroke-dasharray: 6 4; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Pod가 PVC를 거쳐 실제 저장소(PV)에 연결되는 구조</div>
+
+  <div class="flow">
+    <!-- Pod -->
+    <div class="node">
+      <div class="label">Pod</div>
+      <div class="sub">데이터 사용자</div>
+    </div>
+
+    <!-- 화살표 1: Pod → PVC (점선) -->
+    <div class="arrow dashed">
+      <svg viewBox="0 0 120 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="106" y2="7" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="106,2 120,7 106,12" fill="#1565c0"/>
+      </svg>
+      <div class="arrow-label">저장소 연결</div>
+    </div>
+
+    <!-- PVC -->
+    <div class="node">
+      <div class="label">PVC</div>
+      <div class="sub">"10Gi 요청"</div>
+    </div>
+
+    <!-- 화살표 2: PVC → PV -->
+    <div class="arrow">
+      <svg viewBox="0 0 120 14" preserveAspectRatio="none">
+        <line x1="0" y1="7" x2="106" y2="7" stroke="#c62828" stroke-width="2"/>
+        <polygon points="106,2 120,7 106,12" fill="#c62828"/>
+      </svg>
+      <div class="arrow-label" style="color:#c62828;">바인딩</div>
+    </div>
+
+    <!-- PV -->
+    <div class="node pv">
+      <div class="label">PV</div>
+      <div class="sub">실제 디스크</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

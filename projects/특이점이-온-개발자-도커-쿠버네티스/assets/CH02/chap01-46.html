@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
+  html, body { margin: 0; padding: 0; background: transparent; height: auto; }
+  body {
+    padding: 20px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic',
+                 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+  .terminal {
+    width: 860px;
+    margin: 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #d0d0d0;
+    background: #ffffff;
+  }
+  .titlebar {
+    background: #e0e0e0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #c8c8c8;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green { background: #28c940; }
+  .title {
+    color: #555;
+    font-size: 12px;
+    margin-left: 8px;
+    flex: 1;
+    text-align: center;
+    font-weight: 500;
+  }
+  .body { padding: 20px 24px; }
+  .prompt {
+    color: #0066cc;
+    font-size: 13px;
+    margin-bottom: 10px;
+    word-break: break-all;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+  .prompt::before {
+    content: '$ ';
+    color: #2a9d2a;
+    font-weight: bold;
+  }
+  .output {
+    color: #222222;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre;
+    word-break: normal;
+    overflow-x: auto;
+    font-family: Menlo, 'DejaVu Sans Mono', consolas, 'Courier New', monospace;
+  }
+  .output pre { margin: 0; font-family: inherit; font-size: inherit; line-height: inherit; }
+  .output code { font-family: inherit; }
+  .output .err { color: #cc0000; font-weight: 500; }
+  .output .ok  { color: #2a9d2a; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="titlebar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <div class="title">실행결과</div>
+  </div>
+  <div class="body">
+    <div class="prompt">apt update</div>
+    <div class="output">Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists...
+Building dependency tree...
+Reading state information...
+7 packages can be upgraded. Run 'apt list --upgradable' to see them.</div>
+    <div class="prompt">apt install -y nginx</div>
+    <div class="output">After this operation, 1352 kB of additional disk space will be used.
+Fetched 521 kB in 2s (217 kB/s)
+Selecting previously unselected package nginx.
+Preparing to unpack .../nginx_1.24.0-2ubuntu7.6_amd64.deb ...
+Unpacking nginx (1.24.0-2ubuntu7.6) ...
+Setting up nginx (1.24.0-2ubuntu7.6) ...</div>
+    <div class="prompt">nginx</div>
+  </div>
+</div>
+</body>
+</html>

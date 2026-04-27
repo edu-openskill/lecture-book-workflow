@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 175">
+  <rect width="420" height="175" fill="white" rx="8"/>
+  
+    <text x="10" y="28" font-family="'Pretendard',sans-serif" font-size="13" font-weight="600" fill="#333">Palette A: Black + Teal</text>
+    <rect x="200" y="10" width="60" height="28" rx="4" fill="#1A1A1A"/>
+    <rect x="268" y="10" width="60" height="28" rx="4" fill="#008080"/>
+    <rect x="336" y="10" width="60" height="28" rx="4" fill="#B2DFDB"/>
+    <text x="215" y="28" font-family="monospace" font-size="9" fill="white">#1A1A1A</text>
+    <text x="278" y="28" font-family="monospace" font-size="9" fill="white">#008080</text>
+    <text x="346" y="28" font-family="monospace" font-size="9" fill="#333">#B2DFDB</text>
+    <text x="10" y="68" font-family="'Pretendard',sans-serif" font-size="13" font-weight="600" fill="#333">Palette B: Navy + Sky</text>
+    <rect x="200" y="50" width="60" height="28" rx="4" fill="#1A237E"/>
+    <rect x="268" y="50" width="60" height="28" rx="4" fill="#4FC3F7"/>
+    <rect x="336" y="50" width="60" height="28" rx="4" fill="#B3E5FC"/>
+    <text x="215" y="68" font-family="monospace" font-size="9" fill="white">#1A237E</text>
+    <text x="278" y="68" font-family="monospace" font-size="9" fill="white">#4FC3F7</text>
+    <text x="346" y="68" font-family="monospace" font-size="9" fill="#333">#B3E5FC</text>
+    <text x="10" y="108" font-family="'Pretendard',sans-serif" font-size="13" font-weight="600" fill="#333">Palette C: Teal + Amber</text>
+    <rect x="200" y="90" width="60" height="28" rx="4" fill="#006666"/>
+    <rect x="268" y="90" width="60" height="28" rx="4" fill="#B4781E"/>
+    <rect x="336" y="90" width="60" height="28" rx="4" fill="#FFE0B2"/>
+    <text x="215" y="108" font-family="monospace" font-size="9" fill="white">#006666</text>
+    <text x="278" y="108" font-family="monospace" font-size="9" fill="white">#B4781E</text>
+    <text x="346" y="108" font-family="monospace" font-size="9" fill="#333">#FFE0B2</text>
+    <text x="10" y="148" font-family="'Pretendard',sans-serif" font-size="13" font-weight="600" fill="#333">Palette D: Mono</text>
+    <rect x="200" y="130" width="60" height="28" rx="4" fill="#2D2D2D"/>
+    <rect x="268" y="130" width="60" height="28" rx="4" fill="#888888"/>
+    <rect x="336" y="130" width="60" height="28" rx="4" fill="#E0E0E0"/>
+    <text x="215" y="148" font-family="monospace" font-size="9" fill="white">#2D2D2D</text>
+    <text x="278" y="148" font-family="monospace" font-size="9" fill="white">#888888</text>
+    <text x="346" y="148" font-family="monospace" font-size="9" fill="#333">#E0E0E0</text>
+</svg>

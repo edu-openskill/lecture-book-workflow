@@ -42,7 +42,7 @@
 
 // ── 폰트 설정 ──
 #set text(
-  font: ("KoPubDotum_Pro", "Apple SD Gothic Neo"),
+  font: ("RIDIBatang", "Apple SD Gothic Neo"),
   size: 10pt,
   lang: "ko",
   fill: rgb("#1a1a1a"),
@@ -107,7 +107,7 @@
 
 // ── 코드 블록 (페이지 넘김 허용) ──
 #show raw.where(block: true): it => {
-  set text(size: 8pt, weight: "bold", font: ("Menlo", "KoPubDotum_Pro"))
+  set text(size: 8pt, weight: "bold", font: ("D2Coding", "RIDIBatang"))
   block(
     width: 100%,
     fill: white,
@@ -115,6 +115,8 @@
     radius: 8pt,
     stroke: 1pt + rgb("#d1d5db"),
     breakable: true,
+    above: 8pt,
+    below: 8pt,
     text(fill: rgb("#1a1a1a"))[#it]
   )
 }
@@ -125,7 +127,7 @@
     fill: rgb("#f3f4f6"),
     inset: (x: 4pt, y: 2pt),
     radius: 3pt,
-    text(size: 8.5pt, fill: rgb("#1e40af"), font: ("Menlo", "KoPubDotum_Pro"))[#it]
+    text(size: 8.5pt, fill: rgb("#1e40af"), font: ("D2Coding", "RIDIBatang"))[#it]
   )
 }
 
@@ -185,8 +187,14 @@
 // ── 자동 크기 조절 이미지 ──
 // 남은 페이지 공간을 감지하여 이미지 크기를 자동으로 조절합니다.
 // max-width: 이미지 최대 너비 비율 (0.0~1.0)
+// style: 이미지 테두리 프리셋
+//   "plain"          — 효과 없음 (기본값)
+//   "bordered"       — 프라이머리 컬러(#2563eb) 테두리
+//   "shadow"         — 오른쪽/아래 그림자 효과
+//   "bordered-shadow" — 프라이머리 테두리 + 그림자
+//   "minimal"        — 얇은 회색 테두리
 // 이미지가 남은 공간보다 크면 자동 축소, 너무 작아지면 다음 페이지로 넘김
-#let auto-image(path, alt: none, max-width: 0.7) = layout(size => context {
+#let auto-image(path, alt: none, max-width: 0.7, style: "plain") = layout(size => context {
   let target-width = size.width * max-width
   let img = image(path, width: target-width)
   let img-size = measure(img)
@@ -206,10 +214,53 @@
     target-width
   }
 
-  if alt != none {
-    figure(image(path, width: final-width), caption: [#alt])
+  // 스타일별 이미지 래핑
+  let styled-img = if style == "bordered" {
+    block(
+      stroke: 2pt + rgb("#2563eb"),
+      radius: 4pt,
+      clip: true,
+      image(path, width: final-width)
+    )
+  } else if style == "shadow" {
+    block(
+      stroke: (
+        left: 0.5pt + rgb("#e0e0e0"),
+        top: 0.5pt + rgb("#e0e0e0"),
+        right: 2pt + rgb("#c0c0c0"),
+        bottom: 2pt + rgb("#c0c0c0"),
+      ),
+      radius: 4pt,
+      clip: true,
+      image(path, width: final-width)
+    )
+  } else if style == "bordered-shadow" {
+    block(
+      stroke: (
+        left: 2pt + rgb("#2563eb"),
+        top: 2pt + rgb("#2563eb"),
+        right: 3pt + rgb("#1d4ed8"),
+        bottom: 3pt + rgb("#1d4ed8"),
+      ),
+      radius: 4pt,
+      clip: true,
+      image(path, width: final-width)
+    )
+  } else if style == "minimal" {
+    block(
+      stroke: 0.5pt + rgb("#e5e7eb"),
+      radius: 2pt,
+      clip: true,
+      image(path, width: final-width)
+    )
   } else {
-    align(center, image(path, width: final-width))
+    image(path, width: final-width)
+  }
+
+  if alt != none {
+    figure(styled-img, caption: [#alt])
+  } else {
+    align(center, styled-img)
   }
 })
 
@@ -229,34 +280,41 @@
 }
 
 // ══════════════════════════════════════
-// 표지
+// 표지 — 이미지 또는 텍스트
 // ══════════════════════════════════════
-#page(numbering: none, header: none, footer: none)[
-  #v(1fr)
-  #align(center)[
-    // 상단 장식선
-    #line(length: 40%, stroke: 2pt + rgb("#2563eb"))
+#if book-cover-image != "" [
+  #page(numbering: none, header: none, footer: none, margin: (top: 20pt, bottom: 20pt, left: 16pt, right: 16pt))[
+    #image(book-cover-image, width: 100%, height: 100%, fit: "contain")
+  ]
+] else [
+  #page(numbering: none, header: none, footer: none)[
+    #v(1fr)
+    #align(center)[
+      #line(length: 40%, stroke: 2pt + color-primary)
+      #v(24pt)
+      #text(42pt, weight: "bold", fill: color-primary-dark, tracking: 2pt)[#book-title]
+      #v(16pt)
+      #line(length: 60%, stroke: 0.5pt + color-primary-light)
+      #v(16pt)
+      #text(15pt, fill: rgb("#374151"), weight: "medium")[#book-subtitle]
+      #v(48pt)
+      #block(
+        width: 70%,
+        inset: (x: 20pt, y: 16pt),
+        radius: 4pt,
+        fill: rgb("#f8fafc"),
+        stroke: 0.5pt + rgb("#e2e8f0"),
+        text(10.5pt, fill: rgb("#64748b"))[#book-description]
+      )
+    ]
+    #v(1fr)
+    #align(center)[
+      #text(11pt, fill: rgb("#4b5563"), weight: "medium")[#book-authors 지음]
+      #v(14pt)
+      #text(9pt, fill: rgb("#94a3b8"))[#book-header-title]
+    ]
     #v(24pt)
-    #text(42pt, weight: "bold", fill: rgb("#1e40af"), tracking: 2pt)[#book-title]
-    #v(16pt)
-    #line(length: 60%, stroke: 0.5pt + rgb("#93c5fd"))
-    #v(16pt)
-    #text(15pt, fill: rgb("#374151"), weight: "medium")[#book-subtitle]
-    #v(48pt)
-    #block(
-      width: 70%,
-      inset: (x: 20pt, y: 16pt),
-      radius: 4pt,
-      fill: rgb("#f8fafc"),
-      stroke: 0.5pt + rgb("#e2e8f0"),
-      text(10.5pt, fill: rgb("#64748b"))[#book-description]
-    )
   ]
-  #v(1fr)
-  #align(center)[
-    #text(9pt, fill: rgb("#94a3b8"))[RAG 실전 가이드]
-  ]
-  #v(20pt)
 ]
 
 // ══════════════════════════════════════

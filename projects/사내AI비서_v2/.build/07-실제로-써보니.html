@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>챕터 7. 실제로 써보니. 캐시와 모니터링</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+
+
+</head>
+<body>
+<div class="container">
+<h1>챕터 7. 실제로 써보니. 캐시와 모니터링</h1>
+<div class="goal-box">
+<p><strong>이번 챕터가 끝나면</strong></p>
+<ul>
+<li><strong>ResponseCache(TTL)</strong> 로 같은 질문에 같은 답을 0.1초에 돌려줍니다</li>
+<li><strong>EmbeddingCache</strong> 로 같은 텍스트의 임베딩 재계산을 줄입니다</li>
+<li><strong>TokenTracker</strong> 로 LLM 호출별 토큰, 비용, 응답시간을 집계합니다</li>
+<li><strong>Retry 로직</strong>(최대 3회, 간격 2초)으로 네트워크, 파싱 오류에서 자동 회복합니다</li>
+<li>이 모든 것을 <strong>ConnectHRAgent</strong>라는 운영용 래퍼로 한 번에 감쌉니다</li>
+</ul>
+</div>
+<div class="prep-section-md">
+<p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
+<h3>1. 실습 폴더 이동</h3>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div><span class="nb">cd</span><span class="w"> </span>rag-start/ex07</div>
+<p>파일 구조는 다음과 같습니다.</p>
+<div class="code-block highlight" data-lang="text"><div class="cb-title">ex07 디렉토리</div>ex07/
+├── run.py
+├── src/
+│   ├── agent_config.py         # [실습] ConnectHRAgent 운영 래퍼
+│   ├── cache.py                # [실습] ResponseCache + EmbeddingCache
+│   ├── monitoring.py           # [실습] TokenTracker + JSON 로깅
+│   ├── llm_factory.py          # [참고] LLM 인스턴스 생성
+│   ├── agent_helpers.py        # [참고] RAG 체인 + 라우팅 매핑
+│   ├── router.py               # [참고] 사후 분류 로직 (챕터 6)
+│   └── tools/                  # [참고] 도구 4개 (파일 분리)
+│       ├── leave_balance.py
+│       ├── sales_sum.py
+│       ├── list_employees.py
+│       └── search_documents.py
+├── app/
+│   ├── main.py                 # [참고] FastAPI 진입점
+│   ├── chat_api.py             # [참고] Agent API 엔드포인트
+│   └── database.py             # [참고] PostgreSQL 연결
+├── templates/chat.html         # [참고] 채팅 UI
+└── static/                     # [참고] UI 스타일</div>
+<h3>2. 실습 환경 구축</h3>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div><span class="nb">cd</span><span class="w"> </span>ex07
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+ollama<span class="w"> </span>pull<span class="w"> </span>llama3.1:8b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div><span class="nb">cd</span><span class="w"> </span>ex07
+copy<span class="w"> </span>.env.example<span class="w"> </span>.env
+py<span class="w"> </span>-3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+ollama<span class="w"> </span>pull<span class="w"> </span>llama3.1:8b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<h3>3. 사용할 라이브러리</h3>
+<table>
+<thead>
+<tr>
+<th>패키지</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>langchain</code> · <code>langchain-ollama</code></td>
+<td>에이전트 프레임워크·LLM 연결</td>
+</tr>
+<tr>
+<td><code>langchain-chroma</code> · <code>chromadb</code></td>
+<td>벡터 DB</td>
+</tr>
+<tr>
+<td><code>sentence-transformers</code></td>
+<td>ko-sroberta 임베딩</td>
+</tr>
+<tr>
+<td><code>psycopg2-binary</code></td>
+<td>PostgreSQL 드라이버</td>
+</tr>
+<tr>
+<td><code>fastapi</code> · <code>uvicorn</code></td>
+<td>웹 API 서버</td>
+</tr>
+<tr>
+<td><code>rich</code></td>
+<td>운영 로그 가독성 (컬러·테이블 출력)</td>
+</tr>
+</tbody>
+</table>
+<p><code>.env</code> 핵심 상수입니다. 이번 챕터에서 캐시·로깅 관련 항목이 새로 등장합니다.</p>
+<table>
+<thead>
+<tr>
+<th>상수</th>
+<th>기본값</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CACHE_TTL</code></td>
+<td><code>3600</code></td>
+<td>응답 캐시 TTL (초)</td>
+</tr>
+<tr>
+<td><code>CACHE_MAX_SIZE</code></td>
+<td><code>1000</code></td>
+<td>응답 캐시 최대 항목 수</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_CACHE_DIR</code></td>
+<td><code>./outputs/embedding_cache</code></td>
+<td>임베딩 벡터 저장 경로</td>
+</tr>
+<tr>
+<td><code>LOG_LEVEL</code></td>
+<td><code>INFO</code></td>
+<td>로그 레벨</td>
+</tr>
+<tr>
+<td><code>USE_JSON_LOG</code></td>
+<td><code>false</code></td>
+<td>JSON 구조화 로그 여부</td>
+</tr>
+</tbody>
+</table>
+<h3>4. 실습 순서</h3>
+<p>각 주제별로 이론을 짚고 바로 관련 파일 TODO를 채우는 구조입니다.</p>
+<ol>
+<li><strong>7.2 캐시</strong> — ResponseCache·EmbeddingCache 이론 → <code>src/cache.py</code> 작성</li>
+<li><strong>7.3 모니터링</strong> — TokenTracker 이론 → <code>src/monitoring.py</code> 작성</li>
+<li><strong>7.4 Retry + ConnectHRAgent</strong> — 재시도·운영 래퍼 이론 → <code>src/agent_config.py</code> 작성</li>
+<li><strong>7.5 서버 실행</strong> — 같은 질문 두 번 던져 캐시 적중 확인</li>
+</ol>
+</div>
+<h2>7.1 &quot;같은 질문에 또 20초?&quot;</h2>
+<p>![](../assets/챕터 7/gemini/07_chapter-opening.png)
+<em>그림 7-1. 운영 안정화. 캐시와 업무 일지, 재시도까지 붙은 사서</em></p>
+<p>챕터 6에서 통합 에이전트를 완성한 뒤 일주일이 흘렀습니다. 동료들 자리에 한 번씩 깔리던 웃음이 이제는 슬랙 채널에 모이고 있었습니다. 월요일 오전 9시 반. 오픈이는 커피잔을 책상에 내려놓고 슬랙을 열었습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "병가 증빙 필요한지 아까도 물어봤는데, 또 20초 기다려야 해요?"</div>
+<p>20초. 커서만 깜빡이는 화면에서 20초는 깁니다. 오픈이가 터미널을 열어 같은 질문을 던져 봤습니다. 로딩 스피너가 또 20초 동안 돌아갔습니다.</p>
+<p class="thought">같은 질문인데 왜 매번 처음부터 찾는 거지.</p>
+<p>건너편 자리의 다른 동료가 의자를 돌리며 한마디 더 얹었습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "우리 팀에서 하루에 30번은 쓰는 것 같은데, 얼마나 쓰고 있는 건지 파악이 안 돼요."</div>
+<p>얼마나 쓰는지. 호출 횟수, 응답 시간, 토큰 수. 어디에도 기록이 없었습니다. 슬랙 채널을 위로 끌어올려 보니 간간이 &quot;에러가 났어요&quot; 메시지도 섞여 있었습니다. 확인해 보면 네트워크 타임아웃이거나 LLM 파싱 실패. 잠시 뒤 다시 물어보면 정상인데 사용자 입장에선 &quot;고장났다&quot;였습니다.</p>
+<p class="thought">속도, 사용량, 실패. 세 가지가 한꺼번에 문제가 됐다.</p>
+<p>옆 자리 팀장이 지나가다 모니터를 흘끗 봤습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "같은 질문에 매번 서가를 뒤지는 사서가 있으면 어떻겠어요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "비효율적이죠."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "그럼 뭐가 필요해요?"</div>
+<p>잠시 생각했습니다. 팀장은 답을 끌고 가는 스타일이 아니라 늘 질문을 던지는 쪽이었습니다.</p>
+<p class="thought">메모장. 한 번 찾은 답을 적어 두는 메모장이 있으면 되잖아.</p>
+<p>이번 챕터에서 <strong>챕터 6의 <code>IntegratedAgent</code>는 그대로 둡니다</strong>. 엔진을 재설계하는 게 아니라 바깥을 감싸는 작업이죠. 캐시·업무 일지·재시도 세 층을 차례로 얹고, 그 결과물을 <code>ConnectHRAgent</code>라고 부르겠습니다. 이름만 새 옷일 뿐 속은 챕터 6 그대로입니다.</p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 7-2. 챕터 6 에이전트는 그대로, 바깥에 운영 래퍼 3층을 씌웁니다</div>
+<div style="display:grid;grid-template-columns:1fr 40px 1.4fr;gap:var(--space-md);align-items:stretch">
+<div style="border:2px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:white;position:relative;display:flex;flex-direction:column;justify-content:center">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 6. 지금까지</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-bottom:var(--space-sm);text-align:center">IntegratedAgent 단독</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);border-radius:var(--radius-sm);padding:var(--space-sm);font-size:var(--fs-xs)">
+<div style="font-weight:700;text-align:center;margin-bottom:4px">IntegratedAgent</div>
+<div style="display:flex;flex-direction:column;gap:3px;font-family:var(--font-mono);font-size:10px">
+<div style="background:white;padding:3px 6px;border-radius:3px;border:1px solid var(--color-border);text-align:center">AgentExecutor (ReAct)</div>
+<div style="background:white;padding:3px 6px;border-radius:3px;border:1px solid var(--color-border);text-align:center">MCP Tools (4개)</div>
+<div style="background:white;padding:3px 6px;border-radius:3px;border:1px solid var(--color-border);text-align:center">사후 분류</div>
+</div>
+</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:var(--space-sm);text-align:center">운영 기능 없음</div>
+</div>
+<div style="font-size:28px;color:var(--color-accent);text-align:center;font-weight:700;align-self:center">→</div>
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:var(--color-accent-bg);position:relative">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 7. 운영용 래퍼 ConnectHRAgent</div>
+<div style="font-size:var(--fs-xs);color:var(--color-accent-text);margin-bottom:var(--space-sm);text-align:center;font-weight:600">바깥층: 운영 기능 3종 (이번 챕터 추가)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:var(--space-sm)">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;text-align:center;font-size:10px"><div style="font-weight:700">ResponseCache</div><div style="color:var(--color-text-muted)">답변 메모장 (TTL 1h)</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;text-align:center;font-size:10px"><div style="font-weight:700">TokenTracker</div><div style="color:var(--color-text-muted)">업무 일지</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;text-align:center;font-size:10px"><div style="font-weight:700">Retry 루프</div><div style="color:var(--color-text-muted)">3회 재시도</div></div>
+</div>
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-sm);padding:var(--space-sm);background:white">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+<div style="font-weight:700;font-size:11px">안쪽 코어</div>
+<div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);padding:1px 6px;border-radius:3px;font-weight:600">챕터 6 그대로</div>
+</div>
+<div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:3px;padding:4px;font-family:var(--font-mono);font-size:10px">
+<div style="font-weight:700;text-align:center;margin-bottom:3px">IntegratedAgent</div>
+<div style="display:flex;align-items:center;gap:3px;justify-content:center;flex-wrap:wrap">
+<span style="background:white;padding:1px 5px;border-radius:2px;border:1px solid var(--color-border)">AgentExecutor</span>
+<span>+</span>
+<span style="background:white;padding:1px 5px;border-radius:2px;border:1px solid var(--color-border)">Tools</span>
+<span>+</span>
+<span style="background:white;padding:1px 5px;border-radius:2px;border:1px solid var(--color-border)">사후 분류</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-md);font-size:var(--fs-xs);color:var(--color-text-muted);text-align:center">같은 엔진(IntegratedAgent)이지만 바깥에 3층이 더 감싸져 있습니다. 호출이 들어오면 캐시 → 재시도 → 코어 → 토큰 기록 순으로 흐릅니다. 각 층의 상세 파이프라인은 7.4절 그림 7-6에서 다룹니다.</div>
+</div>
+<h2>7.2 ResponseCache + EmbeddingCache</h2>
+<p>메모장 이야기는 팀장 자리로도 이어졌습니다. 오픈이가 화이트보드 앞에 서서 마커 뚜껑을 딸깍 열었습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "메모장에 유통기한은 어떻게 할 건데요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "1시간 정도요. 규정이 자주 바뀌는 건 아니지만, 하루를 넘기면 옛날 답을 줄 수도 있으니까요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "그 감각이 맞아요. 메모장은 오래 들고 있을수록 독이 돼요."</div>
+<p>챕터 5에서 사서에게 대화용 메모장(<strong>WindowMemory</strong>)을 줬던 기억이 떠올랐습니다. 이번에는 <strong>메모장을 두 권 더</strong> 얹습니다. 하나는 답변을 적는 메모장, 또 하나는 임베딩을 적는 메모장입니다.</p>
+<h3>답변 메모장 (ResponseCache)</h3>
+<p>같은 질문이 또 들어오면 서가까지 다시 갈 필요가 없습니다. 이전에 적어 둔 답을 바로 읽어 주면 됩니다. 단, 메모장에는 <strong>유통기한(TTL)</strong> 이 있습니다. 1시간 지나면 지웁니다. 사내 규정이 바뀌었을 수도 있기 때문입니다.</p>
+<div class="rc-timeline">
+  <div class="rc-tl-head">
+    <span class="rc-tl-kind">ResponseCache</span>
+    <span class="rc-tl-sub">같은 질문을 시간 순서로 추적</span>
+  </div>
+  <div class="rc-tl-axis">
+    <div class="rc-tl-time">09:00</div>
+    <div class="rc-tl-time">09:30</div>
+    <div class="rc-tl-time">10:01</div>
+    <div class="rc-tl-bar"></div>
+  </div>
+  <div class="rc-tl-events">
+    <div class="rc-tl-event rc-tl-miss">
+      <div class="rc-tl-q">"병가 증빙?"</div>
+      <div class="rc-tl-tag">MISS</div>
+      <div class="rc-tl-action">서가 가서 찾음<br>→ 메모장 기록<br><span class="rc-tl-latency">20초</span></div>
+      <div class="rc-tl-ttl">⏱ TTL 시작</div>
+    </div>
+    <div class="rc-tl-event rc-tl-hit">
+      <div class="rc-tl-q">"병가 증빙?"</div>
+      <div class="rc-tl-tag">HIT</div>
+      <div class="rc-tl-action">메모장 확인<br>→ 즉시 반환<br><span class="rc-tl-latency">0.1초</span></div>
+      <div class="rc-tl-ttl">⏱ 잔여 30분</div>
+    </div>
+    <div class="rc-tl-event rc-tl-expired">
+      <div class="rc-tl-q">"병가 증빙?"</div>
+      <div class="rc-tl-tag">EXPIRED</div>
+      <div class="rc-tl-action">메모장 만료<br>→ 다시 서가로<br><span class="rc-tl-latency">20초</span></div>
+      <div class="rc-tl-ttl">⏱ 새 TTL 시작</div>
+    </div>
+  </div>
+  <div class="rc-tl-store">
+    <code>self._store = {hash: (answer, expires_at)}</code>
+  </div>
+  <div class="cf-caption">그림 7-4. ResponseCache는 <b>유통기한이 있는 메모장</b>. 같은 질문이 TTL 안에 다시 오면 서가(LLM)를 건너뜁니다</div>
+</div>
+<h3>임베딩 메모장 (EmbeddingCache)</h3>
+<p>질문을 벡터로 바꾸는 데에도 시간이 듭니다. 같은 문장을 여러 번 변환할 필요는 없습니다. 한 번 계산한 벡터를 파일로 저장해 두면 다음엔 바로 꺼내 씁니다. EmbeddingCache는 유통기한이 없습니다. 벡터 값은 텍스트만 같으면 언제든 같기 때문입니다.</p>
+<div class="ec-cabinet">
+  <div class="ec-cab-head">
+    <span class="ec-cab-kind">EmbeddingCache</span>
+    <span class="ec-cab-sub">outputs/embedding_cache/</span>
+  </div>
+  <div class="ec-cab-shelf">
+    <div class="ec-cab-file ec-exists">
+      <div class="ec-file-text">"연차 규정"</div>
+      <div class="ec-file-arrow">→</div>
+      <div class="ec-file-name">a1f3c7.pkl</div>
+    </div>
+    <div class="ec-cab-file ec-exists">
+      <div class="ec-file-text">"휴가 절차"</div>
+      <div class="ec-file-arrow">→</div>
+      <div class="ec-file-name">d9e2b5.pkl</div>
+    </div>
+    <div class="ec-cab-file ec-exists">
+      <div class="ec-file-text">"보안 정책"</div>
+      <div class="ec-file-arrow">→</div>
+      <div class="ec-file-name">7c4a8f.pkl</div>
+    </div>
+  </div>
+  <div class="ec-cab-lookup">
+    <div class="ec-lookup-title">새 텍스트가 들어오면</div>
+    <div class="ec-lookup-rows">
+      <div class="ec-lookup-row ec-hit-row">
+        <div class="ec-lookup-text">"연차 규정"</div>
+        <div class="ec-lookup-tag">HIT</div>
+        <div class="ec-lookup-action">파일 존재 → <code>pickle.load</code> → 벡터 반환 <span class="ec-latency">즉시</span></div>
+      </div>
+      <div class="ec-lookup-row ec-miss-row">
+        <div class="ec-lookup-text">"근태 관리"</div>
+        <div class="ec-lookup-tag">MISS</div>
+        <div class="ec-lookup-action">파일 없음 → 임베딩 계산 → <b>새 파일 저장</b> <span class="ec-latency">약 0.5초</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="cf-caption">그림 7-5. EmbeddingCache는 <b>텍스트별 전용 서랍</b>. 서랍이 있으면 파일을 그대로 꺼내고, 없으면 계산 후 서랍 하나를 추가합니다</div>
+</div>
+<h3>실습 1. cache.py</h3>
+<p><code>ex07/src/cache.py</code> 상단에는 캐시 동작을 조절하는 상수 세 개가 이미 선언돼 있습니다. <code>.env</code> 값이 없으면 이 기본값을 씁니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge explain">설명</span> ex07/src/cache.py. 모듈 상수</div><span class="n">DEFAULT_RESPONSE_TTL</span> <span class="o">=</span> <span class="mi">3600</span>                  <span class="c1"># 응답 캐시 TTL (초). 1시간</span>
+<span class="n">DEFAULT_RESPONSE_CACHE_MAX_SIZE</span> <span class="o">=</span> <span class="mi">1000</span>       <span class="c1"># 최대 저장 항목 수</span>
+<span class="n">DEFAULT_EMBEDDING_CACHE_DIR</span> <span class="o">=</span> <span class="s2">&quot;./outputs/embedding_cache&quot;</span></div>
+<p>이제 두 클래스의 <code>get</code>·<code>set</code> TODO의 <code>pass</code>를 지우고 아래 코드를 채워 보겠습니다. 키 생성(SHA-256 해시)과 파일 I/O는 <code>_cache_utils.py</code>에 헬퍼로 이미 준비돼 있어서, 우리는 <strong>TTL 검사</strong>와 <strong>최대 크기 관리</strong>에만 집중하면 됩니다.</p>
+<p>먼저 클래스 골격과 <code>__init__</code>입니다. 메모장의 <strong>용량 한도(<code>max_size</code>)</strong>, <strong>유통기한(<code>ttl</code>)</strong>, 그리고 히트·미스 카운터를 준비합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex07/src/cache.py. ResponseCache — 초기화</div><span class="k">class</span><span class="w"> </span><span class="nc">ResponseCache</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;TTL 기반 인메모리 응답 캐시.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="n">DEFAULT_RESPONSE_TTL</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="n">DEFAULT_RESPONSE_CACHE_MAX_SIZE</span><span class="p">):</span>
+        <span class="c1"># 1. TTL·max_size는 .env 또는 기본값에서 주입 (3600초, 1000개)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ttl</span> <span class="o">=</span> <span class="n">ttl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span> <span class="o">=</span> <span class="n">max_size</span>
+        <span class="c1"># 2. 메모장 본체: key → (value, expires_at) 튜플</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_store</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># 3. 통계 카운터 — 운영 중 적중률을 보기 위한 값</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hits</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_misses</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[ResponseCache] 초기화 완료 (TTL: </span><span class="si">%d</span><span class="s2">초, 최대 크기: </span><span class="si">%d</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">ttl</span><span class="p">,</span> <span class="n">max_size</span><span class="p">)</span></div>
+<p><code>self._store</code>가 <strong>메모장 본체</strong>입니다. 키 하나당 <code>(실제 답변, 만료 시각)</code> 튜플을 담습니다. 만료 시각을 같이 저장해 두는 것이 TTL 구현의 핵심입니다.</p>
+<p>이제 조회 메서드 <code>get()</code>입니다. <strong>세 가지 경로</strong>로 갈라집니다. 키 없음 → 만료됨 → 적중. 어느 쪽이든 카운터 갱신과 로깅을 잊지 않아야 합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex07/src/cache.py. ResponseCache.get</div>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;캐시에서 응답을 조회합니다 (TTL 만료 체크).&quot;&quot;&quot;</span>
+        <span class="cb-todo"># TODO: get — TTL 검사 후 HIT/MISS 반환</span>
+        <span class="c1"># 1. 질문(+문맥)을 SHA-256 해시로 변환해 고정 길이 키로</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">make_response_key</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="c1"># 2. 저장소에 키가 아예 없으면 MISS</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">entry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_misses</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;[ResponseCache] 미스: key=</span><span class="si">%s</span><span class="s2">...&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">[:</span><span class="mi">12</span><span class="p">])</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># 3. 있더라도 만료 시각이 지났으면 삭제 후 MISS</span>
+        <span class="n">value</span><span class="p">,</span> <span class="n">expires_at</span> <span class="o">=</span> <span class="n">entry</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">expires_at</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_misses</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;[ResponseCache] 만료: key=</span><span class="si">%s</span><span class="s2">...&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">[:</span><span class="mi">12</span><span class="p">])</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># 4. 살아 있으면 HIT — 남은 TTL 로그로 남겨 디버깅 편하게</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hits</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[ResponseCache] 적중: key=</span><span class="si">%s</span><span class="s2">... (잔여 TTL: </span><span class="si">%.0f</span><span class="s2">초)&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">[:</span><span class="mi">12</span><span class="p">],</span> <span class="n">expires_at</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+<p>핵심은 <strong>2·3·4 분기가 모두 카운터를 갱신</strong>한다는 점입니다. 만료된 항목은 그 자리에서 삭제하고 MISS로 처리합니다. 같은 질문이어도 유통기한이 지났으면 새 답을 받아 와야 하기 때문입니다.</p>
+<p>저장할 때는 <strong>용량 관리</strong>가 함께 들어갑니다. 메모장 페이지가 <code>max_size</code>(기본 1000)를 넘으면 <strong>만료 시각이 가장 이른 항목</strong>부터 한 건 지우고 새 항목을 넣습니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex07/src/cache.py. ResponseCache.set</div>    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;캐시에 응답을 저장합니다 (max_size 초과 시 오래된 항목 제거).&quot;&quot;&quot;</span>
+        <span class="cb-todo"># TODO: set — max_size 초과 시 가장 오래된 항목 제거</span>
+        <span class="c1"># 1. 조회와 같은 방식으로 키 생성</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">make_response_key</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="c1"># 2. 용량 초과 시 만료 임박 항목 한 건 제거</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_size</span><span class="p">:</span>
+            <span class="n">oldest_key</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">[</span><span class="n">oldest_key</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;[ResponseCache] 최대 크기 초과로 항목 제거: key=</span><span class="si">%s</span><span class="s2">...&quot;</span><span class="p">,</span> <span class="n">oldest_key</span><span class="p">[:</span><span class="mi">12</span><span class="p">])</span>
+
+        <span class="c1"># 3. 만료 시각 = 지금 + TTL. 튜플로 저장</span>
+        <span class="n">expires_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">expires_at</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[ResponseCache] 저장: key=</span><span class="si">%s</span><span class="s2">... (만료: </span><span class="si">%.0f</span><span class="s2">초 후)&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">[:</span><span class="mi">12</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttl</span><span class="p">)</span></div>
+<p><code>min(self._store, key=lambda k: self._store[k][1])</code>이 <strong>가장 먼저 만료될 항목</strong>을 찾는 부분입니다. 튜플의 두 번째 요소(<code>expires_at</code>)가 작을수록 만료가 가깝습니다. 용량을 딱 채우기 전에 한 건을 빼 주므로, 메모장은 항상 <code>max_size</code> 아래로 유지됩니다.</p>
+<p>마지막으로 클래스 아래에는 <strong>운영용 편의 메서드 두 개</strong>가 이미 완성된 채로 들어 있습니다. 우리가 구현할 부분은 없고, 작동만 기억하면 됩니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge explain">설명</span> ex07/src/cache.py. ResponseCache.clear / stats</div>    <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;만료된 캐시 항목을 제거합니다.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">response_cache_clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;캐시 통계를 반환합니다 (_hits / _misses / 현재 크기 등).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">response_cache_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<p><code>clear()</code>는 만료된 항목을 일괄 정리하고, <code>stats()</code>는 적중·미스 수와 현재 크기를 딕셔너리로 돌려줍니다. 실제 로직은 <code>_cache_utils.py</code> 헬퍼가 맡아 위임만 하고 있습니다. <code>stats()</code>가 반환하는 값은 이후 상태 확인 대시보드에서 &quot;캐시 적중률 72%&quot; 같은 숫자로 쓰입니다.</p>
+<p>여기까지가 <strong>답변 메모장</strong>입니다. 이제 두 번째 메모장인 <strong>임베딩 메모장</strong>으로 넘어갑니다. 같은 &quot;캐시&quot;라는 이름이지만 <strong>무엇을·얼마나·어디에</strong> 기록하느냐가 완전히 다릅니다.</p>
+<div class="cache-diff">
+  <div class="cd-head">
+    <div class="cd-col-title cd-response"><span class="cd-badge">ResponseCache</span>답변 메모장</div>
+    <div class="cd-col-title cd-embedding"><span class="cd-badge">EmbeddingCache</span>임베딩 메모장</div>
+  </div>
+  <div class="cd-row">
+    <div class="cd-label">기록하는 것</div>
+    <div class="cd-cell">LLM이 만든 <b>완성된 답변</b> 문자열</div>
+    <div class="cd-cell">"연차 규정"처럼 텍스트를 <b>숫자 벡터</b>로 변환한 결과</div>
+  </div>
+  <div class="cd-row">
+    <div class="cd-label">유통기한</div>
+    <div class="cd-cell">1시간(TTL). 규정이 바뀌면 답도 바뀌어야 하니까</div>
+    <div class="cd-cell"><b>없음</b>. 텍스트가 같으면 벡터 값은 언제 계산해도 같음</div>
+  </div>
+  <div class="cd-row">
+    <div class="cd-label">저장 위치</div>
+    <div class="cd-cell">메모리 딕셔너리 (서버 재시작 시 소멸)</div>
+    <div class="cd-cell">디스크 파일 <code>cache_dir/{sha256}.pkl</code></div>
+  </div>
+  <div class="cd-row">
+    <div class="cd-label">메서드 구조</div>
+    <div class="cd-cell"><code>get()</code> + <code>set()</code> 두 번 호출</div>
+    <div class="cd-cell"><code>get_or_compute(text, compute_fn)</code> 한 번이면 끝</div>
+  </div>
+</div>
+<p>마지막 행이 구현 차이를 만듭니다. 답변 메모장은 <code>get()</code>이 MISS를 반환하면 호출자가 &quot;그럼 LLM을 돌리자&quot;를 직접 결정해야 합니다. 임베딩 메모장은 <strong>MISS일 때 무엇을 계산할지</strong>(<code>compute_fn</code>)를 미리 받아 두기 때문에 호출자는 결과만 기다리면 됩니다.</p>
+<div class="term-box">
+<p><strong><code>compute_fn</code>이란?</strong> <strong>캐시 미스일 때 값을 계산할 함수</strong>입니다. <code>&quot;연차 규정&quot;</code> 같은 텍스트를 받으면 768차원 벡터를 돌려주는 임베딩 함수를 여기에 넘깁니다. <code>EmbeddingCache</code>가 미스 시 <code>compute_fn(text)</code>로 호출해 계산하고 결과를 파일에 저장합니다.</p>
+</div>
+<p>파일 I/O의 귀찮은 부분(해시 파일명, <code>pickle</code> 직렬화, 히트·미스 카운팅)은 <code>_cache_utils.py</code>의 <code>embedding_get</code> · <code>embedding_set</code>이 맡습니다. 우리는 <strong>이 두 헬퍼를 어떤 순서로 호출할지</strong>만 결정합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex07/src/cache.py. EmbeddingCache</div><span class="k">class</span><span class="w"> </span><span class="nc">EmbeddingCache</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;로컬 파일 기반 임베딩 캐시.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">DEFAULT_EMBEDDING_CACHE_DIR</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hits</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_misses</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[EmbeddingCache] 초기화 완료 (캐시 디렉토리: </span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_or_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">compute_fn</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;캐시 히트면 반환, 미스면 compute_fn으로 계산 후 저장합니다.&quot;&quot;&quot;</span>
+        <span class="cb-todo"># TODO: get_or_compute — 캐시 히트면 반환, 미스면 계산 후 저장</span>
+        <span class="n">emb</span><span class="p">,</span> <span class="n">hits_delta</span><span class="p">,</span> <span class="n">misses_delta</span> <span class="o">=</span> <span class="n">embedding_get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hits</span> <span class="o">+=</span> <span class="n">hits_delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_misses</span> <span class="o">+=</span> <span class="n">misses_delta</span>
+
+        <span class="k">if</span> <span class="n">emb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">emb</span>
+
+        <span class="n">emb</span> <span class="o">=</span> <span class="n">compute_fn</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">embedding_set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">emb</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">emb</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;캐시 통계를 반환합니다.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">embedding_cache_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+<p><code>make_response_key</code>, <code>embedding_get</code>, <code>embedding_set</code>는 <code>_cache_utils.py</code>의 보조 함수입니다. 해시 계산, 파일 이름 규칙, <code>pickle</code> 직렬화 등 <strong>지루한 I/O는 전부 헬퍼가 맡고</strong>, 우리는 TTL 검사와 용량 관리 로직만 다루는 구조입니다.</p>
+<h2>7.3 TokenTracker — 업무 일지를 쓴다</h2>
+<p>화이트보드의 두 번째 네모가 비어 있었습니다. 동료가 던졌던 두 번째 불만이 떠올랐습니다. <em>얼마나 쓰고 있는 건지 파악이 안 돼요.</em></p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "사용량 추적이 안 되고 있어요. 하루에 몇 건 처리하는지, 응답 시간은 평균 얼마인지 전혀 모릅니다."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "사서한테 업무 일지를 쓰게 해요."</div>
+<p>업무 일지. 매 호출마다 한 줄씩 기록을 남기는 것입니다.</p>
+<ul>
+<li>오늘 총 몇 건 처리했는가</li>
+<li>입력, 출력 토큰을 얼마나 썼는가</li>
+<li>평균 응답 시간은 얼마인가</li>
+<li>API 비용은 얼마가 나갔는가</li>
+</ul>
+<p>실무에서는 <strong>Langfuse</strong>, <strong>LangSmith</strong> 같은 전문 모니터링 도구가 이 역할을 합니다. 호출별 토큰, 비용, 지연을 자동 수집해 대시보드로 보여 줍니다. 하지만 도구를 붙이기 전에 <strong>무엇을 측정해야 하는지</strong>를 먼저 이해해야 합니다. 이 책에서는 <code>TokenTracker</code>라는 간단한 클래스를 직접 만들어 감을 잡아 봅니다.</p>
+<div class="term-box">
+<p><strong>TokenTracker 왜 직접 만드나?</strong> Langfuse를 바로 붙이면 대시보드는 예쁘게 나오지만 &quot;무엇이 수집되는지, 왜 그 값이 필요한지&quot;를 이해하지 못한 채 지나가기 쉽습니다. 이 책에서는 <strong>호출 단위로 남길 필드 4개</strong>(입력 토큰·출력 토큰·응답 시간·비용)를 직접 쌓아 보면서 모니터링의 기본기를 체감한 뒤, 실무에서 Langfuse로 교체하는 순서를 권합니다.</p>
+</div>
+<h3>실습 2. monitoring.py</h3>
+<p><code>ex07/src/monitoring.py</code>의 <code>TokenTracker</code>는 세 부분으로 읽어 나갑니다. <strong>단가 표</strong> → <strong>record() 메서드</strong> → <strong>헬퍼 위임 메서드</strong>. 우리가 채울 TODO는 <code>record()</code> 한 곳이며, <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<p>먼저 <strong>클래스 골격</strong>입니다. 모델별 단가 표는 이미 선언돼 있고, <code>__init__</code>에서는 기록 리스트·누적 합계 카운터·로거만 준비합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> ex07/src/monitoring.py. TokenTracker — 골격</div><span class="k">class</span><span class="w"> </span><span class="nc">TokenTracker</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;LLM API 호출별 토큰 사용량을 추적합니다.&quot;&quot;&quot;</span>
+
+    <span class="c1"># 1. 모델별 단가 표 (달러/1000토큰, 참고용)</span>
+    <span class="n">COST_PER_1K_TOKENS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;gpt-4o-mini&quot;</span><span class="p">:</span>    <span class="p">{</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="mf">0.00015</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="mf">0.0006</span><span class="p">},</span>
+        <span class="s2">&quot;gpt-4o&quot;</span><span class="p">:</span>         <span class="p">{</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="mf">0.005</span><span class="p">,</span>   <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="mf">0.015</span><span class="p">},</span>
+        <span class="s2">&quot;deepseek-r1:8b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>     <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>   <span class="c1"># 로컬 모델: 무료</span>
+        <span class="s2">&quot;llama3.1:8b&quot;</span><span class="p">:</span>    <span class="p">{</span><span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>     <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>   <span class="c1"># 로컬 모델: 무료</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># 2. 개별 호출 기록 리스트</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># 3. 누적 토큰 합계 — summary()가 빠르게 읽기 위해 미리 계산</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_input_tokens</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_output_tokens</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+<p>로컬 모델(deepseek·llama)은 비용이 0이라 단가 표에 <code>0.0</code>으로 못 박혀 있습니다. OpenAI 모델은 공식 요금제에서 가져온 값입니다. <code>record()</code>에서 이 표를 보고 비용을 계산합니다.</p>
+<p>다음은 <strong>TODO가 있는 <code>record()</code> 메서드</strong>입니다. 한 호출마다 세 가지를 처리합니다. 비용 계산 → 기록 딕셔너리 조립 → 누적 카운터 갱신.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> ex07/src/monitoring.py. TokenTracker.record</div>    <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">input_tokens</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;chat&quot;</span><span class="p">,</span> <span class="n">latency_ms</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;토큰 사용량을 기록합니다.&quot;&quot;&quot;</span>
+        <span class="cb-todo"># TODO: record — 호출별 토큰·비용·지연 누적</span>
+        <span class="c1"># 1. 모델별 단가로 비용 계산 (헬퍼 위임)</span>
+        <span class="n">cost_usd</span> <span class="o">=</span> <span class="n">calculate_cost</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_tokens</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">COST_PER_1K_TOKENS</span><span class="p">)</span>
+
+        <span class="c1"># 2. 이번 호출의 메타데이터를 딕셔너리 한 건으로 조립</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="n">operation</span><span class="p">,</span>
+            <span class="s2">&quot;input_tokens&quot;</span><span class="p">:</span> <span class="n">input_tokens</span><span class="p">,</span>
+            <span class="s2">&quot;output_tokens&quot;</span><span class="p">:</span> <span class="n">output_tokens</span><span class="p">,</span>
+            <span class="s2">&quot;total_tokens&quot;</span><span class="p">:</span> <span class="n">input_tokens</span> <span class="o">+</span> <span class="n">output_tokens</span><span class="p">,</span>
+            <span class="s2">&quot;cost_usd&quot;</span><span class="p">:</span> <span class="n">cost_usd</span><span class="p">,</span>
+            <span class="s2">&quot;latency_ms&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">latency_ms</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="p">}</span>
+
+        <span class="c1"># 3. 기록 리스트에 추가하고 누적 카운터 갱신 + 로그 한 줄</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_input_tokens</span> <span class="o">+=</span> <span class="n">input_tokens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_output_tokens</span> <span class="o">+=</span> <span class="n">output_tokens</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;[TokenTracker] 사용량 기록: model=</span><span class="si">%s</span><span class="s2">, input=</span><span class="si">%d</span><span class="s2">, output=</span><span class="si">%d</span><span class="s2">, cost=$</span><span class="si">%.6f</span><span class="s2">, latency=</span><span class="si">%.0f</span><span class="s2">ms&quot;</span><span class="p">,</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">input_tokens</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">,</span> <span class="n">cost_usd</span><span class="p">,</span> <span class="n">latency_ms</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 4. Rich Table로 호출 요약을 콘솔에 출력 — 라벨 12자 폭 고정으로 값 컬럼 정렬</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;TokenTracker 기록&quot;</span><span class="p">,</span>
+            <span class="n">title_style</span><span class="o">=</span><span class="s2">&quot;bold cyan&quot;</span><span class="p">,</span>
+            <span class="n">title_justify</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+            <span class="n">show_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">box</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">pad_edge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;dim&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">no_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;bold&quot;</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;모델&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;입력 토큰&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">input_tokens</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;출력 토큰&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_tokens</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;비용 (USD)&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">cost_usd</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span><span class="s2">&quot;지연 시간&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">latency_ms</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> ms&quot;</span><span class="p">)</span>
+        <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">table</span><span class="p">)</span></div>
+<p>핵심은 3단계의 <strong>누적 갱신</strong>입니다. <code>_records</code>에 한 건씩 쌓는 건 &quot;최근 호출 내역&quot;을 보여 주기 위함이고, <code>_total_*</code>은 <code>summary()</code>가 매번 리스트를 합산하지 않고 바로 꺼내 쓰도록 미리 합쳐 두는 값입니다. 4단계의 <strong>Rich Table 출력</strong>은 운영 로그 가독성을 위해 얹은 한 단계입니다. <code>Table</code>과 <code>console</code>은 파일 상단에서 <code>from rich.table import Table</code>, <code>from ._rich_logging import console</code>로 이미 불러와 있어 그대로 쓰면 됩니다. 캡처 이미지에서 본 &quot;TokenTracker 기록&quot; 상자가 이 몇 줄에서 나옵니다.</p>
+<p>마지막으로 <strong>조회 메서드 두 개</strong>는 이미 완성돼 있습니다. 우리가 구현할 부분은 없고 헬퍼로 위임만 합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge explain">설명</span> ex07/src/monitoring.py. TokenTracker.summary / recent</div>    <span class="k">def</span><span class="w"> </span><span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;누적 토큰 사용량 요약을 반환합니다.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">token_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">recent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;최근 n개의 호출 기록을 반환합니다.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">token_recent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span></div>
+<p><code>calculate_cost</code>, <code>token_summary</code>, <code>token_recent</code>는 <code>_monitoring_utils.py</code>의 헬퍼입니다. 비용 공식(<code>input_tokens × input_price / 1000 + output_tokens × output_price / 1000</code>)과 요약 계산은 헬퍼가 맡고, 우리는 <strong>기록을 쌓는 부분</strong>만 구현합니다.</p>
+<h2>7.4 Retry와 ConnectHRAgent — 운영용 래퍼</h2>
+<p>세 번째 네모에는 슬랙의 &quot;에러가 났어요&quot; 메시지가 떠올랐습니다. 팀장이 마커로 그 위에 작게 적었습니다. <strong>재시도 매뉴얼.</strong></p>
+<div class="dialogue"><span class="speaker">팀장</span>: "사서한테 매뉴얼 한 장 쥐여 줘요. '한 번 실패하면 3번까지 다시 시도해. 시도 사이에 2초씩 쉬고.'"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "그 정도면 일시적 오류는 대부분 흡수되겠네요."</div>
+<p>네트워크가 잠깐 끊기거나 모델이 과부하에 걸리는 일시적 문제는 잠깐 뒤에 다시 시도하면 대부분 풀립니다. 점검 중이던 선반도 잠깐 뒤엔 열려 있을 수 있기 때문입니다.</p>
+<p>이 재시도 규칙까지 합쳐 챕터 6의 <code>IntegratedAgent</code>에 캐시·모니터링·재시도를 얹은 버전이 <strong>ConnectHRAgent</strong>입니다. <strong>새 기능을 추가하는 것이 아닙니다.</strong> 기존 에이전트를 <strong>안정적으로 운영</strong>할 수 있게 감싸는 것이 목표입니다.</p>
+<table>
+<thead>
+<tr>
+<th>기능</th>
+<th>역할</th>
+<th>파일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>응답 캐시</td>
+<td>답변 메모장 (1시간 TTL)</td>
+<td><code>cache.py</code></td>
+</tr>
+<tr>
+<td>임베딩 캐시</td>
+<td>단어 → 벡터 변환 결과 저장</td>
+<td><code>cache.py</code></td>
+</tr>
+<tr>
+<td>토큰 추적</td>
+<td>사서의 업무 일지</td>
+<td><code>monitoring.py</code></td>
+</tr>
+<tr>
+<td>재시도 로직</td>
+<td>&quot;3번까지 다시 시도&quot;</td>
+<td><code>agent_config.py</code></td>
+</tr>
+</tbody>
+</table>
+<p>도구도 구조가 바뀝니다. 챕터 6에서 <code>mcp_tools.py</code> 하나에 몰아넣었던 도구 4개를 <code>tools/</code> 디렉토리 아래 파일별로 분리했습니다(<code>leave_balance.py</code>, <code>sales_sum.py</code>, <code>list_employees.py</code>, <code>search_documents.py</code>). 도구가 늘어도 파일 하나씩 추가하면 되는 구조라 관리하기 쉽습니다.</p>
+<div class="wrapper-arch">
+  <div class="wa-title">ConnectHRAgent — 운영용 래퍼 구조</div>
+  <div class="wa-outer">
+    <div class="wa-outer-label">
+      <span class="wa-tag">이번 챕터</span>
+      ConnectHRAgent (운영 래퍼)
+    </div>
+    <div class="wa-middle">
+      <div class="wa-feature wa-cache">
+        <div class="wa-feature-title">ResponseCache</div>
+        <div class="wa-feature-sub">TTL 메모장</div>
+      </div>
+      <div class="wa-feature wa-monitor">
+        <div class="wa-feature-title">TokenTracker</div>
+        <div class="wa-feature-sub">업무 일지</div>
+      </div>
+      <div class="wa-feature wa-retry">
+        <div class="wa-feature-title">Retry 루프</div>
+        <div class="wa-feature-sub">3회 재시도</div>
+      </div>
+    </div>
+    <div class="wa-inner">
+      <div class="wa-inner-label">
+        <span class="wa-tag wa-tag-inner">챕터 6 그대로</span>
+        IntegratedAgent
+      </div>
+      <div class="wa-inner-core">
+        <div class="wa-core-item">AgentExecutor<br><span class="wa-core-hint">(ReAct)</span></div>
+        <div class="wa-core-sep">→</div>
+        <div class="wa-core-item">MCP Tools</div>
+        <div class="wa-core-sep">→</div>
+        <div class="wa-core-item">사후 분류</div>
+      </div>
+    </div>
+  </div>
+  <div class="wa-caption">그림 7-6. 챕터 6의 에이전트는 그대로 두고, 바깥을 <b>운영 래퍼 3종</b>(캐시·추적·재시도)으로 감쌉니다. 요청은 위에서 들어와 래퍼 3층을 거쳐 코어에 닿고, 응답은 반대 방향으로 나오면서 각 층이 추가 작업(저장·기록)을 수행합니다</div>
+</div>
+<h3>실습 3. agent_config.py</h3>
+<p><code>ex07/src/agent_config.py</code>의 <code>ConnectHRAgent.run()</code> 메서드 TODO의 <code>pass</code>를 지우고 <strong>5단계 운영 파이프라인</strong>을 구현합니다. 챕터 6의 <code>IntegratedAgent</code> 엔진(AgentExecutor + ReAct 루프)은 그대로 쓰고, 바깥에 <strong>캐시 · 재시도 · 토큰 기록</strong>을 두르는 게 이 챕터의 핵심입니다. Router는 ex06에서 하던 것처럼 <strong>질문 유형 라벨</strong>을 붙이는 용도로만 호출합니다. 재시도 루프와 AgentExecutor 빌드는 <code>_agent_utils.py</code>의 <code>build_agent_executor()</code> · <code>run_with_retry()</code> 헬퍼가 맡고, 우리는 <strong>단계를 조립하는 데만</strong> 집중하면 됩니다.</p>
+<p><code>run_with_retry</code>는 상수 두 개로 동작을 조절합니다. <code>RETRY_MAX_ATTEMPTS</code>(기본값 3)가 최대 시도 횟수, <code>RETRY_DELAY_SECONDS</code>(기본값 2.0)가 시도 사이 대기 시간입니다. 두 값 모두 <code>_agent_utils.py</code> 상단에 선언돼 있고 챕터 6의 에이전트 실행 로직을 이 루프 안으로 옮겨 넣습니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge reference">참고</span> ex07/src/_agent_utils.py. 재시도 루프 (완성 코드)</div><span class="c1"># 재시도 상수</span>
+<span class="n">RETRY_MAX_ATTEMPTS</span> <span class="o">=</span> <span class="mi">3</span>      <span class="c1"># 최대 시도 횟수</span>
+<span class="n">RETRY_DELAY_SECONDS</span> <span class="o">=</span> <span class="mf">2.0</span>   <span class="c1"># 시도 사이 대기 시간 (초)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run_with_retry</span><span class="p">(</span><span class="n">agent_executor</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">chat_history</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">last_error</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># 1. 최대 3회까지 시도 루프</span>
+    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">RETRY_MAX_ATTEMPTS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 2. Agent 실행 — 성공하면 결과를 그대로 반환</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">agent_executor</span><span class="o">.</span><span class="n">invoke</span><span class="p">({</span>
+                <span class="s2">&quot;input&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+                <span class="s2">&quot;chat_history&quot;</span><span class="p">:</span> <span class="n">chat_history</span> <span class="ow">or</span> <span class="p">[],</span>
+            <span class="p">})</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="c1"># 3. 실패 시 에러를 기억하고 경고 로그 남김</span>
+            <span class="n">last_error</span> <span class="o">=</span> <span class="n">exc</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;[ConnectHRAgent] 시도 </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> 실패: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">attempt</span><span class="p">,</span> <span class="n">RETRY_MAX_ATTEMPTS</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># 4. 마지막 시도가 아니면 2초 쉬고 다시 도전</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">RETRY_MAX_ATTEMPTS</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">RETRY_DELAY_SECONDS</span><span class="p">)</span>
+
+    <span class="c1"># 5. 3회 모두 실패 — 사용자에게 보여줄 안전한 에러 메시지를 반환</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;처리 중 오류가 발생했습니다: </span><span class="si">{</span><span class="n">last_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
+<p><code>run_with_retry</code>는 최대 3회까지 <code>agent_executor.invoke</code>를 재시도하고 시도 사이에 2초씩 쉽니다. 매 실패에 <code>logger.warning</code>으로 몇 번째 시도가 왜 실패했는지 남기고, 전부 실패하면 에러 메시지를 담은 결과를 반환합니다. 이제 <code>ConnectHRAgent.run()</code> 차례입니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 3</span> ex07/src/agent_config.py. ConnectHRAgent.run</div><span class="k">class</span><span class="w"> </span><span class="nc">ConnectHRAgent</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">chat_history</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;사용자 질문을 처리하고 답변을 반환합니다.&quot;&quot;&quot;</span>
+        <span class="cb-todo"># TODO: run — 캐시 → 분류 → 에이전트 실행(재시도) → 토큰 기록 → 캐시 저장 (5단계)</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[ConnectHRAgent] 질문 수신: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="p">[:</span><span class="mi">80</span><span class="p">])</span>
+
+        <span class="c1"># 1. 캐시 조회 — 같은 질문이면 LLM·DB를 건너뛰고 즉시 반환</span>
+        <span class="k">if</span> <span class="n">use_cache</span><span class="p">:</span>
+            <span class="n">cached</span> <span class="o">=</span> <span class="n">response_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cached</span><span class="p">[</span><span class="s2">&quot;from_cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[ConnectHRAgent] 캐시 응답 반환&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">cached</span>
+
+        <span class="c1"># 2. Router로 질문 유형 분류 — 라벨(structured/unstructured/hybrid)만 붙임</span>
+        <span class="n">query_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_router</span><span class="o">.</span><span class="n">classify_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+        <span class="c1"># 3. Agent 실행 — ex06의 IntegratedAgent 엔진 그대로, run_with_retry가 최대 3회 재시도</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_executor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">run_with_retry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_executor</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">chat_history</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;output&quot;</span><span class="p">:</span> <span class="s2">&quot;죄송합니다. 에이전트 서비스를 사용할 수 없습니다.&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;intermediate_steps&quot;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="p">}</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;query_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">query_type</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;from_cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># 4. 토큰 사용량 기록 — 모델·입출력 토큰·지연시간을 TokenTracker에 누적</span>
+        <span class="n">latency_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">provider</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;LLM_PROVIDER&quot;</span><span class="p">,</span> <span class="s2">&quot;ollama&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">&quot;openai&quot;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENAI_MODEL&quot;</span><span class="p">,</span> <span class="s2">&quot;gpt-4o-mini&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OLLAMA_MODEL&quot;</span><span class="p">,</span> <span class="s2">&quot;deepseek-r1:8b&quot;</span><span class="p">)</span>
+        <span class="n">token_tracker</span><span class="o">.</span><span class="n">record</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+            <span class="n">input_tokens</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">output_tokens</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;agent_run&quot;</span><span class="p">,</span>
+            <span class="n">latency_ms</span><span class="o">=</span><span class="n">latency_ms</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 5. 캐시 저장 — 다음에 같은 질문이 오면 1단계에서 바로 꺼내 쓰도록</span>
+        <span class="k">if</span> <span class="n">use_cache</span><span class="p">:</span>
+            <span class="n">response_cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;[ConnectHRAgent] 처리 완료 (유형: </span><span class="si">%s</span><span class="s2">, 소요: </span><span class="si">%.0f</span><span class="s2">ms)&quot;</span><span class="p">,</span>
+            <span class="n">query_type</span><span class="p">,</span>
+            <span class="n">latency_ms</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+<p><strong>1단계</strong>와 <strong>5단계</strong>가 실습 1에서 만든 <code>response_cache</code>와 맞물리고, <strong>4단계</strong>가 실습 2의 <code>token_tracker</code>에 기록을 쌓습니다. 챕터 6의 에이전트 실행 로직은 <strong>3단계</strong>의 <code>run_with_retry</code> 안으로 그대로 들어갔습니다. Router는 ex06에서처럼 질문 유형 라벨만 붙이고 실행 경로는 나누지 않으므로, 검색 도구(<code>search_documents</code>)가 반환한 문서는 AgentExecutor의 <code>intermediate_steps</code>에 고스란히 남아 응답 UI의 근거 패널로 흘러갑니다. 결국 <code>run()</code> 메서드 하나가 <strong>캐시·분류·재시도·모니터링</strong>을 순서대로 엮는 허브가 됩니다. 모델 이름은 <code>LLM_PROVIDER</code> 값에 따라 <code>OPENAI_MODEL</code> 또는 <code>OLLAMA_MODEL</code> 환경변수에서 가져오고, 토큰 수는 <code>단어 수 × 2</code>(한국어 근사)로 추정합니다. Ollama 응답에 토큰 메타가 없어서 쓰는 임시 계산입니다.</p>
+<h2>7.5 서버 실행 + 캐시 적중 확인</h2>
+<p>챕터 6의 <code>ex06</code> 서버가 켜져 있다면 <code>Ctrl+C</code>로 먼저 종료합니다. <code>ex07</code>도 같은 8000 포트를 사용하기 때문에, 이전 서버를 내리지 않으면 새 서버가 뜨지 않습니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 서버 실행</div>python<span class="w"> </span>run.py</div>
+<p>브라우저에서 <code>http://localhost:8000/chat</code>을 열고, 동료가 처음 했던 질문을 그대로 두 번 던져 보세요.</p>
+<p><strong>첫 호출</strong>. LLM을 실제로 돌리므로 20초 근처.</p>
+<p>![](../assets/챕터 7/terminal/07_log-first-query.png)
+<em>그림 7-7. 첫 질문 로그. 입력, 출력 토큰과 소요 시간이 TokenTracker에 기록됩니다</em></p>
+<p><strong>두 번째 호출</strong>. ResponseCache HIT.</p>
+<p>![](../assets/챕터 7/terminal/07_log-cache-hit.png)
+<em>그림 7-8. 같은 질문에 캐시 HIT. 0.1초 이내 응답 반환</em></p>
+<p>첫 호출과 캐시 적중을 나란히 비교하면 비용 차이가 한눈에 보입니다.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>첫 질문</th>
+<th>캐시 적중</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM 호출</td>
+<td>2회 (분류 + 답변)</td>
+<td>0회</td>
+</tr>
+<tr>
+<td>DB 조회</td>
+<td>1회</td>
+<td>0회</td>
+</tr>
+<tr>
+<td>소요 시간</td>
+<td>약 16초</td>
+<td>즉시 반환</td>
+</tr>
+<tr>
+<td>로그</td>
+<td>AgentExecutor 체인 전체 출력</td>
+<td><code>[ResponseCache] 적중</code> 한 줄</td>
+</tr>
+</tbody>
+</table>
+<p><code>잔여 TTL: 3386초</code>. 메모장에 적힌 지 약 3분이 지났다는 뜻입니다(3600 − 3386 = 214초). TTL이 0이 되면 메모가 만료되고, 다음에 같은 질문이 들어오면 다시 서가에서 찾아옵니다.</p>
+<p><code>/stats</code> 엔드포인트를 열면 호출마다 쌓인 누적 통계가 나옵니다. 실제 운영 환경이라면 이 화면이 하루, 일주일 단위로 의미 있어집니다.</p>
+<p>![](../assets/챕터 7/terminal/07_stats-dashboard-2.png)
+<em>그림 7-9. 누적 호출 수, 토큰, 비용, 캐시 적중률 대시보드</em></p>
+<p>같은 질문을 다시 던지자 로딩 스피너가 한 번도 뜨지 않고 답이 바로 나왔습니다. 20초가 0.1초로 줄었습니다. 오픈이는 의자 등받이에 기대며 모니터를 바라봤습니다.</p>
+<p class="thought">이제 동료한테 한 소리 덜 듣겠네.</p>
+<p>슬랙에 스크린샷을 하나 올렸습니다. 같은 질문을 두 번 연달아 던진 타임스탬프가 0.1초 간격으로 찍혀 있었습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "캐시 적중률 72%네요. 10번 중 7번은 LLM을 안 돌린 거잖아요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "그리고 실패한 것도 재시도로 자동 복구됩니다. 이제 '고장났다'는 메시지가 줄어들 거예요."</div>
+<h2>7.6 더 알아보기</h2>
+<p><strong>TTL을 얼마로 설정해야 할까요?</strong> 사내 문서가 자주 갱신되면 짧게(30분), 변동이 거의 없으면 길게(24시간) 잡습니다. 기본값 1시간은 대부분의 사내 환경에 무난합니다. <code>.env</code>의 <code>CACHE_TTL=3600</code> 값을 프로젝트마다 조정합니다.</p>
+<p><strong>서버를 재시작하면 ResponseCache가 사라지지 않나요?</strong> 맞습니다. 인메모리 딕셔너리라 프로세스 종료와 함께 날아갑니다. 운영 환경에서는 <strong>Redis</strong> 같은 외부 캐시로 교체하는 것이 일반적입니다. <code>get()</code>·<code>set()</code> 메서드 안의 <code>self._store</code> 조작을 Redis 클라이언트 호출로 바꾸면 동일 인터페이스를 유지하면서 영속성을 얻을 수 있습니다.</p>
+<p><strong>토큰 수가 추정값인 이유는?</strong> Ollama는 응답 메타데이터에 토큰 사용량을 포함하지 않습니다. 그래서 이 책에서는 <code>단어 수 × 2</code>를 한국어 기준 대략적 추정치로 씁니다. 정확한 과금이 필요한 OpenAI API는 응답 객체의 <code>usage.prompt_tokens</code> / <code>usage.completion_tokens</code>를 읽어 실제 값으로 대체하면 됩니다.</p>
+<p><strong>Router로 실행 경로를 나누면 더 빠르지 않을까요?</strong> 비정형 질문은 문서 검색 체인으로, 정형 질문은 DB 도구로 경로를 나눠서 쏘면 ReAct 한 단계를 절약할 수 있습니다. 다만 그렇게 분기를 두면 답변은 체인에서 나오고 근거 문서는 파이프라인 안에 머물러 응답 UI의 근거 패널과 연결이 끊깁니다. 챕터 7은 ex06의 에이전트 엔진을 그대로 쓰면서 캐시·재시도·토큰 기록만 덧씌우는 게 목표이므로, Router는 질문 유형 라벨 용도로만 남기고 실행은 AgentExecutor 단일 경로로 유지합니다. 검색 도구가 찍은 결과는 <code>intermediate_steps</code>에 자동으로 남아 근거 패널이 그대로 작동합니다. 경로 분기로 속도를 짜내는 튜닝은 챕터 8부터 다루는 검색 품질 최적화 영역입니다.</p>
+<h2>7.7 전체 구성도에서 챕터 7의 자리</h2>
+<div class="arch-fullmap">
+  <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 7 범위</div>
+  <div class="afm-row afm-user">
+    <div class="afm-box afm-built afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">대시보드</span>
+    <div class="afm-row">
+      <div class="afm-box afm-built"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 6 + 챕터 7</span>
+    <span class="afm-zone-label">오케스트레이션 + 운영</span>
+    <div class="afm-row afm-two">
+      <div class="afm-box afm-on"><div class="afm-tag">+ 캐시 · 재시도</div><div class="afm-label">ConnectHRAgent</div><div class="afm-sub">ReAct · 사후 분류 + TokenTracker</div></div>
+      <div class="afm-box afm-on"><div class="afm-tag">+ 임베딩 캐시</div><div class="afm-label">MCP Tools</div><div class="afm-sub">DB 조회 · 문서 검색</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 5</span>
+    <span class="afm-zone-label">검색 (실시간)</span>
+    <div class="afm-row">
+      <div class="afm-box afm-built"><div class="afm-label">LCEL Chain</div><div class="afm-sub">검색기 → 프롬프트 → LLM</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 4</span>
+    <span class="afm-zone-label">파싱·벡터화 (오프라인)</span>
+    <div class="afm-row afm-three">
+      <div class="afm-box afm-built afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">Doc Pipeline</div><div class="afm-sub">파싱·청킹·임베딩</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">데이터</span>
+    <div class="afm-row">
+      <div class="afm-box afm-built"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
+    </div>
+  </div>
+  <div class="afm-row afm-ext">
+    <div class="afm-box afm-faint afm-dashed"><div class="afm-label">Ollama LLM (외부)</div></div>
+  </div>
+  <div class="afm-note">
+    챕터 7은 새 박스를 얹지 않고 <b>챕터 6 오케스트레이션 세 박스를 운영 래퍼로 감싼 챕터</b>입니다. 같은 에이전트지만 이제는 캐시, 토큰 추적, 재시도가 붙어 실제 배포에 견딥니다. 챕터 8부터는 검색 품질 튜닝(Hybrid Search, Reranker) 영역으로 넘어갑니다.
+  </div>
+</div>
+<div class="tip">
+<p><strong>종료합니다</strong></p>
+<p><code>Ctrl + C</code>로 서버를 종료합니다. Docker 컨테이너는 챕터 8에서도 같은 PostgreSQL·ChromaDB를 쓰므로 그대로 두세요.</p>
+</div>
+<h2>용어 정리</h2>
+<table>
+<thead>
+<tr>
+<th>본문 속 표현</th>
+<th>진짜 용어</th>
+<th>정식 정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;답변 메모장&quot;</td>
+<td><strong>ResponseCache</strong></td>
+<td>TTL 기반 인메모리 응답 캐시. SHA-256 해시 키로 질문을 식별</td>
+</tr>
+<tr>
+<td>&quot;임베딩 메모장&quot;</td>
+<td><strong>EmbeddingCache</strong></td>
+<td>파일 기반 임베딩 벡터 캐시. pickle로 저장·유지</td>
+</tr>
+<tr>
+<td>&quot;업무 일지&quot;</td>
+<td><strong>TokenTracker</strong></td>
+<td>LLM 호출별 입출력 토큰·비용·응답시간을 누적 집계</td>
+</tr>
+<tr>
+<td>&quot;3번까지 다시 시도&quot;</td>
+<td><strong>Retry 로직</strong></td>
+<td>LLM 호출 실패 시 최대 N회까지 재시도. 간격 포함</td>
+</tr>
+<tr>
+<td>&quot;운영 래퍼&quot;</td>
+<td><strong>ConnectHRAgent</strong></td>
+<td>챕터 6의 IntegratedAgent에 캐시·모니터링·재시도를 통합한 운영용 에이전트</td>
+</tr>
+</tbody>
+</table>
+<div class="remember">
+<p><strong>이것만은 기억하자</strong></p>
+<ul>
+<li><strong>같은 질문은 같은 답이 빠르게.</strong> ResponseCache(TTL)로 20초 → 0.1초. 하지만 TTL 만료, 규정 개정 시엔 무효화가 필요하다는 점을 잊지 마세요.</li>
+<li><strong>측정이 개선의 시작입니다.</strong> TokenTracker로 토큰, 비용, 응답시간을 쌓아 두면 &quot;느린 질문&quot;, &quot;비싼 질문&quot;이 눈에 보입니다. 실무에서는 Langfuse, LangSmith 같은 도구를 얹어 대시보드화합니다.</li>
+<li><strong>실패는 기본입니다.</strong> 네트워크 오류, 파싱 실패가 드물지 않습니다. Retry 루프(3회, 2초 간격)만 있어도 체감 장애 빈도가 크게 줄어듭니다. 챕터 8부터는 이 위에서 <strong>검색 품질 자체</strong>를 튜닝합니다.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

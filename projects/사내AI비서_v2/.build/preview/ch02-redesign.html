@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CH02 재디자인 매칭</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  body {
+    max-width: 1200px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 28px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 6px; letter-spacing: -0.3px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+  h2 {
+    margin-top: 48px;
+    padding: 6px 12px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: #fff;
+    color: var(--color-accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  h2 .chip.keep { background: var(--color-accent-warm); color: #fff; }
+  h2 .chip.changed { background: #fff; color: #be185d; }
+
+  .sample-note {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 10px 0 14px;
+    line-height: 1.7;
+  }
+  .preview-wrap {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: var(--color-surface);
+  }
+  .spec {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-sm);
+    line-height: 1.7;
+  }
+  .spec b { color: var(--color-accent-text); font-weight: 700; }
+  .spec s { color: #9a3412; text-decoration: line-through; }
+  .spec .kept { color: var(--color-accent-warm-text); font-weight: 700; }
+
+  .banner {
+    padding: 16px 20px;
+    background: var(--color-accent-bg);
+    border: 1px solid var(--color-accent-border);
+    color: var(--color-accent-text);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 12px 0 32px;
+  }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 32px; }
+  .toc a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    color: var(--color-accent-text);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .toc a:hover { background: var(--color-accent-bg); }
+</style>
+</head>
+<body>
+
+<h1>CH02 재디자인 매칭 <span style="font-size:14px;color:var(--color-text-secondary);font-weight:500;margin-left:8px">일단 사내 시스템부터</span></h1>
+<p class="lead">
+  CH02가 쓰는 컴포넌트 6종. arch-fullmap(책 전체 구성도)을 처음으로 등장시키는 챕터.
+</p>
+
+<div class="banner">
+  <strong>CH02 변경 1곳 · <code>term-box + .term</code>만 Primary로 이동.</strong><br>
+  나머지는 <code>arch-fullmap</code>을 비롯해 모두 기존 유지 (Primary·Secondary·무채색만 사용, Utility 0건).
+</div>
+
+<div class="toc">
+  <a href="#goal">:::goal</a>
+  <a href="#term-box">:::term-box / .term</a>
+  <a href="#tip">:::tip</a>
+  <a href="#note">:::note</a>
+  <a href="#remember">:::remember</a>
+  <a href="#fullmap">.arch-fullmap</a>
+</div>
+
+<!-- ══════ :::goal ══════ -->
+<h2 id="goal">1. :::goal <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">챕터 목표. Primary(accent) 유지.</p>
+<div class="preview-wrap">
+  <div class="goal-box">
+    <strong>이번 챕터가 끝나면</strong>
+    <ul>
+      <li>FastAPI + SQLAlchemy 기반 사내 시스템 뼈대가 돈다</li>
+      <li>직원·연차·매출 데이터가 PostgreSQL에 들어간다</li>
+      <li>REST 엔드포인트 5개로 CRUD가 가능하다</li>
+    </ul>
+  </div>
+</div>
+<div class="spec">변경 없음 · Primary(accent) 유지</div>
+
+<!-- ══════ :::term-box ══════ -->
+<h2 id="term-box">2. :::term-box + .term <span class="chip changed">CHANGED</span></h2>
+<p class="sample-note">CH01 결정 적용. <code>.term</code>·<code>.term-box</code>를 <strong>Primary(인디고)</strong>로 통일. CH02 본문 예: "ORM", "세션" 같은 용어.</p>
+<div class="preview-wrap">
+  <p>데이터베이스에 바로 SQL을 쓰는 대신 파이썬 객체로 다루는 방식을 <span class="term">ORM(Object-Relational Mapping)</span>이라 부릅니다. 여기서는 SQLAlchemy를 씁니다.</p>
+  <div class="term-box">
+    <table>
+      <thead><tr><th>비유</th><th>진짜 용어</th><th>정식 정의</th></tr></thead>
+      <tbody>
+        <tr><td>파이썬으로 DB 다루기</td><td>ORM (Object-Relational Mapping)</td><td>관계형 DB의 테이블·행을 프로그래밍 언어의 객체로 매핑하는 기법</td></tr>
+        <tr><td>DB 대화창</td><td>Session</td><td>DB와의 연결·트랜잭션을 관리하는 작업 단위</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="spec">
+  .term color: <s>--color-accent-warm</s> → <b>--color-accent</b><br>
+  .term-box border-left: <s>#2563eb</s> → <b>var(--color-accent)</b><br>
+  .term-box .tb-name color: <s>--color-info-text</s> → <b>--color-accent-text</b>
+</div>
+
+<!-- ══════ :::tip ══════ -->
+<h2 id="tip">3. :::tip <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">실험 해석 박스. Secondary(accent-warm) 유지.</p>
+<div class="preview-wrap">
+  <div class="tip">
+    <strong>FastAPI 첫 실행에서 생각해 볼 것들</strong>
+    <ul>
+      <li><strong>자동 문서화</strong>: /docs 엔드포인트로 Swagger UI가 자동으로 뜬다.</li>
+      <li><strong>Pydantic 검증</strong>: 요청 바디 타입이 자동 검증된다.</li>
+    </ul>
+  </div>
+</div>
+<div class="spec">변경 없음 · Secondary(accent-warm) 유지</div>
+
+<!-- ══════ :::note ══════ -->
+<h2 id="note">4. :::note <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">보조 설명 박스. 무채색 유지.</p>
+<div class="preview-wrap">
+  <div class="prep-note">
+    <p><strong>왜 PostgreSQL인가?</strong> 사내 시스템은 트랜잭션 무결성·외래키 제약이 중요하고, 이 책 끝까지 가야 할 벡터 확장(pgvector)까지 염두에 둔 선택입니다.</p>
+  </div>
+</div>
+<div class="spec">변경 없음 · 무채색 유지</div>
+
+<!-- ══════ :::remember ══════ -->
+<h2 id="remember">5. :::remember <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">챕터 닫기. Secondary(accent-warm) 유지.</p>
+<div class="preview-wrap">
+  <div class="remember">
+    <h2>이것만은 기억하자</h2>
+    <ul>
+      <li><strong>사내 시스템이 먼저.</strong> AI 붙이기 전에 도메인 모델부터 확정한다.</li>
+      <li><strong>REST 엔드포인트</strong>가 다음 챕터부터 AI의 입구가 된다.</li>
+    </ul>
+  </div>
+</div>
+<div class="spec">변경 없음 · h2/strong color: <span class="kept">--color-accent-warm-text (유지)</span></div>
+
+<!-- ══════ arch-fullmap ══════ -->
+<h2 id="fullmap">6. .arch-fullmap <span class="chip keep">KEEP</span></h2>
+<p class="sample-note">책 전체 구성도. CH02가 처음 등장시키는 핵심 컴포넌트. Primary(accent) · 무채색 · Secondary만 사용.</p>
+<div class="preview-wrap">
+  <div class="arch-fullmap">
+    <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 2 범위</div>
+
+    <div class="afm-row afm-user">
+      <div class="afm-box afm-faint afm-round">
+        <div class="afm-label">사내 직원 · 관리자</div>
+      </div>
+    </div>
+
+    <div class="afm-zone">
+      <span class="afm-zone-ch">챕터 2</span>
+      <span class="afm-zone-label">사내 시스템</span>
+      <div class="afm-row afm-two">
+        <div class="afm-box afm-on">
+          <div class="afm-tag">오늘 만든 부분</div>
+          <div class="afm-label">FastAPI</div>
+          <div class="afm-sub">REST 엔드포인트</div>
+        </div>
+        <div class="afm-box afm-on">
+          <div class="afm-tag">오늘 만든 부분</div>
+          <div class="afm-label">PostgreSQL</div>
+          <div class="afm-sub">직원·연차·매출</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="afm-zone">
+      <span class="afm-zone-ch">챕터 3~10</span>
+      <span class="afm-zone-label">RAG + 에이전트</span>
+      <div class="afm-row afm-three">
+        <div class="afm-box afm-faint"><div class="afm-label">청크·벡터</div></div>
+        <div class="afm-box afm-faint"><div class="afm-label">검색·엔진</div></div>
+        <div class="afm-box afm-faint afm-dashed"><div class="afm-label">통합 에이전트</div></div>
+      </div>
+    </div>
+
+    <div class="afm-row afm-ext">
+      <div class="afm-box afm-faint afm-dashed">
+        <div class="afm-label">Ollama LLM (외부)</div>
+      </div>
+    </div>
+
+    <div class="afm-note">
+      오늘 띄운 건 <b>FastAPI · PostgreSQL</b>. 챕터 3부터는 이 엔드포인트가 AI의 입구가 됩니다.
+    </div>
+  </div>
+</div>
+<div class="spec">변경 없음 · afm-on은 accent 계열, afm-faint는 무채색</div>
+
+<!-- ══════ 요약 ══════ -->
+<h2 style="background:var(--color-text-heading)">CH02 리팩터 총 영향</h2>
+
+<div style="margin-top:12px;padding:16px 20px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:13px;line-height:1.8">
+  <strong style="color:var(--color-text-heading)">변경 1건 / 유지 5건</strong><br>
+  <br>
+  변경: <code>term-box + .term</code> — Primary로 통일 (CH01 결정 공통 적용)<br>
+  유지: <code>goal</code> · <code>tip</code> · <code>note</code> · <code>remember</code> · <code>arch-fullmap</code><br>
+  <br>
+  <strong style="color:var(--color-text-heading)">CH02 특이사항</strong><br>
+  <code>arch-fullmap</code>(책 전체 구성도)이 처음 등장. 이 컴포넌트는 <code>afm-on</code>(Primary 진함) ↔ <code>afm-faint</code>(무채색 연함) 대비로 "이번 챕터 범위"를 표시하며, CH03·04·05·07·10도 같은 구조로 재활용.<br>
+  <br>
+  Utility(상태변수) 사용 <strong>0건</strong> — CH01과 동일하게 축소 리팩터 영향 없음.
+</div>
+
+</body>
+</html>

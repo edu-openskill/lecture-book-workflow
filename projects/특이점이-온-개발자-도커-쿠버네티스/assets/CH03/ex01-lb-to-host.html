@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  }
+
+  .diagram {
+    position: relative;
+    width: 480px;
+    height: 280px;
+  }
+
+  /* 호스트 PC 외곽 */
+  .host-box {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border: 2px dashed #aaa;
+    border-radius: 16px;
+  }
+  .host-label {
+    position: absolute;
+    top: -11px;
+    left: 18px;
+    background: #fff;
+    padding: 0 10px;
+    font-size: 12px;
+    color: #888;
+    font-weight: 600;
+  }
+
+  /* Docker 영역 */
+  .docker-box {
+    position: absolute;
+    top: 24px; left: 24px; right: 24px;
+    height: 140px;
+    border: 2px solid #1565c0;
+    border-radius: 12px;
+    background: #f5faff;
+  }
+  .docker-label {
+    position: absolute;
+    top: -11px;
+    left: 14px;
+    background: #f5faff;
+    padding: 0 8px;
+    font-size: 11px;
+    color: #1565c0;
+    font-weight: 700;
+  }
+
+  /* 컨테이너 공통 */
+  .container {
+    position: absolute;
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 14px 20px;
+    background: #fff;
+    text-align: center;
+  }
+  .container-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+  }
+  .container-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 3px;
+    margin-top: 5px;
+    color: #fff;
+  }
+  .badge-nginx { background: #009639; }
+
+  /* lb 컨테이너 */
+  .lb { top: 44px; left: 30px; }
+
+  /* app1 컨테이너 */
+  .app1 { top: 44px; right: 30px; }
+
+  /* 직접 통신 불가 표시 */
+  .blocked-line {
+    position: absolute;
+    top: 48px;
+    left: 170px;
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .blocked-label {
+    font-size: 11px;
+    color: #c62828;
+    font-weight: 600;
+  }
+
+  /* 호스트 포트 (하단 중앙) */
+  .host-port {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .port-circle {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #333;
+    background: #fff;
+  }
+  .port-label {
+    font-size: 10px;
+    color: #888;
+    font-weight: 500;
+  }
+
+  /* 우회 경로 라벨 */
+  .route-label-left {
+    position: absolute;
+    bottom: 100px;
+    left: 40px;
+    font-size: 10px;
+    color: #E67E22;
+    font-weight: 600;
+  }
+  .route-label-right {
+    position: absolute;
+    bottom: 100px;
+    right: 56px;
+    font-size: 10px;
+    color: #E67E22;
+    font-weight: 600;
+  }
+
+  /* SVG 오버레이 */
+  .svg-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <!-- 호스트 PC -->
+  <div class="host-box">
+    <div class="host-label">호스트 PC</div>
+  </div>
+
+  <!-- Docker 영역 -->
+  <div class="docker-box">
+    <div class="docker-label">Docker</div>
+  </div>
+
+  <!-- lb 컨테이너 -->
+  <div class="container lb">
+    <div class="container-name">lb 컨테이너</div>
+  </div>
+
+  <!-- app1 컨테이너 -->
+  <div class="container app1">
+    <div class="container-name">app1 컨테이너</div>
+  </div>
+
+  <!-- 직접 통신 불가 -->
+  <div class="blocked-line">
+    <div class="blocked-label">직접 통신 불가</div>
+  </div>
+
+  <!-- 호스트 포트 -->
+  <div class="host-port">
+    <div class="port-circle">8000</div>
+    <div class="port-label">호스트 포트</div>
+  </div>
+
+  <!-- 우회 경로 라벨 -->
+  <div class="route-label-left">host.docker.internal</div>
+  <div class="route-label-right">포트 포워딩</div>
+
+  <!-- SVG: 선과 화살표 -->
+  <svg class="svg-overlay" viewBox="0 0 480 280">
+    <!-- 직접 통신 불가 선 (빨간 점선 + X) -->
+    <line x1="170" y1="78" x2="310" y2="78" stroke="#c62828" stroke-width="2" stroke-dasharray="6,4"/>
+    <!-- X 표시 -->
+    <line x1="233" y1="68" x2="247" y2="88" stroke="#c62828" stroke-width="2.5"/>
+    <line x1="247" y1="68" x2="233" y2="88" stroke="#c62828" stroke-width="2.5"/>
+
+    <!-- 우회 경로: lb 하단 → 호스트 포트 왼쪽으로 -->
+    <path d="M 100 95 Q 100 210 200 220" fill="none" stroke="#E67E22" stroke-width="2"/>
+    <polygon points="198,215 208,220 198,225" fill="#E67E22"/>
+
+    <!-- 우회 경로: 호스트 포트 오른쪽 → app1 하단 -->
+    <path d="M 280 220 Q 380 210 380 100" fill="none" stroke="#E67E22" stroke-width="2"/>
+    <polygon points="375,102 380,92 385,102" fill="#E67E22"/>
+  </svg>
+</div>
+
+</body>
+</html>

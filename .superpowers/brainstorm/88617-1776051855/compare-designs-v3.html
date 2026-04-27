@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>비교 도식 v3 — 심플</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.8; }
+.container { max-width: 780px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 40px; }
+
+.design-block {
+  background: #fff; border-radius: 12px; padding: 28px; margin: 32px 0;
+  border: 1px solid #edf0f5;
+}
+.design-label {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  color: #a0aec0; letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+.design-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 24px; }
+
+/* 공통 섹션 제목 */
+.section-heading {
+  font-size: 14px; font-weight: 700; color: #4a5568;
+  margin-bottom: 16px;
+  padding-bottom: 8px; border-bottom: 1px solid #edf0f5;
+}
+
+/* ========== A: 인용 블록 (Before/After) ========== */
+.quote-style .quote-row {
+  display: flex; gap: 12px; margin-bottom: 12px;
+}
+.quote-style .quote-row:last-child { margin-bottom: 0; }
+.quote-style .quote-label {
+  flex-shrink: 0; width: 80px;
+  font-size: 12px; font-weight: 700;
+  padding-top: 4px;
+}
+.quote-style .quote-row.bad .quote-label { color: #9b2c2c; }
+.quote-style .quote-row.good .quote-label { color: #276749; }
+.quote-style .quote-body {
+  flex: 1; padding: 8px 14px;
+  border-left: 3px solid;
+  font-size: 14px; color: #2d3748;
+}
+.quote-style .quote-row.bad .quote-body { border-color: #c53030; }
+.quote-style .quote-row.good .quote-body { border-color: #2f855a; }
+.quote-style .quote-body ul { padding-left: 18px; margin-top: 4px; }
+.quote-style .quote-body li { margin: 2px 0; }
+.quote-style .quote-body .meta {
+  font-size: 12px; color: #a0aec0; font-family: monospace;
+  margin-top: 6px;
+}
+
+/* ========== B: 단순 테이블 ========== */
+.simple-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 14px;
+}
+.simple-table th, .simple-table td {
+  text-align: left; padding: 12px 16px;
+  border-bottom: 1px solid #edf0f5;
+}
+.simple-table th {
+  font-weight: 700; font-size: 12px;
+  color: #718096;
+  text-transform: uppercase; letter-spacing: 1px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-top: 8px; padding-bottom: 8px;
+}
+.simple-table th .th-tech {
+  font-family: monospace; color: #a0aec0;
+  font-weight: 400; font-size: 10px;
+  margin-top: 2px; display: block;
+}
+.simple-table td.llm { color: #4a5568; }
+.simple-table td.truth { color: #2d3748; font-weight: 500; }
+.simple-table tr:last-child td { border-bottom: none; }
+.simple-table tr.judgment td {
+  padding-top: 16px; font-weight: 700;
+}
+.simple-table tr.judgment td.llm { color: #9b2c2c; }
+.simple-table tr.judgment td.truth { color: #276749; }
+
+/* ========== C: Diff 스타일 (Git diff) ========== */
+.diff-view {
+  background: #f7fafc; border-radius: 8px;
+  padding: 16px 20px; font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px; line-height: 1.8;
+  border: 1px solid #edf0f5;
+}
+.diff-view .diff-section { margin-bottom: 16px; }
+.diff-view .diff-section:last-child { margin-bottom: 0; }
+.diff-view .diff-section-label {
+  font-size: 11px; color: #718096; font-family: 'Pretendard', sans-serif;
+  font-weight: 700; letter-spacing: 1px; margin-bottom: 6px;
+}
+.diff-line {
+  display: flex; gap: 10px;
+  padding: 2px 10px;
+  margin: 2px 0;
+  border-radius: 3px;
+}
+.diff-line.minus { background: #fff5f5; color: #9b2c2c; }
+.diff-line.plus { background: #f0fff4; color: #276749; }
+.diff-line .marker { color: inherit; opacity: 0.6; flex-shrink: 0; }
+
+/* ========== D: 주석형 (Footnote style) ========== */
+.annotated {
+  font-size: 14px; line-height: 1.9;
+}
+.annotated .a-block {
+  padding: 14px 16px; margin-bottom: 12px;
+  border: 1px solid #edf0f5; border-radius: 6px;
+  background: #fafbfc;
+}
+.annotated .a-block:last-child { margin-bottom: 0; }
+.annotated .a-label {
+  font-size: 12px; font-weight: 700;
+  margin-bottom: 8px;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.annotated .a-label .l-name { }
+.annotated .a-label .l-tech {
+  font-family: monospace; font-size: 10px;
+  color: #a0aec0; letter-spacing: 0.5px;
+}
+.annotated .a-block.llm .l-name { color: #9b2c2c; }
+.annotated .a-block.truth .l-name { color: #276749; }
+.annotated .a-content {
+  color: #2d3748;
+}
+.annotated .a-content .strike {
+  text-decoration: line-through;
+  text-decoration-color: rgba(197,48,48,0.6);
+  color: #718096;
+}
+.annotated .a-note {
+  font-size: 13px; color: #718096;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #edf0f5;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>비교 도식 v3 — 심플</h1>
+<p class="subtitle">이모지·그라디언트·다크배경 제거. 조용하고 읽기 편한 디자인 4개.</p>
+
+<!-- ========== A: 인용 블록 ========== -->
+<div class="design-block">
+  <div class="design-label">A안</div>
+  <div class="design-title">인용 블록</div>
+  <div class="design-desc">좌측 세로선 인용 스타일. 라벨은 작게, 색은 최소. 책 본문과 자연스럽게 섞임</div>
+
+  <div class="section-heading">LLM 응답과 사내 규정</div>
+
+  <div class="quote-style">
+    <div class="quote-row bad">
+      <div class="quote-label">LLM 응답</div>
+      <div class="quote-body">
+        커넥트의 신입사원 연차 규정은 근로기준법에 따라
+        <ul>
+          <li>입사 후 매월 1일 유급휴가</li>
+          <li>1년 근속 시 15일 연차</li>
+          <li>3년 이상 1년마다 1일씩 추가</li>
+        </ul>
+        <div class="meta">Hallucination — 학습 데이터 기반 추측</div>
+      </div>
+    </div>
+    <div class="quote-row good">
+      <div class="quote-label">사내 규정</div>
+      <div class="quote-body">
+        커넥트 취업규칙에 따르면
+        <ul>
+          <li>입사 후 3년간 연차 없음</li>
+          <li>매월 1회 리프레시 데이 (유급)</li>
+          <li>3년 근속 시 30일 일시 발생</li>
+        </ul>
+        <div class="meta">Ground Truth — 커넥트 취업규칙 원문</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== B: 단순 테이블 ========== -->
+<div class="design-block">
+  <div class="design-label">B안</div>
+  <div class="design-title">단순 테이블</div>
+  <div class="design-desc">교과서 표. 색 거의 없고 선만 있음. 본문 흐름 방해 최소</div>
+
+  <div class="section-heading">LLM 응답과 사내 규정</div>
+
+  <table class="simple-table">
+    <tr>
+      <th>
+        LLM 응답
+        <span class="th-tech">Hallucination</span>
+      </th>
+      <th>
+        사내 규정
+        <span class="th-tech">Ground Truth</span>
+      </th>
+    </tr>
+    <tr>
+      <td class="llm">근로기준법 제60조 적용</td>
+      <td class="truth">입사 후 3년간 연차 없음</td>
+    </tr>
+    <tr>
+      <td class="llm">입사 후 매월 1일 유급휴가</td>
+      <td class="truth">매월 1회 리프레시 데이 (유급)</td>
+    </tr>
+    <tr>
+      <td class="llm">1년 근속 시 15일 연차</td>
+      <td class="truth">3년 근속 시 30일 일시 발생</td>
+    </tr>
+    <tr class="judgment">
+      <td class="llm">전부 지어낸 내용</td>
+      <td class="truth">커넥트만의 파격 규정</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ========== C: Diff 스타일 ========== -->
+<div class="design-block">
+  <div class="design-label">C안</div>
+  <div class="design-title">Diff 스타일</div>
+  <div class="design-desc">Git diff처럼 − 빨강, + 초록. 개발자에게 직관적. 색은 파스텔 톤으로 절제</div>
+
+  <div class="section-heading">LLM 응답과 사내 규정</div>
+
+  <div class="diff-view">
+    <div class="diff-section">
+      <div class="diff-section-label">Hallucination — LLM 응답</div>
+      <div class="diff-line minus"><span class="marker">−</span> 근로기준법 제60조 적용</div>
+      <div class="diff-line minus"><span class="marker">−</span> 입사 후 매월 1일 유급휴가</div>
+      <div class="diff-line minus"><span class="marker">−</span> 1년 근속 시 15일 연차</div>
+    </div>
+    <div class="diff-section">
+      <div class="diff-section-label">Ground Truth — 사내 규정</div>
+      <div class="diff-line plus"><span class="marker">+</span> 입사 후 3년간 연차 없음</div>
+      <div class="diff-line plus"><span class="marker">+</span> 매월 1회 리프레시 데이 (유급)</div>
+      <div class="diff-line plus"><span class="marker">+</span> 3년 근속 시 30일 일시 발생</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== D: 주석형 ========== -->
+<div class="design-block">
+  <div class="design-label">D안</div>
+  <div class="design-title">주석형 (문단 + 취소선)</div>
+  <div class="design-desc">LLM 응답을 문단으로 보여주고 틀린 부분에 취소선. 그 아래 사내 규정 문단. 글 흐름과 가장 가까움</div>
+
+  <div class="section-heading">LLM 응답과 사내 규정</div>
+
+  <div class="annotated">
+    <div class="a-block llm">
+      <div class="a-label">
+        <span class="l-name">LLM 응답</span>
+        <span class="l-tech">Hallucination</span>
+      </div>
+      <div class="a-content">
+        커넥트의 신입사원 연차 규정은 <span class="strike">근로기준법에 따라 입사 후 1년 미만 기간에는 1개월 개근 시 1일의 유급휴가가 발생하며, 1년 이상 근무 시에는 15일의 연차가 발생합니다.</span>
+      </div>
+      <div class="a-note">취소선 부분이 학습 데이터에서 가져와 지어낸 내용입니다.</div>
+    </div>
+    <div class="a-block truth">
+      <div class="a-label">
+        <span class="l-name">사내 규정</span>
+        <span class="l-tech">Ground Truth</span>
+      </div>
+      <div class="a-content">
+        커넥트 취업규칙에 따르면, 신입사원은 입사 후 <b>3년간 연차가 발생하지 않으며</b>, 그 기간 동안 <b>매월 1회 유급 리프레시 데이</b>를 사용할 수 있습니다. 3년 근속 시점에 30일의 연차가 일시에 부여됩니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 비교 ========== -->
+<div class="design-block" style="background:#f7fafc; border:none;">
+  <div class="design-title" style="color:#4a5568;">각 안의 특징</div>
+  <table class="simple-table" style="font-size:13px;">
+    <tr>
+      <th>안</th><th>톤</th><th>쓰기 좋은 상황</th>
+    </tr>
+    <tr>
+      <td><b>A. 인용 블록</b></td>
+      <td>차분함, 에세이 느낌</td>
+      <td>본문 흐름에 자연스럽게 녹이고 싶을 때</td>
+    </tr>
+    <tr>
+      <td><b>B. 단순 테이블</b></td>
+      <td>교과서, 명료함</td>
+      <td>여러 항목을 체계적으로 대조할 때</td>
+    </tr>
+    <tr>
+      <td><b>C. Diff 스타일</b></td>
+      <td>개발자 친화, 약간 캐주얼</td>
+      <td>개발자 독자에게 직관적으로 다가가고 싶을 때</td>
+    </tr>
+    <tr>
+      <td><b>D. 주석형</b></td>
+      <td>문단 중심, 서사적</td>
+      <td>이야기 흐름을 유지하면서 틀린 부분을 짚을 때</td>
+    </tr>
+  </table>
+</div>
+
+</div>
+</body>
+</html>

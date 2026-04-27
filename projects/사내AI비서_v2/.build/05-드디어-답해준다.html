@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>챕터 5. 사서가 답해준다. LCEL 파이프라인</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+
+
+</head>
+<body>
+<div class="container">
+<h1>챕터 5. 사서가 답해준다. LCEL 파이프라인</h1>
+<div class="goal-box">
+<p><strong>이번 챕터가 끝나면</strong></p>
+<ul>
+<li><strong>LCEL</strong>(LangChain Expression Language) 파이프 연산자로 Retriever → Prompt → LLM → Parser를 조립합니다</li>
+<li><strong>출처 강제(Source Grounding)</strong> 프롬프트로 환각을 줄이고 답변에 출처를 항상 붙입니다</li>
+<li><strong>WindowMemory(k=5)</strong> 로 최근 5턴 멀티턴 대화를 유지합니다</li>
+<li>채팅 UI에서 커넥트HR 에이전트의 전신인 RAG Q&amp;A 엔진과 실제로 대화해 봅니다</li>
+</ul>
+</div>
+<div class="prep-section-md">
+<p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
+<h3>1. 실습 폴더 이동</h3>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 폴더 이동</div><span class="nb">cd</span><span class="w"> </span>rag-start/ex05</div>
+<p>파일 구조는 다음과 같습니다.</p>
+<div class="code-block highlight" data-lang="text"><div class="cb-title">ex05 디렉토리</div>ex05/
+├── run.py                  # [참고] 서버 실행 진입점
+├── .env                    # [참고] 환경 변수
+├── data/
+│   ├── docs/               # [참고] 원본 문서 (ex04와 동일 샘플)
+│   ├── markdown/           # [참고] 파싱 결과
+│   └── chroma_db/          # [참고] 벡터 DB (첫 실행 시 자동 생성)
+├── src/
+│   ├── rag_chain.py        # [실습] LCEL 파이프라인 + 출처 강제
+│   ├── conversation.py     # [실습] WindowMemory(k=5)
+│   ├── llm_factory.py      # [참고] Ollama/OpenAI 분기
+│   ├── vectorstore.py      # [참고] Retriever 생성
+│   ├── session_manager.py  # [참고] 세션별 Memory + TTL
+│   └── response_parser.py  # [설명] &lt;think&gt; 제거 + 출처 추출
+├── templates/              # [참고] 채팅 UI HTML
+├── static/                 # [참고] 채팅 UI CSS/JS
+└── app/
+    ├── main.py             # [참고] FastAPI 진입점
+    ├── chat_api.py         # [설명] POST /api/chat
+    └── session.py          # [참고] 세션 쿠키</div>
+<h3>2. 실습 환경 구축</h3>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. macOS / Linux</div><span class="nb">cd</span><span class="w"> </span>ex05
+cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+python3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+ollama<span class="w"> </span>pull<span class="w"> </span>deepseek-r1:8b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 환경 구성. Windows</div><span class="nb">cd</span><span class="w"> </span>ex05
+copy<span class="w"> </span>.env.example<span class="w"> </span>.env
+py<span class="w"> </span>-3.12<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+ollama<span class="w"> </span>pull<span class="w"> </span>deepseek-r1:8b
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt</div>
+<p><code>.env</code> 핵심 상수입니다. 코드를 보기 전에 역할부터 파악해 두면 흐름이 잘 읽힙니다.</p>
+<table>
+<thead>
+<tr>
+<th>상수</th>
+<th>기본값</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LLM_PROVIDER</code></td>
+<td><code>ollama</code></td>
+<td>사용할 LLM 제공자 (<code>ollama</code> 또는 <code>openai</code>)</td>
+</tr>
+<tr>
+<td><code>OLLAMA_MODEL</code></td>
+<td><code>deepseek-r1:8b</code></td>
+<td>Ollama에서 쓸 모델 이름</td>
+</tr>
+<tr>
+<td><code>EMBEDDING_MODEL</code></td>
+<td><code>jhgan/ko-sroberta-multitask</code></td>
+<td>문서 임베딩 모델. 챕터 4와 같은 값이어야 검색이 맞음</td>
+</tr>
+<tr>
+<td><code>CHROMA_PERSIST_DIR</code></td>
+<td><code>./data/chroma_db</code></td>
+<td>벡터 DB 저장 경로</td>
+</tr>
+<tr>
+<td><code>RETRIEVER_TOP_K</code></td>
+<td><code>5</code></td>
+<td>질문당 검색해서 가져올 관련 문서 조각 개수</td>
+</tr>
+<tr>
+<td><code>CONVERSATION_WINDOW_SIZE</code></td>
+<td><code>5</code></td>
+<td>프롬프트에 포함할 최근 대화 턴 수</td>
+</tr>
+</tbody>
+</table>
+<h3>3. 사용할 라이브러리</h3>
+<table>
+<thead>
+<tr>
+<th>패키지</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>langchain</code></td>
+<td>체인 조립 프레임워크</td>
+</tr>
+<tr>
+<td><code>langchain-community</code></td>
+<td>HuggingFaceEmbeddings 등 커뮤니티 통합</td>
+</tr>
+<tr>
+<td><code>langchain-ollama</code></td>
+<td>Ollama LLM 연결</td>
+</tr>
+<tr>
+<td><code>langchain-chroma</code></td>
+<td>ChromaDB Retriever 래퍼</td>
+</tr>
+<tr>
+<td><code>fastapi</code> · <code>uvicorn</code></td>
+<td>웹 API + ASGI 서버</td>
+</tr>
+</tbody>
+</table>
+<h3>4. 실습 순서</h3>
+<ol>
+<li><code>src/rag_chain.py</code>. LCEL 파이프라인 + 출처 강제 프롬프트</li>
+<li><code>src/conversation.py</code>. WindowMemory(k=5)</li>
+<li><code>python run.py</code>. 서버 실행 후 브라우저 <code>http://localhost:8000/chat</code> 에서 대화</li>
+</ol>
+</div>
+<h2>5.1 &quot;그냥 답을 알려줘&quot;</h2>
+<p>![](../assets/챕터 5/gemini/05_chapter-opening.png)
+<em>그림 5-1. 사서가 답해준다. 책을 찾아서 읽고, 출처와 함께 답해 줍니다</em></p>
+<p>수요일 점심 직후. 사무실 라디에이터가 한 번 울컥 소리를 내고 다시 잠잠해졌습니다.</p>
+<p>챕터 4에서 벡터 검색까지 돌렸고, 동료에게 CLI 사용법을 알려 줬습니다. 점심 먹고 돌아오니 그 동료가 또 의자를 돌려 제 쪽을 봤어요.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "병가 쓸 때 증빙 서류 필요해요?"</div>
+<div class="dialogue"><span class="speaker">동료</span>: "연차 며칠 남았는지 어떻게 확인해요?"</div>
+<p>CLI가 켜진 터미널을 그대로 보여 줬습니다.</p>
+<div class="search-results">
+  <div class="sr-title">벡터 검색 결과</div>
+  <div class="sr-item">
+    <div class="sr-head">
+      <span class="sr-rank">1</span>
+      <span class="sr-source">HR_취업규칙_v1.0 (p.3)</span>
+      <span class="sr-sim">유사도 87.2%</span>
+    </div>
+    <div class="sr-body">"제15조(병가) 질병이나 부상으로 인하여 직무를 수행할 수 없을 때에는…"</div>
+  </div>
+  <div class="sr-item">
+    <div class="sr-head">
+      <span class="sr-rank">2</span>
+      <span class="sr-source">HR_취업규칙_v1.0 (p.4)</span>
+      <span class="sr-sim">유사도 81.5%</span>
+    </div>
+    <div class="sr-body">"병가 기간이 3일 이상인 경우에는 의사의 진단서를…"</div>
+  </div>
+</div>
+<div class="dialogue"><span class="speaker">동료</span>: "이걸 제가 읽어요? 그냥 답을 알려주세요."</div>
+<p><em>맞다. 사람들은 문서 조각을 원하는 게 아니라 <strong>답변</strong>을 원한다.</em></p>
+<p>벡터 검색은 <strong>재료를 찾아 주는 일</strong>이지 <strong>요리를 해 주는 일</strong>이 아닙니다. 이번 챕터에서는 그 &quot;요리&quot;를 해 주는 <strong>RAG Q&amp;A 엔진</strong>을 만듭니다. 질문하면 문서를 검색하고, 읽어서, 자연어로 답해 주는 시스템입니다.</p>
+<h2>5.2 사서가 일하는 네 단계</h2>
+<p>지금까지 만든 벡터 검색은 <strong>도서관의 검색 시스템</strong>과 비슷합니다. &quot;한국 역사&quot;를 검색하면 관련 책이 어디 있는지 알려주지만, 책을 꺼내서 읽고 정리해 주지는 않습니다.</p>
+<p>우리에게 필요한 건 <strong>사서</strong>입니다. 사서에게 &quot;조선시대 과거 제도가 뭐야?&quot;라고 물으면 네 단계가 일어납니다.</p>
+<ol>
+<li><strong>질문을 듣는다</strong>. &quot;조선 과거 제도&quot;가 핵심이군</li>
+<li><strong>서가에서 책을 찾는다</strong>. 한국사 개론 3장 근처를 꺼냄</li>
+<li><strong>읽고 답변을 정리한다</strong>. &quot;문과, 무과, 잡과 세 종류가 있었습니다&quot;</li>
+<li><strong>출처를 알려준다</strong>. &quot;한국사 개론 3장에 나와 있어요&quot;</li>
+</ol>
+<p>이 네 단계가 바로 RAG Q&amp;A 파이프라인입니다. 챕터 4가 2번까지였다면, 이번 챕터가 <strong>3, 4번을 추가</strong>합니다.</p>
+<div class="librarian-flow">
+  <div class="lf-row">
+    <div class="lf-step lf-done">
+      <div class="lf-num">1</div>
+      <div class="lf-label">질문을 듣는다</div>
+      <div class="lf-hint">사용자 입력 수신</div>
+    </div>
+    <div class="lf-arrow">→</div>
+    <div class="lf-step lf-done">
+      <div class="lf-num">2</div>
+      <div class="lf-label">서가에서 책 찾기</div>
+      <div class="lf-hint">Retriever로 벡터 검색</div>
+    </div>
+    <div class="lf-arrow">→</div>
+    <div class="lf-step lf-new">
+      <div class="lf-num">3</div>
+      <div class="lf-label">읽고 답변 정리</div>
+      <div class="lf-hint">LLM이 문서 읽고 생성</div>
+    </div>
+    <div class="lf-arrow">→</div>
+    <div class="lf-step lf-new">
+      <div class="lf-num">4</div>
+      <div class="lf-label">출처 알려주기</div>
+      <div class="lf-hint">근거 문서명 첨부</div>
+    </div>
+  </div>
+  <div class="lf-legend">
+    <span class="lf-legend-item"><span class="lf-chip lf-chip-done"></span>챕터 4까지 (1~2)</span>
+    <span class="lf-legend-item"><span class="lf-chip lf-chip-new"></span>이번 챕터에서 추가 (3~4)</span>
+  </div>
+  <div class="lf-caption">그림 5-2. RAG Q&amp;A 흐름. 챕터 4까지가 1~2번이었고, 이번 챕터에서 3~4번을 추가합니다</div>
+</div>
+<h2>5.3 LCEL 조립과 출처 강제(rag_chain.py)</h2>
+<p>검색 → 프롬프트 → LLM → 파싱. 각 단계를 직접 이어 붙여도 되지만, <strong>LangChain</strong>이 이걸 부품화해 줍니다. 조립 방식은 <strong>파이프 연산자(<code>|</code>)</strong>. 이를 <strong>LCEL(LangChain Expression Language)</strong> 이라 부릅니다.</p>
+<div class="lcel-pipeline">
+  <div class="lp-title">LCEL 파이프라인. 파이프(<code>|</code>) 연산자로 5개 블록을 연결</div>
+  <div class="lp-row">
+    <div class="lp-node lp-input">
+      <div class="lp-label">질문</div>
+      <div class="lp-type">str</div>
+    </div>
+    <div class="lp-pipe"><span class="lp-pipe-op">|</span></div>
+    <div class="lp-node">
+      <div class="lp-kind">Retriever</div>
+      <div class="lp-label">검색</div>
+      <div class="lp-hint">벡터 DB 조회</div>
+    </div>
+    <div class="lp-pipe"><span class="lp-pipe-op">|</span></div>
+    <div class="lp-node">
+      <div class="lp-kind">Prompt</div>
+      <div class="lp-label">프롬프트</div>
+      <div class="lp-hint">규칙 + 문서 주입</div>
+    </div>
+    <div class="lp-pipe"><span class="lp-pipe-op">|</span></div>
+    <div class="lp-node">
+      <div class="lp-kind">LLM</div>
+      <div class="lp-label">답변 생성</div>
+      <div class="lp-hint">DeepSeek/GPT-4o</div>
+    </div>
+    <div class="lp-pipe"><span class="lp-pipe-op">|</span></div>
+    <div class="lp-node">
+      <div class="lp-kind">Parser</div>
+      <div class="lp-label">파싱</div>
+      <div class="lp-hint">문자열 추출</div>
+    </div>
+    <div class="lp-pipe"><span class="lp-arrow-out">→</span></div>
+    <div class="lp-node lp-output">
+      <div class="lp-label">답변</div>
+      <div class="lp-type">str</div>
+    </div>
+  </div>
+  <div class="lp-caption">그림 5-3. LCEL 파이프라인 구조. 앞 블록의 출력이 <code>|</code>를 타고 다음 블록의 입력이 됩니다</div>
+</div>
+<p><strong>파이프 연산자(<code>|</code>)</strong> 는 앞 블록의 출력을 뒤 블록의 입력으로 흘려보내는 역할을 합니다. 유닉스 셸의 <code>ls | grep</code> 파이프와 같은 발상입니다. 덕분에 Retriever, Prompt, LLM, Parser 어느 블록이든 <strong>같은 인터페이스만 지키면 자리 바꿔 낄 수 있습니다</strong>. LLM을 DeepSeek에서 GPT-4o로 갈아 끼울 때도 체인 구조는 건드리지 않고 LLM 블록만 교체하면 됩니다. 챕터 8~10에서 튜닝할 때 이 구조의 힘이 드러납니다.</p>
+<h3>출처 강제(Source Grounding)</h3>
+<p>챕터 1에서 맛본 <strong>그라운딩</strong>의 강한 버전입니다. 그때는 &quot;참고 정보에서만 답하세요&quot; 한 줄이었지만, 실서비스에서는 그걸로 부족합니다. LLM이 여전히 &quot;문서에서 찾을 수 없으면&quot; 외부 지식을 슬쩍 섞어 지어냅니다.</p>
+<p>이번 챕터는 규칙을 <strong>네 개로 늘립니다</strong>. (1) 제공된 문서에서만, (2) 없으면 &quot;확인되지 않습니다&quot;, (3) 답변 끝에 <code>[출처: 파일명]</code>, (4) 추측 금지. <code>ex05/src/rag_chain.py</code> 상단에 상수 <code>RAG_SYSTEM_PROMPT</code>로 박혀 있습니다.</p>
+<h3>실습(rag_chain.py)</h3>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge explain">설명</span> ex05/src/rag_chain.py. 출처 강제 프롬프트 (발췌)</div><span class="n">RAG_SYSTEM_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;당신은 커넥트HR 사내 문서 Q&amp;A 비서입니다.</span>
+<span class="s2">아래에 제공된 문서(Context)만 사용하여 질문에 답변하십시오.</span>
+
+<span class="s2">규칙:</span>
+<span class="s2">1. 반드시 제공된 문서에서만 근거를 찾아 답변하시오.</span>
+<span class="s2">2. 문서에서 답을 찾을 수 없으면 &quot;해당 내용은 제공된 문서에서 확인되지 않습니다.&quot;라고 답하시오.</span>
+<span class="s2">3. 답변 마지막에 근거 문서명을 반드시 명시하시오. 형식: [출처: 문서명]</span>
+<span class="s2">4. 추측이나 외부 지식을 사용하지 마시오.</span>
+
+<span class="s2">Context (제공된 문서):</span>
+<span class="si">{context}</span>
+
+<span class="s2">이전 대화:</span>
+<span class="si">{history}</span>
+<span class="s2">&quot;&quot;&quot;</span></div>
+<p><code>{context}</code>에는 검색된 문서가, <code>{history}</code>에는 이전 대화가 자동으로 채워집니다. 규칙 2번이 <strong>환각 방지</strong>(모르면 모른다고 답하라), 규칙 3번이 <strong>출처 명시</strong>를 담당합니다. 같은 파일에 <code>RAG_HUMAN_PROMPT = &quot;질문: {question}&quot;</code> 상수도 함께 선언돼 있어, 뒤에서 <code>(&quot;human&quot;, RAG_HUMAN_PROMPT)</code> 자리에 그대로 끼워 넣습니다. <code>_format_docs()</code>와 <code>build_rag_chain()</code> 두 함수에 TODO가 있습니다. TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex05/src/rag_chain.py. _format_docs</div><span class="k">def</span><span class="w"> </span><span class="nf">_format_docs</span><span class="p">(</span><span class="n">docs</span><span class="p">):</span>
+    <span class="cb-todo"># TODO: 검색된 Document를 &quot;[문서 N] 출처: ...&quot; 텍스트로 변환</span>
+    <span class="c1"># 1. 검색된 Document 리스트를 프롬프트에 넣을 텍스트로 변환</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;알 수 없음&quot;</span><span class="p">)</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[문서 </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] 출처: </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2"> (p.</span><span class="si">{</span><span class="n">page</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">page_content</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span></div>
+<p>각 문서에 <code>[출처: 파일명 (p.N)]</code> 라벨을 붙여 한 문자열로 합칩니다. 이 결과가 프롬프트 변수 <code>{context}</code>로 들어갑니다. 이어서 본체 조립. 챕터 1에서 RetrievalQA가 내부에서 알아서 해주던 검색·프롬프트·LLM 호출을, 이번에는 Retriever부터 하나씩 꺼내서 파이프로 직접 조립합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 1</span> ex05/src/rag_chain.py. build_rag_chain</div><span class="k">def</span><span class="w"> </span><span class="nf">build_rag_chain</span><span class="p">():</span>
+    <span class="cb-todo"># TODO: build_llm()으로 LLM 생성 ~ (chain, retriever) 튜플 반환</span>
+    <span class="c1"># 1. LLM 인스턴스 생성 (llm_factory.py에서 Ollama/OpenAI 선택)</span>
+    <span class="n">llm</span> <span class="o">=</span> <span class="n">build_llm</span><span class="p">()</span>
+    <span class="c1"># 2. ChromaDB에서 문서를 검색하는 Retriever 생성</span>
+    <span class="n">retriever</span> <span class="o">=</span> <span class="n">build_retriever</span><span class="p">()</span>
+
+    <span class="c1"># 3. 시스템 프롬프트 + 사용자 프롬프트 조립</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="n">ChatPromptTemplate</span><span class="o">.</span><span class="n">from_messages</span><span class="p">([</span>
+        <span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="n">RAG_SYSTEM_PROMPT</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="n">RAG_HUMAN_PROMPT</span><span class="p">),</span>
+    <span class="p">])</span>
+
+    <span class="c1"># 4. LCEL 파이프로 체인 조립. 질문→검색→포맷→프롬프트→LLM→텍스트</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;context&quot;</span><span class="p">:</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">retriever</span> <span class="o">|</span> <span class="n">_format_docs</span><span class="p">,</span>
+            <span class="s2">&quot;history&quot;</span><span class="p">:</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;history&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="n">itemgetter</span><span class="p">(</span><span class="s2">&quot;question&quot;</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="o">|</span> <span class="n">prompt</span>
+        <span class="o">|</span> <span class="n">llm</span>
+        <span class="o">|</span> <span class="n">StrOutputParser</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 5. 체인과 검색기를 함께 반환</span>
+    <span class="k">return</span> <span class="n">chain</span><span class="p">,</span> <span class="n">retriever</span></div>
+<p>파이프 연산자(<code>|</code>)가 각 단계의 출력을 다음 단계의 입력으로 넘깁니다. <code>itemgetter(&quot;question&quot;)</code> 은 입력 dict에서 <code>question</code> 키만 꺼내는 호출가능 객체입니다. 등장한 LangChain 부품 세 개를 한 줄씩 정리하면 아래와 같습니다.</p>
+<table>
+<thead>
+<tr>
+<th>부품</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ChatPromptTemplate.from_messages([...])</code></td>
+<td><code>system</code>/<code>human</code> 메시지로 프롬프트 조립. <code>{context}</code>, <code>{question}</code> 같은 변수는 체인 실행 시 자동으로 채워짐</td>
+</tr>
+<tr>
+<td><code>build_llm()</code></td>
+<td><code>.env</code>의 <code>LLM_PROVIDER</code>에 따라 <code>ChatOllama</code> 또는 <code>ChatOpenAI</code> 인스턴스를 만들어 줌 (<code>llm_factory.py</code>)</td>
+</tr>
+<tr>
+<td><code>StrOutputParser()</code></td>
+<td>LLM이 돌려주는 <code>AIMessage</code> 객체에서 <code>.content</code> 문자열만 꺼내는 최종 파서</td>
+</tr>
+</tbody>
+</table>
+<div class="term-box">
+<p><strong>왜 chain과 retriever를 같이 반환할까요?</strong> 체인은 최종 답변 텍스트만 돌려주지만, 출처 표시용으로 <strong>검색된 원본 Document</strong> 도 따로 필요합니다. <code>ex05/app/chat_api.py</code>가 <code>retriever.invoke(question)</code>을 한 번 더 호출해 출처 목록을 만들어 응답 JSON에 붙입니다.</p>
+</div>
+<h2>5.4 WindowMemory. conversation.py</h2>
+<p>도서관 방문자가 사서에게 이어서 묻습니다.</p>
+<div class="dialogue"><span class="speaker">방문자</span>: "한국 역사 관련 책 어디 있어요?"</div>
+<div class="dialogue"><span class="speaker">사서</span>: "2층 인문학 서가에 있습니다."</div>
+<div class="dialogue"><span class="speaker">방문자</span>: "거기 세계사도 있어요?"</div>
+<p>여기서 &quot;거기&quot;는 <strong>2층 인문학 서가</strong>입니다. 사람 사서는 당연히 기억하지만 LLM은 기본적으로 <strong>기억력이 없습니다</strong>. 매 요청이 독립적이라 이전 질문을 모릅니다. 그래서 <strong>대화 히스토리</strong>를 직접 관리해야 합니다.</p>
+<p>모든 대화를 다 기억할 수는 없으니 <strong>최근 N턴만 유지</strong>하는 슬라이딩 윈도우 방식을 씁니다. 사서가 메모장을 들고 있다고 생각하시면 됩니다. 새 메모가 들어오면 가장 오래된 메모를 지우고 최근 5장만 남깁니다.</p>
+<p>![](../assets/챕터 5/gemini/05_sliding-window.png)
+<em>그림 5-4. 6번째 메모가 들어오면 가장 오래된 1번째가 빠집니다. 항상 <code>maxlen = 5</code></em></p>
+<p>Python에서는 <code>collections.deque(maxlen=5)</code>를 쓰면 이 구조가 자동으로 구현됩니다.</p>
+<h3>실습(conversation.py)</h3>
+<p><code>ex05/src/conversation.py</code>는 <code>deque(maxlen=k)</code> 위에 얇은 래퍼를 씌워 &quot;이전 대화&quot;를 프롬프트에 넣을 형태로 바꿉니다. <code>save_turn</code>, <code>get_history</code>, <code>clear</code> 세 메서드에 TODO가 있습니다. TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 2</span> ex05/src/conversation.py. WindowMemory</div><span class="k">class</span><span class="w"> </span><span class="nc">WindowMemory</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">human_prefix</span><span class="o">=</span><span class="s2">&quot;사용자&quot;</span><span class="p">,</span> <span class="n">ai_prefix</span><span class="o">=</span><span class="s2">&quot;AI 비서&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">human_prefix</span> <span class="o">=</span> <span class="n">human_prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ai_prefix</span> <span class="o">=</span> <span class="n">ai_prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_turns</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_turn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">question</span><span class="p">,</span> <span class="n">answer</span><span class="p">):</span>
+        <span class="cb-todo"># TODO: (question, answer) 튜플을 self._turns에 추가</span>
+        <span class="c1"># 1. 질문-답변 1턴을 메모장에 저장</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_turns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">question</span><span class="p">,</span> <span class="n">answer</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_history</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="cb-todo"># TODO: self._turns의 (question, answer) 쌍을 순회하며</span>
+        <span class="c1"># 1. 저장된 대화를 &quot;사용자: 질문 / AI: 답변&quot; 텍스트로 변환</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">question</span><span class="p">,</span> <span class="n">answer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_turns</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">human_prefix</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ai_prefix</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">answer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="cb-todo"># TODO: self._turns 초기화</span>
+        <span class="c1"># 1. 메모장 비우기</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_turns</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+<p><code>deque(maxlen=5)</code>가 자동으로 오래된 턴을 제거해 주므로 우리가 할 일은 &quot;append → 텍스트 변환 → 비우기&quot; 셋뿐입니다. <code>ex05/src/session_manager.py</code>가 세션별로 이 <code>WindowMemory</code>를 하나씩 보관하고, 일정 시간 동안 호출이 없으면 TTL로 만료시킵니다.</p>
+<h2>5.5 서버 실행 + 채팅 UI</h2>
+<p>두 파일의 TODO를 모두 채웠으면 서버를 띄워 브라우저에서 직접 대화해 봅니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 서버 실행</div>python<span class="w"> </span>run.py</div>
+<p>터미널에 <code>Uvicorn running on http://0.0.0.0:8000</code>이 찍히면 준비 완료입니다. 브라우저에서 <code>http://localhost:8000/chat</code>을 열면 채팅 UI가 나타납니다.</p>
+<p>![](../assets/챕터 5/terminal/05_chat-ui.png)
+<em>그림 5-5. 커넥트HR 에이전트의 전신. RAG Q&amp;A 채팅 UI</em></p>
+<p>&quot;병가 쓸 때 증빙 서류 필요해요?&quot;라고 물어보면 사내 취업규칙을 근거로 답이 돌아오고, 답변 끝에 출처 파일명이 붙습니다.</p>
+<p>![](../assets/챕터 5/terminal/05_chat-response.png)
+<em>그림 5-6. 답변이 자연어로 돌아오고, 출처까지 명시됩니다</em></p>
+<p>이어서 &quot;그럼 며칠 이상일 때 진단서가 필요해?&quot;라고 물어보면 <strong>이전 대화의 &quot;병가&quot;를 기억</strong>해서 맥락을 이어 답합니다. WindowMemory가 동작한 결과입니다.</p>
+<p>![](../assets/챕터 5/terminal/05_chat-response-followup.png)
+<em>그림 5-7. 멀티턴 대화. 이전 질문을 기억해 &quot;거기&quot;, &quot;그럼&quot;을 해석합니다</em></p>
+<p>옆자리에서 동료가 화면을 넘겨다봤습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "아, 이제 답을 주네요. 아까는 문서 조각만 던지더니."</div>
+<p>오프닝에 &quot;이걸 내가 읽어?&quot; 하던 바로 그 사람입니다. 이번엔 읽을 것도, 해석할 것도 없이 답이 나왔습니다.</p>
+<p>처음으로 <strong>사용자가 쓸 수 있는 형태</strong>의 비서가 생겼습니다. 벡터 검색 결과가 자연어 답변으로 바뀌고, 출처가 붙고, 이어지는 질문의 맥락까지 이해합니다. 다만 &quot;김대리 연차 며칠 남았어?&quot; 같은 <strong>실시간 DB 조회 질문</strong>은 아직 못 풉니다. 챕터 6에서 문서 질문과 DB 질문을 한 에이전트가 동시에 처리하도록 <strong>Tool Calling + ReAct 패턴</strong>을 얹습니다.</p>
+<h3>이 파이프라인, 다음 챕터에서 어떻게 되는가</h3>
+<p>지금 만든 LCEL 파이프라인은 여기서 끝이 아닙니다. 다음 챕터에서 이 구조가 <strong>그대로</strong> <strong>에이전트 도구 하나</strong>(<code>search_documents</code>)로 감싸지고, 옆에 DB 조회 도구(<code>leave_balance</code>, <code>sales_sum</code>, <code>list_employees</code>) 셋이 나란히 놓입니다. 에이전트가 질문을 보고 어떤 도구를 열지 스스로 판단하게 되죠. <strong>파이프라인 자체는 버려지지 않습니다.</strong></p>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 5-4. 이번 챕터의 LCEL 파이프라인은 다음 챕터에서 에이전트 도구가 됩니다</div>
+<div style="display:grid;grid-template-columns:1fr 40px 1.3fr;gap:var(--space-md);align-items:center">
+<div style="border:2px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:white;position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-text-muted);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 5. 지금</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-subtle);margin-bottom:var(--space-sm);text-align:center">LCEL 파이프라인 단독</div>
+<div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm);font-family:var(--font-mono);font-size:11px">
+<div style="display:flex;align-items:center;gap:4px;justify-content:center;flex-wrap:wrap">
+<span style="background:white;padding:2px 6px;border-radius:3px;border:1px solid var(--color-border)">Retriever</span>
+<span>→</span>
+<span style="background:white;padding:2px 6px;border-radius:3px;border:1px solid var(--color-border)">Prompt</span>
+<span>→</span>
+<span style="background:white;padding:2px 6px;border-radius:3px;border:1px solid var(--color-border)">LLM</span>
+<span>→</span>
+<span style="background:white;padding:2px 6px;border-radius:3px;border:1px solid var(--color-border)">Parser</span>
+</div>
+</div>
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:var(--space-sm);text-align:center">문서 검색·답변만 가능</div>
+</div>
+<div style="font-size:28px;color:var(--color-accent);text-align:center;font-weight:700">→</div>
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:var(--color-accent-bg);position:relative">
+<div style="position:absolute;top:-11px;left:16px;background:var(--color-accent);color:white;padding:3px 10px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700">챕터 6. 에이전트 도구로 감싸짐</div>
+<div style="font-size:var(--fs-xs);color:var(--color-accent-text);margin-bottom:var(--space-sm);text-align:center;font-weight:600">ReAct 에이전트의 도구 상자 (4개)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:var(--space-xs)">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;text-align:center;font-size:10px"><div style="font-weight:700">leave_balance</div><div style="color:var(--color-text-muted)">SQL</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;text-align:center;font-size:10px"><div style="font-weight:700">sales_sum</div><div style="color:var(--color-text-muted)">SQL</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px;text-align:center;font-size:10px"><div style="font-weight:700">list_employees</div><div style="color:var(--color-text-muted)">SQL</div></div>
+</div>
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-sm);padding:var(--space-sm);background:white">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+<div style="font-weight:700;font-size:11px">search_documents</div>
+<div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);padding:1px 6px;border-radius:3px;font-weight:600">챕터 5 엔진 그대로</div>
+</div>
+<div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:3px;padding:4px;font-family:var(--font-mono);font-size:10px">
+<div style="display:flex;align-items:center;gap:3px;justify-content:center;flex-wrap:wrap">
+<span style="background:white;padding:1px 5px;border-radius:2px;border:1px solid var(--color-border)">Retriever</span>
+<span>→</span>
+<span style="background:white;padding:1px 5px;border-radius:2px;border:1px solid var(--color-border)">Prompt</span>
+<span>→</span>
+<span style="background:white;padding:1px 5px;border-radius:2px;border:1px solid var(--color-border)">LLM</span>
+<span>→</span>
+<span style="background:white;padding:1px 5px;border-radius:2px;border:1px solid var(--color-border)">Parser</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="margin-top:var(--space-md);font-size:var(--fs-xs);color:var(--color-text-muted);text-align:center">왼쪽이 이번 챕터, 오른쪽이 다음 챕터. 파이프라인이 <code style="background:white;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border)">search_documents</code> 도구 안으로 들어가고, 옆에 SQL 도구 셋이 붙습니다.</div>
+</div>
+<h2>5.6 전체 구성도에서 챕터 5의 자리</h2>
+<div class="arch-fullmap">
+  <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 5 범위</div>
+  <div class="afm-row afm-user">
+    <div class="afm-box afm-built afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">대시보드</span>
+    <div class="afm-row">
+      <div class="afm-box afm-built"><div class="afm-label">FastAPI</div><div class="afm-sub">REST API · 관리자 웹</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 6</span>
+    <span class="afm-zone-label">오케스트레이션</span>
+    <div class="afm-row afm-three">
+      <div class="afm-box afm-faint"><div class="afm-label">Tool Calling Agent</div><div class="afm-sub">ReAct 패턴 · 사후 분류</div></div>
+      <div class="afm-box afm-faint"><div class="afm-label">@tool 도구</div><div class="afm-sub">DB 조회 · 문서 검색</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 5</span>
+    <span class="afm-zone-label">검색 (실시간)</span>
+    <div class="afm-row">
+      <div class="afm-box afm-on">
+        <div class="afm-tag">오늘 만든 부분</div>
+        <div class="afm-label">LCEL Chain</div>
+        <div class="afm-sub">검색기 → 프롬프트 → LLM · 출처 강제 · WindowMemory</div>
+      </div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 4</span>
+    <span class="afm-zone-label">파싱·벡터화 (오프라인)</span>
+    <div class="afm-row afm-three">
+      <div class="afm-box afm-built afm-dashed"><div class="afm-label">챕터 3 문서 규칙</div><div class="afm-sub">PDF·Word·Excel·HWP</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">Doc Pipeline</div><div class="afm-sub">파싱·청킹·임베딩</div></div>
+      <div class="afm-box afm-built"><div class="afm-label">ChromaDB</div><div class="afm-sub">벡터 저장소</div></div>
+    </div>
+  </div>
+  <div class="afm-zone">
+    <span class="afm-zone-ch">챕터 2</span>
+    <span class="afm-zone-label">데이터</span>
+    <div class="afm-row">
+      <div class="afm-box afm-built"><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
+    </div>
+  </div>
+  <div class="afm-row afm-ext">
+    <div class="afm-box afm-faint afm-dashed"><div class="afm-label">Ollama LLM (외부)</div></div>
+  </div>
+  <div class="afm-note">
+    오늘 얹은 건 <b>LCEL Chain</b> 한 박스입니다. 이제 문서 기반 질문에는 출처를 붙여 답합니다. 하지만 "김대리 연차 며칠?" 같은 DB 조회 질문은 아직 못 풉니다. 챕터 6에서 <b>Tool Calling Agent + ReAct 패턴</b>을 얹어 두 종류 질문을 한 에이전트가 처리하게 만듭니다.
+  </div>
+</div>
+<h2>용어 정리</h2>
+<table>
+<thead>
+<tr>
+<th>본문 속 표현</th>
+<th>진짜 용어</th>
+<th>정식 정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&quot;사서의 업무 순서&quot;</td>
+<td><strong>LCEL 파이프라인</strong></td>
+<td>LangChain Expression Language. 파이프(<code>|</code>)로 Retriever → Prompt → LLM → Parser를 연결</td>
+</tr>
+<tr>
+<td>&quot;근거를 대&quot;</td>
+<td><strong>출처 강제(Source Grounding)</strong></td>
+<td>프롬프트로 &quot;제공된 문서에서만 답하고 출처 명시&quot;를 강제하는 기법</td>
+</tr>
+<tr>
+<td>&quot;5장짜리 메모장&quot;</td>
+<td><strong>WindowMemory</strong></td>
+<td>최근 N턴 대화만 유지하는 슬라이딩 윈도우. <code>deque(maxlen=k)</code> 기반</td>
+</tr>
+<tr>
+<td>&quot;메모장 관리인&quot;</td>
+<td><strong>ConversationManager</strong></td>
+<td>세션별 WindowMemory를 보관하고 TTL로 만료 세션을 정리하는 클래스</td>
+</tr>
+<tr>
+<td>&quot;입력 → 출력 연결&quot;</td>
+<td><strong>파이프 연산자(<code>|</code>)</strong></td>
+<td><code>A | B</code>는 A의 출력을 B의 입력으로 전달. Unix 파이프와 같은 개념</td>
+</tr>
+</tbody>
+</table>
+<div class="remember">
+<p><strong>이것만은 기억하자</strong></p>
+<ul>
+<li><strong>벡터 검색은 재료, LCEL은 요리입니다.</strong> 검색 결과를 던져 주는 게 아니라 읽고 답해 주는 체인을 얹어야 사용자가 쓸 수 있는 비서가 됩니다.</li>
+<li><strong>출처 강제는 환각의 안전망입니다.</strong> &quot;제공된 문서에서만 답하라 + 출처를 명시하라&quot; 한 줄이 거짓말을 크게 줄여 줍니다. 답변에 출처 파일명을 항상 붙이세요.</li>
+<li><strong>기억 없는 LLM에게 메모장을 쥐여 줍니다.</strong> WindowMemory(k=5)면 일상 대화에 충분합니다. 챕터 6에서는 에이전트가 도구를 직접 골라 &quot;문서 질문&quot;과 &quot;DB 조회 질문&quot;을 한 번에 처리합니다.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

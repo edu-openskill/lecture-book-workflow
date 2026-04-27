@@ -1,0 +1,52 @@
+direction: right
+
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      fill: "#ffffff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 20
+      font-color: "#374151"
+      bold: true
+    }
+    width: 220
+    height: 70
+  }
+}
+
+step1: "python run.py\n서버 시작" {
+  class: step
+}
+step2: "/docs\nSwagger UI" {
+  class: step
+}
+step3: "CRUD 테스트\nPOST GET PATCH DELETE" {
+  class: step
+  width: 280
+}
+step4: "/admin/\n웹 UI 확인" {
+  class: step
+}
+
+step1 -> step2: {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+  }
+}
+step2 -> step3: {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+  }
+}
+step3 -> step4: {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+  }
+}

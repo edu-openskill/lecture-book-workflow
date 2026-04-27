@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ConnectHR — Mermaid v8 (각 챕터 전체 맥락 포함)</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.7; }
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+.toc { background: #f1f5f9; border-radius: 8px; padding: 20px; margin-bottom: 32px; font-size: 13px; }
+.toc a { color: #2563eb; text-decoration: none; margin-right: 14px; }
+.design-block { background: #fff; border-radius: 12px; padding: 28px; margin: 32px 0; border: 1px solid #edf0f5; scroll-margin-top: 20px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; background: #4299e1; color: #fff; margin-bottom: 8px; letter-spacing: 1px; }
+.design-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 20px; }
+.focus-note { background: #eff6ff; border-left: 3px solid #2563eb; padding: 10px 14px; margin: 12px 0; font-size: 12.5px; color: #1e40af; border-radius: 0 6px 6px 0; }
+.code-block { background: #1a202c; color: #e2e8f0; border-radius: 8px; padding: 20px; font-family: 'JetBrains Mono', Menlo, monospace; font-size: 12.5px; line-height: 1.7; overflow-x: auto; white-space: pre; position: relative; }
+.copy-btn { position: absolute; top: 8px; right: 8px; background: #4a5568; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+.copy-btn:hover { background: #2563eb; }
+.mermaid-render { background: #fff; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; margin: 14px 0; text-align: center; overflow-x: auto; }
+.section-label { font-size: 11px; color: #a0aec0; font-weight: 700; letter-spacing: 1.5px; margin: 18px 0 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>ConnectHR — Mermaid v8 (각 챕터 전체 맥락)</h1>
+<p class="subtitle">각 챕터마다 <b>전체 시스템</b>을 그리되, 해당 챕터가 만드는 부분만 디테일·파란색. 나머지는 회색 점선 추상화 박스</p>
+
+<div class="toc">
+  <strong>목차</strong>:
+  <a href="#full">전체 맵</a>
+  <a href="#ch1">Ch.1</a> <a href="#ch2">Ch.2</a> <a href="#ch3">Ch.3</a>
+  <a href="#ch4">Ch.4</a> <a href="#ch5">Ch.5</a> <a href="#ch6">Ch.6</a>
+  <a href="#ch7">Ch.7</a> <a href="#ch8">Ch.8</a> <a href="#ch9">Ch.9</a> <a href="#ch10">Ch.10</a>
+</div>
+
+<!-- ================= 전체 맵 ================= -->
+<div class="design-block" id="full">
+  <span class="badge">전체 맵</span>
+  <div class="design-title">ConnectHR 완성형</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+    subgraph Ch2["Ch.2 대시보드+DB"]
+        FastAPI["FastAPI"]
+        PostgreSQL[("PostgreSQL")]
+        FastAPI --- PostgreSQL
+    end
+    subgraph Ch6["Ch.6 오케스트레이션"]
+        Router{Router}
+        Agent[["Agent Chain<br/>ReAct"]]
+        MCP[MCP Tools]
+    end
+    subgraph Ch45["Ch.4~5 검색"]
+        Pipeline[Doc Pipeline]
+        LCEL[LCEL Chain]
+    end
+    ChromaDB[("ChromaDB")]
+    Ollama([Ollama LLM])
+    Rules["Ch.3 규칙"]
+
+    User -- "1" --> FastAPI -- "2" --> Router -- "3" --> Agent
+    Agent -- "4" --> MCP -- "5" --> PostgreSQL
+    Agent -- "4" --> LCEL -- "5" --> ChromaDB
+    Agent -- "6" --> Ollama -- "7" --> Agent -- "8" --> User
+    Pipeline -. 파싱·벡터화 .-> ChromaDB
+    Rules -. 규칙 .-> Pipeline
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    class Agent primary</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    subgraph Ch2["Ch.2 대시보드+DB"]
+        FastAPI["FastAPI"]
+        PostgreSQL[("PostgreSQL")]
+        FastAPI --- PostgreSQL
+    end
+    subgraph Ch6["Ch.6 오케스트레이션"]
+        Router{Router}
+        Agent[["Agent Chain<br/>ReAct"]]
+        MCP[MCP Tools]
+    end
+    subgraph Ch45["Ch.4~5 검색"]
+        Pipeline[Doc Pipeline]
+        LCEL[LCEL Chain]
+    end
+    ChromaDB[("ChromaDB")]
+    Ollama([Ollama LLM])
+    Rules["Ch.3 규칙"]
+    User -- "1" --> FastAPI -- "2" --> Router -- "3" --> Agent
+    Agent -- "4" --> MCP -- "5" --> PostgreSQL
+    Agent -- "4" --> LCEL -- "5" --> ChromaDB
+    Agent -- "6" --> Ollama -- "7" --> Agent -- "8" --> User
+    Pipeline -. 파싱·벡터화 .-> ChromaDB
+    Rules -. 규칙 .-> Pipeline
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    class Agent primary
+  </pre></div>
+</div>
+
+<!-- ================= Ch.1 ================= -->
+<div class="design-block" id="ch1">
+  <span class="badge" style="background:#ef4444;">Ch.1 · 맛보기</span>
+  <div class="design-title">LLM 단독(환각) vs RAG — 개념 비교</div>
+  <div class="focus-note">Ch.1은 프로토타입. 본격 시스템은 Ch.2부터</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    subgraph Bad["LLM 단독 (환각)"]
+        direction LR
+        Q1([질문]) --> LLM1[LLM] --> A1(["환각 답변"])
+    end
+    subgraph Good["RAG (정확)"]
+        direction LR
+        Q2([질문]) --> Retriever[검색기] --> VDB[("Vector DB")]
+        VDB -- 관련 문서 --> LLM2[LLM]
+        Q2 --> LLM2 --> A2(["출처 답변"])
+    end
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    class Retriever,VDB primary</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    subgraph Bad["LLM 단독 (환각)"]
+        direction LR
+        Q1([질문]) --> LLM1[LLM] --> A1(["환각 답변"])
+    end
+    subgraph Good["RAG (정확)"]
+        direction LR
+        Q2([질문]) --> Retriever[검색기] --> VDB[("Vector DB")]
+        VDB -- 관련 문서 --> LLM2[LLM]
+        Q2 --> LLM2 --> A2(["출처 답변"])
+    end
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    class Retriever,VDB primary
+  </pre></div>
+</div>
+
+<!-- ================= Ch.2 ================= -->
+<div class="design-block" id="ch2">
+  <span class="badge" style="background:#f59e0b;">Ch.2 · 대시보드</span>
+  <div class="design-title">전체 맥락 속에서 Ch.2가 만드는 것</div>
+  <div class="focus-note"><b>파랑</b>: FastAPI + PostgreSQL + Swagger (Ch.2가 직접 만드는 부분)<br><b>회색</b>: Agent·RAG·LLM 등 앞으로 만들 것 (존재만 표시)</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+
+    subgraph Ch2Detail["Ch.2 · 만드는 부분"]
+        direction LR
+        FastAPI["FastAPI<br/>/employees /leaves /sales"]
+        Swagger["Swagger UI"]
+        PostgreSQL[("PostgreSQL<br/>employees·leaves·sales")]
+        FastAPI --- PostgreSQL
+        FastAPI -. 자동 문서화 .-> Swagger
+    end
+
+    Agent(["Agent Chain<br/>Ch.6 예정"])
+    Retrieval(["RAG<br/>Ch.4~5 예정"])
+    LLM(["LLM<br/>Ch.1/외부"])
+
+    User -- "1. 요청" --> FastAPI
+    FastAPI -- "2. CRUD" --> PostgreSQL
+    PostgreSQL -- "3. 결과" --> FastAPI
+    FastAPI -- "4. JSON" --> User
+
+    FastAPI -. 앞으로 연결 .-> Agent
+    Agent -. .-> Retrieval
+    Agent -. .-> LLM
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class FastAPI,Swagger,PostgreSQL primary
+    class Agent,Retrieval,LLM abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    subgraph Ch2Detail["Ch.2 · 만드는 부분"]
+        direction LR
+        FastAPI["FastAPI<br/>/employees /leaves /sales"]
+        Swagger["Swagger UI"]
+        PostgreSQL[("PostgreSQL<br/>employees·leaves·sales")]
+        FastAPI --- PostgreSQL
+        FastAPI -. 자동 문서화 .-> Swagger
+    end
+    Agent(["Agent Chain<br/>Ch.6 예정"])
+    Retrieval(["RAG<br/>Ch.4~5 예정"])
+    LLM(["LLM<br/>Ch.1/외부"])
+    User -- "1. 요청" --> FastAPI
+    FastAPI -- "2. CRUD" --> PostgreSQL
+    PostgreSQL -- "3. 결과" --> FastAPI
+    FastAPI -- "4. JSON" --> User
+    FastAPI -. 앞으로 연결 .-> Agent
+    Agent -. .-> Retrieval
+    Agent -. .-> LLM
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class FastAPI,Swagger,PostgreSQL primary
+    class Agent,Retrieval,LLM abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.3 ================= -->
+<div class="design-block" id="ch3">
+  <span class="badge" style="background:#6b7280;">Ch.3 · 문서 규칙</span>
+  <div class="design-title">오프라인 준비 단계 — 전체 시스템 속 위치</div>
+  <div class="focus-note"><b>파랑</b>: 규칙 + 준비 문서 (Ch.3 영역)<br><b>회색</b>: Doc Pipeline · Vector DB · RAG 시스템 (앞으로)</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    subgraph Ch3Detail["Ch.3 · 만드는 부분"]
+        direction LR
+        Meta[메타데이터]
+        Folder[폴더 구조]
+        Reindex[재인덱싱]
+        PDF[(PDF)]
+        Word[(Word)]
+        Excel[(Excel)]
+        HWP[(HWP)]
+        Meta --> PDF
+        Folder --> PDF
+    end
+
+    Pipeline(["Doc Pipeline<br/>Ch.4 예정"])
+    VDB[("ChromaDB<br/>Ch.4 예정")]
+    System(["RAG 시스템<br/>Ch.5~ 예정"])
+    User([사내 직원])
+
+    PDF -. 입력 .-> Pipeline
+    Word -. 입력 .-> Pipeline
+    Excel -. 입력 .-> Pipeline
+    HWP -. 입력 .-> Pipeline
+    Pipeline -. .-> VDB
+    VDB -. .-> System
+    User -. .-> System
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Meta,Folder,Reindex,PDF,Word,Excel,HWP primary
+    class Pipeline,VDB,System abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    subgraph Ch3Detail["Ch.3 · 만드는 부분"]
+        direction LR
+        Meta[메타데이터]
+        Folder[폴더 구조]
+        Reindex[재인덱싱]
+        PDF[(PDF)]
+        Word[(Word)]
+        Excel[(Excel)]
+        HWP[(HWP)]
+        Meta --> PDF
+        Folder --> PDF
+    end
+    Pipeline(["Doc Pipeline<br/>Ch.4 예정"])
+    VDB[("ChromaDB<br/>Ch.4 예정")]
+    System(["RAG 시스템<br/>Ch.5~ 예정"])
+    User([사내 직원])
+    PDF -. 입력 .-> Pipeline
+    Word -. 입력 .-> Pipeline
+    Excel -. 입력 .-> Pipeline
+    HWP -. 입력 .-> Pipeline
+    Pipeline -. .-> VDB
+    VDB -. .-> System
+    User -. .-> System
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Meta,Folder,Reindex,PDF,Word,Excel,HWP primary
+    class Pipeline,VDB,System abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.4 ================= -->
+<div class="design-block" id="ch4">
+  <span class="badge" style="background:#10b981;">Ch.4 · 벡터 DB 구축</span>
+  <div class="design-title">전체 시스템 속 Ch.4가 만드는 것</div>
+  <div class="focus-note"><b>파랑</b>: 파싱→청킹→벡터화 오프라인 파이프라인 + ChromaDB<br><b>회색</b>: 질문 경로 (Ch.5부터 만들) · Ch.2 대시보드 · LLM</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    subgraph Ch4Offline["Ch.4 · 오프라인 파이프라인 (만드는 부분)"]
+        direction LR
+        Docs[("사내 문서<br/>PDF·Word·Excel·HWP")]
+        Parser["Parser<br/>pypdf·python-docx·openpyxl"]
+        Chunker["Chunker<br/>500자·100 오버랩"]
+        Embedder["Embedder<br/>ko-sroberta-multitask"]
+        VDB[("ChromaDB<br/>벡터 저장")]
+        Docs --> Parser --> Chunker --> Embedder --> VDB
+    end
+
+    User([사내 직원])
+    FastAPI(["FastAPI<br/>Ch.2"])
+    Retriever(["검색기<br/>Ch.5 예정"])
+    LLM(["Ollama LLM"])
+
+    User -. 질문 .-> FastAPI
+    FastAPI -. .-> Retriever
+    Retriever -. 질문 임베딩 .-> VDB
+    VDB -. 관련 문서 .-> LLM
+    LLM -. 답변 .-> User
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Docs,Parser,Chunker,Embedder,VDB primary
+    class FastAPI,Retriever,LLM abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    subgraph Ch4Offline["Ch.4 · 오프라인 파이프라인 (만드는 부분)"]
+        direction LR
+        Docs[("사내 문서<br/>PDF·Word·Excel·HWP")]
+        Parser["Parser<br/>pypdf·python-docx·openpyxl"]
+        Chunker["Chunker<br/>500자·100 오버랩"]
+        Embedder["Embedder<br/>ko-sroberta-multitask"]
+        VDB[("ChromaDB<br/>벡터 저장")]
+        Docs --> Parser --> Chunker --> Embedder --> VDB
+    end
+    User([사내 직원])
+    FastAPI(["FastAPI<br/>Ch.2"])
+    Retriever(["검색기<br/>Ch.5 예정"])
+    LLM(["Ollama LLM"])
+    User -. 질문 .-> FastAPI
+    FastAPI -. .-> Retriever
+    Retriever -. 질문 임베딩 .-> VDB
+    VDB -. 관련 문서 .-> LLM
+    LLM -. 답변 .-> User
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Docs,Parser,Chunker,Embedder,VDB primary
+    class FastAPI,Retriever,LLM abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.5 ================= -->
+<div class="design-block" id="ch5">
+  <span class="badge" style="background:#8b5cf6;">Ch.5 · LCEL 파이프라인</span>
+  <div class="design-title">전체 맥락 속 LCEL Chain 내부 상세</div>
+  <div class="focus-note"><b>파랑</b>: LCEL Chain 5개 컴포넌트 (Retriever·Prompt·LLM·Parser·Memory)<br><b>회색</b>: 대시보드(Ch.2)·ChromaDB(Ch.4)·외부 LLM</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+    FastAPI(["FastAPI<br/>Ch.2"])
+
+    subgraph Ch5Detail["Ch.5 · LCEL Chain (만드는 부분)"]
+        direction LR
+        Retriever["Retriever<br/>k=3"]
+        Prompt["Prompt 템플릿<br/>출처 강제"]
+        LLMCall["ChatOllama"]
+        Parser["Response Parser<br/>&lt;think&gt; 제거"]
+        Memory["WindowMemory"]
+        Retriever --> Prompt --> LLMCall --> Parser
+        Memory -. 이전 대화 .-> Prompt
+    end
+
+    ChromaDB[("ChromaDB<br/>Ch.4")]
+    LLM(["Ollama LLM"])
+
+    User -- "1" --> FastAPI -- "2" --> Retriever
+    Retriever <-- "3. 관련 문서" --> ChromaDB
+    LLMCall <-- "4" --> LLM
+    Parser -- "5. 답변+출처" --> FastAPI
+    FastAPI -- "6" --> User
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Retriever,Prompt,LLMCall,Parser,Memory primary
+    class FastAPI,ChromaDB,LLM abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    FastAPI(["FastAPI<br/>Ch.2"])
+    subgraph Ch5Detail["Ch.5 · LCEL Chain (만드는 부분)"]
+        direction LR
+        Retriever["Retriever<br/>k=3"]
+        Prompt["Prompt 템플릿<br/>출처 강제"]
+        LLMCall["ChatOllama"]
+        Parser["Response Parser<br/>&lt;think&gt; 제거"]
+        Memory["WindowMemory"]
+        Retriever --> Prompt --> LLMCall --> Parser
+        Memory -. 이전 대화 .-> Prompt
+    end
+    ChromaDB[("ChromaDB<br/>Ch.4")]
+    LLM(["Ollama LLM"])
+    User -- "1" --> FastAPI -- "2" --> Retriever
+    Retriever <-- "3. 관련 문서" --> ChromaDB
+    LLMCall <-- "4" --> LLM
+    Parser -- "5. 답변+출처" --> FastAPI
+    FastAPI -- "6" --> User
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Retriever,Prompt,LLMCall,Parser,Memory primary
+    class FastAPI,ChromaDB,LLM abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.6 ================= -->
+<div class="design-block" id="ch6">
+  <span class="badge" style="background:#ec4899;">Ch.6 · 통합 에이전트</span>
+  <div class="design-title">전체 맥락 속 Router·Agent·MCP 내부 상세</div>
+  <div class="focus-note"><b>파랑</b>: Router 3단계 + Agent ReAct 루프 + MCP Tools 4개<br><b>회색</b>: FastAPI·LCEL·DB들·LLM (기존 또는 외부)</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+    FastAPI(["FastAPI<br/>Ch.2"])
+
+    subgraph Ch6Detail["Ch.6 · 오케스트레이션 (만드는 부분)"]
+        direction LR
+        subgraph Rt["Query Router"]
+            Rule --> Schema --> LLMClass
+        end
+        subgraph AL["Agent Chain (ReAct)"]
+            Think --> Act --> Observe
+            Observe -. 재시도 .-> Think
+        end
+        subgraph Tl["MCP Tools"]
+            T1[leave_balance]
+            T2[sales_sum]
+            T3[search_documents]
+        end
+    end
+
+    LCEL(["LCEL Chain<br/>Ch.5"])
+    PostgreSQL[("PostgreSQL<br/>Ch.2")]
+    ChromaDB[("ChromaDB<br/>Ch.4")]
+    LLM(["Ollama LLM"])
+
+    User -- "1" --> FastAPI -- "2" --> Rt
+    Rt -- "3. 분기" --> AL
+    AL -- "4. 도구" --> Tl
+    T1 -. .-> PostgreSQL
+    T2 -. .-> PostgreSQL
+    T3 -. .-> LCEL -. .-> ChromaDB
+    AL -- "5. LLM" --> LLM
+    LLM -- "6" --> AL -- "7. 통합" --> FastAPI -- "8" --> User
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Rule,Schema,LLMClass,Think,Act,Observe,T1,T2,T3 primary
+    class FastAPI,LCEL,PostgreSQL,ChromaDB,LLM abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    FastAPI(["FastAPI<br/>Ch.2"])
+    subgraph Ch6Detail["Ch.6 · 오케스트레이션 (만드는 부분)"]
+        direction LR
+        subgraph Rt["Query Router"]
+            Rule --> Schema --> LLMClass
+        end
+        subgraph AL["Agent Chain (ReAct)"]
+            Think --> Act --> Observe
+            Observe -. 재시도 .-> Think
+        end
+        subgraph Tl["MCP Tools"]
+            T1[leave_balance]
+            T2[sales_sum]
+            T3[search_documents]
+        end
+    end
+    LCEL(["LCEL Chain<br/>Ch.5"])
+    PostgreSQL[("PostgreSQL<br/>Ch.2")]
+    ChromaDB[("ChromaDB<br/>Ch.4")]
+    LLM(["Ollama LLM"])
+    User -- "1" --> FastAPI -- "2" --> Rt
+    Rt -- "3. 분기" --> AL
+    AL -- "4. 도구" --> Tl
+    T1 -. .-> PostgreSQL
+    T2 -. .-> PostgreSQL
+    T3 -. .-> LCEL -. .-> ChromaDB
+    AL -- "5. LLM" --> LLM
+    LLM -- "6" --> AL -- "7. 통합" --> FastAPI -- "8" --> User
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Rule,Schema,LLMClass,Think,Act,Observe,T1,T2,T3 primary
+    class FastAPI,LCEL,PostgreSQL,ChromaDB,LLM abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.7 ================= -->
+<div class="design-block" id="ch7">
+  <span class="badge" style="background:#14b8a6;">Ch.7 · 운영</span>
+  <div class="design-title">전체 플로우를 감싸는 Cache·Tracker 레이어</div>
+  <div class="focus-note"><b>파랑</b>: ResponseCache(HIT/MISS)·TokenTracker·Log<br><b>회색</b>: 기존 Agent·RAG·LLM</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+
+    subgraph Ch7Detail["Ch.7 · 운영 레이어 (만드는 부분)"]
+        direction LR
+        Cache{"ResponseCache<br/>TTL"}
+        Tracker["TokenTracker"]
+        Log[(로그)]
+        Tracker --> Log
+    end
+
+    Agent(["Agent Chain<br/>Ch.6"])
+    LLM(["Ollama LLM"])
+
+    User -- "1" --> Cache
+    Cache -- "2a. HIT" --> User
+    Cache -- "2b. MISS" --> Agent
+    Agent -- "3" --> LLM
+    LLM -- "4" --> Tracker
+    Tracker -- "5. 캐싱" --> Cache
+    Cache -- "6. 응답" --> User
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Cache,Tracker,Log primary
+    class Agent,LLM abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    subgraph Ch7Detail["Ch.7 · 운영 레이어 (만드는 부분)"]
+        direction LR
+        Cache{"ResponseCache<br/>TTL"}
+        Tracker["TokenTracker"]
+        Log[(로그)]
+        Tracker --> Log
+    end
+    Agent(["Agent Chain<br/>Ch.6"])
+    LLM(["Ollama LLM"])
+    User -- "1" --> Cache
+    Cache -- "2a. HIT" --> User
+    Cache -- "2b. MISS" --> Agent
+    Agent -- "3" --> LLM
+    LLM -- "4" --> Tracker
+    Tracker -- "5. 캐싱" --> Cache
+    Cache -- "6. 응답" --> User
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class Cache,Tracker,Log primary
+    class Agent,LLM abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.8 ================= -->
+<div class="design-block" id="ch8">
+  <span class="badge" style="background:#f97316;">Ch.8 · 검색 품질 튜닝</span>
+  <div class="design-title">전체 맥락 속 Retriever 부분만 상세화</div>
+  <div class="focus-note"><b>파랑</b>: BM25·Vector·Hybrid·Reranker·TopK (검색 품질 레이어)<br><b>회색</b>: 사용자·Agent·LLM·ChromaDB</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+    Agent(["Agent Chain<br/>Ch.6"])
+
+    subgraph Ch8Detail["Ch.8 · 향상된 검색 (만드는 부분)"]
+        direction LR
+        BM25[BM25]
+        Vector[Vector]
+        Merge["Hybrid Merge<br/>alpha=0.5"]
+        Rerank["Cross-Encoder<br/>Reranker"]
+        TopK["Top k=5"]
+        BM25 --> Merge
+        Vector --> Merge
+        Merge --> Rerank --> TopK
+    end
+
+    ChromaDB[("ChromaDB<br/>Ch.4")]
+    LLM(["Ollama LLM"])
+
+    User -- "1" --> Agent
+    Agent -- "2. 질문" --> BM25
+    Agent -- "2. 질문" --> Vector
+    Vector <-- "3. 임베딩" --> ChromaDB
+    TopK -- "4. 최적 문서" --> Agent
+    Agent -- "5" --> LLM
+    LLM -- "6" --> Agent
+    Agent -- "7. 응답" --> User
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class BM25,Vector,Merge,Rerank,TopK primary
+    class Agent,ChromaDB,LLM abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    Agent(["Agent Chain<br/>Ch.6"])
+    subgraph Ch8Detail["Ch.8 · 향상된 검색 (만드는 부분)"]
+        direction LR
+        BM25[BM25]
+        Vector[Vector]
+        Merge["Hybrid Merge<br/>alpha=0.5"]
+        Rerank["Cross-Encoder<br/>Reranker"]
+        TopK["Top k=5"]
+        BM25 --> Merge
+        Vector --> Merge
+        Merge --> Rerank --> TopK
+    end
+    ChromaDB[("ChromaDB<br/>Ch.4")]
+    LLM(["Ollama LLM"])
+    User -- "1" --> Agent
+    Agent -- "2. 질문" --> BM25
+    Agent -- "2. 질문" --> Vector
+    Vector <-- "3. 임베딩" --> ChromaDB
+    TopK -- "4. 최적 문서" --> Agent
+    Agent -- "5" --> LLM
+    LLM -- "6" --> Agent
+    Agent -- "7. 응답" --> User
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class BM25,Vector,Merge,Rerank,TopK primary
+    class Agent,ChromaDB,LLM abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.9 ================= -->
+<div class="design-block" id="ch9">
+  <span class="badge" style="background:#06b6d4;">Ch.9 · 질문 이해</span>
+  <div class="design-title">전체 맥락 속 질문 재작성 레이어</div>
+  <div class="focus-note"><b>파랑</b>: HyDE·Multi-Query·Parent Retriever 변환 로직<br><b>회색</b>: 사용자·RAG 나머지·LLM</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+
+    subgraph Ch9Detail["Ch.9 · 질문 재작성 (만드는 부분)"]
+        direction LR
+        HyDE[HyDE]
+        MQ["Multi-Query"]
+        Parent["Parent<br/>Retriever"]
+        Dedup["중복 제거"]
+    end
+
+    Retriever(["검색기<br/>Ch.5"])
+    ChromaDB[("ChromaDB<br/>Ch.4"])
+    LLM(["Ollama LLM"])
+
+    User -- "1. 원본 질문" --> HyDE
+    User -- "1." --> MQ
+    User -- "1." --> Parent
+    HyDE -- "2. 재작성" --> Retriever
+    MQ -- "2. 재작성" --> Retriever
+    Parent -- "2. 재작성" --> Retriever
+    Retriever <-- "3" --> ChromaDB
+    Retriever -- "4. 후보" --> Dedup
+    Dedup -- "5. 정제 문서" --> LLM
+    LLM -- "6. 답변" --> User
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class HyDE,MQ,Parent,Dedup primary
+    class Retriever,ChromaDB,LLM abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    subgraph Ch9Detail["Ch.9 · 질문 재작성 (만드는 부분)"]
+        direction LR
+        HyDE[HyDE]
+        MQ["Multi-Query"]
+        Parent["Parent<br/>Retriever"]
+        Dedup["중복 제거"]
+    end
+    Retriever(["검색기<br/>Ch.5"])
+    ChromaDB[("ChromaDB<br/>Ch.4"])
+    LLM(["Ollama LLM"])
+    User -- "1. 원본 질문" --> HyDE
+    User -- "1." --> MQ
+    User -- "1." --> Parent
+    HyDE -- "2. 재작성" --> Retriever
+    MQ -- "2. 재작성" --> Retriever
+    Parent -- "2. 재작성" --> Retriever
+    Retriever <-- "3" --> ChromaDB
+    Retriever -- "4. 후보" --> Dedup
+    Dedup -- "5. 정제 문서" --> LLM
+    LLM -- "6. 답변" --> User
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class HyDE,MQ,Parent,Dedup primary
+    class Retriever,ChromaDB,LLM abstract
+  </pre></div>
+</div>
+
+<!-- ================= Ch.10 ================= -->
+<div class="design-block" id="ch10">
+  <span class="badge" style="background:#a855f7;">Ch.10 · 이미지 + 평가</span>
+  <div class="design-title">전체 시스템 + 이미지 파싱 + 평가 루프</div>
+  <div class="focus-note"><b>파랑</b>: Vision LLM·OCR·Eval 3지표<br><b>회색</b>: 전체 RAG·사용자·ChromaDB</div>
+
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code>flowchart LR
+    User([사내 직원])
+    Img[("이미지 PDF")]
+
+    subgraph Ch10Vision["Ch.10 · 이미지 처리 (오프라인)"]
+        direction LR
+        VSelect{선택}
+        VLLM["Vision LLM<br/>LLaVA"]
+        OCR["OCR<br/>EasyOCR"]
+        Text[추출 텍스트]
+        VSelect --> VLLM --> Text
+        VSelect --> OCR --> Text
+    end
+
+    ChromaDB[("ChromaDB<br/>Ch.4"])
+    RAG(["RAG 시스템<br/>Ch.5~9"])
+
+    subgraph Ch10Eval["Ch.10 · 평가 (주기적)"]
+        direction LR
+        Testset["테스트 세트"]
+        P["Precision@k"]
+        R["Recall@k"]
+        H["Hallucination"]
+        Testset --> P
+        Testset --> R
+        Testset --> H
+    end
+
+    Img -. "A. 파싱" .-> VSelect
+    Text -. "B. 저장" .-> ChromaDB
+    User -- "1. 질문" --> RAG
+    RAG -- "2. 검색" --> ChromaDB
+    RAG -- "3. 답변" --> User
+    Testset -. "실행" .-> RAG
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class VSelect,VLLM,OCR,Text,Testset,P,R,H primary
+    class ChromaDB,RAG abstract</code></div>
+  <div class="mermaid-render"><pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+    Img[("이미지 PDF")]
+    subgraph Ch10Vision["Ch.10 · 이미지 처리 (오프라인)"]
+        direction LR
+        VSelect{선택}
+        VLLM["Vision LLM<br/>LLaVA"]
+        OCR["OCR<br/>EasyOCR"]
+        Text[추출 텍스트]
+        VSelect --> VLLM --> Text
+        VSelect --> OCR --> Text
+    end
+    ChromaDB[("ChromaDB<br/>Ch.4"])
+    RAG(["RAG 시스템<br/>Ch.5~9"])
+    subgraph Ch10Eval["Ch.10 · 평가 (주기적)"]
+        direction LR
+        Testset["테스트 세트"]
+        P["Precision@k"]
+        R["Recall@k"]
+        H["Hallucination"]
+        Testset --> P
+        Testset --> R
+        Testset --> H
+    end
+    Img -. "A. 파싱" .-> VSelect
+    Text -. "B. 저장" .-> ChromaDB
+    User -- "1. 질문" --> RAG
+    RAG -- "2. 검색" --> ChromaDB
+    RAG -- "3. 답변" --> User
+    Testset -. "실행" .-> RAG
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef abstract fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    class VSelect,VLLM,OCR,Text,Testset,P,R,H primary
+    class ChromaDB,RAG abstract
+  </pre></div>
+</div>
+
+<div class="design-block" style="background:#f7fafc;">
+  <div class="design-title" style="font-size:15px;">v8 핵심 원칙</div>
+  <ul style="font-size:13px; color:#4a5568; padding-left:20px; line-height:2;">
+    <li>각 챕터 다이어그램이 <b>전체 시스템</b>을 포함 — 독자가 "이 챕터가 어디에 위치하는지" 바로 앎</li>
+    <li><b>파란색</b>: 해당 챕터가 실제로 만드는 부분 (상세)</li>
+    <li><b>회색 점선</b>: 이미 있거나 앞으로 만들 부분 (이름만, 박스만)</li>
+    <li>요청→응답 전체 사이클 번호로 표시</li>
+    <li>오프라인 파이프라인은 점선으로 표시해 실시간 흐름과 구분</li>
+  </ul>
+</div>
+
+</div>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { curve: 'basis', htmlLabels: true } });
+function copyCode(btn) {
+  const code = btn.nextElementSibling.textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const t = btn.textContent;
+    btn.textContent = '복사됨!'; btn.style.background = '#059669';
+    setTimeout(() => { btn.textContent = t; btn.style.background = '#4a5568'; }, 1500);
+  });
+}
+</script>
+</body>
+</html>

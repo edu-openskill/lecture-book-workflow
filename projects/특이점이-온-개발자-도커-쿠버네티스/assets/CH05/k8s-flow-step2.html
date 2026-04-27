@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 2 — kube-proxy가 Ingress Controller로 전달</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1080px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .step-badge {
+    display: inline-block;
+    background: #c62828;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .canvas {
+    display: grid;
+    grid-template-columns: 200px 100px 1fr;
+    align-items: start;
+  }
+
+  /* ===== Host ===== */
+  .host-col { display: flex; flex-direction: column; align-items: center; padding-top: 40px; }
+  .host-label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 8px; }
+  .host-box {
+    width: 140px; height: 60px;
+    border: 2.5px solid #222; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    background: #fff;
+  }
+
+  /* ===== Host → NodePort 화살표 (Step2: 지나간 단계, 회색) ===== */
+  .host-arrow {
+    padding-top: 55px; padding-right: 56px;
+    display: flex; flex-direction: column; align-items: flex-end;
+    position: relative; z-index: 3;
+  }
+  .host-arrow .arrow-label {
+    font-size: 10px; color: #888; font-weight: 700;
+    font-family: 'Consolas', monospace; margin-bottom: 4px;
+  }
+  .host-arrow svg { width: 60px; height: 18px; }
+
+  /* ===== Cluster ===== */
+  .cluster {
+    border: 2px dashed #888; border-radius: 14px;
+    padding: 24px 16px 22px 76px;
+    background: #fdfdfd;
+    position: relative;
+  }
+  .cluster-title {
+    position: absolute; top: -10px; left: 100px;
+    background: #fff; padding: 0 8px;
+    font-size: 12px; font-weight: 700; color: #555;
+  }
+
+  /* NodePort (Step2: 지나간 단계) */
+  .entry-zone {
+    position: absolute;
+    top: 32px;
+    left: -48px;
+    background: #fff8d6;
+    border: 2px solid #d4b94a;
+    border-radius: 10px;
+    padding: 16px 14px 12px;
+    z-index: 2;
+  }
+  .entry-zone-label {
+    position: absolute; top: -9px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff8d6; padding: 0 8px; white-space: nowrap;
+    font-size: 10px; color: #8a6d00; font-weight: 700;
+  }
+  .entry-zone-sub {
+    text-align: center; font-size: 10px; color: #8a6d00; margin-top: 6px;
+  }
+  .nodeport {
+    border: 2.5px solid #888; border-radius: 6px;
+    padding: 10px 14px; background: #fff; text-align: center;
+  }
+  .nodeport .name { font-size: 13px; font-weight: 800; color: #888; }
+  .nodeport .port { font-size: 11px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+
+  /* Row 1 (Step2: 활성 단계) */
+  .row-entry {
+    display: flex; align-items: center; justify-content: flex-start; gap: 12px;
+    margin: 0 auto 14px; max-width: 420px;
+    padding-left: 0; padding-top: 30px;
+    min-height: 60px;
+  }
+  .box-active {
+    border: 2.5px solid #c62828; border-radius: 6px;
+    padding: 8px 12px; background: #fff;
+    font-size: 11px; font-weight: 800; color: #c62828;
+    text-align: center; line-height: 1.25;
+    box-shadow: 0 0 0 3px rgba(220,0,0,0.15);
+  }
+
+  /* L7 zone (muted) */
+  .l7-zone {
+    background: #e3f2fd; border: 1.5px solid #90caf9; border-radius: 6px;
+    padding: 16px 14px 14px; margin: 0 auto 10px; position: relative;
+    opacity: 0.45;
+    max-width: 420px;
+  }
+  .l7-zone::before {
+    content: 'L7';
+    position: absolute; top: -7px; right: 10px;
+    background: #e3f2fd; padding: 0 5px;
+    font-size: 9px; color: #1565c0; font-weight: 700;
+  }
+  .services { display: flex; justify-content: space-around; }
+  .service {
+    border: 2px solid #888; border-radius: 18px;
+    padding: 8px 18px; background: #fff;
+    font-size: 11px; font-weight: 700; color: #777;
+    min-width: 100px; text-align: center;
+  }
+
+  /* L4 zone (muted) */
+  .l4-zone {
+    background: #ffebee; border: 1.5px solid #ef9a9a; border-radius: 6px;
+    padding: 16px 14px 14px; margin: 0 auto 10px; position: relative;
+    opacity: 0.45;
+    max-width: 420px;
+  }
+  .l4-zone::before {
+    content: 'L4';
+    position: absolute; top: -7px; right: 10px;
+    background: #ffebee; padding: 0 5px;
+    font-size: 9px; color: #c62828; font-weight: 700;
+  }
+  .nodes { display: flex; justify-content: space-around; }
+  .node {
+    border: 2px solid #888; border-radius: 5px;
+    padding: 8px 10px; background: #fff; text-align: center; min-width: 120px;
+  }
+  .node-head { font-size: 9.5px; color: #777; font-weight: 700; display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .node-head .port { font-family: 'Consolas', monospace; color: #aaa; }
+  .kube-proxy-inner {
+    border: 1.5px solid #888; border-radius: 3px;
+    padding: 3px 8px; font-size: 10px; font-weight: 700; color: #777;
+    display: inline-block;
+  }
+
+  /* Pods (muted) */
+  .pods-row { display: flex; justify-content: space-around; margin: 0 auto 10px; opacity: 0.45; max-width: 420px; padding: 4px 0; }
+  .pod-group { display: flex; gap: 6px; border: 2px dashed #bbb; border-radius: 5px; padding: 6px 10px; background: #fff; }
+  .pod {
+    border: 1.5px solid #888; border-radius: 12px;
+    padding: 4px 10px; background: #fff;
+    font-size: 9.5px; font-weight: 700; color: #777;
+    text-align: center; min-width: 44px;
+  }
+
+  /* Deployment (muted) */
+  .deployment-zone {
+    background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 6px;
+    padding: 10px 8px; text-align: center; position: relative;
+    opacity: 0.45;
+    max-width: 300px; margin: 0 auto;
+  }
+  .deployment {
+    display: inline-block;
+    border: 2px dashed #66bb6a; border-radius: 5px;
+    padding: 4px 14px; background: #fff;
+    font-size: 10px; font-weight: 700; color: #777;
+  }
+
+  /* Endpoint Controller (muted) */
+  .endpoint-controller {
+    position: absolute; left: 22px; top: 260px;
+    border: 2px solid #888; border-radius: 6px;
+    padding: 10px 12px; background: #fff; text-align: center;
+    opacity: 0.45;
+    width: 90px;
+    z-index: 3;
+  }
+  .endpoint-controller .ec-title { font-size: 11px; font-weight: 700; color: #777; line-height: 1.25; }
+
+  /* zone 사이 연결 화살표 (SVG, muted) */
+  .connector {
+    display: block; margin: -1px auto;
+    max-width: 420px; width: 100%;
+    opacity: 0.4;
+  }
+  .connector-dep {
+    display: block; margin: -1px auto;
+    max-width: 420px; width: 100%;
+    opacity: 0.4;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">
+    <span class="step-badge">STEP 2</span>
+    kube-proxy가 Ingress Controller Pod으로 전달
+  </div>
+
+  <div class="canvas">
+    <!-- Host -->
+    <div class="host-col">
+      <div class="host-label">로컬호스트</div>
+      <div class="host-box">Host</div>
+    </div>
+
+    <!-- Host → NodePort 화살표 (지나간 단계, 회색) -->
+    <div class="host-arrow">
+      <div class="arrow-label">localhost:9000</div>
+      <svg viewBox="0 0 60 18">
+        <line x1="0" y1="9" x2="48" y2="9" stroke="#888" stroke-width="2"/>
+        <polygon points="48,2 60,9 48,16" fill="#888"/>
+      </svg>
+    </div>
+
+    <!-- Cluster -->
+    <div class="cluster">
+      <div class="cluster-title">쿠버네티스 가상세계 (클러스터)</div>
+
+      <!-- NodePort (지나간 단계) -->
+      <div class="entry-zone">
+        <div class="entry-zone-label">클러스터 입구</div>
+        <div class="nodeport">
+          <div class="name">NodePort</div>
+          <div class="port">:9000</div>
+        </div>
+        <div class="entry-zone-sub">NodePort Service</div>
+      </div>
+
+      <!-- NodePort → Kube Proxy 긴 화살표 (Step2 활성 빨간색) -->
+      <svg class="np-to-kp" preserveAspectRatio="none" viewBox="0 0 140 14"
+        style="position:absolute; left:72px; top:62px; width:140px; height:14px; z-index:2;">
+        <line x1="0" y1="7" x2="128" y2="7" stroke="#c62828" stroke-width="3"/>
+        <polygon points="128,1 140,7 128,13" fill="#c62828"/>
+      </svg>
+
+      <!-- Row 1 내부: Kube Proxy → Ingress Controller (Step2 활성) -->
+      <div class="row-entry">
+        <div class="box-active">Kube Proxy</div>
+        <svg width="36" height="14"><line x1="0" y1="7" x2="24" y2="7" stroke="#c62828" stroke-width="3"/><polygon points="24,1 36,7 24,13" fill="#c62828"/></svg>
+        <div class="box-active">Ingress Controller Pod</div>
+      </div>
+
+      <!-- Ingress → Services 분기 (muted) -->
+      <svg class="connector" viewBox="0 0 420 32" preserveAspectRatio="none" style="height:32px;">
+        <path d="M 210 0 L 210 10 L 105 22 L 105 30" stroke="#888" stroke-width="1.5" fill="none"/>
+        <polygon points="101,24 105,32 109,24" fill="#888"/>
+        <path d="M 210 0 L 210 10 L 315 22 L 315 30" stroke="#888" stroke-width="1.5" fill="none"/>
+        <polygon points="311,24 315,32 319,24" fill="#888"/>
+      </svg>
+
+      <!-- L7 Services -->
+      <div class="l7-zone">
+        <div class="services">
+          <div class="service">Service A</div>
+          <div class="service">Service B</div>
+        </div>
+      </div>
+
+      <!-- Services → Nodes 세로 화살표 (muted) -->
+      <svg class="connector" viewBox="0 0 420 28" preserveAspectRatio="none" style="height:28px;">
+        <line x1="105" y1="0" x2="105" y2="22" stroke="#888" stroke-width="1.5"/>
+        <polygon points="101,18 105,28 109,18" fill="#888"/>
+        <line x1="315" y1="0" x2="315" y2="22" stroke="#888" stroke-width="1.5"/>
+        <polygon points="311,18 315,28 319,18" fill="#888"/>
+      </svg>
+
+      <!-- L4 Nodes -->
+      <div class="l4-zone">
+        <div class="nodes">
+          <div class="node">
+            <div class="node-head"><span>Node1</span><span class="port">port: 9000</span></div>
+            <div class="kube-proxy-inner">Kube Proxy</div>
+          </div>
+          <div class="node">
+            <div class="node-head"><span>Node2</span><span class="port">port: 9000</span></div>
+            <div class="kube-proxy-inner">Kube Proxy</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kube Proxy → Pods 분기 (muted) -->
+      <svg class="connector" viewBox="0 0 420 32" preserveAspectRatio="none" style="height:32px;">
+        <path d="M 105 0 L 105 10 L 80 22 L 80 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="76,24 80,32 84,24" fill="#888"/>
+        <path d="M 105 0 L 105 10 L 135 22 L 135 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="131,24 135,32 139,24" fill="#888"/>
+        <path d="M 315 0 L 315 10 L 285 22 L 285 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="281,24 285,32 289,24" fill="#888"/>
+        <path d="M 315 0 L 315 10 L 340 22 L 340 30" stroke="#888" stroke-width="1.3" fill="none"/>
+        <polygon points="336,24 340,32 344,24" fill="#888"/>
+      </svg>
+
+      <!-- Pods -->
+      <div class="pods-row">
+        <div class="pod-group">
+          <div class="pod">Pod A</div>
+          <div class="pod">Pod A</div>
+        </div>
+        <div class="pod-group">
+          <div class="pod">Pod A</div>
+          <div class="pod">Pod B</div>
+        </div>
+      </div>
+
+      <!-- Pods ↔ Deployment (muted) -->
+      <svg class="connector-dep" viewBox="0 0 420 28" preserveAspectRatio="none" style="height:28px;">
+        <line x1="80" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <line x1="135" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <line x1="285" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <line x1="340" y1="0" x2="210" y2="26" stroke="#81c784" stroke-width="1.2" stroke-dasharray="3,3"/>
+      </svg>
+
+      <!-- Deployment -->
+      <div class="deployment-zone">
+        <div class="deployment">Deployment</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

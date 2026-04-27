@@ -1,0 +1,24 @@
+# ex09 RAG 튜닝 — 질의 변환 + 결과 가공
+# 설치: pip install -r requirements.txt
+
+# LangChain 에코시스템
+langchain==0.3.7
+langchain-core==0.3.63
+langchain-community==0.3.7
+
+# 임베딩 모델
+langchain-huggingface==0.1.2
+sentence-transformers==3.3.1
+huggingface-hub==0.30.2
+
+# 출력 형식
+rich==13.9.4
+
+# HTTP 클라이언트 (Ollama 호출)
+httpx==0.28.0
+
+# 환경 변수
+python-dotenv==1.0.1
+
+# 선택: OpenAI 사용 시
+# openai==1.55.3

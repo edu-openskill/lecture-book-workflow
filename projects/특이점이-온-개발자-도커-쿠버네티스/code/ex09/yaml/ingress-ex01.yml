@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shop-ingress
+spec:
+  ingressClassName: nginx           # 어느 Controller가 이 규칙을 집행할지 지정
+  rules:
+    - http:
+        paths:
+          - path: /order            # 주문 경로 → order-service
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 5678
+          - path: /stores           # 매장 경로 → stores-service
+            pathType: Prefix
+            backend:
+              service:
+                name: stores-service
+                port:
+                  number: 5678

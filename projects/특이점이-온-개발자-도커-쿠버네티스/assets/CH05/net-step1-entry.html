@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 1 — 외부 요청이 클러스터 입구에 도착</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    padding: 28px 32px 24px;
+    width: 780px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .scene {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .external {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .f-head {
+    width: 28px; height: 28px;
+    border: 2.5px solid #555;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .f-body {
+    width: 36px; height: 22px;
+    border: 2.5px solid #555;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    background: #e8e8e8;
+    margin-top: -1px;
+  }
+  .ext-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #222;
+    margin-top: 6px;
+  }
+  .ext-sub {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .arrow-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 16px;
+  }
+  .arrow-label {
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-family: 'Consolas', 'Menlo', monospace;
+  }
+  .arrow-block svg { width: 80px; height: 16px; }
+
+  .node-box {
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    background: #fafafa;
+    padding: 20px 24px 16px;
+    position: relative;
+    text-align: center;
+  }
+  .node-label {
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: #fafafa;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+  }
+  .port-box {
+    border: 2.5px dashed #333;
+    border-radius: 8px;
+    background: #f0f0f0;
+    padding: 14px 20px;
+    display: inline-block;
+  }
+  .port-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #222;
+  }
+  .port-detail {
+    font-size: 12px;
+    color: #555;
+    margin-top: 4px;
+    font-family: 'Consolas', 'Menlo', monospace;
+  }
+  .port-analogy {
+    font-size: 11px;
+    color: #888;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .inner-hint {
+    margin-top: 12px;
+    font-size: 11px;
+    color: #aaa;
+  }
+
+  .explain {
+    margin-top: 20px;
+    padding: 16px 18px;
+    background: #fafafa;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    line-height: 1.8;
+  }
+  .explain p {
+    font-size: 12px;
+    color: #444;
+    margin-bottom: 6px;
+  }
+  .explain p:last-child { margin-bottom: 0; }
+  .explain strong { color: #222; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Step 1 — 외부 요청이 클러스터 입구에 도착</div>
+
+  <div class="scene">
+    <div class="external">
+      <div class="figure">
+        <div class="f-head"></div>
+        <div class="f-body"></div>
+      </div>
+      <div class="ext-label">외부 사용자</div>
+      <div class="ext-sub">myapp.com/api</div>
+    </div>
+
+    <div class="arrow-block">
+      <div class="arrow-label">192.168.1.10:31000</div>
+      <svg viewBox="0 0 80 16">
+        <line x1="0" y1="8" x2="68" y2="8" stroke="#333" stroke-width="2"/>
+        <polygon points="68,3 80,8 68,13" fill="#333"/>
+      </svg>
+    </div>
+
+    <div class="node-box">
+      <div class="node-label">워커 노드</div>
+      <div class="port-box">
+        <div class="port-title">NodePort</div>
+        <div class="port-detail">:31000</div>
+        <div class="port-analogy">건물 정문</div>
+      </div>
+      <div class="inner-hint">→ 안쪽으로 계속 전달됩니다</div>
+    </div>
+  </div>
+
+  <div class="explain">
+    <p>외부 요청이 클러스터에 들어오려면, 먼저 <strong>노드의 열린 포트(NodePort)</strong>를 통과해야 합니다.</p>
+    <p>클러스터는 외부에서 직접 접근할 수 없는 내부 네트워크입니다. NodePort는 그 <strong>클러스터의 입구</strong>입니다.</p>
+    <p>프랜차이즈 건물의 정문과 같습니다. 손님이 건물 안으로 들어오려면 정문을 지나야 합니다.</p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+direction: right
+
+l4: "L4 계층 (kube-proxy)" {
+  style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+
+  metaphor: "비유: 고속도로 분기점" {
+    shape: text
+    style: { font-size: 14 }
+  }
+  check: "확인 범위: IP · Port" {
+    shape: text
+    style: { font-size: 14 }
+  }
+  example: "예\n10.96.0.1:80 → Pod IP:Port" {
+    style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 6; font-size: 12 }
+  }
+}
+
+l7: "L7 계층 (Ingress Controller)" {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+
+  metaphor: "비유: 건물 안내 데스크" {
+    shape: text
+    style: { font-size: 14 }
+  }
+  check: "확인 범위: URL 경로 · Host 헤더" {
+    shape: text
+    style: { font-size: 14 }
+  }
+  example: "예\n/api/* → backend-service\n/static/* → frontend-service" {
+    style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 6; font-size: 12 }
+  }
+}
+
+l4 -> l7: "4계층 → 7계층으로 올라갈수록\n더 구체적인 정보를 읽는다" { style: { stroke: "#666"; stroke-dash: 3 } }

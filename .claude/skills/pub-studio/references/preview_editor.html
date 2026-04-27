@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF 디자인 프리뷰 에디터</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/book.css">
+<link rel="stylesheet" href="/static/css/controls.css">
+<style id="dynamic-variant-styles"></style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h1>PDF 디자인 프리뷰 에디터</h1>
+    <div class="project-name" id="project-name">연결 중...</div>
+    <p>디자인 설정 + 실시간 PDF 프리뷰</p>
+  </div>
+
+  <!-- 저장된 디자인 -->
+  <div class="section" id="sec-saved-designs">
+    <div class="section-title" onclick="toggleSection('sec-saved-designs')">저장된 디자인</div>
+    <div class="section-body">
+      <div style="display:flex;gap:4px;margin-bottom:8px;">
+        <input type="text" id="design-name-input" placeholder="디자인 이름" maxlength="50"
+               style="flex:1;padding:4px 8px;font-size:12px;border:1px solid #d1d5db;border-radius:4px;">
+        <button class="action-btn" onclick="saveDesign()" style="padding:4px 10px;font-size:11px;">저장</button>
+      </div>
+      <div id="saved-design-list"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-presets">
+    <div class="section-title" onclick="toggleSection('sec-presets')">CLI 프리셋 (--design N)</div>
+    <div class="section-body">
+      <div style="margin-bottom:8px;">
+        <button class="action-btn" onclick="saveAsPreset()" style="width:100%;padding:6px;font-size:11px;">현재 설정을 프리셋으로 저장</button>
+      </div>
+      <div id="preset-list"></div>
+    </div>
+  </div>
+
+  <!-- 컴포넌트별 디자인 설정 -->
+  <div id="component-toggles">
+    <div class="section comp-section" id="sec-comp-body">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('body')">본문 body <span class="variant-label" id="variant-label-body">양쪽 정렬</span></span>
+        <div class="variant-btns" id="variant-btns-body" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-body" style="display:none;"></div>
+    </div>
+    <div class="section comp-section" id="sec-comp-heading">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('heading')">제목 heading <span class="variant-label" id="variant-label-heading">클래식</span></span>
+        <div class="variant-btns" id="variant-btns-heading" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-heading" style="display:none;"></div>
+    </div>
+    <div class="section comp-section" id="sec-comp-code">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('code')">코드블록 code <span class="variant-label" id="variant-label-code">카드</span></span>
+        <div class="variant-btns" id="variant-btns-code" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-code" style="display:none;"></div>
+    </div>
+    <div class="section comp-section" id="sec-comp-inline_code">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('inline_code')">인라인코드 <span class="variant-label" id="variant-label-inline_code">배경</span></span>
+        <div class="variant-btns" id="variant-btns-inline_code" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-inline_code" style="display:none;"></div>
+    </div>
+    <div class="section comp-section" id="sec-comp-quote">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('quote')">인용 quote <span class="variant-label" id="variant-label-quote">사이드라인</span></span>
+        <div class="variant-btns" id="variant-btns-quote" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-quote" style="display:none;"></div>
+    </div>
+    <div class="section comp-section" id="sec-comp-table">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('table')">표 table <span class="variant-label" id="variant-label-table">컬러 헤더</span></span>
+        <div class="variant-btns" id="variant-btns-table" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-table" style="display:none;"></div>
+    </div>
+    <div class="section comp-section" id="sec-comp-figure">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('figure')">이미지 여백 figure <span class="variant-label" id="variant-label-figure"></span></span>
+        <div class="variant-btns" id="variant-btns-figure" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-figure" style="display:none;"></div>
+    </div>
+    <div class="section comp-section" id="sec-comp-toc">
+      <div class="section-title comp-title">
+        <span class="comp-name" onclick="toggleCompProps('toc')">목차 toc <span class="variant-label" id="variant-label-toc"></span></span>
+        <div class="variant-btns" id="variant-btns-toc" style="margin-left:auto;"></div>
+      </div>
+      <div class="comp-props" id="props-toc" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- 2. 폰트 -->
+  <div class="section" id="sec-font">
+    <div class="section-title" onclick="toggleSection('sec-font')">폰트</div>
+    <div class="section-body">
+      <div class="control-row"><label>본문</label>
+        <select id="font-body" onchange="updateFont('body')">
+          <option value='"RIDIBatang", serif' selected>RIDIBatang</option>
+          <option value='"KoPubBatang_Pro", serif'>KoPubBatang_Pro</option>
+          <option value='"KoPubDotum_Pro", sans-serif'>KoPubDotum_Pro</option>
+          <option value='"Apple SD Gothic Neo", sans-serif'>Apple SD Gothic Neo</option>
+        </select></div>
+      <div class="control-row"><label>코드</label>
+        <select id="font-code" onchange="updateFont('code')">
+          <option value='"D2Coding", monospace' selected>D2Coding</option>
+          <option value='"D2Coding ligature", monospace'>D2Coding ligature</option>
+          <option value='"Menlo", monospace'>Menlo</option>
+          <option value='"Monaco", monospace'>Monaco</option>
+        </select></div>
+    </div>
+  </div>
+
+  <!-- 3. 타이포그래피 — 컴포넌트별 속성 편집기로 이동됨 -->
+
+  <!-- 4. 판형 & 여백 -->
+  <div class="section" id="sec-margin">
+    <div class="section-title" onclick="toggleSection('sec-margin')">판형 & 여백</div>
+    <div class="section-body">
+      <div class="control-row"><label>판형</label>
+        <select id="page-format" onchange="updatePageFormat()">
+          <option value="A4_국배판">A4 / 국배판 (210x297)</option>
+          <option value="B5_4x6배판" selected>B5 / 4x6배판 (188x254)</option>
+          <option value="크라운판">크라운판 (176x248)</option>
+          <option value="신국판">신국판 (152x225)</option>
+          <option value="A5_국판">A5 / 국판 (148x210)</option>
+          <option value="A6_국반판">A6 / 국반판 (105x148)</option>
+        </select></div>
+      <div class="toggle-row" id="output-mode-row">
+        <span class="toggle-label">출력</span>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setOutputMode('pod')">POD</button>
+          <button class="toggle-btn" onclick="setOutputMode('ebook')">전자책</button>
+        </div>
+      </div>
+      <div class="control-row"><label>상단 <span class="unit">mm</span></label><input type="range" id="margin-top" min="5" max="60" step="1" value="20" oninput="syncFromRange(this,'margin-top-num');updateMargin()"><input type="number" id="margin-top-num" min="5" max="60" step="1" value="20" oninput="syncFromNum(this,'margin-top');updateMargin()"><span class="range-hint">5~60</span></div>
+      <div class="control-row"><label>하단 <span class="unit">mm</span></label><input type="range" id="margin-bottom" min="5" max="60" step="1" value="28" oninput="syncFromRange(this,'margin-bottom-num');updateMargin()"><input type="number" id="margin-bottom-num" min="5" max="60" step="1" value="28" oninput="syncFromNum(this,'margin-bottom');updateMargin()"><span class="range-hint">5~60</span></div>
+      <div class="control-row"><label id="label-margin-left">안쪽 <span class="unit">mm</span></label><input type="range" id="margin-left" min="5" max="60" step="1" value="22" oninput="syncFromRange(this,'margin-left-num');updateMargin()"><input type="number" id="margin-left-num" min="5" max="60" step="1" value="22" oninput="syncFromNum(this,'margin-left');updateMargin()"><span class="range-hint">5~60</span></div>
+      <div class="control-row"><label id="label-margin-right">바깥쪽 <span class="unit">mm</span></label><input type="range" id="margin-right" min="5" max="60" step="1" value="17" oninput="syncFromRange(this,'margin-right-num');updateMargin()"><input type="number" id="margin-right-num" min="5" max="60" step="1" value="17" oninput="syncFromNum(this,'margin-right');updateMargin()"><span class="range-hint">5~60</span></div>
+    </div>
+  </div>
+
+  <!-- 5. 이미지 -->
+  <div class="section" id="sec-image">
+    <div class="section-title" onclick="toggleSection('sec-image')">이미지</div>
+    <div class="section-body">
+      <div class="img-type-section">
+        <div class="img-type-title">개념도 (gemini)</div>
+        <div class="border-preset-group" data-imgtype="gemini">
+          <button class="border-preset-btn active" data-border="bordered" onclick="setImgPreset('gemini','bordered')">bordered</button>
+          <button class="border-preset-btn" data-border="plain" onclick="setImgPreset('gemini','plain')">plain</button>
+          <button class="border-preset-btn" data-border="shadow" onclick="setImgPreset('gemini','shadow')">shadow</button>
+          <button class="border-preset-btn" data-border="bordered-shadow" onclick="setImgPreset('gemini','bordered-shadow')">bordered-shadow</button>
+          <button class="border-preset-btn" data-border="minimal" onclick="setImgPreset('gemini','minimal')">minimal</button>
+        </div>
+        <div class="control-row"><label>너비 <span class="unit">%</span></label><input type="range" id="img-w-gemini" min="20" max="100" step="5" value="70" oninput="syncFromRange(this,'img-w-gemini-num');updateImgWidth('gemini')"><input type="number" id="img-w-gemini-num" min="20" max="100" step="5" value="70" oninput="syncFromNum(this,'img-w-gemini');updateImgWidth('gemini')"><span class="range-hint">20~100</span></div>
+      </div>
+      <div class="img-type-section">
+        <div class="img-type-title">터미널 (terminal)</div>
+        <div class="border-preset-group" data-imgtype="terminal">
+          <button class="border-preset-btn active" data-border="minimal" onclick="setImgPreset('terminal','minimal')">minimal</button>
+          <button class="border-preset-btn" data-border="plain" onclick="setImgPreset('terminal','plain')">plain</button>
+          <button class="border-preset-btn" data-border="bordered" onclick="setImgPreset('terminal','bordered')">bordered</button>
+          <button class="border-preset-btn" data-border="shadow" onclick="setImgPreset('terminal','shadow')">shadow</button>
+          <button class="border-preset-btn" data-border="bordered-shadow" onclick="setImgPreset('terminal','bordered-shadow')">bordered-shadow</button>
+        </div>
+        <div class="control-row"><label>너비 <span class="unit">%</span></label><input type="range" id="img-w-terminal" min="20" max="100" step="5" value="70" oninput="syncFromRange(this,'img-w-terminal-num');updateImgWidth('terminal')"><input type="number" id="img-w-terminal-num" min="20" max="100" step="5" value="70" oninput="syncFromNum(this,'img-w-terminal');updateImgWidth('terminal')"><span class="range-hint">20~100</span></div>
+      </div>
+      <div class="img-type-section">
+        <div class="img-type-title">다이어그램 (diagram)</div>
+        <div class="border-preset-group" data-imgtype="diagram">
+          <button class="border-preset-btn active" data-border="minimal" onclick="setImgPreset('diagram','minimal')">minimal</button>
+          <button class="border-preset-btn" data-border="plain" onclick="setImgPreset('diagram','plain')">plain</button>
+          <button class="border-preset-btn" data-border="bordered" onclick="setImgPreset('diagram','bordered')">bordered</button>
+          <button class="border-preset-btn" data-border="shadow" onclick="setImgPreset('diagram','shadow')">shadow</button>
+          <button class="border-preset-btn" data-border="bordered-shadow" onclick="setImgPreset('diagram','bordered-shadow')">bordered-shadow</button>
+        </div>
+        <div class="control-row"><label>너비 <span class="unit">%</span></label><input type="range" id="img-w-diagram" min="20" max="100" step="5" value="60" oninput="syncFromRange(this,'img-w-diagram-num');updateImgWidth('diagram')"><input type="number" id="img-w-diagram-num" min="20" max="100" step="5" value="60" oninput="syncFromNum(this,'img-w-diagram');updateImgWidth('diagram')"><span class="range-hint">20~100</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5b. 개별 이미지 -->
+  <div class="section collapsed" id="sec-image-individual">
+    <div class="section-title" onclick="toggleSection('sec-image-individual')">개별 이미지<span class="img-count-badge" id="img-count-badge"></span></div>
+    <div class="section-body">
+      <div class="img-individual-list" id="img-individual-list">
+        <div class="img-empty">빌드 후 이미지 목록이 표시됩니다</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5c. 개별 표 열 너비 -->
+  <div class="section collapsed" id="sec-table-columns">
+    <div class="section-title" onclick="toggleSection('sec-table-columns')">표 열 너비<span class="img-count-badge" id="table-count-badge"></span></div>
+    <div class="section-body">
+      <div class="control-row-hint">자동 맞춤이 기본 적용됩니다. 특정 표만 수동 조정할 수 있습니다.</div>
+      <div class="table-column-list" id="table-column-list">
+        <div class="img-empty">빌드 후 표 목록이 표시됩니다</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 색상 -->
+  <div class="section" id="sec-color">
+    <div class="section-title" onclick="toggleSection('sec-color')">색상</div>
+    <div class="section-body">
+      <div class="color-row"><label>프라이머리</label><input type="color" id="color-primary" value="#2563eb" oninput="updateColor()"><span class="hex" id="color-primary-hex">#2563eb</span></div>
+      <div class="color-row"><label>텍스트</label><input type="color" id="color-text" value="#1a1a1a" oninput="updateColor()"><span class="hex" id="color-text-hex">#1a1a1a</span></div>
+      <div class="color-row"><label>코드 텍스트</label><input type="color" id="color-code" value="#1e40af" oninput="updateColor()"><span class="hex" id="color-code-hex">#1e40af</span></div>
+      <div class="color-row"><label>인용 배경</label><input type="color" id="color-quote-bg" value="#f5f8ff" oninput="updateColor()"><span class="hex" id="color-quote-bg-hex">#f5f8ff</span></div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="action-btn primary" onclick="exportConfig()">설정 복사</button>
+    <button class="action-btn" onclick="resetAll()">초기화</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="tab-bar">
+    <div class="tab active" data-tab="editor" onclick="switchTab('editor')">PDF 프리뷰</div>
+    <div class="tab" data-tab="layout" onclick="switchTab('layout');fetchLayoutIssues()">레이아웃 이슈 <span class="issue-badge" id="issue-badge" style="display:none">0</span></div>
+  </div>
+  <div class="tab-content">
+    <!-- PDF 프리뷰 (Typst SVG, 기본 탭) -->
+    <div class="tab-panel active" id="panel-editor">
+      <div class="editor-split">
+        <div class="editor-left">
+          <div id="project-file-ui">
+            <div class="file-selector-toolbar">
+              <label class="file-select-all"><input type="checkbox" id="file-select-all" checked onchange="toggleFileSelectAll()"> 전체</label>
+              <span class="file-count" id="file-count">0개 선택</span>
+              <button class="combine-btn" onclick="restageFiles()" title="원본 폴더(chapters/, book/front/, book/back/)에서 .pdf-build/md/로 파일을 다시 복사합니다">Restage</button>
+              <button class="combine-btn" onclick="combineMd()" title="선택한 파일들을 하나의 통합 마크다운으로 합칩니다">통합본 생성</button>
+              <div class="file-toolbar-help">
+                <span>전체</span> PDF에 포함할 파일 선택 &middot;
+                <span>Restage</span> 원본에서 다시 복사 &middot;
+                <span>통합본</span> 선택 파일을 하나의 MD로 병합
+              </div>
+            </div>
+            <div class="file-selector" id="file-selector"></div>
+          </div>
+          <div class="resize-handle-h" id="resize-file-editor"></div>
+          <div class="content-editor" id="content-editor" style="display:none;">
+            <div class="content-editor-header">
+              <span id="editing-filename"></span>
+              <span class="rebuild-hint" id="rebuild-hint">저장 후 Restage + 빌드 필요</span>
+              <button class="save-btn" onclick="saveFileContent()">저장</button>
+              <button class="close-btn" onclick="closeFileEditor()">닫기</button>
+            </div>
+            <textarea id="raw-editor" spellcheck="false" oninput="onEditorInput()"></textarea>
+          </div>
+        </div>
+        <div class="resize-handle-v" id="resize-left-right"></div>
+        <div class="editor-right">
+          <div class="preview-toolbar">
+            <div class="page-nav">
+              <button class="page-nav-btn" onclick="goToPrevPage()" title="이전 페이지">&#9664;</button>
+              <span class="page-info" id="page-info"><span class="page-current">-</span><span class="page-sep">/</span><span class="page-total">-</span></span>
+              <button class="page-nav-btn" onclick="goToNextPage()" title="다음 페이지">&#9654;</button>
+            </div>
+            <div class="zoom-control">
+              <button onclick="zoomOut()">-</button>
+              <span id="zoom-level">100%</span>
+              <button onclick="zoomIn()">+</button>
+              <button onclick="zoomFit()">Fit</button>
+            </div>
+            <label class="build-option"><input type="checkbox" id="include-cover" checked onchange="scheduleDesignRebuild()"> 표지</label>
+            <label class="build-option"><input type="checkbox" id="include-toc" checked onchange="scheduleDesignRebuild()"> 목차</label>
+            <span class="build-status" id="build-status"></span>
+            <button class="verify-btn" id="verify-btn" onclick="buildVerified()">Verified Build</button>
+            <button class="build-btn" onclick="exportPdf()">PDF Export</button>
+          </div>
+          <div class="verify-banner" id="verify-banner"></div>
+          <div class="svg-viewer" id="svg-viewer">
+            <div class="svg-empty">파일을 선택하면 실시간 PDF 프리뷰가 표시됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 탭 3: 레이아웃 이슈 + 가독성 검토 -->
+    <div class="tab-panel" id="panel-layout">
+      <div style="display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid #e2e8f0;">
+        <button class="layout-sub-tab active" onclick="switchLayoutSubTab('issues')" id="sub-tab-issues">레이아웃 이슈</button>
+        <button class="layout-sub-tab" onclick="switchLayoutSubTab('readability')" id="sub-tab-readability">가독성 검토</button>
+      </div>
+      <div class="layout-issues" id="layout-issues-panel">
+        <div class="layout-empty">빌드 후 레이아웃 분석 결과가 표시됩니다.<br>Verified Build 버튼으로 검증을 시작하세요.</div>
+      </div>
+      <div class="layout-issues" id="readability-panel" style="display:none;">
+        <div class="layout-empty">빌드 완료 후 가독성 분석을 실행합니다.<br><button class="verify-btn" onclick="runReadabilityCheck()">가독성 검토 실행</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- MD 편집 모달 -->
+<div id="md-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:12px;width:80%;max-width:800px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #e2e8f0;">
+      <span id="md-modal-title" style="flex:1;font-weight:700;font-size:14px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button onclick="closeMdModal()" style="border:none;background:none;font-size:18px;cursor:pointer;color:#94a3b8;padding:4px 8px;">&times;</button>
+    </div>
+    <textarea id="md-modal-editor" style="flex:1;min-height:400px;font-family:'D2Coding',monospace;font-size:13px;line-height:1.7;border:none;padding:16px;resize:none;outline:none;"></textarea>
+    <div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid #e2e8f0;justify-content:flex-end;">
+      <button onclick="closeMdModal()" style="padding:6px 16px;font-size:13px;border:1px solid #d1d5db;border-radius:6px;background:white;cursor:pointer;">취소</button>
+      <button onclick="buildFromModal()" style="padding:6px 16px;font-size:13px;border:1px solid #2563eb;border-radius:6px;background:#2563eb;color:white;cursor:pointer;font-weight:600;">저장 + 빌드</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

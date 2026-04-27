@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전체 아키텍처 (Docker Compose)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 36px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #1565c0;
+    border-radius: 12px;
+    padding: 28px 36px 26px;
+    width: 880px;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+  }
+
+  /* 브라우저 (외부) */
+  .browser {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .browser-svg { width: 36px; height: 36px; }
+  .browser-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+
+  /* 외부→Compose 화살표 */
+  .down-arrow {
+    display: flex;
+    justify-content: center;
+    margin: 4px 0 8px;
+  }
+  .down-arrow svg { width: 16px; height: 24px; }
+
+  /* Compose 영역 (점선 빨강·주황 강조) */
+  .compose {
+    border: 2px dashed #c62828;
+    border-radius: 10px;
+    padding: 26px 30px 22px;
+    background: #fff3e0;
+    position: relative;
+    box-shadow: 0 0 0 2px rgba(198,40,40,0.10);
+  }
+  .compose-label {
+    position: absolute;
+    top: -11px;
+    left: 22px;
+    background: #fff;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #c62828;
+  }
+
+  .arch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .node {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-width: 140px;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.06);
+  }
+  .node-svg { width: 44px; height: 44px; }
+  .node-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1565c0;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .arrow-area {
+    flex: 1;
+    min-width: 60px;
+    display: flex;
+    justify-content: center;
+  }
+  .arrow-area svg {
+    width: 100%;
+    height: 14px;
+    max-width: 80px;
+  }
+</style>
+</head>
+<body>
+<div class="diagram">
+  <!-- 브라우저 -->
+  <div class="browser">
+    <svg class="browser-svg" viewBox="0 0 36 36">
+      <rect x="3" y="6" width="30" height="24" rx="3" fill="#fff" stroke="#1565c0" stroke-width="2.5"/>
+      <line x1="3" y1="13" x2="33" y2="13" stroke="#1565c0" stroke-width="2"/>
+      <circle cx="7" cy="9.5" r="1" fill="#1565c0"/>
+      <circle cx="11" cy="9.5" r="1" fill="#1565c0"/>
+      <circle cx="15" cy="9.5" r="1" fill="#1565c0"/>
+    </svg>
+    <span class="browser-label">브라우저</span>
+  </div>
+
+  <div class="down-arrow">
+    <svg viewBox="0 0 16 24">
+      <line x1="8" y1="0" x2="8" y2="18" stroke="#1565c0" stroke-width="2"/>
+      <polygon points="3,18 8,24 13,18" fill="#1565c0"/>
+    </svg>
+  </div>
+
+  <!-- Docker Compose 영역 -->
+  <div class="compose">
+    <div class="compose-label">Docker Compose</div>
+    <div class="arch">
+      <div class="node">
+        <svg class="node-svg" viewBox="0 0 44 44">
+          <rect x="6" y="8" width="32" height="28" rx="3" fill="#fff" stroke="#1565c0" stroke-width="2"/>
+          <text x="22" y="26" text-anchor="middle" font-size="10" font-weight="800" fill="#1565c0">NGX</text>
+        </svg>
+        <div class="node-label">NGINX<br>(프론트엔드)</div>
+      </div>
+
+      <div class="arrow-area">
+        <svg viewBox="0 0 80 14" preserveAspectRatio="none">
+          <line x1="0" y1="7" x2="66" y2="7" stroke="#1565c0" stroke-width="2"/>
+          <polygon points="66,2 80,7 66,12" fill="#1565c0"/>
+        </svg>
+      </div>
+
+      <div class="node">
+        <svg class="node-svg" viewBox="0 0 44 44">
+          <rect x="8" y="10" width="28" height="24" rx="3" fill="#fff" stroke="#1565c0" stroke-width="2"/>
+          <line x1="8" y1="16" x2="36" y2="16" stroke="#1565c0" stroke-width="1.5"/>
+          <text x="22" y="28" text-anchor="middle" font-size="10" font-weight="800" fill="#1565c0">API</text>
+        </svg>
+        <div class="node-label">백엔드</div>
+      </div>
+
+      <div class="arrow-area">
+        <svg viewBox="0 0 80 14" preserveAspectRatio="none">
+          <line x1="0" y1="7" x2="66" y2="7" stroke="#1565c0" stroke-width="2"/>
+          <polygon points="66,2 80,7 66,12" fill="#1565c0"/>
+        </svg>
+      </div>
+
+      <div class="node">
+        <svg class="node-svg" viewBox="0 0 44 44">
+          <ellipse cx="22" cy="12" rx="14" ry="4" fill="#fff" stroke="#1565c0" stroke-width="2"/>
+          <path d="M 8 12 L 8 32 Q 8 36 22 36 Q 36 36 36 32 L 36 12"
+                fill="#fff" stroke="#1565c0" stroke-width="2"/>
+          <ellipse cx="22" cy="20" rx="14" ry="3" fill="none" stroke="#1565c0" stroke-width="1.5"/>
+          <ellipse cx="22" cy="28" rx="14" ry="3" fill="none" stroke="#1565c0" stroke-width="1.5"/>
+        </svg>
+        <div class="node-label">MySQL</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

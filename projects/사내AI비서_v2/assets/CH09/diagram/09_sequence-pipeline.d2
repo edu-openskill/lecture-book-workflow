@@ -1,0 +1,65 @@
+shape: sequence_diagram
+
+User: 사용자 {
+  style: {
+    font-size: 16
+    font-color: "#374151"
+    bold: true
+  }
+}
+P1: "질의 준비 (CH09)" {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 16
+    bold: true
+  }
+}
+P2: "검색 실행 (CH08)" {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 16
+    bold: true
+  }
+}
+P3: "결과 가공 (CH09)" {
+  style: {
+    fill: "#eef2ff"
+    font-color: "#1e40af"
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 16
+    bold: true
+  }
+}
+LLM: LLM {
+  style: {
+    font-size: 16
+    font-color: "#374151"
+    bold: true
+  }
+}
+
+User -> P1: '"WFH 신청 방법"' {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+P1."약어 확장 + HyDE 가상 답변 생성"
+P1 -> P2: "변환된 질문 + 가상 답변 임베딩" {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+P2."하이브리드 검색 → 리랭커 → 상위 3개"
+P2 -> P3: "상위 자식 청크 3개" {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+P3."ParentDoc 역매핑 + Compression 핵심 추출"
+P3 -> LLM: "압축된 문서 + 원본 질문" {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+LLM -> User: "최종 답변" {
+  style: { stroke: "#2563eb"; stroke-width: 2; stroke-dash: 5 }
+}

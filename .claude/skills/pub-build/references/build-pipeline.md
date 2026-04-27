@@ -69,4 +69,4 @@ typst compile output.typ output.pdf --font-path ~/Library/Fonts --root /
 ```
 
 - `--root /`: 절대경로 이미지 접근을 위해 루트를 `/`로 설정
-- `--font-path`: KoPubDotum_Pro 등 사용자 폰트 경로
+- `--font-path`: RIDIBatang, D2Coding 등 사용자 폰트 경로

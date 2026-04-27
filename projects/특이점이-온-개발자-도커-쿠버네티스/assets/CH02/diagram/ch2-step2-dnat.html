@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>호스트 포트 → 컨테이너 포트 연결 구조</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 40px 24px 32px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1080px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 32px; }
+
+  .flow {
+    display: grid;
+    grid-template-columns: 200px 140px 260px 140px 200px;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+  }
+
+  .node {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 18px 16px;
+    text-align: center;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+  }
+  .node .label {
+    font-size: 14px; font-weight: 800; color: #1565c0; margin-bottom: 4px;
+  }
+  .node .sub {
+    font-family: 'Consolas', monospace;
+    font-size: 11px; color: #555;
+  }
+
+  .host-wrap {
+    border: 2px solid #1565c0;
+    border-radius: 12px;
+    background: #f5faff;
+    padding: 28px 16px 18px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .host-title {
+    position: absolute; top: -10px; left: 22px;
+    background: #fff; padding: 0 8px;
+    font-size: 12px; font-weight: 700; color: #1565c0;
+  }
+
+  .iptables {
+    border: 2px solid #c62828;
+    background: #fff3e0;
+    border-radius: 8px;
+    padding: 14px 22px;
+    text-align: center;
+  }
+  .iptables .label {
+    font-size: 14px; font-weight: 800; color: #c62828; margin-bottom: 4px;
+  }
+  .iptables .sub {
+    font-size: 11px; color: #6d4c41;
+  }
+
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .arrow svg { width: 100%; height: 16px; }
+  .arrow-label {
+    font-size: 11px;
+    color: #1565c0;
+    font-family: 'Consolas', monospace;
+    font-weight: 700;
+    margin-top: 6px;
+    text-align: center;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">외부 요청이 iptables를 거쳐 컨테이너로 전달되는 구조</div>
+
+  <div class="flow">
+    <!-- 외부 클라이언트 -->
+    <div class="node">
+      <div class="label">외부 클라이언트</div>
+      <div class="sub">browser / curl</div>
+    </div>
+
+    <!-- 화살표 1 -->
+    <div class="arrow">
+      <svg viewBox="0 0 80 16" preserveAspectRatio="none">
+        <line x1="0" y1="8" x2="68" y2="8" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="68,3 80,8 68,13" fill="#1565c0"/>
+      </svg>
+      <div class="arrow-label">:8080 으로 요청</div>
+    </div>
+
+    <!-- 호스트 (iptables 내부) -->
+    <div class="host-wrap">
+      <div class="host-title">호스트</div>
+      <div class="iptables">
+        <div class="label">iptables</div>
+        <div class="sub">DNAT 규칙</div>
+      </div>
+    </div>
+
+    <!-- 화살표 2 -->
+    <div class="arrow">
+      <svg viewBox="0 0 80 16" preserveAspectRatio="none">
+        <line x1="0" y1="8" x2="68" y2="8" stroke="#1565c0" stroke-width="2"/>
+        <polygon points="68,3 80,8 68,13" fill="#1565c0"/>
+      </svg>
+      <div class="arrow-label">:80 으로 변환</div>
+    </div>
+
+    <!-- 컨테이너 -->
+    <div class="node">
+      <div class="label">컨테이너</div>
+      <div class="sub">nginx</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ book.title }}</title>
+
+<link rel="stylesheet" href="{{ fonts_css }}">
+<link rel="stylesheet" href="{{ book_css }}">
+<link rel="stylesheet" href="{{ print_css }}" media="print">
+
+{% if pagedjs %}
+<script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
+{% endif %}
+</head>
+<body>
+<div class="container">
+
+{% if book.cover_html %}
+<section class="cover">{{ book.cover_html | safe }}</section>
+{% endif %}
+
+{% for chapter in book.chapters %}
+<section class="chapter" data-chapter="{{ chapter.number }}">
+{{ chapter.html | safe }}
+</section>
+{% endfor %}
+
+</div>
+</body>
+</html>

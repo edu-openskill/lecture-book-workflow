@@ -1,0 +1,95 @@
+direction: right
+
+# 루트 컨테이너 경계선 숨김
+style: {
+  fill: transparent
+  stroke: transparent
+}
+
+classes: {
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 18
+      bold: true
+    }
+    width: 160
+    height: 60
+  }
+  storage: {
+    shape: cylinder
+    style: {
+      fill: "#f8fafc"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+      bold: true
+    }
+    width: 140
+    height: 80
+  }
+  group-box: {
+    style: {
+      stroke: "#2563eb"
+      stroke-width: 2
+      stroke-dash: 5
+      fill: "#ffffff"
+      font-size: 20
+      bold: true
+      font-color: "#1e3a5f"
+      border-radius: 12
+    }
+  }
+}
+
+tool: "@tool 방식 — 같은 프로세스" {
+  class: group-box
+  direction: right
+
+  A1: 에이전트 {
+    class: process
+  }
+  B1: "@tool 함수" {
+    class: process
+  }
+  C1: "DB / 문서" {
+    class: storage
+  }
+
+  A1 -> B1: 함수 호출 {
+    style: { stroke: "#2563eb"; stroke-width: 2 }
+  }
+  B1 -> C1: {
+    style: { stroke: "#2563eb"; stroke-width: 2 }
+  }
+}
+
+mcp: "MCP 방식 — 별도 프로세스" {
+  class: group-box
+  direction: right
+
+  A2: 에이전트 {
+    class: process
+  }
+  B2: MCP 서버 {
+    class: process
+  }
+  C2: "DB / 문서" {
+    class: storage
+  }
+
+  A2 -> B2: 표준 메시지 {
+    style: { stroke: "#2563eb"; stroke-width: 2 }
+  }
+  B2 -> C2: {
+    style: { stroke: "#2563eb"; stroke-width: 2 }
+  }
+}

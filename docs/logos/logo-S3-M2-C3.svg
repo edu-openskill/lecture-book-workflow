@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 130"
+     role="img" aria-labelledby="t1">
+  <title id="t1">OpenSkillBooks Icon</title>
+  <g transform="translate(2,10) scale(1.25)">
+      <path d="M 45 18 Q 38 14, 12 16 L 8 82 Q 38 78, 45 75 Z"
+            fill="white" stroke="#006666" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M 45 18 Q 52 14, 78 16 L 82 82 Q 52 78, 45 75 Z"
+            fill="white" stroke="#006666" stroke-width="3" stroke-linejoin="round"/>
+      <line x1="17" y1="34" x2="38" y2="32" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <line x1="17" y1="46" x2="36" y2="44" stroke="#B4781E" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+      <line x1="17" y1="58" x2="34" y2="56" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <line x1="52" y1="32" x2="73" y2="34" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <line x1="54" y1="44" x2="71" y2="46" stroke="#B4781E" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+      <line x1="52" y1="56" x2="69" y2="58" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <circle cx="45" cy="10" r="3" fill="#B4781E" opacity="0.45"/>
+    </g>
+</svg>

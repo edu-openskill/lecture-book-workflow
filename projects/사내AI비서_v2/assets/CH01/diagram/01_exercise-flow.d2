@@ -1,0 +1,61 @@
+direction: right
+
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      fill: "#ffffff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 20
+      font-color: "#374151"
+      bold: true
+    }
+    width: 220
+    height: 70
+  }
+}
+
+step1: "step1_fail.py\nLLM 단독 질문" {
+  class: step
+}
+step2: "step2_context.py\n문서 직접 전달" {
+  class: step
+}
+step3: "step3_rag.py\nRAG 파이프라인" {
+  class: step
+}
+step3_no: "step3_rag_no_chunking.py\n청킹 없이 비교" {
+  class: step
+  width: 280
+}
+step4: "step4_rag.py\n추론 심화" {
+  class: step
+}
+
+step1 -> step2: {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+  }
+}
+step2 -> step3: {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+  }
+}
+step3 -> step3_no: {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+  }
+}
+step3_no -> step4: {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+  }
+}

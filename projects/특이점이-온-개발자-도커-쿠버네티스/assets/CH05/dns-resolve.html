@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>DNS가 Service 이름을 ClusterIP로 변환한다</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 40px 24px 28px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1080px; }
+
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  /* 상단: DNS 서버 + 레코드 테이블 */
+  .dns-server {
+    border: 2px solid #c62828;
+    border-radius: 12px;
+    background: #fff3e0;
+    padding: 16px 22px 14px;
+    width: 640px;
+    margin: 0 auto;
+  }
+  .dns-server .header {
+    font-size: 14px;
+    font-weight: 800;
+    color: #c62828;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .records {
+    background: #fff;
+    border: 1px solid #f0c8b8;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: #333;
+  }
+  .records .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    border-bottom: 1px dashed #eee;
+  }
+  .records .row:last-child { border-bottom: none; }
+  .records .row .key { color: #c62828; font-weight: 700; }
+  .records .row .arrow { color: #888; padding: 0 10px; }
+  .records .row .val { color: #1565c0; font-weight: 700; }
+  .records-caption {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+  }
+
+  /* 가운데: 양방향 화살표 영역 */
+  .bi-arrow {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+    margin: 18px 0;
+  }
+  .bi-arrow .col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .bi-arrow .label {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    font-style: italic;
+  }
+  .bi-arrow .label.q { color: #c62828; }
+  .bi-arrow .label.a { color: #2e7d32; }
+  .bi-arrow .line {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .bi-arrow .line.up { color: #c62828; }
+  .bi-arrow .line.down { color: #2e7d32; }
+  .bi-arrow .step {
+    font-size: 11px;
+    color: #888;
+    margin-top: 2px;
+    font-weight: 700;
+  }
+
+  /* 하단: 호출자 Pod */
+  .caller {
+    border: 2px solid #1565c0;
+    border-radius: 12px;
+    background: #fff;
+    padding: 14px 22px;
+    width: 540px;
+    margin: 0 auto;
+  }
+  .caller .header {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .caller .resolv {
+    background: #e3f2fd;
+    border: 1px solid #b6d8f0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: #1565c0;
+    text-align: center;
+    font-weight: 700;
+  }
+  .caller-caption {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">DNS가 Service 이름을 ClusterIP로 변환한다</div>
+
+  <!-- 상단: 클러스터 DNS + 레코드 테이블 -->
+  <div class="dns-server">
+    <div class="header">클러스터 DNS (CoreDNS)</div>
+    <div class="records">
+      <div class="row">
+        <span class="key">order-service.default.svc.cluster.local</span>
+        <span class="arrow">→</span>
+        <span class="val">10.96.0.20</span>
+      </div>
+      <div class="row">
+        <span class="key">payments.default.svc.cluster.local</span>
+        <span class="arrow">→</span>
+        <span class="val">10.96.0.31</span>
+      </div>
+      <div class="row">
+        <span class="key">stores.default.svc.cluster.local</span>
+        <span class="arrow">→</span>
+        <span class="val">10.96.0.42</span>
+      </div>
+    </div>
+    <div class="records-caption">Service 생성 시 자동 등록, 삭제 시 자동 제거</div>
+  </div>
+
+  <!-- 가운데: 양방향 화살표 -->
+  <div class="bi-arrow">
+    <div class="col">
+      <div class="label q">"order-service?"</div>
+      <div class="line up">↑</div>
+      <div class="step">① 이름 질의</div>
+    </div>
+    <div class="col">
+      <div class="label a">"10.96.0.20"</div>
+      <div class="line down">↓</div>
+      <div class="step">② ClusterIP 응답</div>
+    </div>
+  </div>
+
+  <!-- 하단: 호출자 Pod -->
+  <div class="caller">
+    <div class="header">호출자 (Pod / Ingress Controller)</div>
+    <div class="resolv">/etc/resolv.conf  →  클러스터 DNS</div>
+    <div class="caller-caption">Pod 생성 시 DNS 설정이 자동으로 박힌다</div>
+  </div>
+</div>
+
+</body>
+</html>

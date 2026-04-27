@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  }
+  .diagram {
+    display: flex;
+    align-items: center;
+    padding: 48px 40px;
+    gap: 0;
+  }
+
+  .port-label { font-size: 10px; color: #888; font-weight: 500; }
+
+  /* 호스트 영역 */
+  .host-wrapper {
+    border: 2px dashed #aaa;
+    border-radius: 14px;
+    padding: 18px 24px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .host-label {
+    position: absolute;
+    top: -11px;
+    left: 14px;
+    background: #fff;
+    padding: 0 8px;
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+  }
+
+  /* 포트 원 */
+  .port-circle {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #333;
+    background: #fff;
+  }
+  .port-circle.blue {
+    border-color: #2496ED;
+    color: #2496ED;
+  }
+  .port-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* 도커 영역 */
+  .docker-area {
+    border: 2px solid #2496ED;
+    border-radius: 14px;
+    padding: 18px 24px;
+    position: relative;
+    background: #f7fbff;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .docker-label {
+    position: absolute;
+    top: -11px;
+    left: 14px;
+    background: #f7fbff;
+    padding: 0 8px;
+    font-size: 11px;
+    color: #2496ED;
+    font-weight: 700;
+  }
+
+  /* 컨테이너 */
+  .container-box {
+    border: 2px solid #2496ED;
+    border-radius: 10px;
+    padding: 14px 22px;
+    text-align: center;
+    background: #fff;
+  }
+  .container-name { font-size: 14px; font-weight: 700; color: #333; }
+  .container-sub {
+    font-size: 11px;
+    color: #888;
+    margin-top: 3px;
+  }
+
+  /* 응답 박스 */
+  .response-box {
+    border: 2px solid #27ae60;
+    border-radius: 10px;
+    padding: 12px 18px;
+    text-align: center;
+    background: #f0faf4;
+  }
+  .response-label {
+    font-size: 10px;
+    color: #27ae60;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .response-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  /* 화살표 */
+  .arrow-with-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin: 0 12px;
+  }
+  .arrow-label {
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <!-- 호스트 PC 영역 -->
+  <div class="host-wrapper">
+    <div class="host-label">호스트 PC</div>
+
+    <!-- 호스트 포트 -->
+    <div class="port-node">
+      <div class="port-circle">8000</div>
+      <div class="port-label">호스트 포트</div>
+    </div>
+
+    <!-- 화살표: 포트포워딩 -->
+    <div class="arrow-with-label">
+      <div class="arrow-label" style="color: #E67E22;">포트 포워딩</div>
+      <svg width="50" height="12" viewBox="0 0 50 12">
+        <line x1="0" y1="6" x2="40" y2="6" stroke="#E67E22" stroke-width="2" stroke-dasharray="4,3"/>
+        <polygon points="40,1 50,6 40,11" fill="#E67E22"/>
+      </svg>
+    </div>
+
+    <!-- 도커 영역 -->
+    <div class="docker-area">
+      <div class="docker-label">Docker</div>
+
+      <!-- 컨테이너 포트 -->
+      <div class="port-node">
+        <div class="port-circle blue">80</div>
+        <div class="port-label">컨테이너 포트</div>
+      </div>
+
+      <!-- 화살표 -->
+      <div style="margin: 0 10px; align-self: center;">
+        <svg width="36" height="12" viewBox="0 0 36 12">
+          <line x1="0" y1="6" x2="26" y2="6" stroke="#2496ED" stroke-width="2"/>
+          <polygon points="26,1 36,6 26,11" fill="#2496ED"/>
+        </svg>
+      </div>
+
+      <!-- app1 컨테이너 -->
+      <div class="container-box">
+        <div class="container-name">app1 컨테이너</div>
+        <div class="container-sub">index.html</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 화살표: 응답 -->
+  <div class="arrow-with-label">
+    <div class="arrow-label" style="color: #27ae60;">응답</div>
+    <svg width="50" height="12" viewBox="0 0 50 12">
+      <line x1="0" y1="6" x2="40" y2="6" stroke="#27ae60" stroke-width="2"/>
+      <polygon points="40,1 50,6 40,11" fill="#27ae60"/>
+    </svg>
+  </div>
+
+  <!-- 응답 결과 -->
+  <div class="response-box">
+    <div class="response-label">응답 결과</div>
+    <div class="response-value">Nginx Server1</div>
+  </div>
+</div>
+
+</body>
+</html>

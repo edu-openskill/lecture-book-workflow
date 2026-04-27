@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>한 요청, 두 계층</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1080px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  /* 한 층 박스 */
+  .layer {
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 18px 22px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .layer.l7 {
+    border-color: #c62828;
+    background: #fff3e0;
+  }
+
+  .layer-label {
+    flex: 0 0 160px;
+    text-align: left;
+  }
+  .layer-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1565c0;
+    margin-bottom: 2px;
+  }
+  .layer.l7 .layer-name { color: #c62828; }
+  .layer-desc {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .data-box {
+    flex: 1;
+    border: 2px solid #aaa;
+    border-radius: 6px;
+    padding: 12px 16px;
+    background: #fff;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+    font-size: 13px;
+    color: #222;
+  }
+  .data-line { margin: 2px 0; }
+
+  .tool {
+    flex: 0 0 200px;
+    text-align: center;
+    border: 2px dashed #1565c0;
+    border-radius: 8px;
+    padding: 12px 10px;
+    background: #fff;
+  }
+  .layer.l7 .tool { border-color: #c62828; }
+
+  .tool-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+    margin-bottom: 2px;
+  }
+  .layer.l7 .tool-name { color: #c62828; }
+  .tool-action {
+    font-size: 11px;
+    color: #666;
+  }
+
+  /* 층 사이 라벨 */
+  .stack-mark {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 8px 0;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">한 요청, 두 계층 — 보는 깊이가 다르다</div>
+
+  <!-- L7 (위) -->
+  <div class="layer l7">
+    <div class="layer-label">
+      <div class="layer-name">L7</div>
+      <div class="layer-desc">애플리케이션 계층</div>
+    </div>
+    <div class="data-box">
+      <div class="data-line">GET /order HTTP/1.1</div>
+      <div class="data-line">Host: localhost</div>
+    </div>
+    <div class="tool">
+      <div class="tool-name">NGINX</div>
+      <div class="tool-action">HTTP 본문을 읽음</div>
+    </div>
+  </div>
+
+  <div class="stack-mark">▲ L7이 L4 위에 얹혀 있다 ▼</div>
+
+  <!-- L4 (아래) -->
+  <div class="layer">
+    <div class="layer-label">
+      <div class="layer-name">L4</div>
+      <div class="layer-desc">전송 계층</div>
+    </div>
+    <div class="data-box">
+      <div class="data-line">목적지 ClusterIP:Port</div>
+    </div>
+    <div class="tool">
+      <div class="tool-name">리눅스 커널</div>
+      <div class="tool-action">iptables 규칙으로 처리</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

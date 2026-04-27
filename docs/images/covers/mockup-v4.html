@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>표지 디자인 목업 v4 — 획기적 타이포그래픽</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard','Inter',-apple-system,sans-serif;background:#0a0a0a;color:#fff;padding:40px 20px}
+  h1{text-align:center;font-size:24px;font-weight:300;margin-bottom:6px}
+  .sub{text-align:center;font-size:12px;color:#666;margin-bottom:50px}
+  .sec{margin-bottom:80px}
+  .sec-t{font-size:18px;font-weight:700;margin-bottom:4px;padding-left:4px;color:#fff}
+  .sec-d{font-size:11px;color:#666;margin-bottom:16px;padding-left:4px}
+  .g{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .c{aspect-ratio:182/257;border-radius:3px;overflow:hidden;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.6);transition:transform .25s;background:#fff}
+  .c:hover{transform:scale(1.03)}
+  @media(max-width:900px){.g{grid-template-columns:repeat(2,1fr)}}
+
+  /* 유틸리티 */
+  .outline-text{-webkit-text-stroke:2px #1a1a1a;color:transparent}
+  .outline-accent{color:transparent}
+  .gradient-text{background-clip:text;-webkit-background-clip:text;color:transparent}
+  .blend{mix-blend-mode:multiply}
+</style>
+</head>
+<body>
+
+<h1>특이점이 온 개발자 — 표지 목업 v4</h1>
+<p class="sub">획기적 타이포그래픽 공법 / 아웃라인 / 그라디언트 / 오버랩 / 크롭 블리드 / 글리치 / 3D / 브루탈리스트</p>
+
+<!-- ═══════════ 1 — 아웃라인 + 솔리드 레이어 ═══════════ -->
+<div class="sec">
+<div class="sec-t">1 — Outline + Solid Layer</div>
+<div class="sec-d">속이 빈 아웃라인 글자 뒤에 솔리드 글자가 살짝 어긋나게 겹침 / 깊이감 + 현대적</div>
+<div class="g">
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">컨테이너가 왜 필요한지 모를 때<br>Docker Compose로 서비스를 엮고 싶을 때<br>이야기로 시작하는 입문서가 필요할 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#999">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:120px">
+        <div style="position:absolute;font-size:90px;font-weight:900;letter-spacing:-5px;line-height:.85;-webkit-text-stroke:2px #008080;color:transparent;top:0;left:-2%">Docker</div>
+        <div style="position:absolute;font-size:90px;font-weight:900;letter-spacing:-5px;line-height:.85;color:#1a1a1a;top:8px;left:calc(-2% + 6px)">Docker</div>
+      </div>
+      <div style="font-size:9px;color:#999;margin-top:2%">컨테이너의 모든 것</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#008080"></div><div style="font-size:18px;font-weight:800;color:#008080">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">모놀리스의 한계를 느꼈을 때<br>서비스를 쪼개야 하는 이유를 알고 싶을 때<br>이벤트 기반 통신을 이해하고 싶을 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#999">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:140px">
+        <div style="position:absolute;font-size:110px;font-weight:900;letter-spacing:-6px;line-height:.85;-webkit-text-stroke:2px #4B3CB4;color:transparent;top:0;left:-2%">MSA</div>
+        <div style="position:absolute;font-size:110px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#1a1a1a;top:8px;left:calc(-2% + 6px)">MSA</div>
+      </div>
+      <div style="font-size:9px;color:#999">마이크로서비스 아키텍처</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#4B3CB4"></div><div style="font-size:18px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">LLM이 모르는 것에 답하게 만들고 싶을 때<br>임베딩과 벡터 검색을 이해하고 싶을 때<br>AI가 우리 데이터를 활용하게 만들고 싶을 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#999">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:140px">
+        <div style="position:absolute;font-size:110px;font-weight:900;letter-spacing:-6px;line-height:.85;-webkit-text-stroke:2px #7832A0;color:transparent;top:0;left:-2%">RAG</div>
+        <div style="position:absolute;font-size:110px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#1a1a1a;top:8px;left:calc(-2% + 6px)">RAG</div>
+      </div>
+      <div style="font-size:9px;color:#999">검색 증강 생성</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#7832A0"></div><div style="font-size:18px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">OAuth와 OIDC를 제대로 이해하고 싶을 때<br>Spring Security 설정이 막막할 때<br>인증/인가의 흐름을 한눈에 보고 싶을 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#999">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:120px">
+        <div style="position:absolute;font-size:78px;font-weight:900;letter-spacing:-4px;line-height:.85;-webkit-text-stroke:2px #B4781E;color:transparent;top:0;left:-2%">Spring</div>
+        <div style="position:absolute;font-size:78px;font-weight:900;letter-spacing:-4px;line-height:.85;color:#1a1a1a;top:8px;left:calc(-2% + 6px)">Spring</div>
+      </div>
+      <div style="font-size:9px;color:#999;margin-top:2%">9가지 기술</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#B4781E"></div><div style="font-size:18px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 2 — 크롭 블리드 (잘려나가는 초대형 글자) ═══════════ -->
+<div class="sec">
+<div class="sec-t">2 — Crop Bleed (잘려나가는 초대형)</div>
+<div class="sec-d">제목이 표지 경계를 넘어 잘림 / 200-300px 크기 / 일부만 보여서 강렬한 임팩트</div>
+<div class="g">
+
+  <div class="c" style="padding:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative">
+    <div style="position:absolute;top:-8%;left:-5%;font-size:220px;font-weight:900;letter-spacing:-12px;line-height:.75;color:#f5f5f5;z-index:0">Do<br>ck</div>
+    <div style="position:relative;z-index:1;padding:5% 5% 0">
+      <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">컨테이너가 왜 필요한지 모를 때<br>Docker Compose로 서비스를 엮고 싶을 때</div>
+    </div>
+    <div style="position:relative;z-index:1;padding:0 5%">
+      <div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="margin-top:3%"><div style="font-size:60px;font-weight:900;letter-spacing:-3px;color:#008080;line-height:1">Docker</div></div>
+      <div style="font-size:9px;color:#999;margin-top:2%">컨테이너의 모든 것</div>
+    </div>
+    <div style="position:relative;z-index:1;padding:0 5% 5%;display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#008080">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative">
+    <div style="position:absolute;top:-5%;right:-8%;font-size:260px;font-weight:900;letter-spacing:-14px;line-height:.75;color:#f5f5f5;z-index:0">M<br>S</div>
+    <div style="position:relative;z-index:1;padding:5% 5% 0"><div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">모놀리스의 한계를 느꼈을 때<br>서비스를 쪼개야 하는 이유를 알고 싶을 때</div></div>
+    <div style="position:relative;z-index:1;padding:0 5%"><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div><div style="margin-top:3%"><div style="font-size:80px;font-weight:900;letter-spacing:-4px;color:#4B3CB4;line-height:1">MSA</div></div><div style="font-size:9px;color:#999;margin-top:2%">마이크로서비스 아키텍처</div></div>
+    <div style="position:relative;z-index:1;padding:0 5% 5%;display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative">
+    <div style="position:absolute;bottom:-15%;left:-3%;font-size:280px;font-weight:900;letter-spacing:-15px;line-height:.75;color:#f5f5f5;z-index:0">RA</div>
+    <div style="position:relative;z-index:1;padding:5% 5% 0"><div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">LLM이 모르는 것에 답하게 만들고 싶을 때<br>임베딩과 벡터 검색을 이해하고 싶을 때</div></div>
+    <div style="position:relative;z-index:1;padding:0 5%"><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div><div style="margin-top:3%"><div style="font-size:80px;font-weight:900;letter-spacing:-4px;color:#7832A0;line-height:1">RAG</div></div><div style="font-size:9px;color:#999;margin-top:2%">검색 증강 생성</div></div>
+    <div style="position:relative;z-index:1;padding:0 5% 5%;display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative">
+    <div style="position:absolute;top:-10%;left:-8%;font-size:200px;font-weight:900;letter-spacing:-10px;line-height:.75;color:#f5f5f5;z-index:0">Sp<br>ri</div>
+    <div style="position:relative;z-index:1;padding:5% 5% 0"><div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">OAuth와 OIDC를 제대로 이해하고 싶을 때<br>Spring Security 설정이 막막할 때</div></div>
+    <div style="position:relative;z-index:1;padding:0 5%"><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div><div style="margin-top:3%"><div style="font-size:54px;font-weight:900;letter-spacing:-3px;color:#B4781E;line-height:1">Spring</div></div><div style="font-size:9px;color:#999;margin-top:2%">9가지 기술</div></div>
+    <div style="position:relative;z-index:1;padding:0 5% 5%;display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 3 — 그라디언트 텍스트 + 아웃라인 시리즈 ═══════════ -->
+<div class="sec">
+<div class="sec-t">3 — Gradient Text + Outline Series</div>
+<div class="sec-d">제목에 그라디언트 적용 / 시리즈명은 아웃라인 / 모던 테크 느낌</div>
+<div class="g">
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent">특</span><span style="font-size:18px;font-weight:600;-webkit-text-stroke:1px #ddd;color:transparent">이점이</span><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-left:6px">온</span></div>
+      <div style="font-size:28px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-top:1px">개발자</div>
+    </div>
+    <div>
+      <div style="font-size:88px;font-weight:900;letter-spacing:-5px;line-height:.85;background:linear-gradient(135deg,#008080,#00b3b3,#005f5f);-webkit-background-clip:text;background-clip:text;color:transparent">Docker</div>
+      <div style="font-size:9px;color:#999;margin-top:4%">컨테이너의 모든 것</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:3px;width:50px;margin-left:auto;margin-bottom:3px;background:linear-gradient(90deg,#00b3b3,#008080)"></div><div style="font-size:18px;font-weight:800;color:#008080">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent">특</span><span style="font-size:18px;font-weight:600;-webkit-text-stroke:1px #ddd;color:transparent">이점이</span><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-top:1px">개발자</div></div>
+    <div><div style="font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;background:linear-gradient(135deg,#4B3CB4,#7B6CE0,#3a2d8a);-webkit-background-clip:text;background-clip:text;color:transparent">MSA</div><div style="font-size:9px;color:#999;margin-top:4%">마이크로서비스 아키텍처</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:3px;width:50px;margin-left:auto;margin-bottom:3px;background:linear-gradient(90deg,#7B6CE0,#4B3CB4)"></div><div style="font-size:18px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent">특</span><span style="font-size:18px;font-weight:600;-webkit-text-stroke:1px #ddd;color:transparent">이점이</span><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-top:1px">개발자</div></div>
+    <div><div style="font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;background:linear-gradient(135deg,#7832A0,#a855d8,#5a2078);-webkit-background-clip:text;background-clip:text;color:transparent">RAG</div><div style="font-size:9px;color:#999;margin-top:4%">검색 증강 생성</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:3px;width:50px;margin-left:auto;margin-bottom:3px;background:linear-gradient(90deg,#a855d8,#7832A0)"></div><div style="font-size:18px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent">특</span><span style="font-size:18px;font-weight:600;-webkit-text-stroke:1px #ddd;color:transparent">이점이</span><span style="font-size:36px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;-webkit-text-stroke:1.5px #ccc;color:transparent;margin-top:1px">개발자</div></div>
+    <div><div style="font-size:76px;font-weight:900;letter-spacing:-4px;line-height:.85;background:linear-gradient(135deg,#B4781E,#d4a03e,#8a5a10);-webkit-background-clip:text;background-clip:text;color:transparent">Spring</div><div style="font-size:9px;color:#999;margin-top:4%">9가지 기술</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:3px;width:50px;margin-left:auto;margin-bottom:3px;background:linear-gradient(90deg,#d4a03e,#B4781E)"></div><div style="font-size:18px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 4 — 글리치 / 듀오톤 레이어 ═══════════ -->
+<div class="sec">
+<div class="sec-t">4 — Glitch / Duotone Layer</div>
+<div class="sec-d">RGB 채널 분리 느낌 / 3개 레이어 미세 오프셋 / 테크 감성 극대화</div>
+<div class="g">
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">컨테이너가 왜 필요한지 모를 때<br>Docker Compose로 서비스를 엮고 싶을 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#888">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:110px">
+        <div style="position:absolute;font-size:85px;font-weight:900;letter-spacing:-5px;line-height:.85;color:rgba(0,200,200,.25);top:-3px;left:-4px">Docker</div>
+        <div style="position:absolute;font-size:85px;font-weight:900;letter-spacing:-5px;line-height:.85;color:rgba(200,0,100,.15);top:3px;left:4px">Docker</div>
+        <div style="position:absolute;font-size:85px;font-weight:900;letter-spacing:-5px;line-height:.85;color:#1a1a1a;top:0;left:0">Docker</div>
+      </div>
+      <div style="font-size:9px;color:#999;margin-top:3%">컨테이너의 모든 것</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#008080"></div><div style="font-size:18px;font-weight:800;color:#008080">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">모놀리스의 한계를 느꼈을 때<br>서비스를 쪼개야 하는 이유를 알고 싶을 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#888">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:130px">
+        <div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:rgba(100,60,220,.2);top:-3px;left:-4px">MSA</div>
+        <div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:rgba(220,60,100,.12);top:3px;left:4px">MSA</div>
+        <div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#1a1a1a;top:0;left:0">MSA</div>
+      </div>
+      <div style="font-size:9px;color:#999">마이크로서비스 아키텍처</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#4B3CB4"></div><div style="font-size:18px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">LLM이 모르는 것에 답하게 만들고 싶을 때<br>임베딩과 벡터 검색을 이해하고 싶을 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#888">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:130px">
+        <div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:rgba(160,50,200,.2);top:-3px;left:-4px">RAG</div>
+        <div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:rgba(50,200,160,.12);top:3px;left:4px">RAG</div>
+        <div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#1a1a1a;top:0;left:0">RAG</div>
+      </div>
+      <div style="font-size:9px;color:#999">검색 증강 생성</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#7832A0"></div><div style="font-size:18px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">OAuth와 OIDC를 제대로 이해하고 싶을 때<br>Spring Security 설정이 막막할 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:#888">이점이</span><span style="font-size:38px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%;height:100px">
+        <div style="position:absolute;font-size:72px;font-weight:900;letter-spacing:-4px;line-height:.85;color:rgba(200,140,30,.2);top:-3px;left:-4px">Spring</div>
+        <div style="position:absolute;font-size:72px;font-weight:900;letter-spacing:-4px;line-height:.85;color:rgba(30,100,200,.12);top:3px;left:4px">Spring</div>
+        <div style="position:absolute;font-size:72px;font-weight:900;letter-spacing:-4px;line-height:.85;color:#1a1a1a;top:0;left:0">Spring</div>
+      </div>
+      <div style="font-size:9px;color:#999;margin-top:3%">9가지 기술</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#B4781E"></div><div style="font-size:18px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 5 — 리버스 녹아웃 (컬러 배경 + 화이트 타이틀) ═══════════ -->
+<div class="sec">
+<div class="sec-t">5 — Reverse Knockout (Full Accent)</div>
+<div class="sec-d">표지 전체 액센트 컬러 / 제목+시리즈 화이트 / 역방향 컬러 스킴 / 강렬한 브랜드</div>
+<div class="g">
+
+  <div class="c" style="background:#008080;padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:rgba(255,255,255,.5);line-height:1.8">컨테이너가 왜 필요한지 모를 때<br>Docker Compose로 서비스를 엮고 싶을 때<br>이야기로 시작하는 입문서가 필요할 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:rgba(255,255,255,.6)">이점이</span><span style="font-size:38px;font-weight:900;color:#fff;margin-left:6px">온</span></div>
+      <div style="font-size:30px;font-weight:900;color:rgba(255,255,255,.85);margin-top:1px">개발자</div>
+      <div style="position:relative;margin-top:5%">
+        <div style="font-size:84px;font-weight:900;letter-spacing:-5px;line-height:.85;color:rgba(0,0,0,.15)">Docker</div>
+        <div style="font-size:84px;font-weight:900;letter-spacing:-5px;line-height:.85;color:#fff;margin-top:-74px">Docker</div>
+      </div>
+      <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4%">컨테이너의 모든 것</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.4);line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#fff"></div><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="background:#4B3CB4;padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:rgba(255,255,255,.5);line-height:1.8">모놀리스의 한계를 느꼈을 때<br>서비스를 쪼개야 하는 이유를 알고 싶을 때<br>이벤트 기반 통신을 이해하고 싶을 때</div>
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:rgba(255,255,255,.6)">이점이</span><span style="font-size:38px;font-weight:900;color:#fff;margin-left:6px">온</span></div><div style="font-size:30px;font-weight:900;color:rgba(255,255,255,.85);margin-top:1px">개발자</div><div style="position:relative;margin-top:5%"><div style="font-size:100px;font-weight:900;letter-spacing:-6px;line-height:.85;color:rgba(0,0,0,.15)">MSA</div><div style="font-size:100px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#fff;margin-top:-88px">MSA</div></div><div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4%">마이크로서비스 아키텍처</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.4);line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#fff"></div><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="background:#7832A0;padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:rgba(255,255,255,.5);line-height:1.8">LLM이 모르는 것에 답하게 만들고 싶을 때<br>임베딩과 벡터 검색을 이해하고 싶을 때<br>AI가 우리 데이터를 활용하게 만들고 싶을 때</div>
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:rgba(255,255,255,.6)">이점이</span><span style="font-size:38px;font-weight:900;color:#fff;margin-left:6px">온</span></div><div style="font-size:30px;font-weight:900;color:rgba(255,255,255,.85);margin-top:1px">개발자</div><div style="position:relative;margin-top:5%"><div style="font-size:100px;font-weight:900;letter-spacing:-6px;line-height:.85;color:rgba(0,0,0,.15)">RAG</div><div style="font-size:100px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#fff;margin-top:-88px">RAG</div></div><div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4%">검색 증강 생성</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.4);line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#fff"></div><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="background:#B4781E;padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:rgba(255,255,255,.5);line-height:1.8">OAuth와 OIDC를 제대로 이해하고 싶을 때<br>Spring Security 설정이 막막할 때<br>인증/인가의 흐름을 한눈에 보고 싶을 때</div>
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-2px">특</span><span style="font-size:20px;font-weight:700;color:rgba(255,255,255,.6)">이점이</span><span style="font-size:38px;font-weight:900;color:#fff;margin-left:6px">온</span></div><div style="font-size:30px;font-weight:900;color:rgba(255,255,255,.85);margin-top:1px">개발자</div><div style="position:relative;margin-top:5%"><div style="font-size:70px;font-weight:900;letter-spacing:-4px;line-height:.85;color:rgba(0,0,0,.15)">Spring</div><div style="font-size:70px;font-weight:900;letter-spacing:-4px;line-height:.85;color:#fff;margin-top:-62px">Spring</div></div><div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:4%">9가지 기술</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.4);line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#fff"></div><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 6 — 브루탈리스트 그리드 ═══════════ -->
+<div class="sec">
+<div class="sec-t">6 — Brutalist Grid</div>
+<div class="sec-d">격자 구조 + 제목 대형 / 경계선으로 영역 분할 / 거칠고 구조적인 레이아웃</div>
+<div class="g">
+
+  <div class="c" style="padding:0;display:grid;grid-template-rows:auto 1fr auto;border:3px solid #1a1a1a">
+    <div style="padding:3% 4%;border-bottom:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:8px;font-weight:900;letter-spacing:3px;color:#1a1a1a">특이점이 온 개발자</div>
+      <div style="font-size:7px;color:#999">VOL.01</div>
+    </div>
+    <div style="padding:4%;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-size:82px;font-weight:900;letter-spacing:-5px;line-height:.82;color:#1a1a1a">Docker</div>
+      <div style="font-size:10px;letter-spacing:3px;color:#999;margin-top:3%;text-transform:uppercase">컨테이너의 모든 것</div>
+    </div>
+    <div style="padding:3% 4%;border-top:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:7px;color:#999">OPENSKILL BOOKS</div>
+      <div style="font-size:14px;font-weight:900;color:#008080">개념편</div>
+      <div style="font-size:7px;color:#999">류재성</div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;display:grid;grid-template-rows:auto 1fr auto;border:3px solid #1a1a1a">
+    <div style="padding:3% 4%;border-bottom:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center"><div style="font-size:8px;font-weight:900;letter-spacing:3px;color:#1a1a1a">특이점이 온 개발자</div><div style="font-size:7px;color:#999">VOL.02</div></div>
+    <div style="padding:4%;display:flex;flex-direction:column;justify-content:center"><div style="font-size:100px;font-weight:900;letter-spacing:-6px;line-height:.82;color:#1a1a1a">MSA</div><div style="font-size:10px;letter-spacing:3px;color:#999;margin-top:3%">마이크로서비스 아키텍처</div></div>
+    <div style="padding:3% 4%;border-top:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center"><div style="font-size:7px;color:#999">OPENSKILL BOOKS</div><div style="font-size:14px;font-weight:900;color:#4B3CB4">개념편</div><div style="font-size:7px;color:#999">류재성</div></div>
+  </div>
+
+  <div class="c" style="padding:0;display:grid;grid-template-rows:auto 1fr auto;border:3px solid #1a1a1a">
+    <div style="padding:3% 4%;border-bottom:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center"><div style="font-size:8px;font-weight:900;letter-spacing:3px;color:#1a1a1a">특이점이 온 개발자</div><div style="font-size:7px;color:#999">VOL.03</div></div>
+    <div style="padding:4%;display:flex;flex-direction:column;justify-content:center"><div style="font-size:100px;font-weight:900;letter-spacing:-6px;line-height:.82;color:#1a1a1a">RAG</div><div style="font-size:10px;letter-spacing:3px;color:#999;margin-top:3%">검색 증강 생성</div></div>
+    <div style="padding:3% 4%;border-top:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center"><div style="font-size:7px;color:#999">OPENSKILL BOOKS</div><div style="font-size:14px;font-weight:900;color:#7832A0">개념편</div><div style="font-size:7px;color:#999">류재성</div></div>
+  </div>
+
+  <div class="c" style="padding:0;display:grid;grid-template-rows:auto 1fr auto;border:3px solid #1a1a1a">
+    <div style="padding:3% 4%;border-bottom:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center"><div style="font-size:8px;font-weight:900;letter-spacing:3px;color:#1a1a1a">특이점이 온 개발자</div><div style="font-size:7px;color:#999">VOL.04</div></div>
+    <div style="padding:4%;display:flex;flex-direction:column;justify-content:center"><div style="font-size:70px;font-weight:900;letter-spacing:-4px;line-height:.82;color:#1a1a1a">Spring</div><div style="font-size:10px;letter-spacing:3px;color:#999;margin-top:3%">9가지 기술</div></div>
+    <div style="padding:3% 4%;border-top:2px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center"><div style="font-size:7px;color:#999">OPENSKILL BOOKS</div><div style="font-size:14px;font-weight:900;color:#B4781E">개념편</div><div style="font-size:7px;color:#999">류재성</div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 7 — 대각선 분할 ═══════════ -->
+<div class="sec">
+<div class="sec-t">7 — Diagonal Split</div>
+<div class="sec-d">대각선 클리핑으로 화이트/액센트 분할 / 제목이 분할선에 걸침 / 역동적 구성</div>
+<div class="g">
+
+  <div class="c" style="position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:100%;height:100%;background:#008080;clip-path:polygon(100% 0,100% 100%,0 100%,40% 0)"></div>
+    <div style="position:relative;z-index:1;padding:6% 5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:34px;font-weight:900;color:#1a1a1a;letter-spacing:-1px">특</span><span style="font-size:18px;font-weight:700;color:#777">이점이</span><span style="font-size:34px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:26px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:76px;font-weight:900;letter-spacing:-4px;line-height:.85;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,.2)">Docker</div><div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3%">컨테이너의 모든 것</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.5)">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:16px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:100%;height:100%;background:#4B3CB4;clip-path:polygon(100% 0,100% 100%,0 100%,40% 0)"></div>
+    <div style="position:relative;z-index:1;padding:6% 5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:34px;font-weight:900;color:#1a1a1a;letter-spacing:-1px">특</span><span style="font-size:18px;font-weight:700;color:#777">이점이</span><span style="font-size:34px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:26px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:90px;font-weight:900;letter-spacing:-5px;line-height:.85;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,.2)">MSA</div><div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3%">마이크로서비스 아키텍처</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.5)">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:16px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:100%;height:100%;background:#7832A0;clip-path:polygon(100% 0,100% 100%,0 100%,40% 0)"></div>
+    <div style="position:relative;z-index:1;padding:6% 5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:34px;font-weight:900;color:#1a1a1a;letter-spacing:-1px">특</span><span style="font-size:18px;font-weight:700;color:#777">이점이</span><span style="font-size:34px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:26px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:90px;font-weight:900;letter-spacing:-5px;line-height:.85;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,.2)">RAG</div><div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3%">검색 증강 생성</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.5)">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:16px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:100%;height:100%;background:#B4781E;clip-path:polygon(100% 0,100% 100%,0 100%,40% 0)"></div>
+    <div style="position:relative;z-index:1;padding:6% 5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:34px;font-weight:900;color:#1a1a1a;letter-spacing:-1px">특</span><span style="font-size:18px;font-weight:700;color:#777">이점이</span><span style="font-size:34px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:26px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:62px;font-weight:900;letter-spacing:-3px;line-height:.85;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,.2)">Spring</div><div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:3%">9가지 기술</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:rgba(255,255,255,.5)">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:16px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div></div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 8 — 스택드 웨이트 (Ultra Thin + Ultra Bold) ═══════════ -->
+<div class="sec">
+<div class="sec-t">8 — Stacked Weight Contrast</div>
+<div class="sec-d">같은 단어를 Thin + Bold로 겹침 / 무게 대비 / 시리즈명 초경량체 / 모던 고급</div>
+<div class="g">
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#bbb;line-height:1.8">컨테이너가 왜 필요한지 모를 때<br>Docker Compose로 서비스를 엮고 싶을 때<br>이야기로 시작하는 입문서가 필요할 때</div>
+    <div>
+      <div style="font-size:10px;font-weight:100;letter-spacing:8px;color:#ccc;font-family:'Inter',sans-serif">특이점이 온 개발자</div>
+      <div style="position:relative;margin-top:4%;height:130px">
+        <div style="position:absolute;font-size:88px;font-weight:100;letter-spacing:-2px;line-height:.85;color:#ddd;font-family:'Inter',sans-serif;top:0;left:0">Docker</div>
+        <div style="position:absolute;font-size:88px;font-weight:900;letter-spacing:-5px;line-height:.85;color:#1a1a1a;top:10px;left:4px">Docker</div>
+      </div>
+      <div style="font-size:9px;color:#999;margin-top:2%">컨테이너의 모든 것</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5;font-weight:100;letter-spacing:1px">OPENSKILL<br>BOOKS</div><div style="text-align:right"><div style="height:1px;width:50px;margin-left:auto;margin-bottom:4px;background:#008080"></div><div style="font-size:20px;font-weight:800;color:#008080">개념편</div><div style="font-size:7px;color:#999;margin-top:4px;font-weight:300">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#bbb;line-height:1.8">모놀리스의 한계를 느꼈을 때<br>서비스를 쪼개야 하는 이유를 알고 싶을 때<br>이벤트 기반 통신을 이해하고 싶을 때</div>
+    <div><div style="font-size:10px;font-weight:100;letter-spacing:8px;color:#ccc;font-family:'Inter',sans-serif">특이점이 온 개발자</div><div style="position:relative;margin-top:4%;height:140px"><div style="position:absolute;font-size:105px;font-weight:100;letter-spacing:-3px;line-height:.85;color:#ddd;font-family:'Inter',sans-serif;top:0;left:0">MSA</div><div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#1a1a1a;top:10px;left:4px">MSA</div></div><div style="font-size:9px;color:#999">마이크로서비스 아키텍처</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5;font-weight:100;letter-spacing:1px">OPENSKILL<br>BOOKS</div><div style="text-align:right"><div style="height:1px;width:50px;margin-left:auto;margin-bottom:4px;background:#4B3CB4"></div><div style="font-size:20px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:7px;color:#999;margin-top:4px;font-weight:300">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#bbb;line-height:1.8">LLM이 모르는 것에 답하게 만들고 싶을 때<br>임베딩과 벡터 검색을 이해하고 싶을 때<br>AI가 우리 데이터를 활용하게 만들고 싶을 때</div>
+    <div><div style="font-size:10px;font-weight:100;letter-spacing:8px;color:#ccc;font-family:'Inter',sans-serif">특이점이 온 개발자</div><div style="position:relative;margin-top:4%;height:140px"><div style="position:absolute;font-size:105px;font-weight:100;letter-spacing:-3px;line-height:.85;color:#ddd;font-family:'Inter',sans-serif;top:0;left:0">RAG</div><div style="position:absolute;font-size:105px;font-weight:900;letter-spacing:-6px;line-height:.85;color:#1a1a1a;top:10px;left:4px">RAG</div></div><div style="font-size:9px;color:#999">검색 증강 생성</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5;font-weight:100;letter-spacing:1px">OPENSKILL<br>BOOKS</div><div style="text-align:right"><div style="height:1px;width:50px;margin-left:auto;margin-bottom:4px;background:#7832A0"></div><div style="font-size:20px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:7px;color:#999;margin-top:4px;font-weight:300">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="text-align:right;font-size:7px;color:#bbb;line-height:1.8">OAuth와 OIDC를 제대로 이해하고 싶을 때<br>Spring Security 설정이 막막할 때<br>인증/인가의 흐름을 한눈에 보고 싶을 때</div>
+    <div><div style="font-size:10px;font-weight:100;letter-spacing:8px;color:#ccc;font-family:'Inter',sans-serif">특이점이 온 개발자</div><div style="position:relative;margin-top:4%;height:110px"><div style="position:absolute;font-size:76px;font-weight:100;letter-spacing:-2px;line-height:.85;color:#ddd;font-family:'Inter',sans-serif;top:0;left:0">Spring</div><div style="position:absolute;font-size:76px;font-weight:900;letter-spacing:-4px;line-height:.85;color:#1a1a1a;top:10px;left:4px">Spring</div></div><div style="font-size:9px;color:#999;margin-top:2%">9가지 기술</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc;line-height:1.5;font-weight:100;letter-spacing:1px">OPENSKILL<br>BOOKS</div><div style="text-align:right"><div style="height:1px;width:50px;margin-left:auto;margin-bottom:4px;background:#B4781E"></div><div style="font-size:20px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:7px;color:#999;margin-top:4px;font-weight:300">류재성 지음</div></div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 9 — 하프 앤 하프 (세로 분할) ═══════════ -->
+<div class="sec">
+<div class="sec-t">9 — Half & Half (세로 분할)</div>
+<div class="sec-d">좌측 화이트 + 우측 액센트 / 제목이 분할선 걸침 / 좌측=블랙, 우측=화이트 글자</div>
+<div class="g">
+
+  <div class="c" style="display:flex;overflow:hidden">
+    <div style="width:50%;padding:6% 3% 6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:700;color:#ccc;letter-spacing:4px">특이점이 온</div><div style="font-size:13px;font-weight:900;color:#1a1a1a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:50px;font-weight:900;letter-spacing:-3px;line-height:.85;color:#1a1a1a">Do<br>ck<br>er</div></div>
+      <div><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:50%;background:#008080;padding:6% 5% 6% 3%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="font-size:7px;color:rgba(255,255,255,.5);line-height:1.8;text-align:right">컨테이너가 왜 필요한지 모를 때<br>Docker Compose로<br>서비스를 엮고 싶을 때</div>
+      <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.6)">컨테이너의 모든 것</div></div>
+      <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div>
+    </div>
+  </div>
+
+  <div class="c" style="display:flex;overflow:hidden">
+    <div style="width:50%;padding:6% 3% 6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:700;color:#ccc;letter-spacing:4px">특이점이 온</div><div style="font-size:13px;font-weight:900;color:#1a1a1a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:68px;font-weight:900;letter-spacing:-4px;line-height:.85;color:#1a1a1a">M<br>S<br>A</div></div>
+      <div><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:50%;background:#4B3CB4;padding:6% 5% 6% 3%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="font-size:7px;color:rgba(255,255,255,.5);line-height:1.8;text-align:right">모놀리스의 한계를<br>느꼈을 때<br>서비스를 쪼개야 하는<br>이유를 알고 싶을 때</div>
+      <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.6)">마이크로서비스 아키텍처</div></div>
+      <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div>
+    </div>
+  </div>
+
+  <div class="c" style="display:flex;overflow:hidden">
+    <div style="width:50%;padding:6% 3% 6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:700;color:#ccc;letter-spacing:4px">특이점이 온</div><div style="font-size:13px;font-weight:900;color:#1a1a1a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:68px;font-weight:900;letter-spacing:-4px;line-height:.85;color:#1a1a1a">R<br>A<br>G</div></div>
+      <div><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:50%;background:#7832A0;padding:6% 5% 6% 3%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="font-size:7px;color:rgba(255,255,255,.5);line-height:1.8;text-align:right">LLM이 모르는 것에<br>답하게 만들고 싶을 때<br>임베딩과 벡터 검색을<br>이해하고 싶을 때</div>
+      <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.6)">검색 증강 생성</div></div>
+      <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div>
+    </div>
+  </div>
+
+  <div class="c" style="display:flex;overflow:hidden">
+    <div style="width:50%;padding:6% 3% 6% 5%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:700;color:#ccc;letter-spacing:4px">특이점이 온</div><div style="font-size:13px;font-weight:900;color:#1a1a1a;margin-top:1px">개발자</div></div>
+      <div><div style="font-size:38px;font-weight:900;letter-spacing:-2px;line-height:.85;color:#1a1a1a">Sp<br>ri<br>ng</div></div>
+      <div><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:50%;background:#B4781E;padding:6% 5% 6% 3%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="font-size:7px;color:rgba(255,255,255,.5);line-height:1.8;text-align:right">OAuth와 OIDC를<br>제대로 이해하고 싶을 때<br>Spring Security 설정이<br>막막할 때</div>
+      <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.6)">9가지 기술</div></div>
+      <div style="text-align:right"><div style="font-size:18px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.6);margin-top:3px">류재성 지음</div></div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 10 — 3D 원근 타이포 ═══════════ -->
+<div class="sec">
+<div class="sec-t">10 — 3D Perspective Typography</div>
+<div class="sec-d">CSS perspective로 제목에 깊이감 / 소실점을 향해 기울어지는 글자 / SF 느낌</div>
+<div class="g">
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between;perspective:400px">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">컨테이너가 왜 필요한지 모를 때<br>Docker Compose로 서비스를 엮고 싶을 때</div>
+    <div>
+      <div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div>
+      <div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div>
+      <div style="margin-top:5%;transform:rotateX(8deg);transform-origin:bottom left">
+        <div style="font-size:82px;font-weight:900;letter-spacing:-4px;line-height:.82;color:#1a1a1a;text-shadow:2px 4px 0 #ddd,4px 8px 0 #eee">Docker</div>
+      </div>
+      <div style="font-size:9px;color:#999;margin-top:4%">컨테이너의 모든 것</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#008080"></div><div style="font-size:18px;font-weight:800;color:#008080">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between;perspective:400px">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">모놀리스의 한계를 느꼈을 때<br>서비스를 쪼개야 하는 이유를 알고 싶을 때</div>
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div><div style="margin-top:5%;transform:rotateX(8deg);transform-origin:bottom left"><div style="font-size:98px;font-weight:900;letter-spacing:-5px;line-height:.82;color:#1a1a1a;text-shadow:2px 4px 0 #ddd,4px 8px 0 #eee">MSA</div></div><div style="font-size:9px;color:#999;margin-top:4%">마이크로서비스 아키텍처</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#4B3CB4"></div><div style="font-size:18px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between;perspective:400px">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">LLM이 모르는 것에 답하게 만들고 싶을 때<br>임베딩과 벡터 검색을 이해하고 싶을 때</div>
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div><div style="margin-top:5%;transform:rotateX(8deg);transform-origin:bottom left"><div style="font-size:98px;font-weight:900;letter-spacing:-5px;line-height:.82;color:#1a1a1a;text-shadow:2px 4px 0 #ddd,4px 8px 0 #eee">RAG</div></div><div style="font-size:9px;color:#999;margin-top:4%">검색 증강 생성</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#7832A0"></div><div style="font-size:18px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+  <div class="c" style="padding:6% 5%;display:flex;flex-direction:column;justify-content:space-between;perspective:400px">
+    <div style="text-align:right;font-size:7px;color:#aaa;line-height:1.8">OAuth와 OIDC를 제대로 이해하고 싶을 때<br>Spring Security 설정이 막막할 때</div>
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:36px;font-weight:900;color:#1a1a1a;letter-spacing:-2px">특</span><span style="font-size:19px;font-weight:700;color:#888">이점이</span><span style="font-size:36px;font-weight:900;color:#1a1a1a;margin-left:6px">온</span></div><div style="font-size:28px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div><div style="margin-top:5%;transform:rotateX(8deg);transform-origin:bottom left"><div style="font-size:68px;font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a;text-shadow:2px 4px 0 #ddd,4px 8px 0 #eee">Spring</div></div><div style="font-size:9px;color:#999;margin-top:4%">9가지 기술</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:7px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:45px;margin-left:auto;margin-bottom:3px;background:#B4781E"></div><div style="font-size:18px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:7px;color:#999;margin-top:3px">류재성 지음</div></div></div>
+  </div>
+
+</div></div>
+
+</body>
+</html>

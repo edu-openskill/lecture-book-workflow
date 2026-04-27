@@ -1,0 +1,58 @@
+direction: right
+
+classes: {
+  node: {
+    shape: rectangle
+    style: {
+      fill: "#ffffff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 20
+      font-color: "#374151"
+      bold: true
+    }
+    width: 200
+    height: 80
+  }
+}
+
+customer: "손님\n(프론트엔드)" {
+  class: node
+}
+waiter: "웨이터\n(API)" {
+  class: node
+}
+kitchen: "주방\n(DB)" {
+  class: node
+}
+
+customer -> waiter: "된장찌개 주세요\n(HTTP 요청)" {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+  }
+}
+waiter -> kitchen: "된장찌개 주문\n(SQL 쿼리)" {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+  }
+}
+kitchen -> waiter: "된장찌개 완성\n(데이터)" {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+  }
+}
+waiter -> customer: "여기요!\n(HTTP 응답)" {
+  style: {
+    stroke: "#2563eb"
+    stroke-width: 2
+    font-size: 14
+  }
+}

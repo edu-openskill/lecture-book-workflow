@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="white" rx="8"/>
+  <text x="100" y="20" text-anchor="middle" font-family="'Pretendard',sans-serif" font-size="11" fill="#888">5-1. 도형화 (코드 페이지)</text>
+  <g transform="translate(55,30) scale(1.1)">
+    <path d="M 15 5 L 62 5 L 75 18 L 75 95 L 15 95 Z"
+          fill="white" stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M 62 5 L 62 18 L 75 18"
+          fill="none" stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="25" y1="32" x2="58" y2="32" stroke="#008080" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="29" y1="44" x2="62" y2="44" stroke="#008080" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/>
+    <line x1="25" y1="56" x2="52" y2="56" stroke="#008080" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="29" y1="68" x2="56" y2="68" stroke="#008080" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/>
+    <polyline points="30,80 22,86 30,92" fill="none" stroke="#1A1A1A" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+    <line x1="37" y1="79" x2="47" y2="93" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+    <polyline points="54,80 62,86 54,92" fill="none" stroke="#1A1A1A" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  </g>
+  <text x="100" y="160" text-anchor="middle" font-family="'Pretendard',sans-serif" font-size="10" fill="#666">문서 + 코드라인 + 꺾쇠 브래킷</text>
+  <text x="100" y="178" text-anchor="middle" font-family="'Pretendard',sans-serif" font-size="10" fill="#999">기술서 출판사 정체성 직관적 표현</text>
+</svg>

@@ -1,0 +1,25 @@
+direction: right
+
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      fill: "#3b82f6"
+      stroke: "#3b82f6"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 16
+      font-color: "#ffffff"
+      bold: true
+    }
+  }
+}
+
+a: "실습 1\nOCR vs 비전 LLM" { class: step }
+b: "실습 2\n하이브리드 처리" { class: step }
+c: "실습 3\n평가 프레임워크" { class: step }
+d: "실습 4\n완성 웹 UI" { class: step }
+
+a -> b: { style.stroke: "#3b82f6"; style.stroke-width: 2 }
+b -> c: { style.stroke: "#3b82f6"; style.stroke-width: 2 }
+c -> d: { style.stroke: "#3b82f6"; style.stroke-width: 2 }

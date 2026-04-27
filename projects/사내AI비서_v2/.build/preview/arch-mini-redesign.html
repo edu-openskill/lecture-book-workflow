@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>arch-mini · arch11의 미니맵</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  body {
+    max-width: 1100px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 26px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 6px; letter-spacing: -0.3px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+  h2 {
+    margin-top: 48px;
+    padding: 6px 12px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 800;
+  }
+  h2 .sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: #fff;
+    color: var(--color-accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    margin-left: 10px;
+  }
+  .sample-note {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 10px 0 16px;
+    line-height: 1.7;
+  }
+  .spec {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-sm);
+    line-height: 1.7;
+  }
+
+  /* ═════════════════ .arch-mini — arch11의 틀 축소판 ═════════════════ */
+  .arch-mini {
+    max-width: 460px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+  }
+  .arch-mini .mini-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-text-subtle);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--color-border);
+  }
+  .arch-mini .mini-title b {
+    color: var(--color-accent);
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .arch-mini .mini-user {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+    font-weight: 700;
+    padding: 4px 0 8px;
+  }
+  .arch-mini .mini-user .ico {
+    color: var(--color-accent-warm);
+    font-size: 12px;
+    margin-right: 4px;
+  }
+  .arch-mini .row-client,
+  .arch-mini .row-ext {
+    display: grid;
+    grid-template-columns: 1fr 28px 1fr;
+    gap: 6px;
+    align-items: stretch;
+  }
+  .arch-mini .row-ext { margin-top: 6px; }
+  .arch-mini .stores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .arch-mini .box {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    text-align: center;
+    min-height: 42px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .arch-mini .box .lbl {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--color-text-subtle);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .arch-mini .box .name {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--color-text-heading);
+  }
+  .arch-mini .box.llm { border-style: dashed; }
+  .arch-mini .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-subtle);
+    font-size: 11px;
+  }
+  .arch-mini .lvl-lbl {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--color-text-subtle);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 3px 0;
+  }
+
+  /* active modifier — 이번 챕터가 건드리는 박스 */
+  .arch-mini .box.active {
+    background: var(--color-accent-bg);
+    border: 1.5px solid var(--color-accent);
+  }
+  .arch-mini .box.active .lbl { color: var(--color-accent); }
+  .arch-mini .box.active .name { color: var(--color-accent-text); }
+
+  /* done modifier — 이미 완성된 박스 (이전 챕터에서) */
+  .arch-mini .box.done {
+    background: var(--color-surface);
+    border-color: var(--color-accent-border);
+  }
+  .arch-mini .box.done .lbl { color: var(--color-accent); }
+  .arch-mini .box.done .name { color: var(--color-text-heading); }
+
+  /* ═════════════════ 여러 챕터 나란히 보기 ═════════════════ */
+  .chapter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 16px;
+  }
+  .chapter-grid .ch-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .chapter-grid .ch-slot .ch-name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .chapter-grid .ch-slot .ch-name b {
+    color: var(--color-accent);
+    font-weight: 800;
+  }
+
+  .verdict {
+    padding: 16px 20px;
+    background: var(--color-accent-bg);
+    border: 1px solid var(--color-accent-border);
+    color: var(--color-accent-text);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.8;
+    margin-top: 18px;
+  }
+  .verdict strong { color: var(--color-text-heading); }
+
+  /* arch11 마지막 연결 섹션 — 축소 스케일 */
+  .arch11-scale {
+    transform: scale(0.65);
+    transform-origin: top center;
+    margin-bottom: -240px;
+  }
+</style>
+</head>
+<body>
+
+<h1>arch-mini · arch11의 틀 축소판</h1>
+<p class="lead">
+  매 챕터 끝에 <strong>arch11과 같은 3행 2열 골격</strong>을 그대로 보여주되, 내부 디테일(chip·stages·models)은 전부 빼고
+  <strong>이번 챕터가 건드리는 박스만 accent 강조</strong>. 마지막 CH11에서 같은 틀이 arch11로 꽉 채워진다.
+</p>
+
+<!-- ══════ 빈 틀 ══════ -->
+<h2>1. 빈 틀 (구조만) <span class="sub">skeleton</span></h2>
+<p class="sample-note">아무 챕터도 강조하지 않은 골격. arch11의 3행 2열 자리만 있음.</p>
+<div class="arch-mini">
+  <div class="mini-title">전체 구성도 · 틀</div>
+  <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+
+  <div class="row-client">
+    <div class="box"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+    <div class="flow">⇄</div>
+    <div class="box"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+  </div>
+  <div class="lvl-lbl">↕ prompt · tool</div>
+
+  <div class="row-ext">
+    <div class="box llm"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+    <div class="flow">⇄</div>
+    <div class="box"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+  </div>
+  <div class="lvl-lbl">↕ read · write</div>
+
+  <div class="stores">
+    <div class="box"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+    <div class="box"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+  </div>
+</div>
+<div class="spec">6 박스 + 사용자 · 세 rows · 약 460px 폭 · arch11과 구조 동일</div>
+
+<!-- ══════ 챕터별 하이라이트 ══════ -->
+<h2>2. 챕터별 하이라이트 — 6 챕터 시나리오 <span class="sub">per-chapter</span></h2>
+<p class="sample-note">같은 틀. 각 챕터에서 건드리는 박스만 accent. "done"은 이전 챕터에서 이미 완성된 박스(연한 accent border + 무채색 본문).</p>
+
+<div class="chapter-grid">
+
+  <!-- CH02 -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 02</b> · 사내 시스템</div>
+    <div class="arch-mini">
+      <div class="mini-title">챕터 <b>2</b>의 자리 · Gateway + RelationalDB</div>
+      <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+      <div class="row-client">
+        <div class="box active"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+        <div class="flow">⇄</div>
+        <div class="box"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="row-ext">
+        <div class="box llm"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+        <div class="flow">⇄</div>
+        <div class="box"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="stores">
+        <div class="box"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+        <div class="box active"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH04 -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 04</b> · 문서를 지식으로</div>
+    <div class="arch-mini">
+      <div class="mini-title">챕터 <b>4</b>의 자리 · VectorDB</div>
+      <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+      <div class="row-client">
+        <div class="box done"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+        <div class="flow">⇄</div>
+        <div class="box"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="row-ext">
+        <div class="box llm"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+        <div class="flow">⇄</div>
+        <div class="box"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="stores">
+        <div class="box active"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+        <div class="box done"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH05 -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 05</b> · 드디어 답해준다 (RAG 첫 조립)</div>
+    <div class="arch-mini">
+      <div class="mini-title">챕터 <b>5</b>의 자리 · Runtime 첫 조립</div>
+      <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+      <div class="row-client">
+        <div class="box done"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+        <div class="flow">⇄</div>
+        <div class="box active"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="row-ext">
+        <div class="box llm"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+        <div class="flow">⇄</div>
+        <div class="box"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="stores">
+        <div class="box done"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+        <div class="box done"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH06 -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 06</b> · 연차도 규정도 한 번에</div>
+    <div class="arch-mini">
+      <div class="mini-title">챕터 <b>6</b>의 자리 · Runtime + Tools</div>
+      <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+      <div class="row-client">
+        <div class="box done"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+        <div class="flow">⇄</div>
+        <div class="box active"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="row-ext">
+        <div class="box llm"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+        <div class="flow">⇄</div>
+        <div class="box active"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="stores">
+        <div class="box done"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+        <div class="box done"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH10 -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 10</b> · PDF·이미지까지 (Vision 파서)</div>
+    <div class="arch-mini">
+      <div class="mini-title">챕터 <b>10</b>의 자리 · Runtime의 RAG Engine 확장</div>
+      <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+      <div class="row-client">
+        <div class="box done"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+        <div class="flow">⇄</div>
+        <div class="box active"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="row-ext">
+        <div class="box llm"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+        <div class="flow">⇄</div>
+        <div class="box done"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="stores">
+        <div class="box done"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+        <div class="box done"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH11 -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 11</b> · 완성 (모두 done)</div>
+    <div class="arch-mini">
+      <div class="mini-title">챕터 <b>11</b> · 전 박스 완성 → arch11로 확장</div>
+      <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+      <div class="row-client">
+        <div class="box done"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+        <div class="flow">⇄</div>
+        <div class="box done"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="row-ext">
+        <div class="box llm done"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+        <div class="flow">⇄</div>
+        <div class="box done"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+      </div>
+      <div class="lvl-lbl">↕</div>
+      <div class="stores">
+        <div class="box done"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+        <div class="box done"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════ 틀 → arch11 전환 ══════ -->
+<h2>3. 틀 → arch11 전환 <span class="sub">handoff</span></h2>
+<p class="sample-note">같은 3행 2열 골격에 디테일(ops chip·ReAct loop·6 stage·Ollama 3 models·4 tools)이 채워지면 arch11. 책의 마지막 장에서 "이 틀이 이렇게 채워졌구나"가 자연스럽게 이어짐.</p>
+
+<div style="text-align:center;margin:20px 0">
+  <div class="arch-mini" style="margin-bottom: 14px">
+    <div class="mini-title">CH 1~10 · arch-mini 반복</div>
+    <div class="mini-user"><span class="ico">◉</span>사내 직원 · 관리자</div>
+    <div class="row-client">
+      <div class="box done"><span class="lbl">Gateway</span><span class="name">FastAPI</span></div>
+      <div class="flow">⇄</div>
+      <div class="box done"><span class="lbl">Runtime</span><span class="name">통합 에이전트</span></div>
+    </div>
+    <div class="lvl-lbl">↕</div>
+    <div class="row-ext">
+      <div class="box llm done"><span class="lbl">External</span><span class="name">Ollama LLM</span></div>
+      <div class="flow">⇄</div>
+      <div class="box done"><span class="lbl">Tools</span><span class="name">MCP 4개</span></div>
+    </div>
+    <div class="lvl-lbl">↕</div>
+    <div class="stores">
+      <div class="box done"><span class="lbl">Vector</span><span class="name">ChromaDB</span></div>
+      <div class="box done"><span class="lbl">Relational</span><span class="name">PostgreSQL</span></div>
+    </div>
+  </div>
+  <div style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-muted);letter-spacing:2px">↓ CH 11 · 같은 틀 확장</div>
+</div>
+
+<div style="overflow:hidden;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:20px;background:var(--color-surface);margin-top:10px">
+  <div class="arch11-scale">
+    <div class="arch11">
+      <div class="header">
+        <div class="sub">시스템 아키텍처 (System Architecture)</div>
+        <div class="title">커넥트HR 에이전트</div>
+        <div class="desc">11개 챕터에 걸쳐 완성한 RAG 시스템</div>
+      </div>
+      <div class="row-client">
+        <div class="col-c">
+          <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+          <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+          <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+        </div>
+        <div class="flow-arrows">
+          <div class="fa-pair"><div class="fa-label">요청</div><div class="fa-arrow call">→</div></div>
+          <div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+        </div>
+        <div class="col-a">
+          <div class="title">통합 에이전트 · 운영 (Runtime)</div>
+          <div class="ops">
+            <div class="chip"><div class="l">캐시</div><div class="n">Response</div></div>
+            <div class="chip"><div class="l">관찰</div><div class="n">Tracker</div></div>
+            <div class="chip"><div class="l">재시도</div><div class="n">Resilience</div></div>
+          </div>
+          <div class="core">
+            <div class="l">실행기</div>
+            <div class="n">통합 에이전트</div>
+            <div class="loop-inner"><div class="loop-label">ReAct 루프</div><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div></div></div>
+            <div class="engine-inner"><div class="engine-label">RAG Engine</div><div class="engine-name">커넥트HR 엔진</div><div class="stages-6"><div class="s"><span class="num">01</span><span class="nm">파싱</span></div><div class="s"><span class="num">02</span><span class="nm">청킹</span></div><div class="s"><span class="num">03</span><span class="nm">확장</span></div><div class="s"><span class="num">04</span><span class="nm">검색</span></div><div class="s"><span class="num">05</span><span class="nm">리랭크</span></div><div class="s"><span class="num">06</span><span class="nm">LLM</span></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 프롬프트</span> &nbsp;·&nbsp; <span class="down">↓ 응답</span></div>
+      <div class="row-ext">
+        <div class="llm"><div class="box">
+          <div class="l">외부 · LLM</div>
+          <div class="n">Ollama</div>
+          <div class="models">
+            <div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+            <div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool</span></div>
+            <div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+          </div>
+        </div></div>
+        <div class="flow-arrows">
+          <div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+          <div class="fa-pair"><div class="fa-label">호출</div><div class="fa-arrow call">→</div></div>
+        </div>
+        <div class="col-t">
+          <div class="title">도구 호출 · MCP Tools</div>
+          <div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">매출</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">부서</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL</div></div><div class="b rag">RAG</div></div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 조회</span> &nbsp;·&nbsp; <span class="down">↓ 문서</span></div>
+      <div class="stores">
+        <div class="st"><div class="l">벡터 저장소</div><div class="n">ChromaDB</div><div class="s">768차원</div></div>
+        <div class="st"><div class="l">관계형 DB</div><div class="n">PostgreSQL</div><div class="s">직원·연차·매출</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 권장 ══════ -->
+<h2 style="background:var(--color-text-heading)">정리</h2>
+<div class="verdict">
+  <strong>.arch-mini는 arch11의 뼈대만 남긴 미니맵.</strong><br>
+  매 챕터 끝에 460px 폭으로 들어가서 "이번 챕터가 건드린 박스"만 accent로 표시.
+  이전 챕터에서 만든 박스는 <code style="font-family:var(--font-mono);background:var(--color-surface);padding:1px 5px;border-radius:3px">done</code>(연한 accent border).
+  아직 안 만든 박스는 무채색 빈 박스.<br><br>
+  <strong>CH11로 갈 때</strong>: 같은 3행 2열 골격에 디테일이 채워지면 그대로 arch11. 독자가 "이 틀이 이렇게 꽉 찼구나"로 자연스럽게 이해.<br><br>
+  <strong>이 방향으로 가시겠으면</strong>: <code>.arch-mini</code> 컴포넌트를 diagrams.css에 추가하고, CH02·03·04·05·07·10의 <code>.arch-fullmap</code> 마크업을 <code>.arch-mini</code>로 일괄 교체. 각 챕터마다 active 박스만 다르게 지정.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+direction: right
+
+pod_old: "Pod (이전)\nIP: 10.244.0.5\n삭제됨" {
+  style: { fill: "#eeeeee"; stroke: "#666"; stroke-width: 1; stroke-dash: 3; border-radius: 8 }
+}
+
+pod_new: "Pod (새로 생성)\nIP: 10.244.0.9" {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+ec: "Endpoint Controller\nPod IP 변화 감시" {
+  style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+endpoints: "Endpoints 리소스\n연결된 Pod IP 목록\n10.244.0.9" {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+kube_proxy: "kube-proxy\niptables 규칙 갱신\nClusterIP → 새 Pod IP DNAT" {
+  style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+pod_old -> ec: "1. 삭제 감지" { style: { stroke: "#666"; stroke-dash: 3 } }
+pod_new -> ec: "2. 새 IP 감지" { style: { stroke: "#333" } }
+ec -> endpoints: "3. 목록 갱신" { style: { stroke: "#333" } }
+endpoints -> kube_proxy: "4. 규칙 반영" { style: { stroke: "#333" } }

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Ingress 경로 분기</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 40px 24px 28px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 960px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 34px;
+  }
+
+  .canvas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  /* 모든 컬럼 동일 구조: element + 14 gap + label(또는 dummy) */
+  .col {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+
+  /* Customer */
+  .customer-icon {
+    width: 66px; height: 66px;
+    border: 2.5px solid #222;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff;
+  }
+  .customer-icon svg { width: 38px; height: 38px; }
+
+  /* Request arrow */
+  .req-arrow-svg { width: 100px; height: 18px; display: block; }
+
+  /* Ingress */
+  .ingress-box {
+    width: 170px;
+    padding: 22px 16px;
+    border: 2.5px solid #1565c0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.1);
+    text-align: center;
+  }
+  .ingress-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+  .ingress-sub {
+    font-size: 11.5px;
+    color: #666;
+    margin-top: 6px;
+  }
+
+  /* Fork (Y split) */
+  .fork-svg {
+    width: 150px;
+    height: 150px;
+    display: block;
+  }
+
+  /* Services */
+  .services-stack {
+    display: flex; flex-direction: column; gap: 56px;
+  }
+  .service-box {
+    padding: 11px 22px;
+    border: 2px solid #444;
+    border-radius: 22px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* Labels */
+  .col-label {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .col-label.dark { color: #333; }
+  .col-label.blue { color: #1565c0; }
+  .col-label.muted {
+    color: #555;
+    font-weight: 700;
+    font-size: 11.5px;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+  }
+  .col-label.invisible { visibility: hidden; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Ingress — 경로를 읽어 요청을 Service로 분기</div>
+
+  <div class="canvas">
+    <!-- 고객 -->
+    <div class="col">
+      <div class="customer-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="8" r="4" stroke="#222" stroke-width="2"/>
+          <path d="M4 21c0-4 4-7 8-7s8 3 8 7" stroke="#222" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="col-label dark">고객</div>
+    </div>
+
+    <!-- Request arrow — arrow on top, label below -->
+    <div class="col">
+      <svg class="req-arrow-svg" viewBox="0 0 100 18">
+        <line x1="2" y1="9" x2="86" y2="9" stroke="#666" stroke-width="2"/>
+        <polygon points="86,3 96,9 86,15" fill="#666"/>
+      </svg>
+      <div class="col-label muted">/order, /stores</div>
+    </div>
+
+    <!-- Ingress -->
+    <div class="col">
+      <div class="ingress-box">
+        <div class="ingress-name">Ingress</div>
+        <div class="ingress-sub">경로 읽음</div>
+      </div>
+      <div class="col-label invisible">·</div>
+    </div>
+
+    <!-- Fork (Y split diagonal) -->
+    <div class="col">
+      <svg class="fork-svg" viewBox="0 0 150 150">
+        <defs>
+          <marker id="blueArrow" viewBox="0 0 12 10" refX="11" refY="5" markerWidth="10" markerHeight="8" orient="auto">
+            <polygon points="0,0 12,5 0,10" fill="#1565c0"/>
+          </marker>
+        </defs>
+        <!-- Upper diagonal line to /order -->
+        <line x1="5" y1="75" x2="128" y2="25" stroke="#1565c0" stroke-width="2.2" marker-end="url(#blueArrow)"/>
+        <text x="58" y="40" text-anchor="middle" font-size="12.5" font-family="Consolas,monospace" fill="#1565c0" font-weight="700">/order</text>
+        <!-- Lower diagonal line to /stores -->
+        <line x1="5" y1="75" x2="128" y2="125" stroke="#1565c0" stroke-width="2.2" marker-end="url(#blueArrow)"/>
+        <text x="58" y="118" text-anchor="middle" font-size="12.5" font-family="Consolas,monospace" fill="#1565c0" font-weight="700">/stores</text>
+      </svg>
+      <div class="col-label invisible">·</div>
+    </div>
+
+    <!-- Services -->
+    <div class="col">
+      <div class="services-stack">
+        <div class="service-box">order-service</div>
+        <div class="service-box">stores-service</div>
+      </div>
+      <div class="col-label invisible">·</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

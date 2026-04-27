@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>arch-fullmap 배치 재설계</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  body {
+    max-width: 1100px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 28px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 6px; letter-spacing: -0.3px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+  h2 {
+    margin-top: 56px;
+    padding: 8px 14px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+  h2 .sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: #fff;
+    color: var(--color-accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    margin-left: 10px;
+  }
+  .sample-note {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin: 10px 0 16px;
+    line-height: 1.7;
+  }
+  .preview-wrap {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    background: var(--color-surface);
+  }
+  .spec {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-sm);
+    line-height: 1.8;
+  }
+
+  .diagnosis {
+    padding: 14px 18px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #7c2d12;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 12px 0 24px;
+  }
+  .diagnosis ul { margin: 6px 0 0; padding-left: 20px; }
+
+  /* ═════════ 변형 A · 가로 타임라인 ═════════ */
+  .fm-tl {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+  }
+  .fm-tl .tl-top {
+    text-align: center;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--color-border);
+    margin-bottom: 16px;
+  }
+  .fm-tl .tl-top .ico {
+    font-size: 22px;
+    color: var(--color-accent-warm);
+  }
+  .fm-tl .tl-top .n {
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--color-text-heading);
+    margin-top: 2px;
+  }
+  .fm-tl .tl-line {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 4px;
+    position: relative;
+    margin: 18px 0 8px;
+  }
+  .fm-tl .tl-line::before {
+    content: '';
+    position: absolute;
+    left: 3%; right: 3%;
+    top: 50%;
+    height: 2px;
+    background: var(--color-border);
+    z-index: 0;
+  }
+  .fm-tl .tl-node {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .fm-tl .tl-node .dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--color-text-muted);
+  }
+  .fm-tl .tl-node.done .dot { background: var(--color-accent-bg); border-color: var(--color-accent-border); color: var(--color-accent-text); }
+  .fm-tl .tl-node.current .dot {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+    box-shadow: 0 0 0 4px var(--color-accent-bg);
+  }
+  .fm-tl .tl-node .label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-text-subtle);
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .fm-tl .tl-node.current .label { color: var(--color-accent-text); font-weight: 700; }
+  .fm-tl .tl-arrow {
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-accent);
+    margin: 2px 0 8px;
+  }
+  .fm-tl .tl-current-card {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 14px 18px;
+    background: var(--color-accent-bg);
+    border: 1.5px solid var(--color-accent);
+    border-radius: var(--radius-md);
+  }
+  .fm-tl .tl-current-card .hd {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--color-accent-border);
+  }
+  .fm-tl .tl-current-card .hd .tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-accent);
+    letter-spacing: 2px;
+    font-weight: 800;
+  }
+  .fm-tl .tl-current-card .hd .name {
+    font-weight: 800;
+    color: var(--color-text-heading);
+    font-size: 14px;
+  }
+  .fm-tl .tl-current-card .items {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .fm-tl .tl-current-card .it {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-accent-text);
+  }
+  .fm-tl .tl-current-card .it .sub {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-text-muted);
+    font-weight: 400;
+    margin-top: 1px;
+  }
+  .fm-tl .tl-bottom {
+    text-align: center;
+    padding-top: 14px;
+    border-top: 1px dashed var(--color-border);
+    margin-top: 18px;
+  }
+  .fm-tl .tl-bottom .n {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 1px dashed var(--color-border-strong);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-weight: 700;
+  }
+
+  /* ═════════ 변형 B · 시스템 레이어 ═════════ */
+  .fm-layer {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+  }
+  .fm-layer .ln {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: stretch;
+    margin: 6px 0;
+  }
+  .fm-layer .ln .box {
+    padding: 12px 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .fm-layer .ln.user .box { background: #fff; border-radius: 28px; }
+  .fm-layer .ln.ext  .box { background: var(--color-surface); border-style: dashed; }
+  .fm-layer .ln.current .box {
+    background: var(--color-accent-bg);
+    border: 1.5px solid var(--color-accent);
+  }
+  .fm-layer .ln .box .ico { font-size: 18px; color: var(--color-accent-warm); }
+  .fm-layer .ln.current .box .ico { color: var(--color-accent); }
+  .fm-layer .ln .box .t {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-text-subtle);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .fm-layer .ln.current .box .t { color: var(--color-accent); }
+  .fm-layer .ln .box .n { font-weight: 800; color: var(--color-text-heading); font-size: 14px; }
+  .fm-layer .ln .box .s { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+  .fm-layer .ln .chips {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    align-self: center;
+  }
+  .fm-layer .ln .chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 3px 7px;
+    border-radius: 3px;
+    background: var(--color-surface-alt);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    font-weight: 700;
+  }
+  .fm-layer .ln .chip.on {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+  }
+  .fm-layer .ln .arr { text-align: center; color: var(--color-text-subtle); font-size: 11px; padding: 2px 0; font-family: var(--font-mono); letter-spacing: 2px; }
+  .fm-layer .hdr {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-subtle);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+  }
+  .fm-layer .hdr .me { color: var(--color-accent); }
+
+  /* ═════════ 변형 C · 2D 매트릭스 ═════════ */
+  .fm-matrix {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    overflow-x: auto;
+  }
+  .fm-matrix table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 2px;
+    font-size: 11px;
+  }
+  .fm-matrix th, .fm-matrix td {
+    padding: 6px 8px;
+    text-align: center;
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+  }
+  .fm-matrix thead th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    background: var(--color-surface-alt);
+    text-transform: uppercase;
+  }
+  .fm-matrix thead th.current {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .fm-matrix tbody th {
+    text-align: left;
+    padding-right: 12px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--color-text-heading);
+    background: var(--color-bg);
+    font-size: 11px;
+  }
+  .fm-matrix tbody tr.user th, .fm-matrix tbody tr.ext th { color: var(--color-accent-warm-text); font-weight: 700; }
+  .fm-matrix td {
+    color: var(--color-text-subtle);
+    font-family: var(--font-mono);
+  }
+  .fm-matrix td.done { background: var(--color-accent-bg); color: var(--color-accent-text); font-weight: 700; }
+  .fm-matrix td.current { background: var(--color-accent); color: #fff; font-weight: 800; }
+  .fm-matrix td.later { background: var(--color-surface-alt); color: var(--color-text-subtle); }
+  .fm-matrix td.ext { background: #fff; border: 1px dashed var(--color-border-strong); color: var(--color-text-muted); }
+
+  /* ═════════ 비교 ═════════ */
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .cmp-table th, .cmp-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  .cmp-table thead th {
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--color-accent);
+  }
+  .cmp-table tbody th {
+    background: var(--color-surface);
+    color: var(--color-text-heading);
+    font-weight: 700;
+    width: 160px;
+    font-size: 12px;
+  }
+  .cmp-table .rating { font-family: var(--font-mono); font-weight: 800; }
+  .cmp-table .r-a { color: var(--color-accent); }
+  .cmp-table .r-b { color: var(--color-accent-warm-text); }
+  .cmp-table .r-c { color: #9a3412; }
+
+  .verdict {
+    padding: 18px 22px;
+    background: var(--color-accent-bg);
+    border: 1px solid var(--color-accent-border);
+    color: var(--color-accent-text);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.8;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h1>arch-fullmap 배치 재설계 <span style="font-size:14px;color:var(--color-text-secondary);font-weight:500;margin-left:10px">CH02 기준</span></h1>
+<p class="lead">
+  현재 세로 zone 나열이 <strong>"책의 어디쯤 있는지"</strong>를 독자에게 즉각 전달하지 못한다는 진단.
+  세 가지 변형을 만들어 같은 CH02 정보를 다른 배치로 보여줍니다.
+</p>
+
+<!-- ══════ 진단 ══════ -->
+<h2>진단 · 현재 arch-fullmap의 연상 어려움 <span class="sub">problem</span></h2>
+<div class="diagnosis">
+  <strong>현재 문제점 3가지</strong>
+  <ul>
+    <li>세로 zone 나열이 <strong>"책 진행"</strong>과 <strong>"시스템 구조"</strong> 중 어느 축인지 모호 (공간 배치만으로는 구분 불가)</li>
+    <li>챕터 번호가 <em>라벨 텍스트</em>로만 표시 — 공간 위치·인접성이 챕터 순서와 연동되지 않음</li>
+    <li><code>.afm-on</code> 강조가 박스 안 뱃지로 들어가 답답. "오늘 만든 부분" 뱃지가 박스를 가림</li>
+  </ul>
+  <br>
+  <strong>독자가 묻고 싶은 것</strong>
+  <ul>
+    <li>"<strong>내가 지금 책의 몇 %에 있지?</strong>"</li>
+    <li>"<strong>앞으로 뭐가 더 남았지?</strong>"</li>
+    <li>"<strong>이번 챕터는 시스템의 어디를 건드리지?</strong>"</li>
+  </ul>
+</div>
+
+<!-- ══════ 현재 ══════ -->
+<h2>현재 배치 · 베이스라인 <span class="sub">before</span></h2>
+<p class="sample-note">비교 기준. 세로 zone 3개 + 사용자(위)·LLM(아래).</p>
+<div class="preview-wrap">
+  <div class="arch-fullmap">
+    <div class="arch-fullmap-title">전체 구성도. 짙은 박스가 챕터 2 범위</div>
+    <div class="afm-row afm-user">
+      <div class="afm-box afm-faint afm-round"><div class="afm-label">사내 직원 · 관리자</div></div>
+    </div>
+    <div class="afm-zone">
+      <span class="afm-zone-ch">챕터 2</span>
+      <span class="afm-zone-label">사내 시스템</span>
+      <div class="afm-row afm-two">
+        <div class="afm-box afm-on"><div class="afm-tag">오늘 만든 부분</div><div class="afm-label">FastAPI</div><div class="afm-sub">REST 엔드포인트</div></div>
+        <div class="afm-box afm-on"><div class="afm-tag">오늘 만든 부분</div><div class="afm-label">PostgreSQL</div><div class="afm-sub">직원·연차·매출</div></div>
+      </div>
+    </div>
+    <div class="afm-zone">
+      <span class="afm-zone-ch">챕터 3~10</span>
+      <span class="afm-zone-label">RAG + 에이전트</span>
+      <div class="afm-row afm-three">
+        <div class="afm-box afm-faint"><div class="afm-label">청크·벡터</div></div>
+        <div class="afm-box afm-faint"><div class="afm-label">검색·엔진</div></div>
+        <div class="afm-box afm-faint afm-dashed"><div class="afm-label">통합 에이전트</div></div>
+      </div>
+    </div>
+    <div class="afm-row afm-ext">
+      <div class="afm-box afm-faint afm-dashed"><div class="afm-label">Ollama LLM (외부)</div></div>
+    </div>
+    <div class="afm-note">오늘 띄운 건 <b>FastAPI · PostgreSQL</b>. 챕터 3부터는 이 엔드포인트가 AI의 입구가 됩니다.</div>
+  </div>
+</div>
+
+<!-- ══════ 변형 A: 가로 타임라인 ══════ -->
+<h2>변형 A · 가로 타임라인 <span class="sub">journey-bar</span></h2>
+<p class="sample-note">
+  "책의 어느 지점" → 가로 타임라인으로 즉시 보여줌. 1~11 숫자 원이 상단, 현재(2) 만 accent로 크게,
+  채워진 것(1)은 연한 accent, 미래(3~11)는 회색. 타임라인 아래에 "현재 챕터가 만드는 것"만 상세 카드로.
+</p>
+<div class="preview-wrap">
+  <div class="fm-tl">
+    <div class="tl-top">
+      <div class="ico">◉</div>
+      <div class="n">사내 직원 · 관리자</div>
+    </div>
+    <div class="tl-line">
+      <div class="tl-node done"><div class="dot">1</div><div class="label">맛보기</div></div>
+      <div class="tl-node current"><div class="dot">2</div><div class="label">사내시스템</div></div>
+      <div class="tl-node"><div class="dot">3</div><div class="label">문서</div></div>
+      <div class="tl-node"><div class="dot">4</div><div class="label">벡터</div></div>
+      <div class="tl-node"><div class="dot">5</div><div class="label">RAG</div></div>
+      <div class="tl-node"><div class="dot">6</div><div class="label">에이전트</div></div>
+      <div class="tl-node"><div class="dot">7</div><div class="label">운영</div></div>
+      <div class="tl-node"><div class="dot">8</div><div class="label">검색</div></div>
+      <div class="tl-node"><div class="dot">9</div><div class="label">쿼리</div></div>
+      <div class="tl-node"><div class="dot">10</div><div class="label">비전</div></div>
+      <div class="tl-node"><div class="dot">11</div><div class="label">완성</div></div>
+    </div>
+    <div class="tl-arrow">▼ 지금 만드는 것</div>
+    <div class="tl-current-card">
+      <div class="hd"><span class="tag">CH 02</span><span class="name">사내 시스템</span></div>
+      <div class="items">
+        <div class="it">FastAPI<span class="sub">REST · Gateway</span></div>
+        <div class="it">PostgreSQL<span class="sub">직원·연차·매출</span></div>
+      </div>
+    </div>
+    <div class="tl-bottom">
+      <span class="n">Ollama LLM · 외부 의존</span>
+    </div>
+  </div>
+</div>
+<div class="spec">
+  <b>강점</b>: "지금 어디인지" 1초 인지. 원형 타임라인 메타포가 직관적<br>
+  <b>약점</b>: 시스템 구조(어느 레이어·레이어 간 관계)가 드러나지 않음. 타임라인은 "어디"만 보여주고 "무엇"은 약함
+</div>
+
+<!-- ══════ 변형 B: 시스템 레이어 ══════ -->
+<h2>변형 B · 시스템 레이어 스택 <span class="sub">layer-stack</span></h2>
+<p class="sample-note">
+  위에서 아래로 <strong>시스템 레이어 순</strong>(사용자 → Gateway → Runtime → Tools → DB → LLM).
+  각 레이어 오른쪽에 <strong>담당 챕터 뱃지</strong>가 붙음. 이번 챕터가 속한 레이어만 accent로 박스 강조.
+  arch11(최종 구성도)과 구조가 같아 <strong>마지막 챕터로 자연스럽게 수렴</strong>.
+</p>
+<div class="preview-wrap">
+  <div class="fm-layer">
+    <div class="hdr">
+      <span>STACK · 사용자에서 외부까지</span>
+      <span class="me">▲ CH 02 지금</span>
+    </div>
+
+    <div class="ln user">
+      <div class="box">
+        <div class="ico">◉</div>
+        <div><div class="t">Top · User</div><div class="n">사내 직원 · 관리자</div><div class="s">채팅으로 질문</div></div>
+      </div>
+      <div class="chips"><span class="chip">—</span></div>
+    </div>
+    <div class="ln"><div class="arr">↕ API 호출</div><div></div></div>
+
+    <div class="ln current">
+      <div class="box">
+        <div class="ico">◆</div>
+        <div><div class="t">Layer · Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+      </div>
+      <div class="chips"><span class="chip on">CH 02</span></div>
+    </div>
+    <div class="ln"><div class="arr">↕ 데이터 접근</div><div></div></div>
+
+    <div class="ln">
+      <div class="box">
+        <div class="ico">◇</div>
+        <div><div class="t">Layer · Runtime</div><div class="n">통합 에이전트</div><div class="s">ReAct · 캐시 · 관찰</div></div>
+      </div>
+      <div class="chips">
+        <span class="chip">5</span><span class="chip">6</span><span class="chip">7</span>
+      </div>
+    </div>
+    <div class="ln"><div class="arr">↕ 도구 호출</div><div></div></div>
+
+    <div class="ln">
+      <div class="box">
+        <div class="ico">◈</div>
+        <div><div class="t">Layer · RAG Engine</div><div class="n">검색·리랭크·확장</div><div class="s">청크 · 벡터 · 쿼리 · 비전</div></div>
+      </div>
+      <div class="chips">
+        <span class="chip">3</span><span class="chip">4</span><span class="chip">8</span><span class="chip">9</span><span class="chip">10</span>
+      </div>
+    </div>
+    <div class="ln"><div class="arr">↕ 저장소 접근</div><div></div></div>
+
+    <div class="ln current">
+      <div class="box">
+        <div class="ico">▤</div>
+        <div><div class="t">Layer · Stores</div><div class="n">PostgreSQL · ChromaDB</div><div class="s">직원·연차·매출 / 벡터</div></div>
+      </div>
+      <div class="chips"><span class="chip on">CH 02</span><span class="chip">CH 04</span></div>
+    </div>
+    <div class="ln"><div class="arr">↕ 외부 호출</div><div></div></div>
+
+    <div class="ln ext">
+      <div class="box">
+        <div class="ico">◌</div>
+        <div><div class="t">External</div><div class="n">Ollama LLM</div><div class="s">deepseek / llama / qwen-vl</div></div>
+      </div>
+      <div class="chips"><span class="chip">ext</span></div>
+    </div>
+  </div>
+</div>
+<div class="spec">
+  <b>강점</b>: "시스템 어디를 건드리는지" + "앞으로 어느 챕터가 어디를 할지" 동시 제공. arch11과 구조 일치 → 책 끝에서 자연스럽게 확장 완성형으로 전환<br>
+  <b>약점</b>: "현재 진행 %" 는 챕터 뱃지 색에만 의존 (타임라인만큼 직관적이지 않음). 레이어 개념이 CH02 독자에겐 아직 낯설 수 있음
+</div>
+
+<!-- ══════ 변형 C: 매트릭스 ══════ -->
+<h2>변형 C · 2D 매트릭스 <span class="sub">layer × chapter</span></h2>
+<p class="sample-note">
+  행 = 시스템 레이어, 열 = 챕터. 각 셀은 해당 챕터가 해당 레이어에서 만든 것. 이번 챕터 열만 accent로 하이라이트.
+  <strong>정보 밀도가 가장 높음</strong> — 책 전체 조감도 + 진행도가 한 표에.
+</p>
+<div class="preview-wrap">
+  <div class="fm-matrix">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>CH1</th><th class="current">CH2</th><th>CH3</th><th>CH4</th><th>CH5</th>
+          <th>CH6</th><th>CH7</th><th>CH8</th><th>CH9</th><th>CH10</th><th>CH11</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="user">
+          <th>User</th>
+          <td class="done">·</td><td class="current">·</td><td>·</td><td>·</td><td>·</td>
+          <td>·</td><td>·</td><td>·</td><td>·</td><td>·</td><td>·</td>
+        </tr>
+        <tr>
+          <th>Gateway · FastAPI</th>
+          <td class="later"></td><td class="current">●</td><td class="later"></td><td class="later"></td><td class="later"></td>
+          <td class="later"></td><td class="done">▲</td><td class="later"></td><td class="later"></td><td class="later"></td><td class="done">▲</td>
+        </tr>
+        <tr>
+          <th>Runtime · Agent</th>
+          <td class="later"></td><td class="current"></td><td class="later"></td><td class="later"></td><td class="done">●</td>
+          <td class="done">●</td><td class="done">▲</td><td class="later"></td><td class="later"></td><td class="later"></td><td class="done">✦</td>
+        </tr>
+        <tr>
+          <th>RAG Engine</th>
+          <td class="done">맛</td><td class="current"></td><td class="done">●</td><td class="done">●</td><td class="done">●</td>
+          <td class="later"></td><td class="later"></td><td class="done">●</td><td class="done">●</td><td class="done">●</td><td class="done">✦</td>
+        </tr>
+        <tr>
+          <th>DB · Postgres</th>
+          <td class="later"></td><td class="current">●</td><td class="later"></td><td class="later"></td><td class="later"></td>
+          <td class="later"></td><td class="later"></td><td class="later"></td><td class="later"></td><td class="later"></td><td class="done">✦</td>
+        </tr>
+        <tr>
+          <th>DB · Chroma</th>
+          <td class="later"></td><td class="current"></td><td class="later"></td><td class="done">●</td><td class="later"></td>
+          <td class="later"></td><td class="later"></td><td class="later"></td><td class="later"></td><td class="later"></td><td class="done">✦</td>
+        </tr>
+        <tr class="ext">
+          <th>LLM · Ollama</th>
+          <td class="ext">외</td><td class="ext">외</td><td class="ext">외</td><td class="ext">외</td><td class="ext">외</td>
+          <td class="ext">외</td><td class="ext">외</td><td class="ext">외</td><td class="ext">외</td><td class="ext">외</td><td class="ext">외</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--color-text-muted);text-align:center">
+      ● 만들기 · ▲ 개선 · ✦ 완성 · 외 외부 의존 · 빈 칸 이번 챕터 범위 아님
+    </div>
+  </div>
+</div>
+<div class="spec">
+  <b>강점</b>: 책 전체를 한 표로. "몇 % 왔지 / 앞으로 뭐 남았지 / 이번 챕터는 어디를 건드리지" 3가지를 동시에 답함<br>
+  <b>약점</b>: 매 챕터마다 전체 표를 보여주면 반복 피로. 시각적 무게가 큼. 학습 곡선이 독자에게 부담
+</div>
+
+<!-- ══════ 비교 ══════ -->
+<h2>비교 요약 <span class="sub">side-by-side</span></h2>
+<table class="cmp-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>현재 (zone 나열)</th>
+      <th>A · 타임라인</th>
+      <th>B · 레이어 스택</th>
+      <th>C · 매트릭스</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>"몇 %?" 답</th>
+      <td class="rating r-c">약함</td>
+      <td class="rating r-a">강함</td>
+      <td class="rating r-b">보통</td>
+      <td class="rating r-a">강함</td>
+    </tr>
+    <tr>
+      <th>"어느 레이어?"</th>
+      <td class="rating r-c">약함</td>
+      <td class="rating r-c">약함</td>
+      <td class="rating r-a">강함</td>
+      <td class="rating r-a">강함</td>
+    </tr>
+    <tr>
+      <th>arch11과 일관성</th>
+      <td class="rating r-c">낮음</td>
+      <td class="rating r-c">낮음</td>
+      <td class="rating r-a">높음</td>
+      <td class="rating r-b">보통</td>
+    </tr>
+    <tr>
+      <th>반복 피로 (6 챕터)</th>
+      <td class="rating r-b">중간</td>
+      <td class="rating r-a">낮음</td>
+      <td class="rating r-a">낮음</td>
+      <td class="rating r-c">높음</td>
+    </tr>
+    <tr>
+      <th>독자 학습 부담</th>
+      <td class="rating r-a">낮음</td>
+      <td class="rating r-a">낮음</td>
+      <td class="rating r-b">중간</td>
+      <td class="rating r-c">높음</td>
+    </tr>
+    <tr>
+      <th>정보 밀도</th>
+      <td>중</td>
+      <td>저</td>
+      <td>중</td>
+      <td>고</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════ 권장 ══════ -->
+<h2 style="background:var(--color-text-heading)">권장 · B 또는 A + B 조합</h2>
+<div class="verdict">
+  <strong>1안 · B(시스템 레이어) 단독.</strong> "어느 레이어" 답이 강하고 arch11과 일관돼 마지막 챕터로 자연스럽게 수렴.<br><br>
+
+  <strong>2안 · A + B 조합.</strong> 상단에 가로 타임라인(A), 하단에 레이어 스택(B). "몇 %?"와 "어디?"를 동시에 답함. 세로 길이가 늘어나는 게 단점.<br><br>
+
+  <strong>C(매트릭스)는 보류.</strong> 정보 밀도가 너무 높아 6 챕터에서 반복하면 독자가 지칠 수 있음. 대신 <strong>책 전체 인덱스(CH01 도입 또는 에필로그)에 단 한 번</strong> 등장시키면 좋은 조감도 역할.<br><br>
+
+  원하시는 방향 알려주시면 <code style="font-family:var(--font-mono);background:#fff;padding:1px 6px;border-radius:3px">.arch-fullmap</code>을 그 구조로 재작성하고 CH02·03·04·05·07·10에 일괄 적용하는 수정안을 만들겠습니다.
+</div>
+
+</body>
+</html>

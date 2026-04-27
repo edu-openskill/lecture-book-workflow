@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>챕터 5. 주소만 내주는 업로드. Presigned URL + S3 + Lambda</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+
+<link rel="stylesheet" href="./tokens.css">
+
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+
+
+</head>
+<body>
+<div class="container">
+<h1>챕터 5. 주소만 내주는 업로드. Presigned URL + S3 + Lambda</h1>
+<div class="goal-box">
+<p><strong>이번 챕터가 끝나면</strong></p>
+<ul>
+<li>왜 사진을 서버가 직접 받아 쥐지 않고 <strong>주소만</strong> 내주는지 이해합니다 <em>(Presigned URL의 의도)</em></li>
+<li>Spring이 발급한 임시 주소로 <strong>클라이언트가 S3에 곧바로 PUT 업로드</strong>하는 흐름을 손으로 만들어 봅니다</li>
+<li>S3 업로드가 끝나면 <strong>Lambda가 자동으로 리사이즈</strong>해서 <code>resized/</code> 폴더에 결과를 떨어뜨리는 파이프라인을 구성합니다</li>
+<li>서버는 원본 업로드를 한 번도 받지 않고도, <strong>key 규칙만 믿고</strong> DB에 메타데이터를 심습니다</li>
+</ul>
+</div>
+<div class="preview-notice">
+<p><strong>이번 챕터는 &quot;호텔 프런트가 짐을 받지 않고, 방 키만 내주는 이야기&quot;입니다</strong></p>
+<p>챕터 4에서 사진을 글자로 바꿔 JSON에 태워 보내는 방식을 손으로 해 보고, 10MB 앞에서 그 방식이 무너지는 지점을 숫자로 확인했습니다. 팀장이 복도에서 남긴 한마디는 &quot;서버가 직접 받지 말고, 주소만 내주라&quot;였습니다. 그 한마디가 이 챕터의 출발점입니다. 서버가 10MB짜리 바이트 덩어리를 자기 힙 위에 한 번도 올리지 않고, <strong>업로드 주소 한 줄만</strong> 발급해서 내주는 구조를 만들어 보겠습니다. 거기에 <strong>자동 리사이즈</strong>를 붙여, 사진이 S3에 닿는 순간 Lambda가 알아서 썸네일을 깎아 두는 작은 자동화까지 얹습니다.</p>
+</div>
+<div class="prep-section-md">
+<p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
+<h3>1. 소스 코드 준비</h3>
+<p>챕터 5는 Spring Boot 하나로 시작합니다. 단, 이번에는 <strong>AWS 쪽 세팅</strong>이 실습의 절반 이상을 차지합니다. S3 버킷, Lambda 함수, IAM Access Key 세 가지가 서로 맞물려야 전체 흐름이 돕니다.</p>
+<table>
+<thead>
+<tr>
+<th>레포</th>
+<th>용도</th>
+<th>주소</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>spring-presign-url</strong></td>
+<td>Spring Boot + S3 Presigner + H2 인메모리 DB</td>
+<td><code>github.com/metacoding-11-spring-reference/spring-presign-url-start</code></td>
+</tr>
+</tbody>
+</table>
+<p>터미널에서 클론합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실습 레포 클론</div>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-11-spring-reference/spring-presign-url-start.git
+<span class="nb">cd</span><span class="w"> </span>spring-presign-url-start</div>
+<p>파일 구조는 이렇습니다.</p>
+<div class="code-block highlight" data-lang="text"><div class="cb-title">spring-presign-url 디렉토리</div>spring-presign-url/
+├── build.gradle                                # [실습] AWS SDK v2 의존성 추가
+├── .env                                        # [실습] ACCESS_KEY·SECRET_KEY·BUCKET
+├── src/main/
+│   ├── java/com/metacoding/spring_presign_url/
+│   │   ├── _core/config/
+│   │   │   ├── AwsS3Config.java                # [실습] S3Client·S3Presigner 빈 등록
+│   │   │   └── CorsConfig.java                 # [참고] 브라우저 호출용 CORS
+│   │   └── image/
+│   │       ├── ImageController.java            # [실습] /presigned · /complete · /list · /{id}
+│   │       ├── ImageService.java               # [실습] Presign 발급 + 완료 저장 + 조회
+│   │       ├── ImageEntity.java                # [실습] image_tb (originalUrl · resizedUrl)
+│   │       ├── ImageRequest.java               # [실습] PresignRequest · CompleteRequest
+│   │       ├── ImageResponse.java              # [실습] PresignedUrlResponse · Detail · Items
+│   │       └── ImageRepository.java            # [참고] JpaRepository
+│   └── resources/
+│       └── application.properties              # [실습] cloud.aws.* 매핑
+└── lambda/
+    └── image_resize_handler.py                 # [실습] Lambda에 Deploy하는 파이썬 코드</div>
+<div class="prep-note">
+<p><strong>이 레포는 챕터 4의 spring-base64와 별개입니다.</strong> <code>uploads/</code> 폴더도, 로컬 파일시스템 저장도 이제 쓰지 않습니다. 사진의 진짜 보관처는 S3 버킷이고, 서버는 그 사실을 <strong>기록만</strong> 합니다.</p>
+</div>
+<h3>2. 실습 환경 구축</h3>
+<p>이번 챕터는 AWS 계정이 필수입니다. 가입·결제 수단 등록·리전 설정(서울, <code>ap-northeast-2</code>)까지 끝낸 상태를 전제로 합니다. 프리 티어 기준으로 이 실습은 과금이 거의 발생하지 않지만, Access Key가 외부에 노출되면 피해가 커집니다. <code>.env</code>는 반드시 <code>.gitignore</code>에 두고 커밋하지 마세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실습 환경 확인</div>java<span class="w"> </span>--version
+./gradlew<span class="w"> </span>--version
+aws<span class="w"> </span>--version<span class="w">    </span><span class="c1"># 선택. AWS CLI가 있으면 S3 확인이 편합니다</span></div>
+<h3>3. 사용할 구성 요소</h3>
+<p>챕터 5에 새로 얹히는 재료는 다섯 가지입니다.</p>
+<table>
+<thead>
+<tr>
+<th>재료</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>software.amazon.awssdk:s3</code></td>
+<td>AWS SDK v2. <code>S3Client</code>와 <code>S3Presigner</code>를 제공</td>
+</tr>
+<tr>
+<td><code>S3Presigner</code></td>
+<td>Presigned URL을 <strong>서명</strong>해서 발급하는 전용 클라이언트</td>
+</tr>
+<tr>
+<td>AWS S3</td>
+<td>원본 (<code>original/</code>)과 리사이즈 결과 (<code>resized/</code>) 두 폴더를 가진 버킷</td>
+</tr>
+<tr>
+<td>AWS Lambda (Python 3.11)</td>
+<td>S3 이벤트를 받아 Pillow로 리사이즈한 뒤 <code>resized/</code>에 저장</td>
+</tr>
+<tr>
+<td><code>Klayers-p311-Pillow</code></td>
+<td>Lambda 런타임에 없는 Pillow를 얹기 위한 공개 Layer</td>
+</tr>
+</tbody>
+</table>
+<div class="tip">
+<p><strong>Presigned URL을 먼저 만드는 이유</strong></p>
+<p>서버가 10MB짜리 사진을 자기 손으로 받아 쥐지 않는다는 선택은, 단순한 성능 최적화가 아니라 <strong>책임의 분리</strong>입니다. 파일을 받는 일은 S3가 훨씬 잘합니다. 그 위에서 &quot;이미지가 바뀌면 썸네일도 바꿔라&quot; 같은 부수 작업을 Lambda가 이벤트로 자동 처리합니다. 서버는 오직 <strong>언제, 누구 것을, 어떤 규칙으로 부르는지</strong> 만 책임집니다. 이 분리가 뒤 챕터(SSE·RabbitMQ)에서 &quot;서버가 상태를 들고 있지 않아도 흐르는 파이프라인&quot;의 토대가 됩니다.</p>
+</div>
+<h3>4. 실습 순서</h3>
+<p>이번 챕터의 절은 이 순서로 진행합니다.</p>
+<ol>
+<li><code>5.1</code>. 서버가 10MB를 직접 받지 않겠다는 결심</li>
+<li><code>5.2</code>. 프런트에서 방 키만 내주기, 파이프라인 설계</li>
+<li><code>5.3</code>. AWS 기본 세팅 (S3 · IAM · Lambda 트리거)</li>
+<li><code>5.4</code>. Spring에 S3Presigner 얹기</li>
+<li><code>5.5</code>. Postman으로 Presigned URL 받고 S3에 직업로드</li>
+<li><code>5.6</code>. Lambda 리사이즈 함수 배포</li>
+<li><code>5.7</code>. Webhook 꿈꾸다 접기, 완료 저장 API 설계</li>
+<li><code>5.8</code>. Postman으로 전체 흐름 검증과 목록·상세 조회</li>
+</ol>
+<p>1에서 10MB의 벽을 다시 한 번 마주합니다. 2에서 새 파이프라인을 그리고, 3~4에서 AWS와 Spring을 얹습니다. 5에서 첫 업로드를 성공시킨 뒤, 6에서 Lambda를 붙이고, 7에서 한 번 잘못된 설계로 돌아갔다가 본래 자리로 돌아옵니다. 8에서 전체가 한 바퀴 도는 걸 확인합니다.</p>
+</div>
+<h2>5.1 서버가 10MB를 직접 받지 않겠다는 결심</h2>
+<p>챕터 4의 마지막, 10MB짜리 셀카가 힙 위에 올라앉아 서버를 밀어내던 오후였습니다.</p>
+<p>오픈이는 새 프로젝트를 하나 더 만들었습니다. 이번에는 <code>spring-presign-url</code>이라는 이름이었습니다. IntelliJ가 Gradle을 당기는 동안, 옆자리 동료가 의자를 반 바퀴 돌렸습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "그래서 이제 사진을 서버로 안 보내요? 저는 어디로 보내요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "S3로 바로 보내요. 우리 서버는 주소만 내줄 거예요."</div>
+<div class="dialogue"><span class="speaker">동료</span>: "주소요. 그냥 <code>https://s3.aws.com/버킷/cat.png</code> 이런 거요? 그럼 아무나 거기에 사진 올리는 거 아니에요?"</div>
+<p>오픈이는 손이 잠시 멈췄습니다. 동료의 말이 맞았습니다. S3 버킷을 그냥 열어 두면 아무나 아무 이름으로 아무 파일을 올릴 수 있었습니다. 10MB는 해결되지만, 통제가 사라집니다.</p>
+<p class="thought">서명된 주소여야 해.</p>
+<p>그때 복도에서 커피를 타 오던 팀장이 멈췄습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "호텔 프런트에 손님이 오면 직원이 직접 짐을 받아서 방까지 올려다 줘요? 아니면 방 키만 내주고 손님이 알아서 올라가게 해요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "방 키만 주죠."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "그 방 키는 아무 방이나 열려요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "아니요. 배정된 그 방만요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "유효기간은요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "체크아웃까지요."</div>
+<p>팀장은 그 말만 남기고 자리로 돌아갔습니다.</p>
+<p class="thought">배정된 한 방, 정해진 기간. 그게 Presigned URL이구나.</p>
+<p>오픈이는 수첩을 폈습니다. 지금까지의 업로드는 프런트(서버)가 손님(클라이언트)의 짐(사진)을 직접 받아서 방(저장소)까지 들어다 주는 모양이었습니다. 바뀔 구조는 프런트가 <strong>이 방에만, 15분 동안만</strong> 짐을 직접 들일 수 있는 키를 한 장 내주고, 손님이 그 키로 직접 S3 객실 문을 여는 모양입니다. 서버는 짐의 무게를 한 번도 들지 않습니다.</p>
+<p class="thought">그럼 주소는 어떻게 서명하지.</p>
+<p>검색창에 &quot;aws s3 presigned url java&quot;를 쳤습니다. 첫 번째 결과는 AWS SDK v2의 <code>S3Presigner</code> 클래스였습니다. Access Key와 Secret Key로 서명된 <strong>한 번 쓰고 버리는 URL</strong>을 만들어 주는 전용 객체였습니다. URL 안에 서명(Signature)·만료시각(Expires)·객체 키(Key)·HTTP 메서드(PUT)가 전부 박혀 들어가 있었습니다.</p>
+<p class="thought">서버는 이 주소를 발급만 한다. 실제 업로드는 클라이언트와 S3가 한다.</p>
+<p>10MB가 서버 힙에 올라올 일이 사라졌습니다.</p>
+<h2>5.2 프런트에서 방 키만 내주기</h2>
+<p>Presigned URL은 <strong>서명이 찍힌 한 번짜리 주소</strong>입니다. 그 주소는 다음 네 가지를 모두 품고 있습니다.</p>
+<ul>
+<li>어떤 버킷의</li>
+<li>어떤 이름(<code>original/{uuid}.png</code>)으로</li>
+<li>어떤 HTTP 메서드(PUT)로만</li>
+<li>언제까지(15분) 쓸 수 있는지</li>
+</ul>
+<p>이 네 가지가 URL 하나에 서명되어 있으니, 이 URL을 받은 클라이언트는 정확히 그 조건으로만 S3에 접근합니다. 버킷 이름을 바꿔 끼워 넣거나, 만료된 뒤 다시 써 보거나, 같은 URL로 다른 객체를 덮어쓰는 일은 전부 서명 검증 단계에서 거절됩니다.</p>
+<p>[GEMINI PROMPT: 호텔 로비 장면. 왼쪽에 프런트 데스크, 데스크 위에 커다란 방 키카드 한 장이 놓여 있고 카드에는 &quot;Room 302 / PUT / 15 min / original/uuid.png&quot;이라는 글자가 적혀 있다. 프런트 직원(Spring 서버를 상징, 정장 차림) 이 손님(Client 캐릭터)에게 카드를 건네고, 손님은 그 카드를 들고 우측의 거대한 초록색 금고(S3 버킷)에 혼자 걸어가 짐(사진)을 직접 넣는다. 프런트 직원은 뒤돌아 서류(DB)에 무언가를 적기만 한다. 흰 배경, 인디고·오렌지 악센트, 부드러운 일러스트.]</p>
+<p class="thought">그림 5-1. 서버는 방 키만 내주고, 손님(클라이언트)이 직접 객실(S3)에 짐을 넣습니다</p>
+<p>업로드가 S3에 닿은 <strong>순간</strong>부터 자동화가 한 층 덧붙습니다. S3는 객체가 만들어졌다는 사실(ObjectCreated 이벤트)을 Lambda에 알리고, Lambda는 <code>original/</code> 폴더에 떨어진 파일만 골라 Pillow로 썸네일을 깎은 뒤 <code>resized/</code>에 다시 올립니다. 원본의 UUID를 그대로 써서 이름을 맞춥니다.</p>
+<div class="sp-figure">
+  <div class="sp-figure-title">그림 5-2. 한 장의 사진이 S3를 거쳐 DB에 한 행으로 맺히기까지</div>
+  <div class="sp-row accent">
+    <div class="sp-row-label">① Client → Spring</div>
+    <div class="sp-row-value"><code>POST /presigned</code> 파일명·콘텐츠 타입 전달</div>
+  </div>
+  <div class="sp-row accent">
+    <div class="sp-row-label">② Spring → Client</div>
+    <div class="sp-row-value">서명된 PUT URL + <code>key = original/{uuid}.ext</code> 응답</div>
+  </div>
+  <div class="sp-row warm">
+    <div class="sp-row-label">③ Client → S3</div>
+    <div class="sp-row-value">Presigned URL로 원본을 직접 PUT (서버 우회)</div>
+  </div>
+  <div class="sp-row info">
+    <div class="sp-row-label">④ S3 → Lambda</div>
+    <div class="sp-row-value">ObjectCreated 이벤트가 Lambda 트리거로 전달</div>
+  </div>
+  <div class="sp-row info">
+    <div class="sp-row-label">⑤ Lambda → S3</div>
+    <div class="sp-row-value">원본을 받아 Pillow로 800px 리사이즈 → <code>resized/{uuid}.jpg</code> 저장</div>
+  </div>
+  <div class="sp-row accent">
+    <div class="sp-row-label">⑥ Client → Spring</div>
+    <div class="sp-row-value"><code>POST /complete</code> 업로드 완료를 알림 + key 전달</div>
+  </div>
+  <div class="sp-row accent">
+    <div class="sp-row-label">⑦ Spring → DB</div>
+    <div class="sp-row-value">key에서 UUID 뽑아 originalUrl·resizedUrl 조합 후 <code>image_tb</code> 저장</div>
+  </div>
+  <div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:12px;">사진의 바이너리는 서버 힙에 단 한 번도 올라오지 않습니다</div>
+</div>
+<p>오픈이는 수첩에 설계를 정리했습니다.</p>
+<div class="memo-box">
+<p><strong>— 설계 정리 —</strong></p>
+<ol>
+<li><strong>발급 API</strong> (<code>POST /presigned</code>)
+<ul>
+<li>요청: <code>fileName</code> · <code>contentType</code></li>
+<li>응답: <code>presignedUrl</code> · <code>key</code> (<code>original/{uuid}.ext</code>)</li>
+</ul>
+</li>
+<li><strong>업로드</strong>
+<ul>
+<li>클라이언트가 발급받은 URL로 직접 S3에 <strong>PUT</strong></li>
+<li>헤더 <code>Content-Type</code>은 발급 요청의 <code>contentType</code>과 같아야 함</li>
+</ul>
+</li>
+<li><strong>자동 리사이즈</strong>
+<ul>
+<li>S3가 <code>original/</code> 경로의 ObjectCreated 이벤트를 Lambda로 전달</li>
+<li>Lambda가 원본을 읽어 <code>resized/{uuid}.jpg</code>로 저장</li>
+</ul>
+</li>
+<li><strong>완료 저장</strong> (<code>POST /complete</code>)
+<ul>
+<li>요청: <code>fileName</code> · <code>key</code></li>
+<li>서버는 key에서 UUID를 뽑아 <code>originalUrl</code> · <code>resizedUrl</code>을 조합해 DB에 심음</li>
+</ul>
+</li>
+<li><strong>조회</strong> (<code>GET /list</code>, <code>GET /{id}</code>)
+<ul>
+<li>목록은 가벼운 필드만, 상세는 메타 전부</li>
+</ul>
+</li>
+</ol>
+</div>
+<p>이 설계를 코드로 옮기기 전에, AWS 쪽 세 덩어리(S3·IAM·Lambda 트리거)를 먼저 얹어야 합니다.</p>
+<h2>5.3 AWS 기본 세팅</h2>
+<p>AWS 콘솔 작업이 많습니다. 각 단계는 한 번만 하면 이후 챕터에서도 그대로 씁니다.</p>
+<h3>5.3.1 S3 버킷과 두 폴더</h3>
+<p>콘솔 검색창에 <code>S3</code>를 입력해 이동한 뒤, &quot;버킷 만들기&quot;로 새 버킷을 하나 만듭니다. 실습에서 공개 접근을 써야 하기 때문에 <strong>모든 퍼블릭 차단 해제</strong>를 체크합니다. 실서비스에서는 이 설정을 절대 그대로 두면 안 됩니다. 챕터 마지막 &quot;이것만은 기억하자&quot;에서 다시 짚습니다.</p>
+<p>버킷이 만들어지면 버킷 안에 두 폴더를 생성합니다.</p>
+<ul>
+<li><code>original/</code> (원본이 올라오는 자리)</li>
+<li><code>resized/</code> (Lambda가 썸네일을 떨어뜨리는 자리)</li>
+</ul>
+<p>권한 탭의 &quot;버킷 정책&quot;을 편집해 아래 JSON을 붙입니다. <code>metacoding-base64</code> 자리에는 본인 버킷 이름을 넣습니다.</p>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">실습 1</span> S3 버킷 정책. 실습용 전체 공개</div><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Sid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PublicAllAccess&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3:*&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;arn:aws:s3:::metacoding-base64&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;arn:aws:s3:::metacoding-base64/*&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span></div>
+<p><code>&quot;Principal&quot;: &quot;*&quot;</code>는 &quot;누구나&quot;라는 뜻입니다. 실서비스였다면 Cognito·Federated Identity로 사용자를 특정하거나, 업로드는 Presigned URL 서명에만 의존하고 버킷은 <strong>비공개</strong>로 두는 것이 맞습니다. 이번 실습은 브라우저에서 <code>resizedUrl</code>을 직접 열어 보는 확인 단계가 있기 때문에 임시로 공개를 택했습니다.</p>
+<h3>5.3.2 IAM 사용자와 Access Key</h3>
+<p>Spring 서버가 Presigner를 만들 때 쓸 자격 증명을 준비합니다. 콘솔 검색창에서 <code>IAM</code>으로 이동한 뒤 &quot;사용자 → 사용자 생성&quot;으로 새 사용자를 만듭니다. 사용자 이름은 실습 식별용이면 충분합니다 (예: <code>presign-demo-user</code>).</p>
+<p>만들어진 사용자를 클릭해서 <strong>권한 탭 → 권한 추가 → 직접 정책 연결</strong>에서 <code>AmazonS3FullAccess</code>를 체크합니다. 실습에서는 모든 권한을 다 주지만, 실서비스에서는 <code>s3:PutObject</code>와 <code>s3:GetObject</code>만 허용하는 최소 권한 정책을 따로 만들어 쓰는 것이 원칙입니다.</p>
+<p>이제 같은 사용자의 <strong>보안 자격 증명</strong> 탭으로 내려가 &quot;액세스 키 만들기 → 로컬 코드&quot;를 선택한 뒤 <code>.csv</code>로 내려받습니다. 이 CSV 한 장이 <strong>Access Key</strong>와 <strong>Secret Key</strong>를 담고 있습니다. 다시 볼 수 없는 값이니, 분실 시 재발급이 전제입니다.</p>
+<div class="tip">
+<p><strong>Access Key가 깃허브에 올라가면</strong></p>
+<p>과거에 여러 번 발생한 실제 사고 유형입니다. 누군가가 <code>application.properties</code>에 키를 그대로 박고 커밋·푸시하면, 크롤러가 몇 분 안에 발견해서 크립토마이닝·무차별 호출로 요금을 수십만 원 단위로 불립니다. 이 챕터에서 <code>.env</code>를 쓰는 이유는 단순한 관습이 아니라 <strong>사고 예방 장치</strong>입니다. <code>.gitignore</code>에 <code>.env</code>가 있는지 꼭 확인하세요.</p>
+</div>
+<h3>5.3.3 Lambda 함수와 S3 트리거</h3>
+<p>콘솔에서 <code>Lambda</code>로 이동해 &quot;함수 생성&quot;을 클릭합니다.</p>
+<ul>
+<li>함수 이름: <code>image-resize-handler</code></li>
+<li>런타임: <strong>Python 3.11</strong></li>
+<li>기본 실행 역할: &quot;기본 실행 역할 변경 → AWS 정책 템플릿에서 새 역할 생성&quot;</li>
+</ul>
+<p>함수가 만들어지면 <strong>두 가지</strong>를 덧붙여야 합니다. 하나는 이 함수가 S3를 읽고 쓸 수 있도록 <strong>실행 역할에 정책 추가</strong>, 다른 하나는 S3의 <code>original/</code> 폴더를 감시하는 <strong>트리거 등록</strong>입니다.</p>
+<p><strong>실행 역할 정책 추가</strong>. <code>IAM → 역할</code>로 가서 방금 Lambda가 만든 역할(이름에 함수명이 들어 있습니다)을 찾아 권한 정책에 <code>AmazonS3FullAccess</code>를 추가합니다. 실습용이라 그대로 쓰지만, 실서비스에서는 <code>s3:GetObject</code>(original/) + <code>s3:PutObject</code>(resized/) 두 가지만 허용하는 맞춤 정책이 맞습니다.</p>
+<p><strong>트리거 등록</strong>. Lambda 함수 화면에서 &quot;트리거 추가 → S3 선택&quot;으로 아래처럼 설정합니다.</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bucket</td>
+<td>방금 만든 버킷</td>
+</tr>
+<tr>
+<td>Event types</td>
+<td><code>PUT</code> (또는 <code>All object create events</code>)</td>
+</tr>
+<tr>
+<td>Prefix</td>
+<td><code>original/</code></td>
+</tr>
+<tr>
+<td>Suffix</td>
+<td>(비워 둠)</td>
+</tr>
+</tbody>
+</table>
+<p><code>original/</code>로 시작하는 객체가 만들어질 때만 이 함수가 불립니다. <code>resized/</code>에 Lambda 자신이 다시 쓰는 파일로는 절대 재귀 호출이 일어나지 않도록 Prefix가 방지막 역할을 합니다. <strong>이 Prefix를 비우면 무한 루프</strong>가 발생해서 AWS 요금이 치솟습니다. 실습 중 가장 흔한 사고 지점이니 꼭 확인하세요.</p>
+<p>트리거가 등록되면 Lambda 함수 화면 왼쪽 &quot;트리거&quot; 항목에 S3 버킷 이름이 보입니다. 코드는 아직 비었지만, 이제 업로드만 일어나면 이 함수가 시도는 할 겁니다.</p>
+<h3>5.3.4 .env 작성</h3>
+<p>레포 루트에 <code>.env</code> 파일을 만들고 아래처럼 네 줄을 채웁니다. 값 자리의 따옴표는 그대로 둬도 됩니다.</p>
+<div class="code-block highlight" data-lang="properties"><div class="cb-title"><span class="badge">실습 2</span> .env. AWS 자격 증명과 버킷 이름</div><span class="c1"># ---------------------------</span>
+<span class="c1"># AWS 환경변수</span>
+<span class="c1"># ---------------------------</span>
+<span class="na">CLOUD_AWS_CREDENTIALS_ACCESS_KEY</span><span class="o">=</span><span class="s">&quot;AKIA...&quot;</span>
+<span class="na">CLOUD_AWS_CREDENTIALS_SECRET_KEY</span><span class="o">=</span><span class="s">&quot;...&quot;</span>
+<span class="na">CLOUD_AWS_REGION</span><span class="o">=</span><span class="s">ap-northeast-2</span>
+<span class="na">CLOUD_AWS_S3_BUCKET</span><span class="o">=</span><span class="s">&quot;metacoding-base64&quot;</span></div>
+<p><code>ap-northeast-2</code>는 서울 리전입니다. 버킷을 서울에 만들었다면 이 값을 그대로 두고, 다른 리전에 만들었다면 콘솔 상단의 리전 코드와 맞춥니다.</p>
+<h2>5.4 Spring에 S3Presigner 얹기</h2>
+<p>이 절은 네 조각으로 나뉩니다. AWS SDK 의존성 추가 → <code>S3Presigner</code> 빈 등록 → 요청·응답 DTO → 발급 서비스/컨트롤러 순서입니다.</p>
+<h3>5.4.1 AWS SDK v2 의존성</h3>
+<p><code>build.gradle</code>을 열고 <code>dependencies</code> 블록에 한 줄을 보탭니다.</p>
+<div class="code-block highlight" data-lang="gradle"><div class="cb-title"><span class="badge">실습 3</span> build.gradle. AWS SDK v2 추가</div>dependencies {
+    // ... 기존 의존성은 그대로 둡니다
+    implementation 'software.amazon.awssdk:s3:2.25.31'
+}</div>
+<p>이 한 줄이 <code>S3Client</code>·<code>S3Presigner</code>·<code>PutObjectRequest</code> 같은 AWS SDK v2 클래스를 전부 당겨 옵니다. v1(<code>com.amazonaws:aws-java-sdk-s3</code>)이 아닌 <strong>v2</strong>를 쓰는 것이 중요합니다. Presigner API의 모양이 v1·v2가 다릅니다.</p>
+<h3>5.4.2 S3Client와 S3Presigner 빈 등록</h3>
+<p>Spring이 시작될 때 자격 증명을 끼운 두 클라이언트를 한 번만 만들어 두고, 필요한 곳에서 주입받아 쓰도록 합니다.</p>
+<p><code>src/main/java/com/metacoding/spring_presign_url/_core/config/AwsS3Config.java</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> src/main/java/com/metacoding/spring_presign_url/_core/config/AwsS3Config.java. S3 설정</div><span class="nd">@Configuration</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AwsS3Config</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="c1">// TODO: .env에서 넘어온 자격 증명을 주입받아 두 클라이언트를 빈으로 등록합니다</span>
+<span class="w">    </span><span class="c1">// 1. application.properties에 매핑된 환경변수를 필드로 주입</span>
+<span class="w">    </span><span class="nd">@Value</span><span class="p">(</span><span class="s">&quot;${cloud.aws.credentials.access-key}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">accessKey</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Value</span><span class="p">(</span><span class="s">&quot;${cloud.aws.credentials.secret-key}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">secretKey</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Value</span><span class="p">(</span><span class="s">&quot;${cloud.aws.region}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">region</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 2. Access/Secret Key 기반 자격 증명 제공자</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">StaticCredentialsProvider</span><span class="w"> </span><span class="nf">credentialsProvider</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">AwsBasicCredentials</span><span class="w"> </span><span class="n">credentials</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AwsBasicCredentials</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">accessKey</span><span class="p">,</span><span class="w"> </span><span class="n">secretKey</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">StaticCredentialsProvider</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">credentials</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 3. 일반 S3 작업용 (삭제·조회 등)</span>
+<span class="w">    </span><span class="nd">@Bean</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">S3Client</span><span class="w"> </span><span class="nf">s3Client</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">S3Client</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">credentialsProvider</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 4. Presigned URL 서명 전용</span>
+<span class="w">    </span><span class="nd">@Bean</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">S3Presigner</span><span class="w"> </span><span class="nf">s3Presigner</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">S3Presigner</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">credentialsProvider</span><span class="p">(</span><span class="n">credentialsProvider</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">region</span><span class="p">(</span><span class="n">Region</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
+<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span></div>
+<p><code>S3Client</code>와 <code>S3Presigner</code>는 같은 자격 증명·같은 리전을 쓰지만, 역할이 나뉘어 있습니다. <code>S3Client</code>는 실제 API 호출(파일 업로드·삭제·조회)을 하는 쪽이고, <code>S3Presigner</code>는 오직 <strong>서명된 URL을 만들어서 돌려주는</strong> 쪽입니다. 이번 챕터에서 클라이언트가 S3에 PUT을 쏘는 경로는 <code>S3Client</code>를 <strong>거치지 않습니다</strong>. 서버 힙에 파일이 안 올라오는 이유가 여기서도 나옵니다.</p>
+<h3>5.4.3 요청·응답 DTO</h3>
+<p>Presign 발급 한 건의 입출력을 record로 잡습니다.</p>
+<p><code>src/main/java/com/metacoding/spring_presign_url/image/ImageRequest.java</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 5</span> src/main/java/com/metacoding/spring_presign_url/image/ImageRequest.java. 발급 요청</div><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImageRequest</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="c1">// TODO: Presign 발급 요청 DTO</span>
+<span class="w">    </span><span class="c1">// 1. fileName — 원본 파일명 (&quot;cat.png&quot;). 확장자 추출의 근거</span>
+<span class="w">    </span><span class="c1">// 2. contentType — MIME 타입 (&quot;image/png&quot;). 업로드 시 헤더와 일치해야 함</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">PresignRequest</span><span class="p">(</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">fileName</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">contentType</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span></div>
+<p><code>src/main/java/com/metacoding/spring_presign_url/image/ImageResponse.java</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 6</span> src/main/java/com/metacoding/spring_presign_url/image/ImageResponse.java. 발급 응답</div><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImageResponse</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="c1">// TODO: Presign 발급 응답 DTO</span>
+<span class="w">    </span><span class="c1">// 1. key — S3 객체 키 (original/{uuid}.ext). 완료 저장 단계에서 다시 쓰임</span>
+<span class="w">    </span><span class="c1">// 2. presignedUrl — 서명된 PUT URL (15분 유효)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">PresignedUrlResponse</span><span class="p">(</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">presignedUrl</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span></div>
+<p>클라이언트 입장에서 이 응답의 <strong>두 필드</strong>가 모두 중요합니다. <code>presignedUrl</code>은 바로 쏠 업로드 주소고, <code>key</code>는 업로드가 끝난 뒤 <code>/complete</code>를 호출할 때 서버에 돌려줄 식별자입니다. 이 key 하나로 서버는 UUID·경로를 복원합니다.</p>
+<h3>5.4.4 발급 서비스</h3>
+<p>Presign 발급은 네 단계입니다. UUID 생성 → 확장자 추출 → key 조립 → <code>S3Presigner</code>로 서명.</p>
+<p><code>src/main/java/com/metacoding/spring_presign_url/image/ImageService.java</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 7</span> src/main/java/com/metacoding/spring_presign_url/image/ImageService.java. Presigned URL 발급</div><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImageService</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@Value</span><span class="p">(</span><span class="s">&quot;${cloud.aws.s3.bucket}&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">bucket</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">S3Presigner</span><span class="w"> </span><span class="n">presigner</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// TODO: Presigned PUT URL을 만들어 돌려줍니다</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">PresignedUrlResponse</span><span class="w"> </span><span class="nf">generatePresignedUrl</span><span class="p">(</span><span class="n">ImageRequest</span><span class="p">.</span><span class="na">PresignRequest</span><span class="w"> </span><span class="n">reqDTO</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 1. 충돌 없는 객체 식별자</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">uuid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UUID</span><span class="p">.</span><span class="na">randomUUID</span><span class="p">().</span><span class="na">toString</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// 2. 원본 파일명에서 확장자만 뽑는다 (&quot;cat.png&quot; → &quot;png&quot;)</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">ext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reqDTO</span><span class="p">.</span><span class="na">fileName</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">substring</span><span class="p">(</span><span class="n">reqDTO</span><span class="p">.</span><span class="na">fileName</span><span class="p">().</span><span class="na">lastIndexOf</span><span class="p">(</span><span class="sc">&#39;.&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// 3. S3에 저장될 경로 조립 (original/ 프리픽스로 Lambda 트리거 발동)</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;original/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">uuid</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ext</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// 4. 서명할 PUT 요청의 모양 정의</span>
+<span class="w">        </span><span class="n">PutObjectRequest</span><span class="w"> </span><span class="n">objectRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PutObjectRequest</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="na">bucket</span><span class="p">(</span><span class="n">bucket</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">contentType</span><span class="p">(</span><span class="n">reqDTO</span><span class="p">.</span><span class="na">contentType</span><span class="p">())</span>
+<span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// 5. 15분 유효한 Presigned URL 발급</span>
+<span class="w">        </span><span class="n">PresignedPutObjectRequest</span><span class="w"> </span><span class="n">presignedRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">presigner</span><span class="p">.</span><span class="na">presignPutObject</span><span class="p">(</span><span class="n">builder</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">                </span><span class="n">builder</span><span class="p">.</span><span class="na">signatureDuration</span><span class="p">(</span><span class="n">Duration</span><span class="p">.</span><span class="na">ofMinutes</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>
+<span class="w">                        </span><span class="p">.</span><span class="na">putObjectRequest</span><span class="p">(</span><span class="n">objectRequest</span><span class="p">));</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">PresignedUrlResponse</span><span class="p">(</span>
+<span class="w">                </span><span class="n">key</span><span class="p">,</span>
+<span class="w">                </span><span class="n">presignedRequest</span><span class="p">.</span><span class="na">url</span><span class="p">().</span><span class="na">toString</span><span class="p">()</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span></div>
+<p><code>presigner.presignPutObject(...)</code>가 이 챕터의 심장입니다. 이 한 호출이 자격 증명·리전·버킷·key·HTTP 메서드·만료시각을 모두 묶어 SHA-256으로 서명한 URL 한 줄을 만듭니다. URL에는 다음과 같은 쿼리 파라미터가 박힙니다.</p>
+<ul>
+<li><code>X-Amz-Algorithm=AWS4-HMAC-SHA256</code></li>
+<li><code>X-Amz-Date=20251225T203000Z</code></li>
+<li><code>X-Amz-Expires=900</code> (900초 = 15분)</li>
+<li><code>X-Amz-Signature=a1b2c3...</code></li>
+<li><code>X-Amz-Credential=AKIA.../20251225/ap-northeast-2/s3/aws4_request</code></li>
+</ul>
+<p>S3 서버는 이 쿼리 파라미터들을 보고 &quot;이 URL이 진짜 우리 쪽 Access Key로 서명된 것인지, 아직 유효한지, HTTP 메서드가 PUT인지&quot;를 검증한 뒤 업로드를 받습니다. 서명 한 번으로 15분 동안만 유효한 <strong>1회용 입장권</strong>이 만들어지는 셈입니다.</p>
+<p><code>Duration.ofMinutes(15)</code>는 실습 편의를 위한 값입니다. 실서비스에서는 업로드 행위가 얼마나 걸릴지를 예상해서 <strong>가능한 짧게</strong> 잡는 것이 맞습니다 (대개 5~10분). 길수록 유출 시 피해창이 넓어집니다.</p>
+<h3>5.4.5 발급 컨트롤러</h3>
+<p><code>src/main/java/com/metacoding/spring_presign_url/image/ImageController.java</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 8</span> src/main/java/com/metacoding/spring_presign_url/image/ImageController.java. 발급 엔드포인트</div><span class="nd">@RestController</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImageController</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ImageService</span><span class="w"> </span><span class="n">imageService</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// TODO: Presigned URL 발급 엔드포인트</span>
+<span class="w">    </span><span class="nd">@PostMapping</span><span class="p">(</span><span class="s">&quot;/presigned&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">PresignedUrlResponse</span><span class="w"> </span><span class="nf">presign</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">ImageRequest</span><span class="p">.</span><span class="na">PresignRequest</span><span class="w"> </span><span class="n">reqDTO</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">imageService</span><span class="p">.</span><span class="na">generatePresignedUrl</span><span class="p">(</span><span class="n">reqDTO</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span></div>
+<p><code>/complete</code>와 <code>/list</code>·<code>/{id}</code>는 5.7·5.8에서 얹습니다. 이 시점까지는 컨트롤러에 <code>/presigned</code> 하나만 있습니다.</p>
+<h3>5.4.6 application.properties 매핑</h3>
+<p><code>src/main/resources/application.properties</code>에 환경변수 바인딩을 추가합니다.</p>
+<div class="code-block highlight" data-lang="properties"><div class="cb-title"><span class="badge">실습 9</span> src/main/resources/application.properties. AWS 설정 매핑</div><span class="c1"># ---------------------------</span>
+<span class="c1"># AWS 환경변수 (.env에서 로드)</span>
+<span class="c1"># ---------------------------</span>
+<span class="na">cloud.aws.credentials.access-key</span><span class="o">=</span><span class="s">${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}</span>
+<span class="na">cloud.aws.credentials.secret-key</span><span class="o">=</span><span class="s">${CLOUD_AWS_CREDENTIALS_SECRET_KEY}</span>
+<span class="na">cloud.aws.region</span><span class="o">=</span><span class="s">${CLOUD_AWS_REGION}</span>
+<span class="na">cloud.aws.s3.bucket</span><span class="o">=</span><span class="s">${CLOUD_AWS_S3_BUCKET}</span></div>
+<p><code>${}</code> 안의 이름은 <code>.env</code> 파일 변수명과 <strong>대소문자까지</strong> 똑같아야 합니다. <code>AwsS3Config</code>의 <code>@Value(&quot;${cloud.aws.credentials.access-key}&quot;)</code>가 여기서 한 번 변환된 프로퍼티 이름을 찾아갑니다.</p>
+<h2>5.5 Postman으로 Presigned URL 받고 S3에 직업로드</h2>
+<p>서버를 띄웁니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실험 5-1 실행. Spring 서버 기동</div>./gradlew<span class="w"> </span>bootRun</div>
+<p><code>Started SpringPresignUrlApplication in 3.xxx seconds</code>가 찍히면 준비 완료입니다.</p>
+<p>[CAPTURE NEEDED: ./gradlew bootRun 실행 후 &quot;Started SpringPresignUrlApplication&quot;과 &quot;Tomcat started on port 8080&quot;이 찍힌 터미널 화면]</p>
+<h3>5.5.1 Presigned URL 발급</h3>
+<p>Postman에서 새 요청을 하나 엽니다.</p>
+<ul>
+<li>메서드: <code>POST</code></li>
+<li>URL: <code>http://localhost:8080/presigned</code></li>
+<li>Body 탭 → raw → JSON</li>
+</ul>
+<div class="code-block highlight" data-lang="json"><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cat.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;contentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;image/png&quot;</span>
+<span class="p">}</span></div>
+<p>[CAPTURE NEEDED: Postman에서 POST http://localhost:8080/presigned에 Body(raw, JSON)로 fileName과 contentType이 들어간 JSON을 붙인 화면]</p>
+<p><code>Send</code>를 누르면 200 OK와 함께 아래와 같은 응답이 돌아옵니다.</p>
+<p>[CAPTURE NEEDED: Postman 응답 창. 200 OK 상태에 key=&quot;original/c5b8f37c-....png&quot;, presignedUrl=&quot;https://metacoding-base64.s3.ap-northeast-2.amazonaws.com/original/c5b8f37c-....png?X-Amz-Algorithm=...&quot; 가 찍힌 JSON]</p>
+<p><code>presignedUrl</code> 값이 한 줄이지만 꽤 깁니다. <code>?</code> 뒤부터 이어지는 <code>X-Amz-Algorithm</code>·<code>X-Amz-Date</code>·<code>X-Amz-Expires</code>·<code>X-Amz-Signature</code>가 앞 절에서 말했던 서명 쿼리 파라미터들입니다. 이 URL이 서명된 그 15분 동안, 그 key로, PUT 메서드로만 업로드를 받는 전용 주소입니다.</p>
+<h3>5.5.2 S3에 직업로드</h3>
+<p>새 Postman 요청을 하나 더 엽니다.</p>
+<ul>
+<li>메서드: <code>PUT</code></li>
+<li>URL: 방금 응답의 <code>presignedUrl</code>을 통째로 복사해서 붙여넣기</li>
+<li>Header 탭 → <code>Content-Type: image/png</code> 추가 (발급 요청의 <code>contentType</code>과 정확히 일치)</li>
+<li>Body 탭 → binary → 실제 PNG 파일 선택</li>
+</ul>
+<p>[CAPTURE NEEDED: Postman PUT 요청. URL 창에 긴 presignedUrl 문자열이 들어 있고, Headers 탭에 Content-Type: image/png가 설정되고, Body 탭의 binary가 선택되어 cat.png 파일이 선택된 화면]</p>
+<p><code>Send</code>를 누릅니다. 200 OK가 돌아옵니다. 응답 바디는 비어 있습니다. S3는 업로드가 성공하면 본문을 거의 내려 주지 않습니다.</p>
+<p>[CAPTURE NEEDED: Postman에서 S3 PUT 업로드 성공 후 200 OK 응답과 빈 바디가 찍힌 화면]</p>
+<h3>5.5.3 S3 콘솔에서 업로드 확인</h3>
+<p>AWS 콘솔의 버킷 화면으로 가서 <code>original/</code> 폴더를 열면, 방금 올린 <code>c5b8f37c-....png</code> 파일이 한 건 들어앉아 있는 것이 보입니다.</p>
+<p>[CAPTURE NEEDED: AWS S3 콘솔의 metacoding-base64/original 폴더에 c5b8f37c-....png 파일 한 건이 있는 화면]</p>
+<p>파일을 클릭해 &quot;객체 URL&quot;을 웹 브라우저에 붙이면, 공개 정책을 열어 둔 덕분에 사진이 그대로 렌더링됩니다.</p>
+<p>[CAPTURE NEEDED: 브라우저 주소창에 https://metacoding-base64.s3.ap-northeast-2.amazonaws.com/original/c5b8f37c-....png를 입력해 고양이 원본 사진이 뜬 화면]</p>
+<p>여기까지가 챕터 4 대비 가장 큰 변화입니다. <strong>10MB짜리 사진이 Spring 서버의 힙에 한 번도 올라오지 않았습니다.</strong> Spring이 한 일은 URL 한 줄을 만들어 돌려준 것뿐이었습니다.</p>
+<div class="sp-figure">
+  <div class="sp-figure-title">그림 5-3. 챕터 4 Base64 vs 챕터 5 Presigned URL</div>
+  <div class="sp-compare">
+    <div class="sp-compare-block bad">
+      <span class="sp-compare-label">BASE64 (CH04)</span>
+      <div class="sp-compare-content">
+        <div><strong>서버 힙 점유</strong> 요청당 ≈ 25MB (문자열 + 바이트 배열)</div>
+        <div style="margin-top:6px;"><strong>서버 왕복</strong> 업로드 바이트가 서버를 거쳐 감</div>
+        <div style="margin-top:6px;"><strong>10MB 업로드</strong> 3~5초 지연 + OOM 위험</div>
+        <div style="margin-top:6px;"><strong>max-request-size</strong> 키워야 함</div>
+      </div>
+    </div>
+    <div class="sp-compare-block good">
+      <span class="sp-compare-label">PRESIGNED (CH05)</span>
+      <div class="sp-compare-content">
+        <div><strong>서버 힙 점유</strong> ≈ 0 (URL 한 줄만)</div>
+        <div style="margin-top:6px;"><strong>서버 왕복</strong> 클라이언트 ↔ S3 직접</div>
+        <div style="margin-top:6px;"><strong>10MB 업로드</strong> 네트워크 대역폭이 실질적 상한</div>
+        <div style="margin-top:6px;"><strong>max-request-size</strong> 관계 없음 (S3 기본 5GB)</div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:12px;">서버가 줄어든 책임만큼, 보안(서명·만료)과 파이프라인(이벤트·Lambda)이 그 자리를 대신합니다</div>
+</div>
+<p>동료가 모니터를 힐끗 봤습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "서버 콘솔에 로그도 안 찍히네요. 진짜 서버가 안 끼었다는 거네요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "끼긴 했어요. 주소 한 줄 만드는 일만요."</div>
+<p class="thought">그럼 이제 업로드 끝났다는 건 어떻게 알지.</p>
+<p>S3에 사진이 떨어진 건 맞지만, 그 사실을 우리 서버가 알 길은 아직 없었습니다. 그리고 사용자에게 보여줄 썸네일도 아직 없었습니다. 두 개를 동시에 풀어 줄 도구가 한 발짝 앞에 있었습니다.</p>
+<h2>5.6 Lambda 리사이즈 함수 배포</h2>
+<p>5.3.3에서 만든 <code>image-resize-handler</code> 함수로 다시 돌아갑니다. 지금까지는 틀만 만들어 뒀고, 코드는 비어 있었습니다. 이제 이 함수 안에 &quot;원본을 읽어서 썸네일을 구워 <code>resized/</code>에 올리는&quot; 파이썬 코드를 넣습니다.</p>
+<p>Lambda 콘솔에서 함수 화면의 <strong>코드</strong> 탭으로 이동하면 내장 에디터가 열립니다. 거기에 <code>lambda_function.py</code>를 선택해서 아래 코드를 통째로 붙여넣고 <strong>Deploy</strong> 버튼을 누릅니다.</p>
+<div class="code-block highlight" data-lang="python"><div class="cb-title"><span class="badge">실습 10</span> lambda_function.py. original/ 이벤트를 받아 resized/에 저장</div><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">boto3</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PIL</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+
+<span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="c1"># 1. 이벤트 원본을 로그로 찍어 둔다 (디버깅 편의)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== S3 Upload Event ===&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">event</span><span class="p">))</span>
+
+    <span class="c1"># 2. 이벤트에서 bucket과 object key를 뽑는다</span>
+    <span class="n">bucket</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;s3&quot;</span><span class="p">][</span><span class="s2">&quot;bucket&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;s3&quot;</span><span class="p">][</span><span class="s2">&quot;object&quot;</span><span class="p">][</span><span class="s2">&quot;key&quot;</span><span class="p">]</span>
+
+    <span class="c1"># 3. original/ 폴더만 처리한다 (resized/에 쓰는 건 무한 루프 방지)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;original/&quot;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[SKIP] original/ 경로가 아닙니다.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ignored&quot;</span><span class="p">}</span>
+
+    <span class="c1"># 4. original/{uuid}.{ext} → uuid만 떼어 낸다</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;original/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">uuid</span> <span class="o">=</span> <span class="n">file_name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[INFO] original key: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[INFO] uuid: </span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 5. 원본을 내려받아 Pillow로 연다</span>
+    <span class="n">original_obj</span> <span class="o">=</span> <span class="n">s3</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">Key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+    <span class="n">original_bytes</span> <span class="o">=</span> <span class="n">original_obj</span><span class="p">[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">original_bytes</span><span class="p">))</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">)</span>         <span class="c1"># JPEG 저장 대비 투명도 제거</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">thumbnail</span><span class="p">((</span><span class="mi">800</span><span class="p">,</span> <span class="mi">800</span><span class="p">))</span>          <span class="c1"># 긴 변 기준 800px로 축소</span>
+
+    <span class="c1"># 6. 메모리 버퍼에 JPEG로 굽는다</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;JPEG&quot;</span><span class="p">,</span> <span class="n">quality</span><span class="o">=</span><span class="mi">85</span><span class="p">)</span>
+    <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># 7. resized/{uuid}.jpg로 업로드 (이름 규칙이 5.7의 &quot;규칙 신뢰&quot;의 근거)</span>
+    <span class="n">resized_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;resized/</span><span class="si">{</span><span class="n">uuid</span><span class="si">}</span><span class="s2">.jpg&quot;</span>
+    <span class="n">s3</span><span class="o">.</span><span class="n">put_object</span><span class="p">(</span>
+        <span class="n">Bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span>
+        <span class="n">Key</span><span class="o">=</span><span class="n">resized_key</span><span class="p">,</span>
+        <span class="n">Body</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
+        <span class="n">ContentType</span><span class="o">=</span><span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[SUCCESS] 리사이즈 업로드 완료: </span><span class="si">{</span><span class="n">resized_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;originalKey&quot;</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+        <span class="s2">&quot;resizedKey&quot;</span><span class="p">:</span> <span class="n">resized_key</span><span class="p">,</span>
+    <span class="p">}</span></div>
+<p>파이썬 코드지만 흐름은 Spring과 똑같습니다. 이벤트에서 bucket·key를 꺼내서(2), <code>original/</code>로 시작하는 경우만 처리하고(3), UUID를 뽑아 리사이즈 결과 경로를 맞춘(4·7) 다음, 실제 이미지 처리를 하는(5·6) 구조입니다.</p>
+<p><code>image.thumbnail((800, 800))</code>은 <strong>긴 변 기준 800px</strong>로 비율을 유지하며 축소합니다. 1920×1080 원본이라면 800×450으로, 4000×3000 원본이라면 800×600으로 나옵니다. <code>quality=85</code>는 JPEG 품질 파라미터입니다 (0~100). 85 정도가 용량·품질의 실무 기본값입니다.</p>
+<h3>5.6.1 Pillow Layer 연결</h3>
+<p>Deploy를 눌러도 함수는 아직 동작하지 않습니다. Lambda Python 3.11 런타임에는 <strong>Pillow가 기본 포함되어 있지 않기</strong> 때문입니다. <code>from PIL import Image</code>에서 <code>ModuleNotFoundError</code>가 납니다.</p>
+<p>해결책은 <strong>Layer</strong>입니다. Layer는 Lambda 함수에 얹는 공용 라이브러리 꾸러미입니다. 내가 직접 빌드할 수도 있지만, 공개된 Klayers 프로젝트가 리전별 ARN을 이미 만들어 두었기 때문에 그 주소를 붙이기만 하면 됩니다.</p>
+<p>Lambda 함수 화면의 하단 <strong>계층 (Layers)</strong> 항목에서 &quot;계층 추가 → ARN 지정&quot;을 클릭하고 아래 ARN을 붙입니다.</p>
+<div class="code-block highlight" data-lang="text"><div class="cb-title"><span class="badge reference">참고</span> Klayers Pillow Layer ARN (ap-northeast-2, Python 3.11)</div>arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p311-Pillow:10</div>
+<p>리전이 다르면 <a href="https://api.klayers.cloud/api/v2/p3.11/layers/latest/ap-northeast-2/html">api.klayers.cloud/api/v2/p3.11/layers/latest</a>에서 해당 리전용 ARN을 찾아 교체합니다. 뒤의 <code>:10</code>은 Layer 버전입니다. 최신 버전이 바뀌면 숫자가 올라갑니다.</p>
+<p>계층이 등록되면 Deploy 상태로 함수가 완전히 준비된 것입니다.</p>
+<h3>5.6.2 다시 업로드해 리사이즈 확인</h3>
+<p>5.5의 흐름을 다시 한 번 돕니다. <code>/presigned</code>로 새 URL 한 장 발급받고, 그 URL로 PUT 업로드를 쏩니다. 이번에는 업로드 성공 후 <strong>3~5초 기다린 뒤</strong> S3 콘솔을 새로고침합니다.</p>
+<p>[CAPTURE NEEDED: AWS S3 콘솔. 같은 버킷의 resized/ 폴더 안에 {uuid}.jpg 파일이 새로 생긴 화면. original/의 {uuid}.png와 UUID가 같고 확장자만 jpg로 바뀜]</p>
+<p><code>resized/{uuid}.jpg</code>가 생겼다면 파이프라인이 끝까지 한 바퀴 돈 것입니다. 클라이언트가 <code>original/</code>에 PUT → S3가 Lambda 트리거 → Lambda가 Pillow로 리사이즈 → <code>resized/</code>에 저장이 전부 자동으로 이어졌습니다.</p>
+<p>이 결과 JPG를 브라우저에서 열면 800px로 줄어든 축소본이 뜹니다.</p>
+<p>[CAPTURE NEEDED: 브라우저에서 https://metacoding-base64.s3.ap-northeast-2.amazonaws.com/resized/c5b8f37c-....jpg를 연 화면. 긴 변이 800px로 축소된 고양이 썸네일]</p>
+<div class="tip">
+<p><strong>Lambda 로그를 직접 읽고 싶을 때</strong></p>
+<p>Lambda 함수 화면 → 모니터링 탭 → &quot;CloudWatch에서 로그 보기&quot;를 클릭하면 <code>print(json.dumps(event))</code>로 찍은 S3 이벤트 원본을 그대로 볼 수 있습니다. 업로드한 파일 경로·이벤트 시각·버킷 이름이 전부 여기에 남습니다. 파이프라인이 안 돌 때 제일 먼저 확인할 자리입니다.</p>
+</div>
+<h2>5.7 Webhook 꿈꾸다 접기, 완료 저장 API</h2>
+<p>동료가 다시 모니터를 봤습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "이제 서버가 'original에 올라온 거 DB에 적어야지' 이걸 어떻게 알아요? Lambda가 서버한테 전화라도 걸어요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "아, 그거 Webhook으로 Lambda가 우리 서버 <code>/webhook/upload-complete</code>를 때리면 되죠."</div>
+<p>오픈이는 <code>/webhook/upload-complete</code> 엔드포인트 설계를 수첩에 적어 내려갔습니다. Lambda 마지막에 <code>requests.post(&quot;http://localhost:8080/webhook/upload-complete&quot;, json={...})</code>를 한 줄 넣는 그림이었습니다.</p>
+<p class="thought">근데 Lambda에서 localhost가 뭐지.</p>
+<p>손이 멈췄습니다. Lambda는 AWS 안에서 돕니다. Lambda의 <code>localhost:8080</code>은 Lambda 런타임 자기 자신의 8080일 뿐, 내 노트북의 Spring 서버가 아닙니다. 내 노트북은 공인 IP도 없고, NAT 뒤에 숨어 있어서 바깥에서 도달할 방법이 없었습니다.</p>
+<p class="thought">개발 단계에서 Webhook이 안 오는구나.</p>
+<p>실서비스였다면 Spring 서버가 공인 도메인을 가졌을 테니 Lambda가 그 주소로 <code>POST</code>를 쏠 수 있었을 겁니다. 지금은 로컬 개발이라 그 길이 막혔습니다. ngrok 같은 터널링을 잠깐 쓰는 선택지도 있었지만, 실습 단계에서 외부로 구멍을 내는 건 과한 일이었습니다.</p>
+<p>팀장이 지나가다 화면을 보고 멈췄습니다.</p>
+<div class="dialogue"><span class="speaker">팀장</span>: "서버가 Lambda 결과를 꼭 듣고서야 DB에 적을 수 있어요? Lambda가 뭘 만드는지 미리 정해져 있지 않아요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "<code>resized/{uuid}.jpg</code>로 만들어요. 항상 같은 규칙이에요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "그럼 서버가 Lambda에 안 물어봐도 알지 않아요? 원본 key만 받으면 resized key는 그 규칙대로 맞추면 되니까요."</div>
+<p>오픈이는 다시 수첩을 봤습니다. key 규칙이 <code>original/{uuid}.{ext}</code> ↔ <code>resized/{uuid}.jpg</code>로 <strong>대칭</strong>이었습니다. 이 대칭을 서버가 믿는 한, Lambda의 응답을 듣지 않아도 resized URL을 <strong>계산</strong>할 수 있었습니다.</p>
+<p class="thought">이건 Webhook이 아니라 규칙 기반이다.</p>
+<p>대신 업로드 완료 시점은 <strong>클라이언트</strong>가 알려 줘야 했습니다. 클라이언트는 본인이 PUT 업로드를 성공했다는 사실을 알고 있으니까요. 클라이언트가 &quot;업로드 끝났어, key는 이거야&quot;라고 서버에 <code>POST /complete</code>로 알리면, 서버는 그 key로부터 UUID를 뽑고, 규칙에 따라 <code>originalUrl</code>·<code>resizedUrl</code>을 조합하고, DB에 한 행을 심습니다.</p>
+<div class="sp-figure">
+  <div class="sp-figure-title">그림 5-4. Webhook을 버리고, key 규칙을 믿는 쪽으로</div>
+  <div class="sp-compare">
+    <div class="sp-compare-block bad">
+      <span class="sp-compare-label">버린 설계</span>
+      <div class="sp-compare-content">Lambda → Spring Webhook. 로컬 개발에서 서버에 도달 불가</div>
+    </div>
+    <div class="sp-compare-block good">
+      <span class="sp-compare-label">택한 설계</span>
+      <div class="sp-compare-content">Client → Spring <code>/complete</code>. key 규칙으로 resized URL 조합</div>
+    </div>
+  </div>
+  <div class="sp-row info">
+    <div class="sp-row-label">신뢰의 축</div>
+    <div class="sp-row-value">Lambda의 응답이 아니라 <code>resized/{uuid}.jpg</code> 규칙을 서버가 신뢰</div>
+  </div>
+  <div class="sp-row">
+    <div class="sp-row-label">타이밍</div>
+    <div class="sp-row-value">클라이언트가 PUT 성공 후 3~5초 대기 → <code>/complete</code> 호출</div>
+  </div>
+  <div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:12px;">규칙이 서 있으면 서버는 이벤트를 듣지 않고도 "결과가 어디에 있는지" 안다</div>
+</div>
+<p>이 설계를 코드로 내립니다.</p>
+<h3>5.7.1 엔티티와 DTO 확장</h3>
+<p>DB 한 행의 모양이 챕터 4와 달라집니다. 원본과 리사이즈 URL을 둘 다 가져야 합니다.</p>
+<p><code>src/main/java/com/metacoding/spring_presign_url/image/ImageEntity.java</code>를 열고 TODO의 <code>pass</code>를 지우고 아래 코드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 11</span> src/main/java/com/metacoding/spring_presign_url/image/ImageEntity.java. 두 URL을 가진 한 행</div><span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;image_tb&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImageEntity</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="c1">// TODO: 원본 · 리사이즈 URL을 함께 가진 한 행</span>
+<span class="w">    </span><span class="nd">@Id</span>
+<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 1. uuid — original key에서 추출한 값. 두 URL의 공통 식별자</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">uuid</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 2. fileName — 클라이언트가 올린 원본 이름 (&quot;cat.png&quot;)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">fileName</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 3. originalUrl — S3 정식 URL (https://...amazonaws.com/original/{uuid}.ext)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">originalUrl</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 4. resizedUrl — Lambda 결과 URL (https://...amazonaws.com/resized/{uuid}.jpg)</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">resizedUrl</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 5. createdAt — 완료 저장 시각</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span><span class="p">;</span>
+<span class="p">}</span></div>
+<p><code>src/main/java/com/metacoding/spring_presign_url/image/ImageRequest.java</code>에 완료 저장용 record를 하나 더 붙입니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 12</span> src/main/java/com/metacoding/spring_presign_url/image/ImageRequest.java. 완료 저장 요청</div><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImageRequest</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">PresignRequest</span><span class="p">(</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">fileName</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">contentType</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="w">    </span><span class="c1">// TODO: 업로드 완료를 알릴 때 쓰는 DTO</span>
+<span class="w">    </span><span class="c1">// 1. fileName — 원본 파일명 (DB 기록용)</span>
+<span class="w">    </span><span class="c1">// 2. key — /presigned 응답으로 받았던 original key 그대로 되돌려 줌</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">CompleteRequest</span><span class="p">(</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">fileName</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">key</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span></div>
+<p><code>src/main/java/com/metacoding/spring_presign_url/image/ImageResponse.java</code>에 응답 DTO를 확장합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 13</span> src/main/java/com/metacoding/spring_presign_url/image/ImageResponse.java. 메타 응답</div><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ImageResponse</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">PresignedUrlResponse</span><span class="p">(</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">presignedUrl</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="w">    </span><span class="c1">// TODO: 완료 저장·상세 조회 공용 응답</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">Detail</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">uuid</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">originalUrl</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">resizedUrl</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">fileName</span><span class="p">,</span>
+<span class="w">            </span><span class="nd">@JsonFormat</span><span class="p">(</span><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;yyyy-MM-dd HH:mm&quot;</span><span class="p">)</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Detail</span><span class="w"> </span><span class="nf">fromEntity</span><span class="p">(</span><span class="n">ImageEntity</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Detail</span><span class="p">(</span>
+<span class="w">                    </span><span class="n">e</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span>
+<span class="w">                    </span><span class="n">e</span><span class="p">.</span><span class="na">getUuid</span><span class="p">(),</span>
+<span class="w">                    </span><span class="n">e</span><span class="p">.</span><span class="na">getOriginalUrl</span><span class="p">(),</span>
+<span class="w">                    </span><span class="n">e</span><span class="p">.</span><span class="na">getResizedUrl</span><span class="p">(),</span>
+<span class="w">                    </span><span class="n">e</span><span class="p">.</span><span class="na">getFileName</span><span class="p">(),</span>
+<span class="w">                    </span><span class="n">e</span><span class="p">.</span><span class="na">getCreatedAt</span><span class="p">()</span>
+<span class="w">            </span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// TODO: 목록 응답 (가벼운 필드만)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">Item</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">originalUrl</span><span class="p">,</span>
+<span class="w">            </span><span class="n">String</span><span class="w"> </span><span class="n">resizedUrl</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Item</span><span class="w"> </span><span class="nf">fromEntity</span><span class="p">(</span><span class="n">ImageEntity</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Item</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getOriginalUrl</span><span class="p">(),</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getResizedUrl</span><span class="p">());</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">Items</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Item</span><span class="o">&gt;</span><span class="w"> </span><span class="n">items</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="p">}</span></div>
+<p>목록은 상세보다 가벼운 필드(<code>id</code>·두 URL)만 내려 줍니다. 프런트에서 썸네일 그리드를 그리는 데는 이 정도로 충분하고, 상세 페이지로 들어갔을 때 <code>Detail</code>이 필요합니다.</p>
+<h3>5.7.2 완료 저장 서비스</h3>
+<p>이 절이 이 챕터에서 가장 짧으면서 가장 중요한 코드입니다. 서버가 Lambda에 아무것도 묻지 않고, <strong>key 규칙만 믿고</strong> resized URL을 조합하는 지점입니다.</p>
+<p><code>ImageService.java</code>에 메서드를 하나 더 붙입니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 14</span> src/main/java/com/metacoding/spring_presign_url/image/ImageService.java. 완료 저장</div><span class="nd">@Value</span><span class="p">(</span><span class="s">&quot;${cloud.aws.region}&quot;</span><span class="p">)</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">region</span><span class="p">;</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ImageRepository</span><span class="w"> </span><span class="n">imageRepository</span><span class="p">;</span>
+
+<span class="c1">// TODO: original key만 받아 resized URL을 조합해 DB에 한 행을 심는다</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Detail</span><span class="w"> </span><span class="nf">checkAndSave</span><span class="p">(</span><span class="n">ImageRequest</span><span class="p">.</span><span class="na">CompleteRequest</span><span class="w"> </span><span class="n">reqDTO</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">originalKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reqDTO</span><span class="p">.</span><span class="na">key</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 1. original/{uuid}.{ext} → uuid만 뽑는다</span>
+<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">uuid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">originalKey</span><span class="p">.</span><span class="na">replace</span><span class="p">(</span><span class="s">&quot;original/&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">).</span><span class="na">split</span><span class="p">(</span><span class="s">&quot;\\.&quot;</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 2. Lambda가 저장한 resized 경로를 규칙대로 조립한다</span>
+<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">resizedKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;resized/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">uuid</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.jpg&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 3. S3 정식 URL 두 개를 만든다</span>
+<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">originalUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;https://&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">bucket</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.s3.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">region</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.amazonaws.com/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">originalKey</span><span class="p">;</span>
+<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">resizedUrl</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;https://&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">bucket</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.s3.&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">region</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;.amazonaws.com/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">resizedKey</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// 4. 엔티티로 포장해 DB에 한 행</span>
+<span class="w">    </span><span class="n">ImageEntity</span><span class="w"> </span><span class="n">entity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ImageEntity</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="na">uuid</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">fileName</span><span class="p">(</span><span class="n">reqDTO</span><span class="p">.</span><span class="na">fileName</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">originalUrl</span><span class="p">(</span><span class="n">originalUrl</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">resizedUrl</span><span class="p">(</span><span class="n">resizedUrl</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">createdAt</span><span class="p">(</span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">imageRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">entity</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Detail</span><span class="p">.</span><span class="na">fromEntity</span><span class="p">(</span><span class="n">entity</span><span class="p">);</span>
+<span class="p">}</span></div>
+<p>2번 줄의 <code>&quot;resized/&quot; + uuid + &quot;.jpg&quot;</code>가 이 설계의 계약입니다. <strong>Lambda가 이 규칙으로 저장한다</strong>는 것을 서버가 알고, 규칙이 지켜지는 한 서버는 이벤트 응답을 듣지 않고도 resized URL을 계산할 수 있습니다. 규칙이 깨지는 순간(예: Lambda가 확장자를 <code>.png</code>로 쓰거나, 경로를 <code>thumbs/</code>로 바꾸거나) 이 조립은 존재하지 않는 URL을 만들어 냅니다. 그러니까 <strong>Lambda 코드의 <code>resized_key = f&quot;resized/{uuid}.jpg&quot;</code>와 여기 2번 줄은 반드시 같이 움직여야 합니다</strong>.</p>
+<h3>5.7.3 완료 저장 컨트롤러</h3>
+<p><code>ImageController.java</code>에 엔드포인트를 하나 더 얹습니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 15</span> src/main/java/com/metacoding/spring_presign_url/image/ImageController.java. /complete 엔드포인트</div><span class="c1">// TODO: 업로드 완료 알림을 받아 DB에 적는다</span>
+<span class="nd">@PostMapping</span><span class="p">(</span><span class="s">&quot;/complete&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Detail</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">ImageRequest</span><span class="p">.</span><span class="na">CompleteRequest</span><span class="w"> </span><span class="n">reqDTO</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">imageService</span><span class="p">.</span><span class="na">checkAndSave</span><span class="p">(</span><span class="n">reqDTO</span><span class="p">);</span>
+<span class="p">}</span></div>
+<p>이제 <code>/presigned</code>와 <code>/complete</code> 두 축이 섰습니다. 하나는 업로드 시작점, 하나는 업로드 종료점입니다. 그 사이에 Lambda 리사이즈가 자동으로 끼어듭니다.</p>
+<h2>5.8 Postman으로 전체 흐름 검증과 목록·상세 조회</h2>
+<h3>5.8.1 처음부터 끝까지 한 바퀴</h3>
+<p>이번에는 Postman에서 세 요청을 연속으로 날립니다.</p>
+<p><strong>① <code>POST /presigned</code></strong> (5.5.1과 동일). 응답의 <code>key</code>와 <code>presignedUrl</code>을 복사해 둡니다.</p>
+<p><strong>② <code>PUT {presignedUrl}</code></strong> (5.5.2와 동일). 200 OK를 받으면 <strong>3~5초 대기</strong>합니다. Lambda가 리사이즈를 끝낼 시간을 줍니다.</p>
+<p><strong>③ <code>POST /complete</code></strong> (새 요청).</p>
+<ul>
+<li>메서드: <code>POST</code></li>
+<li>URL: <code>http://localhost:8080/complete</code></li>
+<li>Body 탭 → raw → JSON</li>
+</ul>
+<div class="code-block highlight" data-lang="json"><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;fileName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cat.png&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;original/c5b8f37c-e767-46b1-97fd-e2d67bd79dff.png&quot;</span>
+<span class="p">}</span></div>
+<p><code>key</code> 자리에는 ①의 응답에서 받았던 <code>key</code> 값을 그대로 붙입니다.</p>
+<p>[CAPTURE NEEDED: Postman에서 POST http://localhost:8080/complete에 fileName과 original/{uuid}.png 형태의 key가 들어간 JSON을 Body로 보내는 화면]</p>
+<p><code>Send</code>를 누르면 다음 응답이 돌아옵니다.</p>
+<p>[CAPTURE NEEDED: Postman 응답. 200 OK에 id, uuid, originalUrl(https://...amazonaws.com/original/{uuid}.png), resizedUrl(https://...amazonaws.com/resized/{uuid}.jpg), fileName, createdAt이 찍힌 JSON]</p>
+<p>응답 JSON의 <code>resizedUrl</code>을 브라우저에 붙이면 800px로 축소된 JPEG가 뜹니다. <code>originalUrl</code>을 붙이면 원본 PNG가 뜹니다. 같은 UUID가 <code>.png</code>와 <code>.jpg</code> 두 경로를 아우릅니다.</p>
+<h3>5.8.2 H2 콘솔로 DB 확인</h3>
+<div class="code-block highlight" data-lang="text">http://localhost:8080/h2-console</div>
+<p>에 접속해서 <code>SELECT * FROM image_tb</code>를 실행합니다.</p>
+<p>[CAPTURE NEEDED: H2 콘솔에서 SELECT * FROM image_tb 결과. 한 행에 id=1, uuid, file_name=cat.png, original_url, resized_url, created_at이 찍힌 화면]</p>
+<h3>5.8.3 목록·상세 조회 API 얹기</h3>
+<p><code>ImageService.java</code>에 조회 메서드를 두 개 보탭니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 16</span> src/main/java/com/metacoding/spring_presign_url/image/ImageService.java. 목록·상세 조회</div><span class="c1">// TODO: 전체 목록 (가벼운 필드만)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Items</span><span class="w"> </span><span class="nf">listAll</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Item</span><span class="o">&gt;</span><span class="w"> </span><span class="n">items</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">imageRepository</span><span class="p">.</span><span class="na">findAll</span><span class="p">().</span><span class="na">stream</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Item</span><span class="p">::</span><span class="n">fromEntity</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="na">toList</span><span class="p">());</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Items</span><span class="p">(</span><span class="n">items</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// TODO: 단건 상세</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Detail</span><span class="w"> </span><span class="nf">findById</span><span class="p">(</span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ImageEntity</span><span class="w"> </span><span class="n">entity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">imageRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RuntimeException</span><span class="p">(</span><span class="s">&quot;이미지를 찾을 수 없습니다.&quot;</span><span class="p">));</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Detail</span><span class="p">.</span><span class="na">fromEntity</span><span class="p">(</span><span class="n">entity</span><span class="p">);</span>
+<span class="p">}</span></div>
+<p><code>ImageController.java</code>에 엔드포인트 두 개를 더합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 17</span> src/main/java/com/metacoding/spring_presign_url/image/ImageController.java. 목록·상세 엔드포인트</div><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/list&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Items</span><span class="w"> </span><span class="nf">getAllImages</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">imageService</span><span class="p">.</span><span class="na">listAll</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/{id}&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ImageResponse</span><span class="p">.</span><span class="na">Detail</span><span class="w"> </span><span class="nf">getImageDetail</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">imageService</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<span class="p">}</span></div>
+<p>Postman에서 <code>GET http://localhost:8080/list</code>와 <code>GET http://localhost:8080/1</code>을 차례로 쏴 봅니다.</p>
+<p>[CAPTURE NEEDED: Postman에서 GET /list 응답. items 배열 안에 id·originalUrl·resizedUrl만 담긴 가벼운 Item 객체가 들어 있는 JSON]</p>
+<p>[CAPTURE NEEDED: Postman에서 GET /1 응답. id=1 한 건의 Detail이 단일 객체로 내려오는 JSON (fileName·createdAt 포함)]</p>
+<p>목록과 상세가 다른 DTO를 쓰는 이유는 <strong>전송 비용</strong> 입니다. 썸네일 리스트 화면은 한 번에 수십~수백 건을 받아야 합니다. 이때 <code>fileName</code>·<code>createdAt</code>·<code>uuid</code>까지 매 건에 실어 보내면 페이로드가 필요 이상으로 커집니다. <code>Item</code>은 썸네일 리스트 화면에 꼭 필요한 세 필드(<code>id</code>·<code>originalUrl</code>·<code>resizedUrl</code>)만 담습니다.</p>
+<div class="tip">
+<p><strong>실서비스로 가기 전 점검할 것들</strong></p>
+<ul>
+<li><strong>버킷 공개 설정</strong>: 이번 실습은 public 버킷이지만, 실서비스는 비공개 + 조회도 Presigned GET URL로 내려줘야 합니다. 그래야 URL이 유출되어도 권한 만료로 방어됩니다</li>
+<li><strong>Presigned 만료시간</strong>: <code>Duration.ofMinutes(15)</code>는 실습용입니다. 실제로는 5~10분이 적정. 클라이언트의 네트워크 사정과 사용자의 느긋함 사이에서 타협합니다</li>
+<li><strong><code>/complete</code> 검증</strong>: 지금은 클라이언트가 주는 key를 그대로 믿습니다. 실서비스는 <code>HeadObject</code>로 실제로 그 key에 객체가 <strong>존재하는지</strong> 확인한 뒤에 DB를 업데이트하는 편이 안전합니다</li>
+<li><strong>Webhook 복귀</strong>: 실서비스에서 Spring이 공인 도메인을 가지면 Lambda가 직접 서버를 때리는 Webhook 흐름으로 돌아갈 수 있습니다. 그때 이 챕터의 <code>/complete</code> API가 그대로 <code>/webhook/upload-complete</code>로 이름만 바뀌어 재사용됩니다</li>
+</ul>
+</div>
+<h3>5.8.4 심화. React 연동과 CORS</h3>
+<p>이 챕터에서는 다루지 않지만, React 같은 SPA에서 이 파이프라인을 그대로 쓰려면 한 가지가 더 필요합니다. S3가 브라우저의 CORS preflight(<code>OPTIONS</code>)에 답해 주지 않으면 PUT 업로드 자체가 브라우저에서 막힙니다. 버킷의 <strong>권한 → CORS 설정</strong>에 React 개발 서버 Origin(<code>http://localhost:5173</code>)을 허용하는 규칙을 아래처럼 넣어 두면, Postman으로 됐던 흐름이 브라우저에서도 그대로 돕니다.</p>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">{
+    "AllowedHeaders": ["*"</span> ,</div><span class="w">    </span><span class="nt">&quot;AllowedMethods&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;GET&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;HEAD&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;AllowedOrigins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;http://localhost:5173&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;ExposeHeaders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span></div>
+<p>Spring 쪽 CORS(<code>CorsConfig</code>)와 S3 쪽 CORS <strong>둘 다</strong> 맞춰야 합니다. Spring API 호출은 Spring CORS가, S3 직업로드는 S3 CORS가 통제합니다. 하나만 맞춰 두면 절반만 풀립니다. 브라우저 연동은 선택 과제이므로 이 챕터에서는 Postman까지만 검증합니다.</p>
+<p>동료가 의자를 반 바퀴 돌렸습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "그럼 이제 10MB 사진도 그냥 올라가요. 근데 사용자가 올린 다음에, 리사이즈 끝났는지 프런트는 어떻게 알아요? 3~5초 기다리라고 매번 손으로 기다리게 할 순 없잖아요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "지금은 기다렸다가 <code>/complete</code> 한 번 쏘는 걸로 때웠어요. 근데 실제로는 그 3~5초 동안 프런트가 뭔가 보여 줘야 해요. '처리 중' 상태를요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "상태를 주기적으로 물어보게 할 수도 있고, 서버가 끝났을 때 밀어 줄 수도 있고, 아예 실시간 채널로 연결해 둘 수도 있죠."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "그 세 가지가 뭐가 다른지를 비교할 차례네요."</div>
+<p class="thought">업로드는 해결됐다. 이제는 '끝났다'를 어떻게 알리느냐의 문제.</p>
+<p>다음 챕터의 문이 열리고 있었습니다.</p>
+<h2>용어 정리</h2>
+<table>
+<thead>
+<tr>
+<th>이야기 속 표현</th>
+<th>진짜 용어</th>
+<th>정식 정의</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>호텔 방 키</td>
+<td>Presigned URL</td>
+<td>AWS 리소스(S3 객체 등)에 제한된 시간·제한된 작업(HTTP 메서드)으로만 접근할 수 있도록 서명된 임시 URL. AWS SigV4 서명 규격을 따름</td>
+</tr>
+<tr>
+<td>프런트에서 키만 내주기</td>
+<td>Presigned PUT URL 발급</td>
+<td><code>S3Presigner.presignPutObject(...)</code>로 버킷·키·콘텐츠 타입·만료시각을 묶어 서명한 PUT 전용 URL을 생성하는 과정</td>
+</tr>
+<tr>
+<td>짐을 직접 객실에</td>
+<td>클라이언트 직업로드 (Direct Upload)</td>
+<td>서버를 경유하지 않고 클라이언트가 저장소(S3 등)로 파일을 직접 업로드하는 패턴. 서버는 권한 발급과 메타 기록만 담당</td>
+</tr>
+<tr>
+<td>객실 번호</td>
+<td>Object Key</td>
+<td>S3 버킷 안에서 한 객체를 유일하게 식별하는 문자열. 이 실습에서는 <code>original/{uuid}.{ext}</code> · <code>resized/{uuid}.jpg</code> 형태</td>
+</tr>
+<tr>
+<td>배정된 한 방, 정해진 기간</td>
+<td>Signature · Expiration</td>
+<td>Presigned URL에 포함되는 서명 쿼리(<code>X-Amz-Signature</code>)와 만료시각(<code>X-Amz-Expires</code>). 위조·기한 초과 요청을 거절하는 근거</td>
+</tr>
+<tr>
+<td>체크인 알림</td>
+<td>S3 Event Notification</td>
+<td>버킷에 객체가 만들어지거나 삭제될 때 Lambda·SQS·SNS로 발행되는 이벤트. 트리거 등록 시 Prefix/Suffix로 범위 제한 가능</td>
+</tr>
+<tr>
+<td>하우스키핑</td>
+<td>AWS Lambda</td>
+<td>이벤트 기반으로 실행되는 서버리스 함수 서비스. 호출이 없으면 과금도 없고, 동시 실행은 AWS가 자동 스케일링</td>
+</tr>
+<tr>
+<td>라이브러리 꾸러미</td>
+<td>Lambda Layer</td>
+<td>함수가 공용으로 참조할 라이브러리·런타임·의존성을 담은 ZIP 아카이브. ARN으로 함수에 부착</td>
+</tr>
+<tr>
+<td>규칙 기반 조립</td>
+<td>Convention over Configuration (약속된 경로 규칙)</td>
+<td><code>original/{uuid}.ext</code> ↔ <code>resized/{uuid}.jpg</code>처럼 양쪽이 합의한 규칙을 두어, 이벤트 응답 없이도 상대 경로를 계산할 수 있는 설계 원칙</td>
+</tr>
+<tr>
+<td>서버가 직접 전화</td>
+<td>Webhook</td>
+<td>이벤트 발생 측(Lambda)이 수신 측(Spring)의 HTTP 엔드포인트로 <code>POST</code>를 쏴 알림을 전달하는 통합 방식. 수신 측이 공인 주소를 가져야 성립</td>
+</tr>
+<tr>
+<td>사용자 전용 출입증</td>
+<td>IAM Access Key / Secret Key</td>
+<td>AWS 사용자(또는 역할)가 프로그래밍 방식으로 AWS를 호출할 때 쓰는 자격 증명 쌍. Access Key ID는 공개, Secret Access Key는 비밀</td>
+</tr>
+<tr>
+<td>권한 묶음</td>
+<td>IAM Policy</td>
+<td>어떤 리소스에 어떤 액션을 허용/거부할지를 JSON으로 선언하는 권한 규약. 사용자·역할·그룹에 연결</td>
+</tr>
+<tr>
+<td>긴 변 기준 축소</td>
+<td>Thumbnail (비율 유지 리사이즈)</td>
+<td>원본의 가로·세로 비율을 유지하면서 긴 변이 지정 픽셀 이하가 되도록 줄이는 이미지 축소 기법. Pillow <code>Image.thumbnail(size)</code>이 표준 구현</td>
+</tr>
+</tbody>
+</table>
+<h2>이것만은 기억하자</h2>
+<ul>
+<li><strong>서버가 짐을 받지 않는다.</strong> Presigned URL은 &quot;이 키로, 이 메서드로, 이 시간 안에만&quot;이 박힌 1회용 출입증이다. 서버는 이 출입증을 발급만 하고, 실제 업로드는 클라이언트와 S3 사이에서 끝난다</li>
+<li><strong>키 규칙이 계약이다.</strong> <code>original/{uuid}.ext</code> ↔ <code>resized/{uuid}.jpg</code> 대칭을 서버가 믿는 순간, 서버는 Lambda의 응답을 듣지 않고도 결과 경로를 계산할 수 있다. 규칙이 깨지면 조용히 &quot;없는 URL&quot;이 DB에 쌓인다</li>
+<li><strong>Lambda의 로컬 제약을 설계로 돌려라.</strong> 로컬 개발에서 Webhook이 닿지 않는 건 네트워크의 물리 법칙이다. 그 자리를 &quot;클라이언트가 완료를 알린다 + 서버가 규칙으로 조합한다&quot;로 바꾸면 로컬에서도 실서비스에서도 같은 코드가 선다</li>
+<li><strong>트리거 Prefix를 비우지 마라.</strong> <code>original/</code> 없이 트리거를 걸면 Lambda가 자기가 쓴 <code>resized/</code>를 다시 받아 무한 루프가 돌고, 분 단위로 요금이 불어난다. 트리거 등록 화면의 Prefix 칸은 항상 채워 넣는다</li>
+<li><strong>Access Key는 <code>.env</code>로, <code>.env</code>는 <code>.gitignore</code>로.</strong> 깃허브에 키가 노출되면 몇 분 안에 크롤러가 찾아낸다. <code>application.properties</code>에 키를 박지 마라</li>
+<li><strong>다음 챕터에서는</strong> 업로드가 끝났다는 사실을 클라이언트에게 <strong>어떻게 알릴지</strong>를 세 가지 방식으로 비교합니다. 주기적으로 묻게 할지(Polling), 서버가 밀어 줄지(SSE), 아예 양방향 실시간으로 연결해 둘지(WebSocket). 같은 문제를 세 번 풀어 보며 어느 상황에 어느 도구가 맞는지 손으로 체감합니다 (Polling · SSE · WebSocket)</li>
+</ul>
+
+</div>
+</body>
+</html>

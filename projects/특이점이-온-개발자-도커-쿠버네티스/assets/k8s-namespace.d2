@@ -1,0 +1,47 @@
+cluster: Cluster {
+  grid-columns: 2
+  style: {
+    stroke: "#333"
+    stroke-width: 1
+    fill: "#fafafa"
+    border-radius: 12
+  }
+
+  dev: Namespace: dev {
+    style: {
+      stroke: "#999"
+      stroke-dash: 4
+      fill: white
+      border-radius: 8
+    }
+
+    pod1: Pod {
+      style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+    }
+    svc1: Service {
+      style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+    }
+    deploy1: Deployment {
+      style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+    }
+  }
+
+  prod: Namespace: prod {
+    style: {
+      stroke: "#999"
+      stroke-dash: 4
+      fill: white
+      border-radius: 8
+    }
+
+    pod2: Pod {
+      style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+    }
+    svc2: Service {
+      style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+    }
+    deploy2: Deployment {
+      style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+    }
+  }
+}

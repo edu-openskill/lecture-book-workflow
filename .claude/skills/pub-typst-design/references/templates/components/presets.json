@@ -1,0 +1,216 @@
+{
+  "1": {
+    "name": "클래식 블루",
+    "description": "10pt, 파란 악센트, 둥근 코드블록, 여유로운 배치",
+    "components": {
+      "body": "d1",
+      "chapter_opening": "d1",
+      "heading": "d1",
+      "code": "d1",
+      "inline_code": "d1",
+      "quote": "d1",
+      "table": "d1",
+      "toc": "d1"
+    }
+  },
+  "2": {
+    "name": "컴팩트 모노",
+    "description": "8pt, B&W, 위아래 실선 코드블록, 밀도 높은 배치",
+    "components": {
+      "body": "d2",
+      "chapter_opening": "d2",
+      "heading": "d2",
+      "code": "d2",
+      "inline_code": "d2",
+      "quote": "d2",
+      "table": "d2",
+      "toc": "d2"
+    }
+  },
+  "3": {
+    "name": "집필에이전트 기본",
+    "description": "heading 미니멀 + inline_code 굵게 + table 그레이 헤더",
+    "components": {
+      "body": "d1",
+      "chapter_opening": "d1",
+      "heading": "d2",
+      "code": "d1",
+      "inline_code": "d2",
+      "quote": "d1",
+      "table": "d2",
+      "toc": "d1"
+    }
+  },
+  "4": {
+    "name": "집필에이전트 전자책(기존)",
+    "description": "클래식 블루 기반 전자책",
+    "components": {
+      "body": "d1",
+      "heading": "d1",
+      "code": "d1",
+      "inline_code": "d1",
+      "quote": "d1",
+      "table": "d1",
+      "toc": "d1"
+    }
+  },
+  "5": {
+    "name": "오픈스킬북스 POD",
+    "description": "교보 바로출판 B5(188x257mm), 본문 10pt, 문단간격 축소, heading 여백 최적화",
+    "components": {
+      "body": "d1",
+      "chapter_opening": "d1",
+      "heading": "d2",
+      "code": "d1",
+      "inline_code": "d2",
+      "quote": "d1",
+      "table": "d2",
+      "toc": "d1"
+    },
+    "overrides": {
+      "page": {
+        "format": "B5_4x6배판"
+      },
+      "margins": {
+        "top": 20,
+        "bottom": 20,
+        "left": 20,
+        "right": 18
+      },
+      "typo": {
+        "size": 10,
+        "leading": 10,
+        "paragraphGap": 10
+      },
+      "typoSizes": {
+        "h1": 22,
+        "h2": 13,
+        "h3": 13,
+        "h4": 13,
+        "code": 8,
+        "quote": 9,
+        "table": 8.5,
+        "inlineCode": 10
+      },
+      "tocDepth": 2,
+      "tocSpacing": 2,
+      "componentStyles": {
+        "heading": {
+          "h1_marginTop": "0pt",
+          "h1_marginBottom": "14pt",
+          "h1_fontWeight": "700",
+          "h2_marginTop": "20pt",
+          "h2_marginBottom": "10pt",
+          "h2_fontWeight": "700",
+          "h2_color": "#1e40af",
+          "h3_marginTop": "14pt",
+          "h3_marginBottom": "8pt",
+          "h3_fontWeight": "600",
+          "h3_color": "#374151",
+          "h4_marginTop": "10pt",
+          "h4_marginBottom": "6pt",
+          "h4_fontWeight": "500",
+          "h4_color": "#555555"
+        }
+      }
+    }
+  },
+  "6": {
+    "name": "오픈스킬북스 전자책",
+    "description": "e퍼플 A4(210x297mm), 본문 12pt 행간 200%, 이퍼플 기준",
+    "components": {
+      "body": "d1",
+      "chapter_opening": "d1",
+      "heading": "d2",
+      "code": "d1",
+      "inline_code": "d2",
+      "quote": "d3",
+      "table": "d2",
+      "toc": "d1"
+    },
+    "overrides": {
+      "page": {
+        "format": "A4_국배판",
+        "outputMode": "pod"
+      },
+      "margins": {
+        "top": 25,
+        "bottom": 25,
+        "left": 25,
+        "right": 22
+      },
+      "typo": {
+        "size": 12,
+        "tracking": 0.5,
+        "leading": 12,
+        "paragraphGap": 24
+      },
+      "typoSizes": {
+        "h1": 16,
+        "h2": 14,
+        "h3": 13,
+        "h4": 13,
+        "code": 10,
+        "quote": 9,
+        "table": 10,
+        "inlineCode": 12
+      },
+      "tocDepth": 3,
+      "tocSpacing": 4,
+      "images": {
+        "gemini": {
+          "preset": "shadow",
+          "width": 50
+        },
+        "terminal": {
+          "preset": "minimal",
+          "width": 100
+        },
+        "diagram": {
+          "preset": "plain",
+          "width": 100
+        }
+      },
+      "colors": {
+        "primary": "#2563eb",
+        "text": "#1a1a1a",
+        "codeText": "#1e40af",
+        "quoteBg": "#f5f8ff"
+      },
+      "componentStyles": {
+        "heading": {
+          "h1_marginTop": "0pt",
+          "h1_marginBottom": "16pt",
+          "h1_fontWeight": "800",
+          "h2_marginTop": "24pt",
+          "h2_marginBottom": "24",
+          "h2_fontWeight": "700",
+          "h2_borderLeft": "",
+          "h2_paddingLeft": "0",
+          "h3_marginTop": "18",
+          "h3_marginBottom": "10",
+          "h3_fontWeight": "700",
+          "h3_color": "#001061",
+          "h4_marginTop": "12pt",
+          "h4_marginBottom": "8pt",
+          "h4_fontWeight": "500",
+          "h4_color": "#555555",
+          "h2_color": "#3754e1"
+        },
+        "code": {
+          "borderRadius": "10",
+          "background": "#fafafa"
+        },
+        "inline_code": {
+          "fontWeight": "800"
+        },
+        "figure": {
+          "figure_marginTop": "10",
+          "figure_marginBottom": "16pt",
+          "figure_captionGap": "4pt",
+          "figure_captionSize": "8pt"
+        }
+      }
+    }
+  }
+}

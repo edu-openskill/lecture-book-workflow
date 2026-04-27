@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>표지 디자인 목업 v13 — v4.5 + 배경 패턴 8종</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard','Inter',-apple-system,sans-serif;background:#111;color:#fff;padding:30px}
+  h1{text-align:center;font-size:28px;font-weight:300;margin-bottom:6px}
+  .sub{text-align:center;font-size:13px;color:#555;margin-bottom:40px}
+  .sec{margin-bottom:60px}
+  .sec-t{font-size:20px;font-weight:700;margin-bottom:4px;color:#fff}
+  .sec-d{font-size:12px;color:#555;margin-bottom:14px}
+  .g{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .c{aspect-ratio:182/257;border-radius:4px;overflow:hidden;position:relative;background:#fff;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);transition:transform .2s}
+  .c:hover{transform:scale(1.02)}
+
+  /* ── v4.5 타이포 공통 ── */
+  .typo{position:absolute;inset:0;z-index:10;padding:6% 7%;display:flex;flex-direction:column;pointer-events:none}
+  .top-descs{text-align:right;font-size:8px;color:#8c8c8c;line-height:1.7;margin-bottom:6px}
+  .series .line1{display:flex;align-items:baseline;gap:2px}
+  .series .tk{font-size:38px;font-weight:800;color:#1e1e1e;line-height:.95}
+  .series .mid{font-size:22px;font-weight:700;color:#555;margin-left:1px}
+  .series .on{font-size:38px;font-weight:800;color:#1e1e1e;margin-left:8px;line-height:.95}
+  .series .dev{font-size:32px;font-weight:800;color:#2a2a2a;margin-top:2px}
+  .main-title{flex:1;display:flex;align-items:center;position:relative}
+  .title-wrap{position:relative;display:inline-block}
+  .title-wrap .shadow{position:absolute;top:0;left:0;color:#ebebeb;z-index:1}
+  .title-wrap .solid{position:relative;z-index:2}
+  .tagline{font-size:9px;color:#888;margin-top:2px}
+  .bot-area{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto}
+  .bot-area .left{font-size:7px;color:#a0a0a0;line-height:1.5}
+  .bot-area .right{text-align:right}
+  .bot-area .right .accent-line{height:2px;width:30px;margin-left:auto;margin-bottom:3px}
+  .bot-area .right .sub-t{font-size:16px;font-weight:800}
+  .bot-area .right .auth{font-size:7px;color:#999;margin-top:1px}
+  .bg{position:absolute;inset:0;z-index:1;overflow:hidden}
+
+  /* ── 애니메이션 ── */
+  @keyframes float1{0%,100%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(10px,-15px) rotate(180deg)}}
+  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-8px,12px) rotate(-90deg)}}
+  @keyframes float3{0%,100%{transform:translate(0,0)}50%{transform:translate(5px,-10px)}}
+  @keyframes pulse{0%,100%{opacity:.12}50%{opacity:.3}}
+  @keyframes drift{0%{transform:translateY(0)}100%{transform:translateY(-110%)}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes wiggle{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+  @keyframes wave-move{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  @keyframes spin-slow{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+  .shape{position:absolute;animation-iteration-count:infinite;animation-timing-function:ease-in-out}
+  .c:hover .shape{opacity:1!important;transition:opacity .3s}
+</style>
+</head>
+<body>
+
+<h1>특이점이 온 개발자 — 표지 목업 v13</h1>
+<p class="sub">v4.5 레이아웃 + 잘 보이는 배경 8종 / hover 시 더 진하게</p>
+
+<script>
+const books = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker', titleSize:'88px', tagline:'컨테이너의 모든 것',
+    descs:['컨테이너가 왜 필요한지 모를 때','Docker Compose로 서비스를 엮고 싶을 때','이야기로 시작하는 입문서가 필요할 때'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA', titleSize:'100px', tagline:'마이크로서비스 아키텍처',
+    descs:['모놀리스의 한계를 느꼈을 때','서비스를 쪼개야 하는 이유를 알고 싶을 때','이벤트 기반 통신을 이해하고 싶을 때'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG', titleSize:'100px', tagline:'검색 증강 생성',
+    descs:['LLM이 모르는 것에 답하게 만들고 싶을 때','임베딩과 벡터 검색을 이해하고 싶을 때','AI가 우리 데이터를 활용하게 만들고 싶을 때'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring', titleSize:'68px', tagline:'9가지 기술',
+    descs:['OAuth와 OIDC를 제대로 이해하고 싶을 때','Spring Security 설정이 막막할 때','인증/인가의 흐름을 한눈에 보고 싶을 때'] },
+];
+
+function typoHTML(b) {
+  return `<div class="typo">
+    <div class="top-descs">${b.descs.join('<br>')}</div>
+    <div class="series">
+      <div class="line1"><span class="tk">특</span><span class="mid">이점이</span><span class="on">온</span></div>
+      <div class="dev">개발자</div>
+    </div>
+    <div class="main-title">
+      <div class="title-wrap">
+        <div class="shadow" style="font-size:${b.titleSize};font-weight:900;letter-spacing:-4px;line-height:.8;transform:translate(3px,3px)">${b.title}</div>
+        <div class="solid" style="font-size:${b.titleSize};font-weight:900;letter-spacing:-4px;line-height:.8;color:#1a1a1a">${b.title}</div>
+      </div>
+    </div>
+    <div class="tagline">${b.tagline}</div>
+    <div class="bot-area">
+      <div class="left">OPENSKILL BOOKS<br>오픈스킬북스</div>
+      <div class="right">
+        <div class="accent-line" style="background:${b.color}"></div>
+        <div class="sub-t" style="color:${b.color}">개념편</div>
+        <div class="auth">류재성 지음</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ 1. 도트 패턴 ═══════════
+function bgDots(b) {
+  const c = b.rgb;
+  return `<div class="bg" style="background-image:radial-gradient(rgba(${c},.25) 1.5px, transparent 1.5px);background-size:16px 16px"></div>`;
+}
+
+// ═══════════ 2. 격자 패턴 ═══════════
+function bgGrid(b) {
+  const c = b.rgb;
+  return `<div class="bg" style="background-image:
+    linear-gradient(rgba(${c},.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(${c},.12) 1px, transparent 1px);
+    background-size:20px 20px"></div>`;
+}
+
+// ═══════════ 3. 대각선 스트라이프 ═══════════
+function bgStripe(b) {
+  const c = b.rgb;
+  return `<div class="bg" style="background-image:repeating-linear-gradient(
+    45deg, transparent, transparent 14px, rgba(${c},.1) 14px, rgba(${c},.1) 15px);"></div>`;
+}
+
+// ═══════════ 4. 플로팅 도형 (큰 opacity) ═══════════
+function bgShapes(b) {
+  const shapes = [];
+  const c = b.rgb;
+  for(let i=0;i<5;i++){
+    const s = 30+Math.random()*60;
+    shapes.push(`<div class="shape" style="width:${s}px;height:${s}px;border-radius:50%;
+      border:2px solid rgba(${c},.2);background:rgba(${c},.06);
+      top:${5+Math.random()*75}%;left:${5+Math.random()*75}%;opacity:.7;
+      animation-name:float${1+i%3};animation-duration:${6+i*2}s;animation-delay:${i*.4}s"></div>`);
+  }
+  for(let i=0;i<4;i++){
+    const s = 20+Math.random()*35;
+    shapes.push(`<div class="shape" style="width:${s}px;height:${s}px;background:rgba(${c},.08);
+      border-radius:3px;top:${Math.random()*80}%;left:${Math.random()*80}%;opacity:.6;
+      animation-name:float${1+i%3};animation-duration:${7+i*1.5}s;animation-delay:${i*.6}s;
+      transform:rotate(${15+Math.random()*30}deg)"></div>`);
+  }
+  // 삼각형
+  for(let i=0;i<3;i++){
+    const s = 12+Math.random()*20;
+    shapes.push(`<div class="shape" style="width:0;height:0;
+      border-left:${s}px solid transparent;border-right:${s}px solid transparent;
+      border-bottom:${s*1.7}px solid rgba(${c},.1);
+      top:${10+Math.random()*70}%;left:${10+Math.random()*70}%;opacity:.6;
+      animation-name:float${1+i%3};animation-duration:${8+i}s"></div>`);
+  }
+  return `<div class="bg">${shapes.join('')}</div>`;
+}
+
+// ═══════════ 5. 캐릭터 마스코트 (큰 opacity) ═══════════
+function bgMascot(b) {
+  let svg = '';
+  const o = '.35'; // 기본 opacity 올림
+  if(b.id==='docker') {
+    svg = `<svg class="shape" style="bottom:8%;right:4%;width:140px;height:110px;opacity:.6;animation-name:bounce;animation-duration:3s" viewBox="0 0 140 110">
+      <!-- 고래 몸통 -->
+      <ellipse cx="70" cy="65" rx="55" ry="32" fill="${b.color}" opacity="${o}"/>
+      <ellipse cx="40" cy="56" rx="10" ry="7" fill="${b.color}" opacity=".25"/>
+      <!-- 눈 -->
+      <circle cx="90" cy="52" r="5" fill="#fff" opacity=".6"/>
+      <circle cx="91" cy="52" r="2.5" fill="#333" opacity=".5"/>
+      <!-- 컨테이너 박스들 -->
+      <rect x="48" y="30" width="14" height="11" rx="2" fill="${b.color}" opacity="${o}"/>
+      <rect x="65" y="30" width="14" height="11" rx="2" fill="${b.color}" opacity=".3"/>
+      <rect x="82" y="30" width="14" height="11" rx="2" fill="${b.color}" opacity=".25"/>
+      <rect x="56" y="17" width="14" height="11" rx="2" fill="${b.color}" opacity=".28"/>
+      <rect x="73" y="17" width="14" height="11" rx="2" fill="${b.color}" opacity=".22"/>
+      <!-- 물줄기 -->
+      <path d="M28,48 Q16,38 22,26 Q28,16 24,6" fill="none" stroke="${b.color}" stroke-width="2.5" opacity=".25"/>
+    </svg>`;
+  } else if(b.id==='msa') {
+    svg = `<svg class="shape" style="bottom:6%;right:3%;width:150px;height:130px;opacity:.6;animation-name:wiggle;animation-duration:4s" viewBox="0 0 150 130">
+      <!-- 노드들 -->
+      <circle cx="75" cy="35" r="20" fill="${b.color}" opacity=".15" stroke="${b.color}" stroke-width="2" opacity="${o}"/>
+      <circle cx="30" cy="85" r="16" fill="${b.color}" opacity=".12" stroke="${b.color}" stroke-width="2" opacity=".3"/>
+      <circle cx="120" cy="85" r="16" fill="${b.color}" opacity=".12" stroke="${b.color}" stroke-width="2" opacity=".3"/>
+      <circle cx="75" cy="115" r="13" fill="${b.color}" opacity=".1" stroke="${b.color}" stroke-width="2" opacity=".25"/>
+      <!-- 연결선 -->
+      <line x1="75" y1="55" x2="40" y2="72" stroke="${b.color}" stroke-width="2" opacity=".25"/>
+      <line x1="75" y1="55" x2="110" y2="72" stroke="${b.color}" stroke-width="2" opacity=".25"/>
+      <line x1="42" y1="97" x2="65" y2="107" stroke="${b.color}" stroke-width="1.5" opacity=".2"/>
+      <line x1="108" y1="97" x2="85" y2="107" stroke="${b.color}" stroke-width="1.5" opacity=".2"/>
+      <!-- 눈 -->
+      <circle cx="70" cy="32" r="3" fill="${b.color}" opacity="${o}"/>
+      <circle cx="80" cy="32" r="3" fill="${b.color}" opacity="${o}"/>
+      <path d="M68,40 Q75,45 82,40" fill="none" stroke="${b.color}" stroke-width="2" opacity=".3"/>
+    </svg>`;
+  } else if(b.id==='rag') {
+    svg = `<svg class="shape" style="bottom:6%;right:3%;width:130px;height:130px;opacity:.6;animation-name:bounce;animation-duration:3.5s" viewBox="0 0 130 130">
+      <!-- 책 -->
+      <rect x="15" y="60" width="60" height="50" rx="4" fill="${b.color}" opacity=".12" stroke="${b.color}" stroke-width="2" opacity=".3"/>
+      <line x1="45" y1="60" x2="45" y2="110" stroke="${b.color}" stroke-width="1.5" opacity=".2"/>
+      <line x1="24" y1="72" x2="40" y2="72" stroke="${b.color}" stroke-width="1" opacity=".2"/>
+      <line x1="24" y1="80" x2="38" y2="80" stroke="${b.color}" stroke-width="1" opacity=".2"/>
+      <line x1="24" y1="88" x2="36" y2="88" stroke="${b.color}" stroke-width="1" opacity=".18"/>
+      <!-- 돋보기 -->
+      <circle cx="85" cy="40" r="24" fill="${b.color}" opacity=".08" stroke="${b.color}" stroke-width="2.5" opacity="${o}"/>
+      <line x1="102" y1="58" x2="118" y2="78" stroke="${b.color}" stroke-width="4" opacity=".3" stroke-linecap="round"/>
+      <!-- 눈 -->
+      <circle cx="79" cy="38" r="3" fill="${b.color}" opacity=".3"/>
+      <circle cx="91" cy="38" r="3" fill="${b.color}" opacity=".3"/>
+      <!-- 빛 -->
+      <line x1="70" y1="20" x2="68" y2="10" stroke="${b.color}" stroke-width="2" opacity=".2"/>
+      <line x1="85" y1="14" x2="85" y2="4" stroke="${b.color}" stroke-width="2" opacity=".2"/>
+      <line x1="100" y1="20" x2="103" y2="10" stroke="${b.color}" stroke-width="2" opacity=".2"/>
+    </svg>`;
+  } else {
+    svg = `<svg class="shape" style="bottom:6%;right:3%;width:140px;height:130px;opacity:.6;animation-name:spin-slow;animation-duration:20s" viewBox="0 0 140 130">
+      <!-- 큰 기어 -->
+      <circle cx="65" cy="60" r="28" fill="${b.color}" opacity=".08" stroke="${b.color}" stroke-width="2" opacity=".3"/>
+      <circle cx="65" cy="60" r="18" fill="#fff" stroke="${b.color}" stroke-width="1.5" opacity=".2"/>
+      <!-- 톱니 -->
+      ${[0,60,120,180,240,300].map(a=>`<rect x="61" y="28" width="8" height="10" rx="2" fill="${b.color}" opacity=".2" transform="rotate(${a},65,60)"/>`).join('')}
+      <!-- 작은 기어 -->
+      <circle cx="108" cy="42" r="17" fill="${b.color}" opacity=".06" stroke="${b.color}" stroke-width="1.5" opacity=".25"/>
+      ${[0,72,144,216,288].map(a=>`<rect x="105" y="22" width="6" height="7" rx="1" fill="${b.color}" opacity=".15" transform="rotate(${a},108,42)"/>`).join('')}
+      <!-- 스프링 -->
+      <path d="M20,90 Q10,96 20,102 Q30,108 20,114" fill="none" stroke="${b.color}" stroke-width="2.5" opacity=".25"/>
+    </svg>`;
+  }
+  // 작은 도형 몇 개 추가
+  const extras = [];
+  for(let i=0;i<4;i++){
+    const s=8+Math.random()*15;
+    extras.push(`<div class="shape" style="width:${s}px;height:${s}px;border-radius:${Math.random()>.5?'50%':'3px'};
+      border:1.5px solid rgba(${b.rgb},.2);background:rgba(${b.rgb},.05);
+      top:${20+Math.random()*45}%;left:${10+Math.random()*50}%;opacity:.5;
+      animation-name:float${1+i%3};animation-duration:${6+i*2}s"></div>`);
+  }
+  return `<div class="bg">${svg}${extras.join('')}</div>`;
+}
+
+// ═══════════ 6. 아이소메트릭 블록 ═══════════
+function bgIso(b) {
+  const els = [];
+  for(let i=0;i<10;i++){
+    const s = 25+Math.random()*45;
+    const x = Math.random()*85, y = 8+Math.random()*75;
+    els.push(`<svg class="shape" style="top:${y}%;left:${x}%;width:${s}px;height:${s}px;opacity:.5;
+      animation-name:bob;animation-duration:${3+i*.8}s;animation-delay:${i*.3}s" viewBox="0 0 40 46">
+      <polygon points="20,2 38,12 20,22 2,12" fill="${b.color}" opacity=".2"/>
+      <polygon points="2,12 20,22 20,42 2,32" fill="${b.color}" opacity=".15"/>
+      <polygon points="38,12 20,22 20,42 38,32" fill="${b.color}" opacity=".1"/>
+    </svg>`);
+  }
+  return `<div class="bg">${els.join('')}</div>`;
+}
+
+// ═══════════ 7. 도트 + 연결선 (별자리) ═══════════
+function bgConstellation(b) {
+  const c = b.rgb;
+  const pts = [];
+  for(let i=0;i<15;i++) pts.push({x:5+Math.random()*90, y:5+Math.random()*90, s:2+Math.random()*3});
+  let svg = `<svg style="position:absolute;inset:0;width:100%;height:100%">`;
+  // 연결선 (가까운 점끼리)
+  for(let i=0;i<pts.length;i++){
+    for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+      if(Math.sqrt(dx*dx+dy*dy)<30){
+        svg+=`<line x1="${pts[i].x}%" y1="${pts[i].y}%" x2="${pts[j].x}%" y2="${pts[j].y}%" stroke="rgba(${c},.15)" stroke-width="1"/>`;
+      }
+    }
+  }
+  // 점
+  pts.forEach((p,i)=>{
+    svg+=`<circle cx="${p.x}%" cy="${p.y}%" r="${p.s}" fill="rgba(${c},.3)">
+      <animate attributeName="opacity" values=".15;.4;.15" dur="${2+i*.3}s" repeatCount="indefinite"/>
+    </circle>`;
+  });
+  svg += `</svg>`;
+  return `<div class="bg">${svg}</div>`;
+}
+
+// ═══════════ 8. 물결 + 파티클 ═══════════
+function bgWaves(b) {
+  const c = b.rgb;
+  const particles = Array.from({length:10},(_,i)=>{
+    const s=3+Math.random()*5;
+    return `<div class="shape" style="width:${s}px;height:${s}px;border-radius:50%;background:rgba(${c},.2);
+      bottom:${Math.random()*35}%;left:${Math.random()*90}%;opacity:.6;
+      animation-name:drift;animation-duration:${5+Math.random()*8}s;animation-delay:${Math.random()*5}s;
+      animation-iteration-count:infinite;animation-timing-function:linear"></div>`;
+  }).join('');
+  return `<div class="bg">
+    <svg style="position:absolute;bottom:0;width:200%;height:100%;animation:wave-move 10s linear infinite;opacity:.5" viewBox="0 0 1440 400" preserveAspectRatio="none">
+      <path d="M0,300 C360,220 720,350 1080,260 C1260,210 1440,280 1440,280 L1440,400 L0,400Z" fill="rgba(${c},.12)"/>
+      <path d="M0,330 C240,280 480,360 720,310 C960,260 1200,330 1440,310 L1440,400 L0,400Z" fill="rgba(${c},.08)"/>
+    </svg>
+    <svg style="position:absolute;bottom:0;width:200%;height:100%;animation:wave-move 14s linear infinite reverse;opacity:.4" viewBox="0 0 1440 400" preserveAspectRatio="none">
+      <path d="M0,320 C300,260 600,350 900,290 C1100,250 1300,310 1440,300 L1440,400 L0,400Z" fill="rgba(${c},.1)"/>
+    </svg>
+    ${particles}
+  </div>`;
+}
+
+// ═══════════ 섹션 렌더 ═══════════
+const sections = [
+  { name:'1 — 도트 패턴', desc:'균일한 도트 그리드 / 각 책 액센트 컬러 / 심플하고 세련된 텍스처', fn:bgDots },
+  { name:'2 — 격자 패턴', desc:'가로세로 격자선 / 기술 도면 느낌 / 깔끔한 배경 텍스처', fn:bgGrid },
+  { name:'3 — 대각선 스트라이프', desc:'45도 대각선 반복 / 은은한 패턴감 / 모던한 느낌', fn:bgStripe },
+  { name:'4 — 플로팅 도형', desc:'원+삼각형+사각형 떠다님 / CSS 애니메이션 / hover 시 진해짐', fn:bgShapes },
+  { name:'5 — 캐릭터 마스코트', desc:'Docker=고래+컨테이너 / MSA=네트워크 / RAG=돋보기+책 / Spring=기어', fn:bgMascot },
+  { name:'6 — 아이소메트릭 블록', desc:'3D 큐브가 둥실둥실 / 블록체인/컨테이너 메타포 / hover 반응', fn:bgIso },
+  { name:'7 — 별자리 (도트+연결선)', desc:'점이 반짝이며 가까운 점끼리 선 연결 / 데이터 네트워크 느낌', fn:bgConstellation },
+  { name:'8 — 물결 + 파티클', desc:'하단 물결 좌우 흐름 + 파티클 상승 / 유기적 역동성', fn:bgWaves },
+];
+
+let html = '';
+sections.forEach(sec => {
+  html += `<div class="sec"><div class="sec-t">${sec.name}</div><div class="sec-d">${sec.desc}</div><div class="g">`;
+  books.forEach(b => { html += `<div class="c">${sec.fn(b)}${typoHTML(b)}</div>`; });
+  html += '</div></div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html);
+</script>
+
+</body>
+</html>

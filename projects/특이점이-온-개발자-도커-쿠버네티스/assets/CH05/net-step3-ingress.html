@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 3 — Ingress Controller가 URL을 읽고 Service 선택</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    padding: 28px 32px 24px;
+    width: 820px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .scene {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .box {
+    border: 2.5px solid #555;
+    border-radius: 10px;
+    background: #fff;
+    padding: 14px 16px;
+    text-align: center;
+    min-width: 125px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .box.ingress {
+    background: #e8e8e8;
+    border-color: #333;
+    min-width: 150px;
+  }
+  .box-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 3px;
+  }
+  .box-sub {
+    font-size: 10px;
+    color: #888;
+    font-weight: 500;
+  }
+  .box-detail {
+    font-size: 11px;
+    color: #555;
+    margin-top: 5px;
+    font-family: 'Consolas', 'Menlo', monospace;
+    line-height: 1.5;
+  }
+  .box-analogy {
+    font-size: 10px;
+    color: #999;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .arrow-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 8px;
+  }
+  .arrow-label {
+    font-size: 10px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 3px;
+    white-space: nowrap;
+  }
+  .arrow-block svg { width: 56px; height: 14px; }
+
+  .service-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rule-box {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border: 1.5px solid #bbb;
+    border-radius: 6px;
+    background: #fafafa;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+  }
+  .rule-item {
+    font-size: 11px;
+    color: #555;
+    font-family: 'Consolas', 'Menlo', monospace;
+  }
+  .rule-item strong {
+    color: #222;
+    font-family: 'Malgun Gothic', sans-serif;
+  }
+
+  .explain {
+    margin-top: 18px;
+    padding: 16px 18px;
+    background: #fafafa;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    line-height: 1.8;
+  }
+  .explain p {
+    font-size: 12px;
+    color: #444;
+    margin-bottom: 6px;
+  }
+  .explain p:last-child { margin-bottom: 0; }
+  .explain strong { color: #222; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Step 3 — Ingress Controller가 URL 경로를 읽고 Service 선택</div>
+
+  <div class="scene">
+    <div class="box ingress">
+      <div class="box-title">Ingress Controller</div>
+      <div class="box-sub">L7 — HTTP 내용을 읽음</div>
+      <div class="box-detail">/api → ?<br>/&nbsp;&nbsp;&nbsp; → ?</div>
+      <div class="box-analogy">프랜차이즈 공식 앱</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; justify-content: center; gap: 24px; margin: 0 4px;">
+      <div class="arrow-block">
+        <div class="arrow-label">/api 요청</div>
+        <svg viewBox="0 0 56 14">
+          <line x1="0" y1="7" x2="44" y2="7" stroke="#333" stroke-width="2"/>
+          <polygon points="44,3 56,7 44,11" fill="#333"/>
+        </svg>
+      </div>
+      <div class="arrow-block">
+        <div class="arrow-label">/ 요청</div>
+        <svg viewBox="0 0 56 14">
+          <line x1="0" y1="7" x2="44" y2="7" stroke="#333" stroke-width="2"/>
+          <polygon points="44,3 56,7 44,11" fill="#333"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="service-group">
+      <div class="box">
+        <div class="box-title">Service</div>
+        <div class="box-sub">backend-svc</div>
+        <div class="box-detail">ClusterIP 10.96.0.10</div>
+        <div class="box-analogy">강남점 대표번호</div>
+      </div>
+      <div class="box">
+        <div class="box-title">Service</div>
+        <div class="box-sub">frontend-svc</div>
+        <div class="box-detail">ClusterIP 10.96.0.20</div>
+        <div class="box-analogy">홍대점 대표번호</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule-box">
+    <div class="rule-item">/api &nbsp;→ <strong>backend-svc</strong></div>
+    <div class="rule-item">/&nbsp;&nbsp;&nbsp; → <strong>frontend-svc</strong></div>
+  </div>
+
+  <div class="explain">
+    <p>Ingress Controller는 HTTP 요청의 <strong>URL 경로</strong>를 읽습니다. 이전 단계(kube-proxy)는 IP만 봤지만, 여기서는 <strong>HTTP 내용(L7)</strong>까지 봅니다.</p>
+    <p><strong>/api</strong>로 들어오면 backend-svc로, <strong>/</strong>로 들어오면 frontend-svc로 보냅니다.</p>
+    <p>프랜차이즈 공식 앱이 "치킨 주문은 강남점으로, 피자 주문은 홍대점으로" 안내하는 것과 같습니다. <strong>메뉴(URL 경로)를 보고 가맹점(Service)을 골라줍니다.</strong></p>
+    <p>이렇게 선택된 Service는 클러스터 내부의 <strong>고정 접근점(ClusterIP)</strong>입니다. 다음 단계에서 이 가상 IP가 실제 Pod로 연결됩니다.</p>
+  </div>
+</div>
+
+</body>
+</html>

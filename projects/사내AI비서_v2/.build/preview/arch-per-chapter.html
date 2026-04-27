@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>챕터별 arch11 구성도 · 누적 + NEW 표시</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  body {
+    max-width: 1100px;
+    margin: 40px auto 120px;
+    padding: 0 24px;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+  }
+  h1 { font-size: 26px; font-weight: 800; color: var(--color-text-heading); margin: 0 0 6px; letter-spacing: -0.3px; }
+  .lead { color: var(--color-text-secondary); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+  h2 {
+    margin-top: 56px;
+    padding: 6px 12px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 800;
+  }
+  h2 .sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: #fff;
+    color: var(--color-accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    margin-left: 10px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+   * arch11 CSS 그대로 상속. 없는 박스는 .gap, 새로 만든 것은 .new
+   * ═══════════════════════════════════════════════════════════ */
+
+  /* 빈 자리 */
+  .arch11 .gap {
+    border: 1.5px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    min-height: 78px;
+    opacity: 0.35;
+  }
+  .arch11 .gap.gap-col-a { min-height: 230px; }
+  .arch11 .gap.gap-llm { min-height: 120px; }
+  .arch11 .gap.gap-col-t { min-height: 140px; }
+  .arch11 .flow-arrows.empty { opacity: 0.1; }
+  .arch11 .lvl-lbl.muted { opacity: 0.3; }
+
+  /* .core 없이 .loop-inner/.engine-inner 직접 사용 */
+  .arch11 .col-a > .loop-inner {
+    background: var(--color-bg);
+    padding: var(--space-sm);
+    margin: 0;
+    border: 1px solid var(--color-accent-border);
+    border-radius: var(--radius-sm);
+  }
+  .arch11 .col-a > .loop-inner .loop-label {
+    font-family: var(--font-mono); font-size: 9px; color: var(--color-accent);
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+    margin-bottom: var(--space-xs);
+  }
+  .arch11 .col-a > .loop-inner .stages {
+    display: flex; align-items: center; justify-content: center; gap: var(--space-xs);
+  }
+  .arch11 .col-a > .loop-inner .st {
+    font-family: var(--font-mono); font-size: 10px; padding: 3px 10px;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+    color: var(--color-text-heading);
+  }
+  .arch11 .col-a > .loop-inner .arr { color: var(--color-text-subtle); font-size: var(--fs-sm); }
+
+  .arch11 .col-a > .engine-inner {
+    background: var(--color-bg); padding: var(--space-sm); margin: 0;
+    border: 1px solid var(--color-accent-border); border-radius: var(--radius-sm);
+  }
+  .arch11 .col-a > .loop-inner + .engine-inner { margin-top: var(--space-sm); }
+  .arch11 .col-a > .ops + .loop-inner,
+  .arch11 .col-a > .ops + .engine-inner { margin-top: var(--space-md); }
+  .arch11 .col-a > .engine-inner .engine-label {
+    font-family: var(--font-mono); font-size: 9px; color: var(--color-accent);
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs);
+  }
+  .arch11 .col-a > .engine-inner .engine-name {
+    font-family: var(--font-body); font-weight: 700; font-size: var(--fs-sm);
+    color: var(--color-text-heading); margin-bottom: var(--space-xs);
+  }
+  .arch11 .col-a > .engine-inner .stages-6 {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-family: var(--font-mono);
+  }
+  .arch11 .col-a > .engine-inner .stages-6 .s {
+    background: var(--color-surface); border: 1px solid var(--color-border); padding: 6px 4px;
+    text-align: center; color: var(--color-text-heading); font-weight: 700;
+  }
+  .arch11 .col-a > .engine-inner .stages-6 .s .num {
+    display: block; font-size: 8px; color: var(--color-accent); letter-spacing: 1px; margin-bottom: 2px;
+  }
+  .arch11 .col-a > .engine-inner .stages-6 .s .nm { display: block; font-size: 11px; color: var(--color-text-heading); }
+
+  /* ═══ 상태 3단계 ═══ */
+
+  /* 1. future — 아직 안 만든 것 */
+  .arch11 .stages-6 .s.future,
+  .arch11 .col-a .stages-6 .s.future {
+    opacity: 0.3; border-style: dashed; background: transparent;
+  }
+  .arch11 .stages-6 .s.future .num,
+  .arch11 .col-a .stages-6 .s.future .num { color: var(--color-text-subtle); }
+  .arch11 .stages-6 .s.future .nm,
+  .arch11 .col-a .stages-6 .s.future .nm { color: var(--color-text-muted); }
+  .arch11 .llm .box .m.future { opacity: 0.3; font-style: italic; }
+  .arch11 .llm .box .m.future .mn { color: var(--color-text-muted); text-decoration: line-through; }
+  .arch11 .col-a .ops .chip.future { opacity: 0.3; border-bottom-style: dashed; }
+  .arch11 .col-a .ops .chip.future .n { color: var(--color-text-muted); }
+
+  /* 2. new — 이번 챕터에서 새로 만든 것 · 강조 + 뱃지 */
+  .arch11 .new {
+    border-color: var(--color-accent) !important;
+    border-width: 2px !important;
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+    position: relative;
+  }
+  .arch11 .new-badge {
+    position: absolute;
+    top: -11px; right: 10px;
+    background: var(--color-accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+    z-index: 10;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  /* 세부 요소 강조 */
+  .arch11 .stages-6 .s.new,
+  .arch11 .col-a .stages-6 .s.new {
+    border-color: var(--color-accent);
+    border-width: 2px;
+    background: var(--color-accent-bg);
+  }
+  .arch11 .stages-6 .s.new .nm,
+  .arch11 .col-a .stages-6 .s.new .nm { color: var(--color-accent-text); font-weight: 800; }
+  .arch11 .col-a .ops .chip.new {
+    border-bottom: 2.5px solid var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  .arch11 .col-a .ops .chip.new .n { color: var(--color-accent-text); }
+  .arch11 .llm .box .m.new .mn { color: var(--color-accent); font-weight: 800; }
+  /* .m이 grid라 ::before가 grid item으로 끼어들어 레이아웃을 깸.
+   * pseudo를 .mn에 붙여 mn 텍스트 prefix로 동작시킴 */
+  .arch11 .llm .box .m.new .mn::before {
+    content: '+ ';
+    color: var(--color-accent);
+    font-weight: 800;
+    font-family: var(--font-mono);
+  }
+
+  /* 3. done — 이전 챕터에서 만든 것 (기본 상태, 별도 스타일 없음) */
+
+  /* solo: Row 2에 LLM만 있을 때 큰 박스로 */
+  .arch11 .row-ext.solo { grid-template-columns: 1fr; }
+  .arch11 .row-ext.solo .llm .box { max-width: 640px; margin: 0 auto; }
+
+  /* ═══ CH08·09 튜닝 메뉴판 카드 ═══ */
+  .tuning-card {
+    max-width: 820px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-dashed);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl) var(--space-xl);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .tuning-card .tc-header {
+    text-align: center;
+    padding-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
+    border-bottom: 1px dashed var(--color-border);
+  }
+  .tuning-card .tc-sub {
+    font-family: var(--font-mono); font-size: var(--fs-xs);
+    color: var(--color-text-secondary); letter-spacing: 3px;
+    text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs);
+  }
+  .tuning-card .tc-title {
+    font-family: var(--font-body); font-weight: 800;
+    font-size: var(--fs-2xl); color: var(--color-text-heading);
+    letter-spacing: -0.5px;
+  }
+  .tuning-card .tc-desc {
+    font-family: var(--font-body); font-weight: 700;
+    font-size: var(--fs-sm); color: var(--color-text-secondary); margin-top: var(--space-xs);
+  }
+  .tuning-card table {
+    border-collapse: collapse; width: 100%; font-size: var(--fs-sm);
+  }
+  .tuning-card thead th {
+    background: var(--color-surface-alt);
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: left;
+  }
+  .tuning-card thead th.center { text-align: center; }
+  .tuning-card thead th.mark { width: 30px; text-align: center; }
+  .tuning-card thead th.ch-col { width: 50px; text-align: center; }
+  .tuning-card tbody td {
+    padding: 9px 12px;
+    border: 1px solid var(--color-border);
+    vertical-align: top;
+    font-family: var(--font-body);
+  }
+  .tuning-card tbody .col-mark {
+    text-align: center;
+    font-size: var(--fs-lg);
+    font-family: var(--font-mono);
+    font-weight: 800;
+    width: 30px;
+  }
+  .tuning-card tbody .col-name {
+    font-weight: 800;
+    color: var(--color-text-heading);
+  }
+  .tuning-card tbody .col-ch {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 800;
+    width: 50px;
+  }
+  /* 행 상태 3종 */
+  .tuning-card tr.row-done {
+    background: var(--color-accent-bg);
+  }
+  .tuning-card tr.row-done .col-mark { color: var(--color-accent); }
+  .tuning-card tr.row-done td { color: var(--color-accent-text); }
+  .tuning-card tr.row-new {
+    background: var(--color-accent-bg);
+    box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  }
+  .tuning-card tr.row-new .col-mark { color: #fff; background: var(--color-accent); }
+  .tuning-card tr.row-new td { color: var(--color-text-heading); }
+  /* NEW 뱃지는 행 배경 + ✓ 흰 마크 + inset 테두리로 이미 강조되므로 별도 텍스트 뱃지 없음 */
+  .tuning-card tr.row-future td {
+    color: var(--color-text-muted);
+  }
+  .tuning-card tr.row-future .col-mark { color: var(--color-text-subtle); }
+  .tuning-card tr.row-future .col-name { color: var(--color-text-muted); font-weight: 700; }
+  .tuning-card .tc-legend {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--color-text-subtle); margin-top: var(--space-md);
+    text-align: right;
+  }
+
+  /* ═══ CH04 문서 인덱싱 파이프라인 3단계 ═══ */
+  .doc-pipeline {
+    display: grid;
+    grid-template-columns: 1fr 24px 1fr 24px 1fr;
+    gap: 6px;
+    max-width: 680px;
+    margin: var(--space-md) auto var(--space-xs);
+    align-items: stretch;
+  }
+  .doc-pipeline .dp-step {
+    background: var(--color-accent-warm-bg);
+    border: 1.5px dashed var(--color-accent-warm);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .doc-pipeline .dp-step .lbl {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-accent-warm-text);
+    letter-spacing: 2px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .doc-pipeline .dp-step .name {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--fs-sm);
+    color: var(--color-text-heading);
+  }
+  .doc-pipeline .dp-step .desc {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+  }
+  .doc-pipeline .dp-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-warm);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .dp-to-db {
+    text-align: center;
+    margin: 2px 0 6px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--color-accent);
+    letter-spacing: 2px;
+    font-weight: 700;
+  }
+
+  /* ═══ CH03 · 문서 전략 정리 카드 ═══ */
+  .doc-strategy-card {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-dashed);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl) var(--space-xl);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .doc-strategy-card .ds-header {
+    text-align: center;
+    padding-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
+    border-bottom: 1px dashed var(--color-border);
+  }
+  .doc-strategy-card .ds-sub {
+    font-family: var(--font-mono); font-size: var(--fs-xs);
+    color: var(--color-text-secondary); letter-spacing: 3px;
+    text-transform: uppercase; font-weight: 700; margin-bottom: var(--space-xs);
+  }
+  .doc-strategy-card .ds-title {
+    font-family: var(--font-body); font-weight: 800;
+    font-size: var(--fs-2xl); color: var(--color-text-heading);
+    letter-spacing: -0.5px;
+  }
+  .doc-strategy-card .ds-desc {
+    font-family: var(--font-body); font-weight: 700; font-size: var(--fs-sm);
+    color: var(--color-text-secondary); margin-top: var(--space-xs);
+  }
+  .doc-strategy-card .ds-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+  .doc-strategy-card .ds-section {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+  }
+  .doc-strategy-card .ds-section .label {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--color-accent); letter-spacing: 2px;
+    text-transform: uppercase; font-weight: 700; margin-bottom: 4px;
+  }
+  .doc-strategy-card .ds-section .h {
+    font-family: var(--font-body); font-weight: 800;
+    font-size: var(--fs-base); color: var(--color-text-heading);
+    margin-bottom: var(--space-xs);
+  }
+  .doc-strategy-card .ds-section ul {
+    margin: 0; padding-left: 18px; font-size: 12px; color: var(--color-text); line-height: 1.8;
+  }
+  .doc-strategy-card .ds-section ul li code {
+    font-family: var(--font-mono); font-size: 11px;
+    background: var(--color-surface-alt); padding: 1px 5px; border-radius: 3px;
+    color: var(--color-accent-text);
+  }
+  .doc-strategy-card .ds-footer {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px dashed var(--color-border);
+    font-family: var(--font-body); font-weight: 700;
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary); text-align: center; line-height: 1.7;
+  }
+
+  /* ═══════════ 페이지 레이아웃 ═══════════ */
+  .chapter-grid {
+    display: grid; grid-template-columns: 1fr; gap: 50px; margin-top: 16px;
+  }
+  .ch-slot .ch-name {
+    font-family: var(--font-mono); font-size: 11px; color: var(--color-text-muted);
+    margin-bottom: 12px; letter-spacing: 1px; text-align: center;
+  }
+  .ch-slot .ch-name b { color: var(--color-accent); font-weight: 800; }
+  .ch-slot .ch-note {
+    text-align: center; font-family: var(--font-mono); font-size: 11px;
+    color: var(--color-text-muted); margin-top: 10px;
+  }
+  .ch-slot .ch-note b { color: var(--color-accent); }
+
+  .verdict {
+    padding: 18px 22px; background: var(--color-accent-bg);
+    border: 1px solid var(--color-accent-border); color: var(--color-accent-text);
+    border-radius: var(--radius-md); font-size: 14px; line-height: 1.8; margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h1>챕터별 arch11 · 누적 + NEW 표시</h1>
+<p class="lead">
+  이전 챕터에서 만든 박스는 <strong>그대로 보임(done)</strong>,
+  이번 챕터에서 새로 만든 것은 <strong>accent 테두리 + "NEW · CH N" 뱃지</strong>로 강조.
+  아직 안 만든 것은 점선 흐림(future).
+</p>
+
+<!-- ════ CH02 ════ -->
+<h2>CH02 · FastAPI + PostgreSQL <span class="sub">chapter 02 · 2 new</span></h2>
+
+<div class="arch11">
+  <div class="header">
+    <div class="sub">chapter 02</div>
+    <div class="title">대시보드 + SQL</div>
+    <div class="desc">FastAPI · PostgreSQL 첫 등장</div>
+  </div>
+  <div class="row-client">
+    <div class="col-c new">
+      <span class="new-badge">NEW · CH2</span>
+      <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+      <div class="flow"><span class="d">↓ 요청</span><span class="u">↑ 응답</span></div>
+      <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">대시보드 · REST</div></div>
+    </div>
+    <div class="flow-arrows empty">
+      <div class="fa-pair"><div class="fa-arrow call">→</div></div>
+      <div class="fa-pair"><div class="fa-arrow ret">←</div></div>
+    </div>
+    <div class="gap gap-col-a"></div>
+  </div>
+  <div class="lvl-lbl muted"><span class="up">↑</span> &nbsp;·&nbsp; <span class="down">↓</span></div>
+  <div class="row-ext">
+    <div class="gap gap-llm"></div>
+    <div class="flow-arrows empty"><div class="fa-pair"><div class="fa-arrow ret">←</div></div><div class="fa-pair"><div class="fa-arrow call">→</div></div></div>
+    <div class="gap gap-col-t"></div>
+  </div>
+  <div class="lvl-lbl muted"><span class="up">↑</span> &nbsp;·&nbsp; <span class="down">↓</span></div>
+  <div class="stores">
+    <div class="gap"></div>
+    <div class="st new">
+      <span class="new-badge">NEW · CH2</span>
+      <div class="l">관계형 DB (Relational)</div>
+      <div class="n">PostgreSQL</div>
+      <div class="s">SQL · 직원 · 연차 · 매출</div>
+    </div>
+  </div>
+</div>
+
+<!-- 나머지 챕터 -->
+<div class="chapter-grid">
+
+  <!-- ════ CH03 · 문서 전략 정리본 (arch11 아닌 별도 카드) ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 03</b> · 어떤 문서를 넣을까 — 문서 전략 룩북</div>
+    <div class="doc-strategy-card">
+      <div class="ds-header">
+        <div class="ds-sub">chapter 03</div>
+        <div class="ds-title">문서 전략</div>
+        <div class="ds-desc">포맷 · 청킹 · 메타데이터 · 재인덱싱 규칙</div>
+      </div>
+      <div class="ds-grid">
+        <div class="ds-section">
+          <div class="label">① 파일 포맷</div>
+          <div class="h">어떤 문서를 넣을까</div>
+          <ul>
+            <li><code>PDF</code> — 규정집·서약서 (텍스트 추출)</li>
+            <li><code>DOCX</code> — 사내 보안 규정</li>
+            <li><code>XLSX</code> — 매출·예산 시트</li>
+            <li>스캔본 PDF는 CH10에서 Vision 파서로</li>
+          </ul>
+        </div>
+        <div class="ds-section">
+          <div class="label">② 청킹 전략</div>
+          <div class="h">어떻게 쪼갤까</div>
+          <ul>
+            <li><code>RecursiveCharacterTextSplitter</code></li>
+            <li>chunk_size=<code>1000</code> · overlap=<code>200</code></li>
+            <li>한 덩어리 한 주제가 원칙</li>
+            <li>CH08에서 Semantic 청킹으로 업그레이드</li>
+          </ul>
+        </div>
+        <div class="ds-section">
+          <div class="label">③ 메타데이터</div>
+          <div class="h">청크에 무엇을 달까</div>
+          <ul>
+            <li><code>source</code> — 원본 파일명</li>
+            <li><code>section</code> — 조항·절 번호</li>
+            <li><code>page</code> — 페이지 번호</li>
+            <li><code>version</code> — 문서 버전</li>
+          </ul>
+        </div>
+        <div class="ds-section">
+          <div class="label">④ 재인덱싱 정책</div>
+          <div class="h">언제 다시 넣을까</div>
+          <ul>
+            <li>전체 재인덱싱: 포맷·청킹 규칙 변경 시</li>
+            <li>증분: 파일 하나만 바뀐 경우</li>
+            <li><code>source</code> 해시로 변경 감지</li>
+            <li>버전 충돌은 version 메타로 선별</li>
+          </ul>
+        </div>
+      </div>
+      <div class="ds-footer">
+        이 규칙들은 <b>CH04 임베딩·ChromaDB 저장</b>과 <b>CH05 RAG 체인</b>에서 실제 코드로 구현됩니다.
+      </div>
+    </div>
+    <div class="ch-note">arch11 박스 없음 · CH03은 <b>규칙을 세우는 챕터</b>, 박스가 생기는 건 CH04부터</div>
+  </div>
+
+  <!-- ════ CH04 ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 04</b> · 문서를 지식으로 — ChromaDB NEW</div>
+    <div class="arch11">
+      <div class="header">
+        <div class="sub">chapter 04</div>
+        <div class="title">벡터 저장소</div>
+        <div class="desc">임베딩 + ChromaDB 첫 등장</div>
+      </div>
+      <div class="row-client">
+        <div class="col-c">
+          <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+          <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+          <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">대시보드 · REST</div></div>
+        </div>
+        <div class="flow-arrows empty">
+          <div class="fa-pair"><div class="fa-arrow call">→</div></div>
+          <div class="fa-pair"><div class="fa-arrow ret">←</div></div>
+        </div>
+        <div class="gap gap-col-a"></div>
+      </div>
+      <div class="lvl-lbl muted"><span class="up">↑</span> &nbsp;·&nbsp; <span class="down">↓</span></div>
+      <div class="row-ext">
+        <div class="gap gap-llm"></div>
+        <div class="flow-arrows empty"><div class="fa-pair"><div class="fa-arrow ret">←</div></div><div class="fa-pair"><div class="fa-arrow call">→</div></div></div>
+        <div class="gap gap-col-t"></div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 임베딩 저장</span> &nbsp;·&nbsp; <span class="down">↓ 유사도 검색</span></div>
+
+      <!-- 문서 인덱싱 파이프라인 · 3단계 -->
+      <div class="doc-pipeline">
+        <div class="dp-step">
+          <span class="lbl">1</span>
+          <span class="name">사내 문서</span>
+          <span class="desc">PDF · DOCX · XLSX</span>
+        </div>
+        <div class="dp-arrow">→</div>
+        <div class="dp-step">
+          <span class="lbl">2</span>
+          <span class="name">MD 변환</span>
+          <span class="desc">통합 포맷 · 청킹</span>
+        </div>
+        <div class="dp-arrow">→</div>
+        <div class="dp-step">
+          <span class="lbl">3</span>
+          <span class="name">임베딩</span>
+          <span class="desc">ko-sroberta · 768차원</span>
+        </div>
+      </div>
+      <div class="dp-to-db">↓ 벡터로 저장</div>
+
+      <div class="stores">
+        <div class="st new">
+          <span class="new-badge">NEW · CH4</span>
+          <div class="l">벡터 저장소 (Vector Store)</div>
+          <div class="n">ChromaDB</div>
+          <div class="s">ko-sroberta · 768차원</div>
+        </div>
+        <div class="st">
+          <div class="l">관계형 DB (Relational)</div>
+          <div class="n">PostgreSQL</div>
+          <div class="s">직원 · 연차 · 매출</div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-note">이전: <b>사용자·FastAPI·PostgreSQL</b> · 새로: <b>사내 문서 → MD → 임베딩 → ChromaDB</b></div>
+  </div>
+
+  <!-- ════ CH05 ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 05</b> · 사서가 답해준다 — RAG Engine + LLM NEW</div>
+    <div class="arch11">
+      <div class="header">
+        <div class="sub">chapter 05</div>
+        <div class="title">RAG 기초 체인</div>
+        <div class="desc">LCEL 4단계 + Ollama deepseek</div>
+      </div>
+      <div class="row-client">
+        <div class="col-c">
+          <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+          <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+          <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">대시보드 · REST</div></div>
+        </div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow call">→</div></div><div class="fa-pair"><div class="fa-arrow ret">←</div></div></div>
+        <div class="col-a new">
+          <span class="new-badge">NEW · CH5</span>
+          <div class="title">Runtime · RAG 체인</div>
+          <div class="engine-inner">
+            <div class="engine-label">RAG Engine</div>
+            <div class="engine-name">LCEL 4단계 체인 (기초)</div>
+            <div class="stages-6">
+              <div class="s future"><span class="num">01</span><span class="nm">파싱</span></div>
+              <div class="s new"><span class="num">02</span><span class="nm">청킹</span></div>
+              <div class="s future"><span class="num">03</span><span class="nm">확장</span></div>
+              <div class="s new"><span class="num">04</span><span class="nm">검색</span></div>
+              <div class="s future"><span class="num">05</span><span class="nm">리랭크</span></div>
+              <div class="s new"><span class="num">06</span><span class="nm">LLM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 프롬프트</span> &nbsp;·&nbsp; <span class="down">↓ 답변</span></div>
+      <div class="row-ext solo">
+        <div class="llm">
+          <div class="box new">
+            <span class="new-badge">NEW · CH5</span>
+            <div class="l">외부 · LLM (External)</div>
+            <div class="n">Ollama</div>
+            <div class="models">
+              <div class="m new"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+              <div class="m future"><span class="mn">llama3.1:8b</span><span class="mu">CH06에서</span></div>
+              <div class="m future"><span class="mn">qwen2.5vl:7b</span><span class="mu">CH10에서</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lvl-lbl muted"><span class="up">↑</span> &nbsp;·&nbsp; <span class="down">↓</span></div>
+      <div class="stores">
+        <div class="st">
+          <div class="l">벡터 저장소 (Vector Store)</div>
+          <div class="n">ChromaDB</div>
+          <div class="s">ko-sroberta · 768차원</div>
+        </div>
+        <div class="st">
+          <div class="l">관계형 DB (Relational)</div>
+          <div class="n">PostgreSQL</div>
+          <div class="s">직원 · 연차 · 매출</div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-note">새로: <b>Runtime(RAG Engine) + stage 02·04·06 + LLM(deepseek)</b> · MCP Tools 없어 LLM이 Row 전체</div>
+  </div>
+
+  <!-- ════ CH06 ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 06</b> · 연차도 규정도 — ReAct · @tool · MCP NEW</div>
+    <div class="arch11">
+      <div class="header">
+        <div class="sub">chapter 06</div>
+        <div class="title">통합 에이전트 · 도구 호출</div>
+        <div class="desc">ReAct 루프 + llama3.1 + MCP 4 도구</div>
+      </div>
+      <div class="row-client">
+        <div class="col-c">
+          <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+          <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+          <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">대시보드 · REST</div></div>
+        </div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow call">→</div></div><div class="fa-pair"><div class="fa-arrow ret">←</div></div></div>
+        <div class="col-a">
+          <div class="title">Runtime · ReAct + Engine</div>
+          <div class="loop-inner new">
+            <span class="new-badge">NEW · CH6</span>
+            <div class="loop-label">ReAct 루프</div>
+            <div class="stages">
+              <div class="st">Reason</div><div class="arr">→</div>
+              <div class="st">Act</div><div class="arr">→</div>
+              <div class="st">Observe</div><div class="arr">↻</div>
+            </div>
+          </div>
+          <div class="engine-inner">
+            <div class="engine-label">RAG Engine</div>
+            <div class="engine-name">기초 체인 (CH05)</div>
+            <div class="stages-6">
+              <div class="s future"><span class="num">01</span><span class="nm">파싱</span></div>
+              <div class="s"><span class="num">02</span><span class="nm">청킹</span></div>
+              <div class="s future"><span class="num">03</span><span class="nm">확장</span></div>
+              <div class="s"><span class="num">04</span><span class="nm">검색</span></div>
+              <div class="s future"><span class="num">05</span><span class="nm">리랭크</span></div>
+              <div class="s"><span class="num">06</span><span class="nm">LLM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 프롬프트 · 도구 호출</span> &nbsp;·&nbsp; <span class="down">↓ 응답 · 결과</span></div>
+      <div class="row-ext">
+        <div class="llm"><div class="box">
+          <div class="l">외부 · LLM (External)</div>
+          <div class="n">Ollama</div>
+          <div class="models">
+            <div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+            <div class="m new"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+            <div class="m future"><span class="mn">qwen2.5vl:7b</span><span class="mu">CH10에서</span></div>
+          </div>
+        </div></div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div><div class="fa-pair"><div class="fa-label">호출</div><div class="fa-arrow call">→</div></div></div>
+        <div class="col-t new">
+          <span class="new-badge">NEW · CH6</span>
+          <div class="title">도구 호출 · MCP Tools</div>
+          <div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+        </div>
+      </div>
+      <div class="lvl-lbl muted"><span class="up">↑</span> &nbsp;·&nbsp; <span class="down">↓</span></div>
+      <div class="stores">
+        <div class="st">
+          <div class="l">벡터 저장소 (Vector Store)</div>
+          <div class="n">ChromaDB</div>
+          <div class="s">ko-sroberta · 768차원</div>
+        </div>
+        <div class="st">
+          <div class="l">관계형 DB (Relational)</div>
+          <div class="n">PostgreSQL</div>
+          <div class="s">직원 · 연차 · 매출</div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-note">새로: <b>ReAct 루프 + llama3.1(Tool Calling) + MCP 4 도구</b></div>
+  </div>
+
+  <!-- ════ CH07 ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 07</b> · 실제로 써보니 — 운영 ops 3 chip NEW</div>
+    <div class="arch11">
+      <div class="header">
+        <div class="sub">chapter 07</div>
+        <div class="title">운영 안정화</div>
+        <div class="desc">ResponseCache + TokenTracker + Retry</div>
+      </div>
+      <div class="row-client">
+        <div class="col-c">
+          <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+          <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+          <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">대시보드 · REST</div></div>
+        </div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow call">→</div></div><div class="fa-pair"><div class="fa-arrow ret">←</div></div></div>
+        <div class="col-a">
+          <div class="title">Runtime · 운영 ops 추가</div>
+          <div class="ops">
+            <div class="chip new">
+              <span class="new-badge">NEW</span>
+              <div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div>
+            </div>
+            <div class="chip new">
+              <span class="new-badge">NEW</span>
+              <div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div>
+            </div>
+            <div class="chip new">
+              <span class="new-badge">NEW</span>
+              <div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div>
+            </div>
+          </div>
+          <div class="loop-inner">
+            <div class="loop-label">ReAct 루프</div>
+            <div class="stages">
+              <div class="st">Reason</div><div class="arr">→</div>
+              <div class="st">Act</div><div class="arr">→</div>
+              <div class="st">Observe</div><div class="arr">↻</div>
+            </div>
+          </div>
+          <div class="engine-inner">
+            <div class="engine-label">RAG Engine</div>
+            <div class="engine-name">기초 체인</div>
+            <div class="stages-6">
+              <div class="s future"><span class="num">01</span><span class="nm">파싱</span></div>
+              <div class="s"><span class="num">02</span><span class="nm">청킹</span></div>
+              <div class="s future"><span class="num">03</span><span class="nm">확장</span></div>
+              <div class="s"><span class="num">04</span><span class="nm">검색</span></div>
+              <div class="s future"><span class="num">05</span><span class="nm">리랭크</span></div>
+              <div class="s"><span class="num">06</span><span class="nm">LLM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 프롬프트 · 도구 호출</span> &nbsp;·&nbsp; <span class="down">↓ 응답 · 결과</span></div>
+      <div class="row-ext">
+        <div class="llm"><div class="box">
+          <div class="l">외부 · LLM (External)</div>
+          <div class="n">Ollama</div>
+          <div class="models">
+            <div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+            <div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+            <div class="m future"><span class="mn">qwen2.5vl:7b</span><span class="mu">CH10에서</span></div>
+          </div>
+        </div></div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow ret">←</div></div><div class="fa-pair"><div class="fa-arrow call">→</div></div></div>
+        <div class="col-t">
+          <div class="title">도구 호출 · MCP Tools</div>
+          <div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+        </div>
+      </div>
+      <div class="lvl-lbl muted"><span class="up">↑</span> &nbsp;·&nbsp; <span class="down">↓</span></div>
+      <div class="stores">
+        <div class="st">
+          <div class="l">벡터 저장소 (Vector Store)</div>
+          <div class="n">ChromaDB</div>
+          <div class="s">ko-sroberta · 768차원</div>
+        </div>
+        <div class="st">
+          <div class="l">관계형 DB (Relational)</div>
+          <div class="n">PostgreSQL</div>
+          <div class="s">직원 · 연차 · 매출</div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-note">새로: <b>ops 3 chip · Cache · Monitor · Retry</b> · 나머지 기존 유지</div>
+  </div>
+
+  <!-- ════ CH08 · 튜닝 메뉴판 (실험 표) ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 08</b> · 엉뚱한 문서를 가져온다 — 튜닝 메뉴판 (청킹 · 리랭킹 · 하이브리드)</div>
+    <div class="tuning-card">
+      <div class="tc-header">
+        <div class="tc-sub">chapter 08 · tuning menu</div>
+        <div class="tc-title">RAG 튜닝 메뉴판</div>
+        <div class="tc-desc">검색 품질 실험 3종 + 앞으로 다룰 항목 2종</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th class="mark"></th>
+            <th>튜닝</th>
+            <th>무엇을 바꾸나</th>
+            <th>언제 쓰나</th>
+            <th class="ch-col">챕터</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">청킹 전략</td>
+            <td>문서를 자르는 방법 (Fixed → Recursive → Semantic)</td>
+            <td>주제가 섞이는 문제가 있을 때</td>
+            <td class="col-ch">8</td>
+          </tr>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">리랭킹</td>
+            <td>가져온 문서를 Cross-Encoder로 재정렬</td>
+            <td>검색 결과 상위에 엉뚱한 문서가 섞일 때</td>
+            <td class="col-ch">8</td>
+          </tr>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">하이브리드 검색</td>
+            <td>벡터 + BM25를 alpha 가중합으로 합침</td>
+            <td>의미 검색과 키워드 검색 둘 다 필요할 때</td>
+            <td class="col-ch">8</td>
+          </tr>
+          <tr class="row-future">
+            <td class="col-mark">–</td>
+            <td class="col-name">쿼리 재작성</td>
+            <td>불완전한 질문을 LLM이 이해할 수 있는 형태로 변환</td>
+            <td>"병가 어떻게 써?"처럼 모호한 질문이 많을 때</td>
+            <td class="col-ch">9</td>
+          </tr>
+          <tr class="row-future">
+            <td class="col-mark">–</td>
+            <td class="col-name">파이프라인 조립</td>
+            <td>위 튜닝 중 필요한 것만 골라 하나로 조립</td>
+            <td>실서비스에 적용할 때</td>
+            <td class="col-ch">10</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tc-legend">✓ 이번 챕터 실험 · – 앞으로 다룰 항목</div>
+    </div>
+    <div class="ch-note">CH08은 <b>세 실험(청킹·리랭킹·하이브리드)</b> 모두 시도 · 어떤 조합을 쓸지는 CH10에서 선별</div>
+  </div>
+
+  <!-- ════ CH09 · 튜닝 메뉴판 (누적 8 실험) ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 09</b> · 질문을 제대로 이해 못한다 — 튜닝 메뉴판 (CH08·09 누적 8종)</div>
+    <div class="tuning-card">
+      <div class="tc-header">
+        <div class="tc-sub">chapter 09 · tuning menu</div>
+        <div class="tc-title">RAG 튜닝 메뉴판</div>
+        <div class="tc-desc">CH08 검색 3종 + CH09 질의 5종 = 누적 8종 · CH10에서 3종 추가 예정</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th class="mark"></th>
+            <th>튜닝</th>
+            <th>무엇을 바꾸나</th>
+            <th>언제 쓰나</th>
+            <th class="ch-col">챕터</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-done">
+            <td class="col-mark">✓</td>
+            <td class="col-name">청킹 전략</td>
+            <td>문서를 자르는 방법 (Fixed → Recursive → Semantic)</td>
+            <td>주제가 섞이는 문제가 있을 때</td>
+            <td class="col-ch">8</td>
+          </tr>
+          <tr class="row-done">
+            <td class="col-mark">✓</td>
+            <td class="col-name">리랭킹</td>
+            <td>가져온 문서를 Cross-Encoder로 재정렬</td>
+            <td>검색 결과 상위에 엉뚱한 문서가 섞일 때</td>
+            <td class="col-ch">8</td>
+          </tr>
+          <tr class="row-done">
+            <td class="col-mark">✓</td>
+            <td class="col-name">하이브리드 검색</td>
+            <td>벡터 + BM25를 alpha 가중합으로 합침</td>
+            <td>의미 검색과 키워드 검색 둘 다 필요할 때</td>
+            <td class="col-ch">8</td>
+          </tr>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">HyDE</td>
+            <td>가상 답변을 먼저 생성해 답변-문서 유사도로 검색</td>
+            <td>질문과 문서의 어휘 차이가 클 때</td>
+            <td class="col-ch">9</td>
+          </tr>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">Multi-Query</td>
+            <td>한 질문을 여러 표현으로 재작성해 합집합 검색</td>
+            <td>질문의 의미가 넓어 한 방향만으로 부족할 때</td>
+            <td class="col-ch">9</td>
+          </tr>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">약어·동의어 확장</td>
+            <td>사내 용어 사전으로 약어를 원 표현으로 치환</td>
+            <td>사내 약어, 줄임말 검색 실패가 잦을 때</td>
+            <td class="col-ch">9</td>
+          </tr>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">Parent Document</td>
+            <td>작은 청크로 검색하되 부모 문서 단위로 반환</td>
+            <td>조각만 보면 맥락이 부족할 때</td>
+            <td class="col-ch">9</td>
+          </tr>
+          <tr class="row-new">
+            <td class="col-mark">✓</td>
+            <td class="col-name">Contextual Compression</td>
+            <td>검색된 문서에서 질문과 무관한 부분 제거</td>
+            <td>부모 문서가 길어 토큰 비용이 부담될 때</td>
+            <td class="col-ch">9</td>
+          </tr>
+          <tr class="row-future">
+            <td class="col-mark">–</td>
+            <td class="col-name">Vision LLM</td>
+            <td>이미지·표를 Vision 모델로 읽어 텍스트 변환</td>
+            <td>PDF 속 표, 차트, 이미지가 검색에 빠질 때</td>
+            <td class="col-ch">10</td>
+          </tr>
+          <tr class="row-future">
+            <td class="col-mark">–</td>
+            <td class="col-name">하이브리드 파서</td>
+            <td>텍스트 + 시각 요소를 함께 파싱하는 파이프라인</td>
+            <td>복합 문서(텍스트+표+이미지)를 처리할 때</td>
+            <td class="col-ch">10</td>
+          </tr>
+          <tr class="row-future">
+            <td class="col-mark">–</td>
+            <td class="col-name">RAG 평가 프레임워크</td>
+            <td>검색 정확도, 답변 충실도를 숫자로 측정</td>
+            <td>튜닝 전후 품질을 객관적으로 비교할 때</td>
+            <td class="col-ch">10</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tc-legend">✓ 완료 (진한 행 = 이번 챕터) · – 앞으로 다룰 항목</div>
+    </div>
+    <div class="ch-note">CH09는 질문 쪽 다섯 실험 — <b>HyDE · Multi-Query · 약어 · Parent Doc · Compression</b> 추가. 누적 8종이 CH10에서 파이프라인으로 선별 조립됨</div>
+  </div>
+
+  <!-- ════ CH10 ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 10</b> · PDF 이미지까지 — stage 01 + qwen-vl NEW</div>
+    <div class="arch11">
+      <div class="header">
+        <div class="sub">chapter 10</div>
+        <div class="title">Vision 파서</div>
+        <div class="desc">parse_pdf_hybrid + qwen2.5vl (멀티모달)</div>
+      </div>
+      <div class="row-client">
+        <div class="col-c">
+          <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+          <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+          <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">대시보드 · REST</div></div>
+        </div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow call">→</div></div><div class="fa-pair"><div class="fa-arrow ret">←</div></div></div>
+        <div class="col-a">
+          <div class="title">Runtime · Vision 파서 추가</div>
+          <div class="ops">
+            <div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+            <div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+            <div class="chip"><div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div></div>
+          </div>
+          <div class="loop-inner">
+            <div class="loop-label">ReAct 루프</div>
+            <div class="stages">
+              <div class="st">Reason</div><div class="arr">→</div>
+              <div class="st">Act</div><div class="arr">→</div>
+              <div class="st">Observe</div><div class="arr">↻</div>
+            </div>
+          </div>
+          <div class="engine-inner">
+            <div class="engine-label">RAG Engine</div>
+            <div class="engine-name">stage 01 파싱 업그레이드</div>
+            <div class="stages-6">
+              <div class="s new"><span class="num">01</span><span class="nm">파싱</span></div>
+              <div class="s"><span class="num">02</span><span class="nm">청킹</span></div>
+              <div class="s"><span class="num">03</span><span class="nm">확장</span></div>
+              <div class="s"><span class="num">04</span><span class="nm">검색</span></div>
+              <div class="s"><span class="num">05</span><span class="nm">리랭크</span></div>
+              <div class="s"><span class="num">06</span><span class="nm">LLM</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ Vision 호출</span> &nbsp;·&nbsp; <span class="down">↓ OCR 텍스트</span></div>
+      <div class="row-ext">
+        <div class="llm"><div class="box">
+          <div class="l">외부 · LLM (External)</div>
+          <div class="n">Ollama</div>
+          <div class="models">
+            <div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+            <div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+            <div class="m new"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+          </div>
+        </div></div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow ret">←</div></div><div class="fa-pair"><div class="fa-arrow call">→</div></div></div>
+        <div class="col-t">
+          <div class="title">도구 호출 · MCP Tools</div>
+          <div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+        </div>
+      </div>
+      <div class="lvl-lbl muted"><span class="up">↑</span> &nbsp;·&nbsp; <span class="down">↓</span></div>
+      <div class="stores">
+        <div class="st">
+          <div class="l">벡터 저장소 (Vector Store)</div>
+          <div class="n">ChromaDB</div>
+          <div class="s">ko-sroberta · 768차원</div>
+        </div>
+        <div class="st">
+          <div class="l">관계형 DB (Relational)</div>
+          <div class="n">PostgreSQL</div>
+          <div class="s">직원 · 연차 · 매출</div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-note">새로: <b>stage 01 파싱(Vision) + qwen2.5vl 모델</b> · 다른 stage는 CH08(05 리랭크)·CH09(03 확장)에서 누적</div>
+  </div>
+
+  <!-- ════ CH11 ════ -->
+  <div class="ch-slot">
+    <div class="ch-name"><b>CH 11</b> · 완성 (arch11 원본 · NEW 없음)</div>
+    <div class="arch11">
+      <div class="header">
+        <div class="sub">시스템 아키텍처 (System Architecture)</div>
+        <div class="title">커넥트HR 에이전트</div>
+        <div class="desc">11개 챕터에 걸쳐 완성한 RAG 시스템</div>
+      </div>
+      <div class="row-client">
+        <div class="col-c">
+          <div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+          <div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+          <div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">대시보드 · REST · 세션</div></div>
+        </div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-label">요청</div><div class="fa-arrow call">→</div></div><div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div></div>
+        <div class="col-a">
+          <div class="title">통합 에이전트 · 운영 (Runtime)</div>
+          <div class="ops">
+            <div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+            <div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+            <div class="chip"><div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div></div>
+          </div>
+          <div class="core">
+            <div class="l">실행기 (Executor)</div>
+            <div class="n">통합 에이전트</div>
+            <div class="loop-inner"><div class="loop-label">ReAct 루프</div><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+            <div class="engine-inner"><div class="engine-label">RAG Engine</div><div class="engine-name">커넥트HR 엔진</div><div class="stages-6"><div class="s"><span class="num">01</span><span class="nm">파싱</span></div><div class="s"><span class="num">02</span><span class="nm">청킹</span></div><div class="s"><span class="num">03</span><span class="nm">확장</span></div><div class="s"><span class="num">04</span><span class="nm">검색</span></div><div class="s"><span class="num">05</span><span class="nm">리랭크</span></div><div class="s"><span class="num">06</span><span class="nm">LLM</span></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 프롬프트 · 도구 호출</span> &nbsp;·&nbsp; <span class="down">↓ 응답 · 결과</span></div>
+      <div class="row-ext">
+        <div class="llm"><div class="box">
+          <div class="l">외부 · LLM (External)</div>
+          <div class="n">Ollama</div>
+          <div class="models">
+            <div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+            <div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+            <div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+          </div>
+        </div></div>
+        <div class="flow-arrows"><div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div><div class="fa-pair"><div class="fa-label">호출</div><div class="fa-arrow call">→</div></div></div>
+        <div class="col-t">
+          <div class="title">도구 호출 · MCP Tools</div>
+          <div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+          <div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+        </div>
+      </div>
+      <div class="lvl-lbl"><span class="up">↑ 조회 · 도구 실행</span> &nbsp;·&nbsp; <span class="down">↓ 레코드 · 문서</span></div>
+      <div class="stores">
+        <div class="st"><div class="l">벡터 저장소 (Vector Store)</div><div class="n">ChromaDB</div><div class="s">ko-sroberta · 768차원 · 메타데이터</div></div>
+        <div class="st"><div class="l">관계형 DB (Relational)</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+      </div>
+    </div>
+    <div class="ch-note">모두 <b>done</b>. NEW 뱃지 없음. arch11 완성형</div>
+  </div>
+
+</div>
+
+<!-- ══════ 정리 ══════ -->
+<h2 style="background:var(--color-text-heading)">표시 규칙</h2>
+<div class="verdict">
+  <strong>3가지 상태</strong><br>
+  • <strong>done</strong> (이전 챕터에서 만든 것): 평범한 arch11 스타일 그대로<br>
+  • <strong>new</strong> (이번 챕터에서 만든 것): accent 두꺼운 테두리 + 우상단 "NEW · CH N" 뱃지<br>
+  • <strong>future</strong> (아직 안 만든 것): 점선 흐림<br>
+  <br>
+  <strong>단위</strong>: 박스 전체(col-c·col-a·llm·col-t·st) + 세부(stage·chip·model)<br>
+  <strong>사용자·FastAPI</strong>: CH02 이후 모든 챕터에서 계속 표시 (done)<br>
+  <strong>PostgreSQL·ChromaDB</strong>: 각 챕터가 만든 이후 모든 챕터에서 유지
+</div>
+
+</body>
+</html>

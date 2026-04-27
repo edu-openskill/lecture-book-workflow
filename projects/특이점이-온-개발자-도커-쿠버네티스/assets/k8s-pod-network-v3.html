@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pod 네트워크 — 안 3: Before/After 비교</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .diagram {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  .section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+    padding: 4px 16px;
+    border-bottom: 2px solid #222;
+  }
+
+  /* Docker 쪽 */
+  .docker-containers {
+    display: flex;
+    gap: 16px;
+  }
+  .docker-container {
+    border: 1.5px solid #222;
+    border-radius: 8px;
+    padding: 16px 20px;
+    background: #fff;
+    text-align: center;
+    min-width: 120px;
+  }
+  .docker-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+  }
+  .docker-ip {
+    font-size: 11px;
+    color: #666;
+    margin-top: 6px;
+    padding: 3px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f9f9f9;
+  }
+  .docker-comm {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+  }
+  .docker-comm-arrow {
+    font-size: 16px;
+    color: #222;
+  }
+  .section-note {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.5;
+  }
+
+  /* 구분선 */
+  .vs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 50px;
+    gap: 8px;
+  }
+  .vs-line {
+    width: 1.5px;
+    height: 50px;
+    background: #ccc;
+  }
+  .vs-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #999;
+  }
+
+  /* Pod 쪽 */
+  .pod-box {
+    border: 1.5px solid #222;
+    border-radius: 12px;
+    padding: 24px 24px 20px;
+    background: #fff;
+    position: relative;
+    min-width: 300px;
+  }
+  .pod-label {
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: #222;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: 5px;
+  }
+
+  .pod-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 8px;
+  }
+
+  .pod-apps {
+    border: 1.5px solid #222;
+    border-radius: 8px 8px 0 0;
+    padding: 14px 16px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .pod-app {
+    text-align: center;
+    padding: 6px 16px;
+  }
+  .pod-app-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #222;
+  }
+  .pod-app-port {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+  }
+  .pod-localhost {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+    gap: 1px;
+  }
+  .pod-localhost-arrow {
+    font-size: 14px;
+    color: #222;
+  }
+  .pod-localhost-label {
+    font-size: 8px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .pod-pause {
+    border: 1.5px solid #222;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 10px 20px;
+    background: #e8e8e8;
+    text-align: center;
+  }
+  .pod-pause-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .pod-shared-ip {
+    font-size: 11px;
+    color: #666;
+    padding: 3px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f9f9f9;
+    display: inline-block;
+  }
+  .pod-ip-wrap {
+    text-align: center;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+
+  <!-- Docker -->
+  <div class="section">
+    <div class="section-title">Docker</div>
+    <div class="docker-containers">
+      <div class="docker-container">
+        <div class="docker-name">nginx</div>
+        <div class="docker-ip">172.17.0.2</div>
+      </div>
+      <div class="docker-container">
+        <div class="docker-name">redis</div>
+        <div class="docker-ip">172.17.0.3</div>
+      </div>
+    </div>
+    <div class="docker-comm">
+      172.17.0.2 <span class="docker-comm-arrow">↔</span> 172.17.0.3
+    </div>
+    <div class="section-note">컨테이너마다 IP가 따로.<br>서로의 IP를 알아야 통신 가능</div>
+  </div>
+
+  <!-- VS -->
+  <div class="vs">
+    <div class="vs-line"></div>
+    <div class="vs-text">vs</div>
+    <div class="vs-line"></div>
+  </div>
+
+  <!-- Kubernetes Pod -->
+  <div class="section">
+    <div class="section-title">Kubernetes</div>
+    <div class="pod-box">
+      <div class="pod-label">Pod</div>
+      <div class="pod-stack">
+        <div class="pod-apps">
+          <div class="pod-app">
+            <div class="pod-app-name">nginx</div>
+            <div class="pod-app-port">:80</div>
+          </div>
+          <div class="pod-localhost">
+            <div class="pod-localhost-arrow">←→</div>
+            <div class="pod-localhost-label">localhost</div>
+          </div>
+          <div class="pod-app">
+            <div class="pod-app-name">redis</div>
+            <div class="pod-app-port">:6379</div>
+          </div>
+        </div>
+        <div class="pod-pause">
+          <div class="pod-pause-name">pause (네트워크 소유)</div>
+        </div>
+      </div>
+      <div class="pod-ip-wrap">
+        <div class="pod-shared-ip">IP: 10.244.0.5 (공유)</div>
+      </div>
+    </div>
+    <div class="section-note">pause가 네트워크를 만들고,<br>컨테이너들은 localhost로 통신</div>
+  </div>
+
+</div>
+
+</body>
+</html>

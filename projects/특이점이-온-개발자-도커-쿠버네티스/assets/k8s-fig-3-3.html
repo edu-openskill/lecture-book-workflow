@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>컨트롤 플레인 내부 구성 요소의 상호 작용</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 컨트롤 플레인 */
+  .cp-box {
+    border: 1.5px dashed #222;
+    border-radius: 12px;
+    padding: 24px 32px 28px;
+    background: #fff;
+    position: relative;
+  }
+  .cp-label {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .cp-body {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 8px;
+  }
+
+  /* API Server */
+  .api-server {
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+    background: #e8e8e8;
+  }
+
+  /* 화살표 + 라벨 세로 묶음 */
+  .arrows-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .arrow-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .arrow-line {
+    font-size: 18px;
+    color: #222;
+  }
+  .arrow-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #666;
+    white-space: nowrap;
+  }
+
+  /* 우측 구성 요소들 */
+  .components {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .comp {
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+    background: #fff;
+  }
+  .comp-desc {
+    font-size: 9px;
+    font-weight: 400;
+    color: #666;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+
+  <div class="cp-box">
+    <div class="cp-label">컨트롤 플레인</div>
+
+    <div class="cp-body">
+
+      <!-- API Server -->
+      <div class="api-server">Kube API Server</div>
+
+      <!-- 화살표들 -->
+      <div class="arrows-group">
+        <div class="arrow-row">
+          <div class="arrow-line">←</div>
+          <div class="arrow-label">상태 저장/조회</div>
+          <div class="arrow-line">→</div>
+        </div>
+        <div class="arrow-row">
+          <div class="arrow-line">←</div>
+          <div class="arrow-label">상태 비교 및 작업 생성</div>
+          <div class="arrow-line">→</div>
+        </div>
+        <div class="arrow-row">
+          <div class="arrow-line">←</div>
+          <div class="arrow-label">실행 노드 선택</div>
+          <div class="arrow-line">→</div>
+        </div>
+      </div>
+
+      <!-- 구성 요소들 -->
+      <div class="components">
+        <div class="comp">
+          etcd
+          <div class="comp-desc">상태 저장소</div>
+        </div>
+        <div class="comp">
+          Controller Manager
+          <div class="comp-desc">상태 점검/복구</div>
+        </div>
+        <div class="comp">
+          Scheduler
+          <div class="comp-desc">노드 배정</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

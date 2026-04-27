@@ -1,6 +1,7 @@
 {
   "project": "",
   "title": "",
+  "alias": "",
   "status": "not_started",
   "current_step": null,
   "created_at": "",
@@ -59,12 +60,9 @@
       "chapters": []
     },
     "step_6_prologue": {
-      "name": "프롤로그+로드맵",
+      "name": "프롤로그",
       "status": "pending",
-      "artifacts": {
-        "prologue": null,
-        "roadmap": null
-      },
+      "artifact": null,
       "review": {
         "audit": null
       }
@@ -74,8 +72,7 @@
       "status": "pending",
       "artifacts": {
         "preface": null,
-        "afterword": null,
-        "appendix": null
+        "afterword": null
       },
       "final_title": null,
       "total_pages": null,
@@ -91,6 +88,11 @@
     "version": "v0.1",
     "status": "pending",
     "artifact": null,
+    "images": {
+      "total_placeholders": 0,
+      "completed": 0,
+      "status": "pending"
+    },
     "review": {
       "insight": null,
       "intent_watch": null,

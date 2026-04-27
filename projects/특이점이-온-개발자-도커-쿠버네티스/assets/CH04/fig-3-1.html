@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8s Cluster Architecture</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #fff;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .diagram {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 30px;
+            width: 100%;
+            max-width: 950px;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+        }
+        .side-label {
+            position: absolute;
+            left: -60px;
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            width: 150px;
+            text-align: center;
+        }
+        .layer-section {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .control-plane {
+            background-color: #fff;
+            border: 2px solid #c62828;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .control-plane-label {
+            background-color: #c62828;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .api-server {
+            background-color: #fff;
+            border: 2px solid #c62828;
+            border-radius: 6px;
+            padding: 14px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #c62828;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .worker-container {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .worker-node {
+            flex: 1;
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .worker-label {
+            background-color: #1565c0;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .component-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .component {
+            flex: 1;
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #333;
+            text-align: center;
+        }
+        .layer-divider {
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #1565c0 0px, #1565c0 8px, transparent 8px, transparent 16px);
+            margin: 18px 0;
+        }
+        .layer-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin: 15px 0 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .hardware-section {
+            background-color: #f5f5f5;
+            border: 2px solid #999;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .hardware-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <div class="control-plane">
+            <div class="control-plane-label">컨트롤 플레인</div>
+            <div class="api-server">Kube API Server</div>
+        </div>
+
+        <div class="layer-divider"></div>
+
+        <div class="layer-title">워커 노드</div>
+        <div class="worker-container">
+            <div class="worker-node">
+                <div class="worker-label">워커 노드 1</div>
+                <div class="component-row">
+                    <div class="component">kubelet</div>
+                    <div class="component">kube-proxy</div>
+                </div>
+            </div>
+            <div class="worker-node">
+                <div class="worker-label">워커 노드 2</div>
+                <div class="component-row">
+                    <div class="component">kubelet</div>
+                    <div class="component">kube-proxy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layer-divider"></div>
+
+        <div class="layer-title">컨테이너 엔진</div>
+        <div style="text-align: center; font-size: 12px; color: #666; padding: 12px 0; border-bottom: 1px solid #ddd;">
+            컨테이너 엔진
+        </div>
+
+        <div class="layer-divider"></div>
+
+        <div class="layer-title">호스트 OS</div>
+        <div style="text-align: center; font-size: 12px; color: #666; padding: 12px 0; border-bottom: 1px solid #ddd;">
+            호스트 OS
+        </div>
+
+        <div class="hardware-section">
+            <div class="hardware-title">하드웨어</div>
+        </div>
+    </div>
+</body>
+</html>

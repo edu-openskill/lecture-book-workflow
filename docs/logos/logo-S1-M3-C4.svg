@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120"
+     role="img" aria-labelledby="t1">
+  <title id="t1">OpenSkillBooks</title>
+  <g transform="translate(5,8) scale(0.95)">
+      <path d="M 32 8 Q 22 8, 18 16 L 18 38 Q 18 44, 10 48 Q 18 52, 18 58 L 18 80 Q 22 88, 32 88"
+            fill="none" stroke="#2D2D2D" stroke-width="2.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 58 8 Q 68 8, 72 16 L 72 38 Q 72 44, 80 48 Q 72 52, 72 58 L 72 80 Q 68 88, 58 88"
+            fill="none" stroke="#2D2D2D" stroke-width="2.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="30" y1="32" x2="60" y2="32" stroke="#888888" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+      <line x1="33" y1="48" x2="57" y2="48" stroke="#888888" stroke-width="2.2" stroke-linecap="round" opacity="0.65"/>
+      <line x1="30" y1="64" x2="54" y2="64" stroke="#888888" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+    </g>
+  <g id="wordmark">
+    <text x="100" y="52" font-family="'Georgia','Palatino','Times New Roman',serif"
+          font-size="32" font-weight="700" letter-spacing="2" fill="#2D2D2D">OPENSKILLBOOKS</text>
+    <text x="102" y="82" font-family="'Georgia','Palatino',serif"
+          font-size="12" font-weight="400" letter-spacing="6" fill="#888888" opacity="0.6">Open Skill Books</text>
+  </g>
+</svg>

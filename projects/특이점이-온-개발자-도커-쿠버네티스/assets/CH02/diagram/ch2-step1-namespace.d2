@@ -1,0 +1,69 @@
+direction: right
+
+host: 호스트 (Host) {
+  style.fill: "#f0f0f0"
+  style.stroke: "#333333"
+
+  docker0: docker0 브리지 {
+    shape: rectangle
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.font-size: 14
+  }
+
+  veth1: veth-host1 {
+    shape: rectangle
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.stroke-dash: 3
+    style.font-size: 12
+  }
+
+  veth2: veth-host2 {
+    shape: rectangle
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.stroke-dash: 3
+    style.font-size: 12
+  }
+
+  veth1 -> docker0: "" {
+    style.stroke: "#333333"
+  }
+  veth2 -> docker0: "" {
+    style.stroke: "#333333"
+  }
+}
+
+ns-a: Namespace A {
+  style.fill: "#f8f8f8"
+  style.stroke: "#333333"
+
+  containerA: 컨테이너 A\n172.17.0.2 {
+    shape: rectangle
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.font-size: 14
+  }
+}
+
+ns-b: Namespace B {
+  style.fill: "#f8f8f8"
+  style.stroke: "#333333"
+
+  containerB: 컨테이너 B\n172.17.0.3 {
+    shape: rectangle
+    style.fill: "#ffffff"
+    style.stroke: "#333333"
+    style.font-size: 14
+  }
+}
+
+ns-a.containerA -> host.veth1: veth pair {
+  style.stroke: "#333333"
+  style.stroke-dash: 3
+}
+ns-b.containerB -> host.veth2: veth pair {
+  style.stroke: "#333333"
+  style.stroke-dash: 3
+}

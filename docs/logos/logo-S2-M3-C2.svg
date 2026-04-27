@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110"
+     role="img" aria-labelledby="t1">
+  <title id="t1">OpenSkillBooks</title>
+  <text x="260" y="46" text-anchor="middle"
+        font-family="'Georgia','Palatino','Times New Roman',serif"
+        font-size="36" letter-spacing="5" fill="#1A237E">
+    <tspan font-weight="300">OPEN</tspan><tspan font-weight="900">SKILL</tspan><tspan font-weight="300">BOOKS</tspan>
+  </text>
+  <line x1="80" y1="58" x2="440" y2="58" stroke="#4FC3F7" stroke-width="0.7"/>
+  <text x="260" y="84" text-anchor="middle"
+        font-family="'Georgia','Palatino',serif"
+        font-size="13" font-weight="400" letter-spacing="12" fill="#4FC3F7" opacity="0.5">COOKBOOK</text>
+</svg>

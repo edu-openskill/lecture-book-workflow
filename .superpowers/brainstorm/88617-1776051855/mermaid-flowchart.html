@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ConnectHR — Mermaid 플로우차트</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #fafbfc; color: #2d3748; font-family: 'Pretendard', -apple-system, sans-serif; padding: 40px 20px; line-height: 1.7; }
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 24px; margin-bottom: 8px; color: #1a202c; font-weight: 700; }
+.subtitle { color: #718096; font-size: 14px; margin-bottom: 32px; }
+.design-block { background: #fff; border-radius: 12px; padding: 28px; margin: 32px 0; border: 1px solid #edf0f5; }
+.design-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: #2d3748; }
+.design-desc { font-size: 13px; color: #718096; margin-bottom: 20px; }
+.code-block {
+  background: #1a202c; color: #e2e8f0;
+  border-radius: 8px; padding: 20px;
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
+  font-size: 13px; line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+  position: relative;
+}
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: #4a5568; color: #fff; border: none;
+  padding: 6px 12px; border-radius: 4px; cursor: pointer;
+  font-size: 11px; font-family: inherit;
+}
+.copy-btn:hover { background: #2563eb; }
+.mermaid-render {
+  background: #fff; padding: 20px;
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  margin: 16px 0; text-align: center;
+  overflow-x: auto;
+}
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 4px;
+  background: #4299e1; color: #fff;
+  margin-bottom: 8px; letter-spacing: 1px;
+}
+h2 { font-size: 18px; margin: 24px 0 10px; color: #2d3748; }
+.section-label {
+  font-size: 11px; color: #a0aec0; font-weight: 700;
+  letter-spacing: 1.5px; margin: 20px 0 8px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>ConnectHR — Mermaid 플로우차트</h1>
+<p class="subtitle">v8 아키텍처를 Mermaid.js 코드로. 아래 코드 복사해서 Notion, GitHub, Obsidian, mermaid.live 등에서 바로 사용 가능</p>
+
+<!-- ===================== A. 전체 아키텍처 ===================== -->
+<div class="design-block">
+  <span class="badge">A. 전체 아키텍처 (서브그래프 + 번호 흐름)</span>
+  <div class="design-title">서브그래프로 각 Ch 묶고, 번호로 쿼리 흐름 표시</div>
+
+  <div class="section-label">MERMAID CODE</div>
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code id="code-a">flowchart TD
+    %% ===== 사용자 =====
+    User([사내 직원])
+
+    %% ===== Ch.2 대시보드 =====
+    subgraph Ch2["Ch.2 · 대시보드"]
+        FastAPI["FastAPI<br/>사내 대시보드 API"]
+    end
+
+    %% ===== Ch.6 오케스트레이션 =====
+    subgraph Ch6["Ch.6 · 오케스트레이션"]
+        Router{"Query Router<br/>규칙 · 스키마 · LLM 분류"}
+        Agent["ReAct Agent<br/>생각 · 실행 · 관찰"]
+        MCP["MCP Tools<br/>DB 조회 함수"]
+    end
+
+    %% ===== Ch.4~5 검색 =====
+    subgraph Ch45["Ch.4~5 · 검색"]
+        Pipeline["Doc Pipeline<br/>파싱 · 청킹 · 임베딩"]
+        LCEL["LCEL Chain<br/>검색기 → 프롬프트 → LLM"]
+    end
+
+    %% ===== Ch.2·4 데이터 =====
+    subgraph Data["Ch.2·4 · 데이터"]
+        ChromaDB[("ChromaDB<br/>벡터 저장소")]
+        PostgreSQL[("PostgreSQL<br/>직원·연차·매출")]
+    end
+
+    %% ===== Ch.8~10 튜닝·평가 =====
+    subgraph Tuning["Ch.8~10 · 튜닝 · 평가"]
+        Rerank["Hybrid+Rerank<br/>BM25 + 교차인코더"]
+        Rewrite["Query Rewrite<br/>HyDE · 멀티쿼리"]
+        Vision["Vision · OCR<br/>이미지 문서"]
+        Eval["Eval Framework<br/>정확도@k · 환각률"]
+    end
+
+    %% ===== Ch.7 운영 =====
+    subgraph Ops["Ch.7 · 운영"]
+        Cache["ResponseCache · TokenTracker"]
+    end
+
+    %% ===== Ch.1 외부 =====
+    subgraph Ext["Ch.1 · 외부"]
+        Ollama["Ollama LLM<br/>DeepSeek-R1:8b"]
+    end
+
+    %% ===== Ch.3 문서 규칙 (외부 참조) =====
+    Rules["Ch.3 · 문서 규칙 (이론)<br/>메타데이터 · 폴더 구조<br/>재인덱싱 전략"]
+
+    %% ===== 쿼리 흐름 (번호) =====
+    User -- "1" --> FastAPI
+    FastAPI -- "2" --> Router
+    Router -- "3" --> Agent
+    Agent -- "4a" --> MCP
+    Agent -- "4b" --> LCEL
+    MCP -- "5" --> PostgreSQL
+    LCEL -- "5" --> ChromaDB
+    Agent -- "6" --> Ollama
+
+    %% ===== 별도 흐름 =====
+    Pipeline -. "I: 인제스천" .-> ChromaDB
+    Rules -. "규칙 참조" .-> Pipeline
+    LCEL -. "품질 향상" .-> Rerank
+
+    %% ===== 스타일 =====
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef external fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    classDef rules fill:#fff,stroke:#9ca3af,stroke-dasharray:5 3
+
+    class Agent primary
+    class Ollama external
+    class Rules rules</code></div>
+
+  <div class="section-label">렌더링 결과</div>
+  <div class="mermaid-render">
+    <pre class="mermaid">
+flowchart TD
+    User([사내 직원])
+
+    subgraph Ch2["Ch.2 · 대시보드"]
+        FastAPI["FastAPI<br/>사내 대시보드 API"]
+    end
+
+    subgraph Ch6["Ch.6 · 오케스트레이션"]
+        Router{"Query Router<br/>규칙 · 스키마 · LLM 분류"}
+        Agent["ReAct Agent<br/>생각 · 실행 · 관찰"]
+        MCP["MCP Tools<br/>DB 조회 함수"]
+    end
+
+    subgraph Ch45["Ch.4~5 · 검색"]
+        Pipeline["Doc Pipeline<br/>파싱 · 청킹 · 임베딩"]
+        LCEL["LCEL Chain<br/>검색기 → 프롬프트 → LLM"]
+    end
+
+    subgraph Data["Ch.2·4 · 데이터"]
+        ChromaDB[("ChromaDB<br/>벡터 저장소")]
+        PostgreSQL[("PostgreSQL<br/>직원·연차·매출")]
+    end
+
+    subgraph Tuning["Ch.8~10 · 튜닝 · 평가"]
+        Rerank["Hybrid+Rerank<br/>BM25 + 교차인코더"]
+        Rewrite["Query Rewrite<br/>HyDE · 멀티쿼리"]
+        Vision["Vision · OCR<br/>이미지 문서"]
+        Eval["Eval Framework<br/>정확도@k · 환각률"]
+    end
+
+    subgraph Ops["Ch.7 · 운영"]
+        Cache["ResponseCache · TokenTracker"]
+    end
+
+    subgraph Ext["Ch.1 · 외부"]
+        Ollama["Ollama LLM<br/>DeepSeek-R1:8b"]
+    end
+
+    Rules["Ch.3 · 문서 규칙 (이론)<br/>메타데이터 · 폴더 구조<br/>재인덱싱 전략"]
+
+    User -- "1" --> FastAPI
+    FastAPI -- "2" --> Router
+    Router -- "3" --> Agent
+    Agent -- "4a" --> MCP
+    Agent -- "4b" --> LCEL
+    MCP -- "5" --> PostgreSQL
+    LCEL -- "5" --> ChromaDB
+    Agent -- "6" --> Ollama
+
+    Pipeline -. "I: 인제스천" .-> ChromaDB
+    Rules -. "규칙 참조" .-> Pipeline
+    LCEL -. "품질 향상" .-> Rerank
+
+    classDef primary fill:#2563eb,stroke:#1e40af,color:#fff
+    classDef external fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:5 3,color:#6b7280
+    classDef rules fill:#fff,stroke:#9ca3af,stroke-dasharray:5 3
+
+    class Agent primary
+    class Ollama external
+    class Rules rules
+    </pre>
+  </div>
+</div>
+
+<!-- ===================== B. 간결 버전 ===================== -->
+<div class="design-block">
+  <span class="badge" style="background:#059669;">B. 간결 버전 (서브그래프 없이)</span>
+  <div class="design-title">박스만. Notion·깃허브 이슈 같은 곳에서 바로 쓰기 좋음</div>
+
+  <div class="section-label">MERMAID CODE</div>
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code id="code-b">flowchart TD
+    User([사내 직원])
+    FastAPI[FastAPI · 대시보드]
+    Router{Query Router}
+    Agent[["ReAct Agent"]]
+    MCP[MCP Tools]
+    LCEL[LCEL Chain]
+    Pipeline[Doc Pipeline]
+    ChromaDB[("ChromaDB")]
+    PostgreSQL[("PostgreSQL")]
+    Ollama(["Ollama LLM<br/>외부"])
+    Rules["Ch.3 · 문서 규칙"]
+
+    User --1--> FastAPI
+    FastAPI --2--> Router
+    Router --3--> Agent
+    Agent --4a--> MCP
+    Agent --4b--> LCEL
+    MCP --5--> PostgreSQL
+    LCEL --5--> ChromaDB
+    Agent --6--> Ollama
+    Pipeline -.인제스천.-> ChromaDB
+    Rules -.규칙 참조.-> Pipeline
+
+    style Agent fill:#2563eb,color:#fff
+    style Ollama stroke-dasharray: 5 3
+    style Rules stroke-dasharray: 5 3</code></div>
+
+  <div class="section-label">렌더링 결과</div>
+  <div class="mermaid-render">
+    <pre class="mermaid">
+flowchart TD
+    User([사내 직원])
+    FastAPI[FastAPI · 대시보드]
+    Router{Query Router}
+    Agent[["ReAct Agent"]]
+    MCP[MCP Tools]
+    LCEL[LCEL Chain]
+    Pipeline[Doc Pipeline]
+    ChromaDB[("ChromaDB")]
+    PostgreSQL[("PostgreSQL")]
+    Ollama(["Ollama LLM<br/>외부"])
+    Rules["Ch.3 · 문서 규칙"]
+
+    User --1--> FastAPI
+    FastAPI --2--> Router
+    Router --3--> Agent
+    Agent --4a--> MCP
+    Agent --4b--> LCEL
+    MCP --5--> PostgreSQL
+    LCEL --5--> ChromaDB
+    Agent --6--> Ollama
+    Pipeline -.인제스천.-> ChromaDB
+    Rules -.규칙 참조.-> Pipeline
+
+    style Agent fill:#2563eb,color:#fff
+    style Ollama stroke-dasharray: 5 3
+    style Rules stroke-dasharray: 5 3
+    </pre>
+  </div>
+</div>
+
+<!-- ===================== C. LR (가로) ===================== -->
+<div class="design-block">
+  <span class="badge" style="background:#7c3aed;">C. 가로 방향 (LR)</span>
+  <div class="design-title">왼쪽 → 오른쪽 흐름. 슬라이드/블로그 가로 레이아웃에 적합</div>
+
+  <div class="section-label">MERMAID CODE</div>
+  <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">복사</button><code id="code-c">flowchart LR
+    User([사내 직원])
+
+    subgraph Front["대시보드"]
+        FastAPI[FastAPI]
+    end
+
+    subgraph Orch["오케스트레이션"]
+        Router{Router}
+        Agent[["ReAct Agent"]]
+    end
+
+    subgraph Search["검색"]
+        LCEL[LCEL Chain]
+        MCP[MCP Tools]
+        Pipeline[Doc Pipeline]
+    end
+
+    subgraph DataLayer["데이터"]
+        ChromaDB[("ChromaDB")]
+        PostgreSQL[("PostgreSQL")]
+    end
+
+    Ollama(["Ollama LLM"])
+    Rules["Ch.3<br/>문서 규칙"]
+
+    User --1--> FastAPI --2--> Router --3--> Agent
+    Agent --4a--> MCP --5--> PostgreSQL
+    Agent --4b--> LCEL --5--> ChromaDB
+    Agent --6--> Ollama
+    Pipeline -.인제스천.-> ChromaDB
+    Rules -.규칙.-> Pipeline
+
+    style Agent fill:#2563eb,color:#fff
+    style Ollama stroke-dasharray: 5 3
+    style Rules stroke-dasharray: 5 3</code></div>
+
+  <div class="section-label">렌더링 결과</div>
+  <div class="mermaid-render">
+    <pre class="mermaid">
+flowchart LR
+    User([사내 직원])
+
+    subgraph Front["대시보드"]
+        FastAPI[FastAPI]
+    end
+
+    subgraph Orch["오케스트레이션"]
+        Router{Router}
+        Agent[["ReAct Agent"]]
+    end
+
+    subgraph Search["검색"]
+        LCEL[LCEL Chain]
+        MCP[MCP Tools]
+        Pipeline[Doc Pipeline]
+    end
+
+    subgraph DataLayer["데이터"]
+        ChromaDB[("ChromaDB")]
+        PostgreSQL[("PostgreSQL")]
+    end
+
+    Ollama(["Ollama LLM"])
+    Rules["Ch.3<br/>문서 규칙"]
+
+    User --1--> FastAPI --2--> Router --3--> Agent
+    Agent --4a--> MCP --5--> PostgreSQL
+    Agent --4b--> LCEL --5--> ChromaDB
+    Agent --6--> Ollama
+    Pipeline -.인제스천.-> ChromaDB
+    Rules -.규칙.-> Pipeline
+
+    style Agent fill:#2563eb,color:#fff
+    style Ollama stroke-dasharray: 5 3
+    style Rules stroke-dasharray: 5 3
+    </pre>
+  </div>
+</div>
+
+<!-- ===================== 사용 가이드 ===================== -->
+<div class="design-block" style="background:#f7fafc;">
+  <div class="design-title">사용 가이드</div>
+  <ul style="font-size:13px; color:#4a5568; padding-left:20px; line-height:2;">
+    <li><b>Notion</b>: <code>/mermaid</code> 블록에 코드 붙여넣기</li>
+    <li><b>GitHub</b>: 이슈·PR·README에서 <code>```mermaid ... ```</code> 코드 블록 사용</li>
+    <li><b>Obsidian</b>: 코드 블록 언어를 <code>mermaid</code>로 지정</li>
+    <li><b>mermaid.live</b>: <a href="https://mermaid.live" target="_blank">mermaid.live</a>에 코드 붙여넣고 PNG/SVG 내보내기</li>
+    <li><b>기술서적</b>: Markdown에서 <code>mermaid</code> 코드블록 → pub-build 파이프라인이 PNG 렌더링</li>
+  </ul>
+</div>
+
+</div>
+
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { curve: 'basis', htmlLabels: true } });
+
+function copyCode(btn) {
+  const code = btn.nextElementSibling.textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = '복사됨!';
+    btn.style.background = '#059669';
+    setTimeout(() => { btn.textContent = originalText; btn.style.background = '#4a5568'; }, 1500);
+  });
+}
+</script>
+</body>
+</html>

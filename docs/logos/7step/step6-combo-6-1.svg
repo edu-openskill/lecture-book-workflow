@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 110">
+  <rect width="480" height="110" fill="white" rx="8"/>
+  <text x="12" y="16" font-family="'Pretendard',sans-serif" font-size="10" fill="#aaa">6-1. 도형화 + Monospace</text>
+  <g transform="translate(8,14) scale(0.42)">
+    <path d="M 15 5 L 62 5 L 75 18 L 75 95 L 15 95 Z" fill="white" stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M 62 5 L 62 18 L 75 18" fill="none" stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="25" y1="32" x2="58" y2="32" stroke="#008080" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="29" y1="44" x2="62" y2="44" stroke="#008080" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/>
+    <line x1="25" y1="56" x2="52" y2="56" stroke="#008080" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+    <line x1="29" y1="68" x2="56" y2="68" stroke="#008080" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/>
+    <polyline points="30,80 22,86 30,92" fill="none" stroke="#1A1A1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+    <line x1="37" y1="79" x2="47" y2="93" stroke="#1A1A1A" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+    <polyline points="54,80 62,86 54,92" fill="none" stroke="#1A1A1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  </g>
+  <text x="55" y="50" font-family="'SF Mono','Fira Code',monospace" font-size="30" font-weight="800" letter-spacing="1.5" fill="#1A1A1A">OPENSKILLBOOKS</text>
+  <line x1="55" y1="60" x2="460" y2="60" stroke="#008080" stroke-width="0.8" opacity="0.25"/>
+  <text x="57" y="80" font-family="'Pretendard',sans-serif" font-size="12" letter-spacing="4" fill="#008080" opacity="0.6">Hands-on Dev Cookbook</text>
+</svg>

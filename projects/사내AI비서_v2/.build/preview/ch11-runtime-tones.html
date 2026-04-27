@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Runtime 컬럼 4가지 톤 조정 — D 기반</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+body { font-family: var(--font-body); color: var(--color-text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 32px 96px; line-height: 1.6; }
+h1 { font-size: var(--fs-4xl); color: var(--color-text-heading); border-bottom: 2px solid var(--color-text-heading); padding-bottom: var(--space-sm); margin-bottom: var(--space-sm); }
+.intro { color: var(--color-text-secondary); font-size: var(--fs-lg); margin-bottom: var(--space-3xl); line-height: 1.7; }
+h2 { margin-top: var(--space-3xl); font-size: var(--fs-2xl); color: var(--color-text-heading); letter-spacing: -0.3px; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-sm); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 0; }
+.tags .t { background: var(--color-surface); border: 1px solid var(--color-border); padding: 2px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; color: var(--color-text-muted); letter-spacing: 1px; }
+.note { color: var(--color-text-muted); font-size: var(--fs-sm); margin-top: var(--space-sm); line-height: 1.7; }
+
+/* ───── 공통 스타일 (col-c, col-t, llm, stores 같음) ───── */
+.rt {
+  --ink: var(--color-text-heading);
+  --muted: var(--color-text-secondary);
+  --faint: #e2e8f0;
+  --accent: var(--color-accent);
+  --accent-bg: var(--color-accent-bg);
+  --accent-border: var(--color-accent-border);
+  --accent-text: var(--color-accent-text);
+  --info: var(--color-info);
+  --info-bg: var(--color-info-bg);
+  --info-text: var(--color-info-text);
+  width:100%; background:white; padding:var(--space-2xl) var(--space-xl); margin:var(--space-xl) 0;
+  font-family: var(--font-body);
+  border-top: 3px solid var(--accent);
+  border-bottom: 1px solid var(--faint);
+}
+.rt .hd { text-align:center; margin-bottom:var(--space-xl); }
+.rt .hd .sub { font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:4px; text-transform:uppercase; font-weight:700; margin-bottom:6px; }
+.rt .hd .ti { font-size:22px; color:var(--ink); font-weight:800; letter-spacing:-0.5px; }
+.rt .llm { display:flex; justify-content:center; margin-bottom:var(--space-sm); }
+.rt .llm .bx { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-sm) var(--space-xl); text-align:center; min-width:360px; }
+.rt .llm .bx .l { font-family:var(--font-mono); font-size:9px; color:var(--info-text); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.rt .llm .bx .n { font-size:16px; color:var(--ink); font-weight:700; margin:2px 0; }
+.rt .llm .bx .ms { display:flex; flex-direction:column; gap:2px; margin-top:6px; padding-top:6px; border-top:1px dashed var(--info); font-family:var(--font-mono); font-size:10px; }
+.rt .llm .bx .m { display:grid; grid-template-columns:120px 1fr; gap:var(--space-sm); text-align:left; }
+.rt .llm .bx .m .mn { color:var(--info-text); font-weight:700; }
+.rt .llm .bx .m .mu { color:var(--muted); font-size:10px; }
+.rt .flow { display:flex; justify-content:center; gap:var(--space-3xl); margin:var(--space-xs) 0 var(--space-md); font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.rt .flow span { border-bottom:1px solid var(--accent); padding-bottom:2px; }
+.rt .grid { display:grid; grid-template-columns:170px 1fr 220px; gap:var(--space-lg); align-items:stretch; }
+
+.rt .col-c { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-md) var(--space-sm); display:flex; flex-direction:column; justify-content:space-between; min-height:320px; }
+.rt .col-c .us { text-align:center; padding:var(--space-sm) 0; border-bottom:1px dashed var(--info); }
+.rt .col-c .us .ic { width:30px; height:30px; background:var(--info); color:white; border-radius:50%; margin:0 auto 4px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; }
+.rt .col-c .us .n { font-size:15px; color:var(--ink); font-weight:700; }
+.rt .col-c .us .s { font-family:var(--font-mono); font-size:10px; color:var(--info-text); margin-top:2px; }
+.rt .col-c .fm { display:flex; justify-content:space-between; padding:var(--space-sm) 0; font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--info-text); font-weight:700; }
+.rt .col-c .ap { text-align:center; padding:var(--space-sm) 0; border-top:1px dashed var(--info); }
+.rt .col-c .ap .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.rt .col-c .ap .n { font-size:15px; color:var(--ink); font-weight:700; margin-top:3px; }
+.rt .col-c .ap .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:2px; }
+
+.rt .col-t { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-lg) var(--space-sm) var(--space-sm); position:relative; min-height:320px; }
+.rt .col-t .ti { position:absolute; top:-11px; left:var(--space-md); background:var(--info); color:white; padding:3px 10px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; }
+.rt .col-t .tool { background:white; display:grid; grid-template-columns:20px 1fr auto; align-items:center; gap:var(--space-sm); padding:var(--space-sm); border:1px solid var(--faint); margin-bottom:4px; }
+.rt .col-t .tool:last-child { margin-bottom:0; }
+.rt .col-t .tool .no { font-family:var(--font-mono); font-size:9px; color:var(--info); font-weight:700; }
+.rt .col-t .tool .n { font-family:var(--font-mono); font-size:11px; color:var(--ink); font-weight:700; }
+.rt .col-t .tool .s { font-size:9px; color:var(--muted); margin-top:1px; }
+.rt .col-t .tool .b { font-family:var(--font-mono); font-size:9px; color:var(--info-text); background:var(--info-bg); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; border:1px solid var(--info); padding:2px 6px; }
+.rt .col-t .tool .b.rag { color:white; background:var(--accent); border-color:var(--accent); }
+
+.rt .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-lg); margin-top:var(--space-xl); padding-top:var(--space-md); border-top:2px dashed var(--accent-border); }
+.rt .stores .st { border:1px solid var(--info); background:var(--info-bg); padding:var(--space-sm) var(--space-md); text-align:center; }
+.rt .stores .st .l { font-family:var(--font-mono); font-size:10px; color:var(--info-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.rt .stores .st .n { font-size:15px; color:var(--ink); font-weight:700; margin:3px 0; }
+.rt .stores .st .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); }
+.rt .cap { margin-top:var(--space-md); padding-top:var(--space-sm); border-top:1px solid var(--accent); font-size:11px; color:var(--muted); text-align:center; line-height:1.6; }
+
+/* ═══════════════════════════════════════════════════════════
+   T1. Whisper — 가장 연함 (hairline only)
+   ═══════════════════════════════════════════════════════════ */
+.t1 .col-a { border:1px solid var(--faint); background:white; padding:var(--space-lg) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.t1 .col-a .ti { position:absolute; top:-9px; left:var(--space-md); background:white; padding:0 var(--space-sm); font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; color:var(--muted); }
+.t1 .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.t1 .col-a .chip { border:1px solid var(--faint); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.t1 .col-a .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.t1 .col-a .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:3px; }
+.t1 .col-a .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); margin-top:1px; }
+.t1 .col-a .loop { border:1px solid var(--faint); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.t1 .col-a .loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+.t1 .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.t1 .col-a .loop .st { font-family:var(--font-mono); font-size:10px; padding:3px 10px; border:1px solid var(--faint); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--ink); }
+.t1 .col-a .loop .arr { color:var(--muted); font-size:11px; }
+.t1 .col-a .engine { border:1px solid var(--faint); border-left:2px solid var(--accent); padding:var(--space-sm); margin:var(--space-sm) 0; text-align:center; }
+.t1 .col-a .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.t1 .col-a .engine .en { font-size:12px; color:var(--ink); font-weight:700; margin-bottom:var(--space-xs); }
+.t1 .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.t1 .col-a .engine .es .s { border:1px solid var(--faint); padding:3px 2px; text-align:center; color:var(--ink); font-weight:700; }
+.t1 .col-a .core { border:1px solid var(--faint); padding:var(--space-sm); text-align:center; }
+.t1 .col-a .core .l { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.t1 .col-a .core .n { font-size:15px; color:var(--ink); font-weight:700; margin-top:3px; }
+.t1 .col-a .core .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   T2. Soft Hint — 포인트만 살짝 (연중)
+   ═══════════════════════════════════════════════════════════ */
+.t2 .col-a { border:1px solid var(--accent-border); background:white; padding:var(--space-lg) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.t2 .col-a .ti { position:absolute; top:-9px; left:var(--space-md); background:white; padding:0 var(--space-sm); font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; color:var(--accent); }
+.t2 .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.t2 .col-a .chip { border:1px solid var(--faint); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.t2 .col-a .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.t2 .col-a .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:3px; }
+.t2 .col-a .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); margin-top:1px; }
+.t2 .col-a .loop { border:1px solid var(--faint); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.t2 .col-a .loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+.t2 .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.t2 .col-a .loop .st { font-family:var(--font-mono); font-size:10px; padding:3px 10px; border:1px solid var(--accent-border); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--ink); }
+.t2 .col-a .loop .arr { color:var(--accent); font-size:11px; }
+.t2 .col-a .engine { border:1px solid var(--accent-border); border-left:3px solid var(--accent); padding:var(--space-sm); margin:var(--space-sm) 0; text-align:center; }
+.t2 .col-a .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.t2 .col-a .engine .en { font-size:13px; color:var(--ink); font-weight:700; margin-bottom:var(--space-xs); }
+.t2 .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.t2 .col-a .engine .es .s { border:1px solid var(--accent-border); padding:3px 2px; text-align:center; color:var(--accent-text); font-weight:700; }
+.t2 .col-a .core { border:1px solid var(--accent); padding:var(--space-sm); text-align:center; }
+.t2 .col-a .core .l { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.t2 .col-a .core .n { font-size:15px; color:var(--ink); font-weight:700; margin-top:3px; }
+.t2 .col-a .core .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   T3. Balanced — 균형 (중간)
+   ═══════════════════════════════════════════════════════════ */
+.t3 .col-a { border:1.5px solid var(--accent); background:white; padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.t3 .col-a::before { content:""; position:absolute; top:0; left:0; right:0; height:4px; background:var(--accent); }
+.t3 .col-a .ti { position:absolute; top:-10px; left:var(--space-md); background:white; border:1px solid var(--accent); padding:3px 10px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; color:var(--accent); }
+.t3 .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.t3 .col-a .chip { border:1px solid var(--accent-border); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.t3 .col-a .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.t3 .col-a .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:3px; }
+.t3 .col-a .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); margin-top:1px; }
+.t3 .col-a .loop { border:1px solid var(--accent-border); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.t3 .col-a .loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+.t3 .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.t3 .col-a .loop .st { font-family:var(--font-mono); font-size:10px; padding:3px 10px; border:1px solid var(--accent-border); background:var(--accent-bg); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--accent-text); }
+.t3 .col-a .loop .arr { color:var(--accent); font-size:11px; }
+.t3 .col-a .engine { border:1px solid var(--accent); padding:var(--space-sm); margin:var(--space-sm) 0; text-align:center; background:#f8f9ff; }
+.t3 .col-a .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.t3 .col-a .engine .en { font-size:13px; color:var(--ink); font-weight:700; margin-bottom:var(--space-xs); }
+.t3 .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.t3 .col-a .engine .es .s { background:white; border:1px solid var(--accent-border); padding:3px 2px; text-align:center; color:var(--accent-text); font-weight:700; }
+.t3 .col-a .core { background:var(--accent-bg); border:1px solid var(--accent); padding:var(--space-sm); text-align:center; }
+.t3 .col-a .core .l { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.t3 .col-a .core .n { font-size:15px; color:var(--ink); font-weight:700; margin-top:3px; }
+.t3 .col-a .core .s { font-family:var(--font-mono); font-size:10px; color:var(--accent-text); margin-top:2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   T4. Featured — 전경 (진함)
+   ═══════════════════════════════════════════════════════════ */
+.t4 .col-a { border:2px solid var(--accent); background:#f8f9ff; padding:var(--space-2xl) var(--space-md) var(--space-md); position:relative; min-height:320px; }
+.t4 .col-a .ti { position:absolute; top:-11px; left:var(--space-md); background:var(--accent); color:white; padding:4px 12px; font-family:var(--font-mono); font-size:10px; letter-spacing:3px; font-weight:700; text-transform:uppercase; }
+.t4 .col-a .ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.t4 .col-a .chip { background:white; border:1px solid var(--accent-border); padding:var(--space-sm) var(--space-xs); text-align:center; }
+.t4 .col-a .chip .l { font-family:var(--font-mono); font-size:8px; color:var(--accent); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.t4 .col-a .chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:3px; }
+.t4 .col-a .chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); margin-top:1px; }
+.t4 .col-a .loop { background:white; border:1px solid var(--accent-border); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-sm); }
+.t4 .col-a .loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+.t4 .col-a .loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.t4 .col-a .loop .st { font-family:var(--font-mono); font-size:10px; padding:3px 10px; border:1px solid var(--accent); background:var(--accent-bg); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--accent-text); }
+.t4 .col-a .loop .arr { color:var(--accent); font-size:11px; font-weight:800; }
+.t4 .col-a .engine { background:white; border:1px solid var(--accent-border); border-left:4px solid var(--accent); padding:var(--space-sm); margin:var(--space-sm) 0; text-align:center; }
+.t4 .col-a .engine .el { font-family:var(--font-mono); font-size:9px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.t4 .col-a .engine .en { font-size:13px; color:var(--ink); font-weight:700; margin-bottom:var(--space-xs); }
+.t4 .col-a .engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.t4 .col-a .engine .es .s { background:var(--accent-bg); border:1px solid var(--accent-border); padding:3px 2px; text-align:center; color:var(--accent-text); font-weight:700; }
+.t4 .col-a .core { background:var(--accent); color:white; padding:var(--space-sm); text-align:center; }
+.t4 .col-a .core .l { font-family:var(--font-mono); font-size:9px; color:white; opacity:0.8; letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.t4 .col-a .core .n { font-size:15px; font-weight:700; margin-top:3px; }
+.t4 .col-a .core .s { font-family:var(--font-mono); font-size:10px; opacity:0.85; margin-top:2px; }
+</style>
+</head>
+<body>
+
+<h1>Runtime 컬럼 톤 조정 프리뷰 — 4단계</h1>
+<p class="intro">
+D 디자인의 Runtime(에이전트 실행 레이어) 컬럼만 4단계 톤으로 조정. LLM·User·Tools·Stores는 고정. <strong>Runtime 컬럼의 채도·명도·대비</strong>만 T1 → T4로 점점 올라갑니다.
+</p>
+
+<!-- ═════════ T1 Whisper ═════════ -->
+<h2>T1. Whisper — 가장 연함 (현재 상태)</h2>
+<p class="note"><strong>대비 0.5 / 채도 0 / 명도 최고</strong>. Runtime 컬럼이 다른 컬럼들과 거의 구분이 안 됨. 타이틀은 muted 회색. Core·Engine 모두 hairline만. 인디고는 engine 좌측 2px bar 1곳에만.</p>
+<div class="tags">
+<span class="t">border 1px #e2e8f0</span>
+<span class="t">bg white</span>
+<span class="t">title: muted gray</span>
+<span class="t">core: hairline</span>
+<span class="t">engine: 2px accent bar only</span>
+</div>
+
+<div class="rt t1">
+<div class="hd"><div class="sub">System Architecture</div><div class="ti">T1 — Whisper</div></div>
+<div class="llm"><div class="bx"><div class="l">External · Ollama</div><div class="n">로컬 LLM 3종</div><div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div></div></div>
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+<div class="core"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+</div>
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">T1 Whisper — Runtime은 hairline으로만 구분</div>
+</div>
+
+<!-- ═════════ T2 Soft Hint ═════════ -->
+<h2>T2. Soft Hint — 포인트 힌트 (연중)</h2>
+<p class="note"><strong>대비 1 / 채도 1 / 명도 높음</strong>. Border는 `--accent-border`(#c7d2fe) 연한 인디고. 타이틀·라벨에 accent 색 적용. Core는 accent 외곽선. Engine은 좌측 3px + 외곽 연한 accent-border.</p>
+<div class="tags">
+<span class="t">border 1px #c7d2fe (accent-border)</span>
+<span class="t">bg white</span>
+<span class="t">title: accent 인디고 텍스트</span>
+<span class="t">core: accent solid border</span>
+<span class="t">engine: accent-border + 3px bar</span>
+</div>
+
+<div class="rt t2">
+<div class="hd"><div class="sub">System Architecture</div><div class="ti">T2 — Soft Hint</div></div>
+<div class="llm"><div class="bx"><div class="l">External · Ollama</div><div class="n">로컬 LLM 3종</div><div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div></div></div>
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+<div class="core"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+</div>
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">T2 Soft Hint — Runtime은 accent 계열 hairline으로 힌트만</div>
+</div>
+
+<!-- ═════════ T3 Balanced ═════════ -->
+<h2>T3. Balanced — 균형 (중간, 추천)</h2>
+<p class="note"><strong>대비 2 / 채도 1.5 / 명도 중간</strong>. 상단 4px accent bar로 중심 명시. 타이틀은 accent border 노치. Core·Engine 배경에 미세한 accent tint(#f8f9ff)로 따뜻한 인디고 워머. stage 칩은 accent-bg 연파랑 채움. <strong>User/Tools 블루와 밸런스 맞음</strong>.</p>
+<div class="tags">
+<span class="t">border 1.5px + top 4px accent bar</span>
+<span class="t">bg white</span>
+<span class="t">title: accent hairline chip</span>
+<span class="t">core: accent-bg + accent border</span>
+<span class="t">engine: #f8f9ff micro tint</span>
+</div>
+
+<div class="rt t3">
+<div class="hd"><div class="sub">System Architecture</div><div class="ti">T3 — Balanced ★</div></div>
+<div class="llm"><div class="bx"><div class="l">External · Ollama</div><div class="n">로컬 LLM 3종</div><div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div></div></div>
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+<div class="core"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+</div>
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">T3 Balanced — Core는 accent-bg + accent 외곽, 상단 4px bar로 중심 강조</div>
+</div>
+
+<!-- ═════════ T4 Featured ═════════ -->
+<h2>T4. Featured — 전경 (진함, 센터 강조)</h2>
+<p class="note"><strong>대비 3 / 채도 2 / 명도 낮아짐</strong>. 컬럼 전체에 연한 accent tint(#f8f9ff). 타이틀 accent solid chip(흰 글자). Core는 accent 솔리드 + 흰 글자. Engine left 4px bar + stage cells accent-bg. <strong>가장 진함, 이전 "너무 진함" 수준보단 덜함</strong>.</p>
+<div class="tags">
+<span class="t">border 2px accent</span>
+<span class="t">bg #f8f9ff (≈2% accent tint)</span>
+<span class="t">title: accent solid chip</span>
+<span class="t">core: accent solid, white text</span>
+<span class="t">engine: accent-bg stages + 4px bar</span>
+</div>
+
+<div class="rt t4">
+<div class="hd"><div class="sub">System Architecture</div><div class="ti">T4 — Featured</div></div>
+<div class="llm"><div class="bx"><div class="l">External · Ollama</div><div class="n">로컬 LLM 3종</div><div class="ms">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div></div></div>
+<div class="flow"><span>↑ 프롬프트</span><span>↓ 응답</span></div>
+<div class="grid">
+<div class="col-c">
+<div class="us"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="fm"><span>↓ 질문</span><span>↑ 답변</span></div>
+<div class="ap"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="col-a">
+<div class="ti">Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+<div class="core"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+</div>
+<div class="col-t">
+<div class="ti">Tools · MCP</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+<div class="cap">T4 Featured — Runtime 전체 연한 accent tint + Core 솔리드 인디고</div>
+</div>
+
+<h2 style="margin-top:96px">결정 가이드</h2>
+<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);margin-top:var(--space-lg)">
+<thead><tr style="background:var(--color-surface);border-bottom:2px solid var(--color-text-heading)">
+<th style="padding:var(--space-md) var(--space-sm);text-align:left;width:70px">톤</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">채도·명도·대비</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">핵심 시각 신호</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">어울리는 상황</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">T1 Whisper</td>
+<td style="padding:var(--space-md) var(--space-sm)">채도 0 · 명도 最高 · 대비 0.5</td>
+<td style="padding:var(--space-md) var(--space-sm)">회색 hairline, engine 좌측 2px bar만 인디고</td>
+<td style="padding:var(--space-md) var(--space-sm)">User/Tools만 존재감 있으면 됨. Runtime은 "배경"</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">T2 Soft Hint</td>
+<td style="padding:var(--space-md) var(--space-sm)">채도 1 · 명도 高 · 대비 1</td>
+<td style="padding:var(--space-md) var(--space-sm)">accent-border 연한 인디고 보더 + 인디고 텍스트</td>
+<td style="padding:var(--space-md) var(--space-sm)">톤 맞추면서 Runtime 정체성 약간만 살리고 싶을 때</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border);background:var(--color-accent-bg)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">T3 Balanced ★</td>
+<td style="padding:var(--space-md) var(--space-sm)">채도 1.5 · 명도 中 · 대비 2</td>
+<td style="padding:var(--space-md) var(--space-sm)">상단 4px bar + accent 텍스트 + Core 연한 tint</td>
+<td style="padding:var(--space-md) var(--space-sm)"><strong>세 컬럼 밸런스 최적</strong>. Runtime 중심성 유지</td>
+</tr>
+<tr>
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">T4 Featured</td>
+<td style="padding:var(--space-md) var(--space-sm)">채도 2 · 명도 低 · 대비 3</td>
+<td style="padding:var(--space-md) var(--space-sm)">컬럼 전체 tint + solid accent Core</td>
+<td style="padding:var(--space-md) var(--space-sm)">Runtime이 "엔진"임을 강하게 외치고 싶을 때</td>
+</tr>
+</tbody>
+</table>
+
+<p style="margin-top:var(--space-lg);font-size:var(--fs-md);color:var(--color-text-muted)">
+<strong>추천</strong>: T3 Balanced (★ 행). 상단 4px bar + 흰 배경 + 미세 tint Core가 User·Tools 블루와 조화를 이루면서 Runtime이 중앙 엔진임을 분명히 합니다. T2도 좋은 대안.
+</p>
+
+</body>
+</html>

@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 
-def analyze_whitespace(img_path: Path, padding: int = 6) -> dict:
+def analyze_whitespace(img_path: Path, padding: int = 14) -> dict:
     """이미지의 공백 영역을 분석하여 통계 반환"""
     from PIL import Image, ImageChops
 
@@ -56,7 +56,7 @@ def analyze_whitespace(img_path: Path, padding: int = 6) -> dict:
     }
 
 
-def autocrop_image(img_path: Path, padding: int = 6, dry_run: bool = False) -> dict:
+def autocrop_image(img_path: Path, padding: int = 14, dry_run: bool = False) -> dict:
     """이미지 공백 제거. dry_run=True이면 분석만."""
     from PIL import Image, ImageChops
 
@@ -93,7 +93,7 @@ def autocrop_image(img_path: Path, padding: int = 6, dry_run: bool = False) -> d
     return stats
 
 
-def process_path(target: Path, padding: int = 6, dry_run: bool = False) -> list[dict]:
+def process_path(target: Path, padding: int = 14, dry_run: bool = False) -> list[dict]:
     """파일 또는 디렉토리 처리"""
     results = []
 

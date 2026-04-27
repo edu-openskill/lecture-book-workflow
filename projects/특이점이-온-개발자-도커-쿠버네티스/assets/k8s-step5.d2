@@ -1,0 +1,67 @@
+direction: right
+
+namespace: Namespace {
+  style: {
+    stroke: "#999"
+    stroke-dash: 4
+    fill: "#fafafa"
+    border-radius: 12
+  }
+
+  ingress: Ingress\n외부 요청을 내부로 연결 {
+    style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  service: Service\n고정 접근 주소 {
+    style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  deployment: Deployment\n"Pod N개 유지하라" {
+    style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  replicaset: ReplicaSet\nPod 수 조절 {
+    style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  pod1: Pod ① {
+    style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+  pod2: Pod ② {
+    style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+  pod3: Pod ③ {
+    style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  configmap: ConfigMap\n설정값 {
+    style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  secret: Secret\n민감 정보 {
+    style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  pv: PV\n저장 공간 {
+    style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  pvc: PVC\n공간 요청 {
+    style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  ingress -> service: 요청 전달 { style: { stroke: "#333" } }
+  deployment -> replicaset: 생성 { style: { stroke: "#333" } }
+  replicaset -> pod1 { style: { stroke: "#333" } }
+  replicaset -> pod2 { style: { stroke: "#333" } }
+  replicaset -> pod3 { style: { stroke: "#333" } }
+  service -> pod1 { style: { stroke: "#333" } }
+  service -> pod2 { style: { stroke: "#333" } }
+  service -> pod3 { style: { stroke: "#333" } }
+
+  configmap -> pod2: 설정 주입 { style: { stroke: "#333"; stroke-dash: 3 } }
+  secret -> pod2: 비밀 주입 { style: { stroke: "#333"; stroke-dash: 3 } }
+
+  pv -> pvc: 바인딩 { style: { stroke: "#333" } }
+  pvc -> pod3: 저장소 연결 { style: { stroke: "#333"; stroke-dash: 3 } }
+}

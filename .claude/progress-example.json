@@ -140,8 +140,7 @@
       "status": "pending",
       "artifacts": {
         "preface": null,
-        "afterword": null,
-        "appendix": null
+        "afterword": null
       },
       "final_title": null,
       "total_pages": null,

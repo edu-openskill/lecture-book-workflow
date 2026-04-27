@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 구성도 — D1 Editorial · 프로젝트 토큰 적용</title>
+<style>
+/* ========= 프로젝트 디자인 토큰 (tokens.css 복제) ========= */
+:root {
+  --color-text: #1e293b;
+  --color-text-heading: #2d3748;
+  --color-text-secondary: #718096;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-bg: #ffffff;
+  --color-surface: #fafbfc;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e0;
+  --color-border-dashed: #edf0f5;
+  --color-accent: #4f46e5;
+  --color-accent-bg: #eef2ff;
+  --color-accent-border: #c7d2fe;
+  --color-accent-text: #3730a3;
+  --color-accent-warm: #ff7849;
+  --color-accent-warm-text: #7b341e;
+  --color-info: #3b82f6;
+  --color-info-bg: #eff6ff;
+  --color-info-text: #1e40af;
+  --color-success: #059669;
+  --color-success-bg: #d1fae5;
+  --color-success-text: #166534;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+
+  --fs-footnote: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+  --fs-base: 14px;
+  --fs-lg: 15px;
+  --fs-xl: 17px;
+  --fs-2xl: 20px;
+  --fs-3xl: 24px;
+  --fs-4xl: 32px;
+
+  --font-body: "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: white;
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 24px 64px;
+  line-height: 1.55;
+}
+h1 {
+  font-size: var(--fs-4xl);
+  border-bottom: 2px solid var(--color-text-heading);
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-heading);
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+.intro {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  margin-bottom: var(--space-3xl);
+  line-height: 1.7;
+}
+.token-note {
+  background: var(--color-accent-bg);
+  border-left: 3px solid var(--color-accent);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  font-size: var(--fs-md);
+  color: var(--color-accent-text);
+  margin-bottom: var(--space-3xl);
+  line-height: 1.7;
+}
+.token-note code {
+  background: white;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  color: var(--color-accent);
+}
+
+/* ========= D1 Editorial · 프로젝트 토큰 ========= */
+.d1 {
+  background: var(--color-surface);
+  padding: 48px 40px;
+  margin: var(--space-2xl) 0;
+  overflow-x: auto;
+  border-radius: var(--radius-xl);
+}
+
+.d1 .header {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+}
+.d1 .header .sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: var(--space-xs);
+  font-weight: 700;
+}
+.d1 .header .title {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-4xl);
+  color: var(--color-text-heading);
+  letter-spacing: -0.5px;
+  font-weight: 800;
+}
+.d1 .header .desc {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+/* ---- LLM (상단) ---- */
+.d1 .llm {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+.d1 .llm .box {
+  background: var(--color-bg);
+  border: 1px solid var(--color-text-heading);
+  padding: var(--space-lg) var(--space-3xl);
+  text-align: center;
+  position: relative;
+  min-width: 320px;
+}
+.d1 .llm .box::before,
+.d1 .llm .box::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 6px;
+  border: 1px solid var(--color-text-heading);
+}
+.d1 .llm .box::before { left: -4px; border-right: none; }
+.d1 .llm .box::after { right: -4px; border-left: none; }
+.d1 .llm .box .l {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.d1 .llm .box .n {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-2xl);
+  color: var(--color-text-heading);
+  margin: 2px 0;
+}
+.d1 .llm .box .s {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+}
+.d1 .llm .box .models {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px dashed var(--color-border);
+}
+.d1 .llm .box .m {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-md);
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  text-align: left;
+}
+.d1 .llm .box .m .mn {
+  color: var(--color-text-heading);
+  font-weight: 700;
+}
+.d1 .llm .box .m .mu {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+.d1 .llm .box .m .ch {
+  display: inline-block;
+  background: var(--color-accent-bg);
+  color: var(--color-accent-text);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.d1 .llm-flow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin: var(--space-md) 0 var(--space-2xl);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.d1 .llm-flow .u { color: var(--color-accent); font-weight: 700; }
+.d1 .llm-flow .d { color: var(--color-success); font-weight: 700; }
+
+/* ---- Main 3-column ---- */
+.d1 .grid {
+  display: grid;
+  grid-template-columns: 180px 36px 1fr 36px 260px;
+  gap: var(--space-sm);
+  align-items: stretch;
+  min-width: 980px;
+}
+
+/* Agent ↔ Tools 화살표 */
+.d1 .flow-arrows {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-md);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.d1 .flow-arrows .fa-pair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.d1 .flow-arrows .fa-label {
+  font-size: 8px;
+  color: var(--color-text-subtle);
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.d1 .flow-arrows .fa-arrow {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1;
+}
+.d1 .flow-arrows .fa-arrow.call { color: var(--color-accent); }
+.d1 .flow-arrows .fa-arrow.ret { color: var(--color-success); }
+
+/* Client column */
+.d1 .col-c {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+}
+.d1 .col-c .user {
+  text-align: center;
+  padding: var(--space-lg) var(--space-sm);
+  border-bottom: 1px dashed var(--color-border);
+}
+.d1 .col-c .user .ico {
+  font-size: var(--fs-2xl);
+  color: var(--color-accent-warm);
+  margin-bottom: var(--space-xs);
+}
+.d1 .col-c .user .n {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-2xl);
+  color: var(--color-text-heading);
+}
+.d1 .col-c .user .s {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+.d1 .col-c .flow {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.d1 .col-c .flow .d { color: var(--color-accent); font-weight: 700; }
+.d1 .col-c .flow .u { color: var(--color-success); font-weight: 700; }
+.d1 .col-c .api {
+  text-align: center;
+  padding: var(--space-lg) var(--space-sm);
+  border-top: 1px dashed var(--color-border);
+}
+.d1 .col-c .api .l {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+.d1 .col-c .api .n {
+  font-size: var(--fs-2xl);
+  color: var(--color-text-heading);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.d1 .col-c .api .s {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+/* Agent column (accent indigo) */
+.d1 .col-a {
+  background: var(--color-bg);
+  border: 1px solid var(--color-text-heading);
+  padding: var(--space-2xl) var(--space-xl);
+  position: relative;
+  min-height: 380px;
+}
+.d1 .col-a .title {
+  position: absolute;
+  top: -8px;
+  left: var(--space-xl);
+  background: var(--color-surface);
+  padding: 0 var(--space-md);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--color-text-heading);
+}
+.d1 .col-a .ops {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+.d1 .col-a .chip {
+  background: var(--color-surface);
+  padding: var(--space-md) var(--space-sm);
+  text-align: center;
+  border-bottom: 2px solid var(--color-border);
+}
+.d1 .col-a .chip .l {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-text-subtle);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.d1 .col-a .chip .n {
+  font-size: var(--fs-md);
+  color: var(--color-text-heading);
+  font-weight: 700;
+}
+.d1 .col-a .chip .s {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 1px;
+}
+.d1 .col-a .sep {
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-base);
+  color: var(--color-accent);
+  margin: var(--space-lg) 0 var(--space-md);
+  position: relative;
+}
+.d1 .col-a .sep::before,
+.d1 .col-a .sep::after {
+  content: "";
+  display: inline-block;
+  width: 40px;
+  height: 1px;
+  background: var(--color-border);
+  vertical-align: middle;
+  margin: 0 var(--space-md);
+}
+.d1 .col-a .loop {
+  background: var(--color-surface);
+  padding: var(--space-md);
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+.d1 .col-a .loop .stages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+.d1 .col-a .loop .st {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-text-heading);
+}
+.d1 .col-a .loop .arr {
+  color: var(--color-text-subtle);
+  font-size: var(--fs-md);
+}
+.d1 .col-a .core {
+  text-align: center;
+  padding: var(--space-lg);
+  background: var(--color-accent-bg);
+}
+.d1 .col-a .core .loop-inner {
+  background: var(--color-bg);
+  padding: var(--space-md);
+  margin: var(--space-md) 0;
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-md);
+}
+.d1 .col-a .core .loop-inner .loop-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--color-accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+.d1 .col-a .core .loop-inner .stages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+.d1 .col-a .core .loop-inner .st {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-text-heading);
+}
+.d1 .col-a .core .loop-inner .arr {
+  color: var(--color-text-subtle);
+  font-size: var(--fs-md);
+}
+.d1 .col-a .core .l {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.d1 .col-a .core .n {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-2xl);
+  color: var(--color-text-heading);
+  margin-top: 2px;
+}
+.d1 .col-a .core .s {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+/* Tools column */
+.d1 .col-t {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: var(--space-2xl) var(--space-lg) var(--space-lg);
+  position: relative;
+  min-height: 380px;
+}
+.d1 .col-t .title {
+  position: absolute;
+  top: -8px;
+  left: var(--space-xl);
+  background: var(--color-surface);
+  padding: 0 var(--space-md);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--color-text-heading);
+}
+.d1 .col-t .tool {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-md);
+  align-items: center;
+  padding: var(--space-md) var(--space-xs);
+  border-bottom: 1px solid var(--color-border-dashed);
+}
+.d1 .col-t .tool:last-child { border-bottom: none; }
+.d1 .col-t .tool .no {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-subtle);
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+.d1 .col-t .tool .n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  color: var(--color-text-heading);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.d1 .col-t .tool .s {
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+  margin-top: 1px;
+}
+.d1 .col-t .tool .b {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-accent-warm-text);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: #fff4ed;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+}
+.d1 .col-t .tool .b.rag {
+  color: var(--color-accent-text);
+  background: var(--color-accent-bg);
+}
+
+/* Stores */
+.d1 .stores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-border);
+}
+.d1 .stores .st {
+  text-align: center;
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+.d1 .stores .st .l {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.d1 .stores .st .n {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-2xl);
+  color: var(--color-text-heading);
+  margin: 3px 0;
+}
+.d1 .stores .st .s {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+}
+
+.d1 .caption {
+  margin-top: var(--space-2xl);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-base);
+  color: var(--color-text-secondary);
+  text-align: center;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+
+/* Token palette preview */
+.palette {
+  background: var(--color-surface);
+  padding: var(--space-xl);
+  border-radius: var(--radius-xl);
+  margin-top: var(--space-3xl);
+}
+.palette h2 {
+  font-size: var(--fs-xl);
+  color: var(--color-text-heading);
+  margin: 0 0 var(--space-md);
+  font-weight: 700;
+}
+.palette .row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+}
+.palette .sw {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+.palette .sw .dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.palette .sw .name {
+  color: var(--color-text-heading);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.palette .sw .hex {
+  color: var(--color-text-secondary);
+  margin-left: 4px;
+}
+</style>
+</head>
+<body>
+
+<h1>D1 Editorial — 프로젝트 토큰 적용</h1>
+<p class="intro">
+D1 Editorial의 구성은 그대로, <strong>색상·폰트·여백·반지름을 <code style="background:var(--color-surface);padding:1px 5px;border-radius:3px">tokens.css</code>의 프로젝트 디자인 토큰으로 교체</strong>했습니다. Georgia serif를 제거하고 Pretendard italic + light weight(300)로 우아함을 대체해, 폰트도 프로젝트 토큰(<code>--font-body</code>, <code>--font-mono</code>) 안에서만 구성됩니다.
+</p>
+
+<div class="token-note">
+<strong>토큰 매핑</strong> &nbsp;
+<code>Georgia serif</code> → <code>--font-body</code> + <code>italic</code> + <code>font-weight: 700</code> &nbsp;·&nbsp;
+<code>--ed-oxide</code> → <code>--color-accent-warm</code> &nbsp;·&nbsp;
+<code>--ed-ink</code> → <code>--color-text-heading</code> &nbsp;·&nbsp;
+<code>--ed-muted</code> → <code>--color-text-secondary</code> &nbsp;·&nbsp;
+<code>--ed-faint</code> → <code>--color-border</code> &nbsp;·&nbsp;
+<code>--ed-bg</code> → <code>--color-surface</code> &nbsp;·&nbsp;
+Agent core 강조는 <code>--color-accent-bg</code> 인디고 (브랜드 메인)
+</div>
+
+<!-- ═══════════ D1 with project tokens ═══════════ -->
+<div class="d1">
+<div class="header">
+<div class="sub">시스템 아키텍처 (System Architecture)</div>
+<div class="title">커넥트HR 에이전트</div>
+<div class="desc">10개 챕터에 걸쳐 완성한 RAG 시스템</div>
+</div>
+
+<div class="llm">
+<div class="box">
+<div class="l">외부 · LLM (External)</div>
+<div class="n">Ollama</div>
+<div class="models">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu"><span class="ch">CH05</span>추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu"><span class="ch">CH06~</span>Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">minicpm-v</span><span class="mu"><span class="ch">CH10</span>Vision · 이미지·스캔 파싱</span></div>
+</div>
+</div>
+</div>
+<div class="llm-flow">
+<span class="u">↑ 프롬프트 (Prompt)</span>
+<span class="d">↓ 응답 (Answer)</span>
+</div>
+
+<div class="grid">
+
+<!-- Client -->
+<div class="col-c">
+<div class="user">
+<div class="ico">◉</div>
+<div class="n">사용자</div>
+<div class="s">채팅으로 질문</div>
+</div>
+<div class="flow">
+<span class="d">↓ 질문</span>
+<span class="u">↑ 답변</span>
+</div>
+<div class="api">
+<div class="l">API 게이트웨이 (Gateway)</div>
+<div class="n">FastAPI</div>
+<div class="s">REST · 세션</div>
+</div>
+</div>
+
+<!-- Client ↔ Agent 화살표 -->
+<div class="flow-arrows">
+<div class="fa-pair">
+<div class="fa-label">요청</div>
+<div class="fa-arrow call">→</div>
+</div>
+<div class="fa-pair">
+<div class="fa-arrow ret">←</div>
+<div class="fa-label">응답</div>
+</div>
+</div>
+
+<!-- Agent -->
+<div class="col-a">
+<div class="title">통합 에이전트 · 운영 (Runtime)</div>
+<div class="ops">
+<div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+<div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">재시도 (Resilience)</div><div class="n">Retry</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="l">실행기 (Executor)</div>
+<div class="n">통합 에이전트</div>
+<div class="loop-inner">
+<div class="loop-label">ReAct 루프 (Loop)</div>
+<div class="stages">
+<div class="st">Reason</div>
+<div class="arr">→</div>
+<div class="st">Act</div>
+<div class="arr">→</div>
+<div class="st">Observe</div>
+<div class="arr">↻</div>
+</div>
+</div>
+<div class="s">IntegratedAgent · ReAct 패턴 기반 · 에이전트 + 도구</div>
+</div>
+</div>
+
+<!-- Agent ↔ Tools 화살표 -->
+<div class="flow-arrows">
+<div class="fa-pair">
+<div class="fa-label">도구 호출</div>
+<div class="fa-arrow call">→</div>
+</div>
+<div class="fa-pair">
+<div class="fa-arrow ret">←</div>
+<div class="fa-label">결과 반환</div>
+</div>
+</div>
+
+<!-- Tools -->
+<div class="col-t">
+<div class="title">도구 호출 · MCP Tools</div>
+<div class="tool">
+<div class="no">01</div>
+<div><div class="n">leave_balance</div><div class="s">직원 연차 조회</div></div>
+<div class="b">SQL</div>
+</div>
+<div class="tool">
+<div class="no">02</div>
+<div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div>
+<div class="b">SQL</div>
+</div>
+<div class="tool">
+<div class="no">03</div>
+<div><div class="n">list_employees</div><div class="s">이름·부서 조회</div></div>
+<div class="b">SQL</div>
+</div>
+<div class="tool">
+<div class="no">04</div>
+<div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div>
+<div class="b rag">RAG</div>
+</div>
+</div>
+
+</div>
+
+<div class="stores">
+<div class="st">
+<div class="l">벡터 저장소 (Vector Store)</div>
+<div class="n">ChromaDB</div>
+<div class="s">768차원 · 메타데이터</div>
+</div>
+<div class="st">
+<div class="l">관계형 DB (Relational)</div>
+<div class="n">PostgreSQL</div>
+<div class="s">직원 · 연차 · 매출</div>
+</div>
+</div>
+
+<div class="caption">
+사용자 질문이 FastAPI를 거쳐 통합 에이전트로 들어오고, 운영 레이어 뒤의 ReAct 패턴(Reason · Act · Observe)이 4개 도구를 선택적으로 호출합니다. 상단 Ollama가 답변을 만들어 되돌려 주죠.
+</div>
+</div>
+
+<!-- 팔레트 확인 -->
+<div class="palette">
+<h2>사용된 프로젝트 토큰</h2>
+<div class="row">
+<div class="sw"><span class="dot" style="background:#4f46e5"></span><span class="name">accent</span><span class="hex">#4f46e5</span></div>
+<div class="sw"><span class="dot" style="background:#eef2ff"></span><span class="name">accent-bg</span><span class="hex">#eef2ff</span></div>
+<div class="sw"><span class="dot" style="background:#3730a3"></span><span class="name">accent-text</span><span class="hex">#3730a3</span></div>
+<div class="sw"><span class="dot" style="background:#ff7849"></span><span class="name">accent-warm</span><span class="hex">#ff7849</span></div>
+<div class="sw"><span class="dot" style="background:#7b341e"></span><span class="name">accent-warm-text</span><span class="hex">#7b341e</span></div>
+<div class="sw"><span class="dot" style="background:#059669"></span><span class="name">success</span><span class="hex">#059669</span></div>
+<div class="sw"><span class="dot" style="background:#2d3748"></span><span class="name">text-heading</span><span class="hex">#2d3748</span></div>
+<div class="sw"><span class="dot" style="background:#718096"></span><span class="name">text-secondary</span><span class="hex">#718096</span></div>
+<div class="sw"><span class="dot" style="background:#94a3b8"></span><span class="name">text-subtle</span><span class="hex">#94a3b8</span></div>
+<div class="sw"><span class="dot" style="background:#e2e8f0"></span><span class="name">border</span><span class="hex">#e2e8f0</span></div>
+<div class="sw"><span class="dot" style="background:#fafbfc;border-color:#cbd5e0"></span><span class="name">surface</span><span class="hex">#fafbfc</span></div>
+<div class="sw"><span class="dot" style="background:#ffffff;border-color:#cbd5e0"></span><span class="name">bg</span><span class="hex">#ffffff</span></div>
+</div>
+</div>
+
+</body>
+</html>

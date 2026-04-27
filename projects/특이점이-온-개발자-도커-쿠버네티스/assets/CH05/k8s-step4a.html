@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>ConfigMap + Secret → Pod 주입</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 36px 24px 32px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 940px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 30px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    align-items: center;
+  }
+
+  .left-col {
+    display: flex; flex-direction: column;
+    gap: 18px;
+  }
+  .config-box {
+    border: 2.5px solid #1565c0;
+    border-radius: 10px;
+    background: #fff;
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+  }
+  .config-box .name {
+    font-size: 14px; font-weight: 800; color: #1565c0; margin-bottom: 4px;
+  }
+  .config-box .sub {
+    font-size: 11px; color: #555;
+  }
+  .config-box.secret {
+    border-color: #c62828;
+    box-shadow: 0 0 0 3px rgba(198,40,40,0.10);
+    background: #fff3e0;
+  }
+  .config-box.secret .name { color: #c62828; }
+
+  .pod-box {
+    border: 2.5px solid #1565c0;
+    border-radius: 10px;
+    background: #f5faff;
+    padding: 26px 20px;
+    text-align: center;
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.10);
+  }
+  .pod-box .name {
+    font-size: 16px; font-weight: 800; color: #1565c0;
+  }
+
+  .arrows {
+    height: 160px;
+    position: relative;
+  }
+  .arrows svg { width: 100%; height: 100%; }
+  .lbl-cm {
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff; padding: 2px 8px;
+    font-size: 11px; color: #1565c0; font-weight: 700;
+    white-space: nowrap;
+  }
+  .lbl-sc {
+    position: absolute;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff; padding: 2px 8px;
+    font-size: 11px; color: #c62828; font-weight: 700;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">ConfigMap과 Secret이 이미지와 별개로 Pod에 주입되는 구조</div>
+
+  <div class="row">
+    <!-- 좌측: ConfigMap + Secret -->
+    <div class="left-col">
+      <div class="config-box">
+        <div class="name">ConfigMap</div>
+        <div class="sub">일반 설정값</div>
+      </div>
+      <div class="config-box secret">
+        <div class="name">Secret</div>
+        <div class="sub">민감 정보</div>
+      </div>
+    </div>
+
+    <!-- 가운데: 화살표 (점선) -->
+    <div class="arrows">
+      <svg viewBox="0 0 220 160" preserveAspectRatio="none">
+        <!-- ConfigMap → Pod -->
+        <line x1="6" y1="38" x2="200" y2="80" stroke="#1565c0" stroke-width="2" stroke-dasharray="6 4"/>
+        <polygon points="196,76 214,80 198,90" fill="#1565c0"/>
+        <!-- Secret → Pod -->
+        <line x1="6" y1="122" x2="200" y2="80" stroke="#c62828" stroke-width="2" stroke-dasharray="6 4"/>
+        <polygon points="196,84 214,80 198,70" fill="#c62828"/>
+      </svg>
+      <div class="lbl-cm">일반 설정 주입</div>
+      <div class="lbl-sc">비밀 설정 주입</div>
+    </div>
+
+    <!-- 우측: Pod -->
+    <div class="pod-box">
+      <div class="name">Pod</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

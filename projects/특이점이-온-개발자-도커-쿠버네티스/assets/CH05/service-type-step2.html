@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 2 — NodePort</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 40px 20px; background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 900px; }
+
+  .canvas {
+    display: grid;
+    grid-template-columns: 160px 110px 1fr;
+    align-items: center;
+  }
+
+  /* Host */
+  .host-col {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .host-box {
+    width: 130px; height: 56px;
+    border: 2.5px solid #222; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; background: #fff;
+  }
+
+  /* Host → NodePort 화살표 */
+  .host-arrow {
+    display: flex; flex-direction: column; align-items: flex-end;
+    padding-right: 36px;
+  }
+  .host-arrow svg { width: 70px; height: 18px; }
+
+  /* Cluster — step1(ClusterIP)과 같은 크기/스타일 */
+  .cluster {
+    border: 2.5px solid #c62828; border-radius: 14px;
+    padding: 30px 28px 24px 50px;
+    background: #fff8f8; position: relative;
+    box-shadow: 0 0 0 4px rgba(220,0,0,0.15);
+    width: fit-content;
+  }
+  .cluster-title {
+    position: absolute; top: -11px; left: 58px;
+    background: #fff8f8; padding: 0 10px;
+    font-size: 12px; font-weight: 800; color: #c62828;
+  }
+
+  /* NodePort 클러스터 경계에 걸침 */
+  .entry-zone {
+    position: absolute;
+    top: 30px; left: -34px;
+    background: #fff8d6;
+    border: 2px solid #d4b94a;
+    border-radius: 8px;
+    padding: 10px 10px 7px;
+    box-shadow: 0 0 0 3px rgba(220,0,0,0.18);
+    z-index: 2;
+  }
+  .entry-zone-label {
+    position: absolute; top: -8px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff8d6; padding: 0 6px; white-space: nowrap;
+    font-size: 9px; color: #8a6d00; font-weight: 700;
+  }
+  .nodeport {
+    border: 2px solid #c62828; border-radius: 5px;
+    padding: 6px 10px; background: #fff; text-align: center;
+  }
+  .nodeport .name { font-size: 11px; font-weight: 800; color: #c62828; }
+  .nodeport .port { font-size: 9.5px; color: #555; margin-top: 1px; font-family: 'Consolas', monospace; }
+
+  /* NodePort → Service 연결 화살표 (절대 위치) */
+  .np-to-svc {
+    position: absolute; left: 67px; top: 54px;
+    width: 40px; height: 14px; z-index: 2;
+  }
+
+  /* Service + Pods flow */
+  .inner-flow {
+    display: flex; align-items: center; justify-content: flex-start;
+    gap: 14px;
+    padding-left: 60px;
+  }
+  .service-box {
+    border: 2.5px solid #c62828; border-radius: 8px;
+    padding: 12px 16px; background: #fff; text-align: center;
+  }
+  .service-box .name { font-size: 13px; font-weight: 800; color: #c62828; }
+  .service-box .sub { font-size: 10px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+  .pod-stack { display: flex; flex-direction: column; gap: 6px; }
+  .pod {
+    border: 1.5px solid #666; border-radius: 14px;
+    padding: 6px 12px; background: #fff;
+    font-size: 10.5px; font-weight: 700; color: #333;
+    min-width: 56px; text-align: center;
+  }
+  .arrow-sm { width: 28px; height: 12px; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="canvas">
+    <div class="host-col">
+      <div class="host-box">Host</div>
+    </div>
+
+    <div class="host-arrow">
+      <svg viewBox="0 0 70 18">
+        <line x1="0" y1="9" x2="58" y2="9" stroke="#c62828" stroke-width="3"/>
+        <polygon points="58,2 70,9 58,16" fill="#c62828"/>
+      </svg>
+    </div>
+
+    <div class="cluster">
+      <div class="cluster-title">클러스터</div>
+
+      <!-- NodePort: 클러스터 경계에 걸침 -->
+      <div class="entry-zone">
+        <div class="entry-zone-label">클러스터 입구</div>
+        <div class="nodeport">
+          <div class="name">NodePort</div>
+          <div class="port">:30001</div>
+        </div>
+      </div>
+
+      <!-- NodePort → Service 화살표 -->
+      <svg class="np-to-svc" preserveAspectRatio="none" viewBox="0 0 40 14">
+        <line x1="0" y1="7" x2="30" y2="7" stroke="#c62828" stroke-width="2.5"/>
+        <polygon points="30,2 40,7 30,12" fill="#c62828"/>
+      </svg>
+
+      <div class="inner-flow">
+        <div class="service-box">
+          <div class="name">Service</div>
+          <div class="sub">ClusterIP</div>
+        </div>
+        <svg class="arrow-sm" viewBox="0 0 28 12">
+          <line x1="0" y1="6" x2="20" y2="6" stroke="#c62828" stroke-width="2.5"/>
+          <polygon points="20,2 28,6 20,10" fill="#c62828"/>
+        </svg>
+        <div class="pod-stack">
+          <div class="pod">Pod A</div>
+          <div class="pod">Pod B</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

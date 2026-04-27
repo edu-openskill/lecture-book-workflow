@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 8-1 프리뷰 — 4가지 버전</title>
+<link rel="stylesheet" href="./styles/tokens.css">
+<style>
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #f8f9fa; padding: 40px; }
+.version { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 32px; margin-bottom: 40px; }
+.version-label { font-size: 14px; color: #64748b; margin-bottom: 16px; font-weight: 600; }
+svg.person { width: 40px; height: 40px; }
+</style>
+</head>
+<body>
+
+<div class="version">
+<div class="version-label">버전 1 — 사서 성장 스토리 (가로 흐름)</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px;text-align:center">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:24px">검색 품질 튜닝. 사서가 똑똑해지는 세 가지 방법</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:24px">
+<div style="text-align:center;flex:1;max-width:200px">
+<svg viewBox="0 0 80 80" width="60" height="60" style="margin-bottom:8px">
+<circle cx="40" cy="20" r="12" fill="#e2e8f0"/>
+<rect x="25" y="35" width="30" height="30" rx="6" fill="#e2e8f0"/>
+<text x="40" y="24" text-anchor="middle" font-size="12" fill="#64748b">😐</text>
+</svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-danger)">초보 사서</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:4px">500자마다 가위로 자름</div>
+<div style="font-size:11px;color:var(--color-text-subtle);margin-top:2px">병가+출장이 섞임</div>
+</div>
+<div style="font-size:24px;color:var(--color-text-subtle)">→</div>
+<div style="text-align:center;flex:1;max-width:200px;background:var(--color-info-bg);border-radius:var(--radius-md);padding:16px">
+<svg viewBox="0 0 80 80" width="60" height="60" style="margin-bottom:8px">
+<circle cx="40" cy="20" r="12" fill="var(--color-info)"/>
+<rect x="25" y="35" width="30" height="30" rx="6" fill="var(--color-info)"/>
+<circle cx="60" cy="25" r="8" fill="none" stroke="var(--color-info)" stroke-width="2"/>
+<line x1="65" y1="30" x2="72" y2="37" stroke="var(--color-info)" stroke-width="2"/>
+</svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-info)">청킹 튜닝</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:4px">의미 단위로 자름</div>
+<div style="font-size:11px;color:var(--color-text-subtle);margin-top:2px">주제 섞임 방지</div>
+</div>
+<div style="font-size:24px;color:var(--color-text-subtle)">→</div>
+<div style="text-align:center;flex:1;max-width:200px;background:var(--color-success-bg);border-radius:var(--radius-md);padding:16px">
+<svg viewBox="0 0 80 80" width="60" height="60" style="margin-bottom:8px">
+<circle cx="30" cy="20" r="12" fill="var(--color-success)"/>
+<rect x="15" y="35" width="30" height="30" rx="6" fill="var(--color-success)"/>
+<circle cx="55" cy="20" r="12" fill="var(--color-accent)"/>
+<rect x="40" y="35" width="30" height="30" rx="6" fill="var(--color-accent)"/>
+</svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-success)">리랭킹</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:4px">면접관이 재확인</div>
+<div style="font-size:11px;color:var(--color-text-subtle);margin-top:2px">정확도 향상</div>
+</div>
+<div style="font-size:24px;color:var(--color-text-subtle)">→</div>
+<div style="text-align:center;flex:1;max-width:200px;background:#fff7ed;border-radius:var(--radius-md);padding:16px">
+<svg viewBox="0 0 80 80" width="60" height="60" style="margin-bottom:8px">
+<circle cx="25" cy="25" r="12" fill="var(--color-success)"/>
+<rect x="10" y="40" width="30" height="25" rx="6" fill="var(--color-success)"/>
+<circle cx="55" cy="25" r="12" fill="var(--color-accent)"/>
+<rect x="40" y="40" width="30" height="25" rx="6" fill="var(--color-accent)"/>
+<line x1="35" y1="52" x2="45" y2="52" stroke="var(--color-accent-warm)" stroke-width="3"/>
+</svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-accent-warm)">하이브리드</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:4px">두 사서가 협력</div>
+<div style="font-size:11px;color:var(--color-text-subtle);margin-top:2px">의미 + 키워드</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="version">
+<div class="version-label">버전 2 — 세 축 카드 (심플)</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px;text-align:center">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:8px">검색 품질 튜닝</div>
+<div style="font-size:13px;color:var(--color-text-muted);margin-bottom:24px">"병가를 물었는데 출장이 나오는" 문제를 세 방향에서 잡습니다</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+<div style="border:2px solid var(--color-info);border-radius:var(--radius-md);padding:20px;text-align:center">
+<svg viewBox="0 0 48 48" width="48" height="48" style="margin-bottom:12px">
+<rect x="4" y="4" width="40" height="40" rx="4" fill="none" stroke="var(--color-info)" stroke-width="2" stroke-dasharray="6 3"/>
+<line x1="20" y1="4" x2="20" y2="44" stroke="var(--color-danger)" stroke-width="2"/>
+<line x1="34" y1="4" x2="34" y2="44" stroke="var(--color-info)" stroke-width="2"/>
+</svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-info)">청킹(Chunking)</div>
+<div style="font-size:13px;color:var(--color-text-muted);margin-top:8px">자르는 방법을 바꾼다</div>
+<div style="font-size:12px;color:var(--color-text-subtle);margin-top:4px">가위 → 돋보기</div>
+</div>
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-md);padding:20px;text-align:center">
+<svg viewBox="0 0 48 48" width="48" height="48" style="margin-bottom:12px">
+<rect x="4" y="8" width="16" height="12" rx="2" fill="#fed7aa"/>
+<rect x="4" y="24" width="16" height="12" rx="2" fill="var(--color-success-bg)" stroke="var(--color-success)" stroke-width="1.5"/>
+<rect x="28" y="16" width="16" height="12" rx="2" fill="var(--color-success-bg)" stroke="var(--color-success)" stroke-width="1.5"/>
+<path d="M20 14 L28 22" stroke="var(--color-success)" stroke-width="2" marker-end="url(#arr)"/>
+<path d="M20 30 L28 22" stroke="var(--color-success)" stroke-width="2"/>
+</svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-success)">리랭킹(ReRanking)</div>
+<div style="font-size:13px;color:var(--color-text-muted);margin-top:8px">가져온 뒤 다시 확인</div>
+<div style="font-size:12px;color:var(--color-text-subtle);margin-top:4px">서류 → 면접</div>
+</div>
+<div style="border:2px solid var(--color-accent-warm);border-radius:var(--radius-md);padding:20px;text-align:center">
+<svg viewBox="0 0 48 48" width="48" height="48" style="margin-bottom:12px">
+<circle cx="16" cy="24" r="12" fill="none" stroke="var(--color-success)" stroke-width="2"/>
+<circle cx="32" cy="24" r="12" fill="none" stroke="var(--color-accent)" stroke-width="2"/>
+<path d="M22 16 Q24 24 22 32" fill="var(--color-accent-warm)" opacity="0.3"/>
+</svg>
+<div style="font-size:15px;font-weight:700;color:var(--color-accent-warm)">하이브리드(Hybrid)</div>
+<div style="font-size:13px;color:var(--color-text-muted);margin-top:8px">두 검색을 섞는다</div>
+<div style="font-size:12px;color:var(--color-text-subtle);margin-top:4px">의미 + 키워드</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="version">
+<div class="version-label">버전 3 — 문제 → 도구 → 해결 (스토리)</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:24px;text-align:center">검색 품질 튜닝. 세 가지 도구로 검색을 고칩니다</div>
+<div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:center">
+<div style="background:var(--color-danger-bg);border:1px solid #fca5a5;border-radius:var(--radius-md);padding:16px;text-align:center">
+<svg viewBox="0 0 48 48" width="40" height="40" style="margin-bottom:8px">
+<circle cx="24" cy="16" r="10" fill="var(--color-danger)"/>
+<rect x="14" y="28" width="20" height="16" rx="4" fill="var(--color-danger)"/>
+<line x1="10" y1="8" x2="14" y2="12" stroke="var(--color-danger)" stroke-width="2"/>
+<line x1="38" y1="8" x2="34" y2="12" stroke="var(--color-danger)" stroke-width="2"/>
+</svg>
+<div style="font-size:14px;font-weight:700;color:var(--color-danger)">문제</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:4px">병가를 물었는데<br>출장이 나온다</div>
+</div>
+<div style="font-size:24px;color:var(--color-text-subtle)">→</div>
+<div style="text-align:center">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-accent-border);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;color:var(--color-info-text);font-weight:600">청킹 — 자르는 법 교체</div>
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;color:var(--color-success-text);font-weight:600">리랭킹 — 면접관 추가</div>
+<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;color:var(--color-warning-text);font-weight:600">하이브리드 — 두 검색 합침</div>
+</div>
+</div>
+<div style="font-size:24px;color:var(--color-text-subtle)">→</div>
+<div style="background:var(--color-success-bg);border:1px solid #86efac;border-radius:var(--radius-md);padding:16px;text-align:center">
+<svg viewBox="0 0 48 48" width="40" height="40" style="margin-bottom:8px">
+<circle cx="24" cy="16" r="10" fill="var(--color-success)"/>
+<rect x="14" y="28" width="20" height="16" rx="4" fill="var(--color-success)"/>
+<polyline points="18,36 22,40 30,32" fill="none" stroke="white" stroke-width="2.5"/>
+</svg>
+<div style="font-size:14px;font-weight:700;color:var(--color-success)">해결</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:4px">병가를 물으면<br>병가가 나온다</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="version">
+<div class="version-label">버전 4 — 사서 비유 중심 (캐릭터)</div>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:32px;text-align:center">
+<div style="font-size:17px;font-weight:600;color:var(--color-text-heading);margin-bottom:8px">검색 품질 튜닝</div>
+<div style="font-size:13px;color:var(--color-text-muted);margin-bottom:24px">사서에게 세 가지 도구를 쥐어 줍니다</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+<div style="background:var(--color-info-bg);border-radius:var(--radius-lg);padding:24px;text-align:center">
+<div style="font-size:48px;margin-bottom:8px">
+<svg viewBox="0 0 64 64" width="56" height="56">
+<circle cx="32" cy="18" r="12" fill="var(--color-info)"/>
+<rect x="18" y="32" width="28" height="24" rx="6" fill="var(--color-info)"/>
+<rect x="42" y="22" width="14" height="3" rx="1" fill="#333" transform="rotate(30 49 23)"/>
+<circle cx="56" cy="18" r="6" fill="none" stroke="#333" stroke-width="2"/>
+</svg>
+</div>
+<div style="font-size:16px;font-weight:700;color:var(--color-info-text)">돋보기</div>
+<div style="font-size:13px;color:var(--color-info-text);margin-top:4px">청킹(Chunking)</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:8px">가위 대신 돋보기로<br>의미 단위로 자른다</div>
+</div>
+<div style="background:var(--color-success-bg);border-radius:var(--radius-lg);padding:24px;text-align:center">
+<div style="font-size:48px;margin-bottom:8px">
+<svg viewBox="0 0 64 64" width="56" height="56">
+<circle cx="22" cy="18" r="10" fill="var(--color-success)"/>
+<rect x="10" y="30" width="24" height="20" rx="5" fill="var(--color-success)"/>
+<circle cx="46" cy="18" r="10" fill="#e2e8f0"/>
+<rect x="34" y="30" width="24" height="20" rx="5" fill="#e2e8f0"/>
+<rect x="30" y="52" width="8" height="8" rx="2" fill="var(--color-success)" opacity="0.5"/>
+<polyline points="32,58 34,60 38,54" fill="none" stroke="var(--color-success)" stroke-width="2"/>
+</svg>
+</div>
+<div style="font-size:16px;font-weight:700;color:var(--color-success-text)">면접관</div>
+<div style="font-size:13px;color:var(--color-success-text);margin-top:4px">리랭킹(ReRanking)</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:8px">서류 심사 후<br>면접으로 재확인</div>
+</div>
+<div style="background:#fff7ed;border-radius:var(--radius-lg);padding:24px;text-align:center">
+<div style="font-size:48px;margin-bottom:8px">
+<svg viewBox="0 0 64 64" width="56" height="56">
+<circle cx="22" cy="18" r="10" fill="var(--color-success)"/>
+<rect x="10" y="30" width="24" height="20" rx="5" fill="var(--color-success)"/>
+<circle cx="46" cy="18" r="10" fill="var(--color-accent)"/>
+<rect x="34" y="30" width="24" height="20" rx="5" fill="var(--color-accent)"/>
+<path d="M32 35 L32 50" stroke="var(--color-accent-warm)" stroke-width="3" stroke-dasharray="4 2"/>
+</svg>
+</div>
+<div style="font-size:16px;font-weight:700;color:var(--color-accent-warm-text)">두 사서</div>
+<div style="font-size:13px;color:var(--color-accent-warm-text);margin-top:4px">하이브리드(Hybrid)</div>
+<div style="font-size:12px;color:var(--color-text-muted);margin-top:8px">의미 사서 + 키워드 사서<br>결과를 합친다</div>
+</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>

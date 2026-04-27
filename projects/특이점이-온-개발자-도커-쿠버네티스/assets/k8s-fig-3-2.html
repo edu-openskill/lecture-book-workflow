@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>개발자의 명령이 Kube API Server로 전달되는 흐름</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+
+  .diagram {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  /* 개발자 */
+  .developer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .dev-icon {
+    width: 48px;
+    height: 48px;
+    position: relative;
+  }
+  .dev-head {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid #222;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e8e8e8;
+  }
+  .dev-body-shape {
+    width: 36px;
+    height: 22px;
+    border: 1.5px solid #222;
+    border-radius: 10px 10px 4px 4px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e8e8e8;
+  }
+  .dev-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #222;
+  }
+
+  /* 화살표 */
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .arrow-line {
+    font-size: 24px;
+    color: #222;
+  }
+  .arrow-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    white-space: nowrap;
+    font-style: italic;
+  }
+
+  /* 컨트롤 플레인 */
+  .cp-box {
+    border: 1.5px dashed #222;
+    border-radius: 12px;
+    padding: 20px 28px 24px;
+    background: #fff;
+    position: relative;
+    text-align: center;
+  }
+  .cp-label {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .cp-inner {
+    border: 1.5px solid #222;
+    border-radius: 6px;
+    padding: 14px 24px;
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+  }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+
+  <!-- 개발자 -->
+  <div class="developer">
+    <div class="dev-icon">
+      <div class="dev-head"></div>
+      <div class="dev-body-shape"></div>
+    </div>
+    <div class="dev-label">개발자</div>
+  </div>
+
+  <!-- 화살표 -->
+  <div class="arrow-col">
+    <div class="arrow-line">→</div>
+    <div class="arrow-label">kubectl 명령</div>
+  </div>
+
+  <!-- 컨트롤 플레인 -->
+  <div class="cp-box">
+    <div class="cp-label">컨트롤 플레인</div>
+    <div class="cp-inner">Kube API Server</div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>11.5 d1-tokens 스타일 · LLM+Tools 상단 배치 4안 + L3 A4 크기</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+body { font-family: var(--font-body); color: var(--color-text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 24px 96px; line-height: 1.55; }
+h1 { font-size: var(--fs-4xl); color: var(--color-text-heading); border-bottom: 2px solid var(--color-text-heading); padding-bottom: var(--space-sm); margin-bottom: var(--space-sm); }
+.intro { color: var(--color-text-secondary); font-size: var(--fs-lg); margin-bottom: var(--space-3xl); line-height: 1.7; }
+h2 { margin-top: var(--space-3xl); font-size: var(--fs-2xl); color: var(--color-text-heading); letter-spacing: -0.3px; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-sm); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 16px; }
+.tags .t { background: var(--color-surface); border: 1px solid var(--color-border); padding: 2px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; color: var(--color-text-muted); letter-spacing: 1px; }
+.note { color: var(--color-text-muted); font-size: var(--fs-sm); line-height: 1.7; margin-bottom: var(--space-md); }
+.a4-frame { max-width: 658px; margin: 0 auto; border: 1px dashed #bcc3d0; padding: 4px; position: relative; }
+.a4-frame::before { content: "A4 본문 폭 658px"; display:block; text-align:right; font-family: var(--font-mono); font-size: 9px; color: #94a3b8; letter-spacing: 1px; padding: 2px 6px; }
+
+/* ═══════════════════════════════════════════════════════════
+   D1 Editorial 원본 CSS (fig-arch-d1-tokens.html 그대로 복사)
+   ═══════════════════════════════════════════════════════════ */
+.d1 { background: var(--color-surface); padding: 48px 40px; margin: var(--space-2xl) 0; overflow-x: auto; border-radius: var(--radius-xl); }
+.d1 .header { text-align: center; margin-bottom: var(--space-3xl); }
+.d1 .header .sub { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); letter-spacing: 3px; text-transform: uppercase; margin-bottom: var(--space-xs); font-weight: 700; }
+.d1 .header .title { font-family: var(--font-body); font-weight: 800; font-size: var(--fs-4xl); color: var(--color-text-heading); letter-spacing: -0.5px; }
+.d1 .header .desc { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-md); color: var(--color-text-secondary); margin-top: var(--space-xs); }
+
+/* LLM (bracket box) */
+.d1 .llm { display: flex; justify-content: center; margin-bottom: var(--space-md); }
+.d1 .llm .box { background: var(--color-bg); border: 1px solid var(--color-text-heading); padding: var(--space-lg) var(--space-3xl); text-align: center; position: relative; min-width: 320px; }
+.d1 .llm .box::before, .d1 .llm .box::after { content:""; position:absolute; top:-4px; bottom:-4px; width:6px; border:1px solid var(--color-text-heading); }
+.d1 .llm .box::before { left:-4px; border-right:none; }
+.d1 .llm .box::after { right:-4px; border-left:none; }
+.d1 .llm .box .l { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+.d1 .llm .box .n { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-2xl); color: var(--color-text-heading); margin: 2px 0; }
+.d1 .llm .box .s { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-text-secondary); }
+.d1 .llm .box .models { display:flex; flex-direction:column; gap:2px; margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px dashed var(--color-border); }
+.d1 .llm .box .m { display: grid; grid-template-columns: 140px 1fr; gap: var(--space-md); align-items: baseline; font-family: var(--font-mono); font-size: var(--fs-sm); text-align: left; }
+.d1 .llm .box .m .mn { color: var(--color-text-heading); font-weight: 700; }
+.d1 .llm .box .m .mu { color: var(--color-text-secondary); font-size: var(--fs-xs); }
+
+.d1 .llm-flow { display:flex; justify-content:center; align-items:center; gap:40px; margin:var(--space-md) 0 var(--space-2xl); font-family:var(--font-mono); font-size:var(--fs-xs); color:var(--color-text-secondary); letter-spacing:1.5px; text-transform:uppercase; }
+.d1 .llm-flow .u { color: var(--color-accent); font-weight: 700; }
+.d1 .llm-flow .d { color: var(--color-success); font-weight: 700; }
+
+.d1 .grid { display: grid; grid-template-columns: 180px 36px 1fr 36px 260px; gap: var(--space-sm); align-items: stretch; }
+.d1 .flow-arrows { display:flex; flex-direction:column; justify-content:center; align-items:center; gap:var(--space-md); font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase; }
+.d1 .flow-arrows .fa-pair { display:flex; flex-direction:column; align-items:center; gap:1px; }
+.d1 .flow-arrows .fa-label { font-size:8px; color:var(--color-text-subtle); font-weight:700; letter-spacing:1px; white-space:nowrap; }
+.d1 .flow-arrows .fa-arrow { font-size:var(--fs-lg); font-weight:700; line-height:1; }
+.d1 .flow-arrows .fa-arrow.call { color: var(--color-accent); }
+.d1 .flow-arrows .fa-arrow.ret { color: var(--color-success); }
+
+.d1 .col-c { background: var(--color-bg); border: 1px solid var(--color-border); padding: var(--space-lg); display: flex; flex-direction: column; justify-content: space-between; min-height: 380px; }
+.d1 .col-c .user { text-align:center; padding:var(--space-lg) var(--space-sm); border-bottom:1px dashed var(--color-border); }
+.d1 .col-c .user .ico { font-size:var(--fs-2xl); color:var(--color-accent-warm); margin-bottom:var(--space-xs); }
+.d1 .col-c .user .n { font-family:var(--font-body); font-weight:700; font-size:var(--fs-2xl); color:var(--color-text-heading); }
+.d1 .col-c .user .s { font-size:var(--fs-xs); color:var(--color-text-secondary); margin-top:2px; }
+.d1 .col-c .flow { display:flex; justify-content:space-between; padding:var(--space-md) var(--space-sm); font-family:var(--font-mono); font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:1px; }
+.d1 .col-c .flow .d { color:var(--color-accent); font-weight:700; }
+.d1 .col-c .flow .u { color:var(--color-success); font-weight:700; }
+.d1 .col-c .api { text-align:center; padding:var(--space-lg) var(--space-sm); border-top:1px dashed var(--color-border); }
+.d1 .col-c .api .l { font-family:var(--font-mono); font-size:11px; color:var(--color-text-secondary); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:var(--space-xs); }
+.d1 .col-c .api .n { font-size:var(--fs-2xl); color:var(--color-text-heading); font-weight:700; letter-spacing:-0.3px; }
+.d1 .col-c .api .s { font-family:var(--font-mono); font-size:var(--fs-xs); color:var(--color-text-secondary); margin-top:2px; }
+
+.d1 .col-a { background: var(--color-bg); border: 1px solid var(--color-text-heading); padding: var(--space-2xl) var(--space-xl); position: relative; min-height: 380px; }
+.d1 .col-a .title { position:absolute; top:-8px; left:var(--space-xl); background:var(--color-surface); padding:0 var(--space-md); font-family:var(--font-body); font-weight:700; font-size:var(--fs-lg); color:var(--color-text-heading); }
+.d1 .col-a .ops { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-sm); margin-bottom: var(--space-lg); }
+.d1 .col-a .chip { background:var(--color-surface); padding:var(--space-md) var(--space-sm); text-align:center; border-bottom:2px solid var(--color-border); }
+.d1 .col-a .chip .l { font-family:var(--font-mono); font-size:9px; color:var(--color-text-subtle); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.d1 .col-a .chip .n { font-size:var(--fs-md); color:var(--color-text-heading); font-weight:700; }
+.d1 .col-a .chip .s { font-family:var(--font-mono); font-size:11px; color:var(--color-text-secondary); margin-top:1px; }
+.d1 .col-a .core { text-align:center; padding:var(--space-lg); background:var(--color-accent-bg); }
+.d1 .col-a .core .loop-inner { background:var(--color-bg); padding:var(--space-md); margin:var(--space-md) 0; border:1px solid var(--color-accent-border); border-radius:var(--radius-md); }
+.d1 .col-a .core .loop-inner .loop-label { font-family:var(--font-mono); font-size:9px; color:var(--color-accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:var(--space-sm); }
+.d1 .col-a .core .loop-inner .stages { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.d1 .col-a .core .loop-inner .st { font-family:var(--font-mono); font-size:var(--fs-xs); padding:var(--space-xs) var(--space-md); background:var(--color-surface); border:1px solid var(--color-border); letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--color-text-heading); }
+.d1 .col-a .core .loop-inner .arr { color:var(--color-text-subtle); font-size:var(--fs-md); }
+.d1 .col-a .core .l { font-family:var(--font-mono); font-size:11px; color:var(--color-accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.d1 .col-a .core .n { font-family:var(--font-body); font-weight:700; font-size:var(--fs-2xl); color:var(--color-text-heading); margin-top:2px; }
+.d1 .col-a .core .s { font-family:var(--font-mono); font-size:var(--fs-xs); color:var(--color-text-secondary); margin-top:2px; }
+.d1 .col-a .engine-inner { background:var(--color-bg); padding:var(--space-md); margin:var(--space-md) 0 0; border:1px solid var(--color-accent-border); border-radius:var(--radius-md); }
+.d1 .col-a .engine-inner .engine-label { font-family:var(--font-mono); font-size:9px; color:var(--color-accent); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:var(--space-sm); }
+.d1 .col-a .engine-inner .engine-name { font-family:var(--font-body); font-size:var(--fs-md); color:var(--color-text-heading); font-weight:700; margin-bottom:var(--space-xs); }
+.d1 .col-a .engine-inner .stages-6 { display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; font-family:var(--font-mono); font-size:10px; }
+.d1 .col-a .engine-inner .stages-6 .s { background:var(--color-surface); border:1px solid var(--color-border); padding:6px 4px; text-align:center; color:var(--color-text-heading); font-weight:700; letter-spacing:0.3px; }
+.d1 .col-a .engine-inner .stages-6 .s .num { display:block; font-size:8px; color:var(--color-accent); letter-spacing:1px; margin-bottom:2px; }
+.d1 .col-a .engine-inner .stages-6 .s .nm { display:block; font-size:11px; color:var(--color-text-heading); }
+
+.d1 .col-t { background: var(--color-bg); border: 1px solid var(--color-border); padding: var(--space-2xl) var(--space-lg) var(--space-lg); position: relative; min-height: 380px; }
+.d1 .col-t .title { position:absolute; top:-8px; left:var(--space-xl); background:var(--color-surface); padding:0 var(--space-md); font-family:var(--font-body); font-weight:700; font-size:var(--fs-lg); color:var(--color-text-heading); }
+.d1 .col-t .tool { display:grid; grid-template-columns:auto 1fr auto; gap:var(--space-md); align-items:center; padding:var(--space-md) var(--space-xs); border-bottom:1px solid var(--color-border-dashed); }
+.d1 .col-t .tool:last-child { border-bottom:none; }
+.d1 .col-t .tool .no { font-family:var(--font-mono); font-size:var(--fs-xs); color:var(--color-text-subtle); letter-spacing:1px; font-weight:700; }
+.d1 .col-t .tool .n { font-family:var(--font-mono); font-size:var(--fs-md); color:var(--color-text-heading); font-weight:700; }
+.d1 .col-t .tool .s { font-size:var(--fs-xs); color:var(--color-text-secondary); margin-top:1px; }
+.d1 .col-t .tool .b { font-family:var(--font-mono); font-size:11px; color:var(--color-accent-warm-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; background:#fff4ed; padding:2px var(--space-sm); border-radius:var(--radius-sm); }
+.d1 .col-t .tool .b.rag { color:var(--color-accent-text); background:var(--color-accent-bg); }
+
+.d1 .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-lg); margin-top:var(--space-3xl); padding-top:var(--space-xl); border-top:1px solid var(--color-border); }
+.d1 .stores .st { text-align:center; padding:var(--space-lg); border:1px solid var(--color-border); background:var(--color-bg); }
+.d1 .stores .st .l { font-family:var(--font-mono); font-size:11px; color:var(--color-text-secondary); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.d1 .stores .st .n { font-family:var(--font-body); font-weight:700; font-size:var(--fs-2xl); color:var(--color-text-heading); margin:3px 0; }
+.d1 .stores .st .s { font-family:var(--font-mono); font-size:var(--fs-xs); color:var(--color-text-secondary); }
+.d1 .caption { margin-top:var(--space-2xl); font-family:var(--font-body); font-weight:700; font-size:var(--fs-base); color:var(--color-text-secondary); text-align:center; max-width:640px; margin-left:auto; margin-right:auto; line-height:1.7; }
+
+/* A4 크기로 축소 렌더링 */
+.d1.a4 { padding: var(--space-xl) var(--space-lg); min-width: 0; }
+.d1.a4 .grid { min-width: 0; grid-template-columns: 130px 24px 1fr 24px 170px; gap: 6px; }
+.d1.a4 .header { margin-bottom: var(--space-xl); }
+.d1.a4 .header .title { font-size: 22px; }
+.d1.a4 .llm .box { min-width: 280px; padding: var(--space-md) var(--space-xl); }
+.d1.a4 .llm .box .n { font-size: 16px; }
+.d1.a4 .llm .box .m { grid-template-columns: 110px 1fr; font-size: 11px; }
+.d1.a4 .col-c, .d1.a4 .col-a, .d1.a4 .col-t { min-height: 320px; }
+.d1.a4 .col-c { padding: var(--space-md); }
+.d1.a4 .col-c .user .n { font-size: 16px; }
+.d1.a4 .col-c .api .n { font-size: 16px; }
+.d1.a4 .col-a { padding: var(--space-xl) var(--space-md) var(--space-md); }
+.d1.a4 .col-a .title { font-size: var(--fs-sm); left: var(--space-md); }
+.d1.a4 .col-a .core .n { font-size: 16px; }
+.d1.a4 .col-a .core .loop-inner .st { font-size:10px; padding:2px 8px; }
+.d1.a4 .col-t { padding: var(--space-xl) var(--space-sm) var(--space-sm); }
+.d1.a4 .col-t .title { font-size: var(--fs-sm); left: var(--space-md); }
+.d1.a4 .col-t .tool { gap: var(--space-xs); padding: var(--space-sm) 2px; }
+.d1.a4 .col-t .tool .n { font-size: 11px; }
+.d1.a4 .col-t .tool .s { font-size: 10px; }
+.d1.a4 .col-t .tool .b { font-size: 9px; padding: 1px 5px; }
+.d1.a4 .stores { margin-top: var(--space-xl); padding-top: var(--space-md); }
+.d1.a4 .stores .st { padding: var(--space-sm) var(--space-md); }
+.d1.a4 .stores .st .n { font-size: 16px; }
+
+/* 상단 LLM+Tools 배치 variants */
+/* V1: LLM ┃ Tools 2-col */
+.d1.v1 .top-row { display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-md); }
+.d1.v1 .top-row .llm { margin:0; }
+.d1.v1 .top-row .col-t { min-height: 0; padding: var(--space-xl) var(--space-lg) var(--space-md); }
+.d1.v1 .grid { grid-template-columns: 180px 36px 1fr; gap: var(--space-sm); }
+
+/* V2: LLM full-width + Tools full-width (2행) */
+.d1.v2 .col-t.wide { min-height: 0; padding: var(--space-xl) var(--space-xl) var(--space-md); margin-bottom: var(--space-md); }
+.d1.v2 .col-t.wide .tools-inner { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--space-md); }
+.d1.v2 .col-t.wide .tools-inner .tool { border-bottom: none; border: 1px solid var(--color-border-dashed); padding: var(--space-sm); grid-template-columns: auto 1fr; }
+.d1.v2 .col-t.wide .tools-inner .tool .b { justify-self: end; grid-column: 1/3; margin-top: 6px; width: fit-content; }
+.d1.v2 .grid { grid-template-columns: 180px 36px 1fr; gap: var(--space-sm); }
+
+/* V3: 3-row 2-column stack. 각 행은 고유 비율 + 자연 높이 */
+
+/* Row 1: 사용자(좁음) · 화살표 · Runtime(넓음) — 원본 d1-tokens 비율 복원 */
+.d1.v3 .row-client { display:grid; grid-template-columns:180px 36px 1fr; gap:var(--space-sm); align-items:stretch; }
+.d1.v3 .row-client .col-c { min-height:0; padding:var(--space-lg) var(--space-md); }
+.d1.v3 .row-client .col-a { min-height:0; padding:var(--space-xl) var(--space-md) var(--space-md); }
+.d1.v3 .row-client .col-a .title { left:var(--space-md); font-size:var(--fs-sm); }
+
+/* Row 2: LLM(좁음·브라켓) · 화살표 · Tools(넓음·4 rows) — 자연 비율 */
+.d1.v3 .row-ext { display:grid; grid-template-columns:280px 36px 1fr; gap:var(--space-sm); align-items:stretch; margin-top:var(--space-md); }
+.d1.v3 .row-ext .llm { margin:0; display:flex; align-items:stretch; }
+.d1.v3 .row-ext .llm .box { min-width:0; width:100%; padding:var(--space-md) var(--space-lg); display:flex; flex-direction:column; justify-content:center; box-sizing:border-box; }
+.d1.v3 .row-ext .col-t { min-height:0; padding:var(--space-xl) var(--space-md) var(--space-md); }
+.d1.v3 .row-ext .col-t .title { left:var(--space-md); font-size:var(--fs-sm); }
+
+/* Row 사이 흐름 라벨 */
+.d1.v3 .lvl-lbl { text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--color-text-secondary); letter-spacing:2px; text-transform:uppercase; font-weight:700; padding:var(--space-md) 0; }
+.d1.v3 .lvl-lbl .up { color:var(--color-accent); }
+.d1.v3 .lvl-lbl .down { color:var(--color-success); }
+
+/* Row 3: Stores — 2개 같은 폭 (둘 다 같은 역할의 저장소) */
+.d1.v3 .stores { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-sm); margin-top:var(--space-md); padding-top:0; border-top:none; align-items:stretch; }
+.d1.v3 .stores .st { padding:var(--space-md) var(--space-lg); }
+
+/* V4: Tools 좌측 + LLM 우측 2-col */
+.d1.v4 .top-row { display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-md); }
+.d1.v4 .top-row .llm { margin:0; }
+.d1.v4 .top-row .col-t { min-height: 0; padding: var(--space-xl) var(--space-lg) var(--space-md); }
+.d1.v4 .grid { grid-template-columns: 180px 36px 1fr; gap: var(--space-sm); }
+</style>
+</head>
+<body>
+
+<h1>11.5 d1-tokens 스타일 · LLM+Tools 상단 배치 4안</h1>
+<p class="intro">
+<strong>fig-arch-d1-tokens.html의 CSS와 타이포그래피를 그대로</strong> 유지. <strong>LLM과 MCP Tools만 위로</strong> 올리고 Client(User+API) · Agent · Stores는 그대로 둠. 모두 A4 본문 폭(~658px)에 맞춘 축소 렌더링(<code>.d1.a4</code>) 적용. Runtime(Agent) 컬럼에는 이전 요청대로 ReAct Loop와 커넥트HR 엔진이 Executor 안에 중첩.
+</p>
+
+<!-- ═════════ L3 원본 A4 크기 ═════════ -->
+<h2>참고 · L3 (이전 프리뷰) A4 크기</h2>
+<p class="note">이전 <code>ch11-llm-layouts.html</code>의 L3 세로 5행 스택을 A4 폭에 맞춰 렌더링한 모습. 세로가 길어지는 특성 확인.</p>
+
+<div class="a4-frame"><div style="background:var(--color-surface);padding:var(--space-xl) var(--space-lg);border-radius:var(--radius-xl);font-family:var(--font-body)">
+<div style="text-align:center;margin-bottom:var(--space-xl)">
+<div style="font-family:var(--font-mono);font-size:10px;color:var(--color-accent);letter-spacing:4px;text-transform:uppercase;font-weight:700;margin-bottom:6px">System Architecture</div>
+<div style="font-size:22px;color:var(--color-text-heading);font-weight:800;letter-spacing:-0.5px">L3 · 세로 5행 스택</div>
+<div style="font-family:var(--font-body);font-size:13px;color:var(--color-text-secondary);margin-top:3px">A4 658px 폭 적용</div>
+</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);padding:var(--space-md);display:grid;grid-template-columns:auto 1fr;gap:var(--space-lg);align-items:center;margin-bottom:var(--space-sm)">
+<div style="border-right:1px dashed var(--color-info);padding-right:var(--space-lg)"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-info-text);letter-spacing:2.5px;text-transform:uppercase;font-weight:700">External · Ollama</div><div style="font-size:16px;color:var(--color-text-heading);font-weight:700;margin-top:2px">로컬 LLM 3종</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-sm);text-align:center;font-family:var(--font-mono);font-size:11px"><div><span style="color:var(--color-info-text);font-weight:700;display:block">deepseek-r1:8b</span><span style="color:var(--color-text-secondary);font-size:10px">추론·Q&amp;A</span></div><div><span style="color:var(--color-info-text);font-weight:700;display:block">llama3.1:8b</span><span style="color:var(--color-text-secondary);font-size:10px">Tool Calling</span></div><div><span style="color:var(--color-info-text);font-weight:700;display:block">qwen2.5vl:7b</span><span style="color:var(--color-text-secondary);font-size:10px">Vision</span></div></div>
+</div>
+<div style="text-align:center;color:var(--color-accent);font-family:var(--font-mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;padding:var(--space-xs) 0">↓ 프롬프트 · 응답</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);padding:var(--space-md);display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-lg);align-items:center;margin-bottom:var(--space-sm)">
+<div style="text-align:center"><div style="width:30px;height:30px;background:var(--color-info);color:white;border-radius:50%;margin:0 auto 3px;display:flex;align-items:center;justify-content:center;font-weight:800">◉</div><div style="font-size:15px;color:var(--color-text-heading);font-weight:700">사용자</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--color-info-text);margin-top:2px">채팅 질문</div></div>
+<div style="font-family:var(--font-mono);font-size:9px;color:var(--color-info-text);text-align:center;font-weight:700"><span style="display:block">↓ 요청</span><span style="display:block">↑ 응답</span></div>
+<div style="text-align:center"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-secondary);letter-spacing:2px;text-transform:uppercase;font-weight:700">Gateway</div><div style="font-size:15px;color:var(--color-text-heading);font-weight:700;margin-top:3px">FastAPI</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-secondary);margin-top:2px">REST · 세션</div></div>
+</div>
+<div style="text-align:center;color:var(--color-accent);font-family:var(--font-mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;padding:var(--space-xs) 0">↓ 요청 · 응답</div>
+<div style="background:white;border:1.5px solid var(--color-accent);padding:var(--space-xl) var(--space-md) var(--space-md);position:relative;margin-bottom:var(--space-sm)">
+<div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--color-accent)"></div>
+<div style="position:absolute;top:-10px;left:var(--space-md);background:white;border:1px solid var(--color-accent);padding:3px 10px;font-family:var(--font-mono);font-size:10px;letter-spacing:3px;font-weight:700;text-transform:uppercase;color:var(--color-accent)">Runtime</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+<div style="border:1px solid var(--color-accent-border);padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:8px;color:var(--color-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:700">Cache</div><div style="font-size:12px;color:var(--color-text-heading);font-weight:700;margin-top:2px">Response</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-secondary);margin-top:1px">TTL 1h</div></div>
+<div style="border:1px solid var(--color-accent-border);padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:8px;color:var(--color-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:700">Monitor</div><div style="font-size:12px;color:var(--color-text-heading);font-weight:700;margin-top:2px">Tracker</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-secondary);margin-top:1px">토큰·로그</div></div>
+<div style="border:1px solid var(--color-accent-border);padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:8px;color:var(--color-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:700">Retry</div><div style="font-size:12px;color:var(--color-text-heading);font-weight:700;margin-top:2px">Resilience</div><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-text-secondary);margin-top:1px">3회</div></div>
+</div>
+<div style="background:#f8f9ff;border:1.5px solid var(--color-accent);padding:var(--space-sm)">
+<div style="text-align:center;padding-bottom:var(--space-sm);border-bottom:1px dashed var(--color-accent-border);margin-bottom:var(--space-sm)"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);letter-spacing:2px;text-transform:uppercase;font-weight:700">Executor</div><div style="font-size:15px;color:var(--color-text-heading);font-weight:700;margin-top:3px">통합 에이전트</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--color-accent-text);margin-top:2px">Agent + Tools</div></div>
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:var(--space-sm)">
+<div style="background:white;border:1px solid var(--color-accent-border);padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);letter-spacing:2px;font-weight:700;text-transform:uppercase;margin-bottom:5px">ReAct Loop</div><div style="display:flex;justify-content:center;gap:3px;font-family:var(--font-mono);flex-wrap:wrap"><span style="font-size:9px;padding:2px 6px;border:1px solid var(--color-accent-border);background:var(--color-accent-bg);font-weight:700;color:var(--color-accent-text)">Reason</span><span style="font-size:9px;padding:2px 6px;border:1px solid var(--color-accent-border);background:var(--color-accent-bg);font-weight:700;color:var(--color-accent-text)">Act</span><span style="font-size:9px;padding:2px 6px;border:1px solid var(--color-accent-border);background:var(--color-accent-bg);font-weight:700;color:var(--color-accent-text)">Obs</span></div></div>
+<div style="background:white;border:1px solid var(--color-accent-border);padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-accent);letter-spacing:2px;text-transform:uppercase;font-weight:700">RAG Engine · 커넥트HR 엔진</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-family:var(--font-mono);margin-top:4px"><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);padding:6px 4px;color:var(--color-accent-text);font-weight:700;text-align:center"><span style="display:block;font-size:8px;letter-spacing:1px;margin-bottom:2px">01</span><span style="display:block;font-size:11px">파싱</span></div><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);padding:6px 4px;color:var(--color-accent-text);font-weight:700;text-align:center"><span style="display:block;font-size:8px;letter-spacing:1px;margin-bottom:2px">02</span><span style="display:block;font-size:11px">청킹</span></div><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);padding:6px 4px;color:var(--color-accent-text);font-weight:700;text-align:center"><span style="display:block;font-size:8px;letter-spacing:1px;margin-bottom:2px">03</span><span style="display:block;font-size:11px">확장</span></div><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);padding:6px 4px;color:var(--color-accent-text);font-weight:700;text-align:center"><span style="display:block;font-size:8px;letter-spacing:1px;margin-bottom:2px">04</span><span style="display:block;font-size:11px">검색</span></div><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);padding:6px 4px;color:var(--color-accent-text);font-weight:700;text-align:center"><span style="display:block;font-size:8px;letter-spacing:1px;margin-bottom:2px">05</span><span style="display:block;font-size:11px">리랭크</span></div><div style="background:var(--color-accent-bg);border:1px solid var(--color-accent-border);padding:6px 4px;color:var(--color-accent-text);font-weight:700;text-align:center"><span style="display:block;font-size:8px;letter-spacing:1px;margin-bottom:2px">06</span><span style="display:block;font-size:11px">LLM</span></div></div></div>
+</div>
+</div>
+</div>
+<div style="text-align:center;color:var(--color-accent);font-family:var(--font-mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;padding:var(--space-xs) 0">↓ 도구 · 결과</div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);padding:var(--space-md);position:relative;margin-bottom:var(--space-sm)">
+<div style="position:absolute;top:-11px;left:var(--space-md);background:var(--color-info);color:white;padding:3px 10px;font-family:var(--font-mono);font-size:10px;letter-spacing:3px;font-weight:700;text-transform:uppercase">Tools · MCP</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-sm);margin-top:var(--space-xs)">
+<div style="background:white;border:1px solid #e2e8f0;padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-info);font-weight:700">01</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-heading);font-weight:700;margin:3px 0 2px">leave_balance</div><div style="font-size:9px;color:var(--color-text-secondary);margin-bottom:3px">연차 조회</div><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-info-text);background:var(--color-info-bg);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;border:1px solid var(--color-info);padding:1px 6px">SQL</span></div>
+<div style="background:white;border:1px solid #e2e8f0;padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-info);font-weight:700">02</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-heading);font-weight:700;margin:3px 0 2px">sales_sum</div><div style="font-size:9px;color:var(--color-text-secondary);margin-bottom:3px">매출</div><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-info-text);background:var(--color-info-bg);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;border:1px solid var(--color-info);padding:1px 6px">SQL</span></div>
+<div style="background:white;border:1px solid #e2e8f0;padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-info);font-weight:700">03</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-heading);font-weight:700;margin:3px 0 2px">list_employees</div><div style="font-size:9px;color:var(--color-text-secondary);margin-bottom:3px">직원</div><span style="font-family:var(--font-mono);font-size:9px;color:var(--color-info-text);background:var(--color-info-bg);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;border:1px solid var(--color-info);padding:1px 6px">SQL</span></div>
+<div style="background:white;border:1px solid #e2e8f0;padding:var(--space-sm);text-align:center"><div style="font-family:var(--font-mono);font-size:9px;color:var(--color-info);font-weight:700">04</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-heading);font-weight:700;margin:3px 0 2px">search_documents</div><div style="font-size:9px;color:var(--color-text-secondary);margin-bottom:3px">RAG</div><span style="font-family:var(--font-mono);font-size:9px;color:white;background:var(--color-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;border:1px solid var(--color-accent);padding:1px 6px">RAG</span></div>
+</div>
+</div>
+<div style="text-align:center;color:var(--color-accent);font-family:var(--font-mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;padding:var(--space-xs) 0">↓ 조회 · 결과</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)">
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);padding:var(--space-sm) var(--space-md);text-align:center"><div style="font-family:var(--font-mono);font-size:10px;color:var(--color-info-text);letter-spacing:2px;text-transform:uppercase;font-weight:700">Vector Store</div><div style="font-size:15px;color:var(--color-text-heading);font-weight:700;margin:3px 0">ChromaDB</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-secondary)">768차원 · 메타데이터</div></div>
+<div style="background:var(--color-info-bg);border:1px solid var(--color-info);padding:var(--space-sm) var(--space-md);text-align:center"><div style="font-family:var(--font-mono);font-size:10px;color:var(--color-info-text);letter-spacing:2px;text-transform:uppercase;font-weight:700">Relational</div><div style="font-size:15px;color:var(--color-text-heading);font-weight:700;margin:3px 0">PostgreSQL</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-secondary)">직원 · 연차 · 매출</div></div>
+</div>
+</div></div>
+
+<!-- ═════════ V1 ═════════ -->
+<h2>V1. d1-tokens · LLM | Tools 2-col 상단</h2>
+<div class="tags">
+<span class="t">d1-tokens CSS 원본 유지</span>
+<span class="t">LLM + Tools 가로 2칸 상단</span>
+<span class="t">Client + Agent 2-col 중단</span>
+</div>
+<p class="note">LLM 브라켓 박스와 Tools 박스를 상단에 나란히. Agent 컬럼은 Tools가 빠진 2-col 구조(Client + flow-arrows + Agent).</p>
+
+<div class="a4-frame"><div class="d1 a4 v1">
+<div class="header">
+<div class="sub">시스템 아키텍처 (System Architecture)</div>
+<div class="title">커넥트HR 에이전트</div>
+<div class="desc">11개 챕터에 걸쳐 완성한 RAG 시스템</div>
+</div>
+
+<div class="top-row">
+<div class="llm"><div class="box">
+<div class="l">외부 · LLM (External)</div>
+<div class="n">Ollama</div>
+<div class="models">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div>
+</div></div>
+<div class="col-t">
+<div class="title">도구 호출 · MCP Tools</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">직원 연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="llm-flow"><span class="u">↑ 프롬프트 · 도구 호출</span><span class="d">↓ 응답 · 결과</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="flow-arrows">
+<div class="fa-pair"><div class="fa-label">요청</div><div class="fa-arrow call">→</div></div>
+<div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+</div>
+<div class="col-a">
+<div class="title">통합 에이전트 · 운영 (Runtime)</div>
+<div class="ops">
+<div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+<div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="l">실행기 (Executor)</div>
+<div class="n">통합 에이전트</div>
+<div class="loop-inner"><div class="loop-label">ReAct 루프</div><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine-inner"><div class="engine-label">RAG Engine</div><div class="engine-name">커넥트HR 엔진</div><div class="stages-6"><div class="s"><span class="num">01</span><span class="nm">파싱</span></div><div class="s"><span class="num">02</span><span class="nm">청킹</span></div><div class="s"><span class="num">03</span><span class="nm">확장</span></div><div class="s"><span class="num">04</span><span class="nm">검색</span></div><div class="s"><span class="num">05</span><span class="nm">리랭크</span></div><div class="s"><span class="num">06</span><span class="nm">LLM</span></div></div></div>
+</div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">벡터 저장소 (Vector Store)</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">관계형 DB (Relational)</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="caption">V1 · LLM과 MCP Tools를 가로 2칸 상단에 나란히. 나머지 Client·Agent·Stores는 원본 그대로</div>
+</div></div>
+
+<!-- ═════════ V2 ═════════ -->
+<h2>V2. d1-tokens · LLM 전체 + Tools 전체 (2행 분리)</h2>
+<div class="tags">
+<span class="t">LLM 가로 전체 1행</span>
+<span class="t">Tools 가로 전체 1행 (4-column grid)</span>
+<span class="t">각자 독립된 "외부 자원" 레이어</span>
+</div>
+<p class="note">원본의 LLM 브라켓 박스를 그대로 유지하되 Tools도 폭을 전부 사용. Tools는 4개라 4-column grid로 가로 정리.</p>
+
+<div class="a4-frame"><div class="d1 a4 v2">
+<div class="header">
+<div class="sub">시스템 아키텍처 (System Architecture)</div>
+<div class="title">커넥트HR 에이전트</div>
+<div class="desc">11개 챕터에 걸쳐 완성한 RAG 시스템</div>
+</div>
+
+<div class="llm"><div class="box">
+<div class="l">외부 · LLM (External)</div>
+<div class="n">Ollama</div>
+<div class="models">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div></div>
+
+<div class="col-t wide">
+<div class="title">도구 호출 · MCP Tools</div>
+<div class="tools-inner">
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="llm-flow"><span class="u">↑ 프롬프트 · 도구 호출</span><span class="d">↓ 응답 · 결과</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="flow-arrows">
+<div class="fa-pair"><div class="fa-label">요청</div><div class="fa-arrow call">→</div></div>
+<div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+</div>
+<div class="col-a">
+<div class="title">통합 에이전트 · 운영 (Runtime)</div>
+<div class="ops">
+<div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+<div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="l">실행기 (Executor)</div>
+<div class="n">통합 에이전트</div>
+<div class="loop-inner"><div class="loop-label">ReAct 루프</div><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine-inner"><div class="engine-label">RAG Engine</div><div class="engine-name">커넥트HR 엔진</div><div class="stages-6"><div class="s"><span class="num">01</span><span class="nm">파싱</span></div><div class="s"><span class="num">02</span><span class="nm">청킹</span></div><div class="s"><span class="num">03</span><span class="nm">확장</span></div><div class="s"><span class="num">04</span><span class="nm">검색</span></div><div class="s"><span class="num">05</span><span class="nm">리랭크</span></div><div class="s"><span class="num">06</span><span class="nm">LLM</span></div></div></div>
+</div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">벡터 저장소 (Vector Store)</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">관계형 DB (Relational)</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="caption">V2 · LLM 가로 전체 / Tools 가로 전체. 외부 자원 2종을 2행으로 분리</div>
+</div></div>
+
+<!-- ═════════ V3 ═════════ -->
+<h2>V3. d1-tokens · 3행 2열 스택</h2>
+<div class="tags">
+<span class="t">1행: 사용자·Gateway ┃ Runtime</span>
+<span class="t">2행: LLM ┃ MCP Tools</span>
+<span class="t">3행: Vector ┃ PostgreSQL</span>
+</div>
+<p class="note">3 레이어를 세로로 쌓고 각 레이어를 가로 2칸으로 나눔. 위에서부터 클라이언트·런타임 / 외부 서비스 / 저장소.</p>
+
+<div class="a4-frame"><div class="d1 a4 v3">
+<div class="header">
+<div class="sub">시스템 아키텍처 (System Architecture)</div>
+<div class="title">커넥트HR 에이전트</div>
+<div class="desc">11개 챕터에 걸쳐 완성한 RAG 시스템</div>
+</div>
+
+<!-- Row 1: 사용자 · Runtime -->
+<div class="row-client">
+<div class="col-c">
+<div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="flow-arrows">
+<div class="fa-pair"><div class="fa-label">요청</div><div class="fa-arrow call">→</div></div>
+<div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+</div>
+<div class="col-a">
+<div class="title">통합 에이전트 · 운영 (Runtime)</div>
+<div class="ops">
+<div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+<div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="l">실행기 (Executor)</div>
+<div class="n">통합 에이전트</div>
+<div class="loop-inner"><div class="loop-label">ReAct 루프</div><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine-inner"><div class="engine-label">RAG Engine</div><div class="engine-name">커넥트HR 엔진</div><div class="stages-6"><div class="s"><span class="num">01</span><span class="nm">파싱</span></div><div class="s"><span class="num">02</span><span class="nm">청킹</span></div><div class="s"><span class="num">03</span><span class="nm">확장</span></div><div class="s"><span class="num">04</span><span class="nm">검색</span></div><div class="s"><span class="num">05</span><span class="nm">리랭크</span></div><div class="s"><span class="num">06</span><span class="nm">LLM</span></div></div></div>
+</div>
+</div>
+</div>
+
+<div class="lvl-lbl"><span class="up">↑ 프롬프트 · 도구 호출</span> &nbsp;·&nbsp; <span class="down">↓ 응답 · 결과</span></div>
+
+<!-- Row 2: LLM · Tools -->
+<div class="row-ext">
+<div class="llm"><div class="box">
+<div class="l">외부 · LLM (External)</div>
+<div class="n">Ollama</div>
+<div class="models">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div>
+</div></div>
+<div class="flow-arrows">
+<div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+<div class="fa-pair"><div class="fa-label">호출</div><div class="fa-arrow call">→</div></div>
+</div>
+<div class="col-t">
+<div class="title">도구 호출 · MCP Tools</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="lvl-lbl"><span class="up">↑ 조회 · 도구 실행</span> &nbsp;·&nbsp; <span class="down">↓ 레코드 · 문서</span></div>
+
+<!-- Row 3: Vector Store · PostgreSQL -->
+<div class="stores">
+<div class="st"><div class="l">벡터 저장소 (Vector Store)</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">관계형 DB (Relational)</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="caption">V3 · 3행 2열 세로 스택. (1행) 사용자·Gateway ┃ Runtime / (2행) LLM ┃ Tools / (3행) Vector ┃ PostgreSQL</div>
+</div></div>
+
+<!-- ═════════ V4 ═════════ -->
+<h2>V4. d1-tokens · Tools ┃ LLM 좌우 반전</h2>
+<div class="tags">
+<span class="t">Tools 좌 · LLM 우</span>
+<span class="t">v1과 위치만 반전</span>
+<span class="t">왼쪽에 도구 먼저 제시</span>
+</div>
+<p class="note">v1과 동일 구조지만 Tools를 왼쪽에, LLM을 오른쪽에 배치. 독자가 아래 Agent의 Tools 호출을 읽을 때 시선이 좌상단(Tools)과 바로 연결.</p>
+
+<div class="a4-frame"><div class="d1 a4 v4">
+<div class="header">
+<div class="sub">시스템 아키텍처 (System Architecture)</div>
+<div class="title">커넥트HR 에이전트</div>
+<div class="desc">11개 챕터에 걸쳐 완성한 RAG 시스템</div>
+</div>
+
+<div class="top-row">
+<div class="col-t">
+<div class="title">도구 호출 · MCP Tools</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">직원 연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+<div class="llm"><div class="box">
+<div class="l">외부 · LLM (External)</div>
+<div class="n">Ollama</div>
+<div class="models">
+<div class="m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div>
+</div></div>
+</div>
+
+<div class="llm-flow"><span class="u">↑ 프롬프트 · 도구 호출</span><span class="d">↓ 응답 · 결과</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="flow"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">API 게이트웨이 (Gateway)</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+<div class="flow-arrows">
+<div class="fa-pair"><div class="fa-label">요청</div><div class="fa-arrow call">→</div></div>
+<div class="fa-pair"><div class="fa-arrow ret">←</div><div class="fa-label">응답</div></div>
+</div>
+<div class="col-a">
+<div class="title">통합 에이전트 · 운영 (Runtime)</div>
+<div class="ops">
+<div class="chip"><div class="l">캐시 (Cache)</div><div class="n">Response</div><div class="s">TTL 1시간</div></div>
+<div class="chip"><div class="l">관찰 (Monitor)</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="chip"><div class="l">재시도 (Retry)</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="core">
+<div class="l">실행기 (Executor)</div>
+<div class="n">통합 에이전트</div>
+<div class="loop-inner"><div class="loop-label">ReAct 루프</div><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="engine-inner"><div class="engine-label">RAG Engine</div><div class="engine-name">커넥트HR 엔진</div><div class="stages-6"><div class="s"><span class="num">01</span><span class="nm">파싱</span></div><div class="s"><span class="num">02</span><span class="nm">청킹</span></div><div class="s"><span class="num">03</span><span class="nm">확장</span></div><div class="s"><span class="num">04</span><span class="nm">검색</span></div><div class="s"><span class="num">05</span><span class="nm">리랭크</span></div><div class="s"><span class="num">06</span><span class="nm">LLM</span></div></div></div>
+</div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">벡터 저장소 (Vector Store)</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">관계형 DB (Relational)</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="caption">V4 · Tools 좌 · LLM 우. V1 좌우 반전</div>
+</div></div>
+
+<h2 style="margin-top:96px">결정 가이드</h2>
+<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);margin-top:var(--space-lg)">
+<thead><tr style="background:var(--color-surface);border-bottom:2px solid var(--color-text-heading)">
+<th style="padding:var(--space-md) var(--space-sm);text-align:left;width:80px">안</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">상단 배치</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">강점</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">단점</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V1</td>
+<td style="padding:var(--space-md) var(--space-sm)">LLM ┃ Tools 가로 2칸</td>
+<td style="padding:var(--space-md) var(--space-sm)">균형. 공간 효율 최고</td>
+<td style="padding:var(--space-md) var(--space-sm)">각 박스 내용 약간 좁음</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V2</td>
+<td style="padding:var(--space-md) var(--space-sm)">LLM 전체 행 + Tools 전체 행</td>
+<td style="padding:var(--space-md) var(--space-sm)">각 레이어 내용 여유</td>
+<td style="padding:var(--space-md) var(--space-sm)">세로 길이 증가</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border);background:var(--color-accent-bg)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V3 ★</td>
+<td style="padding:var(--space-md) var(--space-sm)">External Services 외곽 박스 + LLM·Tools 2칸</td>
+<td style="padding:var(--space-md) var(--space-sm)"><strong>"외부 의존" 개념 그루핑</strong>. 에디토리얼 콜아웃 느낌</td>
+<td style="padding:var(--space-md) var(--space-sm)">중첩 박스라 구조 복잡</td>
+</tr>
+<tr>
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V4</td>
+<td style="padding:var(--space-md) var(--space-sm)">Tools 좌 ┃ LLM 우</td>
+<td style="padding:var(--space-md) var(--space-sm)">Agent→Tools 시선 연결</td>
+<td style="padding:var(--space-md) var(--space-sm)">LLM이 주 역할인데 오른쪽 놓임</td>
+</tr>
+</tbody>
+</table>
+
+<p style="margin-top:var(--space-lg);font-size:var(--fs-md);color:var(--color-text-muted)">
+<strong>추천</strong>: <strong>V3 External Services 외곽 그룹</strong>. d1-tokens 스타일의 상징인 <code>::before/::after</code> 브라켓 장식과 어울리는 "외부 서비스 콜아웃" 그루핑. V1이 가장 단순한 대안.
+</p>
+
+</body>
+</html>

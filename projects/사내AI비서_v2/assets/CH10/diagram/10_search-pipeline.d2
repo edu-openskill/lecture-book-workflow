@@ -1,0 +1,40 @@
+direction: right
+
+classes: {
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#3b82f6"
+      stroke: "#3b82f6"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 14
+      font-color: "#ffffff"
+      bold: true
+    }
+  }
+  input: {
+    shape: rectangle
+    style: {
+      fill: white
+      stroke: "#333333"
+      stroke-width: 1
+      border-radius: 8
+      font-size: 14
+      bold: true
+    }
+  }
+}
+
+a: "사용자 질문" { class: input }
+b: "약어 확장\n(CH09)" { class: process }
+c: "HyDE\n(CH09)" { class: process }
+d: "하이브리드 검색\n벡터 + BM25\n(CH08)" { class: process }
+e: "리랭킹\nCross-Encoder\n(CH08)" { class: process }
+f: "결과 + image_path\n(CH10)" { class: input }
+
+a -> b: { style.stroke: "#3b82f6"; style.stroke-width: 2 }
+b -> c: { style.stroke: "#3b82f6"; style.stroke-width: 2 }
+c -> d: { style.stroke: "#3b82f6"; style.stroke-width: 2 }
+d -> e: { style.stroke: "#3b82f6"; style.stroke-width: 2 }
+e -> f: { style.stroke: "#3b82f6"; style.stroke-width: 2 }

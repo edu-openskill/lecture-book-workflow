@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110"
+     role="img" aria-labelledby="t1">
+  <title id="t1">OpenSkillBooks</title>
+  <defs>
+    <linearGradient id="wvG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B4781E" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="#B4781E"/>
+      <stop offset="100%" stop-color="#D4942A" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(222,0) scale(0.3)">
+      <path d="M 45 18 Q 38 14, 12 16 L 8 82 Q 38 78, 45 75 Z"
+            fill="white" stroke="#006666" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M 45 18 Q 52 14, 78 16 L 82 82 Q 52 78, 45 75 Z"
+            fill="white" stroke="#006666" stroke-width="1.8" stroke-linejoin="round"/>
+      <line x1="17" y1="34" x2="38" y2="32" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <line x1="17" y1="46" x2="36" y2="44" stroke="#B4781E" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+      <line x1="17" y1="58" x2="34" y2="56" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <line x1="52" y1="32" x2="73" y2="34" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <line x1="54" y1="44" x2="71" y2="46" stroke="#B4781E" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+      <line x1="52" y1="56" x2="69" y2="58" stroke="#B4781E" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+      <circle cx="45" cy="10" r="3" fill="#B4781E" opacity="0.45"/>
+    </g>
+  <text x="260" y="65" text-anchor="middle"
+        font-family="'Pretendard','Apple SD Gothic Neo',sans-serif"
+        font-size="38" font-weight="700" letter-spacing="1" fill="#006666">openskillbooks</text>
+  <path d="M 60 80 C 100 70, 140 90, 180 80 S 260 70, 300 80 S 380 90, 420 80 S 460 70, 470 80"
+        fill="none" stroke="url(#wvG)" stroke-width="2" stroke-linecap="round"/>
+  <text x="260" y="102" text-anchor="middle"
+        font-family="'Pretendard',sans-serif"
+        font-size="10" letter-spacing="6" fill="#B4781E" opacity="0.45">learn by doing</text>
+</svg>

@@ -1,0 +1,42 @@
+direction: right
+
+classes: {
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 16
+      bold: true
+    }
+    width: 200
+    height: 70
+  }
+}
+
+A: "agent_config.py\nConnectHRAgent" {
+  class: process
+}
+B: "cache.py\nResponseCache\nEmbeddingCache" {
+  class: process
+}
+C: "monitoring.py\nTokenTracker" {
+  class: process
+}
+D: "실행 결과 확인\n채팅창에서 테스트" {
+  class: process
+}
+
+A -> B: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+B -> C: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+C -> D: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Ingress 실습 4단계</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 36px 24px 24px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram { width: 1140px; }
+  .title {
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .flow {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 4px;
+  }
+  .step {
+    flex: 1;
+    min-width: 180px;
+    max-width: 210px;
+    border: 2px solid #1565c0;
+    border-radius: 10px;
+    padding: 16px 12px 14px;
+    background: #fff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .step-badge {
+    width: 30px; height: 30px; line-height: 26px;
+    border-radius: 50%;
+    background: #1565c0; color: #fff;
+    font-size: 14px; font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .step-title {
+    font-size: 13px; font-weight: 800; color: #222;
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+  .step-sub {
+    font-size: 11px; color: #666; line-height: 1.5;
+    font-family: 'Consolas', 'Malgun Gothic', monospace;
+  }
+
+  .arrow {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 30px;
+    color: #1565c0; font-size: 24px; font-weight: 700;
+  }
+
+  /* 1번 강조 */
+  .step.highlight {
+    background: #fff3e0;
+    border-color: #c62828;
+  }
+  .step.highlight .step-badge { background: #c62828; }
+  .step.highlight .step-title { color: #c62828; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Ingress 실습 4단계</div>
+
+  <div class="flow">
+    <div class="step highlight">
+      <div class="step-badge">1</div>
+      <div class="step-title">Ingress Controller 실행</div>
+      <div class="step-sub">minikube addons<br>enable ingress</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-badge">2</div>
+      <div class="step-title">백엔드 서비스</div>
+      <div class="step-sub">order-service<br>stores-service</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-badge">3</div>
+      <div class="step-title">규칙 문서</div>
+      <div class="step-sub">Ingress YAML<br>경로 → Service</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-badge">4</div>
+      <div class="step-title">브라우저 접속</div>
+      <div class="step-sub">/order<br>/stores</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

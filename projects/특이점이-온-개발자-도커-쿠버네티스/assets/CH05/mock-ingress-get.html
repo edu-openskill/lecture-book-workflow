@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+  body {
+    padding: 20px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  }
+  .terminal {
+    width: 860px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #d8d2c5;
+    background: #faf6ef;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .titlebar {
+    background: #ece6d8;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #d8d2c5;
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.red    { background: #ff5f57; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green  { background: #28c940; }
+  .title {
+    color: #6b6258;
+    font-size: 12px;
+    flex: 1;
+    text-align: center;
+  }
+  .body {
+    padding: 18px 22px;
+    font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #333;
+  }
+  .prompt {
+    color: #1f5fb7;
+  }
+  .prompt::before {
+    content: '$ ';
+    color: #1f5fb7;
+  }
+  pre {
+    margin: 4px 0 12px 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: #333;
+    white-space: pre;
+  }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="titlebar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <div class="title">실행결과</div>
+  </div>
+  <div class="body">
+    <div class="prompt">kubectl apply -f ex09/yaml/ingress-ex01.yml</div>
+    <pre>ingress.networking.k8s.io/shop-ingress created</pre>
+    <div class="prompt">kubectl get ingress</div>
+<pre>NAME           CLASS   HOSTS   ADDRESS        PORTS   AGE
+shop-ingress   nginx   *       192.168.49.2   80      12s</pre>
+  </div>
+</div>
+</body>
+</html>

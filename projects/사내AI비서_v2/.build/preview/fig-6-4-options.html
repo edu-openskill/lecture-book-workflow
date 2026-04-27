@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>그림 6-4 디자인 옵션 (4가지)</title>
+<style>
+:root {
+  --color-surface: #f8fafc;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #cbd5e1;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-heading: #0f172a;
+  --color-accent: #2563eb;
+  --color-accent-text: #1e40af;
+  --color-accent-bg: #eff6ff;
+  --color-accent-border: #93c5fd;
+  --color-info: #0284c7;
+  --color-info-bg: #e0f2fe;
+  --color-info-text: #075985;
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-success-text: #166534;
+  --color-warning: #ca8a04;
+  --color-warning-text: #854d0e;
+  --color-warning-bg: #fef9c3;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --fs-footnote: 10px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-lg: 18px;
+  --font-mono: "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--color-text); background: white; max-width: 1000px; margin: 32px auto; padding: 0 24px 64px; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--color-text-heading); padding-bottom: 8px; margin-bottom: 8px; }
+.intro { color: var(--color-text-muted); font-size: 14px; margin-bottom: 32px; }
+h2 { margin-top: 56px; font-size: 17px; color: var(--color-accent-text); border-bottom: 1px solid var(--color-border); padding-bottom: 6px; }
+.tag { display: inline-block; background: var(--color-warning-bg); color: var(--color-warning-text); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.tag.current { background: var(--color-accent-bg); color: var(--color-accent-text); }
+.note { color: var(--color-text-muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; }
+code { font-family: var(--font-mono); font-size: 0.92em; background: var(--color-surface-alt); padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<h1>그림 6-4. ReAct 에이전트 안의 파이프라인 — 디자인 옵션 4종</h1>
+<p class="intro">"챕터 5 엔진이 버려지지 않고 <code>search_documents</code> 도구 안에 박혀서 ReAct 루프가 바깥을 감싼다"는 구조를 어떤 방식으로 시각화할지. 4가지 버전을 비교합니다.</p>
+
+<!-- ============ V1 ============ -->
+<h2>V1. 3층 박스 (위: 루프, 아래: Act의 도구 상자) <span class="tag current">CH06에 현재 반영됨 · 소속감 강화판</span></h2>
+<p class="note">Act 박스를 accent 색상으로 강조하고, 도구들을 <strong>"② Act 의 도구 상자"</strong> 부모 박스에 담아 귀속 관계를 명시. 루프와 도구 사이에 세로 연결선 추가.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 6-4. ReAct 에이전트 안의 파이프라인</div>
+
+<div style="border:2px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-lg);background:var(--color-surface-alt)">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);margin-bottom:var(--space-sm);letter-spacing:1px;text-align:center">REACT 루프 (AgentExecutor가 자동 반복)</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-sm);font-size:var(--fs-sm)">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center;flex:1"><div style="font-weight:700">① Reason</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">어느 도구를?</div></div>
+<div style="font-size:var(--fs-lg);color:var(--color-text-muted)">→</div>
+<div style="background:var(--color-accent-bg);border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center;flex:1"><div style="font-weight:700;color:var(--color-accent-text)">② Act</div><div style="font-size:var(--fs-xs);color:var(--color-accent-text)">도구 호출 ↓</div></div>
+<div style="font-size:var(--fs-lg);color:var(--color-text-muted)">→</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);text-align:center;flex:1"><div style="font-weight:700">③ Observe</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">결과 확인</div></div>
+<div style="font-size:var(--fs-lg);color:var(--color-text-muted)">↵</div>
+</div>
+<div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:var(--space-sm)">충분하면 답변, 부족하면 ①로 되돌아가 루프</div>
+</div>
+
+<div style="text-align:center;padding:var(--space-xs) 0">
+<div style="display:inline-block;width:2px;height:18px;background:var(--color-accent)"></div>
+</div>
+
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-lg) var(--space-md) var(--space-md);background:var(--color-accent-bg);position:relative;margin-top:4px">
+<div style="position:absolute;top:-11px;left:20px;background:var(--color-accent);color:white;padding:3px 12px;border-radius:var(--radius-sm);font-size:var(--fs-xs);font-weight:700;letter-spacing:0.5px">② Act 의 도구 상자 (자료함 4개)</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-sm);margin-top:var(--space-xs);margin-bottom:var(--space-sm)">
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:white;text-align:center"><div style="font-weight:700;font-size:var(--fs-sm)">leave_balance</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL 직접 조회</div></div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:white;text-align:center"><div style="font-weight:700;font-size:var(--fs-sm)">sales_sum</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL 직접 조회</div></div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:white;text-align:center"><div style="font-weight:700;font-size:var(--fs-sm)">list_employees</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL 직접 조회</div></div>
+</div>
+
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-md);background:white">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-sm)">
+<div style="font-weight:700;font-size:var(--fs-sm)">search_documents <span style="font-weight:400;color:var(--color-text-muted)">(속을 열어 보면)</span></div>
+<div style="font-size:var(--fs-footnote);color:var(--color-success-text);font-weight:600;background:var(--color-success-bg);padding:2px 8px;border-radius:4px">챕터 5 엔진 그대로</div>
+</div>
+<div style="background:var(--color-surface-alt);border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:var(--space-sm);font-family:var(--font-mono);font-size:var(--fs-xs)">
+<div style="color:var(--color-text-subtle);margin-bottom:6px;text-align:center">챕터 5의 LCEL 파이프라인</div>
+<div style="display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap">
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Retriever</span><span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Prompt</span><span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">LLM</span><span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Parser</span>
+</div>
+</div>
+</div>
+
+<div style="margin-top:var(--space-md);font-size:var(--fs-xs);color:var(--color-text-muted);text-align:center">SQL 도구 3개는 DB 직접 호출, <code style="background:white;padding:1px 5px;border-radius:3px;border:1px solid var(--color-border)">search_documents</code>만 <strong>챕터 5 파이프라인</strong>을 품고 있습니다.</div>
+</div>
+</div>
+
+<!-- ============ V2 ============ -->
+<h2>V2. 좌우 분할 (왼쪽: 루프, 오른쪽: 도구) <span class="tag">대안</span></h2>
+<p class="note">루프와 도구를 나란히 배치. "Act가 도구를 고른다"는 방향성이 왼→오 화살표로 시각화. 가로 폭이 넓어 모바일에서 스크롤 필요할 수 있음.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 6-4. ReAct 에이전트 안의 파이프라인</div>
+<div style="display:grid;grid-template-columns:260px 1fr;gap:var(--space-lg);align-items:stretch">
+
+<!-- Left: ReAct loop vertical -->
+<div style="border:2px dashed var(--color-border);border-radius:var(--radius-md);padding:var(--space-md);background:var(--color-surface-alt);display:flex;flex-direction:column">
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);letter-spacing:1px;text-align:center;margin-bottom:var(--space-sm)">REACT 루프</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-sm)">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);text-align:center"><div style="font-weight:700">① Reason</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">어느 도구?</div></div>
+<div style="text-align:center;font-size:var(--fs-lg);color:var(--color-text-muted)">↓</div>
+<div style="background:white;border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-sm);text-align:center"><div style="font-weight:700;color:var(--color-accent-text)">② Act →</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">(오른쪽 도구 호출)</div></div>
+<div style="text-align:center;font-size:var(--fs-lg);color:var(--color-text-muted)">↓</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);text-align:center"><div style="font-weight:700">③ Observe</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">결과 평가</div></div>
+<div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-subtle);margin-top:4px">부족 → ①로<br>충분 → 답변</div>
+</div>
+</div>
+
+<!-- Right: tools -->
+<div>
+<div style="font-size:var(--fs-xs);font-weight:600;color:var(--color-text-muted);margin-bottom:var(--space-sm);letter-spacing:1px">②가 부르는 도구</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:var(--color-info-bg)"><div style="font-weight:700;font-size:var(--fs-sm)">leave_balance</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL</div></div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:var(--color-info-bg)"><div style="font-weight:700;font-size:var(--fs-sm)">sales_sum</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL</div></div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm);background:var(--color-info-bg)"><div style="font-weight:700;font-size:var(--fs-sm)">list_employees</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">PostgreSQL</div></div>
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-sm);background:var(--color-accent-bg)"><div style="font-weight:700;font-size:var(--fs-sm);color:var(--color-accent-text)">search_documents</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">↓ 속을 열면</div></div>
+</div>
+<div style="border:1px dashed var(--color-accent-border);border-radius:var(--radius-md);padding:var(--space-md);background:white;font-family:var(--font-mono);font-size:var(--fs-xs)">
+<div style="color:var(--color-accent-text);margin-bottom:6px;font-weight:600">search_documents 내부 — 챕터 5 LCEL 파이프라인</div>
+<div style="display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap">
+<span style="background:var(--color-surface-alt);padding:3px 10px;border-radius:4px">Retriever</span><span>→</span>
+<span style="background:var(--color-surface-alt);padding:3px 10px;border-radius:4px">Prompt</span><span>→</span>
+<span style="background:var(--color-surface-alt);padding:3px 10px;border-radius:4px">LLM</span><span>→</span>
+<span style="background:var(--color-surface-alt);padding:3px 10px;border-radius:4px">Parser</span>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ============ V3 ============ -->
+<h2>V3. 세로 순서도 (위→아래 선형 흐름) <span class="tag">대안</span></h2>
+<p class="note">질문 → Reason → Act → (도구 선택) → Observe → 분기. 시간순 흐름이 명확. 학습자에게 가장 직관적. 대신 "루프"라는 개념이 마지막 화살표로만 표현돼서 약함.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 6-4. ReAct 에이전트 안의 파이프라인</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-sm)">
+<div style="background:var(--color-warning-bg);border:1px solid var(--color-warning);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-lg);font-weight:600">사용자 질문</div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-lg)">↓</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-xl);text-align:center;min-width:220px"><div style="font-weight:700">① Reason</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">어느 도구가 맞나?</div></div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-lg)">↓</div>
+<div style="background:white;border:2px solid var(--color-accent);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-xl);text-align:center;min-width:220px"><div style="font-weight:700;color:var(--color-accent-text)">② Act</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">도구 호출 ↓</div></div>
+
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-md);background:var(--color-surface-alt);width:100%;max-width:680px">
+<div style="font-size:var(--fs-xs);color:var(--color-text-muted);margin-bottom:var(--space-sm);text-align:center">사용 가능한 도구 4개</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:var(--space-xs);font-size:var(--fs-xs)">
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px;background:var(--color-info-bg);text-align:center"><div style="font-weight:700">leave_balance</div><div style="color:var(--color-text-muted);font-size:11px">PostgreSQL</div></div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px;background:var(--color-info-bg);text-align:center"><div style="font-weight:700">sales_sum</div><div style="color:var(--color-text-muted);font-size:11px">PostgreSQL</div></div>
+<div style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:6px;background:var(--color-info-bg);text-align:center"><div style="font-weight:700">list_employees</div><div style="color:var(--color-text-muted);font-size:11px">PostgreSQL</div></div>
+<div style="border:2px solid var(--color-accent);border-radius:var(--radius-sm);padding:6px;background:var(--color-accent-bg);text-align:center"><div style="font-weight:700;color:var(--color-accent-text)">search_documents</div><div style="color:var(--color-text-muted);font-size:11px">LCEL 파이프</div></div>
+</div>
+<div style="margin-top:var(--space-sm);padding:var(--space-sm);background:white;border:1px dashed var(--color-accent-border);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:11px;text-align:center">
+<span style="color:var(--color-text-subtle)">search_documents 내부: </span>
+<span style="background:var(--color-surface-alt);padding:2px 6px;border-radius:3px">Retriever</span> →
+<span style="background:var(--color-surface-alt);padding:2px 6px;border-radius:3px">Prompt</span> →
+<span style="background:var(--color-surface-alt);padding:2px 6px;border-radius:3px">LLM</span> →
+<span style="background:var(--color-surface-alt);padding:2px 6px;border-radius:3px">Parser</span>
+</div>
+</div>
+
+<div style="color:var(--color-text-muted);font-size:var(--fs-lg)">↓</div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-xl);text-align:center;min-width:220px"><div style="font-weight:700">③ Observe</div><div style="font-size:var(--fs-xs);color:var(--color-text-muted)">결과 평가</div></div>
+<div style="color:var(--color-text-muted);font-size:var(--fs-lg)">↓</div>
+<div style="display:flex;gap:var(--space-md);font-size:var(--fs-xs)">
+<div style="background:var(--color-success-bg);border:1px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md)"><strong>충분</strong> → 최종 답변</div>
+<div style="background:var(--color-warning-bg);border:1px solid var(--color-warning);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md)"><strong>부족</strong> → ① Reason으로 복귀 ↻</div>
+</div>
+</div>
+</div>
+
+<!-- ============ V4 ============ -->
+<h2>V4. 중첩 박스 (러시안 돌) <span class="tag">대안</span></h2>
+<p class="note">바깥에서 안쪽으로 껍질 벗기듯. "파이프라인이 도구 안에 박혀 있다"를 공간적으로 가장 강하게 표현. 루프 개념은 별도 화살표로 약하게.</p>
+
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0">
+<div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-accent-text);margin-bottom:var(--space-lg);text-align:center">그림 6-4. ReAct 에이전트 안의 파이프라인</div>
+
+<!-- 가장 바깥: ReAct Agent -->
+<div style="border:3px solid var(--color-accent);border-radius:var(--radius-lg);padding:var(--space-lg);background:var(--color-accent-bg);position:relative">
+<div style="position:absolute;top:-11px;left:20px;background:var(--color-accent);color:white;padding:2px 10px;border-radius:4px;font-size:var(--fs-xs);font-weight:700">ReAct Agent (AgentExecutor)</div>
+<div style="font-size:var(--fs-xs);color:var(--color-accent-text);margin:0 0 var(--space-md) 0;padding-top:var(--space-xs)">Reason → Act → Observe 루프를 질문이 풀릴 때까지 자동 반복</div>
+
+<!-- 중간: Tools -->
+<div style="border:2px solid var(--color-info);border-radius:var(--radius-md);padding:var(--space-md);background:var(--color-info-bg);position:relative">
+<div style="position:absolute;top:-10px;left:16px;background:var(--color-info);color:white;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:700">Tools (자료함 4개)</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-sm);margin-top:var(--space-xs);margin-bottom:var(--space-sm)">
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs) var(--space-sm);font-size:var(--fs-xs);text-align:center"><div style="font-weight:700">leave_balance</div><div style="color:var(--color-text-muted);font-size:11px">SQL</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs) var(--space-sm);font-size:var(--fs-xs);text-align:center"><div style="font-weight:700">sales_sum</div><div style="color:var(--color-text-muted);font-size:11px">SQL</div></div>
+<div style="background:white;border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:var(--space-xs) var(--space-sm);font-size:var(--fs-xs);text-align:center"><div style="font-weight:700">list_employees</div><div style="color:var(--color-text-muted);font-size:11px">SQL</div></div>
+</div>
+
+<!-- 안쪽: search_documents -->
+<div style="border:2px solid var(--color-success);border-radius:var(--radius-md);padding:var(--space-md);background:white;position:relative;margin-top:var(--space-sm)">
+<div style="position:absolute;top:-10px;left:16px;background:var(--color-success);color:white;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:700">search_documents</div>
+
+<!-- 가장 안쪽: LCEL Pipeline -->
+<div style="border:2px dashed var(--color-text-muted);border-radius:var(--radius-sm);padding:var(--space-sm);background:var(--color-surface-alt);margin-top:var(--space-xs);font-family:var(--font-mono);font-size:var(--fs-xs);position:relative">
+<div style="position:absolute;top:-8px;left:14px;background:var(--color-text-muted);color:white;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700">챕터 5 LCEL 파이프라인 (재사용)</div>
+<div style="display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:var(--space-xs)">
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Retriever</span><span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Prompt</span><span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">LLM</span><span>→</span>
+<span style="background:white;padding:3px 10px;border-radius:4px;border:1px solid var(--color-border)">Parser</span>
+</div>
+</div>
+
+</div>
+</div>
+
+<div style="text-align:center;font-size:var(--fs-xs);color:var(--color-text-muted);margin-top:var(--space-md)">껍질을 열수록: <strong>ReAct Agent</strong> → <strong>도구 4개</strong> → <strong>search_documents</strong> → <strong>LCEL 파이프라인(챕터 5 엔진)</strong></div>
+</div>
+</div>
+
+<!-- ============ 결론 ============ -->
+<h2 style="margin-top:80px;border-bottom:2px solid var(--color-text-heading);padding-bottom:6px">추천 판단 기준</h2>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-lg);font-size:var(--fs-sm);line-height:1.8">
+<p><strong>V1 — 3층 박스</strong>: 현재 반영된 버전. 루프와 도구를 분리해 "루프 중에서도 ②Act가 도구를 부른다"를 명시. <strong>균형 좋음. 기본 권장.</strong></p>
+<p><strong>V2 — 좌우 분할</strong>: 루프가 세로로, 도구가 오른쪽에. Act에서 오른쪽으로 화살표가 나가는 방향성이 강함. 가로 공간이 필요해 PDF 인쇄 시 좁을 수 있음.</p>
+<p><strong>V3 — 세로 순서도</strong>: 초심자에게 가장 쉬움. 질문 입력부터 답변까지 시간순으로 따라 읽기. 다만 "루프" 개념이 마지막 분기(부족→복귀)에 한 줄로만 표현돼 약함.</p>
+<p><strong>V4 — 중첩 박스</strong>: "파이프라인이 도구 안에 박혀 있다"는 공간적 관계를 가장 강하게 전달. "챕터 5 엔진이 여기 들어 있구나"가 한눈에 와닿음. 다만 루프 개념은 거의 사라지고 상단 한 줄 설명으로 대체.</p>
+</div>
+
+<h2 style="margin-top:48px">어느 것을 고를지 힌트</h2>
+<ul style="font-size:var(--fs-sm);line-height:1.8">
+<li><strong>"챕터 5 엔진 재사용"을 가장 강조하고 싶다면</strong> → V4</li>
+<li><strong>"ReAct 루프가 질문마다 반복된다"를 가장 강조하고 싶다면</strong> → V1 또는 V2</li>
+<li><strong>"처음부터 끝까지 흐름을 따라가기"가 목적이라면</strong> → V3</li>
+<li><strong>균형</strong> (루프 + 도구 + 파이프 셋 다 고르게) → V1</li>
+</ul>
+
+</body>
+</html>

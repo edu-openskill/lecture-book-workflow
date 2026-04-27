@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>시스템 아키텍처 (챕터 분류 제거) — 3종</title>
+<style>
+:root {
+  --ink: #0f172a;
+  --text: #334155;
+  --muted: #64748b;
+  --subtle: #94a3b8;
+  --line: #cbd5e1;
+  --line-soft: #e2e8f0;
+  --bg: #ffffff;
+  --bg-soft: #f8fafc;
+  --bg-soft2: #f1f5f9;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --accent-ink: #1e40af;
+  --amber: #d97706;
+  --amber-soft: #fef3c7;
+  --emerald: #059669;
+  --emerald-soft: #d1fae5;
+  --radius: 8px;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 24px 64px; line-height: 1.5; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 8px; color: var(--ink); }
+.intro { color: var(--muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
+h2 { margin-top: 56px; font-size: 17px; color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.tag { display: inline-block; background: var(--accent-soft); color: var(--accent-ink); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.note { color: var(--muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.6; }
+code { font-family: "SF Mono", Menlo, monospace; font-size: 0.92em; background: var(--bg-soft); padding: 1px 5px; border-radius: 3px; }
+
+.board { background: white; padding: 36px 24px; margin: 24px 0; overflow-x: auto; }
+
+/* ========= A1 Layered ========= */
+.a1-wrap { max-width: 900px; margin: 0 auto; }
+.a1-layer { background: var(--bg-soft); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px; position: relative; }
+.a1-layer .label { font-size: 10px; color: var(--subtle); letter-spacing: 2px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+.a1-layer .comps { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.a1-comp { background: white; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; color: var(--ink); }
+.a1-comp .n { font-weight: 700; }
+.a1-comp .s { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.a1-arrow { text-align: center; color: var(--subtle); font-size: 14px; margin: 4px 0; }
+
+/* 오프라인·외부 박스 */
+.a1-side { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+.a1-side .sbox { background: var(--bg-soft); border-radius: var(--radius); padding: 14px 16px; }
+.a1-side .sbox .label { font-size: 10px; color: var(--subtle); letter-spacing: 2px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; }
+.a1-side .sbox .comps { display: flex; flex-direction: column; gap: 6px; }
+
+/* ========= A2 Flow ========= */
+.a2-wrap { min-width: 1100px; }
+.a2-main { display: flex; align-items: center; gap: 6px; }
+.a2-n { flex: 1 1 0; min-width: 140px; padding: 14px 12px; border-radius: var(--radius); background: var(--bg-soft); text-align: center; }
+.a2-n .ty { font-size: 9px; color: var(--subtle); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.a2-n .nm { font-size: 14px; font-weight: 700; color: var(--ink); }
+.a2-n .ds { font-size: 10px; color: var(--muted); margin-top: 3px; }
+.a2-arr { color: var(--subtle); font-size: 16px; flex: 0 0 16px; text-align: center; }
+
+.a2-branch { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--line-soft); }
+.a2-b { background: var(--bg-soft); border-radius: var(--radius); padding: 10px 14px; }
+.a2-b .ty { font-size: 9px; color: var(--subtle); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; }
+.a2-b .nm { font-size: 13px; font-weight: 700; color: var(--ink); }
+.a2-b .ds { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.a2-tail { display: flex; justify-content: center; margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line-soft); }
+.a2-tail .tb { background: var(--accent-soft); padding: 10px 18px; border-radius: var(--radius); text-align: center; }
+.a2-tail .tb .ty { font-size: 9px; color: var(--accent); letter-spacing: 1.5px; font-weight: 700; }
+.a2-tail .tb .nm { font-size: 13px; font-weight: 700; color: var(--accent-ink); margin-top: 2px; }
+
+/* ========= A3 Container ========= */
+.a3-wrap { display: flex; flex-direction: column; gap: 18px; max-width: 980px; margin: 0 auto; }
+.a3-box { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px 16px; position: relative; }
+.a3-box .boundary { position: absolute; top: -10px; left: 18px; background: white; padding: 0 10px; font-size: 10px; letter-spacing: 2px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+.a3-box.online { background: var(--bg-soft); }
+.a3-box.online .boundary { background: var(--bg-soft); color: var(--accent-ink); }
+.a3-box.ingestion { background: var(--amber-soft); }
+.a3-box.ingestion .boundary { background: var(--amber-soft); color: var(--amber); }
+.a3-box.ext { background: var(--emerald-soft); }
+.a3-box.ext .boundary { background: var(--emerald-soft); color: var(--emerald); }
+.a3-box.ops { background: var(--bg-soft2); }
+.a3-box.ops .boundary { background: var(--bg-soft2); color: var(--muted); }
+
+.a3-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.a3-c { background: white; padding: 10px 14px; border-radius: var(--radius); flex: 1 1 160px; min-width: 140px; }
+.a3-c .nm { font-size: 13px; font-weight: 700; color: var(--ink); }
+.a3-c .ds { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.a3-sub { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line-soft); }
+.a3-sub-label { font-size: 9px; color: var(--subtle); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<h1>시스템 아키텍처 — 3종 (챕터 분류 제거)</h1>
+<p class="intro">
+챕터 번호·태그 없이 <strong>순수 시스템 뷰</strong>. 각 컴포넌트의 역할·연결·경계만 드러나는 아키텍처 다이어그램입니다. 책 마지막에 "완성된 시스템" 한 장으로 제시하기 적합.
+</p>
+
+<!-- ============ A1. Layered ============ -->
+<h2>A1. 계층형 (Layered Architecture) <span class="tag">클래식 · 가독성 좋음</span></h2>
+<p class="note">전형적 웹 아키텍처 레이어: <code>Client · API · Application · Service · Data</code>. 오프라인 Ingestion과 외부 LLM은 우측·하단에 별도. 엔지니어에게 친숙한 구조.</p>
+
+<div class="board">
+<div class="a1-wrap">
+
+<div class="a1-layer">
+<div class="label">Client</div>
+<div class="comps"><div class="a1-comp"><div class="n">Browser Chat UI</div><div class="s">사용자</div></div></div>
+</div>
+<div class="a1-arrow">↓ HTTP</div>
+
+<div class="a1-layer">
+<div class="label">API Gateway</div>
+<div class="comps"><div class="a1-comp"><div class="n">FastAPI</div><div class="s">REST · Session · Routing</div></div></div>
+</div>
+<div class="a1-arrow">↓</div>
+
+<div class="a1-layer" style="background:var(--accent-soft)">
+<div class="label" style="color:var(--accent-ink)">Application · Agent Runtime</div>
+<div class="comps">
+<div class="a1-comp"><div class="n">ResponseCache</div><div class="s">TTL 메모장</div></div>
+<div class="a1-comp"><div class="n">TokenTracker</div><div class="s">사용량 기록</div></div>
+<div class="a1-comp"><div class="n">Retry Loop</div><div class="s">3회 재시도</div></div>
+<div class="a1-comp"><div class="n">ReAct Agent</div><div class="s">Reason · Act · Observe</div></div>
+<div class="a1-comp"><div class="n">Tool Registry</div><div class="s">4 MCP Tools</div></div>
+</div>
+</div>
+<div class="a1-arrow">↓</div>
+
+<div class="a1-layer">
+<div class="label">Service (Retrieval)</div>
+<div class="comps">
+<div class="a1-comp"><div class="n">LCEL Chain</div><div class="s">Retriever → Prompt → LLM → Parser</div></div>
+<div class="a1-comp"><div class="n">Reranker · Hybrid · HyDE</div><div class="s">튜닝 전략</div></div>
+</div>
+</div>
+<div class="a1-arrow">↓</div>
+
+<div class="a1-layer">
+<div class="label">Data Store</div>
+<div class="comps">
+<div class="a1-comp"><div class="n">ChromaDB</div><div class="s">벡터 · 768d · 메타데이터</div></div>
+<div class="a1-comp"><div class="n">PostgreSQL</div><div class="s">employees · leave_balance · sales</div></div>
+</div>
+</div>
+
+<!-- 오프라인·외부·평가 병행 -->
+<div class="a1-side">
+<div class="sbox">
+<div class="label">Offline Ingestion</div>
+<div class="comps">
+<div class="a1-comp"><div class="n">Doc Pipeline</div><div class="s">pypdf → Vision 폴백</div></div>
+<div class="a1-comp"><div class="n">Chunker · Embedder</div><div class="s">500자 · ko-sroberta</div></div>
+</div>
+</div>
+<div class="sbox">
+<div class="label">External · Observability</div>
+<div class="comps">
+<div class="a1-comp"><div class="n">Ollama LLM</div><div class="s">llama3.1 + minicpm-v</div></div>
+<div class="a1-comp"><div class="n">RAG Eval Framework</div><div class="s">Precision · Hallucination · Latency</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ A2. Data Flow ============ -->
+<h2>A2. 데이터 플로우 (요청 → 응답) <span class="tag">흐름 중심</span></h2>
+<p class="note">질문이 시스템을 가로지르는 <strong>경로</strong>를 가장 가독성 좋게. 메인 6단계 + 하단 4개 저장·외부 + 뒷단 평가.</p>
+
+<div class="board">
+<div class="a2-wrap">
+<div class="a2-main">
+<div class="a2-n"><div class="ty">Input</div><div class="nm">사용자</div><div class="ds">채팅 질문</div></div>
+<div class="a2-arr">▸</div>
+<div class="a2-n"><div class="ty">API</div><div class="nm">FastAPI</div><div class="ds">REST 수신</div></div>
+<div class="a2-arr">▸</div>
+<div class="a2-n"><div class="ty">Runtime</div><div class="nm">Agent</div><div class="ds">Cache · ReAct · Retry</div></div>
+<div class="a2-arr">▸</div>
+<div class="a2-n"><div class="ty">Service</div><div class="nm">Retrieval</div><div class="ds">LCEL + 튜닝 전략</div></div>
+<div class="a2-arr">▸</div>
+<div class="a2-n"><div class="ty">Model</div><div class="nm">LLM</div><div class="ds">답변 생성</div></div>
+<div class="a2-arr">▸</div>
+<div class="a2-n"><div class="ty">Output</div><div class="nm">답변</div><div class="ds">사용자 화면</div></div>
+</div>
+
+<div class="a2-branch">
+<div class="a2-b"><div class="ty">Data Store</div><div class="nm">PostgreSQL</div><div class="ds">직원·연차·매출</div></div>
+<div class="a2-b"><div class="ty">Data Store</div><div class="nm">ChromaDB</div><div class="ds">문서 벡터</div></div>
+<div class="a2-b"><div class="ty">Ingestion</div><div class="nm">Doc Pipeline</div><div class="ds">pypdf · Vision</div></div>
+<div class="a2-b"><div class="ty">External</div><div class="nm">Ollama</div><div class="ds">llama3.1 + Vision</div></div>
+</div>
+
+<div class="a2-tail">
+<div class="tb"><div class="ty">Observability</div><div class="nm">RAG Evaluation · Precision · Recall · Hallucination · Latency</div></div>
+</div>
+</div>
+</div>
+
+<!-- ============ A3. Container Boundaries ============ -->
+<h2>A3. 컨테이너 경계 (C4-like) <span class="tag">경계 명확</span></h2>
+<p class="note">시스템을 <strong>논리 경계</strong>로 묶음: Online Serving · Offline Ingestion · External · Observability. 각 박스가 배포 단위이자 책임 경계. 실제 운영 관점에서 가장 설득력.</p>
+
+<div class="board">
+<div class="a3-wrap">
+
+<!-- Online Serving -->
+<div class="a3-box online">
+<span class="boundary">Online Serving</span>
+<div class="a3-row">
+<div class="a3-c"><div class="nm">FastAPI</div><div class="ds">REST API · Session</div></div>
+<div class="a3-c"><div class="nm">ConnectHRAgent</div><div class="ds">Runtime Wrapper</div></div>
+<div class="a3-c"><div class="nm">ReAct Agent</div><div class="ds">AgentExecutor</div></div>
+<div class="a3-c"><div class="nm">LCEL Chain</div><div class="ds">Retrieval Pipeline</div></div>
+</div>
+<div class="a3-sub">
+<div class="a3-sub-label">Operational · Agent 내부</div>
+<div class="a3-row">
+<div class="a3-c"><div class="nm">ResponseCache</div><div class="ds">TTL 1h</div></div>
+<div class="a3-c"><div class="nm">TokenTracker</div><div class="ds">비용 로그</div></div>
+<div class="a3-c"><div class="nm">Retry Loop</div><div class="ds">3회</div></div>
+<div class="a3-c"><div class="nm">MCP Tools</div><div class="ds">4개 도구</div></div>
+</div>
+</div>
+</div>
+
+<!-- Data Store -->
+<div class="a3-box ops">
+<span class="boundary">Data Store</span>
+<div class="a3-row">
+<div class="a3-c"><div class="nm">ChromaDB</div><div class="ds">벡터 768d · 메타데이터</div></div>
+<div class="a3-c"><div class="nm">PostgreSQL</div><div class="ds">employees · leave_balance · sales</div></div>
+</div>
+</div>
+
+<!-- Offline Ingestion -->
+<div class="a3-box ingestion">
+<span class="boundary">Offline Ingestion</span>
+<div class="a3-row">
+<div class="a3-c"><div class="nm">Doc Pipeline</div><div class="ds">pypdf → Vision 폴백</div></div>
+<div class="a3-c"><div class="nm">Chunker</div><div class="ds">500자 · 100 overlap</div></div>
+<div class="a3-c"><div class="nm">Embedder</div><div class="ds">ko-sroberta-multitask</div></div>
+<div class="a3-c"><div class="nm">Vector Writer</div><div class="ds">ChromaDB upsert</div></div>
+</div>
+</div>
+
+<!-- External -->
+<div class="a3-box ext">
+<span class="boundary">External Services</span>
+<div class="a3-row">
+<div class="a3-c"><div class="nm">Ollama</div><div class="ds">llama3.1:8b · Tool Calling</div></div>
+<div class="a3-c"><div class="nm">Vision Model</div><div class="ds">minicpm-v · qwen2.5vl</div></div>
+</div>
+</div>
+
+<!-- Observability -->
+<div class="a3-box ops" style="background:var(--accent-soft)">
+<span class="boundary" style="background:var(--accent-soft);color:var(--accent-ink)">Observability · Quality</span>
+<div class="a3-row">
+<div class="a3-c"><div class="nm">RAG Evaluation</div><div class="ds">Precision@k · Recall</div></div>
+<div class="a3-c"><div class="nm">Hallucination Judge</div><div class="ds">LLM 판정</div></div>
+<div class="a3-c"><div class="nm">Latency Log</div><div class="ds">p50 · p95 · p99</div></div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ============ 비교 ============ -->
+<h2 style="margin-top:80px">3개 비교</h2>
+<div style="background:var(--bg-soft);padding:16px;border-radius:var(--radius);font-size:13px;line-height:1.8">
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+<tr style="background:white;color:var(--ink);font-weight:700"><th style="padding:8px;text-align:left">스타일</th><th style="padding:8px;text-align:left">관점</th><th style="padding:8px;text-align:left">강점</th><th style="padding:8px;text-align:left">적합</th></tr>
+<tr><td style="padding:6px"><b>A1 · 계층형</b></td><td style="padding:6px">소프트웨어 레이어</td><td style="padding:6px">엔지니어 친숙 · 책임 구분</td><td style="padding:6px">기술 문서 · 내부 설명</td></tr>
+<tr><td style="padding:6px"><b>A2 · 데이터 플로우</b></td><td style="padding:6px">요청 → 응답 경로</td><td style="padding:6px">동작 흐름 명확</td><td style="padding:6px">완성본 요약 · 발표</td></tr>
+<tr><td style="padding:6px"><b>A3 · 컨테이너 경계</b></td><td style="padding:6px">배포 · 운영 단위</td><td style="padding:6px">책임 경계 · 확장 계획</td><td style="padding:6px">프로덕션 · 부록</td></tr>
+</table>
+</div>
+
+<h2 style="margin-top:48px">조합 제안</h2>
+<ul style="font-size:13px;line-height:1.8">
+<li><strong>§10.10 완성본</strong>에 <b>A2 데이터 플로우</b>: 질문이 시스템을 관통하는 흐름. 독자가 "내가 만든 시스템은 이렇게 동작한다"를 한 장에 확인.</li>
+<li><strong>부록 · 에필로그</strong>에 <b>A3 컨테이너 경계</b>: 실제 운영 확장·배포 관점. 책 이후 여정을 위한 지도.</li>
+<li><strong>A1 계층형</strong>은 선택: 기술 중심 서문이나 책 소개에 쓰면 독자가 구조를 빠르게 포착.</li>
+</ul>
+
+</body>
+</html>

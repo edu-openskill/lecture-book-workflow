@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ chapter.title }}</title>
+
+<link rel="stylesheet" href="{{ fonts_css }}">
+<link rel="stylesheet" href="{{ tokens_css }}">
+{% if tokens_override %}
+<link rel="stylesheet" href="./tokens.css">
+{% endif %}
+<link rel="stylesheet" href="{{ base_css }}">
+<link rel="stylesheet" href="{{ components_css }}">
+<link rel="stylesheet" href="{{ diagrams_css }}">
+<link rel="stylesheet" href="{{ print_css }}" media="print">
+
+{% if pagedjs %}
+<script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
+{% endif %}
+</head>
+<body>
+<div class="container">
+{{ chapter.html | safe }}
+</div>
+</body>
+</html>

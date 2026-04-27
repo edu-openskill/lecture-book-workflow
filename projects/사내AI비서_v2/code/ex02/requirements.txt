@@ -1,0 +1,21 @@
+# ex02 사내 CRUD 시스템 의존성
+# Python 3.10+ 필요
+
+# 웹 프레임워크
+fastapi==0.135.2
+uvicorn[standard]==0.42.0
+
+# 템플릿 엔진
+jinja2==3.1.6
+
+# 폼 파싱 (multipart/form-data)
+python-multipart==0.0.22
+
+# PostgreSQL 드라이버
+psycopg2-binary==2.9.11
+
+# 환경 변수 관리
+python-dotenv==1.2.2
+
+# 데이터 검증
+pydantic==2.12.5

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>LoadBalancer — 공인 IP</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { display: flex; justify-content: center; padding: 40px 20px; background: #fff; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
+  .diagram { width: 1020px; }
+  .title { font-size: 16px; font-weight: 800; text-align: center; margin-bottom: 26px; }
+  .badge { display: inline-block; background: #2e7d32; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+
+  .canvas { display: grid; grid-template-columns: 160px 100px 140px 100px 1fr; align-items: center; }
+
+  .host-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .host-label { font-size: 11px; font-weight: 700; color: #555; }
+  .host-box { width: 130px; height: 60px; border: 2.5px solid #222; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #fff; }
+
+  .arrow-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .arrow-label { font-size: 10px; color: #2e7d32; font-weight: 700; font-family: 'Consolas', monospace; }
+  .arrow-col svg { width: 80px; height: 16px; }
+
+  .lb-col { display: flex; flex-direction: column; align-items: center; }
+  .lb-label { font-size: 10px; color: #666; font-weight: 700; margin-bottom: 6px; }
+  .lb-box { border: 2.5px solid #2e7d32; border-radius: 10px; padding: 12px 16px; background: #fff; text-align: center; box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
+  .lb-box .name { font-size: 13px; font-weight: 800; color: #2e7d32; }
+  .lb-box .sub { font-size: 10px; color: #555; margin-top: 2px; font-family: 'Consolas', monospace; }
+
+  .fan-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 0; position: relative; }
+  .fan-col svg { width: 90px; }
+
+  .cluster { border: 2px dashed #888; border-radius: 14px; padding: 16px 18px; background: #f5fbf6; position: relative; }
+  .cluster-title { position: absolute; top: -10px; left: 22px; background: #fff; padding: 0 8px; font-size: 12px; font-weight: 700; color: #555; }
+
+  .nodes-col { display: flex; flex-direction: column; gap: 8px; }
+  .node { border: 2px solid #666; border-radius: 6px; padding: 8px 12px; background: #fff; text-align: center; min-width: 110px; font-size: 11px; font-weight: 700; color: #333; }
+  .node .pods-inline { font-size: 10px; color: #555; margin-top: 3px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">
+    <span class="badge">LoadBalancer</span>
+    공인 IP로 여러 노드에 트래픽 분산
+  </div>
+
+  <div class="canvas">
+    <div class="host-col">
+      <div class="host-label">외부 사용자</div>
+      <div class="host-box">Host</div>
+    </div>
+
+    <div class="arrow-col">
+      <div class="arrow-label">공인 IP</div>
+      <svg viewBox="0 0 80 16"><line x1="0" y1="8" x2="68" y2="8" stroke="#2e7d32" stroke-width="3"/><polygon points="68,2 80,8 68,14" fill="#2e7d32"/></svg>
+    </div>
+
+    <div class="lb-col">
+      <div class="lb-label">클라우드 제공자</div>
+      <div class="lb-box">
+        <div class="name">Load Balancer</div>
+        <div class="sub">xx.xx.xx.xx</div>
+      </div>
+    </div>
+
+    <div class="fan-col">
+      <svg viewBox="0 0 90 90" preserveAspectRatio="none" style="height:100px;">
+        <line x1="0" y1="45" x2="78" y2="12" stroke="#2e7d32" stroke-width="2"/>
+        <polygon points="74,7 86,12 74,18" fill="#2e7d32"/>
+        <line x1="0" y1="45" x2="78" y2="45" stroke="#2e7d32" stroke-width="2"/>
+        <polygon points="76,40 86,45 76,50" fill="#2e7d32"/>
+        <line x1="0" y1="45" x2="78" y2="78" stroke="#2e7d32" stroke-width="2"/>
+        <polygon points="74,72 86,78 74,82" fill="#2e7d32"/>
+      </svg>
+    </div>
+
+    <div class="cluster">
+      <div class="cluster-title">클러스터</div>
+      <div class="nodes-col">
+        <div class="node">Node 1<div class="pods-inline">Pod A · Pod B</div></div>
+        <div class="node">Node 2<div class="pods-inline">Pod A · Pod C</div></div>
+        <div class="node">Node 3<div class="pods-inline">Pod B · Pod C</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

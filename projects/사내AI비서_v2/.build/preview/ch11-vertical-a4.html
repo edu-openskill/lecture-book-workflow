@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>11.5 A4 세로 4가지 레이아웃 — d1-tokens 기반</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<style>
+body { font-family: var(--font-body); color: var(--color-text); background: white; max-width: 820px; margin: 32px auto; padding: 0 24px 96px; line-height: 1.55; }
+h1 { font-size: var(--fs-4xl); color: var(--color-text-heading); border-bottom: 2px solid var(--color-text-heading); padding-bottom: var(--space-sm); margin-bottom: var(--space-sm); }
+.intro { color: var(--color-text-secondary); font-size: var(--fs-lg); margin-bottom: var(--space-3xl); line-height: 1.7; }
+h2 { margin-top: var(--space-3xl); font-size: var(--fs-2xl); color: var(--color-text-heading); letter-spacing: -0.3px; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-sm); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 16px; }
+.tags .t { background: var(--color-surface); border: 1px solid var(--color-border); padding: 2px 10px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; color: var(--color-text-muted); letter-spacing: 1px; }
+.note { color: var(--color-text-muted); font-size: var(--fs-sm); line-height: 1.7; }
+.a4-frame { max-width: 658px; margin: 0 auto; border: 1px dashed #bcc3d0; padding: 4px; }
+.a4-frame::before { content: "A4 본문 폭 ~658px"; display:block; text-align:right; font-family: var(--font-mono); font-size: 9px; color: #94a3b8; letter-spacing: 1px; padding: 2px 6px; }
+
+/* ═══════════════════════════════════════════════════════════
+   공통: d1-tokens 에디토리얼 베이스
+   ═══════════════════════════════════════════════════════════ */
+.ax {
+  --paper: var(--color-surface);
+  --ink: var(--color-text-heading);
+  --ink-soft: #3a352c;
+  --muted: var(--color-text-secondary);
+  --subtle: var(--color-text-subtle);
+  --faint: #e2e8f0;
+  --oxide: var(--color-accent-warm);
+  --oxide-text: var(--color-accent-warm-text);
+  --oxide-soft: #f4e7df;
+  --accent: var(--color-accent);
+  --accent-bg: var(--color-accent-bg);
+  --accent-border: var(--color-accent-border);
+  --accent-text: var(--color-accent-text);
+  background: var(--paper);
+  padding: var(--space-2xl) var(--space-lg);
+  font-family: var(--font-body);
+}
+.ax .ahd { text-align:center; margin-bottom:var(--space-lg); }
+.ax .ahd .sub { font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:4px; text-transform:uppercase; font-weight:700; margin-bottom:var(--space-xs); }
+.ax .ahd .ti { font-size:22px; color:var(--ink); font-style:italic; font-weight:700; letter-spacing:-0.3px; }
+.ax .ahd .ds { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:3px; font-style:italic; }
+
+/* Bracket box (LLM용 d1-tokens 장식) */
+.brx { background:white; border:1px solid var(--ink); padding:var(--space-md) var(--space-lg); text-align:center; position:relative; }
+.brx::before, .brx::after { content:""; position:absolute; top:-4px; bottom:-4px; width:5px; border:1px solid var(--ink); }
+.brx::before { left:-4px; border-right:none; }
+.brx::after { right:-4px; border-left:none; }
+
+/* LLM 내용 공통 */
+.llm-lbl { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.llm-name { font-size:16px; color:var(--ink); font-style:italic; font-weight:500; margin:2px 0; }
+.llm-models { display:flex; flex-direction:column; gap:3px; margin-top:var(--space-sm); padding-top:var(--space-sm); border-top:1px dashed var(--faint); }
+.llm-m { display:grid; grid-template-columns:120px 1fr; gap:var(--space-sm); font-family:var(--font-mono); font-size:11px; text-align:left; align-items:baseline; }
+.llm-m .mn { color:var(--ink); font-weight:700; }
+.llm-m .mu { color:var(--muted); font-size:10px; font-style:italic; }
+
+/* Tools 공통 */
+.tl-wrap { background:white; border:1px solid var(--ink); padding:var(--space-md) var(--space-lg) var(--space-md); position:relative; }
+.tl-wrap .tl-ti { position:absolute; top:-10px; left:var(--space-md); background:var(--paper); padding:0 var(--space-sm); font-family:var(--font-body); font-style:italic; font-weight:600; font-size:12px; color:var(--ink); }
+.tl-item { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:var(--space-sm); padding:var(--space-sm) 2px; border-bottom:1px dashed var(--faint); }
+.tl-item:last-child { border-bottom:none; }
+.tl-item .no { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-weight:700; }
+.tl-item .nm { font-family:var(--font-mono); font-size:12px; color:var(--ink); font-weight:700; }
+.tl-item .desc { font-size:10px; color:var(--muted); font-style:italic; margin-top:1px; }
+.tl-item .b { font-family:var(--font-mono); font-size:9px; color:var(--ink); letter-spacing:2px; text-transform:uppercase; font-weight:700; border:1px solid var(--ink); padding:2px 6px; }
+.tl-item .b.rag { color:var(--oxide); border-color:var(--oxide); }
+
+/* User·Gateway 공통 */
+.user-ap { display:grid; grid-template-columns:1fr auto 1fr; gap:var(--space-lg); align-items:center; background:white; border:1px solid var(--faint); padding:var(--space-md) var(--space-lg); }
+.user-ap .user { text-align:center; }
+.user-ap .user .ic { font-size:20px; color:var(--oxide); }
+.user-ap .user .n { font-size:15px; color:var(--ink); font-style:italic; font-weight:500; margin-top:2px; }
+.user-ap .user .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; margin-top:2px; }
+.user-ap .sep { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; text-align:center; line-height:1.7; }
+.user-ap .sep .d { color:var(--accent); display:block; }
+.user-ap .sep .u { color:var(--oxide); display:block; }
+.user-ap .api { text-align:center; }
+.user-ap .api .l { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.user-ap .api .n { font-size:16px; color:var(--ink); font-weight:700; letter-spacing:-0.2px; margin-top:3px; }
+.user-ap .api .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; margin-top:2px; }
+
+/* Runtime 공통 (core 안에 loop + engine 중첩) */
+.rt-wrap { background:white; border:2px solid var(--ink); padding:var(--space-2xl) var(--space-lg) var(--space-md); position:relative; }
+.rt-wrap .rt-ti { position:absolute; top:-10px; left:var(--space-md); background:var(--paper); padding:0 var(--space-sm); font-family:var(--font-body); font-style:italic; font-weight:600; font-size:13px; color:var(--ink); }
+.rt-wrap .rt-ops { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-xs); margin-bottom:var(--space-md); }
+.rt-wrap .rt-chip { background:var(--paper); padding:var(--space-sm) var(--space-xs); text-align:center; border-bottom:2px solid var(--faint); }
+.rt-wrap .rt-chip .l { font-family:var(--font-mono); font-size:8px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; font-weight:700; }
+.rt-wrap .rt-chip .n { font-size:12px; color:var(--ink); font-weight:700; margin-top:3px; }
+.rt-wrap .rt-chip .s { font-family:var(--font-mono); font-size:9px; color:var(--muted); font-style:italic; margin-top:1px; }
+.rt-wrap .rt-core { background:var(--oxide-soft); border:1px solid var(--oxide); padding:var(--space-md) var(--space-sm); }
+.rt-wrap .rt-core .rt-core-hd { text-align:center; padding-bottom:var(--space-sm); border-bottom:1px dashed var(--oxide); margin-bottom:var(--space-sm); }
+.rt-wrap .rt-core .rt-core-hd .l { font-family:var(--font-mono); font-size:9px; color:var(--oxide-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.rt-wrap .rt-core .rt-core-hd .n { font-size:16px; color:var(--ink); font-style:italic; font-weight:500; margin-top:2px; }
+.rt-wrap .rt-core .rt-core-hd .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; margin-top:2px; }
+.rt-wrap .rt-core .rt-loop { background:white; border:1px dashed var(--oxide); padding:var(--space-sm); text-align:center; margin-bottom:var(--space-xs); }
+.rt-wrap .rt-core .rt-loop .ll { font-family:var(--font-mono); font-size:9px; color:var(--oxide-text); letter-spacing:2px; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+.rt-wrap .rt-core .rt-loop .sts { display:flex; align-items:center; justify-content:center; gap:var(--space-xs); }
+.rt-wrap .rt-core .rt-loop .st { font-family:var(--font-mono); font-size:10px; padding:3px 10px; border:1px solid var(--oxide); background:white; letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--oxide-text); }
+.rt-wrap .rt-core .rt-loop .arr { color:var(--oxide); font-size:11px; font-weight:800; }
+.rt-wrap .rt-core .rt-engine { background:white; border:1px dashed var(--oxide); padding:var(--space-sm); text-align:center; }
+.rt-wrap .rt-core .rt-engine .el { font-family:var(--font-mono); font-size:9px; color:var(--oxide-text); letter-spacing:2px; text-transform:uppercase; font-weight:700; margin-bottom:3px; }
+.rt-wrap .rt-core .rt-engine .en { font-size:13px; color:var(--ink); font-style:italic; font-weight:500; margin-bottom:var(--space-xs); }
+.rt-wrap .rt-core .rt-engine .es { display:grid; grid-template-columns:repeat(6, 1fr); gap:2px; font-family:var(--font-mono); font-size:8px; }
+.rt-wrap .rt-core .rt-engine .es .s { background:var(--oxide-soft); border:1px solid var(--oxide); padding:3px 2px; text-align:center; color:var(--oxide-text); font-weight:700; }
+
+/* Stores 공통 */
+.stores-row { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-md); }
+.stores-row .st { background:white; border:1px solid var(--faint); padding:var(--space-md) var(--space-lg); text-align:center; }
+.stores-row .st .l { font-family:var(--font-mono); font-size:9px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+.stores-row .st .n { font-size:16px; color:var(--ink); font-style:italic; font-weight:500; margin:4px 0; letter-spacing:-0.2px; }
+.stores-row .st .s { font-family:var(--font-mono); font-size:10px; color:var(--muted); font-style:italic; }
+
+/* Layer arrow */
+.lvl-arr { text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; font-weight:700; padding:var(--space-sm) 0; font-style:italic; }
+
+/* Cap */
+.ax-cap { margin-top:var(--space-lg); padding-top:var(--space-md); border-top:1px dashed var(--faint); font-family:var(--font-body); font-size:12px; color:var(--muted); text-align:center; font-style:italic; line-height:1.7; }
+
+/* ═══════════════════════════════════════════════════════════
+   V1. LLM + Tools 상단 2열
+   ═══════════════════════════════════════════════════════════ */
+.v1 .top2 { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-md); margin-bottom:var(--space-sm); }
+
+/* ═══════════════════════════════════════════════════════════
+   V2. LLM 가로 전체 + Tools 가로 전체 (2행)
+   ═══════════════════════════════════════════════════════════ */
+.v2 .llm-wide { margin-bottom:var(--space-sm); }
+.v2 .llm-wide .brx { padding:var(--space-md) var(--space-xl); }
+.v2 .llm-wide .llm-models { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-md); text-align:center; }
+.v2 .llm-wide .llm-m { display:block; }
+.v2 .llm-wide .llm-m .mn { display:block; text-align:center; }
+.v2 .llm-wide .llm-m .mu { display:block; text-align:center; margin-top:2px; }
+.v2 .tools-wide { margin-bottom:var(--space-sm); }
+.v2 .tools-wide .tl-items { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:var(--space-sm); }
+.v2 .tools-wide .tl-item { display:block; text-align:center; border-bottom:none; border:1px solid var(--faint); padding:var(--space-sm); }
+.v2 .tools-wide .tl-item .no { display:block; }
+.v2 .tools-wide .tl-item .nm { display:block; margin:2px 0; }
+.v2 .tools-wide .tl-item .desc { margin-top:2px; }
+.v2 .tools-wide .tl-item .b { display:inline-block; margin-top:4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   V3. External Services 그룹 (LLM + Tools를 External 묶음으로)
+   ═══════════════════════════════════════════════════════════ */
+.v3 .ext-group { border:1px solid var(--ink); padding:var(--space-lg); position:relative; margin-bottom:var(--space-sm); }
+.v3 .ext-group .ext-lbl { position:absolute; top:-10px; left:var(--space-md); background:var(--paper); padding:0 var(--space-sm); font-family:var(--font-mono); font-size:10px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; font-weight:700; }
+.v3 .ext-group .ext-inner { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-md); }
+.v3 .ext-group .brx { border:1px solid var(--ink); }
+.v3 .ext-group .tl-wrap { border:1px solid var(--ink); }
+
+/* ═══════════════════════════════════════════════════════════
+   V4. 완전 세로 단일 컬럼 (5-row stack)
+   ═══════════════════════════════════════════════════════════ */
+.v4 .row { margin-bottom:var(--space-sm); }
+.v4 .llm-wide .llm-models { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-md); }
+.v4 .llm-wide .llm-m { display:block; text-align:center; }
+.v4 .llm-wide .llm-m .mn { display:block; }
+.v4 .llm-wide .llm-m .mu { display:block; margin-top:2px; text-align:center; }
+.v4 .tools-wide .tl-items { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-xs); }
+.v4 .tools-wide .tl-item { border-bottom:1px dashed var(--faint); }
+.v4 .tools-wide .tl-item:nth-last-child(1), .v4 .tools-wide .tl-item:nth-last-child(2) { border-bottom:none; }
+</style>
+</head>
+<body>
+
+<h1>11.5 A4 세로 레이아웃 4종 — d1-tokens 에디토리얼</h1>
+<p class="intro">
+A4 본문 폭(~658px) 안에 맞추는 4가지 세로 배치. <strong>LLM과 MCP Tools를 위쪽에</strong> 배치하고 Runtime·User·Stores를 아래로 흐르게. 디자인은 d1-tokens의 에디토리얼(아이보리 종이, Serif italic, 브라켓 박스) 스타일을 프로젝트 토큰으로 번역.
+</p>
+
+<!-- ═════════ V1 ═════════ -->
+<h2>V1. 상단 2열: LLM ┃ Tools</h2>
+<div class="tags">
+<span class="t">상단 2칸 분할</span>
+<span class="t">LLM 좌 · Tools 우</span>
+<span class="t">수직 4단 흐름</span>
+</div>
+<p class="note"><strong>구조</strong>: [LLM | Tools] 2칸 나란히 → Runtime → User·Gateway → Stores. 상단에서 "외부 자원" 두 개를 동시에 제시, 아래로 실행 경로.</p>
+
+<div class="a4-frame"><div class="ax v1">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">커넥트HR 에이전트</div><div class="ds">11개 챕터로 완성한 RAG 시스템</div></div>
+
+<div class="top2">
+<div class="brx">
+<div class="llm-lbl">External · LLM</div>
+<div class="llm-name">Ollama</div>
+<div class="llm-models">
+<div class="llm-m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="llm-m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="llm-m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div>
+</div>
+<div class="tl-wrap">
+<div class="tl-ti">MCP Tools</div>
+<div class="tl-item"><div class="no">01</div><div><div class="nm">leave_balance</div><div class="desc">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">02</div><div><div class="nm">sales_sum</div><div class="desc">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">03</div><div><div class="nm">list_employees</div><div class="desc">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">04</div><div><div class="nm">search_documents</div><div class="desc">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+
+<div class="lvl-arr">↕ 프롬프트 · 도구 호출</div>
+
+<div class="rt-wrap">
+<div class="rt-ti">Runtime</div>
+<div class="rt-ops">
+<div class="rt-chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="rt-chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="rt-chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="rt-core">
+<div class="rt-core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="rt-loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="rt-engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div>
+
+<div class="lvl-arr">↓ 질문 · 응답</div>
+
+<div class="user-ap">
+<div class="user"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="sep"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+
+<div class="lvl-arr">↓ 조회 · 결과</div>
+
+<div class="stores-row">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="ax-cap">V1 · 상단 LLM + Tools 2칸. 아래로 Runtime → User → Stores 흐름</div>
+</div></div>
+
+<!-- ═════════ V2 ═════════ -->
+<h2>V2. LLM 가로 전체 + Tools 가로 전체 (2행 분리)</h2>
+<div class="tags">
+<span class="t">LLM 1행 전체</span>
+<span class="t">Tools 1행 전체 (4열)</span>
+<span class="t">서로 구분되는 2행</span>
+</div>
+<p class="note"><strong>구조</strong>: LLM 한 줄, Tools 한 줄. 각자 가로 폭 전체를 씀. 외부 자원 2종을 나란히 나열하되 서로 독립된 행으로 분리. 시선이 LLM → Tools → Runtime으로 자연스럽게 내려옴.</p>
+
+<div class="a4-frame"><div class="ax v2">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">커넥트HR 에이전트</div><div class="ds">11개 챕터로 완성한 RAG 시스템</div></div>
+
+<div class="llm-wide"><div class="brx">
+<div class="llm-lbl">External · LLM · Ollama</div>
+<div class="llm-models">
+<div class="llm-m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="llm-m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling · 에이전트</span></div>
+<div class="llm-m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔 파싱</span></div>
+</div>
+</div></div>
+
+<div class="tools-wide"><div class="tl-wrap">
+<div class="tl-ti">MCP Tools</div>
+<div class="tl-items">
+<div class="tl-item"><div class="no">01</div><div class="nm">leave_balance</div><div class="desc">연차 조회</div><span class="b">SQL</span></div>
+<div class="tl-item"><div class="no">02</div><div class="nm">sales_sum</div><div class="desc">부서·기간 매출</div><span class="b">SQL</span></div>
+<div class="tl-item"><div class="no">03</div><div class="nm">list_employees</div><div class="desc">이름·부서</div><span class="b">SQL</span></div>
+<div class="tl-item"><div class="no">04</div><div class="nm">search_documents</div><div class="desc">LCEL · Top-k</div><span class="b rag">RAG</span></div>
+</div>
+</div></div>
+
+<div class="lvl-arr">↕ 프롬프트 · 도구 호출</div>
+
+<div class="rt-wrap">
+<div class="rt-ti">Runtime</div>
+<div class="rt-ops">
+<div class="rt-chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="rt-chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="rt-chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="rt-core">
+<div class="rt-core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="rt-loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="rt-engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div>
+
+<div class="lvl-arr">↓ 질문 · 응답</div>
+
+<div class="user-ap">
+<div class="user"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="sep"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+
+<div class="lvl-arr">↓ 조회 · 결과</div>
+
+<div class="stores-row">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="ax-cap">V2 · LLM 가로 전체 + Tools 가로 전체. 2행으로 분리된 "외부 자원" 레이어</div>
+</div></div>
+
+<!-- ═════════ V3 ═════════ -->
+<h2>V3. External Services 그룹 (LLM + Tools 묶음)</h2>
+<div class="tags">
+<span class="t">LLM + Tools를 External 그룹 하나에</span>
+<span class="t">상단 "외부 의존" 통합</span>
+<span class="t">개념 그루핑 강조</span>
+</div>
+<p class="note"><strong>구조</strong>: LLM과 Tools를 "External Services" 외곽 박스 하나 안에 가로 2칸으로 묶음. 아래로 Runtime·User·Stores. "에이전트가 의존하는 외부 리소스가 이 두 개"라는 개념을 한 그루핑으로 명시.</p>
+
+<div class="a4-frame"><div class="ax v3">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">커넥트HR 에이전트</div><div class="ds">11개 챕터로 완성한 RAG 시스템</div></div>
+
+<div class="ext-group">
+<div class="ext-lbl">External Services</div>
+<div class="ext-inner">
+<div class="brx">
+<div class="llm-lbl">LLM · Ollama</div>
+<div class="llm-name">로컬 LLM 3종</div>
+<div class="llm-models">
+<div class="llm-m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론</span></div>
+<div class="llm-m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="llm-m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision</span></div>
+</div>
+</div>
+<div class="tl-wrap">
+<div class="tl-ti">MCP Tools</div>
+<div class="tl-item"><div class="no">01</div><div><div class="nm">leave_balance</div><div class="desc">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">02</div><div><div class="nm">sales_sum</div><div class="desc">매출</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">03</div><div><div class="nm">list_employees</div><div class="desc">직원</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">04</div><div><div class="nm">search_documents</div><div class="desc">LCEL</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+</div>
+
+<div class="lvl-arr">↕ 에이전트 ↔ 외부 리소스</div>
+
+<div class="rt-wrap">
+<div class="rt-ti">Runtime</div>
+<div class="rt-ops">
+<div class="rt-chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="rt-chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="rt-chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="rt-core">
+<div class="rt-core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="rt-loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="rt-engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div>
+
+<div class="lvl-arr">↓ 질문 · 응답</div>
+
+<div class="user-ap">
+<div class="user"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="sep"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div>
+
+<div class="lvl-arr">↓ 조회 · 결과</div>
+
+<div class="stores-row">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div>
+
+<div class="ax-cap">V3 · External Services 외곽 박스로 LLM + Tools 묶음. "외부 의존" 개념 시각화</div>
+</div></div>
+
+<!-- ═════════ V4 ═════════ -->
+<h2>V4. 세로 단일 컬럼 5행 스택</h2>
+<div class="tags">
+<span class="t">LLM / Tools(2×2) / Runtime / User·API / Stores</span>
+<span class="t">모든 레이어 가로 전체</span>
+<span class="t">계층 흐름 가장 명확</span>
+</div>
+<p class="note"><strong>구조</strong>: 위에서부터 LLM → Tools(2×2 그리드) → Runtime → User·Gateway → Stores. 각 레이어가 가로 폭 100% 씀. Tools가 4개라 2×2로 컴팩트 배치.</p>
+
+<div class="a4-frame"><div class="ax v4">
+<div class="ahd"><div class="sub">System Architecture</div><div class="ti">커넥트HR 에이전트</div><div class="ds">11개 챕터로 완성한 RAG 시스템</div></div>
+
+<div class="row llm-wide"><div class="brx">
+<div class="llm-lbl">External · LLM · Ollama</div>
+<div class="llm-models">
+<div class="llm-m"><span class="mn">deepseek-r1:8b</span><span class="mu">추론 · Q&amp;A</span></div>
+<div class="llm-m"><span class="mn">llama3.1:8b</span><span class="mu">Tool Calling</span></div>
+<div class="llm-m"><span class="mn">qwen2.5vl:7b</span><span class="mu">Vision · 스캔</span></div>
+</div>
+</div></div>
+
+<div class="lvl-arr">↕ 프롬프트 · 응답</div>
+
+<div class="row tools-wide"><div class="tl-wrap">
+<div class="tl-ti">MCP Tools</div>
+<div class="tl-items">
+<div class="tl-item"><div class="no">01</div><div><div class="nm">leave_balance</div><div class="desc">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">02</div><div><div class="nm">sales_sum</div><div class="desc">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">03</div><div><div class="nm">list_employees</div><div class="desc">이름·부서</div></div><div class="b">SQL</div></div>
+<div class="tl-item"><div class="no">04</div><div><div class="nm">search_documents</div><div class="desc">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div></div>
+
+<div class="lvl-arr">↕ 도구 호출 · 결과</div>
+
+<div class="row"><div class="rt-wrap">
+<div class="rt-ti">Runtime</div>
+<div class="rt-ops">
+<div class="rt-chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="rt-chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">토큰·로그</div></div>
+<div class="rt-chip"><div class="l">Retry</div><div class="n">Resilience</div><div class="s">3회</div></div>
+</div>
+<div class="rt-core">
+<div class="rt-core-hd"><div class="l">Executor</div><div class="n">통합 에이전트</div><div class="s">Agent + Tools</div></div>
+<div class="rt-loop"><div class="ll">ReAct Loop</div><div class="sts"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="rt-engine"><div class="el">RAG Engine</div><div class="en">커넥트HR 엔진</div><div class="es"><div class="s">01 파싱</div><div class="s">02 청킹</div><div class="s">03 확장</div><div class="s">04 검색</div><div class="s">05 리랭크</div><div class="s">06 LLM</div></div></div>
+</div>
+</div></div>
+
+<div class="lvl-arr">↓ 질문 · 응답</div>
+
+<div class="row"><div class="user-ap">
+<div class="user"><div class="ic">◉</div><div class="n">사용자</div><div class="s">채팅 질문</div></div>
+<div class="sep"><span class="d">↓ 질문</span><span class="u">↑ 답변</span></div>
+<div class="api"><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · 세션</div></div>
+</div></div>
+
+<div class="lvl-arr">↓ 조회 · 결과</div>
+
+<div class="row"><div class="stores-row">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768차원 · 메타데이터</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div>
+</div></div>
+
+<div class="ax-cap">V4 · 세로 단일 컬럼 5행. LLM·Tools·Runtime·User·Stores가 계층적으로 내려오는 가장 단순 구조</div>
+</div></div>
+
+<h2 style="margin-top:96px">결정 가이드</h2>
+<table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm);margin-top:var(--space-lg)">
+<thead><tr style="background:var(--color-surface);border-bottom:2px solid var(--color-text-heading)">
+<th style="padding:var(--space-md) var(--space-sm);text-align:left;width:80px">레이아웃</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">상단 배치</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">강점</th>
+<th style="padding:var(--space-md) var(--space-sm);text-align:left">단점</th>
+</tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V1 2열 상단</td>
+<td style="padding:var(--space-md) var(--space-sm)">LLM ┃ Tools 가로 2칸</td>
+<td style="padding:var(--space-md) var(--space-sm)">균형, 공간 효율</td>
+<td style="padding:var(--space-md) var(--space-sm)">Tools 내용이 좁음</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V2 2행 전체</td>
+<td style="padding:var(--space-md) var(--space-sm)">LLM 한 줄 + Tools 한 줄</td>
+<td style="padding:var(--space-md) var(--space-sm)">각 레이어 내용 여유</td>
+<td style="padding:var(--space-md) var(--space-sm)">세로 길이 증가</td>
+</tr>
+<tr style="border-bottom:1px solid var(--color-border);background:var(--color-accent-bg)">
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V3 External 그룹 ★</td>
+<td style="padding:var(--space-md) var(--space-sm)">External Services 외곽 박스 + LLM·Tools 2칸</td>
+<td style="padding:var(--space-md) var(--space-sm)"><strong>"외부 의존" 개념 강조</strong>. 에이전트와 외부 분리 명확</td>
+<td style="padding:var(--space-md) var(--space-sm)">중첩 박스라 구조 약간 복잡</td>
+</tr>
+<tr>
+<td style="padding:var(--space-md) var(--space-sm);font-weight:800">V4 세로 5행</td>
+<td style="padding:var(--space-md) var(--space-sm)">LLM·Tools·Runtime 각자 한 줄</td>
+<td style="padding:var(--space-md) var(--space-sm)">흐름 가장 명확, 계층 분명</td>
+<td style="padding:var(--space-md) var(--space-sm)">세로 길이 최장. LLM·Tools가 대등한 레이어처럼 보임</td>
+</tr>
+</tbody>
+</table>
+
+<p style="margin-top:var(--space-lg);font-size:var(--fs-md);color:var(--color-text-muted)">
+<strong>추천</strong>: <strong>V3 External Services 그룹</strong>. "LLM과 Tools가 둘 다 에이전트 외부의 리소스"라는 개념이 외곽 박스 하나로 명시되어 독자 이해도가 높음. V2는 안전한 대안.
+</p>
+
+</body>
+</html>

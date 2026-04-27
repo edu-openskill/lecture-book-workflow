@@ -62,6 +62,21 @@ cd projects/{프로젝트}
 - `Pillow` (pip install Pillow, 이미지 autocrop)
 - `PyMuPDF` (pip install PyMuPDF, 레이아웃 분석)
 
+## `--design` 옵션
+
+컴포넌트 단위로 디자인을 선택하여 PDF를 빌드한다.
+
+```bash
+# 프리셋 (전체 컴포넌트 동일 디자인)
+python3 book/build_pdf_typst.py --design 1    # 클래식 블루
+python3 book/build_pdf_typst.py --design 2    # 컴팩트 모노
+
+# 믹스매치 (컴포넌트별 선택, 기본값 프리셋 1)
+python3 book/build_pdf_typst.py --design "body=2,heading=1,code=2,table=2"
+```
+
+`--design` 생략 시 기존 `book_base.typ`을 사용 (하위호환).
+
 ## 설정 변경 포인트
 
 | 항목 | 파일 | 위치 |

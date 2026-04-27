@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>표지 디자인 목업 v15 — 슬로건 히어로 풀 타이포</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard',-apple-system,sans-serif;background:#111;color:#fff;padding:30px}
+  h1{text-align:center;font-size:28px;font-weight:300;margin-bottom:6px}
+  .sub{text-align:center;font-size:13px;color:#555;margin-bottom:40px}
+  .g{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:60px}
+  .sec-t{font-size:20px;font-weight:700;margin-bottom:4px;color:#fff}
+  .sec-d{font-size:12px;color:#555;margin-bottom:14px}
+  .c{aspect-ratio:182/257;border-radius:4px;overflow:hidden;position:relative;background:#fff;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);transition:transform .2s}
+  .c:hover{transform:scale(1.02)}
+  .typo{position:absolute;inset:0;z-index:10;padding:5% 6%;display:flex;flex-direction:column;pointer-events:none}
+
+  /* 배지 */
+  .badges{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+  .badge{font-size:6.5px;font-weight:600;padding:2px 6px;border-radius:10px;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<h1>특이점이 온 개발자 — 표지 목업 v15</h1>
+<p class="sub">슬로건 히어로 확장 / 여백 최소 + 텍스트 꽉 채움 + 기술 키워드 배지</p>
+
+<script>
+const books = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker', titleSize:'82px',
+    tagline:'컨테이너의 모든 것',
+    slogan:'컨테이너 하나로\n세상을 담다',
+    badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA', titleSize:'94px',
+    tagline:'마이크로서비스 아키텍처',
+    slogan:'쪼갤수록\n강해진다',
+    badges:['API Gateway','Kafka','보상 트랜잭션','서비스 분리','이벤트 드리븐','오케스트레이션','WebSocket','SAGA 패턴'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG', titleSize:'94px',
+    tagline:'검색 증강 생성',
+    slogan:'AI에게 기억을\n선물하다',
+    badges:['임베딩','벡터 DB','LLM','프롬프트','청킹','유사도 검색','LangChain','토큰'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring', titleSize:'62px',
+    tagline:'9가지 기술',
+    slogan:'인증부터 인가까지\n한 권에 끝내다',
+    badges:['OAuth2','OIDC','JWT','Spring Security','소셜 로그인','권한 관리','세션','필터 체인'] },
+];
+
+function badgesHTML(b) {
+  return b.badges.map(t =>
+    `<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`
+  ).join('');
+}
+
+function botHTML(b) {
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div style="font-size:7px;color:#a0a0a0;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+    <div style="text-align:right">
+      <div style="height:2px;width:30px;margin-left:auto;margin-bottom:3px;background:${b.color}"></div>
+      <div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div>
+      <div style="font-size:7px;color:#999;margin-top:1px">류재성 지음</div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ Style A — 세로 스택 (시리즈명 큼 + 슬로건 큼 + 타이틀 큼) ═══════════
+function styleA(b) {
+  return `<div class="c">
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <!-- 시리즈명 크게 -->
+      <div>
+        <div style="font-size:30px;font-weight:900;color:#1a1a1a;line-height:1.05;letter-spacing:-1px">특이점이 온<br>개발자</div>
+      </div>
+      <!-- 슬로건 크게 -->
+      <div style="margin:2px 0">
+        <div style="font-size:22px;font-weight:800;color:${b.color};line-height:1.25;white-space:pre-line">${b.slogan}</div>
+      </div>
+      <!-- 메인 타이틀 -->
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+      </div>
+      <!-- 배지 -->
+      <div class="badges" style="margin-top:4px">${badgesHTML(b)}</div>
+      <!-- 하단 -->
+      ${botHTML(b)}
+    </div>
+  </div>`;
+}
+
+// ═══════════ Style B — 타이틀 상단 + 슬로건 중앙 대형 + 배지 하단 ═══════════
+function styleB(b) {
+  return `<div class="c">
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <!-- 상단: 시리즈명 + 타이틀 나란히 -->
+      <div>
+        <div style="font-size:10px;font-weight:700;color:${b.color};letter-spacing:1px;margin-bottom:2px">특이점이 온 개발자</div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:2px">${b.tagline}</div>
+      </div>
+      <!-- 중앙: 슬로건 초대형 -->
+      <div style="flex:1;display:flex;align-items:center">
+        <div style="font-size:28px;font-weight:900;color:#1a1a1a;line-height:1.2;white-space:pre-line;letter-spacing:-1px">${b.slogan}</div>
+      </div>
+      <!-- 배지 -->
+      <div class="badges">${badgesHTML(b)}</div>
+      <!-- 하단 -->
+      <div style="margin-top:4px">${botHTML(b)}</div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ Style C — 전면 컬러 배경 + 화이트 텍스트 ═══════════
+function styleC(b) {
+  return `<div class="c" style="background:${b.color}">
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <div>
+        <div style="font-size:28px;font-weight:900;color:rgba(255,255,255,.95);line-height:1.05;letter-spacing:-1px">특이점이 온<br>개발자</div>
+      </div>
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#fff">${b.title}</div>
+        <div style="font-size:8px;color:rgba(255,255,255,.6);margin-top:3px">${b.tagline}</div>
+      </div>
+      <div>
+        <div style="font-size:22px;font-weight:800;color:rgba(255,255,255,.9);line-height:1.25;white-space:pre-line">${b.slogan}</div>
+      </div>
+      <!-- 배지 화이트 -->
+      <div class="badges">${b.badges.map(t =>
+        `<span class="badge" style="background:rgba(255,255,255,.2);color:#fff">${t}</span>`
+      ).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:rgba(255,255,255,.5);line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+        <div style="text-align:right">
+          <div style="height:2px;width:30px;margin-left:auto;margin-bottom:3px;background:rgba(255,255,255,.4)"></div>
+          <div style="font-size:14px;font-weight:800;color:#fff">개념편</div>
+          <div style="font-size:7px;color:rgba(255,255,255,.5);margin-top:1px">류재성 지음</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ Style D — 대각 분할 (좌상 타이틀 / 우하 슬로건) ═══════════
+function styleD(b) {
+  return `<div class="c">
+    <div style="position:absolute;inset:0;z-index:1">
+      <div style="position:absolute;bottom:0;right:0;width:100%;height:45%;background:${b.color};opacity:.06"></div>
+    </div>
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <div>
+        <div style="font-size:26px;font-weight:900;color:#1a1a1a;line-height:1.05;letter-spacing:-1px">특이점이 온<br>개발자</div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a;margin-top:4px">${b.title}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:24px;font-weight:800;color:${b.color};line-height:1.25;white-space:pre-line">${b.slogan}</div>
+        <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+      </div>
+      <div class="badges" style="justify-content:flex-end">${badgesHTML(b)}</div>
+      ${botHTML(b)}
+    </div>
+  </div>`;
+}
+
+// ═══════════ Style E — 극대형 시리즈명 배경 + 오버레이 ═══════════
+function styleE(b) {
+  return `<div class="c">
+    <div style="position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <div style="font-size:120px;font-weight:900;color:rgba(${b.rgb},.04);line-height:.85;white-space:nowrap;letter-spacing:-8px;transform:rotate(-8deg)">특이점</div>
+    </div>
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <div>
+        <div style="font-size:26px;font-weight:900;color:#1a1a1a;line-height:1.05">특이점이 온<br>개발자</div>
+      </div>
+      <div>
+        <div style="font-size:24px;font-weight:800;color:${b.color};line-height:1.25;white-space:pre-line">${b.slogan}</div>
+      </div>
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+      </div>
+      <div class="badges">${badgesHTML(b)}</div>
+      ${botHTML(b)}
+    </div>
+  </div>`;
+}
+
+// ═══════════ Style F — 하단 컬러 밴드 (배지+슬로건) + 상단 풀 타이포 ═══════════
+function styleF(b) {
+  return `<div class="c">
+    <div style="position:absolute;bottom:0;left:0;right:0;height:30%;background:${b.color};z-index:1"></div>
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <div>
+        <div style="font-size:28px;font-weight:900;color:#1a1a1a;line-height:1.05;letter-spacing:-1px">특이점이 온<br>개발자</div>
+      </div>
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+      </div>
+      <!-- 하단 컬러 영역 -->
+      <div style="color:#fff;margin-top:auto">
+        <div style="font-size:18px;font-weight:800;line-height:1.25;white-space:pre-line;margin-bottom:4px">${b.slogan}</div>
+        <div class="badges">${b.badges.map(t =>
+          `<span class="badge" style="background:rgba(255,255,255,.2);color:#fff">${t}</span>`
+        ).join('')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
+          <div style="font-size:7px;opacity:.6;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+          <div style="text-align:right">
+            <div style="font-size:14px;font-weight:800">개념편</div>
+            <div style="font-size:7px;opacity:.6;margin-top:1px">류재성 지음</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const sections = [
+  { name:'A — 세로 스택', desc:'시리즈명(30px) → 슬로건(22px) → 타이틀 → 배지 / 전부 크고 여백 최소', fn:styleA },
+  { name:'B — 타이틀 톱 + 슬로건 센터', desc:'타이틀 상단 배치 / 슬로건 28px 초대형 중앙 / 배지 하단', fn:styleB },
+  { name:'C — 풀 컬러 배경', desc:'각 책 액센트 컬러 전면 / 화이트 텍스트 / 배지 반투명', fn:styleC },
+  { name:'D — 대각 구도', desc:'좌상단 시리즈+타이틀 / 우하단 슬로건 / 비대칭 긴장감', fn:styleD },
+  { name:'E — 워터마크 배경', desc:'"특이점" 초대형 워터마크 / 그 위에 풀 타이포 스택', fn:styleE },
+  { name:'F — 컬러 밴드 하단', desc:'상단 화이트(시리즈+타이틀) / 하단 30% 컬러밴드(슬로건+배지)', fn:styleF },
+];
+
+let html = '';
+sections.forEach(sec => {
+  html += `<div class="sec-t">${sec.name}</div><div class="sec-d">${sec.desc}</div><div class="g">`;
+  books.forEach(b => { html += sec.fn(b); });
+  html += '</div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html);
+</script>
+
+<script>
+// ═══════════ 추가 G~L — 다양한 배치 ═══════════
+
+const books2 = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker', titleSize:'82px',
+    tagline:'컨테이너의 모든 것', slogan:'컨테이너 하나로\n세상을 담다',
+    badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA', titleSize:'94px',
+    tagline:'마이크로서비스 아키텍처', slogan:'쪼갤수록\n강해진다',
+    badges:['API Gateway','Kafka','보상 트랜잭션','서비스 분리','이벤트 드리븐','오케스트레이션','WebSocket','SAGA 패턴'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG', titleSize:'94px',
+    tagline:'검색 증강 생성', slogan:'AI에게 기억을\n선물하다',
+    badges:['임베딩','벡터 DB','LLM','프롬프트','청킹','유사도 검색','LangChain','토큰'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring', titleSize:'62px',
+    tagline:'9가지 기술', slogan:'인증부터 인가까지\n한 권에 끝내다',
+    badges:['OAuth2','OIDC','JWT','Spring Security','소셜 로그인','권한 관리','세션','필터 체인'] },
+];
+
+function badgesHTML2(b, style) {
+  if(style==='white') return b.badges.map(t=>`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff">${t}</span>`).join('');
+  if(style==='outline') return b.badges.map(t=>`<span class="badge" style="border:1px solid rgba(${b.rgb},.3);color:${b.color};background:transparent">${t}</span>`).join('');
+  return b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`).join('');
+}
+
+function bot2(b, white) {
+  if(white) return `<div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div style="font-size:7px;color:rgba(255,255,255,.5);line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+    <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.5);margin-top:1px">류재성 지음</div></div></div>`;
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div style="font-size:7px;color:#a0a0a0;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+    <div style="text-align:right"><div style="height:2px;width:30px;margin-left:auto;margin-bottom:3px;background:${b.color}"></div><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999;margin-top:1px">류재성 지음</div></div></div>`;
+}
+
+// ═══════════ G — 센터 정렬 전체 ═══════════
+function styleG(b) {
+  return `<div class="c">
+    <div style="position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <div style="font-size:160px;font-weight:900;color:rgba(${b.rgb},.035);line-height:.75;letter-spacing:-10px">${b.title}</div>
+    </div>
+    <div class="typo" style="padding:4% 5%;align-items:center;text-align:center;justify-content:space-between">
+      <div style="font-size:11px;font-weight:700;color:${b.color};letter-spacing:2px">특이점이 온 개발자</div>
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+      </div>
+      <div style="font-size:22px;font-weight:800;color:#1a1a1a;line-height:1.25;white-space:pre-line">${b.slogan}</div>
+      <div class="badges" style="justify-content:center">${badgesHTML2(b)}</div>
+      ${bot2(b)}
+    </div>
+  </div>`;
+}
+
+// ═══════════ H — 우측 정렬 + 좌측 컬러 사이드바 ═══════════
+function styleH(b) {
+  return `<div class="c">
+    <div style="position:absolute;top:0;left:0;bottom:0;width:8%;background:${b.color};z-index:1"></div>
+    <div class="typo" style="padding:4% 5% 4% 12%;text-align:right;justify-content:space-between">
+      <div style="font-size:24px;font-weight:900;color:#1a1a1a;line-height:1.05">특이점이 온<br>개발자</div>
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+      </div>
+      <div style="font-size:20px;font-weight:800;color:${b.color};line-height:1.25;white-space:pre-line">${b.slogan}</div>
+      <div class="badges" style="justify-content:flex-end">${badgesHTML2(b)}</div>
+      ${bot2(b)}
+    </div>
+  </div>`;
+}
+
+// ═══════════ I — 상하 2분할 (상단 컬러+시리즈 / 하단 화이트+타이틀) ═══════════
+function styleI(b) {
+  return `<div class="c">
+    <div style="position:absolute;top:0;left:0;right:0;height:38%;background:${b.color};z-index:1"></div>
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <!-- 상단 컬러 영역 -->
+      <div style="color:#fff">
+        <div style="font-size:24px;font-weight:900;line-height:1.05">특이점이 온<br>개발자</div>
+        <div style="font-size:13px;font-weight:700;opacity:.8;margin-top:4px;white-space:pre-line">${b.slogan}</div>
+      </div>
+      <!-- 하단 화이트 영역 -->
+      <div style="text-align:center;margin-top:auto">
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+      </div>
+      <div class="badges" style="justify-content:center">${badgesHTML2(b)}</div>
+      ${bot2(b)}
+    </div>
+  </div>`;
+}
+
+// ═══════════ J — 중앙 슬로건 + 상하단 타이틀/시리즈 분산 ═══════════
+function styleJ(b) {
+  return `<div class="c">
+    <div style="position:absolute;inset:0;z-index:1;overflow:hidden">
+      <div style="position:absolute;top:8%;right:5%;font-size:100px;font-weight:900;color:rgba(${b.rgb},.04);line-height:.8;letter-spacing:-6px">${b.title}</div>
+    </div>
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <!-- 상단 좌: 시리즈 / 우: 개념편 -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="font-size:10px;font-weight:700;color:${b.color};letter-spacing:1px">특이점이 온 개발자</div>
+        <div style="font-size:10px;font-weight:800;color:${b.color}">개념편</div>
+      </div>
+      <!-- 중앙: 슬로건 초대형 센터 -->
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center">
+        <div>
+          <div style="font-size:26px;font-weight:900;color:#1a1a1a;line-height:1.2;white-space:pre-line;letter-spacing:-1px">${b.slogan}</div>
+        </div>
+      </div>
+      <!-- 하단: 타이틀 좌 + 배지 -->
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:2px;margin-bottom:4px">${b.tagline}</div>
+        <div class="badges">${badgesHTML2(b)}</div>
+      </div>
+      <div style="margin-top:4px">${bot2(b)}</div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ K — 대각선 타이틀 워터마크 + 우하 정렬 텍스트 ═══════════
+function styleK(b) {
+  return `<div class="c">
+    <div style="position:absolute;inset:0;z-index:1;overflow:hidden">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-25deg);font-size:130px;font-weight:900;color:rgba(${b.rgb},.05);line-height:.8;letter-spacing:-8px;white-space:nowrap">${b.title}</div>
+    </div>
+    <div class="typo" style="padding:4% 5%;justify-content:space-between">
+      <div style="text-align:right">
+        <div style="font-size:24px;font-weight:900;color:#1a1a1a;line-height:1.05">특이점이 온<br>개발자</div>
+      </div>
+      <div style="flex:1"></div>
+      <div style="text-align:right">
+        <div style="font-size:22px;font-weight:800;color:${b.color};line-height:1.25;white-space:pre-line">${b.slogan}</div>
+      </div>
+      <div style="text-align:left;margin-top:4px">
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:2px">${b.tagline}</div>
+      </div>
+      <div class="badges">${badgesHTML2(b)}</div>
+      ${bot2(b)}
+    </div>
+  </div>`;
+}
+
+// ═══════════ L — 프레임 보더 + 센터 타이포 ═══════════
+function styleL(b) {
+  return `<div class="c">
+    <div style="position:absolute;inset:3%;border:2px solid rgba(${b.rgb},.15);border-radius:2px;z-index:1"></div>
+    <div style="position:absolute;inset:0;z-index:0;overflow:hidden">
+      <div style="position:absolute;bottom:-5%;left:-5%;font-size:180px;font-weight:900;color:rgba(${b.rgb},.03);line-height:.7;letter-spacing:-12px">${b.title}</div>
+    </div>
+    <div class="typo" style="padding:7% 8%;align-items:center;text-align:center;justify-content:space-between">
+      <div style="font-size:10px;font-weight:700;color:${b.color};letter-spacing:3px">특이점이 온 개발자</div>
+      <div>
+        <div style="width:30px;height:2px;background:${b.color};margin:0 auto 6px"></div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:4px">${b.tagline}</div>
+        <div style="width:30px;height:2px;background:${b.color};margin:6px auto 0"></div>
+      </div>
+      <div style="font-size:20px;font-weight:800;color:#1a1a1a;line-height:1.3;white-space:pre-line">${b.slogan}</div>
+      <div class="badges" style="justify-content:center">${badgesHTML2(b,'outline')}</div>
+      ${bot2(b)}
+    </div>
+  </div>`;
+}
+
+const sections2 = [
+  { name:'G — 센터 정렬 + 워터마크', desc:'모든 요소 중앙 정렬 / 타이틀 초대형 워터마크 배경 / 대칭적 안정감', fn:styleG },
+  { name:'H — 우측 정렬 + 사이드바', desc:'좌측 컬러 사이드바 8% / 본문 전체 우측 정렬 / 세로 리듬감', fn:styleH },
+  { name:'I — 상하 2분할', desc:'상단 38% 풀 컬러(시리즈+슬로건) / 하단 화이트(타이틀+배지) / 강한 대비', fn:styleI },
+  { name:'J — 상하 분산 + 센터 슬로건', desc:'시리즈 좌상 / 개념편 우상 / 슬로건 중앙 초대형 / 타이틀+배지 하단', fn:styleJ },
+  { name:'K — 대각 워터마크 + 교차 정렬', desc:'타이틀 대각선 25도 워터마크 / 시리즈 우상 / 슬로건 우하 / 타이틀 좌하', fn:styleK },
+  { name:'L — 프레임 보더 + 센터', desc:'안쪽 보더 프레임 / 모든 요소 중앙 / 아웃라인 배지 / 우아한 느낌', fn:styleL },
+];
+
+let html2 = '';
+sections2.forEach(sec => {
+  html2 += `<div class="sec-t">${sec.name}</div><div class="sec-d">${sec.desc}</div><div class="g">`;
+  books2.forEach(b => { html2 += sec.fn(b); });
+  html2 += '</div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html2);
+</script>
+
+<script>
+// ═══════════ 추가 M~P — 여백 없는 디자인 ═══════════
+
+const books3 = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker', titleSize:'82px',
+    tagline:'컨테이너의 모든 것', slogan:'컨테이너 하나로\n세상을 담다',
+    badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA', titleSize:'94px',
+    tagline:'마이크로서비스 아키텍처', slogan:'쪼갤수록\n강해진다',
+    badges:['API Gateway','Kafka','보상 트랜잭션','서비스 분리','이벤트 드리븐','오케스트레이션','WebSocket','SAGA 패턴'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG', titleSize:'94px',
+    tagline:'검색 증강 생성', slogan:'AI에게 기억을\n선물하다',
+    badges:['임베딩','벡터 DB','LLM','프롬프트','청킹','유사도 검색','LangChain','토큰'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring', titleSize:'62px',
+    tagline:'9가지 기술', slogan:'인증부터 인가까지\n한 권에 끝내다',
+    badges:['OAuth2','OIDC','JWT','Spring Security','소셜 로그인','권한 관리','세션','필터 체인'] },
+];
+
+function b3badges(b,s){
+  if(s==='white') return b.badges.map(t=>`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff">${t}</span>`).join('');
+  if(s==='dark') return b.badges.map(t=>`<span class="badge" style="background:rgba(0,0,0,.08);color:#1a1a1a">${t}</span>`).join('');
+  return b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`).join('');
+}
+
+// ═══════════ M — 풀블리드 타이포: 타이틀이 표지 전체를 채움 ═══════════
+function styleM(b) {
+  return `<div class="c" style="background:#fff">
+    <!-- 초대형 타이틀 배경 (표지 전체) -->
+    <div style="position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <div style="font-size:200px;font-weight:900;color:rgba(${b.rgb},.08);line-height:.75;letter-spacing:-12px">${b.title}</div>
+    </div>
+    <!-- 상단 밴드: 시리즈명 풀 와이드 -->
+    <div style="position:absolute;top:0;left:0;right:0;background:${b.color};padding:3% 4%;z-index:5">
+      <div style="font-size:22px;font-weight:900;color:#fff;line-height:1.05">특이점이 온 개발자</div>
+      <div style="font-size:8px;color:rgba(255,255,255,.7);margin-top:2px">OPENSKILL BOOKS</div>
+    </div>
+    <!-- 중앙~하단 콘텐츠 (여백 없이 꽉 채움) -->
+    <div class="typo" style="padding:0 3%;padding-top:26%;justify-content:flex-end;gap:0">
+      <div style="font-size:28px;font-weight:900;color:${b.color};line-height:1.15;white-space:pre-line;margin-bottom:2px">${b.slogan}</div>
+      <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.8;color:#1a1a1a">${b.title}</div>
+      <div style="font-size:8px;color:#888;margin:2px 0 3px">${b.tagline}</div>
+      <div class="badges" style="margin-bottom:2px">${b3badges(b)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:3%">
+        <div style="font-size:7px;color:#a0a0a0;line-height:1.5">오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ N — 매거진 레이어: 텍스트가 겹치며 모든 공간 채움 ═══════════
+function styleN(b) {
+  return `<div class="c" style="background:${b.color}">
+    <!-- 타이틀 초대형 (잘림 허용) -->
+    <div style="position:absolute;top:-5%;left:-3%;z-index:1;overflow:hidden">
+      <div style="font-size:180px;font-weight:900;color:rgba(255,255,255,.08);line-height:.75;letter-spacing:-10px">${b.title}</div>
+    </div>
+    <!-- 슬로건 중간 레이어 -->
+    <div style="position:absolute;top:35%;left:0;right:0;z-index:2;padding:0 4%">
+      <div style="font-size:48px;font-weight:900;color:rgba(255,255,255,.1);line-height:1.05;white-space:pre-line">${b.slogan}</div>
+    </div>
+    <!-- 메인 콘텐츠 -->
+    <div class="typo" style="padding:3% 4%;justify-content:space-between;z-index:10">
+      <div>
+        <div style="font-size:28px;font-weight:900;color:#fff;line-height:1">특이점이 온<br>개발자</div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center">
+        <div>
+          <div style="font-size:24px;font-weight:800;color:rgba(255,255,255,.95);line-height:1.25;white-space:pre-line">${b.slogan}</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.8;color:#fff">${b.title}</div>
+        <div style="font-size:8px;color:rgba(255,255,255,.5);margin-top:2px">${b.tagline}</div>
+      </div>
+      <div class="badges" style="margin:3px 0">${b3badges(b,'white')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:rgba(255,255,255,.4);line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#fff">개념편</div><div style="font-size:7px;color:rgba(255,255,255,.4);margin-top:1px">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ O — 블록 그리드: 컬러 블록들이 표지를 분할 ═══════════
+function styleO(b) {
+  return `<div class="c" style="background:#fff">
+    <!-- 상단 60% 컬러 블록 -->
+    <div style="position:absolute;top:0;left:0;right:0;height:62%;background:${b.color};z-index:1"></div>
+    <!-- 우측 사이드 블록 -->
+    <div style="position:absolute;top:62%;right:0;bottom:0;width:35%;background:rgba(${b.rgb},.08);z-index:1"></div>
+    <!-- 콘텐츠: 여백 없이 꽉 채움 -->
+    <div class="typo" style="padding:3% 4%;justify-content:space-between">
+      <!-- 상단 컬러 영역 -->
+      <div style="color:#fff">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-size:26px;font-weight:900;line-height:1">특이점이 온<br>개발자</div>
+          <div style="font-size:9px;font-weight:700;opacity:.7;text-align:right">OPENSKILL<br>BOOKS</div>
+        </div>
+      </div>
+      <div style="color:#fff">
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.8">${b.title}</div>
+        <div style="font-size:8px;opacity:.6;margin-top:2px">${b.tagline}</div>
+      </div>
+      <!-- 전환점 (컬러→화이트 경계) -->
+      <div>
+        <div style="font-size:26px;font-weight:900;color:#1a1a1a;line-height:1.2;white-space:pre-line">${b.slogan}</div>
+      </div>
+      <div class="badges">${b3badges(b)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:#a0a0a0;line-height:1.5">오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ P — 다크 풀블리드: 블랙 배경 + 타이틀 엣지투엣지 ═══════════
+function styleP(b) {
+  return `<div class="c" style="background:#111">
+    <!-- 타이틀 초대형 상단 (잘리며 꽉 참) -->
+    <div style="position:absolute;top:-8%;left:-2%;z-index:1;overflow:visible">
+      <div style="font-size:200px;font-weight:900;color:rgba(${b.rgb},.12);line-height:.7;letter-spacing:-12px">${b.title}</div>
+    </div>
+    <!-- 하단 액센트 라인 -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:${b.color};z-index:5"></div>
+    <div class="typo" style="padding:2% 4%;justify-content:space-between;z-index:10">
+      <!-- 시리즈 상단 -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:2%">
+        <div style="font-size:9px;font-weight:700;color:${b.color};letter-spacing:2px">특이점이 온 개발자</div>
+        <div style="font-size:9px;font-weight:700;color:${b.color}">개념편</div>
+      </div>
+      <!-- 중앙 확장 -->
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px">
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.8;color:#fff">${b.title}</div>
+        <div style="font-size:8px;color:#555;margin-bottom:6px">${b.tagline}</div>
+        <div style="font-size:26px;font-weight:900;color:rgba(255,255,255,.9);line-height:1.15;white-space:pre-line">${b.slogan}</div>
+      </div>
+      <!-- 배지 + 하단 -->
+      <div class="badges" style="margin-bottom:3px">${b3badges(b,'white')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:2%">
+        <div style="font-size:7px;color:#555;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+        <div style="font-size:7px;color:#555;text-align:right">류재성 지음</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ Q — 타이포 파편: 글자가 표지를 완전히 덮음 ═══════════
+function styleQ(b) {
+  const words = b.slogan.replace(/\n/g,' ').split(' ');
+  return `<div class="c" style="background:#f5f5f0">
+    <!-- 배경 레이어: 키워드들이 랜덤 산재 -->
+    <div style="position:absolute;inset:0;z-index:1;overflow:hidden">
+      ${b.badges.map((t,i) => `<div style="position:absolute;top:${8+i*11}%;left:${(i%2)*45+5}%;font-size:${18+i*3}px;font-weight:900;color:rgba(${b.rgb},.04);transform:rotate(${-5+i*3}deg)">${t}</div>`).join('')}
+    </div>
+    <!-- 타이틀 초대형 좌측 잘림 -->
+    <div style="position:absolute;top:15%;left:-8%;z-index:2;overflow:visible">
+      <div style="font-size:150px;font-weight:900;color:rgba(${b.rgb},.07);line-height:.75;letter-spacing:-8px">${b.title}</div>
+    </div>
+    <!-- 콘텐츠 -->
+    <div class="typo" style="padding:3% 4%;justify-content:space-between;z-index:10">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="font-size:22px;font-weight:900;color:#1a1a1a;line-height:1">특이점이 온<br>개발자</div>
+        <div style="font-size:9px;font-weight:700;color:${b.color};text-align:right">OPENSKILL<br>BOOKS</div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center">
+        <div>
+          <div style="font-size:30px;font-weight:900;color:#1a1a1a;line-height:1.1;white-space:pre-line;letter-spacing:-1px">${b.slogan}</div>
+          <div style="height:2px;width:40px;background:${b.color};margin:5px 0"></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:${b.titleSize};font-weight:900;letter-spacing:-3px;line-height:.8;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:2px">${b.tagline}</div>
+      </div>
+      <div class="badges" style="margin:3px 0">${b3badges(b)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:#a0a0a0;line-height:1.5">오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const sections3 = [
+  { name:'M — 풀블리드 밴드', desc:'상단 컬러 밴드 + 초대형 타이틀 워터마크 + 여백 제로 / 텍스트가 엣지까지 닿음', fn:styleM },
+  { name:'N — 매거진 레이어 (풀컬러)', desc:'컬러 배경 + 타이틀·슬로건이 겹겹이 레이어 / 텍스트가 표지 전체를 채움', fn:styleN },
+  { name:'O — 블록 분할', desc:'상단 62% 컬러 + 우하단 서브블록 / 여백 없이 블록이 표지를 채움', fn:styleO },
+  { name:'P — 다크 풀블리드', desc:'블랙 배경 / 타이틀 엣지투엣지 / 네온 액센트 라인 / 텍스트 꽉 채움', fn:styleP },
+  { name:'Q — 타이포 파편', desc:'키워드+타이틀이 배경을 덮음 / 슬로건 센터 대형 / 여백 제로 레이어드', fn:styleQ },
+];
+
+let html3 = '';
+sections3.forEach(sec => {
+  html3 += `<div class="sec-t">${sec.name}</div><div class="sec-d">${sec.desc}</div><div class="g">`;
+  books3.forEach(b => { html3 += sec.fn(b); });
+  html3 += '</div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html3);
+</script>
+
+<script>
+// ═══════════ R~V — 타이포로 여백을 꽉 채운 디자인 ═══════════
+
+const books4 = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker', titleSize:'82px',
+    tagline:'컨테이너의 모든 것', slogan:'컨테이너 하나로\n세상을 담다', sloganFlat:'컨테이너 하나로 세상을 담다',
+    badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA', titleSize:'94px',
+    tagline:'마이크로서비스 아키텍처', slogan:'쪼갤수록\n강해진다', sloganFlat:'쪼갤수록 강해진다',
+    badges:['API Gateway','Kafka','보상 트랜잭션','서비스 분리','이벤트 드리븐','오케스트레이션','WebSocket','SAGA 패턴'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG', titleSize:'94px',
+    tagline:'검색 증강 생성', slogan:'AI에게 기억을\n선물하다', sloganFlat:'AI에게 기억을 선물하다',
+    badges:['임베딩','벡터 DB','LLM','프롬프트','청킹','유사도 검색','LangChain','토큰'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring', titleSize:'62px',
+    tagline:'9가지 기술', slogan:'인증부터 인가까지\n한 권에 끝내다', sloganFlat:'인증부터 인가까지 한 권에 끝내다',
+    badges:['OAuth2','OIDC','JWT','Spring Security','소셜 로그인','권한 관리','세션','필터 체인'] },
+];
+
+// ═══════════ R — 타이틀 풀스크린: 글자가 표지 전체를 덮음 ═══════════
+function styleR(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 타이틀이 표지 전체를 덮는 초대형 -->
+    <div style="position:absolute;top:-2%;left:-3%;right:-3%;z-index:1">
+      <div style="font-size:240px;font-weight:900;color:rgba(${b.rgb},.09);line-height:.78;letter-spacing:-15px;word-break:break-all">${b.title}${b.title}${b.title}</div>
+    </div>
+    <!-- 시리즈명 상단 풀와이드 -->
+    <div style="position:absolute;top:0;left:0;right:0;z-index:5;padding:3% 4%">
+      <div style="font-size:32px;font-weight:900;color:#1a1a1a;line-height:.95;letter-spacing:-1.5px">특이점이 온<br>개발자</div>
+    </div>
+    <!-- 슬로건 중앙 대형 -->
+    <div style="position:absolute;top:28%;left:0;right:0;z-index:5;padding:0 4%">
+      <div style="font-size:36px;font-weight:900;color:${b.color};line-height:1.15;white-space:pre-line;letter-spacing:-1px">${b.slogan}</div>
+    </div>
+    <!-- 메인 타이틀 중하단 -->
+    <div style="position:absolute;bottom:18%;left:0;right:0;z-index:5;padding:0 4%">
+      <div style="font-size:100px;font-weight:900;letter-spacing:-5px;line-height:.78;color:#1a1a1a">${b.title}</div>
+      <div style="font-size:9px;color:#888;margin-top:4px">${b.tagline}</div>
+    </div>
+    <!-- 배지 + 하단 -->
+    <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;padding:0 4% 3%">
+      <div class="badges" style="margin-bottom:4px">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:#a0a0a0;line-height:1.5">OPENSKILL BOOKS<br>오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ S — 키워드 월: 배경 전체를 키워드 텍스트가 채움 ═══════════
+function styleS(b) {
+  const wall = (b.badges.join(' ') + ' ').repeat(12);
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 키워드 텍스트가 배경 전체를 채움 -->
+    <div style="position:absolute;inset:-5%;z-index:1;overflow:hidden">
+      <div style="font-size:18px;font-weight:800;color:rgba(${b.rgb},.06);line-height:1.8;word-break:break-all;letter-spacing:2px">${wall}</div>
+    </div>
+    <!-- 시리즈명 최상단 풀 -->
+    <div style="position:absolute;top:0;left:0;right:0;z-index:5;padding:2% 3%">
+      <div style="font-size:38px;font-weight:900;color:#1a1a1a;line-height:.92;letter-spacing:-2px">특이점이<br>온 개발자</div>
+    </div>
+    <!-- 슬로건 좌측 대형 -->
+    <div style="position:absolute;top:30%;left:0;right:0;z-index:5;padding:0 3%">
+      <div style="font-size:32px;font-weight:900;color:${b.color};line-height:1.15;white-space:pre-line">${b.slogan}</div>
+    </div>
+    <!-- 타이틀 하단 엣지투엣지 -->
+    <div style="position:absolute;bottom:8%;left:-2%;right:-2%;z-index:5">
+      <div style="font-size:120px;font-weight:900;letter-spacing:-6px;line-height:.75;color:#1a1a1a;padding:0 3%">${b.title}</div>
+    </div>
+    <!-- 개념편 + 저자 -->
+    <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;padding:0 3% 2%;display:flex;justify-content:space-between;align-items:flex-end">
+      <div style="font-size:7px;color:#a0a0a0;line-height:1.5">오픈스킬북스</div>
+      <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999">류재성 지음</div></div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ T — 세로 슬로건 풀: 슬로건이 세로로 표지 전체 높이를 채움 ═══════════
+function styleT(b) {
+  const chars = b.sloganFlat.split('');
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 슬로건 세로 쓰기 좌측 (표지 전체 높이) -->
+    <div style="position:absolute;top:-1%;left:2%;bottom:-1%;z-index:1;writing-mode:vertical-rl;display:flex;align-items:flex-start">
+      <div style="font-size:42px;font-weight:900;color:rgba(${b.rgb},.07);letter-spacing:4px;line-height:1">${b.sloganFlat}</div>
+    </div>
+    <!-- 슬로건 세로 쓰기 우측 (반복) -->
+    <div style="position:absolute;top:-1%;right:2%;bottom:-1%;z-index:1;writing-mode:vertical-rl;display:flex;align-items:flex-end">
+      <div style="font-size:42px;font-weight:900;color:rgba(${b.rgb},.04);letter-spacing:4px;line-height:1">${b.sloganFlat}</div>
+    </div>
+    <!-- 콘텐츠: 전체를 텍스트로 채움 -->
+    <div style="position:absolute;top:0;left:0;right:0;z-index:5;padding:3% 12%">
+      <div style="font-size:28px;font-weight:900;color:#1a1a1a;line-height:.95">특이점이 온<br>개발자</div>
+    </div>
+    <div style="position:absolute;top:25%;left:0;right:0;z-index:5;padding:0 12%">
+      <div style="font-size:28px;font-weight:900;color:${b.color};line-height:1.2;white-space:pre-line">${b.slogan}</div>
+    </div>
+    <div style="position:absolute;bottom:16%;left:0;right:0;z-index:5;padding:0 12%">
+      <div style="font-size:90px;font-weight:900;letter-spacing:-5px;line-height:.78;color:#1a1a1a">${b.title}</div>
+      <div style="font-size:8px;color:#888;margin-top:3px">${b.tagline}</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;padding:0 12% 3%">
+      <div class="badges" style="margin-bottom:4px">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:#a0a0a0">오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ U — 올타이포 다크: 블랙에 글자만으로 빈틈 없이 ═══════════
+function styleU(b) {
+  const repeat3 = (b.badges.join(' · ') + ' · ').repeat(3);
+  return `<div class="c" style="background:#111;overflow:hidden">
+    <!-- 타이틀 초대형 상단 잘림 -->
+    <div style="position:absolute;top:-15%;left:-5%;z-index:1">
+      <div style="font-size:260px;font-weight:900;color:rgba(${b.rgb},.1);line-height:.7;letter-spacing:-16px">${b.title}</div>
+    </div>
+    <!-- 키워드 띠 중앙 -->
+    <div style="position:absolute;top:42%;left:-5%;right:-5%;z-index:2">
+      <div style="font-size:11px;font-weight:700;color:rgba(${b.rgb},.2);white-space:nowrap;letter-spacing:3px">${repeat3}</div>
+    </div>
+    <!-- 키워드 띠 하단 -->
+    <div style="position:absolute;top:65%;left:-5%;right:-5%;z-index:2">
+      <div style="font-size:11px;font-weight:700;color:rgba(${b.rgb},.12);white-space:nowrap;letter-spacing:3px">${repeat3}</div>
+    </div>
+    <!-- 메인 콘텐츠 -->
+    <div style="position:absolute;top:0;left:0;right:0;z-index:5;padding:3% 4%">
+      <div style="font-size:34px;font-weight:900;color:rgba(255,255,255,.95);line-height:.92;letter-spacing:-1.5px">특이점이 온<br>개발자</div>
+    </div>
+    <div style="position:absolute;top:30%;left:0;right:0;z-index:5;padding:0 4%">
+      <div style="font-size:34px;font-weight:900;color:${b.color};line-height:1.15;white-space:pre-line">${b.slogan}</div>
+    </div>
+    <div style="position:absolute;bottom:14%;left:0;right:0;z-index:5;padding:0 4%">
+      <div style="font-size:100px;font-weight:900;letter-spacing:-5px;line-height:.78;color:#fff">${b.title}</div>
+      <div style="font-size:9px;color:#555;margin-top:3px">${b.tagline}</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;padding:0 4% 3%">
+      <div class="badges" style="margin-bottom:3px">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.2);color:${b.color}">${t}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:#555;line-height:1.5">OPENSKILL BOOKS</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#555">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ V — 슬로건 풀블리드: 슬로건이 표지 전체를 덮는 초대형 ═══════════
+function styleV(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 슬로건 초대형으로 표지 전체 -->
+    <div style="position:absolute;top:5%;left:-3%;right:-3%;z-index:1">
+      <div style="font-size:88px;font-weight:900;color:rgba(${b.rgb},.06);line-height:1.05;white-space:pre-line;letter-spacing:-4px">${b.slogan}</div>
+    </div>
+    <!-- 타이틀도 초대형 하단 -->
+    <div style="position:absolute;bottom:-5%;left:-3%;right:-3%;z-index:1">
+      <div style="font-size:180px;font-weight:900;color:rgba(${b.rgb},.05);line-height:.7;letter-spacing:-10px">${b.title}</div>
+    </div>
+    <!-- 메인 콘텐츠 (모든 텍스트 크게) -->
+    <div style="position:absolute;top:0;left:0;right:0;z-index:5;padding:3% 4%">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="font-size:30px;font-weight:900;color:#1a1a1a;line-height:.95">특이점이 온<br>개발자</div>
+        <div style="text-align:right"><div style="font-size:16px;font-weight:800;color:${b.color}">개념편</div></div>
+      </div>
+    </div>
+    <div style="position:absolute;top:28%;left:0;right:0;z-index:5;padding:0 4%">
+      <div style="font-size:36px;font-weight:900;color:${b.color};line-height:1.15;white-space:pre-line;letter-spacing:-1px">${b.slogan}</div>
+    </div>
+    <div style="position:absolute;bottom:16%;left:0;right:0;z-index:5;padding:0 4%">
+      <div style="font-size:100px;font-weight:900;letter-spacing:-5px;line-height:.78;color:#1a1a1a">${b.title}</div>
+      <div style="font-size:9px;color:#888;margin-top:3px">${b.tagline}</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;z-index:5;padding:0 4% 3%">
+      <div class="badges" style="margin-bottom:3px">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.15);color:${b.color}">${t}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:#a0a0a0">오픈스킬북스</div>
+        <div style="font-size:7px;color:#999;text-align:right">류재성 지음</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const sections4 = [
+  { name:'R — 타이틀 풀스크린', desc:'타이틀 반복이 배경 전체를 덮음 / 시리즈·슬로건·타이틀 모두 대형 / 화이트 빈틈 제로', fn:styleR },
+  { name:'S — 키워드 월', desc:'8개 키워드가 배경 전체를 텍스트로 채움 / 시리즈 38px + 슬로건 32px + 타이틀 120px', fn:styleS },
+  { name:'T — 세로 슬로건 풀', desc:'슬로건이 세로쓰기로 표지 양쪽 전체 높이를 채움 / 가운데 콘텐츠도 대형', fn:styleT },
+  { name:'U — 올타이포 다크', desc:'블랙 배경 / 타이틀 260px 배경 + 키워드 띠 2줄 + 콘텐츠 / 글자만으로 빈틈 없음', fn:styleU },
+  { name:'V — 슬로건+타이틀 이중 풀블리드', desc:'슬로건 88px + 타이틀 180px이 배경 전체 / 그 위에 콘텐츠 대형 오버레이', fn:styleV },
+];
+
+let html4 = '';
+sections4.forEach(sec => {
+  html4 += `<div class="sec-t">${sec.name}</div><div class="sec-d">${sec.desc}</div><div class="g">`;
+  books4.forEach(b => { html4 += sec.fn(b); });
+  html4 += '</div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html4);
+</script>
+
+<script>
+// ═══════════ W~Z — 실제 텍스트를 키워서 여백 없이 채움 ═══════════
+
+const books5 = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker',
+    tagline:'컨테이너의 모든 것', slogan:'컨테이너 하나로\n세상을 담다',
+    sloganL1:'컨테이너 하나로', sloganL2:'세상을 담다',
+    badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA',
+    tagline:'마이크로서비스 아키텍처', slogan:'쪼갤수록\n강해진다',
+    sloganL1:'쪼갤수록', sloganL2:'강해진다',
+    badges:['API Gateway','Kafka','보상 트랜잭션','서비스 분리','이벤트 드리븐','오케스트레이션','WebSocket','SAGA 패턴'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG',
+    tagline:'검색 증강 생성', slogan:'AI에게 기억을\n선물하다',
+    sloganL1:'AI에게 기억을', sloganL2:'선물하다',
+    badges:['임베딩','벡터 DB','LLM','프롬프트','청킹','유사도 검색','LangChain','토큰'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring',
+    tagline:'9가지 기술', slogan:'인증부터 인가까지\n한 권에 끝내다',
+    sloganL1:'인증부터 인가까지', sloganL2:'한 권에 끝내다',
+    badges:['OAuth2','OIDC','JWT','Spring Security','소셜 로그인','권한 관리','세션','필터 체인'] },
+];
+
+// ═══════════ W — 3단 풀: 시리즈/슬로건/타이틀이 각각 1/3씩 꽉 채움 ═══════════
+function styleW(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column">
+      <!-- 상단: 시리즈명 -->
+      <div style="flex:1;display:flex;align-items:center;padding:0 3%;overflow:hidden">
+        <div style="width:100%">
+          <div style="font-size:52px;font-weight:900;color:#1a1a1a;line-height:.92;letter-spacing:-2.5px">특이점이 온</div>
+          <div style="font-size:52px;font-weight:900;color:#1a1a1a;line-height:.92;letter-spacing:-2.5px">개발자</div>
+          <div style="font-size:9px;font-weight:700;color:${b.color};margin-top:3px;letter-spacing:1px">OPENSKILL BOOKS · 개념편</div>
+        </div>
+      </div>
+      <!-- 중단: 블랙 배경 + 슬로건 (깔끔하게) -->
+      <div style="flex:1.1;position:relative;display:flex;align-items:center;padding:0 3%;background:#111;overflow:hidden">
+        <div style="width:100%">
+          <div style="font-size:44px;font-weight:900;color:#fff;line-height:1.05;letter-spacing:-2px">${b.sloganL1}</div>
+          <div style="font-size:44px;font-weight:900;color:#fff;line-height:1.05;letter-spacing:-2px">${b.sloganL2}</div>
+        </div>
+      </div>
+      <!-- 하단: 타이틀 + 배지 -->
+      <div style="flex:1.3;display:flex;flex-direction:column;justify-content:center;padding:3% 3% 2%;overflow:hidden">
+        <div style="font-size:100px;font-weight:900;letter-spacing:-5px;line-height:.8;color:#1a1a1a">${b.title}</div>
+        <div style="font-size:8px;color:#888;margin-top:6px">${b.tagline}</div>
+        <div class="badges" style="margin-top:5px">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`).join('')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
+          <div style="font-size:7px;color:#a0a0a0">오픈스킬북스</div>
+          <div style="font-size:7px;color:#999">류재성 지음</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ X — 풀텍스트 스택: 위에서 아래로 텍스트가 빈틈없이 쌓임 ═══════════
+function styleX(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:2% 3% 2%">
+      <!-- 시리즈명 대형 -->
+      <div style="font-size:46px;font-weight:900;color:#1a1a1a;line-height:.9;letter-spacing:-2px">특이점이 온</div>
+      <div style="font-size:46px;font-weight:900;color:#1a1a1a;line-height:.9;letter-spacing:-2px">개발자</div>
+      <!-- 슬로건 대형 (컬러) -->
+      <div style="margin-top:2px">
+        <div style="font-size:40px;font-weight:900;color:${b.color};line-height:1;letter-spacing:-1.5px">${b.sloganL1}</div>
+        <div style="font-size:40px;font-weight:900;color:${b.color};line-height:1;letter-spacing:-1.5px">${b.sloganL2}</div>
+      </div>
+      <!-- 개념편 -->
+      <div style="font-size:28px;font-weight:800;color:#1a1a1a;margin-top:2px">개념편</div>
+      <!-- 타이틀 초대형 -->
+      <div style="flex:1;display:flex;align-items:center">
+        <div style="font-size:120px;font-weight:900;letter-spacing:-6px;line-height:.78;color:#1a1a1a">${b.title}</div>
+      </div>
+      <!-- 배지 -->
+      <div class="badges" style="margin-bottom:2px">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`).join('')}</div>
+      <!-- 하단 -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:8px;color:#888">${b.tagline}</div>
+        <div style="font-size:7px;color:#999">오픈스킬북스 · 류재성 지음</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ Y — 다크 풀텍스트: 검정 배경 + 모든 텍스트 최대 크기 ═══════════
+function styleY(b) {
+  return `<div class="c" style="background:#111;overflow:hidden">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:2% 3% 2%">
+      <!-- 시리즈명 -->
+      <div style="font-size:44px;font-weight:900;color:#fff;line-height:.9;letter-spacing:-2px">특이점이 온</div>
+      <div style="font-size:44px;font-weight:900;color:#fff;line-height:.9;letter-spacing:-2px">개발자</div>
+      <!-- 슬로건 -->
+      <div style="margin-top:3px">
+        <div style="font-size:38px;font-weight:900;color:${b.color};line-height:1;letter-spacing:-1.5px">${b.sloganL1}</div>
+        <div style="font-size:38px;font-weight:900;color:${b.color};line-height:1;letter-spacing:-1.5px">${b.sloganL2}</div>
+      </div>
+      <!-- 타이틀 최대한 크게 -->
+      <div style="flex:1;display:flex;align-items:center">
+        <div style="font-size:130px;font-weight:900;letter-spacing:-7px;line-height:.78;color:#fff">${b.title}</div>
+      </div>
+      <!-- 배지 -->
+      <div class="badges" style="margin-bottom:2px">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.25);color:${b.color}">${t}</span>`).join('')}</div>
+      <!-- 하단 -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:8px;color:#555">${b.tagline} · 오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#555">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ Z — 컬러 풀텍스트: 액센트 배경 + 흰 텍스트 꽉 채움 ═══════════
+function styleZ(b) {
+  return `<div class="c" style="background:${b.color};overflow:hidden">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:2% 3% 2%">
+      <!-- 시리즈명 -->
+      <div style="font-size:46px;font-weight:900;color:#fff;line-height:.9;letter-spacing:-2px">특이점이 온</div>
+      <div style="font-size:46px;font-weight:900;color:#fff;line-height:.9;letter-spacing:-2px">개발자</div>
+      <!-- 슬로건 -->
+      <div style="margin-top:3px">
+        <div style="font-size:38px;font-weight:900;color:rgba(255,255,255,.8);line-height:1;letter-spacing:-1.5px">${b.sloganL1}</div>
+        <div style="font-size:38px;font-weight:900;color:rgba(255,255,255,.8);line-height:1;letter-spacing:-1.5px">${b.sloganL2}</div>
+      </div>
+      <!-- 개념편 -->
+      <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.6);margin-top:2px">개념편</div>
+      <!-- 타이틀 -->
+      <div style="flex:1;display:flex;align-items:center">
+        <div style="font-size:120px;font-weight:900;letter-spacing:-6px;line-height:.78;color:#fff">${b.title}</div>
+      </div>
+      <!-- 배지 -->
+      <div class="badges" style="margin-bottom:2px">${b.badges.map(t=>`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff">${t}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:8px;color:rgba(255,255,255,.5)">${b.tagline} · 오픈스킬북스</div>
+        <div style="font-size:7px;color:rgba(255,255,255,.5)">류재성 지음</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ AA — 타이틀 센터 + 시리즈/슬로건 상하로 꽉 ═══════════
+function styleAA(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:2% 3% 2%">
+      <!-- 시리즈명 상단 꽉 -->
+      <div style="font-size:42px;font-weight:900;color:#1a1a1a;line-height:.9;letter-spacing:-2px;text-align:center">특이점이 온 개발자</div>
+      <!-- 타이틀 센터 초대형 -->
+      <div style="flex:1;display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center">
+          <div style="font-size:140px;font-weight:900;letter-spacing:-8px;line-height:.78;color:#1a1a1a">${b.title}</div>
+          <div style="font-size:9px;color:#888;margin-top:4px">${b.tagline}</div>
+        </div>
+      </div>
+      <!-- 슬로건 하단 꽉 -->
+      <div style="text-align:center">
+        <div style="font-size:36px;font-weight:900;color:${b.color};line-height:1.05;letter-spacing:-1.5px">${b.sloganL1}</div>
+        <div style="font-size:36px;font-weight:900;color:${b.color};line-height:1.05;letter-spacing:-1.5px">${b.sloganL2}</div>
+      </div>
+      <div class="badges" style="justify-content:center;margin:3px 0">${b.badges.map(t=>`<span class="badge" style="background:rgba(${b.rgb},.12);color:${b.color}">${t}</span>`).join('')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-size:7px;color:#a0a0a0">오픈스킬북스</div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:${b.color}">개념편</div><div style="font-size:7px;color:#999">류재성 지음</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const sections5 = [
+  { name:'W — 3단 분할 풀텍스트', desc:'시리즈(52px) / 슬로건(44px, 컬러밴드) / 타이틀(110px) 각 1/3씩 꽉 채움', fn:styleW },
+  { name:'X — 스택 풀텍스트 (화이트)', desc:'시리즈(46px) → 슬로건(40px) → 개념편(28px) → 타이틀(120px) 위에서 아래로 빈틈 없이', fn:styleX },
+  { name:'Y — 스택 풀텍스트 (다크)', desc:'블랙 배경 / 시리즈(44px) → 슬로건(38px) → 타이틀(130px) 모두 최대 크기', fn:styleY },
+  { name:'Z — 스택 풀텍스트 (컬러)', desc:'액센트 컬러 배경 / 시리즈(46px) → 슬로건(38px) → 타이틀(120px) 화이트 텍스트', fn:styleZ },
+  { name:'AA — 센터 풀텍스트', desc:'시리즈(42px) 상단 / 타이틀(140px) 센터 / 슬로건(36px) 하단 — 중앙 정렬로 꽉', fn:styleAA },
+];
+
+let html5 = '';
+sections5.forEach(sec => {
+  html5 += `<div class="sec-t">${sec.name}</div><div class="sec-d">${sec.desc}</div><div class="g">`;
+  books5.forEach(b => { html5 += sec.fn(b); });
+  html5 += '</div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html5);
+</script>
+
+<script>
+// ═══════════ BB~FF — 폰트의 해부학 스타일: 텍스트로 꽉 채움 ═══════════
+
+const books6 = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker',
+    tagline:'컨테이너의 모든 것', sloganL1:'컨테이너 하나로', sloganL2:'세상을 담다',
+    badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA',
+    tagline:'마이크로서비스 아키텍처', sloganL1:'쪼갤수록', sloganL2:'강해진다',
+    badges:['API Gateway','Kafka','보상 트랜잭션','서비스 분리','이벤트 드리븐','오케스트레이션','WebSocket','SAGA 패턴'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG',
+    tagline:'검색 증강 생성', sloganL1:'AI에게 기억을', sloganL2:'선물하다',
+    badges:['임베딩','벡터 DB','LLM','프롬프트','청킹','유사도 검색','LangChain','토큰'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring',
+    tagline:'9가지 기술', sloganL1:'인증부터 인가까지', sloganL2:'한 권에 끝내다',
+    badges:['OAuth2','OIDC','JWT','Spring Security','소셜 로그인','권한 관리','세션','필터 체인'] },
+];
+
+// ═══════════ BB — 십자 라인 + 초대형 타이틀 (예시 이미지와 가장 유사) ═══════════
+function styleBB(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 얇은 십자 라인 -->
+    <div style="position:absolute;top:0;bottom:0;left:28%;width:1px;background:${b.color};opacity:.3;z-index:1"></div>
+    <div style="position:absolute;left:0;right:0;top:62%;height:1px;background:${b.color};opacity:.3;z-index:1"></div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:4% 5% 3%;z-index:2">
+      <!-- 소제목 좌상단 -->
+      <div style="font-size:8px;color:#999;line-height:1.5;letter-spacing:.5px">특이점이 온 개발자<br>개념편 시리즈</div>
+      <!-- 메인 타이틀: 표지의 50% 이상 차지 -->
+      <div style="flex:1;display:flex;align-items:center;padding:0">
+        <div>
+          <div style="font-size:72px;font-weight:900;color:#1a1a1a;line-height:.88;letter-spacing:-4px">${b.sloganL1}</div>
+          <div style="font-size:72px;font-weight:900;color:#1a1a1a;line-height:.88;letter-spacing:-4px">${b.sloganL2}</div>
+        </div>
+      </div>
+      <!-- 부제 우측 -->
+      <div style="text-align:right;margin-bottom:6px">
+        <div style="font-size:9px;color:#888;line-height:1.6">${b.tagline}에 대한<br>실전 가이드</div>
+        <div style="font-size:10px;font-weight:700;color:#1a1a1a;margin-top:2px">류재성 작</div>
+      </div>
+      <!-- 하단 배지 -->
+      <div style="font-size:7px;color:#999;line-height:1.5">${b.badges.join(' · ')}</div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ CC — 타이틀(영문) 초대형 + 슬로건 대형 ═══════════
+function styleCC(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 가로 액센트 라인 -->
+    <div style="position:absolute;left:5%;right:5%;top:55%;height:1px;background:${b.color};opacity:.25;z-index:1"></div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:4% 4% 3%;z-index:2">
+      <!-- 시리즈명 -->
+      <div style="font-size:9px;color:#999;letter-spacing:1px">특이점이 온 개발자 · 개념편</div>
+      <!-- 영문 타이틀 초대형 -->
+      <div style="margin-top:2px">
+        <div style="font-size:140px;font-weight:900;color:#1a1a1a;line-height:.78;letter-spacing:-8px">${b.title}</div>
+      </div>
+      <!-- 슬로건 대형 -->
+      <div style="flex:1;display:flex;align-items:flex-end">
+        <div>
+          <div style="font-size:52px;font-weight:900;color:#1a1a1a;line-height:.95;letter-spacing:-2.5px">${b.sloganL1}</div>
+          <div style="font-size:52px;font-weight:900;color:#1a1a1a;line-height:.95;letter-spacing:-2.5px">${b.sloganL2}</div>
+        </div>
+      </div>
+      <!-- 하단 -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:6px">
+        <div style="font-size:7px;color:#bbb">${b.badges.slice(0,4).join(' · ')}</div>
+        <div style="font-size:9px;font-weight:700;color:#1a1a1a">류재성 작</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ DD — 슬로건 풀 + 타이틀 하단 (컬러 액센트) ═══════════
+function styleDD(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 세로 액센트 라인 -->
+    <div style="position:absolute;top:5%;bottom:5%;right:22%;width:1px;background:${b.color};opacity:.2;z-index:1"></div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:4% 5% 3%;z-index:2">
+      <!-- 시리즈 -->
+      <div style="font-size:9px;color:#999;letter-spacing:.5px">특이점이 온 개발자</div>
+      <!-- 슬로건 초대형 (표지의 핵심) -->
+      <div style="flex:1;display:flex;align-items:center">
+        <div>
+          <div style="font-size:68px;font-weight:900;color:#1a1a1a;line-height:.9;letter-spacing:-3.5px">${b.sloganL1}</div>
+          <div style="font-size:68px;font-weight:900;color:#1a1a1a;line-height:.9;letter-spacing:-3.5px">${b.sloganL2}</div>
+        </div>
+      </div>
+      <!-- 타이틀 + 개념편 하단 -->
+      <div>
+        <div style="font-size:80px;font-weight:900;color:${b.color};line-height:.78;letter-spacing:-4px">${b.title}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:4px">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:#1a1a1a">개념편</div>
+            <div style="font-size:7px;color:#999;margin-top:1px">${b.tagline}</div>
+          </div>
+          <div style="font-size:9px;font-weight:700;color:#1a1a1a">류재성 작</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ EE — 다크 버전: 검정에 흰 타이포 꽉 채움 ═══════════
+function styleEE(b) {
+  return `<div class="c" style="background:#111;overflow:hidden">
+    <!-- 가로 라인 -->
+    <div style="position:absolute;left:0;right:0;top:58%;height:1px;background:${b.color};opacity:.3;z-index:1"></div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:4% 5% 3%;z-index:2">
+      <div style="font-size:9px;color:#666;letter-spacing:1px">특이점이 온 개발자 · 개념편</div>
+      <!-- 타이틀 초대형 -->
+      <div style="margin-top:2px">
+        <div style="font-size:130px;font-weight:900;color:#fff;line-height:.78;letter-spacing:-7px">${b.title}</div>
+      </div>
+      <!-- 슬로건 대형 -->
+      <div style="flex:1;display:flex;align-items:flex-end">
+        <div>
+          <div style="font-size:50px;font-weight:900;color:#fff;line-height:.92;letter-spacing:-2px">${b.sloganL1}</div>
+          <div style="font-size:50px;font-weight:900;color:#fff;line-height:.92;letter-spacing:-2px">${b.sloganL2}</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:6px">
+        <div style="font-size:7px;color:#555">${b.badges.slice(0,4).join(' · ')}</div>
+        <div style="font-size:9px;font-weight:700;color:${b.color}">류재성 작</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════ FF — 시리즈명+슬로건+타이틀 3줄 모두 최대 크기 ═══════════
+function styleFF(b) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <!-- 십자 라인 -->
+    <div style="position:absolute;top:0;bottom:0;left:70%;width:1px;background:${b.color};opacity:.15;z-index:1"></div>
+    <div style="position:absolute;left:0;right:0;top:33%;height:1px;background:${b.color};opacity:.15;z-index:1"></div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:3% 4% 2%;z-index:2">
+      <!-- 시리즈명 대형 -->
+      <div>
+        <div style="font-size:40px;font-weight:900;color:#1a1a1a;line-height:.88;letter-spacing:-2px">특이점이 온</div>
+        <div style="font-size:40px;font-weight:900;color:#1a1a1a;line-height:.88;letter-spacing:-2px">개발자</div>
+      </div>
+      <!-- 슬로건 대형 -->
+      <div style="margin-top:3px">
+        <div style="font-size:42px;font-weight:900;color:${b.color};line-height:.92;letter-spacing:-2px">${b.sloganL1}</div>
+        <div style="font-size:42px;font-weight:900;color:${b.color};line-height:.92;letter-spacing:-2px">${b.sloganL2}</div>
+      </div>
+      <!-- 타이틀 최대 -->
+      <div style="flex:1;display:flex;align-items:flex-end">
+        <div>
+          <div style="font-size:115px;font-weight:900;color:#1a1a1a;line-height:.76;letter-spacing:-6px">${b.title}</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:3px">
+            <div><div style="font-size:11px;font-weight:800;color:#1a1a1a">개념편</div><div style="font-size:7px;color:#999">${b.tagline}</div></div>
+            <div style="font-size:9px;font-weight:700;color:#1a1a1a">류재성 작</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const sections6 = [
+  { name:'BB — 십자 라인 + 슬로건 풀 (예시 이미지 스타일)', desc:'얇은 십자 라인 장식 / 슬로건(72px)이 표지 중앙을 꽉 채움 / 최소 장식', fn:styleBB },
+  { name:'CC — 영문 타이틀 초대형 + 슬로건', desc:'타이틀(140px) 상단 + 슬로건(52px) 하단 / 텍스트 2덩어리가 표지를 채움', fn:styleCC },
+  { name:'DD — 슬로건 센터 + 컬러 타이틀 하단', desc:'슬로건(68px) 중앙 + 타이틀(80px, 컬러) 하단 / 세로 라인 액센트', fn:styleDD },
+  { name:'EE — 다크 + 타이포 꽉 채움', desc:'블랙 배경 / 타이틀(130px) 상단 + 슬로건(50px) 하단 / 가로 라인', fn:styleEE },
+  { name:'FF — 3줄 모두 최대: 시리즈+슬로건+타이틀', desc:'시리즈(40px) + 슬로건(42px, 컬러) + 타이틀(115px) 세 덩어리가 표지 전체를 채움', fn:styleFF },
+];
+
+let html6 = '';
+sections6.forEach(sec => {
+  html6 += `<div class="sec-t">${sec.name}</div><div class="sec-d">${sec.desc}</div><div class="g">`;
+  books6.forEach(b => { html6 += sec.fn(b); });
+  html6 += '</div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html6);
+</script>
+
+<script>
+// ═══════════ W 색상 변형 ═══════════
+
+const books7 = [
+  { id:'docker', color:'#008080', rgb:'0,128,128', title:'Docker',
+    tagline:'컨테이너의 모든 것', sloganL1:'컨테이너 하나로', sloganL2:'세상을 담다',
+    badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] },
+  { id:'msa', color:'#4B3CB4', rgb:'75,60,180', title:'MSA',
+    tagline:'마이크로서비스 아키텍처', sloganL1:'쪼갤수록', sloganL2:'강해진다',
+    badges:['API Gateway','Kafka','보상 트랜잭션','서비스 분리','이벤트 드리븐','오케스트레이션','WebSocket','SAGA 패턴'] },
+  { id:'rag', color:'#7832A0', rgb:'120,50,160', title:'RAG',
+    tagline:'검색 증강 생성', sloganL1:'AI에게 기억을', sloganL2:'선물하다',
+    badges:['임베딩','벡터 DB','LLM','프롬프트','청킹','유사도 검색','LangChain','토큰'] },
+  { id:'spring', color:'#B4781E', rgb:'180,120,30', title:'Spring',
+    tagline:'9가지 기술', sloganL1:'인증부터 인가까지', sloganL2:'한 권에 끝내다',
+    badges:['OAuth2','OIDC','JWT','Spring Security','소셜 로그인','권한 관리','세션','필터 체인'] },
+];
+
+// 공통 3단 구조 생성기
+function wVariant(b, top, mid, bot) {
+  // top = {bg, text, sub}  mid = {bg, text}  bot = {bg, text, badge, badgeBg, meta}
+  return `<div class="c" style="background:${bot.bg};overflow:hidden">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column">
+      <div style="flex:1;display:flex;align-items:center;padding:0 3%;background:${top.bg};overflow:hidden">
+        <div style="width:100%">
+          <div style="font-size:52px;font-weight:900;color:${top.text};line-height:.92;letter-spacing:-2.5px">특이점이 온</div>
+          <div style="font-size:52px;font-weight:900;color:${top.text};line-height:.92;letter-spacing:-2.5px">개발자</div>
+          <div style="font-size:9px;font-weight:700;color:${top.sub};margin-top:3px;letter-spacing:1px">OPENSKILL BOOKS · 개념편</div>
+        </div>
+      </div>
+      <div style="flex:1.1;display:flex;align-items:center;padding:0 3%;background:${mid.bg};overflow:hidden">
+        <div style="width:100%">
+          <div style="font-size:44px;font-weight:900;color:${mid.text};line-height:1.05;letter-spacing:-2px">${b.sloganL1}</div>
+          <div style="font-size:44px;font-weight:900;color:${mid.text};line-height:1.05;letter-spacing:-2px">${b.sloganL2}</div>
+        </div>
+      </div>
+      <div style="flex:1.3;display:flex;flex-direction:column;justify-content:center;padding:3% 3% 2%;background:${bot.bg};overflow:hidden">
+        <div style="font-size:100px;font-weight:900;letter-spacing:-5px;line-height:.8;color:${bot.text}">${b.title}</div>
+        <div style="font-size:8px;color:${bot.meta};margin-top:6px">${b.tagline}</div>
+        <div class="badges" style="margin-top:5px">${b.badges.map(t=>`<span class="badge" style="background:${bot.badgeBg};color:${bot.badge}">${t}</span>`).join('')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
+          <div style="font-size:7px;color:${bot.meta}">오픈스킬북스</div>
+          <div style="font-size:7px;color:${bot.meta}">류재성 지음</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── W1: 현재 (화이트 / 블랙 / 화이트) ──
+function wV1(b) {
+  return wVariant(b,
+    {bg:'#fff', text:'#1a1a1a', sub:b.color},
+    {bg:'#111', text:'#fff'},
+    {bg:'#fff', text:'#1a1a1a', badge:b.color, badgeBg:`rgba(${b.rgb},.12)`, meta:'#999'}
+  );
+}
+
+// ── W2: 블랙 / 컬러 / 화이트 ──
+function wV2(b) {
+  return wVariant(b,
+    {bg:'#111', text:'#fff', sub:b.color},
+    {bg:b.color, text:'#fff'},
+    {bg:'#fff', text:'#1a1a1a', badge:b.color, badgeBg:`rgba(${b.rgb},.12)`, meta:'#999'}
+  );
+}
+
+// ── W3: 화이트 / 컬러 / 블랙 ──
+function wV3(b) {
+  return wVariant(b,
+    {bg:'#fff', text:'#1a1a1a', sub:b.color},
+    {bg:b.color, text:'#fff'},
+    {bg:'#111', text:'#fff', badge:b.color, badgeBg:`rgba(${b.rgb},.25)`, meta:'#555'}
+  );
+}
+
+// ── W4: 컬러 / 블랙 / 화이트 ──
+function wV4(b) {
+  return wVariant(b,
+    {bg:b.color, text:'#fff', sub:'rgba(255,255,255,.7)'},
+    {bg:'#111', text:'#fff'},
+    {bg:'#fff', text:'#1a1a1a', badge:b.color, badgeBg:`rgba(${b.rgb},.12)`, meta:'#999'}
+  );
+}
+
+// ── W5: 컬러 / 화이트 / 블랙 ──
+function wV5(b) {
+  return wVariant(b,
+    {bg:b.color, text:'#fff', sub:'rgba(255,255,255,.7)'},
+    {bg:'#fff', text:'#1a1a1a'},
+    {bg:'#111', text:'#fff', badge:b.color, badgeBg:`rgba(${b.rgb},.25)`, meta:'#555'}
+  );
+}
+
+// ── W6: 블랙 / 화이트 / 컬러 ──
+function wV6(b) {
+  return wVariant(b,
+    {bg:'#111', text:'#fff', sub:b.color},
+    {bg:'#fff', text:'#1a1a1a'},
+    {bg:b.color, text:'#fff', badge:'#fff', badgeBg:'rgba(255,255,255,.2)', meta:'rgba(255,255,255,.6)'}
+  );
+}
+
+// ── W7: 화이트 / 블랙 / 컬러 ──
+function wV7(b) {
+  return wVariant(b,
+    {bg:'#fff', text:'#1a1a1a', sub:b.color},
+    {bg:'#111', text:'#fff'},
+    {bg:b.color, text:'#fff', badge:'#fff', badgeBg:'rgba(255,255,255,.2)', meta:'rgba(255,255,255,.6)'}
+  );
+}
+
+// ── W8: 올블랙 (블랙 / 다크그레이 / 블랙) ──
+function wV8(b) {
+  return wVariant(b,
+    {bg:'#111', text:'#fff', sub:b.color},
+    {bg:'#222', text:b.color},
+    {bg:'#111', text:'#fff', badge:b.color, badgeBg:`rgba(${b.rgb},.2)`, meta:'#555'}
+  );
+}
+
+// ── W9: 컬러 / 블랙 / 컬러 (동일 컬러 샌드위치) ──
+function wV9(b) {
+  return wVariant(b,
+    {bg:b.color, text:'#fff', sub:'rgba(255,255,255,.7)'},
+    {bg:'#111', text:'#fff'},
+    {bg:b.color, text:'#fff', badge:'#fff', badgeBg:'rgba(255,255,255,.2)', meta:'rgba(255,255,255,.6)'}
+  );
+}
+
+const wSections = [
+  { name:'W1 — 화이트 / 블랙 / 화이트 (현재)', fn:wV1 },
+  { name:'W2 — 블랙 / 컬러 / 화이트', fn:wV2 },
+  { name:'W3 — 화이트 / 컬러 / 블랙', fn:wV3 },
+  { name:'W4 — 컬러 / 블랙 / 화이트', fn:wV4 },
+  { name:'W5 — 컬러 / 화이트 / 블랙', fn:wV5 },
+  { name:'W6 — 블랙 / 화이트 / 컬러', fn:wV6 },
+  { name:'W7 — 화이트 / 블랙 / 컬러', fn:wV7 },
+  { name:'W8 — 올블랙 (슬로건 컬러)', fn:wV8 },
+  { name:'W9 — 컬러 / 블랙 / 컬러 (동일 컬러 샌드위치)', fn:wV9 },
+];
+
+let html7 = '';
+wSections.forEach(sec => {
+  html7 += `<div class="sec-t">${sec.name}</div><div class="sec-d"></div><div class="g">`;
+  books7.forEach(b => { html7 += sec.fn(b); });
+  html7 += '</div>';
+});
+document.currentScript.insertAdjacentHTML('afterend', html7);
+</script>
+
+<script>
+// ═══════════ Docker 중간 밴드 색상 탐색 ═══════════
+
+const dk = { title:'Docker', tagline:'컨테이너의 모든 것',
+  sloganL1:'컨테이너 하나로', sloganL2:'세상을 담다',
+  badges:['Dockerfile','이미지 빌드','컨테이너','Docker Compose','볼륨 마운트','네트워크','멀티 스테이지','레지스트리'] };
+
+// 차가운 톤 + 비비드 조합
+const midColors = [
+  // 비비드 블루 계열
+  ['일렉트릭블루 / 화이트', '#0066FF', '#fff'],
+  ['일렉트릭블루 / 블랙', '#0066FF', '#000'],
+  ['코발트 / 화이트', '#0047AB', '#fff'],
+  ['코발트 / 시안', '#0047AB', '#00FFFF'],
+  // 비비드 시안·틸 계열
+  ['시안 / 블랙', '#00D4FF', '#000'],
+  ['시안 / 네이비', '#00D4FF', '#001133'],
+  ['틸 비비드 / 화이트', '#00B4D8', '#fff'],
+  ['아쿠아 / 블랙', '#00E5CC', '#000'],
+  // 비비드 퍼플·바이올렛
+  ['일렉트릭퍼플 / 화이트', '#7C3AED', '#fff'],
+  ['일렉트릭퍼플 / 시안', '#7C3AED', '#00FFFF'],
+  ['바이올렛 / 화이트', '#8B5CF6', '#fff'],
+  ['로얄퍼플 / 민트', '#6D28D9', '#A7F3D0'],
+  // 네온 믹스
+  ['네이비 / 네온시안', '#0A1628', '#00F0FF'],
+  ['네이비 / 네온퍼플', '#0A1628', '#BF40FF'],
+  ['블랙 / 네온블루', '#000', '#3B82F6'],
+  ['블랙 / 네온민트', '#000', '#34D399'],
+  // 투톤 대비
+  ['딥블루 / 일렉트릭민트', '#1E3A5F', '#00FFB3'],
+  ['인디고 / 아이스블루', '#312E81', '#BAE6FD'],
+  ['미드나잇 / 일렉트릭블루', '#020617', '#0088FF'],
+  ['스틸블루 / 화이트', '#2563EB', '#fff'],
+  // 그라디언트 느낌 (단색이지만 선명한)
+  ['퓨어블루 / 화이트', '#2196F3', '#fff'],
+  ['오션 / 화이트', '#0077B6', '#fff'],
+  ['아이스 / 다크네이비', '#E0F7FA', '#01579B'],
+  ['스카이 / 다크블루', '#B3E5FC', '#0D47A1'],
+];
+
+function midCard(label, bg, fg) {
+  return `<div class="c" style="background:#fff;overflow:hidden">
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column">
+      <div style="flex:1;display:flex;align-items:center;padding:0 3%">
+        <div style="width:100%">
+          <div style="font-size:52px;font-weight:900;color:#1a1a1a;line-height:.92;letter-spacing:-2.5px">특이점이 온</div>
+          <div style="font-size:52px;font-weight:900;color:#1a1a1a;line-height:.92;letter-spacing:-2.5px">개발자</div>
+          <div style="font-size:9px;font-weight:700;color:#008080;margin-top:3px;letter-spacing:1px">OPENSKILL BOOKS · 개념편</div>
+        </div>
+      </div>
+      <div style="flex:1.1;display:flex;align-items:center;padding:0 3%;background:${bg}">
+        <div style="width:100%">
+          <div style="font-size:44px;font-weight:900;color:${fg};line-height:1.05;letter-spacing:-2px">${dk.sloganL1}</div>
+          <div style="font-size:44px;font-weight:900;color:${fg};line-height:1.05;letter-spacing:-2px">${dk.sloganL2}</div>
+        </div>
+      </div>
+      <div style="flex:1.3;display:flex;flex-direction:column;justify-content:center;padding:3% 3% 2%">
+        <div style="font-size:100px;font-weight:900;letter-spacing:-5px;line-height:.8;color:#1a1a1a">Docker</div>
+        <div style="font-size:7px;color:#999;margin-top:4px">${label}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+let html8 = '<div class="sec-t">Docker 중간 밴드 — 색상 탐색 (24가지)</div>';
+html8 += '<div class="sec-d">배경색 + 폰트색 대비 조합 / 상단·하단은 고정</div>';
+html8 += '<div class="g" style="grid-template-columns:repeat(4,1fr)">';
+midColors.forEach(([l,bg,fg]) => { html8 += midCard(l, bg, fg); });
+html8 += '</div>';
+document.currentScript.insertAdjacentHTML('afterend', html8);
+</script>
+
+</body>
+</html>

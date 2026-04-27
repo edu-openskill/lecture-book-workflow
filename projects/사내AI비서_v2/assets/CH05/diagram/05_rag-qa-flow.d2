@@ -1,0 +1,61 @@
+direction: right
+
+classes: {
+  start-end: {
+    shape: oval
+    style: {
+      fill: "#ffffff"
+      stroke: "#c5cee0"
+      stroke-width: 2
+      shadow: true
+      font-size: 18
+      font-color: "#374151"
+    }
+    width: 150
+    height: 70
+  }
+  process: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      font-color: "#1e40af"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 8
+      shadow: true
+      font-size: 18
+      bold: true
+    }
+    width: 150
+    height: 60
+  }
+}
+
+A: 질문 {
+  class: start-end
+}
+B: 검색 {
+  class: process
+}
+C: 문서 조각 {
+  class: process
+}
+D: "LLM이\n읽고 답변" {
+  class: process
+}
+E: "답변 + 출처" {
+  class: start-end
+}
+
+A -> B: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+B -> C: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+C -> D: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}
+D -> E: {
+  style: { stroke: "#2563eb"; stroke-width: 2 }
+}

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReplicaSet</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #fff;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .diagram {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 40px;
+            width: 100%;
+            max-width: 1000px;
+            box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+        }
+        .flow-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 35px;
+        }
+        .replicaset-section {
+            flex: 0 0 auto;
+        }
+        .pods-section {
+            flex: 1;
+        }
+        .replicaset-box {
+            background-color: #fff;
+            border: 2.5px solid #1565c0;
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 220px;
+            text-align: center;
+        }
+        .replicaset-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .replica-info {
+            background-color: #fff3e0;
+            border: 2px solid #c62828;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #c62828;
+            line-height: 1.4;
+        }
+        .arrow-right {
+            font-size: 24px;
+            color: #1565c0;
+            font-weight: bold;
+            align-self: center;
+        }
+        .pods-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .pod {
+            background-color: #fff;
+            border: 2px solid #1565c0;
+            border-radius: 6px;
+            padding: 14px;
+            text-align: center;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .pod.active {
+            background-color: #fff3e0;
+            border: 2.5px solid #c62828;
+            box-shadow: 0 0 0 2px rgba(198,40,40,0.1);
+        }
+        .pod-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        .pod-name.active {
+            color: #c62828;
+        }
+        .pod-status {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .pod-status.active {
+            color: #c62828;
+            font-weight: 500;
+        }
+        .pod.inactive {
+            opacity: 0.4;
+        }
+        .guarantee-box {
+            background-color: #f5faff;
+            border: 1.5px solid #90caf9;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagram">
+        <div class="flow-container">
+            <div class="replicaset-section">
+                <div class="replicaset-box">
+                    <div class="replicaset-title">Deployment<br>ReplicaSet</div>
+                    <div class="replica-info">설정 개수: 3</div>
+                </div>
+            </div>
+
+            <div class="arrow-right">→</div>
+
+            <div class="pods-section">
+                <div class="pods-grid">
+                    <div class="pod active">
+                        <div class="pod-name active">Pod 1</div>
+                        <div class="pod-status active">실행 중</div>
+                    </div>
+                    <div class="pod active">
+                        <div class="pod-name active">Pod 2</div>
+                        <div class="pod-status active">실행 중</div>
+                    </div>
+                    <div class="pod inactive">
+                        <div class="pod-name">Pod 3</div>
+                        <div class="pod-status">(종료)</div>
+                    </div>
+                    <div class="pod inactive">
+                        <div class="pod-name">Pod 4</div>
+                        <div class="pod-status">(자동 생성)</div>
+                    </div>
+                </div>
+
+                <div class="guarantee-box">
+                    항상 설정된 개수(3)만큼 Pod를 유지합니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

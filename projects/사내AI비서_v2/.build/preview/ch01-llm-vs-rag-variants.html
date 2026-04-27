@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CH01 다이어그램 · 8가지 변형 프리뷰</title>
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+<style>
+  .page-title { font-size: 22px; color: var(--color-text-heading); font-weight: 700; margin-bottom: 6px; }
+  .page-sub { color: var(--color-text-muted); font-size: 13px; margin-bottom: 36px; }
+
+  .group-heading { font-size: 18px; color: var(--color-text-heading); font-weight: 700; margin: 48px 0 4px; padding-top: 24px; border-top: 2px solid var(--color-accent); }
+  .group-sub { color: var(--color-text-muted); font-size: 12px; margin-bottom: 28px; }
+  .group-heading:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .variant-section { margin: 44px 0; padding-top: 24px; border-top: 1px dashed var(--color-border-dashed); }
+  .variant-section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .vs-tag { display: inline-block; font-size: 10px; color: var(--color-accent-warm-text); letter-spacing: 0.6px; text-transform: uppercase; font-weight: 700; background: var(--color-accent-warm-bg); padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; }
+  .variant-section h3 { font-size: 16px; color: var(--color-text-heading); margin: 2px 0 6px; padding: 0; border: none; font-weight: 700; }
+  .vs-desc { color: var(--color-text-secondary); font-size: 13px; margin-bottom: 20px; }
+  .vs-note { margin-top: 10px; font-size: 12px; color: var(--color-text-muted); font-style: italic; text-align: center; }
+
+  /* ==================================================================
+     그룹 1. 그림 1-7 RAG 파이프라인 — 4 variants (rp-*)
+     ================================================================== */
+
+  /* ---------- RP V1: 현행 (카드 + 원형 번호 + 점선 비유) ---------- */
+  .rp1-box { background: var(--color-surface); border: 1px solid var(--color-border-dashed); border-radius: 12px; padding: 24px; }
+  .rp1-title { color: var(--color-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 18px; letter-spacing: 0.3px; }
+  .rp1-flow { display: flex; align-items: stretch; gap: 12px; justify-content: space-between; width: 100%; }
+  .rp1-step { flex: 1; min-width: 0; background: var(--color-accent-bg); border: 1px solid var(--color-accent-border); border-radius: 10px; padding: 20px 16px 18px; text-align: center; display: flex; flex-direction: column; }
+  .rp1-num { color: #fff; background: var(--color-accent); font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 1px 3px rgba(55,48,163,0.2); }
+  .rp1-title-s { color: var(--color-text-heading); font-size: 15px; font-weight: 700; margin: 2px 0 6px; }
+  .rp1-desc { color: var(--color-text-secondary); font-size: 12px; line-height: 1.6; flex: 1; }
+  .rp1-meta { color: var(--color-accent-warm-text); font-size: 11px; font-style: italic; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--color-accent-border); }
+  .rp1-arrow { display: flex; align-items: center; color: var(--color-accent); font-size: 22px; font-weight: 300; }
+
+  /* ---------- RP V2: 미니멀 좌상단 뱃지 ---------- */
+  .rp2-box { background: var(--color-surface); border: 1px solid var(--color-border-dashed); border-radius: 12px; padding: 24px; }
+  .rp2-title { color: var(--color-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 18px; letter-spacing: 0.3px; }
+  .rp2-flow { display: flex; align-items: stretch; gap: 12px; justify-content: space-between; width: 100%; }
+  .rp2-step { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--color-border); border-radius: 10px; padding: 18px 18px 16px; display: flex; flex-direction: column; position: relative; }
+  .rp2-badge { font-family: var(--font-mono, monospace); color: var(--color-accent); font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+  .rp2-title-s { color: var(--color-text-heading); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .rp2-desc { color: var(--color-text-secondary); font-size: 12px; line-height: 1.6; flex: 1; }
+  .rp2-meta { color: var(--color-accent-warm-text); font-size: 11px; font-style: italic; margin-top: 12px; padding-top: 8px; border-top: 1px dashed var(--color-border-dashed); }
+  .rp2-arrow { display: flex; align-items: center; color: var(--color-accent); font-size: 20px; font-weight: 300; }
+
+  /* ---------- RP V3: 비유 상단 강조 ---------- */
+  .rp3-box { background: var(--color-surface); border: 1px solid var(--color-border-dashed); border-radius: 12px; padding: 24px; }
+  .rp3-title { color: var(--color-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 18px; letter-spacing: 0.3px; }
+  .rp3-flow { display: flex; align-items: stretch; gap: 12px; justify-content: space-between; width: 100%; }
+  .rp3-step { flex: 1; min-width: 0; background: #fff; border: 1px solid var(--color-accent-border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; }
+  .rp3-meta-top { color: var(--color-accent-warm-text); font-size: 14px; font-weight: 700; font-style: italic; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid var(--color-accent-warm-bg); }
+  .rp3-num { color: var(--color-accent-text); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+  .rp3-title-s { color: var(--color-text-heading); font-size: 14px; font-weight: 700; margin: 2px 0 6px; }
+  .rp3-desc { color: var(--color-text-secondary); font-size: 12px; line-height: 1.6; }
+  .rp3-arrow { display: flex; align-items: center; color: var(--color-accent); font-size: 20px; font-weight: 300; }
+
+  /* ---------- RP V4: 타임라인 스텝 인디케이터 (박스 없음) ---------- */
+  .rp4-box { background: var(--color-surface); border: 1px solid var(--color-border-dashed); border-radius: 12px; padding: 28px 24px; }
+  .rp4-title { color: var(--color-text-muted); font-size: 13px; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.3px; }
+  .rp4-timeline { display: grid; grid-template-columns: repeat(3, 1fr); position: relative; gap: 0; }
+  .rp4-timeline::before { content: ''; position: absolute; top: 18px; left: calc(100%/6); right: calc(100%/6); height: 2px; background: var(--color-accent-border); z-index: 0; }
+  .rp4-step { position: relative; z-index: 1; text-align: center; padding: 0 10px; }
+  .rp4-dot { color: #fff; background: var(--color-accent); width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; box-shadow: 0 2px 6px rgba(55,48,163,0.25); border: 3px solid #fff; margin-bottom: 12px; }
+  .rp4-title-s { color: var(--color-text-heading); font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .rp4-desc { color: var(--color-text-secondary); font-size: 12px; line-height: 1.5; margin-bottom: 8px; }
+  .rp4-meta { color: var(--color-accent-warm-text); font-size: 11px; font-style: italic; }
+
+  /* ==================================================================
+     그룹 2. 그림 1-8 LLM vs RAG — 4 variants (lrv-*)
+     ================================================================== */
+
+  /* ---------- V1: 2행 대시 박스 + 가로 플로우 (공백 제거) ---------- */
+  .lrv1 { display: flex; flex-direction: column; gap: 12px; }
+  .lrv1-row { padding: 20px 22px; border: 1.5px dashed; border-radius: 10px; display: flex; align-items: center; gap: 16px; }
+  .lrv1-row.bad  { border-color: var(--color-accent-warm); background: var(--color-accent-warm-bg); }
+  .lrv1-row.good { border-color: var(--color-accent); background: var(--color-accent-bg); }
+  .lrv1-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; padding: 3px 10px; border-radius: 4px; white-space: nowrap; color: #fff; }
+  .lrv1-row.bad  .lrv1-tag { background: var(--color-accent-warm); }
+  .lrv1-row.good .lrv1-tag { background: var(--color-accent); }
+  .lrv1-flow { display: flex; align-items: center; flex: 1; justify-content: space-between; font-size: 13px; }
+  .lrv1-node { padding: 8px 14px; border-radius: 14px; background: #fff; border: 1px solid var(--color-border); color: var(--color-text-heading); white-space: nowrap; font-size: 12px; flex-shrink: 0; }
+  .lrv1-node.llm { border-radius: 6px; border: 1.5px solid var(--color-accent); color: var(--color-accent-text); font-weight: 600; }
+  .lrv1-node.db  { border-radius: 22px 22px 6px 6px; border-color: var(--color-accent-border); }
+  .lrv1-arrow { color: var(--color-accent); font-size: 14px; font-weight: 300; flex: 1; text-align: center; }
+  .lrv1-row.bad .lrv1-arrow { color: var(--color-accent-warm); }
+
+  /* ---------- V2: 좌우 2열 Before/After 카드 ---------- */
+  .lrv2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .lrv2-card { padding: 20px; border-radius: 10px; border: 1px solid; display: flex; flex-direction: column; gap: 12px; }
+  .lrv2-card.bad  { background: var(--color-accent-warm-bg); border-color: var(--color-accent-warm); }
+  .lrv2-card.good { background: var(--color-accent-bg); border-color: var(--color-accent); }
+  .lrv2-head { font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: baseline; }
+  .lrv2-card.bad  .lrv2-head { color: var(--color-accent-warm-text); }
+  .lrv2-card.good .lrv2-head { color: var(--color-accent-text); }
+  .lrv2-badge { font-size: 10px; padding: 2px 7px; border-radius: 3px; color: #fff; font-weight: 600; font-family: var(--font-mono, monospace); letter-spacing: 0.3px; }
+  .lrv2-card.bad  .lrv2-badge { background: var(--color-accent-warm); }
+  .lrv2-card.good .lrv2-badge { background: var(--color-accent); }
+  .lrv2-steps { display: flex; flex-direction: column; gap: 6px; }
+  .lrv2-step { background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--color-border-dashed); font-size: 12px; color: var(--color-text-secondary); }
+  .lrv2-step b { color: var(--color-text-heading); }
+  .lrv2-result { margin-top: 2px; padding: 10px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; background: #fff; }
+  .lrv2-card.bad  .lrv2-result { color: var(--color-accent-warm-text); border: 1px solid var(--color-accent-warm); }
+  .lrv2-card.good .lrv2-result { color: var(--color-accent-text); border: 1px solid var(--color-accent); }
+
+  /* ---------- V3: 단일 파이프라인 2갈래 분기 (공백 제거) ---------- */
+  .lrv3 { padding: 28px 24px; background: var(--color-surface); border: 1px solid var(--color-border-dashed); border-radius: 10px; }
+  .lrv3-wrap { display: grid; grid-template-columns: auto 1fr; gap: 18px 20px; align-items: center; }
+  .lrv3-label { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; padding: 4px 10px; border-radius: 4px; color: #fff; text-align: center; white-space: nowrap; }
+  .lrv3-label.bad  { background: var(--color-accent-warm); }
+  .lrv3-label.good { background: var(--color-accent); }
+  .lrv3-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .lrv3-node { padding: 8px 14px; border-radius: 6px; background: #fff; border: 1.5px solid var(--color-border); color: var(--color-text-heading); white-space: nowrap; font-size: 12px; flex-shrink: 0; }
+  .lrv3-node.q   { border-color: var(--color-accent-border); background: var(--color-accent-bg); color: var(--color-accent-text); font-weight: 700; border-radius: 22px; }
+  .lrv3-node.llm { border-color: var(--color-accent); color: var(--color-accent-text); font-weight: 600; }
+  .lrv3-node.db  { border-radius: 22px 22px 4px 4px; border-color: var(--color-accent-border); }
+  .lrv3-node.bad-out  { background: #fff; border-color: var(--color-accent-warm); color: var(--color-accent-warm-text); border-radius: 22px; font-weight: 600; }
+  .lrv3-node.good-out { background: #fff; border-color: var(--color-accent); color: var(--color-accent-text); border-radius: 22px; font-weight: 600; }
+  .lrv3-arrow { color: var(--color-accent); font-size: 14px; font-weight: 300; flex: 1; text-align: center; }
+  .lrv3-arrow.bad { color: var(--color-accent-warm); }
+
+  /* ---------- V4: 스텝 매트릭스 ---------- */
+  .lrv4 { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12px; border: 1px solid var(--color-border-dashed); border-radius: 10px; overflow: hidden; }
+  .lrv4 th, .lrv4 td { padding: 12px 14px; text-align: center; border-right: 1px solid var(--color-border-dashed); border-bottom: 1px solid var(--color-border-dashed); }
+  .lrv4 th:last-child, .lrv4 td:last-child { border-right: none; }
+  .lrv4 tr:last-child td { border-bottom: none; }
+  .lrv4 th { background: var(--color-surface); color: var(--color-text-muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .lrv4 th:first-child { background: #fff; }
+  .lrv4 .row-label { font-weight: 700; text-align: left; font-size: 12px; }
+  .lrv4 .row-label.bad  { background: var(--color-accent-warm-bg); color: var(--color-accent-warm-text); }
+  .lrv4 .row-label.good { background: var(--color-accent-bg); color: var(--color-accent-text); }
+  .lrv4 td.empty { color: var(--color-text-subtle); background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(0,0,0,0.035) 4px 5px); font-style: italic; }
+  .lrv4 td.step { background: #fff; color: var(--color-text-heading); }
+  .lrv4 td.result.bad  { background: var(--color-accent-warm-bg); color: var(--color-accent-warm-text); font-weight: 700; }
+  .lrv4 td.result.good { background: var(--color-accent-bg); color: var(--color-accent-text); font-weight: 700; }
+
+  @media (max-width: 640px) {
+    .lrv2 { grid-template-columns: 1fr; }
+    .rp1-flow, .rp2-flow, .rp3-flow { flex-direction: column; }
+    .rp1-arrow, .rp2-arrow, .rp3-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="page-title">CH01 다이어그램 — 8가지 디자인 변형</div>
+  <div class="page-sub">그림 1-7(RAG 파이프라인) 4개 · 그림 1-8(LLM vs RAG) 4개 · 브랜드 토큰 기반.</div>
+
+  <!-- ═════════════════════ 그룹 1. 그림 1-7 RAG 파이프라인 ═════════════════════ -->
+  <h2 class="group-heading">그림 1-7 · RAG 파이프라인 (사서가 일하는 순서)</h2>
+  <p class="group-sub">3단계(저장·검색·생성) + 비유(서가에 책 꽂기 / 사서가 책 찾기 / AI가 읽고 답하기).</p>
+
+  <!-- RP V1 -->
+  <div class="variant-section">
+    <span class="vs-tag">RP-V1 · 현행</span>
+    <h3>카드 + 원형 번호 + 점선 비유</h3>
+    <p class="vs-desc">방금 리디자인한 기본형. 28px 원형 번호, 카드 상단 인디고 배경, 하단 점선 구분선 위에 비유(오렌지 이탤릭). 탄탄한 기본.</p>
+    <div class="rp1-box">
+      <div class="rp1-title">RAG 파이프라인. 사서가 일하는 순서</div>
+      <div class="rp1-flow">
+        <div class="rp1-step">
+          <div class="rp1-num">1</div>
+          <div class="rp1-title-s">문서 저장</div>
+          <div class="rp1-desc">문서를 벡터로 변환<br>ChromaDB에 저장</div>
+          <div class="rp1-meta">서가에 책 꽂기</div>
+        </div>
+        <div class="rp1-arrow">→</div>
+        <div class="rp1-step">
+          <div class="rp1-num">2</div>
+          <div class="rp1-title-s">문서 검색</div>
+          <div class="rp1-desc">질문과 가장 비슷한<br>문서를 자동으로 찾기</div>
+          <div class="rp1-meta">사서가 책 찾기</div>
+        </div>
+        <div class="rp1-arrow">→</div>
+        <div class="rp1-step">
+          <div class="rp1-num">3</div>
+          <div class="rp1-title-s">답변 생성</div>
+          <div class="rp1-desc">찾은 문서를 LLM에<br>넘겨서 답변 생성</div>
+          <div class="rp1-meta">AI가 읽고 답하기</div>
+        </div>
+      </div>
+    </div>
+    <div class="vs-note">▲ 현행 기본. 안정적.</div>
+  </div>
+
+  <!-- RP V2 -->
+  <div class="variant-section">
+    <span class="vs-tag">RP-V2 · 미니멀</span>
+    <h3>좌상단 모노스페이스 뱃지 (원형 제거)</h3>
+    <p class="vs-desc">원형 번호 제거. 좌상단 `01 / 02 / 03` 모노스페이스 인덱스로 숫자 인상을 가볍게. 흰 카드 배경으로 시각 무게 축소.</p>
+    <div class="rp2-box">
+      <div class="rp2-title">RAG 파이프라인. 사서가 일하는 순서</div>
+      <div class="rp2-flow">
+        <div class="rp2-step">
+          <div class="rp2-badge">01</div>
+          <div class="rp2-title-s">문서 저장</div>
+          <div class="rp2-desc">문서를 벡터로 변환해 ChromaDB에 저장</div>
+          <div class="rp2-meta">서가에 책 꽂기</div>
+        </div>
+        <div class="rp2-arrow">→</div>
+        <div class="rp2-step">
+          <div class="rp2-badge">02</div>
+          <div class="rp2-title-s">문서 검색</div>
+          <div class="rp2-desc">질문과 가장 비슷한 문서를 자동으로 찾기</div>
+          <div class="rp2-meta">사서가 책 찾기</div>
+        </div>
+        <div class="rp2-arrow">→</div>
+        <div class="rp2-step">
+          <div class="rp2-badge">03</div>
+          <div class="rp2-title-s">답변 생성</div>
+          <div class="rp2-desc">찾은 문서를 LLM에 넘겨서 답변 생성</div>
+          <div class="rp2-meta">AI가 읽고 답하기</div>
+        </div>
+      </div>
+    </div>
+    <div class="vs-note">▲ 가볍고 담백. 본문 텍스트와 잘 섞인다.</div>
+  </div>
+
+  <!-- RP V3 -->
+  <div class="variant-section">
+    <span class="vs-tag">RP-V3 · 비유 상단</span>
+    <h3>비유를 맨 위 큰 글씨로</h3>
+    <p class="vs-desc">"사서 이야기"를 맨 위에 큰 오렌지 이탤릭으로 먼저 놓아 **독자의 정서적 진입점**을 확보. 기술 설명(저장/검색/생성)은 그 아래 작게. 이야기 파트 톤과 가장 가까움.</p>
+    <div class="rp3-box">
+      <div class="rp3-title">RAG 파이프라인. 사서가 일하는 순서</div>
+      <div class="rp3-flow">
+        <div class="rp3-step">
+          <div class="rp3-meta-top">서가에 책 꽂기</div>
+          <div class="rp3-num">01</div>
+          <div class="rp3-title-s">문서 저장</div>
+          <div class="rp3-desc">문서를 벡터로 변환해 ChromaDB에 저장</div>
+        </div>
+        <div class="rp3-arrow">→</div>
+        <div class="rp3-step">
+          <div class="rp3-meta-top">사서가 책 찾기</div>
+          <div class="rp3-num">02</div>
+          <div class="rp3-title-s">문서 검색</div>
+          <div class="rp3-desc">질문과 가장 비슷한 문서를 자동으로 찾기</div>
+        </div>
+        <div class="rp3-arrow">→</div>
+        <div class="rp3-step">
+          <div class="rp3-meta-top">AI가 읽고 답하기</div>
+          <div class="rp3-num">03</div>
+          <div class="rp3-title-s">답변 생성</div>
+          <div class="rp3-desc">찾은 문서를 LLM에 넘겨서 답변 생성</div>
+        </div>
+      </div>
+    </div>
+    <div class="vs-note">▲ 이야기 → 기술 순서의 책 톤과 직결.</div>
+  </div>
+
+  <!-- RP V4 -->
+  <div class="variant-section">
+    <span class="vs-tag">RP-V4 · 타임라인</span>
+    <h3>박스 없이 수평선 + 원형 스텝</h3>
+    <p class="vs-desc">박스 테두리 제거. 36px 원형 스텝 + 수평 연결선. 시각적 공간을 가장 적게 쓰고, "하나의 흐름"이라는 인상이 강하다. 챕터 초반 개념 도입부에 어울림.</p>
+    <div class="rp4-box">
+      <div class="rp4-title">RAG 파이프라인. 사서가 일하는 순서</div>
+      <div class="rp4-timeline">
+        <div class="rp4-step">
+          <div class="rp4-dot">1</div>
+          <div class="rp4-title-s">문서 저장</div>
+          <div class="rp4-desc">벡터로 변환해 ChromaDB에 저장</div>
+          <div class="rp4-meta">서가에 책 꽂기</div>
+        </div>
+        <div class="rp4-step">
+          <div class="rp4-dot">2</div>
+          <div class="rp4-title-s">문서 검색</div>
+          <div class="rp4-desc">질문과 가장 비슷한 문서를 찾기</div>
+          <div class="rp4-meta">사서가 책 찾기</div>
+        </div>
+        <div class="rp4-step">
+          <div class="rp4-dot">3</div>
+          <div class="rp4-title-s">답변 생성</div>
+          <div class="rp4-desc">찾은 문서를 LLM에 넘겨 답변 생성</div>
+          <div class="rp4-meta">AI가 읽고 답하기</div>
+        </div>
+      </div>
+    </div>
+    <div class="vs-note">▲ 공간 효율 최고. A4 프린트 한 페이지에도 안정.</div>
+  </div>
+
+  <!-- ═════════════════════ 그룹 2. 그림 1-8 LLM vs RAG ═════════════════════ -->
+  <h2 class="group-heading">그림 1-8 · LLM 단독 vs RAG</h2>
+  <p class="group-sub">기존 PNG(<code>01_llm-vs-rag.png</code>)를 HTML로 이관. 노드 사이 공백은 flex space-between으로 양 끝까지 확장.</p>
+
+  <!-- LRV V1 -->
+  <div class="variant-section">
+    <span class="vs-tag">LR-V1 · 현행 유지형</span>
+    <h3>2행 대시 박스 + 가로 플로우</h3>
+    <p class="vs-desc">PNG의 세로 스택 구조 유지, 색만 Primary/Secondary로 이관. 화살표가 flex-grow로 양 끝까지 뻗어 공백 제거.</p>
+    <div class="lrv1">
+      <div class="lrv1-row bad">
+        <span class="lrv1-tag">LLM 단독</span>
+        <div class="lrv1-flow">
+          <span class="lrv1-node">질문</span>
+          <span class="lrv1-arrow">→</span>
+          <span class="lrv1-node llm">LLM</span>
+          <span class="lrv1-arrow">→</span>
+          <span class="lrv1-node">환각 답변</span>
+        </div>
+      </div>
+      <div class="lrv1-row good">
+        <span class="lrv1-tag">RAG</span>
+        <div class="lrv1-flow">
+          <span class="lrv1-node">질문</span>
+          <span class="lrv1-arrow">→</span>
+          <span class="lrv1-node llm">검색기</span>
+          <span class="lrv1-arrow">→</span>
+          <span class="lrv1-node db">벡터 DB</span>
+          <span class="lrv1-arrow">→</span>
+          <span class="lrv1-node llm">LLM</span>
+          <span class="lrv1-arrow">→</span>
+          <span class="lrv1-node">출처 포함 답변</span>
+        </div>
+      </div>
+    </div>
+    <div class="vs-note">▲ PNG와 동일 구조. 본문 수정 최소.</div>
+  </div>
+
+  <!-- LRV V2 -->
+  <div class="variant-section">
+    <span class="vs-tag">LR-V2 · Before/After</span>
+    <h3>좌우 2열 카드 비교</h3>
+    <p class="vs-desc">단계 개수 자체(2 vs 3)가 시각적 대비. annotated-compare(그림 1-3)와 시각 언어 일관.</p>
+    <div class="lrv2">
+      <div class="lrv2-card bad">
+        <div class="lrv2-head">LLM 단독 호출 <span class="lrv2-badge">Hallucination</span></div>
+        <div class="lrv2-steps">
+          <div class="lrv2-step"><b>1.</b> 질문을 받는다</div>
+          <div class="lrv2-step"><b>2.</b> LLM이 학습 데이터만으로 답변 생성</div>
+        </div>
+        <div class="lrv2-result">환각 답변 — 근거 없음</div>
+      </div>
+      <div class="lrv2-card good">
+        <div class="lrv2-head">RAG 적용 <span class="lrv2-badge">Grounded</span></div>
+        <div class="lrv2-steps">
+          <div class="lrv2-step"><b>1.</b> 질문을 받는다</div>
+          <div class="lrv2-step"><b>2.</b> 관련 문서를 검색해서 가져온다</div>
+          <div class="lrv2-step"><b>3.</b> LLM이 문서를 근거로 답변 생성</div>
+        </div>
+        <div class="lrv2-result">출처 포함 답변</div>
+      </div>
+    </div>
+    <div class="vs-note">▲ 카드 구조로 확장성 높음.</div>
+  </div>
+
+  <!-- LRV V3 -->
+  <div class="variant-section">
+    <span class="vs-tag">LR-V3 · 2갈래 분기</span>
+    <h3>한 질문에서 두 경로로 갈라지기</h3>
+    <p class="vs-desc">경로 길이 차이로 "추가 단계"가 한눈에 보임. space-between으로 양쪽 끝까지 확장.</p>
+    <div class="lrv3">
+      <div class="lrv3-wrap">
+        <span class="lrv3-label bad">LLM 단독</span>
+        <div class="lrv3-row">
+          <span class="lrv3-node q">질문</span>
+          <span class="lrv3-arrow bad">→</span>
+          <span class="lrv3-node llm">LLM</span>
+          <span class="lrv3-arrow bad">→</span>
+          <span class="lrv3-node bad-out">환각 답변</span>
+        </div>
+
+        <span class="lrv3-label good">RAG</span>
+        <div class="lrv3-row">
+          <span class="lrv3-node q">질문</span>
+          <span class="lrv3-arrow">→</span>
+          <span class="lrv3-node llm">검색기</span>
+          <span class="lrv3-arrow">→</span>
+          <span class="lrv3-node db">벡터 DB</span>
+          <span class="lrv3-arrow">→</span>
+          <span class="lrv3-node llm">LLM</span>
+          <span class="lrv3-arrow">→</span>
+          <span class="lrv3-node good-out">출처 포함 답변</span>
+        </div>
+      </div>
+    </div>
+    <div class="vs-note">▲ 서사성 최강. 경로 길이 차이가 노골적으로 보인다.</div>
+  </div>
+
+  <!-- LRV V4 -->
+  <div class="variant-section">
+    <span class="vs-tag">LR-V4 · 매트릭스</span>
+    <h3>단계 유무를 테이블로</h3>
+    <p class="vs-desc">빈칸(빗금)이 결핍을 직접 시각화. 튜닝 챕터 톤과 어울리고 공간 가장 적게 사용.</p>
+    <table class="lrv4">
+      <thead>
+        <tr>
+          <th></th>
+          <th>1. 질문</th>
+          <th>2. 검색</th>
+          <th>3. 생성</th>
+          <th>4. 결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label bad">LLM 단독</td>
+          <td class="step">질문 수신</td>
+          <td class="empty">— 없음 —</td>
+          <td class="step">LLM 생성</td>
+          <td class="result bad">환각 답변</td>
+        </tr>
+        <tr>
+          <td class="row-label good">RAG</td>
+          <td class="step">질문 수신</td>
+          <td class="step">벡터 DB 조회</td>
+          <td class="step">문서 + LLM 생성</td>
+          <td class="result good">출처 포함 답변</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="vs-note">▲ 데이터성·공간 효율 모두 높음.</div>
+  </div>
+
+</div>
+</body>
+</html>

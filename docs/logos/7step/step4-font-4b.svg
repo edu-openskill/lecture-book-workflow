@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 100">
+  <rect width="480" height="100" fill="white" rx="8"/>
+  <text x="12" y="18" font-family="'Pretendard',sans-serif" font-size="11" fill="#888">Sans-serif</text>
+  <text x="240" y="58" text-anchor="middle" font-family='Pretendard','SF Pro Display','Helvetica',sans-serif
+        font-size="34" font-weight="800" letter-spacing="2" fill="#1A1A1A">OPENSKILLBOOKS</text>
+  <text x="240" y="88" text-anchor="middle" font-family="'Pretendard',sans-serif"
+        font-size="11" fill="#999">깔끔, 현대적. Packt/한빛미디어 스타일</text>
+</svg>

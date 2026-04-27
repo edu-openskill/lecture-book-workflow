@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>표지 디자인 목업 v5 — 기울기 + 인포그래픽</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard','Inter',-apple-system,sans-serif;background:#0a0a0a;color:#fff;padding:40px 20px}
+  h1{text-align:center;font-size:24px;font-weight:300;margin-bottom:6px}
+  .sub{text-align:center;font-size:12px;color:#555;margin-bottom:50px}
+  .sec{margin-bottom:80px}
+  .sec-t{font-size:18px;font-weight:700;margin-bottom:4px;padding-left:4px;color:#fff}
+  .sec-d{font-size:11px;color:#555;margin-bottom:16px;padding-left:4px}
+  .g{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .c{aspect-ratio:182/257;border-radius:3px;overflow:hidden;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.6);transition:transform .25s;background:#fff}
+  .c:hover{transform:scale(1.03)}
+  .mono{font-family:'JetBrains Mono',monospace}
+  @media(max-width:900px){.g{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<h1>특이점이 온 개발자 — 표지 목업 v5</h1>
+<p class="sub">다양한 기울기 + 인포그래픽 / 45deg 대각 / 세로 90deg / 원근 / 역회전 / 계단 / 곡선 배치</p>
+
+<!-- ═══════════ 1 — 45deg 대각선 관통 타이틀 + 터미널 ═══════════ -->
+<div class="sec">
+<div class="sec-t">1 — 45deg Diagonal Cross + Terminal</div>
+<div class="sec-d">제목이 45도로 표지를 대각 관통 / 터미널 프롬프트 인포그래픽 / 파격적 각도</div>
+<div class="g">
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);white-space:nowrap;z-index:1">
+      <div style="font-size:72px;font-weight:900;letter-spacing:-4px;color:#1a1a1a;text-shadow:2px 2px 0 #eee">Docker</div>
+    </div>
+    <div style="position:relative;z-index:2;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#aaa">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div>
+        <div class="mono" style="background:#1a1a1e;border-radius:3px;padding:3% 4%;margin-bottom:4%"><div style="font-size:6px;color:#0f0;line-height:1.7"><span style="color:#666">$</span> docker compose up<br><span style="color:#0a0">3 containers started</span></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#008080"></div><div style="font-size:14px;font-weight:800;color:#008080">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);white-space:nowrap;z-index:1"><div style="font-size:88px;font-weight:900;letter-spacing:-5px;color:#1a1a1a;text-shadow:2px 2px 0 #eee">MSA</div></div>
+    <div style="position:relative;z-index:2;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#aaa">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div><div class="mono" style="background:#1a1a1e;border-radius:3px;padding:3% 4%;margin-bottom:4%"><div style="font-size:6px;color:#0f0;line-height:1.7"><span style="color:#666">$</span> kubectl get pods<br><span style="color:#0a0">5 pods running</span></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#4B3CB4"></div><div style="font-size:14px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);white-space:nowrap;z-index:1"><div style="font-size:88px;font-weight:900;letter-spacing:-5px;color:#1a1a1a;text-shadow:2px 2px 0 #eee">RAG</div></div>
+    <div style="position:relative;z-index:2;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#aaa">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div><div class="mono" style="background:#1a1a1e;border-radius:3px;padding:3% 4%;margin-bottom:4%"><div style="font-size:6px;color:#0f0;line-height:1.7"><span style="color:#666">&gt;&gt;&gt;</span> chain.invoke(query)<br><span style="color:#0a0">Answer generated</span></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#7832A0"></div><div style="font-size:14px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);white-space:nowrap;z-index:1"><div style="font-size:64px;font-weight:900;letter-spacing:-3px;color:#1a1a1a;text-shadow:2px 2px 0 #eee">Spring</div></div>
+    <div style="position:relative;z-index:2;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#aaa">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div><div class="mono" style="background:#1a1a1e;border-radius:3px;padding:3% 4%;margin-bottom:4%"><div style="font-size:6px;color:#0f0;line-height:1.7"><span style="color:#666">$</span> ./gradlew bootRun<br><span style="color:#0a0">Started on :8080</span></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#B4781E"></div><div style="font-size:14px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 2 — 세로 90deg 제목 + 가로 시리즈 + 플로우 ═══════════ -->
+<div class="sec">
+<div class="sec-t">2 — Vertical 90deg Title + Horizontal Flow</div>
+<div class="sec-d">제목이 세로 90도 회전 / 시리즈명 가로 / 좌측에 플로우 다이어그램 / 극단적 대비</div>
+<div class="g">
+
+  <div class="c" style="padding:5%;display:flex;gap:2%;overflow:hidden">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:900;color:#1a1a1a;letter-spacing:4px">특이점이 온</div><div style="font-size:14px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <!-- 세로 플로우 -->
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px">
+        <div style="background:#008080;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Image</div>
+        <div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div>
+        <div style="background:#008080;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Container</div>
+        <div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div>
+        <div style="background:#008080;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Compose</div>
+        <div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div>
+        <div style="background:#008080;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Deploy</div>
+      </div>
+      <div><div style="font-size:8px;color:#999">컨테이너의 모든 것</div><div style="height:2px;width:30px;background:#008080;margin:4px 0 2px"></div><div style="font-size:12px;font-weight:800;color:#008080">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div><div style="font-size:5px;color:#ccc;margin-top:1px">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:35%;display:flex;align-items:center;justify-content:center">
+      <div style="writing-mode:vertical-rl;text-orientation:mixed;font-size:72px;font-weight:900;letter-spacing:-4px;color:#1a1a1a;line-height:.85">Docker</div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:5%;display:flex;gap:2%;overflow:hidden">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:900;color:#1a1a1a;letter-spacing:4px">특이점이 온</div><div style="font-size:14px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px"><div style="background:#4B3CB4;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Gateway</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#4B3CB4;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Service A</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#4B3CB4;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Event Bus</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#4B3CB4;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Service B</div></div>
+      <div><div style="font-size:8px;color:#999">마이크로서비스 아키텍처</div><div style="height:2px;width:30px;background:#4B3CB4;margin:4px 0 2px"></div><div style="font-size:12px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div><div style="font-size:5px;color:#ccc;margin-top:1px">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:30%;display:flex;align-items:center;justify-content:center"><div style="writing-mode:vertical-rl;text-orientation:mixed;font-size:88px;font-weight:900;letter-spacing:-5px;color:#1a1a1a;line-height:.85">MSA</div></div>
+  </div>
+
+  <div class="c" style="padding:5%;display:flex;gap:2%;overflow:hidden">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:900;color:#1a1a1a;letter-spacing:4px">특이점이 온</div><div style="font-size:14px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px"><div style="background:#7832A0;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Query</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#7832A0;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Embed</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#7832A0;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Retrieve</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#7832A0;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Generate</div></div>
+      <div><div style="font-size:8px;color:#999">검색 증강 생성</div><div style="height:2px;width:30px;background:#7832A0;margin:4px 0 2px"></div><div style="font-size:12px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div><div style="font-size:5px;color:#ccc;margin-top:1px">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:30%;display:flex;align-items:center;justify-content:center"><div style="writing-mode:vertical-rl;text-orientation:mixed;font-size:88px;font-weight:900;letter-spacing:-5px;color:#1a1a1a;line-height:.85">RAG</div></div>
+  </div>
+
+  <div class="c" style="padding:5%;display:flex;gap:2%;overflow:hidden">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="font-size:9px;font-weight:900;color:#1a1a1a;letter-spacing:4px">특이점이 온</div><div style="font-size:14px;font-weight:900;color:#2a2a2a;margin-top:1px">개발자</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px"><div style="background:#B4781E;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">OAuth2</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#B4781E;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">OIDC</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#B4781E;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">JWT</div><div style="width:1px;height:8px;background:#ccc;margin-left:12px"></div><div style="background:#B4781E;color:#fff;font-size:5.5px;padding:2px 6px;border-radius:2px;font-weight:600" class="mono">Security</div></div>
+      <div><div style="font-size:8px;color:#999">9가지 기술</div><div style="height:2px;width:30px;background:#B4781E;margin:4px 0 2px"></div><div style="font-size:12px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div><div style="font-size:5px;color:#ccc;margin-top:1px">OPENSKILL BOOKS</div></div>
+    </div>
+    <div style="width:32%;display:flex;align-items:center;justify-content:center"><div style="writing-mode:vertical-rl;text-orientation:mixed;font-size:60px;font-weight:900;letter-spacing:-3px;color:#1a1a1a;line-height:.85">Spring</div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 3 — 계단식 글자 + 코드 텍스처 ═══════════ -->
+<div class="sec">
+<div class="sec-t">3 — Staircase Letters + Code Texture</div>
+<div class="sec-d">각 글자가 계단처럼 내려감 / 코드가 배경 텍스처 / 글자마다 다른 높이</div>
+<div class="g">
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div class="mono" style="position:absolute;top:2%;left:3%;right:3%;font-size:4.5px;color:rgba(0,0,0,.05);line-height:1.5;z-index:0;word-break:break-all">FROM node:18 WORKDIR /app COPY . . RUN npm ci EXPOSE 3000 CMD node server.js docker-compose.yml services: web: build: . ports: 3000:3000 redis: image: redis:alpine</div>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:32px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:16px;font-weight:700;color:#999">이점이</span><span style="font-size:32px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:24px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div style="display:flex;align-items:flex-start;line-height:1">
+        <span style="font-size:80px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(0)">D</span>
+        <span style="font-size:80px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(10px)">o</span>
+        <span style="font-size:80px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(20px)">c</span>
+        <span style="font-size:80px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(30px)">k</span>
+        <span style="font-size:80px;font-weight:900;color:#008080;display:inline-block;transform:translateY(40px)">e</span>
+        <span style="font-size:80px;font-weight:900;color:#008080;display:inline-block;transform:translateY(50px)">r</span>
+      </div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">컨테이너의 모든 것</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#008080">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div class="mono" style="position:absolute;top:2%;left:3%;right:3%;font-size:4.5px;color:rgba(0,0,0,.05);line-height:1.5;z-index:0;word-break:break-all">@RestController public class OrderService @Autowired EventPublisher pub @PostMapping void create(Order o) pub.publish(new OrderCreated(o)) @FeignClient ServiceB client</div>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:32px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:16px;font-weight:700;color:#999">이점이</span><span style="font-size:32px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:24px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div style="display:flex;align-items:flex-start;line-height:1">
+        <span style="font-size:105px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(0)">M</span>
+        <span style="font-size:105px;font-weight:900;color:#4B3CB4;display:inline-block;transform:translateY(20px)">S</span>
+        <span style="font-size:105px;font-weight:900;color:#4B3CB4;display:inline-block;transform:translateY(40px)">A</span>
+      </div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">마이크로서비스 아키텍처</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div class="mono" style="position:absolute;top:2%;left:3%;right:3%;font-size:4.5px;color:rgba(0,0,0,.05);line-height:1.5;z-index:0;word-break:break-all">from langchain import Chroma embeddings = OpenAIEmbeddings() vectorstore = Chroma.from_docs(docs, embeddings) retriever = vectorstore.as_retriever(k=5) chain = RetrievalQA(llm, retriever)</div>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:32px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:16px;font-weight:700;color:#999">이점이</span><span style="font-size:32px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:24px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div style="display:flex;align-items:flex-start;line-height:1">
+        <span style="font-size:105px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(0)">R</span>
+        <span style="font-size:105px;font-weight:900;color:#7832A0;display:inline-block;transform:translateY(20px)">A</span>
+        <span style="font-size:105px;font-weight:900;color:#7832A0;display:inline-block;transform:translateY(40px)">G</span>
+      </div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">검색 증강 생성</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <div class="mono" style="position:absolute;top:2%;left:3%;right:3%;font-size:4.5px;color:rgba(0,0,0,.05);line-height:1.5;z-index:0;word-break:break-all">@EnableWebSecurity SecurityFilterChain filterChain http.oauth2Login() .oauth2ResourceServer().jwt() http.build() @Bean JwtDecoder</div>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:32px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:16px;font-weight:700;color:#999">이점이</span><span style="font-size:32px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:24px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div style="display:flex;align-items:flex-start;line-height:1">
+        <span style="font-size:62px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(0)">S</span>
+        <span style="font-size:62px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(8px)">p</span>
+        <span style="font-size:62px;font-weight:900;color:#1a1a1a;display:inline-block;transform:translateY(16px)">r</span>
+        <span style="font-size:62px;font-weight:900;color:#B4781E;display:inline-block;transform:translateY(24px)">i</span>
+        <span style="font-size:62px;font-weight:900;color:#B4781E;display:inline-block;transform:translateY(32px)">n</span>
+        <span style="font-size:62px;font-weight:900;color:#B4781E;display:inline-block;transform:translateY(40px)">g</span>
+      </div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">9가지 기술</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 4 — 역회전 충돌 (시리즈 +15deg, 제목 -20deg) ═══════════ -->
+<div class="sec">
+<div class="sec-t">4 — Counter-Rotation Collision</div>
+<div class="sec-d">시리즈명 +15deg / 제목 -20deg / 서로 반대로 충돌 / SVG 아키텍처 배경</div>
+<div class="g">
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0" viewBox="0 0 182 257"><line x1="20" y1="100" x2="80" y2="180" stroke="#008080" stroke-width=".3" opacity=".12"/><line x1="80" y1="180" x2="160" y2="130" stroke="#008080" stroke-width=".3" opacity=".12"/><circle cx="20" cy="100" r="2" fill="none" stroke="#008080" stroke-width=".3" opacity=".15"/><circle cx="80" cy="180" r="2" fill="none" stroke="#008080" stroke-width=".3" opacity=".15"/><circle cx="160" cy="130" r="2" fill="none" stroke="#008080" stroke-width=".3" opacity=".15"/></svg>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="transform:rotate(12deg);transform-origin:left top;margin-top:5%">
+        <div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div>
+        <div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div>
+      </div>
+      <div style="transform:rotate(-18deg);transform-origin:right center;margin-right:-5%">
+        <div style="font-size:76px;font-weight:900;letter-spacing:-4px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #eee">Docker</div>
+      </div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">컨테이너의 모든 것</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#008080"></div><div style="font-size:14px;font-weight:800;color:#008080">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0" viewBox="0 0 182 257"><line x1="30" y1="70" x2="91" y2="140" stroke="#4B3CB4" stroke-width=".3" opacity=".12"/><line x1="91" y1="140" x2="150" y2="70" stroke="#4B3CB4" stroke-width=".3" opacity=".12"/><line x1="91" y1="140" x2="91" y2="220" stroke="#4B3CB4" stroke-width=".3" opacity=".12"/><circle cx="30" cy="70" r="2" fill="none" stroke="#4B3CB4" stroke-width=".3" opacity=".15"/><circle cx="91" cy="140" r="3" fill="none" stroke="#4B3CB4" stroke-width=".3" opacity=".15"/><circle cx="150" cy="70" r="2" fill="none" stroke="#4B3CB4" stroke-width=".3" opacity=".15"/></svg>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="transform:rotate(12deg);transform-origin:left top;margin-top:5%"><div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div style="transform:rotate(-18deg);transform-origin:right center;margin-right:-5%"><div style="font-size:92px;font-weight:900;letter-spacing:-5px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #eee">MSA</div></div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">마이크로서비스 아키텍처</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#4B3CB4"></div><div style="font-size:14px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0" viewBox="0 0 182 257"><circle cx="91" cy="150" r="40" fill="none" stroke="#7832A0" stroke-width=".3" opacity=".1"/><circle cx="91" cy="150" r="25" fill="none" stroke="#7832A0" stroke-width=".3" opacity=".12"/><circle cx="91" cy="150" r="10" fill="none" stroke="#7832A0" stroke-width=".3" opacity=".15"/></svg>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="transform:rotate(12deg);transform-origin:left top;margin-top:5%"><div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div style="transform:rotate(-18deg);transform-origin:right center;margin-right:-5%"><div style="font-size:92px;font-weight:900;letter-spacing:-5px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #eee">RAG</div></div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">검색 증강 생성</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#7832A0"></div><div style="font-size:14px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:0;position:relative;overflow:hidden">
+    <svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0" viewBox="0 0 182 257"><rect x="40" y="90" width="40" height="40" rx="3" fill="none" stroke="#B4781E" stroke-width=".3" opacity=".12"/><rect x="100" y="140" width="40" height="40" rx="3" fill="none" stroke="#B4781E" stroke-width=".3" opacity=".12"/><line x1="80" y1="110" x2="100" y2="160" stroke="#B4781E" stroke-width=".3" opacity=".12"/></svg>
+    <div style="position:relative;z-index:1;padding:5%;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="transform:rotate(12deg);transform-origin:left top;margin-top:5%"><div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div style="transform:rotate(-18deg);transform-origin:right center;margin-right:-5%"><div style="font-size:64px;font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #eee">Spring</div></div>
+      <div><div style="font-size:8px;color:#999;margin-bottom:3%">9가지 기술</div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="height:2px;width:35px;margin-left:auto;margin-bottom:2px;background:#B4781E"></div><div style="font-size:14px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 5 — Perspective 소실점 + 매거진 스탯 ═══════════ -->
+<div class="sec">
+<div class="sec-t">5 — Vanishing Point Perspective + Stats</div>
+<div class="sec-d">CSS perspective로 소실점 원근 / 3D 깊이감 / 하단 숫자 통계 인포그래픽</div>
+<div class="g">
+
+  <div class="c" style="padding:5%;display:flex;flex-direction:column;justify-content:space-between;perspective:300px">
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#999">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+    <div style="transform:rotateY(-12deg) rotateX(5deg);transform-origin:left center">
+      <div style="font-size:78px;font-weight:900;letter-spacing:-4px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #ddd,6px 6px 0 #eee,9px 9px 0 #f5f5f5">Docker</div>
+      <div style="font-size:8px;color:#999;margin-top:4%">컨테이너의 모든 것</div>
+    </div>
+    <div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;margin-bottom:4%;padding:3% 0;border-top:1px solid #eee;border-bottom:1px solid #eee">
+        <div><div style="font-size:18px;font-weight:900;color:#008080">12</div><div style="font-size:4.5px;color:#999" class="mono">CHAPTERS</div></div>
+        <div><div style="font-size:18px;font-weight:900;color:#008080">100</div><div style="font-size:4.5px;color:#999" class="mono">PAGES</div></div>
+        <div><div style="font-size:18px;font-weight:900;color:#008080">30+</div><div style="font-size:4.5px;color:#999" class="mono">EXAMPLES</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#008080">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:5%;display:flex;flex-direction:column;justify-content:space-between;perspective:300px">
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#999">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+    <div style="transform:rotateY(-12deg) rotateX(5deg);transform-origin:left center"><div style="font-size:95px;font-weight:900;letter-spacing:-5px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #ddd,6px 6px 0 #eee,9px 9px 0 #f5f5f5">MSA</div><div style="font-size:8px;color:#999;margin-top:4%">마이크로서비스 아키텍처</div></div>
+    <div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;margin-bottom:4%;padding:3% 0;border-top:1px solid #eee;border-bottom:1px solid #eee"><div><div style="font-size:18px;font-weight:900;color:#4B3CB4">10</div><div style="font-size:4.5px;color:#999" class="mono">CHAPTERS</div></div><div><div style="font-size:18px;font-weight:900;color:#4B3CB4">100</div><div style="font-size:4.5px;color:#999" class="mono">PAGES</div></div><div><div style="font-size:18px;font-weight:900;color:#4B3CB4">25+</div><div style="font-size:4.5px;color:#999" class="mono">PATTERNS</div></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+  </div>
+
+  <div class="c" style="padding:5%;display:flex;flex-direction:column;justify-content:space-between;perspective:300px">
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#999">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+    <div style="transform:rotateY(-12deg) rotateX(5deg);transform-origin:left center"><div style="font-size:95px;font-weight:900;letter-spacing:-5px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #ddd,6px 6px 0 #eee,9px 9px 0 #f5f5f5">RAG</div><div style="font-size:8px;color:#999;margin-top:4%">검색 증강 생성</div></div>
+    <div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;margin-bottom:4%;padding:3% 0;border-top:1px solid #eee;border-bottom:1px solid #eee"><div><div style="font-size:18px;font-weight:900;color:#7832A0">8</div><div style="font-size:4.5px;color:#999" class="mono">CHAPTERS</div></div><div><div style="font-size:18px;font-weight:900;color:#7832A0">100</div><div style="font-size:4.5px;color:#999" class="mono">PAGES</div></div><div><div style="font-size:18px;font-weight:900;color:#7832A0">15+</div><div style="font-size:4.5px;color:#999" class="mono">PROMPTS</div></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+  </div>
+
+  <div class="c" style="padding:5%;display:flex;flex-direction:column;justify-content:space-between;perspective:300px">
+    <div><div style="display:flex;align-items:baseline"><span style="font-size:30px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:15px;font-weight:700;color:#999">이점이</span><span style="font-size:30px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:22px;font-weight:900;color:#2a2a2a">개발자</div></div>
+    <div style="transform:rotateY(-12deg) rotateX(5deg);transform-origin:left center"><div style="font-size:66px;font-weight:900;letter-spacing:-3px;line-height:.82;color:#1a1a1a;text-shadow:3px 3px 0 #ddd,6px 6px 0 #eee,9px 9px 0 #f5f5f5">Spring</div><div style="font-size:8px;color:#999;margin-top:4%">9가지 기술</div></div>
+    <div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;margin-bottom:4%;padding:3% 0;border-top:1px solid #eee;border-bottom:1px solid #eee"><div><div style="font-size:18px;font-weight:900;color:#B4781E">9</div><div style="font-size:4.5px;color:#999" class="mono">SKILLS</div></div><div><div style="font-size:18px;font-weight:900;color:#B4781E">100</div><div style="font-size:4.5px;color:#999" class="mono">PAGES</div></div><div><div style="font-size:18px;font-weight:900;color:#B4781E">20+</div><div style="font-size:4.5px;color:#999" class="mono">CONFIGS</div></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ 6 — X자 교차 레이어 + 프로그레스 ═══════════ -->
+<div class="sec">
+<div class="sec-t">6 — X-Cross Layers + Progress Ring</div>
+<div class="sec-d">제목 2겹이 X자로 교차 / 하나는 +20deg 아웃라인, 하나는 -20deg 솔리드 / 원형 프로그레스</div>
+<div class="g">
+
+  <div class="c" style="padding:5%;position:relative;overflow:hidden">
+    <div style="position:absolute;top:35%;left:50%;transform:translate(-50%,-50%) rotate(20deg);white-space:nowrap;font-size:70px;font-weight:900;letter-spacing:-4px;-webkit-text-stroke:1.5px #ddd;color:transparent;opacity:.6">Docker</div>
+    <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);white-space:nowrap;font-size:70px;font-weight:900;letter-spacing:-4px;color:#1a1a1a">Docker</div>
+    <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:20px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div>
+        <!-- 원형 프로그레스 느낌 -->
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4%">
+          <svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="#eee" stroke-width="2"/><circle cx="14" cy="14" r="11" fill="none" stroke="#008080" stroke-width="2" stroke-dasharray="69" stroke-dashoffset="0" transform="rotate(-90 14 14)"/><text x="14" y="17" text-anchor="middle" font-size="7" font-weight="bold" fill="#008080">12</text></svg>
+          <div><div style="font-size:6px;color:#999" class="mono">CHAPTERS</div><div style="font-size:7px;color:#aaa">컨테이너의 모든 것</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#008080">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:5%;position:relative;overflow:hidden">
+    <div style="position:absolute;top:35%;left:50%;transform:translate(-50%,-50%) rotate(20deg);white-space:nowrap;font-size:86px;font-weight:900;letter-spacing:-5px;-webkit-text-stroke:1.5px #ddd;color:transparent;opacity:.6">MSA</div>
+    <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);white-space:nowrap;font-size:86px;font-weight:900;letter-spacing:-5px;color:#1a1a1a">MSA</div>
+    <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:20px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div><div style="display:flex;align-items:center;gap:6px;margin-bottom:4%"><svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="#eee" stroke-width="2"/><circle cx="14" cy="14" r="11" fill="none" stroke="#4B3CB4" stroke-width="2" stroke-dasharray="69" stroke-dashoffset="0" transform="rotate(-90 14 14)"/><text x="14" y="17" text-anchor="middle" font-size="7" font-weight="bold" fill="#4B3CB4">10</text></svg><div><div style="font-size:6px;color:#999" class="mono">CHAPTERS</div><div style="font-size:7px;color:#aaa">마이크로서비스 아키텍처</div></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#4B3CB4">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:5%;position:relative;overflow:hidden">
+    <div style="position:absolute;top:35%;left:50%;transform:translate(-50%,-50%) rotate(20deg);white-space:nowrap;font-size:86px;font-weight:900;letter-spacing:-5px;-webkit-text-stroke:1.5px #ddd;color:transparent;opacity:.6">RAG</div>
+    <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);white-space:nowrap;font-size:86px;font-weight:900;letter-spacing:-5px;color:#1a1a1a">RAG</div>
+    <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:20px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div><div style="display:flex;align-items:center;gap:6px;margin-bottom:4%"><svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="#eee" stroke-width="2"/><circle cx="14" cy="14" r="11" fill="none" stroke="#7832A0" stroke-width="2" stroke-dasharray="69" stroke-dashoffset="0" transform="rotate(-90 14 14)"/><text x="14" y="17" text-anchor="middle" font-size="7" font-weight="bold" fill="#7832A0">8</text></svg><div><div style="font-size:6px;color:#999" class="mono">CHAPTERS</div><div style="font-size:7px;color:#aaa">검색 증강 생성</div></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#7832A0">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="c" style="padding:5%;position:relative;overflow:hidden">
+    <div style="position:absolute;top:35%;left:50%;transform:translate(-50%,-50%) rotate(20deg);white-space:nowrap;font-size:60px;font-weight:900;letter-spacing:-3px;-webkit-text-stroke:1.5px #ddd;color:transparent;opacity:.6">Spring</div>
+    <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);white-space:nowrap;font-size:60px;font-weight:900;letter-spacing:-3px;color:#1a1a1a">Spring</div>
+    <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between">
+      <div><div style="display:flex;align-items:baseline"><span style="font-size:28px;font-weight:900;color:#1a1a1a">특</span><span style="font-size:14px;font-weight:700;color:#aaa">이점이</span><span style="font-size:28px;font-weight:900;color:#1a1a1a;margin-left:4px">온</span></div><div style="font-size:20px;font-weight:900;color:#2a2a2a">개발자</div></div>
+      <div></div>
+      <div><div style="display:flex;align-items:center;gap:6px;margin-bottom:4%"><svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="#eee" stroke-width="2"/><circle cx="14" cy="14" r="11" fill="none" stroke="#B4781E" stroke-width="2" stroke-dasharray="69" stroke-dashoffset="0" transform="rotate(-90 14 14)"/><text x="14" y="17" text-anchor="middle" font-size="7" font-weight="bold" fill="#B4781E">9</text></svg><div><div style="font-size:6px;color:#999" class="mono">SKILLS</div><div style="font-size:7px;color:#aaa">9가지 기술</div></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end"><div style="font-size:6px;color:#ccc">OPENSKILL BOOKS</div><div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#B4781E">개념편</div><div style="font-size:6px;color:#999;margin-top:2px">류재성 지음</div></div></div></div>
+    </div>
+  </div>
+
+</div></div>
+
+</body>
+</html>

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 구성도 — 디자인 세련화 3종</title>
+<style>
+:root {
+  --ink: #0f172a;
+  --ink-soft: #1e293b;
+  --text: #334155;
+  --muted: #64748b;
+  --subtle: #94a3b8;
+  --faint: #cbd5e1;
+  --line: #e2e8f0;
+  --line-soft: #f1f5f9;
+  --bg: #ffffff;
+  --bg-soft: #f8fafc;
+  --bg-soft2: #f1f5f9;
+  --accent: #2563eb;
+  --accent-deep: #1e40af;
+  --accent-soft: #dbeafe;
+  --emerald: #059669;
+  --emerald-soft: #d1fae5;
+  --emerald-deep: #065f46;
+  --rose: #e11d48;
+  --rose-soft: #ffe4e6;
+  --amber: #d97706;
+  --amber-soft: #fef3c7;
+  /* Editorial */
+  --ed-bg: #faf8f3;
+  --ed-ink: #1a1a1a;
+  --ed-muted: #6b6456;
+  --ed-subtle: #9c9384;
+  --ed-faint: #e6ddcc;
+  --ed-oxide: #a8553a;
+  --ed-oxide-soft: #f4e7df;
+  --ed-paper: #ffffff;
+  --radius: 10px;
+  --radius-pill: 20px;
+  --font-mono: "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --font-serif: Georgia, "Times New Roman", serif;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: var(--text); background: white; max-width: 1200px; margin: 32px auto; padding: 0 24px 64px; line-height: 1.55; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 8px; color: var(--ink); font-weight: 800; letter-spacing: -0.3px; }
+.intro { color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.7; }
+h2 { margin-top: 64px; font-size: 17px; color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 6px; font-weight: 700; letter-spacing: -0.2px; }
+.tag { display: inline-block; background: var(--accent-soft); color: var(--accent-deep); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; font-weight: 700; }
+.note { color: var(--muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.7; }
+
+/* ─────────────────── D1. Editorial Refined ─────────────────── */
+.d1 { background: var(--ed-bg); padding: 48px 40px; margin: 24px 0; overflow-x: auto; }
+.d1 .header { text-align: center; margin-bottom: 32px; }
+.d1 .header .sub { font-size: 10px; color: var(--ed-muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
+.d1 .header .title { font-family: var(--font-serif); font-style: italic; font-size: 24px; color: var(--ed-ink); letter-spacing: -0.5px; font-weight: 500; }
+.d1 .header .desc { font-size: 11px; color: var(--ed-muted); margin-top: 6px; font-style: italic; }
+
+.d1 .llm { display: flex; justify-content: center; margin-bottom: 12px; }
+.d1 .llm .box { background: var(--ed-paper); border: 1px solid var(--ed-ink); padding: 14px 32px; text-align: center; position: relative; min-width: 320px; }
+.d1 .llm .box::before, .d1 .llm .box::after { content: ""; position: absolute; top: -4px; bottom: -4px; width: 6px; border: 1px solid var(--ed-ink); }
+.d1 .llm .box::before { left: -4px; border-right: none; }
+.d1 .llm .box::after { right: -4px; border-left: none; }
+.d1 .llm .box .l { font-size: 9px; color: var(--ed-muted); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+.d1 .llm .box .n { font-family: var(--font-serif); font-style: italic; font-size: 18px; color: var(--ed-ink); margin: 2px 0; }
+.d1 .llm .box .s { font-family: var(--font-mono); font-size: 10px; color: var(--ed-muted); }
+
+.d1 .llm-flow { display: flex; justify-content: center; align-items: center; gap: 40px; margin: 12px 0 24px; font-size: 10px; color: var(--ed-muted); font-style: italic; letter-spacing: 1.5px; text-transform: uppercase; }
+.d1 .llm-flow .u { color: var(--accent); font-weight: 700; }
+.d1 .llm-flow .d { color: var(--emerald); font-weight: 700; }
+
+.d1 .grid { display: grid; grid-template-columns: 180px 1fr 260px; gap: 20px; align-items: stretch; min-width: 900px; }
+
+/* Client column */
+.d1 .col-c { background: var(--ed-paper); border: 1px solid var(--ed-faint); padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 380px; }
+.d1 .col-c .user { text-align: center; padding: 14px 10px; border-bottom: 1px dashed var(--ed-faint); }
+.d1 .col-c .user .ico { font-size: 20px; color: var(--ed-oxide); margin-bottom: 4px; }
+.d1 .col-c .user .n { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--ed-ink); }
+.d1 .col-c .user .s { font-size: 10px; color: var(--ed-muted); margin-top: 2px; }
+.d1 .col-c .flow { display: flex; justify-content: space-between; padding: 12px 8px; font-size: 10px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
+.d1 .col-c .flow .d { color: var(--accent); font-weight: 700; }
+.d1 .col-c .flow .u { color: var(--emerald); font-weight: 700; }
+.d1 .col-c .api { text-align: center; padding: 14px 10px; border-top: 1px dashed var(--ed-faint); }
+.d1 .col-c .api .l { font-family: var(--font-mono); font-size: 9px; color: var(--ed-muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+.d1 .col-c .api .n { font-size: 16px; color: var(--ed-ink); font-weight: 700; letter-spacing: -0.3px; }
+.d1 .col-c .api .s { font-family: var(--font-mono); font-size: 10px; color: var(--ed-muted); margin-top: 2px; }
+
+/* Agent column */
+.d1 .col-a { background: var(--ed-paper); border: 1px solid var(--ed-ink); padding: 24px 20px; position: relative; min-height: 380px; }
+.d1 .col-a .title { position: absolute; top: -8px; left: 20px; background: var(--ed-bg); padding: 0 10px; font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--ed-ink); }
+.d1 .col-a .ops { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+.d1 .col-a .chip { background: var(--ed-bg); padding: 10px 8px; text-align: center; border-bottom: 2px solid var(--ed-faint); }
+.d1 .col-a .chip .l { font-family: var(--font-mono); font-size: 8px; color: var(--ed-subtle); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 3px; }
+.d1 .col-a .chip .n { font-size: 12px; color: var(--ed-ink); font-weight: 700; }
+.d1 .col-a .chip .s { font-family: var(--font-mono); font-size: 9px; color: var(--ed-muted); margin-top: 1px; }
+.d1 .col-a .sep { text-align: center; font-family: var(--font-serif); font-style: italic; font-size: 13px; color: var(--ed-oxide); margin: 14px 0 10px; position: relative; }
+.d1 .col-a .sep::before, .d1 .col-a .sep::after { content: ""; display: inline-block; width: 40px; height: 1px; background: var(--ed-faint); vertical-align: middle; margin: 0 10px; }
+.d1 .col-a .loop { background: var(--ed-bg); padding: 12px; text-align: center; margin-bottom: 10px; }
+.d1 .col-a .loop .stages { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.d1 .col-a .loop .st { font-family: var(--font-mono); font-size: 10px; padding: 4px 10px; background: var(--ed-paper); border: 1px solid var(--ed-faint); letter-spacing: 1px; text-transform: uppercase; font-weight: 700; color: var(--ed-ink); }
+.d1 .col-a .loop .arr { color: var(--ed-subtle); font-size: 12px; }
+.d1 .col-a .core { text-align: center; padding: 12px; background: var(--ed-oxide-soft); }
+.d1 .col-a .core .l { font-family: var(--font-mono); font-size: 9px; color: var(--ed-oxide); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.d1 .col-a .core .n { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--ed-ink); margin-top: 2px; }
+.d1 .col-a .core .s { font-family: var(--font-mono); font-size: 10px; color: var(--ed-muted); margin-top: 2px; }
+
+/* Tools column */
+.d1 .col-t { background: var(--ed-paper); border: 1px solid var(--ed-faint); padding: 24px 16px 16px; position: relative; min-height: 380px; }
+.d1 .col-t .title { position: absolute; top: -8px; left: 20px; background: var(--ed-bg); padding: 0 10px; font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--ed-ink); }
+.d1 .col-t .tool { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--ed-line-soft); }
+.d1 .col-t .tool:last-child { border-bottom: none; }
+.d1 .col-t .tool .no { font-family: var(--font-mono); font-size: 10px; color: var(--ed-subtle); letter-spacing: 1px; font-weight: 700; }
+.d1 .col-t .tool .n { font-size: 13px; color: var(--ed-ink); font-weight: 700; letter-spacing: -0.2px; }
+.d1 .col-t .tool .s { font-size: 10px; color: var(--ed-muted); margin-top: 1px; }
+.d1 .col-t .tool .b { font-family: var(--font-mono); font-size: 9px; color: var(--ed-oxide); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+
+/* Stores */
+.d1 .stores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--ed-faint); }
+.d1 .stores .st { text-align: center; padding: 14px 16px; border: 1px solid var(--ed-faint); background: var(--ed-paper); }
+.d1 .stores .st .l { font-family: var(--font-mono); font-size: 9px; color: var(--ed-muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.d1 .stores .st .n { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--ed-ink); margin: 3px 0; }
+.d1 .stores .st .s { font-family: var(--font-mono); font-size: 10px; color: var(--ed-muted); }
+
+.d1 .caption { margin-top: 24px; font-family: var(--font-serif); font-style: italic; font-size: 13px; color: var(--ed-muted); text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+
+
+/* ─────────────────── D2. Modern Tech ─────────────────── */
+.d2 { background: white; padding: 40px 32px; margin: 24px 0; overflow-x: auto; box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.04); border-radius: 16px; }
+.d2 .header { text-align: center; margin-bottom: 28px; }
+.d2 .header .sub { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+.d2 .header .title { font-size: 22px; color: var(--ink); font-weight: 800; letter-spacing: -0.5px; }
+
+.d2 .llm { display: flex; justify-content: center; margin-bottom: 14px; }
+.d2 .llm .box { background: linear-gradient(180deg, #ecfdf5 0%, var(--emerald-soft) 100%); padding: 16px 32px; border-radius: 14px; text-align: center; min-width: 320px; box-shadow: 0 1px 3px rgba(5,150,105,0.08); }
+.d2 .llm .box .ico { width: 36px; height: 36px; background: var(--emerald); border-radius: 10px; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; }
+.d2 .llm .box .l { font-size: 10px; color: var(--emerald-deep); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.d2 .llm .box .n { font-size: 16px; color: var(--ink); font-weight: 800; margin: 2px 0; letter-spacing: -0.3px; }
+.d2 .llm .box .s { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+
+.d2 .llm-flow { display: flex; justify-content: center; align-items: center; gap: 40px; margin: 10px 0 28px; font-size: 11px; }
+.d2 .llm-flow .u { color: var(--accent); font-weight: 700; }
+.d2 .llm-flow .u::before { content: "↑ "; }
+.d2 .llm-flow .d { color: var(--emerald); font-weight: 700; }
+.d2 .llm-flow .d::before { content: "↓ "; }
+
+.d2 .grid { display: grid; grid-template-columns: 180px 1fr 260px; gap: 18px; align-items: stretch; min-width: 900px; }
+
+.d2 .col-c { background: linear-gradient(180deg, white 0%, var(--bg-soft) 100%); border-radius: 14px; padding: 20px 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 380px; box-shadow: 0 1px 3px rgba(15,23,42,0.05); }
+.d2 .col-c .user { background: linear-gradient(180deg, #fff1f2 0%, var(--rose-soft) 100%); border-radius: 12px; padding: 14px 10px; text-align: center; }
+.d2 .col-c .user .ico { width: 36px; height: 36px; background: var(--rose); border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 16px; }
+.d2 .col-c .user .n { font-size: 14px; font-weight: 800; color: var(--ink); }
+.d2 .col-c .user .s { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.d2 .col-c .flow-mid { display: flex; justify-content: space-between; padding: 12px 12px; font-size: 10px; font-weight: 700; }
+.d2 .col-c .flow-mid .d { color: var(--accent); }
+.d2 .col-c .flow-mid .u { color: var(--emerald); }
+.d2 .col-c .api { background: white; border-radius: 12px; padding: 14px 10px; text-align: center; border: 1px solid var(--line); }
+.d2 .col-c .api .ico { width: 36px; height: 36px; background: var(--ink); border-radius: 10px; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; font-family: var(--font-mono); }
+.d2 .col-c .api .l { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; }
+.d2 .col-c .api .n { font-size: 14px; color: var(--ink); font-weight: 800; margin-top: 2px; }
+.d2 .col-c .api .s { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+.d2 .col-a { background: linear-gradient(180deg, #eff6ff 0%, var(--accent-soft) 100%); border-radius: 14px; padding: 22px 18px 18px; position: relative; min-height: 380px; box-shadow: 0 1px 3px rgba(37,99,235,0.08); }
+.d2 .col-a .title { position: absolute; top: -10px; left: 18px; background: var(--accent); color: white; padding: 4px 14px; border-radius: 8px; font-size: 10px; letter-spacing: 1.5px; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 6px rgba(37,99,235,0.3); }
+.d2 .col-a .ops { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px; margin-bottom: 16px; }
+.d2 .col-a .chip { background: white; border-radius: 10px; padding: 10px 8px; text-align: center; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+.d2 .col-a .chip .l { font-family: var(--font-mono); font-size: 8px; color: var(--accent); letter-spacing: 1.5px; font-weight: 800; text-transform: uppercase; }
+.d2 .col-a .chip .n { font-size: 12px; color: var(--ink); font-weight: 800; margin-top: 2px; }
+.d2 .col-a .chip .s { font-size: 9px; color: var(--muted); margin-top: 1px; }
+.d2 .col-a .sep { text-align: center; font-size: 10px; color: var(--accent-deep); letter-spacing: 3px; font-weight: 800; text-transform: uppercase; margin: 12px 0 8px; }
+.d2 .col-a .loop { background: white; border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+.d2 .col-a .loop .stages { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.d2 .col-a .loop .st { font-size: 11px; padding: 6px 12px; background: var(--accent-soft); color: var(--accent-deep); border-radius: 16px; font-weight: 800; }
+.d2 .col-a .loop .arr { color: var(--accent); font-size: 13px; font-weight: 800; }
+.d2 .col-a .loop-msg { margin-top: 6px; font-size: 10px; color: var(--muted); font-style: italic; }
+.d2 .col-a .core { background: var(--accent); color: white; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 2px 6px rgba(37,99,235,0.2); }
+.d2 .col-a .core .l { font-family: var(--font-mono); font-size: 9px; color: white; opacity: 0.7; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; }
+.d2 .col-a .core .n { font-size: 14px; font-weight: 800; margin-top: 2px; letter-spacing: -0.2px; }
+.d2 .col-a .core .s { font-family: var(--font-mono); font-size: 10px; opacity: 0.8; margin-top: 2px; }
+
+.d2 .col-t { background: linear-gradient(180deg, white 0%, var(--bg-soft) 100%); border-radius: 14px; padding: 22px 16px 16px; position: relative; min-height: 380px; box-shadow: 0 1px 3px rgba(15,23,42,0.05); }
+.d2 .col-t .title { position: absolute; top: -10px; left: 18px; background: var(--ink); color: white; padding: 4px 14px; border-radius: 8px; font-size: 10px; letter-spacing: 1.5px; font-weight: 800; text-transform: uppercase; }
+.d2 .col-t .tools { display: flex; flex-direction: column; gap: 8px; }
+.d2 .col-t .tool { background: white; border-radius: 10px; padding: 10px 14px; display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px; border: 1px solid var(--line-soft); }
+.d2 .col-t .tool .no { font-family: var(--font-mono); font-size: 10px; color: var(--subtle); font-weight: 800; }
+.d2 .col-t .tool .n { font-size: 12px; color: var(--ink); font-weight: 800; letter-spacing: -0.1px; }
+.d2 .col-t .tool .s { font-size: 9px; color: var(--muted); margin-top: 1px; }
+.d2 .col-t .tool .b { font-family: var(--font-mono); font-size: 9px; padding: 3px 8px; border-radius: 6px; font-weight: 800; letter-spacing: 0.5px; }
+.d2 .col-t .tool .b.sql { background: var(--amber-soft); color: var(--amber); }
+.d2 .col-t .tool .b.rag { background: var(--accent-soft); color: var(--accent-deep); }
+
+.d2 .stores { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; padding-top: 18px; border-top: 2px dashed var(--line); }
+.d2 .stores .st { background: var(--bg-soft2); border-radius: 12px; padding: 14px 18px; display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; }
+.d2 .stores .st .ico { width: 40px; height: 40px; border-radius: 10px; background: var(--ink); color: white; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 800; font-size: 11px; letter-spacing: 0.5px; }
+.d2 .stores .st .txt .l { font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
+.d2 .stores .st .txt .n { font-size: 14px; color: var(--ink); font-weight: 800; margin: 2px 0; letter-spacing: -0.2px; }
+.d2 .stores .st .txt .s { font-size: 10px; color: var(--muted); }
+
+/* ─────────────────── D3. Architectural Blueprint ─────────────────── */
+.d3 { background: #fdfdfa; padding: 48px 36px; margin: 24px 0; overflow-x: auto; border: 1px solid var(--ink); }
+.d3 .corner { position: absolute; }
+.d3 .header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--ink); padding-bottom: 16px; }
+.d3 .header .ns { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+.d3 .header .title { font-size: 20px; color: var(--ink); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+.d3 .header .sub { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; margin-top: 4px; }
+
+.d3 .llm { display: flex; justify-content: center; margin-bottom: 10px; }
+.d3 .llm .box { border: 1px dashed var(--ink); padding: 14px 30px; text-align: center; min-width: 320px; font-family: var(--font-mono); }
+.d3 .llm .box .l { font-size: 9px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+.d3 .llm .box .n { font-size: 14px; color: var(--ink); font-weight: 800; margin: 4px 0; letter-spacing: 1px; text-transform: uppercase; }
+.d3 .llm .box .s { font-size: 10px; color: var(--muted); }
+
+.d3 .llm-flow { display: flex; justify-content: center; align-items: center; gap: 40px; margin: 10px 0 26px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+.d3 .llm-flow .u { color: var(--ink); font-weight: 800; }
+.d3 .llm-flow .d { color: var(--ink); font-weight: 800; }
+
+.d3 .grid { display: grid; grid-template-columns: 180px 1fr 260px; gap: 16px; align-items: stretch; min-width: 900px; }
+
+.d3 .col-c { border: 1px solid var(--ink); padding: 18px 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 380px; position: relative; }
+.d3 .col-c::before { content: ""; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border: 1px solid var(--line); pointer-events: none; }
+.d3 .col-c .user { text-align: center; padding: 14px 8px; border-bottom: 1px dashed var(--ink); font-family: var(--font-mono); }
+.d3 .col-c .user .n { font-size: 13px; color: var(--ink); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+.d3 .col-c .user .s { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; }
+.d3 .col-c .flow { display: flex; justify-content: space-between; padding: 12px 4px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
+.d3 .col-c .flow .d { color: var(--ink); }
+.d3 .col-c .flow .u { color: var(--ink); }
+.d3 .col-c .api { text-align: center; padding: 14px 8px; border-top: 1px dashed var(--ink); font-family: var(--font-mono); }
+.d3 .col-c .api .l { font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+.d3 .col-c .api .n { font-size: 14px; color: var(--ink); font-weight: 800; letter-spacing: 1px; margin-top: 3px; }
+.d3 .col-c .api .s { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.d3 .col-a { border: 2px solid var(--ink); padding: 22px 16px 16px; position: relative; min-height: 380px; }
+.d3 .col-a .title { position: absolute; top: -10px; left: 16px; background: #fdfdfa; padding: 0 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px; font-weight: 800; text-transform: uppercase; color: var(--ink); }
+.d3 .col-a .ops { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+.d3 .col-a .chip { border: 1px solid var(--ink); padding: 10px 6px; text-align: center; font-family: var(--font-mono); }
+.d3 .col-a .chip .l { font-size: 8px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
+.d3 .col-a .chip .n { font-size: 11px; color: var(--ink); font-weight: 800; margin-top: 3px; letter-spacing: 1px; text-transform: uppercase; }
+.d3 .col-a .chip .s { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.d3 .col-a .sep { font-family: var(--font-mono); font-size: 10px; color: var(--ink); letter-spacing: 3px; font-weight: 800; text-align: center; margin: 14px 0 8px; text-transform: uppercase; }
+.d3 .col-a .sep::before, .d3 .col-a .sep::after { content: "──"; color: var(--ink); margin: 0 10px; letter-spacing: 0; }
+.d3 .col-a .loop { border: 1px dashed var(--ink); padding: 12px; text-align: center; margin-bottom: 10px; }
+.d3 .col-a .loop .stages { display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-mono); }
+.d3 .col-a .loop .st { font-size: 10px; padding: 5px 10px; border: 1px solid var(--ink); letter-spacing: 1.5px; text-transform: uppercase; font-weight: 800; }
+.d3 .col-a .loop .arr { color: var(--ink); font-size: 13px; font-weight: 800; }
+.d3 .col-a .core { border: 1px solid var(--ink); padding: 14px 10px; text-align: center; font-family: var(--font-mono); background: #f6f4ec; }
+.d3 .col-a .core .l { font-size: 9px; color: var(--muted); letter-spacing: 2px; font-weight: 800; text-transform: uppercase; }
+.d3 .col-a .core .n { font-size: 14px; color: var(--ink); font-weight: 800; margin-top: 3px; letter-spacing: 1px; text-transform: uppercase; }
+.d3 .col-a .core .s { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+.d3 .col-t { border: 1px solid var(--ink); padding: 22px 14px 14px; position: relative; min-height: 380px; }
+.d3 .col-t .title { position: absolute; top: -10px; left: 16px; background: #fdfdfa; padding: 0 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px; font-weight: 800; text-transform: uppercase; color: var(--ink); }
+.d3 .col-t .tool { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; padding: 12px 4px; border-bottom: 1px dashed var(--line); font-family: var(--font-mono); }
+.d3 .col-t .tool:last-child { border-bottom: none; }
+.d3 .col-t .tool .no { font-size: 10px; color: var(--muted); font-weight: 800; letter-spacing: 1px; }
+.d3 .col-t .tool .n { font-size: 12px; color: var(--ink); font-weight: 800; letter-spacing: 0.3px; }
+.d3 .col-t .tool .s { font-size: 9px; color: var(--muted); margin-top: 1px; }
+.d3 .col-t .tool .b { font-size: 8px; color: var(--ink); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; border: 1px solid var(--ink); padding: 2px 6px; }
+
+.d3 .stores { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--ink); }
+.d3 .stores .st { border: 1px solid var(--ink); padding: 14px 16px; text-align: center; font-family: var(--font-mono); }
+.d3 .stores .st .l { font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
+.d3 .stores .st .n { font-size: 14px; color: var(--ink); font-weight: 800; margin: 4px 0; letter-spacing: 1px; text-transform: uppercase; }
+.d3 .stores .st .s { font-size: 10px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>전체 구성도 — 디자인 세련화 3종</h1>
+<p class="intro">
+구조는 <strong>최종안 그대로</strong>(3열 + 상단 LLM + 하단 저장소) 유지. CSS·타이포그래피·색감만 세 가지 방향으로 다듬었습니다.
+</p>
+
+<!-- ═══════════ D1 Editorial ═══════════ -->
+<h2>D1. Editorial Refined <span class="tag">출판물 · 잡지 감성</span></h2>
+<p class="note">Warm off-white · Georgia 이탤릭 · Mono 라벨 · Hairline 보더 · 헤더에 격조 있는 이탤릭 타이틀. 종이책 마지막 장의 완성 요약 페이지 느낌.</p>
+
+<div class="d1">
+<div class="header">
+<div class="sub">System Architecture</div>
+<div class="title">Connect HR Agent</div>
+<div class="desc">A complete RAG system across ten chapters</div>
+</div>
+
+<div class="llm"><div class="box"><div class="l">External · LLM</div><div class="n">Ollama</div><div class="s">llama3.1:8b · minicpm-v</div></div></div>
+<div class="llm-flow"><span class="u">↑ prompt · context</span><span class="d">↓ completion · answer</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="flow"><span class="d">↓ ask</span><span class="u">↑ reply</span></div>
+<div class="api"><div class="l">API Gateway</div><div class="n">FastAPI</div><div class="s">REST · session</div></div>
+</div>
+
+<div class="col-a">
+<div class="title">ReAct Agent · Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">token · log</div></div>
+<div class="chip"><div class="l">Resilience</div><div class="n">Retry</div><div class="s">3 attempts</div></div>
+</div>
+<div class="sep">ReAct Loop</div>
+<div class="loop"><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="core"><div class="l">Executor</div><div class="n">IntegratedAgent</div><div class="s">Agent + Tools</div></div>
+</div>
+
+<div class="col-t">
+<div class="title">Act · MCP Tools</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">직원 연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768-dim · metadata</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">employees · leave · sales</div></div>
+</div>
+
+<div class="caption">사용자 질문이 FastAPI를 거쳐 ReAct Agent로 들어오고, 운영 레이어 뒤에서 Act가 4개 도구를 선택적으로 호출합니다. 상단 Ollama가 답변을 만들어 되돌려 주죠.</div>
+</div>
+
+
+<!-- ═══════════ D2 Modern Tech ═══════════ -->
+<h2>D2. Modern Tech <span class="tag">Vercel·Linear 감성</span></h2>
+<p class="note">Soft gradient · Rounded 14px · Subtle shadow · 진한 Accent 뱃지 · 아이콘 박스. 테크 스타트업 제품 스펙 문서 같은 현대적 질감.</p>
+
+<div class="d2">
+<div class="header">
+<div class="sub">System Architecture</div>
+<div class="title">ConnectHR Agent</div>
+</div>
+
+<div class="llm"><div class="box"><div class="ico">⌘</div><div class="l">External LLM</div><div class="n">Ollama</div><div class="s">llama3.1:8b + minicpm-v</div></div></div>
+<div class="llm-flow"><span class="u">prompt + context</span><span class="d">completion</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="user"><div class="ico">◉</div><div class="n">사용자</div><div class="s">채팅으로 질문</div></div>
+<div class="flow-mid"><span class="d">↓ ask</span><span class="u">↑ reply</span></div>
+<div class="api"><div class="ico">API</div><div class="l">Gateway</div><div class="n">FastAPI</div><div class="s">REST · Session</div></div>
+</div>
+
+<div class="col-a">
+<div class="title">ReAct Agent · Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">token</div></div>
+<div class="chip"><div class="l">Resilience</div><div class="n">Retry</div><div class="s">3회</div></div>
+</div>
+<div class="sep">· ReAct Loop ·</div>
+<div class="loop"><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div><div class="loop-msg">충분하면 답변, 부족하면 Reason으로</div></div>
+<div class="core"><div class="l">Executor</div><div class="n">IntegratedAgent</div><div class="s">Agent + Tools</div></div>
+</div>
+
+<div class="col-t">
+<div class="title">Act · MCP Tools</div>
+<div class="tools">
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">직원 연차 조회</div></div><div class="b sql">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">부서·기간 매출</div></div><div class="b sql">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">이름·부서 조회</div></div><div class="b sql">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b rag">RAG</div></div>
+</div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="ico">VEC</div><div class="txt"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">벡터 768d · metadata</div></div></div>
+<div class="st"><div class="ico">SQL</div><div class="txt"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">employees · leave · sales</div></div></div>
+</div>
+</div>
+
+
+<!-- ═══════════ D3 Architectural Blueprint ═══════════ -->
+<h2>D3. Architectural Blueprint <span class="tag">도면 · 기술 사양서 느낌</span></h2>
+<p class="note">Cream paper · 모노스페이스 전체 · 굵은 Uppercase · 이중 보더(inset line) · 도면 상단 "SYSTEM · ARCHITECTURE" 헤더. 기술 사양서 또는 부록 참고 도면 스타일.</p>
+
+<div class="d3">
+<div class="header">
+<div class="ns"><span>Fig · 10.14</span><span>Scale · 1:1</span><span>Revision · v1.0</span></div>
+<div class="title">System · Architecture</div>
+<div class="sub">Connect HR Agent · Chapter 10 Complete</div>
+</div>
+
+<div class="llm"><div class="box"><div class="l">External · LLM</div><div class="n">Ollama</div><div class="s">llama3.1:8b · minicpm-v</div></div></div>
+<div class="llm-flow"><span class="u">↑ PROMPT</span><span class="d">↓ ANSWER</span></div>
+
+<div class="grid">
+<div class="col-c">
+<div class="user"><div class="n">User</div><div class="s">채팅 질문</div></div>
+<div class="flow"><span class="d">↓ Ask</span><span class="u">↑ Reply</span></div>
+<div class="api"><div class="l">API · Gateway</div><div class="n">FastAPI</div><div class="s">REST · Session</div></div>
+</div>
+
+<div class="col-a">
+<div class="title">ReAct · Runtime</div>
+<div class="ops">
+<div class="chip"><div class="l">Cache</div><div class="n">Response</div><div class="s">TTL 1h</div></div>
+<div class="chip"><div class="l">Monitor</div><div class="n">Tracker</div><div class="s">Token · Log</div></div>
+<div class="chip"><div class="l">Resilience</div><div class="n">Retry</div><div class="s">3 Attempts</div></div>
+</div>
+<div class="sep">ReAct Loop</div>
+<div class="loop"><div class="stages"><div class="st">Reason</div><div class="arr">→</div><div class="st">Act</div><div class="arr">→</div><div class="st">Observe</div><div class="arr">↻</div></div></div>
+<div class="core"><div class="l">Executor</div><div class="n">IntegratedAgent</div><div class="s">Agent + Tools</div></div>
+</div>
+
+<div class="col-t">
+<div class="title">Act · MCP Tools</div>
+<div class="tool"><div class="no">01</div><div><div class="n">leave_balance</div><div class="s">연차 조회</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">02</div><div><div class="n">sales_sum</div><div class="s">매출 합계</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">03</div><div><div class="n">list_employees</div><div class="s">직원 목록</div></div><div class="b">SQL</div></div>
+<div class="tool"><div class="no">04</div><div><div class="n">search_documents</div><div class="s">LCEL · Top-k</div></div><div class="b">RAG</div></div>
+</div>
+</div>
+
+<div class="stores">
+<div class="st"><div class="l">Vector Store</div><div class="n">ChromaDB</div><div class="s">768-dim · metadata</div></div>
+<div class="st"><div class="l">Relational</div><div class="n">PostgreSQL</div><div class="s">Employees · Leave · Sales</div></div>
+</div>
+</div>
+
+
+<!-- 비교 -->
+<h2 style="margin-top:80px">3개 비교</h2>
+<div style="background:var(--bg-soft);padding:16px;border-radius:10px;font-size:13px;line-height:1.8">
+<table style="width:100%;border-collapse:collapse;font-size:12px">
+<tr style="background:white;color:var(--ink);font-weight:700"><th style="padding:8px;text-align:left">디자인</th><th style="padding:8px;text-align:left">톤</th><th style="padding:8px;text-align:left">타이포</th><th style="padding:8px;text-align:left">적합</th></tr>
+<tr><td style="padding:6px"><b>D1 Editorial</b></td><td style="padding:6px">Warm · 잡지</td><td style="padding:6px">Georgia italic + Mono</td><td style="padding:6px">종이책 마지막 장 · 완성 요약</td></tr>
+<tr><td style="padding:6px"><b>D2 Modern Tech</b></td><td style="padding:6px">Gradient · 쾌적</td><td style="padding:6px">Sans 800 + 아이콘</td><td style="padding:6px">전자책 · 제품 스펙 문서</td></tr>
+<tr><td style="padding:6px"><b>D3 Blueprint</b></td><td style="padding:6px">Cream · 도면</td><td style="padding:6px">전부 Mono uppercase</td><td style="padding:6px">부록 · 기술 사양서</td></tr>
+</table>
+</div>
+
+</body>
+</html>

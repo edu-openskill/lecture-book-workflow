@@ -1,0 +1,31 @@
+direction: right
+
+client: 클라이언트 {
+  style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+}
+
+cluster: Cluster {
+  style: {
+    stroke: "#333"
+    stroke-width: 1
+    fill: "#fafafa"
+    border-radius: 12
+  }
+
+  ingress: Ingress {
+    style: { fill: "#eeeeee"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  service: Service {
+    style: { fill: "#f5f5f5"; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  pod: Pod {
+    style: { fill: white; stroke: "#333"; stroke-width: 1; border-radius: 8 }
+  }
+
+  ingress -> service: 요청 전달 { style: { stroke: "#333" } }
+  service -> pod: 요청 분배 { style: { stroke: "#333" } }
+}
+
+client -> cluster.ingress: 외부 요청 { style: { stroke: "#333" } }

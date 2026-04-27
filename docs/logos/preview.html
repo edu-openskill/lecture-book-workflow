@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>OpenSkillBooks Logo Preview v4</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #f5f5f5; padding: 30px; }
+  h1 { text-align: center; font-size: 28px; margin-bottom: 8px; color: #1A1A1A; }
+  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 40px; }
+  .matrix { margin-bottom: 50px; }
+  .matrix h2 { font-size: 20px; margin-bottom: 6px; color: #333; }
+  .matrix .desc { font-size: 13px; color: #888; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s; }
+  .card:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .card img { width: 100%; height: auto; }
+  .card .label { text-align: center; font-size: 11px; color: #aaa; margin-top: 8px; }
+  .color-tag { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .section-divider { border: none; border-top: 2px solid #e0e0e0; margin: 40px 0; }
+  h3.mood { font-size: 14px; color: #666; margin: 12px 0 8px; }
+  .dark-bg .card { background: #1a1a1a; }
+  .dark-bg .card .label { color: #666; }
+  .toggle-bar { text-align: center; margin-bottom: 30px; }
+  .toggle-bar button { padding: 8px 20px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 13px; background: white; margin: 0 4px; }
+  .toggle-bar button.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+  .brand-tag { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
+</style>
+</head>
+<body>
+<h1>OpenSkillBooks Logo v4</h1>
+<p class="subtitle">실습형 IT 기술서(Cookbook) 브랜드 &mdash; 4 스타일 &times; 3 분위기 &times; 4 색상 = 52 SVG</p>
+
+<div class="toggle-bar">
+  <button onclick="toggleBg('light')" class="active" id="btn-light">Light</button>
+  <button onclick="toggleBg('dark')" id="btn-dark">Dark</button>
+</div>
+
+<div id="content">
+
+<!-- S1 -->
+<div class="matrix">
+  <h2>S1. Combination Mark <span class="brand-tag">icon + text</span></h2>
+  <p class="desc">아이콘 + 텍스트 조합</p>
+
+  <h3 class="mood">M1 Tech/Modern &mdash; Code Page + Monospace</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S1-M1-C1.svg"><div class="label"><span class="color-tag" style="background:#1A1A1A"></span><span class="color-tag" style="background:#008080"></span>C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S1-M1-C2.svg"><div class="label"><span class="color-tag" style="background:#1A237E"></span><span class="color-tag" style="background:#4FC3F7"></span>C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S1-M1-C3.svg"><div class="label"><span class="color-tag" style="background:#006666"></span><span class="color-tag" style="background:#B4781E"></span>C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S1-M1-C4.svg"><div class="label"><span class="color-tag" style="background:#2D2D2D"></span><span class="color-tag" style="background:#888888"></span>C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M2 Warm/Friendly &mdash; Open Book + Round Font</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S1-M2-C1.svg"><div class="label"><span class="color-tag" style="background:#1A1A1A"></span><span class="color-tag" style="background:#008080"></span>C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S1-M2-C2.svg"><div class="label"><span class="color-tag" style="background:#1A237E"></span><span class="color-tag" style="background:#4FC3F7"></span>C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S1-M2-C3.svg"><div class="label"><span class="color-tag" style="background:#006666"></span><span class="color-tag" style="background:#B4781E"></span>C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S1-M2-C4.svg"><div class="label"><span class="color-tag" style="background:#2D2D2D"></span><span class="color-tag" style="background:#888888"></span>C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M3 Professional &mdash; Bracket Frame { } + Serif</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S1-M3-C1.svg"><div class="label"><span class="color-tag" style="background:#1A1A1A"></span><span class="color-tag" style="background:#008080"></span>C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S1-M3-C2.svg"><div class="label"><span class="color-tag" style="background:#1A237E"></span><span class="color-tag" style="background:#4FC3F7"></span>C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S1-M3-C3.svg"><div class="label"><span class="color-tag" style="background:#006666"></span><span class="color-tag" style="background:#B4781E"></span>C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S1-M3-C4.svg"><div class="label"><span class="color-tag" style="background:#2D2D2D"></span><span class="color-tag" style="background:#888888"></span>C4 Mono</div></div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- S2 -->
+<div class="matrix">
+  <h2>S2. Typography <span class="brand-tag">text-only</span></h2>
+  <p class="desc">글자 자체가 디자인 요소</p>
+
+  <h3 class="mood">M1 Tech/Modern &mdash; Monospace + Terminal Cursor</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S2-M1-C1.svg"><div class="label"><span class="color-tag" style="background:#1A1A1A"></span><span class="color-tag" style="background:#008080"></span>C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S2-M1-C2.svg"><div class="label"><span class="color-tag" style="background:#1A237E"></span><span class="color-tag" style="background:#4FC3F7"></span>C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S2-M1-C3.svg"><div class="label"><span class="color-tag" style="background:#006666"></span><span class="color-tag" style="background:#B4781E"></span>C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S2-M1-C4.svg"><div class="label"><span class="color-tag" style="background:#2D2D2D"></span><span class="color-tag" style="background:#888888"></span>C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M2 Warm/Friendly &mdash; Round Type + Step Dots</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S2-M2-C1.svg"><div class="label"><span class="color-tag" style="background:#1A1A1A"></span><span class="color-tag" style="background:#008080"></span>C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S2-M2-C2.svg"><div class="label"><span class="color-tag" style="background:#1A237E"></span><span class="color-tag" style="background:#4FC3F7"></span>C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S2-M2-C3.svg"><div class="label"><span class="color-tag" style="background:#006666"></span><span class="color-tag" style="background:#B4781E"></span>C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S2-M2-C4.svg"><div class="label"><span class="color-tag" style="background:#2D2D2D"></span><span class="color-tag" style="background:#888888"></span>C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M3 Professional &mdash; Serif Weight Contrast (OPEN-light SKILL-bold)</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S2-M3-C1.svg"><div class="label"><span class="color-tag" style="background:#1A1A1A"></span><span class="color-tag" style="background:#008080"></span>C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S2-M3-C2.svg"><div class="label"><span class="color-tag" style="background:#1A237E"></span><span class="color-tag" style="background:#4FC3F7"></span>C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S2-M3-C3.svg"><div class="label"><span class="color-tag" style="background:#006666"></span><span class="color-tag" style="background:#B4781E"></span>C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S2-M3-C4.svg"><div class="label"><span class="color-tag" style="background:#2D2D2D"></span><span class="color-tag" style="background:#888888"></span>C4 Mono</div></div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- S3 -->
+<div class="matrix">
+  <h2>S3. Icon Only <span class="brand-tag">symbol</span></h2>
+  <p class="desc">텍스트 없이 아이콘만</p>
+
+  <h3 class="mood">M1 Tech/Modern &mdash; Code Page Icon</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S3-M1-C1.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S3-M1-C2.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S3-M1-C3.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S3-M1-C4.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M2 Warm/Friendly &mdash; Open Book Icon</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S3-M2-C1.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S3-M2-C2.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S3-M2-C3.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S3-M2-C4.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M3 Professional &mdash; Bracket Frame { } Icon</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S3-M3-C1.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S3-M3-C2.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S3-M3-C3.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S3-M3-C4.svg" style="max-width:120px;margin:0 auto;display:block"><div class="label">C4 Mono</div></div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- S4 -->
+<div class="matrix">
+  <h2>S4. Wordmark <span class="brand-tag">minimal</span></h2>
+  <p class="desc">텍스트 위주 + 미니멀 장식</p>
+
+  <h3 class="mood">M1 Tech/Modern &mdash; Code Page + Wordmark + Line</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S4-M1-C1.svg"><div class="label">C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S4-M1-C2.svg"><div class="label">C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S4-M1-C3.svg"><div class="label">C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S4-M1-C4.svg"><div class="label">C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M2 Warm/Friendly &mdash; Lowercase + Wave + Open Book</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S4-M2-C1.svg"><div class="label">C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S4-M2-C2.svg"><div class="label">C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S4-M2-C3.svg"><div class="label">C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S4-M2-C4.svg"><div class="label">C4 Mono</div></div>
+  </div>
+
+  <h3 class="mood">M3 Professional &mdash; Serif + Diamond Ornaments + Bracket</h3>
+  <div class="grid">
+    <div class="card"><img src="logo-S4-M3-C1.svg"><div class="label">C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S4-M3-C2.svg"><div class="label">C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S4-M3-C3.svg"><div class="label">C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S4-M3-C4.svg"><div class="label">C4 Mono</div></div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- S5 -->
+<div class="matrix">
+  <h2>S5. Cookbook Emphasis <span class="brand-tag">S4-M1 variant</span></h2>
+  <p class="desc">S4-M1 레이아웃 기반 &mdash; 서브텍스트 강조형</p>
+
+  <div class="grid">
+    <div class="card"><img src="logo-S5-M1-C1.svg"><div class="label">C1 Black+Teal</div></div>
+    <div class="card"><img src="logo-S5-M1-C2.svg"><div class="label">C2 Navy+Sky</div></div>
+    <div class="card"><img src="logo-S5-M1-C3.svg"><div class="label">C3 Teal+Amber</div></div>
+    <div class="card"><img src="logo-S5-M1-C4.svg"><div class="label">C4 Mono</div></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleBg(mode) {
+  const content = document.getElementById('content');
+  const btnLight = document.getElementById('btn-light');
+  const btnDark = document.getElementById('btn-dark');
+  if (mode === 'dark') {
+    content.classList.add('dark-bg');
+    btnDark.classList.add('active');
+    btnLight.classList.remove('active');
+  } else {
+    content.classList.remove('dark-bg');
+    btnLight.classList.add('active');
+    btnDark.classList.remove('active');
+  }
+}
+</script>
+</body>
+</html>

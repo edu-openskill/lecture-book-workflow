@@ -1,0 +1,210 @@
+{
+  "project": "특이점이-온-개발자-도커-쿠버네티스",
+  "title": "처음 만나는 도커 쿠버네티스",
+  "version": "v12",
+  "status": "in_progress",
+  "current_step": "step_7_finish",
+  "created_at": "2026-04-07",
+  "updated_at": "2026-04-27",
+  "note": "v12 — 6챕터 정착(chapters-v2/ → chapters/), 메타 어미 5종 0건, outline-v2 회수 사슬 9개 복원, HTML 빌드 완료. PDF 재빌드·MOCK 교체·CH06 캡처 보강·CH02/CH05 캐릭터 보강 미완. 상세는 review/v12-수정내역.md.",
+
+  "steps": {
+    "step_1_seed": {
+      "name": "씨앗",
+      "status": "done",
+      "artifact": "answers.md",
+      "artifact_version": 1,
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_2_code": {
+      "name": "코드 해부",
+      "status": "done",
+      "artifact": null,
+      "artifact_version": 0,
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_3_scenario": {
+      "name": "시나리오+버전",
+      "status": "done",
+      "artifact": "answers.md",
+      "artifact_version": 1,
+      "versions_created": ["code/ex00", "code/ex01", "code/ex02", "code/ex03", "code/ex04", "code/ex05", "code/ex06", "code/ex07", "code/ex08"],
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_4_outline": {
+      "name": "뼈대",
+      "status": "done",
+      "artifact": "planning/outline-v2.md",
+      "artifact_version": 2,
+      "gap_analysis": "done",
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0,
+      "note": "outline-v2.md가 6챕터 구조의 단일 진실원. planning/outline-v2-from-chapters.md는 chapters-v2 작업본 사본(보관용)."
+    },
+    "step_5_chapters": {
+      "name": "챕터 집필",
+      "status": "done",
+      "note": "v12 6챕터 정착 — chapters/ 정식 배치, HTML 빌드 통과(.build/01~06.html). 메타 어미 5종 0건, outline-v2 회수 사슬 9개 복원. 잔존 작업은 pending_work 참조.",
+      "chapters": [
+        {
+          "id": "CH01",
+          "title": "왜 컨테이너인가",
+          "version": "v12",
+          "status": "done",
+          "artifact": "chapters/01-왜-컨테이너인가.md",
+          "lines": 122,
+          "images": { "total_placeholders": 4, "completed": 4, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" },
+          "v12_note": "프랜차이즈 매핑 씨앗(1.3 표 + 미니 매핑표 4행) 추가, Secret 비유 '금고 속 레시피'로 통일."
+        },
+        {
+          "id": "CH02",
+          "title": "Docker 이해하기",
+          "version": "v12",
+          "status": "done",
+          "artifact": "chapters/02-Docker-이해하기.md",
+          "lines": 814,
+          "images": { "total_placeholders": 46, "completed": 46, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" },
+          "v12_note": "메타 어미 5건 치환, 시간선 '몇 시간 전' → '오늘 낮', 저자 dockerhub-id 일반화. 캐릭터 부재 보강 권장(pending_work)."
+        },
+        {
+          "id": "CH03",
+          "title": "Docker 다루기",
+          "version": "v12",
+          "status": "done",
+          "artifact": "chapters/03-Docker-다루기.md",
+          "lines": 951,
+          "images": { "total_placeholders": 37, "completed": 37, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" },
+          "v12_note": "L3 다리 문장 + 3.6 끝 'Docker 네트워크의 진화' 표 신설(K8s 회수 복선), 시간선 '어제' → '지난번' 정합."
+        },
+        {
+          "id": "CH04",
+          "title": "Kubernetes 시작하기",
+          "version": "v12",
+          "status": "done",
+          "artifact": "chapters/04-Kubernetes-시작하기.md",
+          "lines": 550,
+          "images": { "total_placeholders": 20, "completed": 20, "status": "done" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" },
+          "v12_note": "4.4.6 '바뀌는 번호' 절 신설(60줄, Pod IP 체감 실습), kube-proxy iptables 회수 + Service 라벨 복선 + 종결 단축, 가정형 회수 정확 매칭."
+        },
+        {
+          "id": "CH05",
+          "title": "Kubernetes 네트워킹",
+          "version": "v12",
+          "status": "done",
+          "artifact": "chapters/05-Kubernetes-네트워킹.md",
+          "lines": 515,
+          "images": { "total_placeholders": 25, "completed": 22, "mock_count": 3, "status": "needs_recapture" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" },
+          "v12_note": "신규 챕터(v2 분할 산출). CoreDNS·Namespace 명시, 톨게이트/안내데스크 L4/L7 비유, 5.3.3 Docker→K8s 매핑 표 6행 신설. L332/L351/L358에 MOCK 마커 3건(실환경 재캡처 필요)."
+        },
+        {
+          "id": "CH06",
+          "title": "Kubernetes 운영하기",
+          "version": "v12",
+          "status": "done",
+          "artifact": "chapters/06-Kubernetes-운영하기.md",
+          "lines": 561,
+          "images": { "total_placeholders": 16, "completed": 13, "capture_pending": 3, "status": "pending_capture" },
+          "review": { "insight": "pass", "intent_watch": "pass", "audit": "pass" },
+          "v12_note": "6.4 '문제가 생겼을 때 — 디버깅' 절 신설(50줄, 진단 명령어 표 + 자주 만나는 에러 표 + 디버깅 순서), CoreDNS 회수 명시, 메타 어미 5건 치환. L135~139/L153/L464~476 캡처 미보강."
+        }
+      ]
+    },
+    "step_6_prologue": {
+      "name": "프롤로그",
+      "status": "done",
+      "artifact": "book/front/prologue.md",
+      "review": {
+        "audit": "pass"
+      },
+      "note": "v2에서 6챕터 구조 반영, 수평선 제거 완료."
+    },
+    "step_7_finish": {
+      "name": "마무리",
+      "status": "in_progress",
+      "artifacts": {
+        "preface": null,
+        "afterword": "book/back/afterword.md",
+        "roadmap": "book/front/roadmap.md",
+        "appendix": "book/back/appendix.md",
+        "preface_stub": "book/front/머릿말.md"
+      },
+      "final_title": "처음 만나는 도커 쿠버네티스",
+      "total_pages": null,
+      "review": {
+        "audit": "pass"
+      },
+      "note": "v1 PDF는 156쪽(5챕터 기준)이었으나 v12 6챕터 구조 변경으로 폐기. PDF 재빌드 후 final_title·total_pages 갱신 필요. 머릿말.md는 4줄 스텁 상태."
+    }
+  },
+
+  "pending_work": {
+    "priority_order": [
+      "1. 캐릭터 보강 (작은 작업)",
+      "2. 이미지 보강 (캡처 + MOCK 교체, 사용자 환경 작업)",
+      "3. PDF 재빌드",
+      "4. (선택) 베타 후 큰 리팩토링"
+    ],
+    "captures_missing": [
+      { "chapter": "CH06", "location": "L135~139", "desc": "kubectl apply -f configmap-conn.yml 결과 + Pod 환경변수 조회 결과" },
+      { "chapter": "CH06", "location": "L153", "desc": "kubectl rollout restart 후 환경변수 갱신 확인" },
+      { "chapter": "CH06", "location": "L464~476", "desc": "6.3.5 ContainerCreating 시점 kubectl get 출력" }
+    ],
+    "mock_replacements": [
+      { "chapter": "CH05", "locations": ["L332", "L351", "L358"], "desc": "<!-- MOCK: 실제 환경에서 재캡처 후 교체 필요 --> 마커 3건. 출판 직전 교체 필수." }
+    ],
+    "character_supplements": [
+      { "chapter": "CH02", "desc": "선배 한 줄 추가 — storytelling.md '2챕터 연속 캐릭터 부재 금지' 경계 보강. 후보 절 2.5 또는 2.8." },
+      { "chapter": "CH05", "desc": "선배 한 줄 추가 — CH05 선배 0회 보강. 후보 절 5.2.1 또는 5.3.1." }
+    ],
+    "pdf_rebuild": {
+      "tool": "pub-html-to-pdf 또는 pub-build (Typst)",
+      "desc": "v12 6챕터 + 프롤로그 + 부록 구조로 재빌드. 완료 후 step_7_finish.total_pages 업데이트.",
+      "html_input": ".build/01~06.html (생성 완료)"
+    },
+    "future_refactor_after_beta": [
+      "CH03 NGINX 3예제 압축 — chapters-v3 검수에서 피로 피크 지목",
+      "CH06 6.3 종합실습 분할 — YAML 15개 연타 분산"
+    ]
+  },
+
+  "version_history": {
+    "v1": {
+      "date": "2026-04-12",
+      "summary": "5챕터 초기본 (status: done, total_pages: 156). PDF 빌드까지 완료된 첫 정착본.",
+      "snapshot": "(이 progress.json의 이전 스냅샷)"
+    },
+    "v2": {
+      "date": "2026-04-12",
+      "summary": "6챕터 리팩토링 시작 — 네트워킹 전용 CH05 신설, 기존 CH05 → CH06.",
+      "snapshot": "progress-v2.json (mid-refactor)"
+    },
+    "v3_to_v11": {
+      "summary": "본문 톤·서사·구조 반복 다듬기 (chapters-v2/에 v2~v11 보관 후 삭제)."
+    },
+    "v12": {
+      "date": "2026-04-27",
+      "summary": "정착본. chapters-v2/ → chapters/ 이름 변경, v12 파일에서 -v12 접미사 제거, 옛 버전 50개 삭제. 메타 어미 0건, outline-v2 회수 사슬 9개 복원, HTML 빌드 통과.",
+      "report": "review/v12-수정내역.md"
+    }
+  }
+}

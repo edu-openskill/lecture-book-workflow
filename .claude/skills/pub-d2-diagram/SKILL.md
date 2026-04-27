@@ -76,6 +76,30 @@ rsvg-convert -d 144 -p 144 output_mono.svg -o output.png
 rm output.svg output_mono.svg
 ```
 
+## Mermaid → D2 변환
+
+기존 챕터의 Mermaid 다이어그램을 D2로 자동 변환한다.
+
+```bash
+# 단일 .mmd 파일 변환
+python3 mermaid_to_d2.py input.mmd output.d2
+
+# 마크다운에서 Mermaid 블록 추출 + 일괄 변환
+python3 mermaid_to_d2.py --extract chapters/01-시작.md --outdir assets/CH01/diagram/
+```
+
+- 프로젝트 classes 템플릿 자동 적용 (start-end, process, danger, success, storage, decision, step, group-box)
+- Mermaid classDef → D2 class 자동 매핑 (fill 색상 기반)
+- subgraph → D2 group-box 블록 변환
+- 변환 후 수동 검수 필수 (노드 크기, 레이아웃 조정)
+
+스크립트: `references/scripts/mermaid_to_d2.py`
+
+## 꺾인선 라우팅
+
+`--layout elk` 사용 시 자동으로 직각 꺾인선(orthogonal) 라우팅이 적용된다.
+기본 레이아웃(`dagre`)은 곡선을 생성하므로 반드시 `--layout elk`을 사용한다.
+
 ## 일괄 빌드
 
 ```bash

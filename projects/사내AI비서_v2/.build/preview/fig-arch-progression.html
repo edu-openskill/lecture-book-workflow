@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>전체 구성도 — 챕터별 채워지는 과정 (CH02·04·05·06·07·10)</title>
+<style>
+:root {
+  --color-surface: #f8fafc;
+  --color-surface-alt: #f1f5f9;
+  --color-border: #cbd5e1;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-heading: #0f172a;
+  --color-accent: #2563eb;
+  --color-accent-text: #1e40af;
+  --color-accent-bg: #eff6ff;
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-success-text: #166534;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --fs-footnote: 10px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --font-mono: "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, "Apple SD Gothic Neo", sans-serif; color: var(--color-text); background: white; max-width: 1000px; margin: 32px auto; padding: 0 24px 64px; }
+h1 { font-size: 22px; border-bottom: 2px solid var(--color-text-heading); padding-bottom: 8px; margin-bottom: 8px; }
+.intro { color: var(--color-text-muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
+h2 { margin-top: 56px; font-size: 18px; color: var(--color-text-heading); border-bottom: 2px solid var(--color-border); padding-bottom: 6px; }
+.chapter-tag { display: inline-block; background: var(--color-accent); color: white; font-size: 11px; padding: 3px 10px; border-radius: 12px; margin-right: 8px; font-weight: 700; letter-spacing: 0.5px; }
+.stage-caption { color: var(--color-text-muted); font-size: 12px; margin-top: 4px; margin-bottom: 16px; line-height: 1.6; }
+
+.arch { background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;margin:16px 0; }
+.arch-title { font-size:13px;font-weight:700;color:var(--color-text-heading);margin-bottom:16px;text-align:center; }
+.actor { display:flex;justify-content:center;margin-bottom:10px; }
+.actor .pill { background:white;border:1px dashed var(--color-border);border-radius:100px;padding:5px 18px;font-size:11px;color:var(--color-text-subtle); }
+.actor.on .pill { background:var(--color-accent-bg);border:1px solid var(--color-accent);color:var(--color-accent-text);font-weight:600; }
+.arrow { text-align:center;color:var(--color-text-subtle);font-size:13px;margin:3px 0; }
+.arrow.faint { opacity:0.5; }
+.zone { border-radius:var(--radius-md);padding:18px 10px 10px;position:relative;margin-bottom:6px; }
+.zone.built { border:1px solid var(--color-border);background:white; }
+.zone.new { border:2px solid var(--color-accent);background:var(--color-accent-bg); }
+.zone.future { border:1px dashed var(--color-border);background:white;opacity:0.55; }
+.zone-badge { position:absolute;top:-10px;left:14px;padding:2px 9px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;letter-spacing:0.3px; }
+.zone.built .zone-badge { background:var(--color-text-muted);color:white; }
+.zone.new .zone-badge { background:var(--color-accent);color:white; }
+.zone.future .zone-badge { background:var(--color-text-subtle);color:white; }
+.zone-cards { display:grid;gap:6px; }
+.zone-cards.c1 { grid-template-columns:1fr; }
+.zone-cards.c2 { grid-template-columns:1fr 1fr; }
+.zone-cards.c3 { grid-template-columns:1fr 1fr 1fr; }
+.card { border-radius:var(--radius-sm);padding:7px;text-align:center;font-size:11px; }
+.card .t { font-weight:700;font-size:12px; }
+.card .s { color:var(--color-text-muted);font-size:10px;margin-top:1px; }
+.card.built { background:var(--color-surface-alt);border:1px solid var(--color-border); }
+.card.new { background:white;border:1px solid var(--color-accent); }
+.card.future { background:var(--color-surface-alt);border:1px solid var(--color-border); }
+.card.future.dashed { border:1px dashed var(--color-border); }
+.card .new-tag { font-size:9px;color:var(--color-accent-text);font-weight:700;background:var(--color-accent-bg);display:inline-block;padding:1px 5px;border-radius:3px;margin-bottom:2px;letter-spacing:0.5px; }
+.arch-note { margin-top:12px;font-size:11px;color:var(--color-text-muted);line-height:1.6;text-align:center;background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:10px; }
+.ext { display:flex;justify-content:center;margin-top:6px; }
+.ext .pill { background:white;border:1px dashed var(--color-border);border-radius:var(--radius-sm);padding:5px 14px;font-size:11px;color:var(--color-text-muted); }
+.ext.on .pill { background:var(--color-accent-bg);border:1px solid var(--color-accent);color:var(--color-accent-text); }
+.ext.faint { opacity:0.55; }
+</style>
+</head>
+<body>
+
+<h1>전체 구성도 — 챕터별 채워지는 시리즈</h1>
+<p class="intro">
+<strong>동일한 맵</strong>이 CH02부터 CH10까지 챕터를 지날 때마다 한 층씩 accent로 채워지는 progression. 독자가 각 챕터 끝에서 "내가 이만큼 왔구나"를 한눈에 체감합니다. CH08·CH09는 튜닝 챕터라 구성도가 없고, <strong>§10.10에서 완성본</strong>이 등장합니다.
+</p>
+<p class="intro">
+<strong>범례</strong>: <span style="background:white;border:2px solid var(--color-accent);padding:1px 8px;border-radius:3px;color:var(--color-accent-text);font-weight:700">accent</span> = 이번 챕터에서 추가 · <span style="background:var(--color-surface-alt);border:1px solid var(--color-border);padding:1px 8px;border-radius:3px;color:var(--color-text-muted)">회색</span> = 이전 챕터에서 만든 것 (유지) · <span style="border:1px dashed var(--color-border);padding:1px 8px;border-radius:3px;color:var(--color-text-subtle);opacity:0.7">흐림</span> = 앞으로 채울 것
+</p>
+
+<!-- ============ CH02 ============ -->
+<h2><span class="chapter-tag">CH02</span>뼈대를 세우다 — FastAPI + PostgreSQL</h2>
+<p class="stage-caption">사용자 인터페이스도, 검색도, 에이전트도 아직 없음. 뼈대(API + DB) 두 박스만 세움.</p>
+
+<div class="arch">
+<div class="arch-title">그림 2-N. 전체 구성도 (CH02 시점)</div>
+<div class="actor"><div class="pill">▼ 사용자 · 사내 직원·관리자</div></div>
+<div class="zone new"><div class="zone-badge">CH02 · 대시보드 (이번 챕터)</div><div class="zone-cards c1"><div class="card new"><div class="t">FastAPI</div><div class="s">REST API · 관리자 웹</div></div></div></div>
+<div class="arrow faint">↓</div>
+<div class="zone future"><div class="zone-badge">CH06 · 오케스트레이션 (앞으로)</div><div class="zone-cards c2"><div class="card future"><div class="t">Tool Calling Agent</div><div class="s">ReAct 패턴</div></div><div class="card future"><div class="t">MCP Tools</div><div class="s">DB · 문서 검색</div></div></div></div>
+<div class="arrow faint">↓</div>
+<div class="zone future"><div class="zone-badge">CH05 · 검색 (앞으로)</div><div class="zone-cards c1"><div class="card future"><div class="t">LCEL Chain</div><div class="s">Retriever → Prompt → LLM</div></div></div></div>
+<div class="arrow faint">↓</div>
+<div class="zone future"><div class="zone-badge">CH04 · 파싱·벡터화 (앞으로)</div><div class="zone-cards c3"><div class="card future dashed"><div class="t">CH03 문서 규칙</div><div class="s">PDF·Word·Excel</div></div><div class="card future"><div class="t">Doc Pipeline</div><div class="s">파싱·청킹·임베딩</div></div><div class="card future"><div class="t">ChromaDB</div><div class="s">벡터 저장소</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone new"><div class="zone-badge">CH02 · 데이터 (이번 챕터)</div><div class="zone-cards c1"><div class="card new"><div class="t">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div></div></div>
+<div class="ext faint"><div class="pill">외부 · Ollama LLM (앞으로)</div></div>
+<div class="arch-note">오늘 띄운 건 <strong>FastAPI + PostgreSQL</strong>. 나머지는 챕터 3부터 하나씩 채워집니다.</div>
+</div>
+
+<!-- ============ CH04 ============ -->
+<h2><span class="chapter-tag">CH04</span>문서를 지식으로 — Doc Pipeline + ChromaDB</h2>
+<p class="stage-caption">문서 파싱·청킹·임베딩 파이프라인이 붙어 벡터 DB가 생김. 검색 엔진은 아직.</p>
+
+<div class="arch">
+<div class="arch-title">그림 4-N. 전체 구성도 (CH04 시점)</div>
+<div class="actor"><div class="pill">▼ 사용자</div></div>
+<div class="zone built"><div class="zone-badge">CH02 · 대시보드</div><div class="zone-cards c1"><div class="card built"><div class="t">FastAPI</div><div class="s">REST API · 관리자 웹</div></div></div></div>
+<div class="arrow faint">↓</div>
+<div class="zone future"><div class="zone-badge">CH06 · 오케스트레이션 (앞으로)</div><div class="zone-cards c2"><div class="card future"><div class="t">Tool Calling Agent</div><div class="s">ReAct</div></div><div class="card future"><div class="t">MCP Tools</div><div class="s">DB · 문서 검색</div></div></div></div>
+<div class="arrow faint">↓</div>
+<div class="zone future"><div class="zone-badge">CH05 · 검색 (앞으로)</div><div class="zone-cards c1"><div class="card future"><div class="t">LCEL Chain</div><div class="s">Retriever → Prompt → LLM</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone new"><div class="zone-badge">CH04 · 파싱·벡터화 (이번 챕터)</div><div class="zone-cards c3"><div class="card built dashed" style="border:1px dashed var(--color-border)"><div class="t">CH03 문서 규칙</div><div class="s">PDF·Word·Excel</div></div><div class="card new"><div class="new-tag">NEW</div><div class="t">Doc Pipeline</div><div class="s">파싱·청킹·임베딩</div></div><div class="card new"><div class="new-tag">NEW</div><div class="t">ChromaDB</div><div class="s">벡터 저장소</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH02 · 데이터</div><div class="zone-cards c1"><div class="card built"><div class="t">PostgreSQL</div><div class="s">직원 · 연차 · 매출</div></div></div></div>
+<div class="ext faint"><div class="pill">외부 · Ollama LLM (앞으로)</div></div>
+<div class="arch-note">이번 챕터에서 <strong>Doc Pipeline + ChromaDB</strong>가 추가. 문서가 벡터로 저장됐지만 아직 "꺼내서 답하는" 체인은 없습니다.</div>
+</div>
+
+<!-- ============ CH05 ============ -->
+<h2><span class="chapter-tag">CH05</span>답변 엔진 — LCEL Chain</h2>
+<p class="stage-caption">벡터 DB를 Retriever로 연결한 LCEL 파이프라인. 사내 문서 Q&amp;A 엔진 가동. Ollama 첫 연결.</p>
+
+<div class="arch">
+<div class="arch-title">그림 5-N. 전체 구성도 (CH05 시점)</div>
+<div class="actor"><div class="pill">▼ 사용자</div></div>
+<div class="zone built"><div class="zone-badge">CH02 · 대시보드</div><div class="zone-cards c1"><div class="card built"><div class="t">FastAPI</div><div class="s">REST API · 관리자 웹</div></div></div></div>
+<div class="arrow faint">↓</div>
+<div class="zone future"><div class="zone-badge">CH06 · 오케스트레이션 (앞으로)</div><div class="zone-cards c2"><div class="card future"><div class="t">Tool Calling Agent</div><div class="s">ReAct</div></div><div class="card future"><div class="t">MCP Tools</div><div class="s">DB · 문서 검색</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone new"><div class="zone-badge">CH05 · 검색 (이번 챕터)</div><div class="zone-cards c1"><div class="card new"><div class="new-tag">NEW</div><div class="t">LCEL Chain</div><div class="s">Retriever → Prompt → LLM → Parser · 출처 강제 · WindowMemory</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH04 · 파싱·벡터화</div><div class="zone-cards c3"><div class="card built dashed" style="border:1px dashed var(--color-border)"><div class="t">CH03 문서 규칙</div></div><div class="card built"><div class="t">Doc Pipeline</div></div><div class="card built"><div class="t">ChromaDB</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH02 · 데이터</div><div class="zone-cards c1"><div class="card built"><div class="t">PostgreSQL</div><div class="s">(아직 미연결)</div></div></div></div>
+<div class="ext on"><div class="pill"><strong>외부 · Ollama LLM</strong> · deepseek-r1:8b <span style="background:white;padding:1px 5px;border-radius:3px;margin-left:4px;border:1px solid var(--color-accent)">NEW 연결</span></div></div>
+<div class="arch-note"><strong>LCEL Chain</strong>이 추가되며 Ollama가 처음 연결. 문서 질문은 답할 수 있지만 "A 사원 연차" 같은 DB 질문은 아직 불가.</div>
+</div>
+
+<!-- ============ CH06 ============ -->
+<h2><span class="chapter-tag">CH06</span>연차도 규정도 한번에 — Agent + MCP Tools</h2>
+<p class="stage-caption">ReAct 에이전트가 DB와 문서를 통합. 복합 질문 대응 시작.</p>
+
+<div class="arch">
+<div class="arch-title">그림 6-N. 전체 구성도 (CH06 시점)</div>
+<div class="actor on"><div class="pill">▼ 사용자 · 채팅으로 질문</div></div>
+<div class="zone built"><div class="zone-badge">CH02 · 대시보드</div><div class="zone-cards c1"><div class="card built"><div class="t">FastAPI</div><div class="s">REST API · 채팅 UI</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone new"><div class="zone-badge">CH06 · 오케스트레이션 (이번 챕터)</div><div class="zone-cards c2"><div class="card new"><div class="new-tag">NEW</div><div class="t">IntegratedAgent</div><div class="s">ReAct · 사후 분류</div></div><div class="card new"><div class="new-tag">NEW</div><div class="t">MCP Tools (4개)</div><div class="s">leave_balance · sales_sum · list_employees · search_documents</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH05 · 검색 (도구로 감싸짐)</div><div class="zone-cards c1"><div class="card built"><div class="t">LCEL Chain</div><div class="s">search_documents 도구 내부에서 호출</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH04 · 파싱·벡터화</div><div class="zone-cards c3"><div class="card built dashed" style="border:1px dashed var(--color-border)"><div class="t">CH03 문서 규칙</div></div><div class="card built"><div class="t">Doc Pipeline</div></div><div class="card built"><div class="t">ChromaDB</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH02 · 데이터 (에이전트가 연결)</div><div class="zone-cards c1"><div class="card built"><div class="t">PostgreSQL</div><div class="s">leave_balance · sales_sum 도구가 직접 쿼리</div></div></div></div>
+<div class="ext on"><div class="pill">외부 · Ollama LLM · <strong>llama3.1:8b</strong> <span style="background:white;padding:1px 5px;border-radius:3px;margin-left:4px;border:1px solid var(--color-accent);font-size:9px">Tool Calling 지원 모델로 교체</span></div></div>
+<div class="arch-note"><strong>Agent + MCP Tools</strong>가 PostgreSQL까지 연결해 "연차 + 신청 절차" 복합 질문에 한 번에 답합니다.</div>
+</div>
+
+<!-- ============ CH07 ============ -->
+<h2><span class="chapter-tag">CH07</span>실제로 써보니 — 운영용 래퍼 (캐시·모니터링·재시도)</h2>
+<p class="stage-caption">CH06 에이전트는 그대로, 바깥에 ResponseCache · TokenTracker · Retry 3층 래핑. ConnectHRAgent로 승격.</p>
+
+<div class="arch">
+<div class="arch-title">그림 7-N. 전체 구성도 (CH07 시점)</div>
+<div class="actor on"><div class="pill">▼ 사용자 · 채팅으로 질문</div></div>
+<div class="zone built"><div class="zone-badge">CH02 · 대시보드</div><div class="zone-cards c1"><div class="card built"><div class="t">FastAPI</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone new"><div class="zone-badge">CH06 + CH07 · 오케스트레이션 + 운영 (이번 챕터)</div>
+<div style="font-size:10px;color:var(--color-accent-text);text-align:center;margin:4px 0 8px;font-weight:600">바깥층: 운영 기능 3종 (이번 챕터 추가)</div>
+<div class="zone-cards c3" style="margin-bottom:6px"><div class="card new"><div class="new-tag">NEW</div><div class="t">ResponseCache</div><div class="s">답변 메모장 (TTL 1h)</div></div><div class="card new"><div class="new-tag">NEW</div><div class="t">TokenTracker</div><div class="s">업무 일지</div></div><div class="card new"><div class="new-tag">NEW</div><div class="t">Retry 루프</div><div class="s">3회 재시도</div></div></div>
+<div class="zone-cards c2"><div class="card built"><div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);display:inline-block;padding:1px 5px;border-radius:3px;margin-bottom:2px;font-weight:600">CH06 그대로</div><div class="t">IntegratedAgent</div><div class="s">ReAct · AgentExecutor</div></div><div class="card built"><div class="t">MCP Tools</div><div class="s">4개 도구 (파일별 분리)</div></div></div>
+</div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH05 · 검색 (도구로 감싸짐)</div><div class="zone-cards c1"><div class="card built"><div class="t">LCEL Chain</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH04 · 파싱·벡터화</div><div class="zone-cards c3"><div class="card built dashed" style="border:1px dashed var(--color-border)"><div class="t">CH03 문서 규칙</div></div><div class="card built"><div class="t">Doc Pipeline</div></div><div class="card built"><div class="t">ChromaDB</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH02 · 데이터</div><div class="zone-cards c1"><div class="card built"><div class="t">PostgreSQL</div></div></div></div>
+<div class="ext"><div class="pill">외부 · Ollama LLM · llama3.1:8b</div></div>
+<div class="arch-note"><strong>ConnectHRAgent</strong>(운영 래퍼) = CH06 Agent 그대로 + 캐시·모니터링·재시도 3층. 같은 질문이 두 번 오면 0.1초 내 응답.</div>
+</div>
+
+<!-- ============ CH10 ============ -->
+<h2><span class="chapter-tag">CH10</span>PDF 이미지까지 잡아라 — Vision 파서 + 평가 프레임워크</h2>
+<p class="stage-caption">CH08·CH09의 검색·질의 튜닝이 반영된 상태. 앞단에 Vision LLM 파서, 뒷단에 RAG 평가 프레임워크 추가로 구성도 <strong>완성</strong>.</p>
+
+<div class="arch">
+<div class="arch-title">그림 10-N. 전체 구성도 (CH10 · 최종 완성)</div>
+<div class="actor on"><div class="pill">▼ 사용자 · 채팅으로 질문</div></div>
+<div class="zone built"><div class="zone-badge">CH02 · 대시보드</div><div class="zone-cards c1"><div class="card built"><div class="t">FastAPI</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH06 + CH07 · 오케스트레이션 + 운영</div>
+<div class="zone-cards c3" style="margin-bottom:6px"><div class="card built"><div class="t">ResponseCache</div></div><div class="card built"><div class="t">TokenTracker</div></div><div class="card built"><div class="t">Retry 루프</div></div></div>
+<div class="zone-cards c2"><div class="card built"><div class="t">IntegratedAgent (ReAct)</div></div><div class="card built"><div class="t">MCP Tools (4개)</div></div></div>
+</div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH05 + CH08 + CH09 · 검색 (튜닝 반영)</div><div class="zone-cards c1"><div class="card built"><div style="font-size:9px;color:var(--color-success-text);background:var(--color-success-bg);display:inline-block;padding:1px 5px;border-radius:3px;margin-bottom:2px;font-weight:600">튜닝 완료</div><div class="t">LCEL Chain</div><div class="s">+ Reranker · Hybrid · HyDE · Parent Doc · Compression</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone new"><div class="zone-badge">CH04 + CH10 · 파싱·벡터화 (이번 챕터 확장)</div>
+<div class="zone-cards c3"><div class="card built dashed" style="border:1px dashed var(--color-border)"><div class="t">CH03 문서 규칙</div></div><div class="card new"><div class="new-tag">+ Vision 폴백</div><div class="t">Doc Pipeline</div><div class="s">pypdf → Vision LLM 하이브리드</div></div><div class="card built"><div class="t">ChromaDB</div></div></div>
+</div>
+<div class="arrow">↓</div>
+<div class="zone built"><div class="zone-badge">CH02 · 데이터</div><div class="zone-cards c1"><div class="card built"><div class="t">PostgreSQL</div></div></div></div>
+<div class="arrow">↓</div>
+<div class="zone new"><div class="zone-badge">CH10 · 평가 (이번 챕터)</div><div class="zone-cards c1"><div class="card new"><div class="new-tag">NEW</div><div class="t">RAG 평가 프레임워크</div><div class="s">Precision@k · Recall · Hallucination Rate · Latency</div></div></div></div>
+<div class="ext"><div class="pill">외부 · Ollama LLM · llama3.1:8b <strong>+ minicpm-v (Vision)</strong></div></div>
+<div class="arch-note"><strong>모든 층이 채워졌습니다.</strong> 앞단에 Vision 파서, 뒷단에 평가 프레임워크 추가로 커넥트HR 에이전트가 문서·DB·스캔본·복합 질문까지 한 창구로 답하며 품질은 숫자로 관측됩니다.</div>
+</div>
+
+<h2 style="margin-top:80px">진행감 요약</h2>
+<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px;font-size:13px;line-height:1.8">
+<p>독자는 6개 장 끝에서 같은 지도를 다시 만나는데, 각 장마다 accent로 물든 영역이 한 층씩 넓어집니다. 책 전체에서 <strong>"내가 여기까지 왔다"</strong>가 시각적으로 확인되는 <strong>쌓임 시리즈</strong>.</p>
+<ul>
+<li>CH02: 뼈대 2개 (FastAPI + Postgres)</li>
+<li>CH04: + 파싱·벡터화 층</li>
+<li>CH05: + 검색 층 (+ Ollama 연결)</li>
+<li>CH06: + 에이전트 층 (PostgreSQL 연결 완성)</li>
+<li>CH07: + 운영 래퍼 3종</li>
+<li>CH10: + Vision 파서 + 평가 → <strong>완성</strong></li>
+</ul>
+<p><strong>CH08·CH09는 구성도 없음</strong>. 튜닝이 실제 구성 요소에 반영되는 건 CH10 최종본에 "튜닝 완료" 뱃지로 표시.</p>
+</div>
+
+<h2 style="margin-top:48px">이 스타일을 적용하면</h2>
+<ul style="font-size:13px;line-height:1.8">
+<li>각 챕터 <code>§N.last</code>(전체 구성도에서 챕터 N의 자리)가 이 스타일로 통일</li>
+<li>Before/After 그림(5-4·6-4·7-2·10-2)과 <strong>같은 시각 언어</strong>(부모 박스 + 상단 뱃지 + accent/회색/점선 3단계)</li>
+<li>독자의 누적 성취감 + "다음 챕터가 어디를 채울지" 예고까지 포함</li>
+</ul>
+
+</body>
+</html>

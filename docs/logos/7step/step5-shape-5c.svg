@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="white" rx="8"/>
+  <text x="100" y="20" text-anchor="middle" font-family="'Pretendard',sans-serif" font-size="11" fill="#888">5-3. 모노그램 (이니셜)</text>
+  <g transform="translate(100,95)">
+    <text x="0" y="0" text-anchor="middle" font-family="'SF Mono','Fira Code',monospace"
+          font-size="64" font-weight="900" fill="#1A1A1A" letter-spacing="-2">OSB</text>
+    <line x1="-52" y1="14" x2="52" y2="14" stroke="#008080" stroke-width="1.5"/>
+    <text x="0" y="32" text-anchor="middle" font-family="'Pretendard',sans-serif"
+          font-size="9" letter-spacing="4" fill="#008080">OPENSKILLBOOKS</text>
+  </g>
+  <text x="100" y="178" text-anchor="middle" font-family="'Pretendard',sans-serif" font-size="10" fill="#999">간결, 파비콘/앱아이콘에 적합</text>
+</svg>

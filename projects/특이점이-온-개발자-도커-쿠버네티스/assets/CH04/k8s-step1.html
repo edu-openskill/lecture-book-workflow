@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pod = 컨테이너를 감싸는 최소 실행 단위</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex; justify-content: center;
+    padding: 50px 24px 36px;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .stage {
+    display: flex; flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .pod-wrap {
+    border: 2.5px solid #1565c0;
+    border-radius: 14px;
+    background: #f5faff;
+    padding: 30px 56px 30px;
+    position: relative;
+    box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+  }
+  .pod-label {
+    position: absolute;
+    top: -12px; left: 24px;
+    background: #fff;
+    padding: 0 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+
+  .container-box {
+    border: 2px solid #1565c0;
+    border-radius: 8px;
+    background: #fff;
+    padding: 22px 38px;
+    text-align: center;
+  }
+  .container-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1565c0;
+  }
+
+  .caption {
+    margin-top: 14px;
+    font-size: 11px;
+    color: #666;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="pod-wrap">
+    <div class="pod-label">Pod</div>
+    <div class="container-box">
+      <div class="container-name">Container</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

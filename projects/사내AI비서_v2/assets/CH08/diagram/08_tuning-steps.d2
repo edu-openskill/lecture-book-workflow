@@ -1,0 +1,23 @@
+direction: right
+
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      fill: "#3b82f6"
+      stroke: "#3b82f6"
+      stroke-width: 2
+      border-radius: 8
+      font-size: 18
+      font-color: "#ffffff"
+      bold: true
+    }
+  }
+}
+
+a: "step1\n청킹 + Retriever" { class: step }
+b: "step2\n리랭킹 전후 비교" { class: step }
+c: "step3\nBM25+Vector 앙상블" { class: step }
+
+a -> b: { style.stroke: "#3b82f6"; style.stroke-width: 2 }
+b -> c: { style.stroke: "#3b82f6"; style.stroke-width: 2 }

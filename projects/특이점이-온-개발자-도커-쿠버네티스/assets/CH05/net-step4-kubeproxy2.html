@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Step 4 — kube-proxy(2차)가 Service IP를 Pod IP로 변환</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #fff;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    color: #222;
+  }
+  .diagram {
+    background: #fff;
+    border: 2.5px solid #333;
+    border-radius: 10px;
+    padding: 28px 32px 24px;
+    width: 820px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .scene {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .box {
+    border: 2.5px solid #555;
+    border-radius: 10px;
+    background: #fff;
+    padding: 14px 16px;
+    text-align: center;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .box.svc {
+    background: #f5f5f5;
+  }
+  .box.proxy {
+    border-color: #333;
+    background: #f0f0f0;
+  }
+  .box-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 3px;
+  }
+  .box-sub {
+    font-size: 10px;
+    color: #888;
+    font-weight: 500;
+  }
+  .box-detail {
+    font-size: 11px;
+    color: #555;
+    margin-top: 5px;
+    font-family: 'Consolas', 'Menlo', monospace;
+  }
+  .box-analogy {
+    font-size: 10px;
+    color: #999;
+    margin-top: 5px;
+    font-style: italic;
+  }
+
+  .arrow-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 10px;
+  }
+  .arrow-label {
+    font-size: 10px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 3px;
+    white-space: nowrap;
+  }
+  .arrow-block svg { width: 56px; height: 14px; }
+
+  .pod-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pod-group .box {
+    padding: 10px 14px;
+    min-width: 110px;
+  }
+
+  .transform {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  .transform-box {
+    font-size: 11px;
+    font-family: 'Consolas', 'Menlo', monospace;
+    padding: 5px 10px;
+    border: 1.5px solid #aaa;
+    border-radius: 6px;
+    background: #fafafa;
+    color: #555;
+  }
+  .transform-box.before { text-decoration: line-through; color: #bbb; }
+  .transform-box.after { border-color: #333; color: #222; font-weight: 600; }
+  .transform-arrow { font-size: 16px; color: #333; }
+
+  .note {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+  }
+
+  .explain {
+    margin-top: 18px;
+    padding: 16px 18px;
+    background: #fafafa;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    line-height: 1.8;
+  }
+  .explain p {
+    font-size: 12px;
+    color: #444;
+    margin-bottom: 6px;
+  }
+  .explain p:last-child { margin-bottom: 0; }
+  .explain strong { color: #222; }
+</style>
+</head>
+<body>
+
+<div class="diagram">
+  <div class="title">Step 4 — kube-proxy(2차)가 Service IP를 실제 Pod IP로 변환</div>
+
+  <div class="scene">
+    <div class="box svc">
+      <div class="box-title">Service</div>
+      <div class="box-sub">backend-svc</div>
+      <div class="box-detail">10.96.0.10:80</div>
+      <div class="box-analogy">대표 번호</div>
+    </div>
+
+    <div class="arrow-block">
+      <div class="arrow-label">가상 IP</div>
+      <svg viewBox="0 0 56 14">
+        <line x1="0" y1="7" x2="44" y2="7" stroke="#333" stroke-width="2"/>
+        <polygon points="44,3 56,7 44,11" fill="#333"/>
+      </svg>
+    </div>
+
+    <div class="box proxy">
+      <div class="box-title">kube-proxy</div>
+      <div class="box-sub">2차 — IP 변환</div>
+      <div class="box-analogy">배달 담당</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; justify-content: center; gap: 16px; margin-left: 6px;">
+      <div class="arrow-block">
+        <div class="arrow-label">172.17.0.5</div>
+        <svg viewBox="0 0 56 14">
+          <line x1="0" y1="7" x2="44" y2="7" stroke="#333" stroke-width="2"/>
+          <polygon points="44,3 56,7 44,11" fill="#333"/>
+        </svg>
+      </div>
+      <div class="arrow-block">
+        <div class="arrow-label">172.17.0.6</div>
+        <svg viewBox="0 0 56 14">
+          <line x1="0" y1="7" x2="44" y2="7" stroke="#aaa" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <polygon points="44,3 56,7 44,11" fill="#aaa"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="pod-group">
+      <div class="box">
+        <div class="box-title">Pod 1</div>
+        <div class="box-detail">172.17.0.5</div>
+        <div class="box-analogy">주방 1</div>
+      </div>
+      <div class="box" style="border-color: #bbb;">
+        <div class="box-title" style="color: #999;">Pod 2</div>
+        <div class="box-detail" style="color: #bbb;">172.17.0.6</div>
+        <div class="box-analogy">주방 2 (대기)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="transform">
+    <div class="transform-box before">10.96.0.10:80</div>
+    <div class="transform-arrow">→</div>
+    <div class="transform-box after">172.17.0.5:8080</div>
+  </div>
+
+  <div class="note">kube-proxy가 두 번째로 등장합니다 — Step 2에서는 NodePort → Ingress, 여기서는 Service → Pod</div>
+
+  <div class="explain">
+    <p>Ingress Controller가 선택한 Service의 IP(<strong>10.96.0.10</strong>)는 가상 주소입니다. 실제로 트래픽을 처리하는 건 Pod입니다.</p>
+    <p><strong>kube-proxy가 다시 한번 등장</strong>해서, Service의 가상 IP를 실제 Pod IP(<strong>172.17.0.5</strong>)로 변환합니다.</p>
+    <p>대표 번호로 전화하면, 배달 담당 직원이 지금 빈 주방을 골라 주문을 넘기는 것과 같습니다. Pod가 여러 개면 그중 하나를 골라 보냅니다.</p>
+  </div>
+</div>
+
+</body>
+</html>
