@@ -53,6 +53,7 @@
 | `rc-` | reindex-compare (CH03) / rc-timeline (CH07) | comparisons + pipelines (주의: 충돌) |
 | `rag-` | rag pipeline | pipelines |
 | `jf-` | journey forward | pipelines |
+| `ev-` | evolve flow (CH01 단계별 진화) | pipelines |
 | `s-` | rag-step 내부 (pipeline 전용) | pipelines |
 | `rl-` | react-loop caption | captions |
 | `mm-` | minimap | 글로벌 |

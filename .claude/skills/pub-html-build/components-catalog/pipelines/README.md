@@ -11,6 +11,7 @@
 - `.journey-forward` + `.jf-*` (CH01 여정 맵)
 - `.journey-roadmap` + `.roadmap-*`, `.node-*` (CH01 노드 기반 로드맵)
 - `.qr-flow` + `.qr-*` (CH06 QueryRouter 3단계 분기 플로우차트)
+- `.evolve-flow` + `.ev-*` (CH01 단계별 좌→우 진화 — 도커·쿠버네티스 책)
 
 ## 속하지 않음
 
@@ -479,3 +480,40 @@
 - `.ep-port`를 3개 이상 두기 금지: INPUT · OUTPUT 두 쌍이 기본 구조. 제3의 포트가 필요하면 별도 컴포넌트
 - `.ep-stage-fn`에 2줄 이상 텍스트: 셀 높이가 부풀어 그리드 균형이 깨짐. 함수명 한 줄로
 - 입력·출력 포트를 같은 색으로 쓰기: 입력·출력 구분이 색으로 되어 있으므로 `.in`·`.out` modifier로 반드시 구분
+
+### .evolve-flow
+
+**언제 쓰는가**: 책 전체 챕터(또는 챕터군) 흐름을 **좌→우 카드 + 화살표** 한 줄로 압축할 때. 챕터 1의 학습 로드맵에서 "한 단계씩 다음 챕터로 진화"하는 흐름을 보여주는 자리에 사용. `.journey-forward`가 PART 단위 그룹 펼침이고 `.journey-roadmap`이 노드+점선이라면, `.evolve-flow`는 **카드 5개 좌→우 균등 배치**로 단계 간 진화 의미를 강조.
+
+**사용 챕터**: CH01 (도커·쿠버네티스 책)
+
+**HTML 사용 예**:
+```html
+<div class="evolve-flow">
+  <div class="ev-card">
+    <div class="ev-step">1</div>
+    <div class="ev-meta">CH02 · Docker</div>
+    <div class="ev-name">이해하기</div>
+    <div class="ev-add">컨테이너를 띄운다</div>
+  </div>
+  <div class="ev-arrow">→</div>
+  <div class="ev-card">
+    <div class="ev-step">2</div>
+    <div class="ev-meta">CH03 · Docker</div>
+    <div class="ev-name">다루기</div>
+    <div class="ev-add">여러 개를 한 번에 묶는다</div>
+  </div>
+  <!-- ... 단계 5까지 동일 패턴 -->
+</div>
+```
+
+**렌더 CSS**: `styles/components.css`의 `/* evolve-flow */` 블록 (`.evolve-flow`, `.ev-card`, `.ev-step`, `.ev-meta`, `.ev-name`, `.ev-add`, `.ev-arrow`, `.ev-caption`)
+
+**변형**: `.evolve-flow`는 5개 카드 + 4개 화살표 = 9칸 그리드(`1fr 24px 1fr 24px 1fr 24px 1fr 24px 1fr`) 고정. 단계 수가 다르면 `grid-template-columns`만 비율 조정. 카드 내부 4요소(`.ev-step`·`.ev-meta`·`.ev-name`·`.ev-add`)는 모두 필수 — 빠지면 카드 균형이 무너짐.
+
+**피해야 할 것**
+- 카드 6개 이상: 카드 폭이 너무 좁아져 텍스트 잘림. 6단계 이상은 `.journey-forward` 또는 `.journey-roadmap`으로
+- 카드 1~2개: 카드가 너무 넓게 퍼져 진화 의미가 사라짐. 3단계 이상에서 사용
+- 마지막 카드만 강조색으로 칠하기: 전체가 한 흐름이라 마지막만 다르면 시각이 깨진다. 모든 카드 같은 스타일
+- `.ev-arrow`에 `→` 외 다른 기호: `▶`·`>` 등은 시각 무게가 달라 카드와 어긋난다. 항상 `→`
+- `.ev-meta`에 챕터 번호만(예: "CH02") 적기: 기술 컨텍스트(`Docker`·`Kubernetes`)가 빠지면 PART 구분이 사라진다. `CH02 · Docker` 형식 유지

@@ -18,10 +18,6 @@
 <body>
 <div class="container">
 <h1>Ch.2 Docker 이해하기</h1>
-<blockquote>
-<p>한 줄 요약: Docker가 무엇이고 어떻게 돌아가는지, 개념과 기본 사용법을 손에 익힌다
-핵심 개념: 컨테이너, 이미지, Docker CLI, 네트워크, 마운트</p>
-</blockquote>
 <p>오픈이는 퇴근하고 집으로 돌아와 커피 한 잔을 옆에 두고 노트북을 열었습니다. 오늘 저녁은 Docker에 씁니다. 목표는 하나입니다.</p>
 <p><strong>Docker가 무엇이고 어떻게 돌아가는지, 개념과 기본 사용법을 손에 익힌다.</strong></p>
 <p>선배가 던져준 단어 하나에 오늘 저녁을 걸었습니다. 그 단어가 Docker였고, 어제까지 오픈이는 이 이름조차 몰랐습니다. 오늘 저녁 안에 다 될 것 같지도 않았지만, 그래도 여기까지 가봐야 이 도구가 정말 현업에서 쓸 만한지 알 수 있었습니다. 설치 버튼에 손이 갔다가 멈췄습니다.</p>
@@ -197,7 +193,43 @@
 <div class="chapter-image"><img src="..\assets\CH02\ch2-step1-namespace1.png" alt="" /></div><p class="thought">그림 2-12. 푸드코트의 식당, 픽업 창구, 홀이 컨테이너 네트워크의 비유</p>
 <p>A, B, C 식당이 벽으로 완전히 분리되어 있습니다. 서로의 내부는 볼 수 없습니다. 대신 각 식당마다 홀 쪽으로 <strong>픽업 창구</strong>가 하나씩 있어서, 음식이 그 창구를 통해 홀로 나갑니다. 주방은 독립이지만 창구와 홀 덕분에 옆 식당과도 오갈 수 있습니다.</p>
 <p>Docker의 네트워크도 이 구조입니다. 컨테이너가 뜰 때 가장 먼저 <strong>독립된 네트워크 공간(주방)</strong> 이 생깁니다. 그다음 그 공간과 호스트를 잇는 <strong>가상 케이블(창구)</strong> 이 생성됩니다. 케이블의 반대쪽 끝은 호스트의 <strong>가상 스위치(홀)</strong> 에 꽂힙니다. 같은 홀에 꽂힌 컨테이너들은 이 홀을 거쳐 서로의 IP로 직접 데이터를 주고받을 수 있습니다.</p>
-<div class="chapter-image diagram"><img src="..\assets\CH02\diagram\ch2-step1-namespace.png" alt="" /></div><p class="thought">그림 2-13. 컨테이너 네트워크 격리 구조</p>
+<div class="svg-figure">
+<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너 네트워크 격리 구조">
+  <defs>
+    <marker id="ns-ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">컨테이너 네트워크 격리 구조 — Namespace · veth pair · docker0</text>
+  <rect x="20" y="50" width="170" height="170" rx="8" fill="#fff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="40" y="70" font-size="11" font-weight="600" fill="#6b7280">Namespace A</text>
+  <rect x="40" y="100" width="130" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="105" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">컨테이너 A</text>
+  <text x="105" y="155" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.17.0.2</text>
+  <rect x="240" y="50" width="280" height="170" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="380" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">호스트 (Host)</text>
+  <rect x="270" y="85" width="100" height="32" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="4,3"/>
+  <text x="320" y="105" text-anchor="middle" font-size="11" fill="#6b7280">veth-host1</text>
+  <rect x="320" y="135" width="120" height="50" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="380" y="158" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">docker0 브리지</text>
+  <text x="380" y="173" text-anchor="middle" font-size="10" fill="#7b341e">가상 스위치</text>
+  <rect x="270" y="195" width="100" height="32" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="4,3"/>
+  <text x="320" y="215" text-anchor="middle" font-size="11" fill="#6b7280">veth-host2</text>
+  <rect x="570" y="50" width="170" height="170" rx="8" fill="#fff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="590" y="70" font-size="11" font-weight="600" fill="#6b7280">Namespace B</text>
+  <rect x="590" y="100" width="130" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="655" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">컨테이너 B</text>
+  <text x="655" y="155" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.17.0.3</text>
+  <path d="M 170 130 Q 220 130, 270 105" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#ns-ah)"/>
+  <text x="220" y="120" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">veth pair</text>
+  <path d="M 370 105 Q 400 105, 380 135" fill="none" stroke="#9ca3af" stroke-width="1.4"/>
+  <path d="M 380 185 Q 400 215, 370 215" fill="none" stroke="#9ca3af" stroke-width="1.4"/>
+  <path d="M 370 215 Q 470 215, 590 150" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#ns-ah)"/>
+  <text x="510" y="200" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">veth pair</text>
+  <text x="380" y="260" text-anchor="middle" font-size="10" fill="#6b7280">점선 박스 = 가상 케이블 끝(veth) · 흰색 박스 = 컨테이너 · 주황 박스 = docker0 가상 스위치</text>
+</svg>
+</div>
+<p class="thought">그림 2-13. 컨테이너 네트워크 격리 구조</p>
 <table>
 <thead>
 <tr>
@@ -262,7 +294,36 @@
 <div class="chapter-image"><img src="..\assets\CH02\ch2-step3-dns1.png" alt="" /></div><p class="thought">그림 2-16. 안내 지도가 이름을 위치로 바꿔주는 비유</p>
 <p>손님 한 명이 &quot;B식당&quot;을 찾고 있습니다. 가게명은 알고 있는데 위치는 어디쯤에 있는지는 알 수 없습니다. 그럴 때 홀에 걸린 <strong>안내 지도</strong>에 &quot;B식당 = 2구역&quot;이라고 표시가 되어있다면, 손님은 지도를 보고 가게의 위치를 쉽게 찾을 수 있습니다.</p>
 <p>Docker 내부에도 이 안내 지도가 있습니다. 이름이 <strong>Docker DNS</strong>입니다. 새 컨테이너가 뜨면 이름과 IP가 자동으로 DNS에 등록되고, 다른 컨테이너가 그 이름으로 요청을 보내면 Docker DNS가 이름을 IP로 변환해 줍니다. 매번 바뀌는 IP 주소를 외울 필요가 없습니다.</p>
-<div class="chapter-image diagram"><img src="..\assets\CH02\diagram\ch2-step3-dns.png" alt="" /></div><p class="thought">그림 2-17. Docker DNS가 이름을 IP로 변환</p>
+<div class="svg-figure">
+<svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Docker DNS가 이름을 IP로 변환하는 흐름">
+  <defs>
+    <marker id="ah-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="ah-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/>
+    </marker>
+  </defs>
+  <text x="350" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Docker DNS가 이름을 IP로 변환하는 흐름</text>
+  <rect x="20" y="50" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="100" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">app 컨테이너</text>
+  <text x="100" y="100" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.17.0.2</text>
+  <rect x="270" y="50" width="160" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="350" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Docker DNS</text>
+  <text x="350" y="100" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">127.0.0.11</text>
+  <rect x="520" y="50" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="600" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">db 컨테이너</text>
+  <text x="600" y="100" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.17.0.3</text>
+  <line x1="180" y1="72" x2="270" y2="72" stroke="#475569" stroke-width="1.8" marker-end="url(#ah-p)"/>
+  <text x="225" y="65" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">1.</tspan> db의 IP는?</text>
+  <line x1="270" y1="98" x2="180" y2="98" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ah-o)"/>
+  <text x="225" y="113" text-anchor="middle" font-size="11" fill="#7b341e"><tspan font-weight="700">2.</tspan> 172.17.0.3</text>
+  <path d="M 100 120 L 100 175 L 600 175 L 600 120" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ah-p)"/>
+  <rect x="265" y="163" width="170" height="22" rx="4" fill="#fff"/>
+  <text x="350" y="178" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.17.0.3 으로 요청</text>
+</svg>
+</div>
+<p class="thought">그림 2-17. Docker DNS가 이름을 IP로 변환</p>
 <p>다만 여기에 주의할 점이 하나 있습니다. 지금까지 본 docker0가 바로 Docker의 <strong>기본 네트워크</strong>인데, 이 이름 기반 통신은 기본 네트워크에서는 작동하지 않습니다. 사용자가 직접 만든 <strong>사용자 정의 네트워크(User-defined Network)</strong> 안에서만 자동 DNS가 켜집니다. 이 차이는 다음 챕터에서 직접 만들어보며 확인합니다.</p>
 <div class="prep-note">
 <p><strong>DNS / 사용자 정의 네트워크</strong></p>
@@ -368,15 +429,15 @@ apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </s
 nginx<span class="w">                </span><span class="c1"># nginx 실행</span></div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-46.png" alt="" /></div><p class="thought">그림 2-19. nginx 설치와 실행 결과</p>
 <p>설치 로그가 한참 흐른 뒤 nginx가 떴습니다. 포트가 실제로 열려 있는지 확인하려고 오픈이는 <code>net-tools</code>를 추가로 깔고 <code>netstat</code>으로 상태를 봤습니다.</p>
-<div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>net-tools
-netstat<span class="w"> </span>-nlpt</div>
+<div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>net-tools<span class="w">   </span><span class="c1"># netstat 사용을 위한 net-tools 설치</span>
+netstat<span class="w"> </span>-nlpt<span class="w">              </span><span class="c1"># 열려 있는 TCP 포트 확인</span></div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-47.png" alt="" /></div><p class="thought">그림 2-20. 포트 상태 확인</p>
 <p>80 포트가 열려 있는 것을 확인했습니다. 이제 브라우저 차례. 주소창에 <code>localhost:80</code>을 쳤습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-48.png" alt="" /></div><p class="thought">그림 2-21. nginx 환영 페이지 응답</p>
 <p>익숙한 nginx 환영 페이지가 떴습니다. 컨테이너를 띄울 때 <code>-p 80:80</code>으로 포트를 열어둔 덕에, 컨테이너 안의 nginx와 브라우저가 연결된 것입니다.</p>
 <h3>2.6.3 vim으로 파일 편집</h3>
 <p>서버는 깔았지만, 운영하다 보면 설정 파일을 고칠 일이 꼭 생깁니다. 그런데 컨테이너 안엔 GUI 편집기가 없어서 터미널에서 바로 쓰는 편집기가 필요했습니다. 오픈이는 리눅스에서 오래 쓰여온 <strong>vim</strong>을 설치했습니다.</p>
-<div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim</div>
+<div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">   </span><span class="c1"># 터미널 편집기 vim 설치</span></div>
 <blockquote>
 <p>설치 도중 Geographic area와 Time zone을 선택하는 화면이 나옵니다. 이때 <strong>Asia</strong>, <strong>Seoul</strong>을 각각 선택합니다.</p>
 </blockquote>
@@ -462,8 +523,8 @@ docker<span class="w"> </span>ps<span class="w">                            </sp
 <p>오픈이는 두 방식이 건드리는 지점이 다르다는 걸 알았습니다. <code>exit</code>는 컨테이너 안의 메인 프로세스를 끝내는 명령이고, <code>CTRL+P → CTRL+Q</code>는 바깥의 터미널 연결만 떼는 키입니다. 컨테이너는 터미널을 떼어도 안에서 계속 돌고 있는 겁니다.</p>
 <h3>2.7.2 백그라운드로 살아남는 조건</h3>
 <p>2.4.3 챕터에서 nginx를 <code>-d</code>로 띄웠을 때도 컨테이너는 돌아가는데 터미널이 떨어져 있었습니다. 오픈이는 ubuntu에도 당연히 같은 결과가 나올 거라 보고 같은 옵션을 줘봤습니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>ubuntu
-docker<span class="w"> </span>ps</div>
+<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># ubuntu를 백그라운드로 실행</span>
+docker<span class="w"> </span>ps<span class="w">              </span><span class="c1"># 실행 중인 컨테이너 목록 확인</span></div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-33.png" alt="" /></div><p class="thought">그림 2-27. ubuntu는 -d만으로는 바로 종료</p>
 <p class="thought">'어 왜 실행 목록에 없지?'</p>
 <p>목록에 ubuntu가 없었습니다. 컨테이너가 실행되자마자 꺼진 겁니다. 안의 메인 프로세스가 바로 죽었기 때문입니다. 그런데 2.4.3 챕터에서 실행한 nginx는 같은 <code>-d</code>로 잘 돌았습니다.</p>
@@ -558,7 +619,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 <p>지금까지 오픈이는 남이 올려둔 이미지(ubuntu, nginx, tomcat)를 Docker Hub에서 받아 쓰기만 했습니다. 이번엔 반대로, 직접 수정한 컨테이너를 이미지로 만들어 Docker Hub에 올립니다. 다른 컴퓨터에서도 이 이미지 받으면 같은 상태로 쓸 수 있습니다.</p>
 <h3>2.8.1 Tomcat으로 commit 감 잡기</h3>
 <p>오픈이는 나만의 이미지를 만들기 위해 Tomcat 이미지를 받아 컨테이너를 실행했습니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>tomcat</div>
+<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>tomcat<span class="w">   </span><span class="c1"># 8080 포트로 Tomcat 백그라운드 실행</span></div>
 <p>실행 후 브라우저에서 <strong>localhost:8080</strong> 으로 접속했더니 <strong>404</strong>가 떴습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-58.png" alt="" /></div><p class="thought">그림 2-35. Tomcat 404 에러 화면</p>
 <p class="thought">'연결은 된 거 같은데 왜 404 에러가 뜨지?'</p>
@@ -611,7 +672,8 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <div class="chapter-image"><img src="..\assets\CH02\volume-mount.png" alt="" /></div><p class="thought">그림 2-43. Docker 엔진이 관리하는 내부 저장 공간에 데이터가 저장되는 구조</p>
 <p>두 번째 방식이 그 역할을 합니다. Docker 엔진이 자기 안에 별도 저장 공간을 두고, 사용자는 볼륨에 이름만 붙여 컨테이너와 연결합니다. 실제 저장 위치는 Docker가 맡아서 관리합니다.</p>
 <p>오픈이는 <code>metacoding-volume</code>이라는 이름으로 볼륨을 하나 만들면서 ubuntu 컨테이너를 띄웠습니다. 존재하지 않는 볼륨 이름을 주면 Docker가 자동으로 만들어 줍니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>metacoding-volume,dst<span class="o">=</span>/app/volume<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># 볼륨 마운트로 ubuntu 실행</span></div>
+<div class="code-block highlight" data-lang="bash"><span class="c1"># 볼륨 마운트로 ubuntu 실행</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>metacoding-volume,dst<span class="o">=</span>/app/volume<span class="w"> </span>ubuntu</div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-81.png" alt="" /></div><p class="thought">그림 2-44. 볼륨 마운트로 ubuntu 실행</p>
 <p>컨테이너 안에 들어가자 <code>/app/volume</code> 폴더가 자동으로 생성돼 있었습니다.</p>
 <div class="tip">
@@ -624,7 +686,8 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 docker<span class="w"> </span>volume<span class="w"> </span>ls<span class="w">          </span><span class="c1"># 볼륨 목록 재확인</span></div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-84.png" alt="" /></div><p class="thought">그림 2-45. 컨테이너가 사라져도 볼륨은 유지</p>
 <p>컨테이너는 사라졌지만 볼륨은 목록에 그대로 남아 있었습니다. 이어서 같은 볼륨을 연결해 새 컨테이너를 다시 띄웠습니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>metacoding-volume,dst<span class="o">=</span>/app/volume<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># 같은 볼륨으로 새 컨테이너 실행</span>
+<div class="code-block highlight" data-lang="bash"><span class="c1"># 같은 볼륨으로 새 컨테이너 실행</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>metacoding-volume,dst<span class="o">=</span>/app/volume<span class="w"> </span>ubuntu
 ls<span class="w"> </span>/app/volume</div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-85.png" alt="" /></div><p class="thought">그림 2-46. 볼륨 데이터 재사용</p>
 <p>방금 전에 만들었던 <code>b.txt</code>가 새 컨테이너 안에서도 그대로 보였습니다. 볼륨이 컨테이너와 독립적으로 유지되기 때문입니다.</p>

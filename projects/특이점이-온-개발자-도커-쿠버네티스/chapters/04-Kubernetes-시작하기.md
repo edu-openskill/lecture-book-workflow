@@ -53,7 +53,46 @@ Compose가 **명령형**이라면 K8s는 **선언형**입니다. 선언형이란
 
 쿠버네티스 세상에서는 모든 작업 단위를 **리소스(Resource)**라고 부릅니다. 사용자의 요청이 들어오면 여러 리소스를 거쳐 실제 컨테이너에 도달하게 됩니다. 전체적인 흐름은 다음과 같습니다.
 
-![](../assets/CH04/chap03-k8s-architecture.png)
+<div class="svg-figure">
+<svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes 핵심 리소스의 전체 구조">
+  <defs>
+    <marker id="k4-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="k4-g" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#9ca3af"/></marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Kubernetes 핵심 리소스의 전체 구조</text>
+  <rect x="20" y="100" width="80" height="50" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.4"/>
+  <text x="60" y="130" text-anchor="middle" font-size="12" fill="#374151">클라이언트</text>
+  <line x1="100" y1="125" x2="140" y2="125" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#k4-g)"/>
+  <rect x="140" y="60" width="600" height="220" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6" stroke-dasharray="6,4"/>
+  <text x="160" y="80" font-size="11" font-weight="600" fill="#0f172a">Kubernetes 클러스터</text>
+  <rect x="170" y="100" width="100" height="50" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="220" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Ingress</text>
+  <text x="220" y="142" text-anchor="middle" font-size="9" fill="#6b7280">진입점</text>
+  <line x1="270" y1="125" x2="310" y2="125" stroke="#475569" stroke-width="1.6" marker-end="url(#k4-p)"/>
+  <rect x="310" y="100" width="100" height="50" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="360" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Service</text>
+  <text x="360" y="142" text-anchor="middle" font-size="9" fill="#6b7280">고정 주소</text>
+  <line x1="410" y1="125" x2="450" y2="125" stroke="#475569" stroke-width="1.6" marker-end="url(#k4-p)"/>
+  <rect x="450" y="100" width="110" height="50" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="505" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Deployment</text>
+  <text x="505" y="142" text-anchor="middle" font-size="9" fill="#6b7280">Pod 관리</text>
+  <line x1="560" y1="115" x2="600" y2="105" stroke="#475569" stroke-width="1.6" marker-end="url(#k4-p)"/>
+  <line x1="560" y1="135" x2="600" y2="170" stroke="#475569" stroke-width="1.6" marker-end="url(#k4-p)"/>
+  <rect x="600" y="80" width="120" height="55" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="660" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod 1</text>
+  <text x="660" y="123" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
+  <rect x="600" y="155" width="120" height="55" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="660" y="180" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod 2</text>
+  <text x="660" y="198" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
+  <rect x="380" y="220" width="110" height="40" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="435" y="244" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">ConfigMap</text>
+  <rect x="500" y="220" width="90" height="40" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="545" y="244" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Secret</text>
+  <path d="M 435 220 Q 500 195, 600 130" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k4-p)"/>
+  <path d="M 545 220 Q 580 200, 620 165" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k4-p)"/>
+  <text x="380" y="295" text-anchor="middle" font-size="10" fill="#6b7280">Ingress(진입) → Service(주소) → Deployment(관리) → Pod(실행). ConfigMap·Secret은 Pod에 설정 주입</text>
+</svg>
+</div>
 
 *그림 4-2. Kubernetes 핵심 리소스의 전체 구조*
 
@@ -88,7 +127,37 @@ Compose가 **명령형**이라면 K8s는 **선언형**입니다. 선언형이란
 
 개발자가 명령을 내리면 **본사 관리팀(컨트롤 플레인)** 에서는 접수, 판단, 지시가 순차적으로 일어납니다.
 
-![](../assets/CH04/fig-3-4.png)
+<div class="svg-figure">
+<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="명령이 접수되어 현장으로 내려가는 흐름">
+  <defs>
+    <marker id="cmd-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">명령이 접수되어 현장으로 내려가는 흐름</text>
+  <rect x="170" y="50" width="420" height="60" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="190" y="72" font-size="11" font-weight="700" fill="#7b341e">컨트롤 플레인</text>
+  <rect x="290" y="65" width="180" height="35" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="380" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube API Server</text>
+  <line x1="280" y1="115" x2="280" y2="160" stroke="#475569" stroke-width="1.8" marker-end="url(#cmd-p)"/>
+  <line x1="480" y1="115" x2="480" y2="160" stroke="#475569" stroke-width="1.8" marker-end="url(#cmd-p)"/>
+  <text x="380" y="145" text-anchor="middle" font-size="11" fill="#0f172a" font-style="italic">명령 전달</text>
+  <rect x="170" y="170" width="220" height="90" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="190" y="190" font-size="11" font-weight="700" fill="#0f172a">워커 노드 1</text>
+  <rect x="190" y="200" width="80" height="48" rx="5" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="230" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">kubelet</text>
+  <text x="230" y="237" text-anchor="middle" font-size="9" fill="#6b7280">컨테이너 생성·관리</text>
+  <rect x="285" y="200" width="90" height="48" rx="5" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="330" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">kube-proxy</text>
+  <text x="330" y="237" text-anchor="middle" font-size="9" fill="#6b7280">네트워크 라우팅</text>
+  <rect x="410" y="170" width="220" height="90" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="430" y="190" font-size="11" font-weight="700" fill="#0f172a">워커 노드 2</text>
+  <rect x="430" y="200" width="80" height="48" rx="5" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="470" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">kubelet</text>
+  <text x="470" y="237" text-anchor="middle" font-size="9" fill="#6b7280">컨테이너 생성·관리</text>
+  <rect x="525" y="200" width="90" height="48" rx="5" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="570" y="220" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">kube-proxy</text>
+  <text x="570" y="237" text-anchor="middle" font-size="9" fill="#6b7280">네트워크 라우팅</text>
+</svg>
+</div>
 
 *그림 4-4. 명령이 접수되어 현장으로 내려가는 흐름*
 
@@ -296,8 +365,8 @@ kubectl describe pod hello-pod2       # Pod 상세 정보 조회
 방금 만든 Pod를 지워보며 한 가지 실험을 해봤습니다. 만약 운영 중에 누군가의 실수로 Pod가 삭제되거나, 프로그램 오류로 종료된다면 어떻게 될까?
 
 ```bash
-kubectl delete pod hello-pod1
-kubectl get pod
+kubectl delete pod hello-pod1   # hello-pod1 삭제
+kubectl get pod                 # 남은 Pod 목록 확인
 ```
 
 ![](../assets/CH04/05_kubectl-delete-hello-pod1.png)
@@ -433,8 +502,8 @@ spec:
 이 YAML 파일을 클러스터에 적용하고, 설정한 대로 4개의 Pod가 생성되는지 확인했습니다.
 
 ```bash
-kubectl apply -f ex10/deploy-ex02.yml
-kubectl get pod
+kubectl apply -f ex10/deploy-ex02.yml   # Deployment YAML 적용
+kubectl get pod                          # 생성된 Pod 목록 확인
 ```
 
 ![](../assets/CH04/07_kubectl-get-pods-replicas.png)
@@ -465,7 +534,7 @@ kubectl get pod
 명령어 한 줄로 이미지 버전을 올려봤습니다.
 
 ```bash
-kubectl set image deployment/nginx-replica nginx-container=nginx:1.21
+kubectl set image deployment/nginx-replica nginx-container=nginx:1.21   # 이미지 1.21로 교체
 ```
 
 ![](../assets/CH04/chap03-33.png)
@@ -546,7 +615,7 @@ nginx-replica-6d4cf56db6-mno90  1/1     Running   10.244.0.9    minikube
 
 메모장에 적어 둔 그 번호는 더 이상 존재하지 않는 가맹점 번호였습니다.
 
-순간 머릿속에 떠오른 그림은 챕터 3의 풀스택이었습니다. 프론트엔드 컨테이너가 백엔드 컨테이너를 호출할 때, 그 백엔드의 IP가 배포할 때마다 달라진다면 프론트엔드 설정을 매번 고쳐야 합니다. 자동 복구가 진짜 자동이 되려면 이 흔들림을 가려 줄 고정된 주소가 필요했습니다.
+순간 머릿속에 떠오른 그림은 챕터 3의 통합 웹사이트였습니다. 프론트엔드 컨테이너가 백엔드 컨테이너를 호출할 때, 그 백엔드의 IP가 배포할 때마다 달라진다면 프론트엔드 설정을 매번 고쳐야 합니다. 자동 복구가 진짜 자동이 되려면 이 흔들림을 가려 줄 고정된 주소가 필요했습니다.
 
 *'이 숫자를 프론트엔드 코드에 박아 둘 수는 없잖아.'*
 

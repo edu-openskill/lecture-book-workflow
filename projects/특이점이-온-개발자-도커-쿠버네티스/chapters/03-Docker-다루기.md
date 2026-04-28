@@ -223,7 +223,7 @@ server {
 
 이 뼈대 위에 세부적인 옵션을 얹으면 다양한 기능을 구현할 수 있습니다. 이번 절에서는 가장 대표적인 활용 사례인 경로 기반 라우팅, 로드밸런싱, 그리고 캐싱을 차례로 살펴보겠습니다.
 
-### 3.2.3 실습 ① 경로 기반 라우팅
+### 3.2.3 실습 1 경로 기반 라우팅
 
 오픈이는 가장 먼저 URL 경로에 따라 서로 다른 서버로 요청을 보내는 실습을 시작했습니다. /app1로 접속하면 1번 서버로, /app2로 접속하면 2번 서버로 요청이 가도록 만드는 방식입니다. 서비스가 여러 컨테이너로 나뉘어 있을 때 NGINX가 앞단에서 길을 갈라주는 구조입니다.
 
@@ -277,9 +277,9 @@ server {
 설정을 마친 오픈이는 ex01 폴더 안의 실습 파일들로 세 컨테이너를 순서대로 빌드하고 실행했습니다.
 
 ```bash
-docker build -t app1 ex01/app1 && docker run -dit -p 8000:80 app1
-docker build -t app2 ex01/app2 && docker run -dit -p 9000:80 app2
-docker build -t lb ex01/lb && docker run -dit -p 80:80 lb
+docker build -t app1 ex01/app1 && docker run -dit -p 8000:80 app1   # app1 빌드+실행 (8000)
+docker build -t app2 ex01/app2 && docker run -dit -p 9000:80 app2   # app2 빌드+실행 (9000)
+docker build -t lb ex01/lb && docker run -dit -p 80:80 lb           # 로드밸런서(nginx) 빌드+실행 (80)
 ```
 
 준비가 끝나고 브라우저 주소창에 localhost:80/app1을 입력하자 app1 서버가 응답했습니다. 이어서 /app2로 주소를 바꾸자 이번에는 app2 서버의 화면이 떴습니다.
@@ -310,7 +310,7 @@ nginx.conf를 작성하던 오픈이의 눈에 계속 걸리는 지점이 하나
 
 오픈이는 이 우회 방식이 다소 번거롭고 복잡하다는 인상을 받았습니다. 하지만 이 문제는 곧 이어질 3.3절에서 배울 '사용자 정의 네트워크'를 통해 해결됩니다. 
 
-### 3.2.4 실습 ② 로드밸런싱
+### 3.2.4 실습 2 로드밸런싱
 
 경로에 따라 서버를 나누는 방법은 이제 익혔습니다. 하지만 문득 똑같은 앱을 두 대, 세 대로 복제해서 운영하려면 NGINX 설정을 어떻게 바꿔야 할지 궁금해졌습니다.
 
@@ -370,7 +370,7 @@ docker run -dit -p 80:80 lb
 
 오픈이는 NGINX를 활용한 부하 분산의 편리함을 실감하며 다음 실습으로 넘어갔습니다.
 
-### 3.2.5 실습 ③ 캐싱
+### 3.2.5 실습 3 캐싱
 
 로드밸런싱 테스트를 하던 오픈이는 문득 백엔드 서버의 로그를 보고 멈춰 섰습니다. 새로고침을 할 때마다 화면에 있는 똑같은 로고 이미지 파일 요청이 백엔드까지 계속 전달되고 있었기 때문입니다.
 
@@ -424,8 +424,8 @@ server {
         proxy_pass http://host.docker.internal:5000;
         proxy_cache my_cache;                        # 선언한 캐시 공간을 사용합니다.
         proxy_cache_valid 200 1m;                    # 정상 응답(200)을 1분 동안 보관합니다.
-        add_header X-Cache-Status $upstream_cache_status always;  # 헤더에 HIT/MISS 여부를 표시합니다.
-        proxy_ignore_headers Cache-Control Expires;  # 백엔드의 캐시 제어 설정을 무시하고 NGINX 설정을 따릅니다.
+        add_header X-Cache-Status $upstream_cache_status always;  # HIT/MISS 표시
+        proxy_ignore_headers Cache-Control Expires;  # 백엔드 캐시 헤더 무시 (NGINX 설정 우선)
     }
 }
 ```
@@ -510,7 +510,32 @@ Redis 컨테이너와 API 컨테이너를 띄우고 나면, 두 컨테이너가 
 
 이 문제를 해결하기 위해 드디어 **사용자 정의 네트워크(User-defined Network)**를 사용할 차례입니다. 사용자 정의 네트워크 안에 있는 컨테이너들은 도커 내부의 **DNS(Domain Name System)**가 컨테이너 이름을 IP 주소로 자동 변환해 줍니다. 덕분에 번거로운 우회 없이 컨테이너 이름을 도메인 주소처럼 바로 쓸 수 있습니다.
 
-![](../assets/CH03/net-05-docker-dns.png)
+<div class="svg-figure">
+<svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="사용자 정의 네트워크에서 이름으로 통신하는 흐름">
+  <defs>
+    <marker id="dn23-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="dn23-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="350" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">사용자 정의 네트워크 — 이름으로 컨테이너 호출</text>
+  <rect x="20" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="100" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">api 컨테이너</text>
+  <text x="100" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.2</text>
+  <rect x="270" y="55" width="160" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="350" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Docker DNS</text>
+  <text x="350" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">127.0.0.11</text>
+  <rect x="520" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="600" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">redis 컨테이너</text>
+  <text x="600" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.3</text>
+  <line x1="180" y1="77" x2="270" y2="77" stroke="#475569" stroke-width="1.8" marker-end="url(#dn23-p)"/>
+  <text x="225" y="70" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">1.</tspan> redis의 IP는?</text>
+  <line x1="270" y1="103" x2="180" y2="103" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#dn23-o)"/>
+  <text x="225" y="118" text-anchor="middle" font-size="11" fill="#7b341e"><tspan font-weight="700">2.</tspan> 172.18.0.3</text>
+  <path d="M 100 125 L 100 180 L 600 180 L 600 125" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#dn23-p)"/>
+  <rect x="265" y="168" width="170" height="22" rx="4" fill="#fff"/>
+  <text x="350" y="183" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.18.0.3 으로 요청</text>
+  <text x="350" y="218" text-anchor="middle" font-size="10" fill="#6b7280">사용자 정의 네트워크에서만 자동 DNS가 켜집니다 (기본 docker0에는 없음)</text>
+</svg>
+</div>
 
 *그림 3-23. 사용자 정의 네트워크 — 같은 네트워크 안의 컨테이너끼리 이름으로 호출*
 
@@ -615,8 +640,8 @@ Dockerfile에서 눈여겨볼 지점은 두 가지였습니다.
 오픈이는 ex05 폴더의 파일로 이미지를 빌드하고 컨테이너를 실행했습니다.
 
 ```bash
-docker build -t db ex05/db
-docker run -dit -p 3306:3306 db
+docker build -t db ex05/db          # ex05/db의 Dockerfile로 db 이미지 빌드
+docker run -dit -p 3306:3306 db     # db 컨테이너를 3306 포트로 실행
 ```
 
 ![](../assets/CH03/chap02-43.png)
@@ -647,10 +672,10 @@ mysql -u metacoding -p      # MySQL 접속 (비밀번호 입력 창이 뜨면 me
 접속 후에는 DB 목록과 테이블, 그리고 초기 데이터를 차례로 조회해 보았습니다.
 
 ```sql
-show databases;
-use metadb;
-show tables;
-select * from user_tb;
+show databases;            -- MySQL 서버에 있는 DB 목록 조회
+use metadb;                -- metadb를 사용할 DB로 선택
+show tables;               -- metadb 안의 테이블 목록 조회
+select * from user_tb;     -- user_tb 테이블의 전체 행 조회
 ```
 
 ![](../assets/CH03/chap02-46.png)
@@ -741,37 +766,63 @@ networks:
 
 **ex06/docker-compose.yml**
 ```yaml
-services:
-  app1:
+services:                          # 컨테이너 단위로 실행할 서비스 묶음
+  app1:                            # 첫 번째 서비스 이름 (다른 서비스가 부를 때 호스트명이 됨)
     build:
-      context: ./app1        
+      context: ./app1              # ./app1 폴더의 Dockerfile로 이미지 빌드
     ports:
-      - 8000:80
+      - 8000:80                    # 호스트 8000 → 컨테이너 80 포워딩
     networks:
-      - ex06-network
-  app2:
+      - ex06-network               # ex06-network에 연결
+  app2:                            # 두 번째 서비스
     build:
       context: ./app2
     ports:
-      - 9000:80
+      - 9000:80                    # 호스트 9000 → 컨테이너 80
     networks:
       - ex06-network
-  lb:
+  lb:                              # 로드밸런서(nginx) 서비스
     build:
       context: ./lb
     ports:
-      - 80:80
+      - 80:80                      # 호스트 80 → 컨테이너 80
     networks:
       - ex06-network
 
 networks:
-  ex06-network:
+  ex06-network:                    # 세 서비스가 공유하는 사용자 정의 네트워크
 ```
 
 여기서 결정적인 차이가 생깁니다. **lb/nginx.conf** 설정 파일에서 백엔드 주소를 적을 때, 더 이상 host.docker.internal을 쓸 필요가 없습니다. Compose가 자동으로 만든 네트워크 덕분에 app1:80, **app2:80**처럼 서비스 이름으로 바로 부를 수 있기 때문입니다.
 
 
-![](../assets/CH03/net-06-compose-network.png)
+<div class="svg-figure">
+<svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Compose 네트워크에서 서비스 이름으로 통신">
+  <defs>
+    <marker id="cn-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="cn-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="350" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Compose 네트워크 — 서비스 이름으로 통신</text>
+  <rect x="20" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="100" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">lb (NGINX)</text>
+  <text x="100" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.2</text>
+  <rect x="270" y="55" width="160" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="350" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Docker DNS</text>
+  <text x="350" y="98" text-anchor="middle" font-size="10" fill="#7b341e">(자동 생성)</text>
+  <text x="350" y="113" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">127.0.0.11</text>
+  <rect x="520" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="600" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">app1 컨테이너</text>
+  <text x="600" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.3</text>
+  <line x1="180" y1="77" x2="270" y2="77" stroke="#475569" stroke-width="1.8" marker-end="url(#cn-p)"/>
+  <text x="225" y="70" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">1.</tspan> app1의 IP는?</text>
+  <line x1="270" y1="103" x2="180" y2="103" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#cn-o)"/>
+  <text x="225" y="118" text-anchor="middle" font-size="11" fill="#7b341e"><tspan font-weight="700">2.</tspan> 172.18.0.3</text>
+  <path d="M 100 125 L 100 180 L 600 180 L 600 125" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#cn-p)"/>
+  <rect x="270" y="168" width="160" height="22" rx="4" fill="#fff"/>
+  <text x="350" y="183" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.18.0.3 으로 요청</text>
+  <text x="350" y="218" text-anchor="middle" font-size="10" fill="#6b7280">Compose가 docker-compose.yml의 서비스 이름으로 자동 DNS 등록</text>
+</svg>
+</div>
 
 *그림 3-33. Compose가 자동 생성한 네트워크에서 서비스 이름으로 통신*
 
@@ -800,7 +851,7 @@ docker compose -f ex06/docker-compose.yml up   # 모든 컨테이너 한 번에 
 | `docker compose logs` | 서비스 로그 |
 | `docker compose build` | 이미지만 빌드 |
 
-## 3.6 종합 실습 — 풀스택 웹사이트
+## 3.6 종합 실습 — 통합 웹사이트
 
 오픈이는 이제 각각의 컨테이너를 실행하는 법과 이를 컴포즈로 묶는 법을 익혔습니다. 이제 이 조각들을 모아 실제 서비스와 유사한 프론트엔드(NGINX) + 백엔드(Spring Boot) + DB(MySQL) 세트를 조립해 볼 차례입니다. docker compose up 한 줄로 전체 시스템을 가동하는 것이 이번 실습의 최종 목표입니다.
 
@@ -845,11 +896,11 @@ ex07/
 **ex07/backend/entrypoint.sh**
 ```bash
 #!/bin/bash
-git clone https://github.com/metacoding-10-linux-docker/backend-server
-cd backend-server
-chmod +x gradlew
-./gradlew build
-java -jar -Dspring.profiles.active=prod build/libs/*.jar
+git clone https://github.com/metacoding-10-linux-docker/backend-server   # 백엔드 소스 내려받기
+cd backend-server                       # 클론한 폴더로 이동
+chmod +x gradlew                        # 실행 권한 부여
+./gradlew build                         # Gradle로 JAR 빌드
+java -jar -Dspring.profiles.active=prod build/libs/*.jar   # prod 프로필로 실행
 ```
 
 :::tip
@@ -867,37 +918,38 @@ java -jar -Dspring.profiles.active=prod build/libs/*.jar
 **ex07/docker-compose.yml**
 ```yaml
 services:
-  backend:
+  backend:                          # Spring Boot 백엔드 서비스
     build:
-      context: ./backend
+      context: ./backend            # ./backend 폴더의 Dockerfile로 빌드
     ports:
-      - "8080:8080"
-    environment:
+      - "8080:8080"                 # 호스트 8080 → 컨테이너 8080
+    environment:                    # 컨테이너에 주입할 환경 변수
+      # DB 접속 URL (호스트명 db = 아래 db 서비스명)
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/metadb?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root1234
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver   # JDBC 드라이버 클래스
+      SPRING_DATASOURCE_USERNAME: root                                # DB 계정
+      SPRING_DATASOURCE_PASSWORD: root1234                            # DB 비밀번호
     networks:
-      - ex07-network
+      - ex07-network                # 공용 네트워크 연결
 
-  db:
+  db:                               # MySQL DB 서비스
     build:
       context: ./db
     ports:
-      - 3306:3306
+      - 3306:3306                   # 호스트 3306 → 컨테이너 3306
     networks:
       - ex07-network
 
-  frontend:
+  frontend:                         # nginx 프론트엔드 서비스
     build:
       context: ./frontend
     ports:
-      - "80:80"
+      - "80:80"                     # 호스트 80 → 컨테이너 80
     networks:
       - ex07-network
 
 networks:
-  ex07-network:
+  ex07-network:                     # backend·db·frontend가 공유하는 네트워크
 ```
 
 backend의 `SPRING_DATASOURCE_URL`에 들어간 `jdbc:mysql://db:3306/...`이 DB 컨테이너를 이름으로 부르는 지점입니다.
@@ -907,7 +959,7 @@ backend의 `SPRING_DATASOURCE_URL`에 들어간 `jdbc:mysql://db:3306/...`이 DB
 오픈이는 터미널에서 ex07의 docker-compose.yml로 서비스를 실행했습니다.
 
 ```bash
-docker compose -f ex07/docker-compose.yml up
+docker compose -f ex07/docker-compose.yml up   # compose 파일 기반으로 서비스 일괄 실행
 ```
 
 ![](../assets/CH03/chap02-ex07-compose.png)

@@ -175,7 +175,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <p>이 뼈대 위에 세부적인 옵션을 얹으면 다양한 기능을 구현할 수 있습니다. 이번 절에서는 가장 대표적인 활용 사례인 경로 기반 라우팅, 로드밸런싱, 그리고 캐싱을 차례로 살펴보겠습니다.</p>
-<h3>3.2.3 실습 ① 경로 기반 라우팅</h3>
+<h3>3.2.3 실습 1 경로 기반 라우팅</h3>
 <p>오픈이는 가장 먼저 URL 경로에 따라 서로 다른 서버로 요청을 보내는 실습을 시작했습니다. /app1로 접속하면 1번 서버로, /app2로 접속하면 2번 서버로 요청이 가도록 만드는 방식입니다. 서비스가 여러 컨테이너로 나뉘어 있을 때 NGINX가 앞단에서 길을 갈라주는 구조입니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-18.png" alt="" /></div><p class="thought">그림 3-9. 경로 기반 라우팅 구조</p>
 <blockquote>
@@ -215,9 +215,9 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <p>설정을 마친 오픈이는 ex01 폴더 안의 실습 파일들로 세 컨테이너를 순서대로 빌드하고 실행했습니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app1<span class="w"> </span>ex01/app1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:80<span class="w"> </span>app1
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app2<span class="w"> </span>ex01/app2<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">9000</span>:80<span class="w"> </span>app2
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>lb<span class="w"> </span>ex01/lb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
+<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app1<span class="w"> </span>ex01/app1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:80<span class="w"> </span>app1<span class="w">   </span><span class="c1"># app1 빌드+실행 (8000)</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app2<span class="w"> </span>ex01/app2<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">9000</span>:80<span class="w"> </span>app2<span class="w">   </span><span class="c1"># app2 빌드+실행 (9000)</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>lb<span class="w"> </span>ex01/lb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb<span class="w">           </span><span class="c1"># 로드밸런서(nginx) 빌드+실행 (80)</span></div>
 <p>준비가 끝나고 브라우저 주소창에 localhost:80/app1을 입력하자 app1 서버가 응답했습니다. 이어서 /app2로 주소를 바꾸자 이번에는 app2 서버의 화면이 떴습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-21.png" alt="" /></div><p class="thought">그림 3-10. /app1 경로로 접속한 결과</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-22.png" alt="" /></div><p class="thought">그림 3-11. /app2 경로로 접속한 결과</p>
@@ -230,7 +230,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p><strong>host.docker.internal</strong>: 컨테이너 내부에서 '호스트 PC' 그 자체를 가리키는 특수 주소입니다. 컨테이너 안에서 localhost라고 입력하면 호스트 PC가 아닌 <strong>컨테이너 자기 자신을</strong> 가리키게 됩니다. 따라서 호스트 PC에 열려 있는 포트에 접근하려면 이 <strong>별칭을</strong> 사용해야 합니다.</p>
 </div>
 <p>오픈이는 이 우회 방식이 다소 번거롭고 복잡하다는 인상을 받았습니다. 하지만 이 문제는 곧 이어질 3.3절에서 배울 '사용자 정의 네트워크'를 통해 해결됩니다.</p>
-<h3>3.2.4 실습 ② 로드밸런싱</h3>
+<h3>3.2.4 실습 2 로드밸런싱</h3>
 <p>경로에 따라 서버를 나누는 방법은 이제 익혔습니다. 하지만 문득 똑같은 앱을 두 대, 세 대로 복제해서 운영하려면 NGINX 설정을 어떻게 바꿔야 할지 궁금해졌습니다.</p>
 <p class="thought">'업스트림을 여러 개 만들어야 할까? 아니면 하나 안에 서버 주소를 여러 개 넣을 수 있을까?'</p>
 <p>답은 후자였습니다. upstream 블록 안에 server 줄을 추가하기만 하면 NGINX가 들어오는 요청을 순서대로 뿌려줍니다. 마치 놀이공원 매표소 창구 두 곳이 손님을 번갈아 가며 받는 것과 비슷합니다. 이러한 방식을 <strong>라운드 로빈(Round Robin)</strong> 이라고 부릅니다.</p>
@@ -265,7 +265,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <p>새로고침을 할 때마다 요청이 8000번 컨테이너와 8001번 컨테이너로 번갈아 들어오는 것을 눈으로 확인할 수 있었습니다. 설정 파일에 server 줄 하나를 추가했을 뿐인데, NGINX가 알아서 트래픽을 두 대의 서버로 나누어 보내준 것입니다. 별도의 복잡한 세팅 없이도 기본적으로 라운드 로빈 방식이 적용된 결과였습니다.</p>
 <p class="thought">'서버가 100대로 늘어나도 결국 이 파일에 한 줄만 더 추가하면 끝나는 거네. 되게 간단하네?'</p>
 <p>오픈이는 NGINX를 활용한 부하 분산의 편리함을 실감하며 다음 실습으로 넘어갔습니다.</p>
-<h3>3.2.5 실습 ③ 캐싱</h3>
+<h3>3.2.5 실습 3 캐싱</h3>
 <p>로드밸런싱 테스트를 하던 오픈이는 문득 백엔드 서버의 로그를 보고 멈춰 섰습니다. 새로고침을 할 때마다 화면에 있는 똑같은 로고 이미지 파일 요청이 백엔드까지 계속 전달되고 있었기 때문입니다.</p>
 <p class="thought">'똑같은 파일인데 굳이 매번 백엔드까지 가서 가져와야 하나? 요청이 몰리면 서버에 부하가 많겠는데...'</p>
 <p>자주 꺼내 입는 옷을 옷장 깊숙이 넣지 않고 옷걸이에 따로 걸어두는 것처럼, 자주 요청되는 파일을 NGINX 앞단에 잠시 보관해두면 효율적입니다. 이 과정을 **캐싱(Caching)**이라고 부릅니다.</p>
@@ -303,8 +303,8 @@ proxy_cache_path로 어디에 얼마만큼 보관할지 틀을 짜고, location 
 <span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://host.docker.internal:5000</span><span class="p">;</span>
 <span class="w">        </span><span class="kn">proxy_cache</span><span class="w"> </span><span class="s">my_cache</span><span class="p">;</span><span class="w">                        </span><span class="c1"># 선언한 캐시 공간을 사용합니다.</span>
 <span class="w">        </span><span class="kn">proxy_cache_valid</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="mi">1m</span><span class="p">;</span><span class="w">                    </span><span class="c1"># 정상 응답(200)을 1분 동안 보관합니다.</span>
-<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Cache-Status</span><span class="w"> </span><span class="nv">$upstream_cache_status</span><span class="w"> </span><span class="s">always</span><span class="p">;</span><span class="w">  </span><span class="c1"># 헤더에 HIT/MISS 여부를 표시합니다.</span>
-<span class="w">        </span><span class="kn">proxy_ignore_headers</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">Expires</span><span class="p">;</span><span class="w">  </span><span class="c1"># 백엔드의 캐시 제어 설정을 무시하고 NGINX 설정을 따릅니다.</span>
+<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Cache-Status</span><span class="w"> </span><span class="nv">$upstream_cache_status</span><span class="w"> </span><span class="s">always</span><span class="p">;</span><span class="w">  </span><span class="c1"># HIT/MISS 표시</span>
+<span class="w">        </span><span class="kn">proxy_ignore_headers</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">Expires</span><span class="p">;</span><span class="w">  </span><span class="c1"># 백엔드 캐시 헤더 무시 (NGINX 설정 우선)</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <p>오픈이는 터미널을 열고 실습 환경을 실행했습니다.</p>
@@ -346,7 +346,33 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <p>Redis 컨테이너와 API 컨테이너를 띄우고 나면, 두 컨테이너가 서로를 어떻게 호출할 것인가가 숙제로 남습니다. host.docker.internal나 컨테이너 IP가 아닌 컨테이너의 이름을 그대로 주소처럼 쓰면 편할 것 같았기 때문입니다.</p>
 <p class="thought">'지난 예제에서는 호스트 IP를 거쳐서 돌아갔지만, 이번에는 네트워크를 하나 만들어서 이름으로 바로 묶어보자.'</p>
 <p>이 문제를 해결하기 위해 드디어 **사용자 정의 네트워크(User-defined Network)**를 사용할 차례입니다. 사용자 정의 네트워크 안에 있는 컨테이너들은 도커 내부의 **DNS(Domain Name System)**가 컨테이너 이름을 IP 주소로 자동 변환해 줍니다. 덕분에 번거로운 우회 없이 컨테이너 이름을 도메인 주소처럼 바로 쓸 수 있습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\net-05-docker-dns.png" alt="" /></div><p class="thought">그림 3-23. 사용자 정의 네트워크 — 같은 네트워크 안의 컨테이너끼리 이름으로 호출</p>
+<div class="svg-figure">
+<svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="사용자 정의 네트워크에서 이름으로 통신하는 흐름">
+  <defs>
+    <marker id="dn23-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="dn23-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="350" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">사용자 정의 네트워크 — 이름으로 컨테이너 호출</text>
+  <rect x="20" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="100" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">api 컨테이너</text>
+  <text x="100" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.2</text>
+  <rect x="270" y="55" width="160" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="350" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Docker DNS</text>
+  <text x="350" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">127.0.0.11</text>
+  <rect x="520" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="600" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">redis 컨테이너</text>
+  <text x="600" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.3</text>
+  <line x1="180" y1="77" x2="270" y2="77" stroke="#475569" stroke-width="1.8" marker-end="url(#dn23-p)"/>
+  <text x="225" y="70" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">1.</tspan> redis의 IP는?</text>
+  <line x1="270" y1="103" x2="180" y2="103" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#dn23-o)"/>
+  <text x="225" y="118" text-anchor="middle" font-size="11" fill="#7b341e"><tspan font-weight="700">2.</tspan> 172.18.0.3</text>
+  <path d="M 100 125 L 100 180 L 600 180 L 600 125" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#dn23-p)"/>
+  <rect x="265" y="168" width="170" height="22" rx="4" fill="#fff"/>
+  <text x="350" y="183" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.18.0.3 으로 요청</text>
+  <text x="350" y="218" text-anchor="middle" font-size="10" fill="#6b7280">사용자 정의 네트워크에서만 자동 DNS가 켜집니다 (기본 docker0에는 없음)</text>
+</svg>
+</div>
+<p class="thought">그림 3-23. 사용자 정의 네트워크 — 같은 네트워크 안의 컨테이너끼리 이름으로 호출</p>
 <p>실습에 필요한 네트워크 관련 명령어는 세 가지입니다.</p>
 <table>
 <thead>
@@ -429,8 +455,8 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <p>이번 실습에서는 과정을 단순하게 보여드리기 위해 비밀번호를 Dockerfile에 직접 적었습니다. 하지만 실무에서 이런 방식은 매우 위험합니다. 이미지를 빌드하는 순간 이미지를 가진 사람 누구나 비밀번호를 볼 수 있기 때문입니다. 그래서 실제 서비스를 운영할 때는 비밀번호 같은 민감한 정보를 이미지 내부에 기록하지 않고 외부에 따로 보관해 두었다가, 컨테이너가 실행되는 시점에만 살짝 건네주는 방식을 사용합니다. 이 방식은 쿠버네티스에서 사용해보겠습니다.</p>
 </div>
 <p>오픈이는 ex05 폴더의 파일로 이미지를 빌드하고 컨테이너를 실행했습니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>db<span class="w"> </span>ex05/db
-docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">3306</span>:3306<span class="w"> </span>db</div>
+<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>db<span class="w"> </span>ex05/db<span class="w">          </span><span class="c1"># ex05/db의 Dockerfile로 db 이미지 빌드</span>
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">3306</span>:3306<span class="w"> </span>db<span class="w">     </span><span class="c1"># db 컨테이너를 3306 포트로 실행</span></div>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-43.png" alt="" /></div><p class="thought">그림 3-26. MySQL 컨테이너 실행 로그</p>
 <p>데이터가 잘 들어갔는지 확인하기 위해 실행 중인 컨테이너 내부로 직접 진입해 보기로 했습니다. docker ps로 컨테이너 ID를 확인한 뒤, docker exec 명령어를 사용했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>ps<span class="w">                    </span><span class="c1"># 실행 중인 컨테이너 확인</span>
@@ -440,10 +466,10 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <div class="code-block highlight" data-lang="bash">mysql<span class="w"> </span>-u<span class="w"> </span>metacoding<span class="w"> </span>-p<span class="w">      </span><span class="c1"># MySQL 접속 (비밀번호 입력 창이 뜨면 metacoding1234 입력)</span></div>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-45.png" alt="" /></div><p class="thought">그림 3-28. MySQL 접속 성공</p>
 <p>접속 후에는 DB 목록과 테이블, 그리고 초기 데이터를 차례로 조회해 보았습니다.</p>
-<div class="code-block highlight" data-lang="sql"><span class="k">show</span><span class="w"> </span><span class="n">databases</span><span class="p">;</span>
-<span class="n">use</span><span class="w"> </span><span class="n">metadb</span><span class="p">;</span>
-<span class="k">show</span><span class="w"> </span><span class="n">tables</span><span class="p">;</span>
-<span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">user_tb</span><span class="p">;</span></div>
+<div class="code-block highlight" data-lang="sql"><span class="k">show</span><span class="w"> </span><span class="n">databases</span><span class="p">;</span><span class="w">            </span><span class="c1">-- MySQL 서버에 있는 DB 목록 조회</span>
+<span class="n">use</span><span class="w"> </span><span class="n">metadb</span><span class="p">;</span><span class="w">                </span><span class="c1">-- metadb를 사용할 DB로 선택</span>
+<span class="k">show</span><span class="w"> </span><span class="n">tables</span><span class="p">;</span><span class="w">               </span><span class="c1">-- metadb 안의 테이블 목록 조회</span>
+<span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">user_tb</span><span class="p">;</span><span class="w">     </span><span class="c1">-- user_tb 테이블의 전체 행 조회</span></div>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-46.png" alt="" /></div><p class="thought">그림 3-29. 데이터베이스 목록 확인</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-47.png" alt="" /></div><p class="thought">그림 3-30. user_tb 데이터 조회 결과</p>
 <p>init.sql에 적어두었던 초기 데이터들이 테이블에 안전하게 담겨 있는 것을 확인했습니다.</p>
@@ -534,33 +560,60 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex06</p>
 </blockquote>
 <p><strong>ex06/docker-compose.yml</strong></p>
-<div class="code-block highlight" data-lang="yaml"><span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">app1</span><span class="p">:</span>
+<div class="code-block highlight" data-lang="yaml"><span class="nt">services</span><span class="p">:</span><span class="w">                          </span><span class="c1"># 컨테이너 단위로 실행할 서비스 묶음</span>
+<span class="w">  </span><span class="nt">app1</span><span class="p">:</span><span class="w">                            </span><span class="c1"># 첫 번째 서비스 이름 (다른 서비스가 부를 때 호스트명이 됨)</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./app1</span><span class="w">        </span>
+<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./app1</span><span class="w">              </span><span class="c1"># ./app1 폴더의 Dockerfile로 이미지 빌드</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000:80</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000:80</span><span class="w">                    </span><span class="c1"># 호스트 8000 → 컨테이너 80 포워딩</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex06-network</span>
-<span class="w">  </span><span class="nt">app2</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex06-network</span><span class="w">               </span><span class="c1"># ex06-network에 연결</span>
+<span class="w">  </span><span class="nt">app2</span><span class="p">:</span><span class="w">                            </span><span class="c1"># 두 번째 서비스</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./app2</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9000:80</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9000:80</span><span class="w">                    </span><span class="c1"># 호스트 9000 → 컨테이너 80</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex06-network</span>
-<span class="w">  </span><span class="nt">lb</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lb</span><span class="p">:</span><span class="w">                              </span><span class="c1"># 로드밸런서(nginx) 서비스</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./lb</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:80</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:80</span><span class="w">                      </span><span class="c1"># 호스트 80 → 컨테이너 80</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex06-network</span>
 
 <span class="nt">networks</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">ex06-network</span><span class="p">:</span></div>
+<span class="w">  </span><span class="nt">ex06-network</span><span class="p">:</span><span class="w">                    </span><span class="c1"># 세 서비스가 공유하는 사용자 정의 네트워크</span></div>
 <p>여기서 결정적인 차이가 생깁니다. <strong>lb/nginx.conf</strong> 설정 파일에서 백엔드 주소를 적을 때, 더 이상 host.docker.internal을 쓸 필요가 없습니다. Compose가 자동으로 만든 네트워크 덕분에 app1:80, <strong>app2:80</strong>처럼 서비스 이름으로 바로 부를 수 있기 때문입니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\net-06-compose-network.png" alt="" /></div><p class="thought">그림 3-33. Compose가 자동 생성한 네트워크에서 서비스 이름으로 통신</p>
+<div class="svg-figure">
+<svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Compose 네트워크에서 서비스 이름으로 통신">
+  <defs>
+    <marker id="cn-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="cn-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="350" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Compose 네트워크 — 서비스 이름으로 통신</text>
+  <rect x="20" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="100" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">lb (NGINX)</text>
+  <text x="100" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.2</text>
+  <rect x="270" y="55" width="160" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="350" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Docker DNS</text>
+  <text x="350" y="98" text-anchor="middle" font-size="10" fill="#7b341e">(자동 생성)</text>
+  <text x="350" y="113" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">127.0.0.11</text>
+  <rect x="520" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="600" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">app1 컨테이너</text>
+  <text x="600" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.3</text>
+  <line x1="180" y1="77" x2="270" y2="77" stroke="#475569" stroke-width="1.8" marker-end="url(#cn-p)"/>
+  <text x="225" y="70" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">1.</tspan> app1의 IP는?</text>
+  <line x1="270" y1="103" x2="180" y2="103" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#cn-o)"/>
+  <text x="225" y="118" text-anchor="middle" font-size="11" fill="#7b341e"><tspan font-weight="700">2.</tspan> 172.18.0.3</text>
+  <path d="M 100 125 L 100 180 L 600 180 L 600 125" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#cn-p)"/>
+  <rect x="270" y="168" width="160" height="22" rx="4" fill="#fff"/>
+  <text x="350" y="183" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.18.0.3 으로 요청</text>
+  <text x="350" y="218" text-anchor="middle" font-size="10" fill="#6b7280">Compose가 docker-compose.yml의 서비스 이름으로 자동 DNS 등록</text>
+</svg>
+</div>
+<p class="thought">그림 3-33. Compose가 자동 생성한 네트워크에서 서비스 이름으로 통신</p>
 <p>이제 터미널을 열고 ex06의 docker-compose.yml로 명령어를 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>ex06/docker-compose.yml<span class="w"> </span>up<span class="w">   </span><span class="c1"># 모든 컨테이너 한 번에 실행</span></div>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-52.png" alt="" /></div><p class="thought">그림 3-34. docker compose up 실행 결과</p>
@@ -601,7 +654,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </tr>
 </tbody>
 </table>
-<h2>3.6 종합 실습 — 풀스택 웹사이트</h2>
+<h2>3.6 종합 실습 — 통합 웹사이트</h2>
 <p>오픈이는 이제 각각의 컨테이너를 실행하는 법과 이를 컴포즈로 묶는 법을 익혔습니다. 이제 이 조각들을 모아 실제 서비스와 유사한 프론트엔드(NGINX) + 백엔드(Spring Boot) + DB(MySQL) 세트를 조립해 볼 차례입니다. docker compose up 한 줄로 전체 시스템을 가동하는 것이 이번 실습의 최종 목표입니다.</p>
 <blockquote>
 <p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex07</p>
@@ -633,11 +686,11 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p>백엔드 설정을 보던 오픈이는 특이한 점을 발견했습니다. 소스 코드를 미리 빌드해서 넣지 않고, 컨테이너가 뜨는 시점에 깃허브에서 코드를 가져와 즉석에서 빌드하도록 구성되어 있었습니다.</p>
 <p><strong>ex07/backend/entrypoint.sh</strong></p>
 <div class="code-block highlight" data-lang="bash"><span class="ch">#!/bin/bash</span>
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-10-linux-docker/backend-server
-<span class="nb">cd</span><span class="w"> </span>backend-server
-chmod<span class="w"> </span>+x<span class="w"> </span>gradlew
-./gradlew<span class="w"> </span>build
-java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active<span class="o">=</span>prod<span class="w"> </span>build/libs/*.jar</div>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-10-linux-docker/backend-server<span class="w">   </span><span class="c1"># 백엔드 소스 내려받기</span>
+<span class="nb">cd</span><span class="w"> </span>backend-server<span class="w">                       </span><span class="c1"># 클론한 폴더로 이동</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>gradlew<span class="w">                        </span><span class="c1"># 실행 권한 부여</span>
+./gradlew<span class="w"> </span>build<span class="w">                         </span><span class="c1"># Gradle로 JAR 빌드</span>
+java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active<span class="o">=</span>prod<span class="w"> </span>build/libs/*.jar<span class="w">   </span><span class="c1"># prod 프로필로 실행</span></div>
 <div class="tip">
 <p><strong>실제 운영 환경과의 차이</strong></p>
 <p>운영 환경에서는 이미지를 빌드하는 시점에 JAR 파일을 미리 포함시키는 것이 일반적입니다. 여기서는 별도의 로컬 빌드 환경 없이도 누구나 바로 실습할 수 있도록 실행 시점에 빌드하는 방식을 썼습니다.</p>
@@ -647,41 +700,42 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 <p>오픈이는 마지막으로 모든 서비스를 연결하는 설정 파일을 작성했습니다.</p>
 <p><strong>ex07/docker-compose.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w">                          </span><span class="c1"># Spring Boot 백엔드 서비스</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./backend</span>
+<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./backend</span><span class="w">            </span><span class="c1"># ./backend 폴더의 Dockerfile로 빌드</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:8080&quot;</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8080:8080&quot;</span><span class="w">                 </span><span class="c1"># 호스트 8080 → 컨테이너 8080</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">                    </span><span class="c1"># 컨테이너에 주입할 환경 변수</span>
+<span class="w">      </span><span class="c1"># DB 접속 URL (호스트명 db = 아래 db 서비스명)</span>
 <span class="w">      </span><span class="nt">SPRING_DATASOURCE_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://db:3306/metadb?useSSL=false&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;allowPublicKeyRetrieval=true</span>
-<span class="w">      </span><span class="nt">SPRING_DATASOURCE_DRIVER_CLASS_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">com.mysql.cj.jdbc.Driver</span>
-<span class="w">      </span><span class="nt">SPRING_DATASOURCE_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span>
-<span class="w">      </span><span class="nt">SPRING_DATASOURCE_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root1234</span>
+<span class="w">      </span><span class="nt">SPRING_DATASOURCE_DRIVER_CLASS_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">com.mysql.cj.jdbc.Driver</span><span class="w">   </span><span class="c1"># JDBC 드라이버 클래스</span>
+<span class="w">      </span><span class="nt">SPRING_DATASOURCE_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span><span class="w">                                </span><span class="c1"># DB 계정</span>
+<span class="w">      </span><span class="nt">SPRING_DATASOURCE_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root1234</span><span class="w">                            </span><span class="c1"># DB 비밀번호</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex07-network</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex07-network</span><span class="w">                </span><span class="c1"># 공용 네트워크 연결</span>
 
-<span class="w">  </span><span class="nt">db</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w">                               </span><span class="c1"># MySQL DB 서비스</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./db</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306:3306</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3306:3306</span><span class="w">                   </span><span class="c1"># 호스트 3306 → 컨테이너 3306</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex07-network</span>
 
-<span class="w">  </span><span class="nt">frontend</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">frontend</span><span class="p">:</span><span class="w">                         </span><span class="c1"># nginx 프론트엔드 서비스</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./frontend</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:80&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:80&quot;</span><span class="w">                     </span><span class="c1"># 호스트 80 → 컨테이너 80</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex07-network</span>
 
 <span class="nt">networks</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">ex07-network</span><span class="p">:</span></div>
+<span class="w">  </span><span class="nt">ex07-network</span><span class="p">:</span><span class="w">                     </span><span class="c1"># backend·db·frontend가 공유하는 네트워크</span></div>
 <p>backend의 <code>SPRING_DATASOURCE_URL</code>에 들어간 <code>jdbc:mysql://db:3306/...</code>이 DB 컨테이너를 이름으로 부르는 지점입니다.</p>
 <h3>3.6.4 한 줄로 전체 띄우기</h3>
 <p>오픈이는 터미널에서 ex07의 docker-compose.yml로 서비스를 실행했습니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>ex07/docker-compose.yml<span class="w"> </span>up</div>
+<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>ex07/docker-compose.yml<span class="w"> </span>up<span class="w">   </span><span class="c1"># compose 파일 기반으로 서비스 일괄 실행</span></div>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-ex07-compose.png" alt="" /></div><p class="thought">그림 3-36. docker compose up 한 줄로 세 컨테이너가 동시에 뜨는 모습</p>
 <p>백엔드가 소스를 가져와 빌드하는 과정이 있어 첫 실행 시에는 시간이 다소 걸렸습니다. 빌드가 완료된 후 브라우저에서 localhost:80에 접속하자, DB에서 가져온 사용자 목록이 화면에 나타났습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-58.png" alt="" /></div><p class="thought">그림 3-37. 사용자 목록 조회 성공</p>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CH01 학습 로드맵 — 단계 진화</title>
+
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+
+<style>
+  body { background: #f7f8fa; }
+  .container { max-width: 980px; margin: 0 auto; padding: 32px 24px; }
+  .preview-header {
+    background: var(--color-accent);
+    color: #fff;
+    padding: 18px 22px;
+    border-radius: 10px;
+    margin-bottom: 28px;
+  }
+  .preview-header h1 { color:#fff; margin:0 0 6px; font-size:20px; }
+  .preview-header p { margin:0; opacity:0.9; font-size:14px; }
+
+  .option-section {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 32px 22px 28px;
+    margin-bottom: 32px;
+  }
+  .option-section h2 {
+    margin-top: 0;
+    font-size: 18px;
+    color: var(--color-accent);
+    border-bottom: 2px solid var(--color-accent-bg);
+    padding-bottom: 8px;
+  }
+  .option-meta {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  /* ====================================================================== */
+  /* evolve-flow — 단계별 좌→우 진화                                         */
+  /* ====================================================================== */
+  .evolve-flow {
+    display: grid;
+    grid-template-columns: 1fr 24px 1fr 24px 1fr 24px 1fr 24px 1fr;
+    align-items: stretch;
+    column-gap: 4px;
+    padding: 12px 4px;
+  }
+  .ev-card {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px 12px 16px;
+    text-align: center;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: none;
+  }
+  .ev-step {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--color-accent-warm);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    box-shadow: 0 1px 3px rgba(255,120,73,0.25);
+    margin-bottom: 4px;
+  }
+  .ev-meta {
+    font-size: 10.5px;
+    color: var(--color-text-muted);
+    letter-spacing: 0.2px;
+    font-weight: 600;
+  }
+  .ev-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-heading);
+    line-height: 1.2;
+  }
+  .ev-add {
+    font-size: 11.5px;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+    margin-top: 4px;
+    border-top: 1px dashed var(--color-border);
+    padding-top: 8px;
+    width: 100%;
+  }
+  .ev-arrow {
+    align-self: center;
+    color: var(--color-accent);
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.6;
+  }
+
+  .ev-caption {
+    text-align: center;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 14px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="preview-header">
+  <h1>CH01 학습 로드맵 — 단계 진화</h1>
+  <p>특이점이 온 개발자: 도커·쿠버네티스 / CH02~CH06 / 좌→우 한 단계씩</p>
+</div>
+
+<section class="option-section">
+  <h2>evolve-flow — 단계별 좌→우 진화 (제안 디자인)</h2>
+  <p class="option-meta">5개 카드를 좌→우로 늘어놓고 화살표로 연결. 각 단계가 무엇을 더하는지 카드 안에서 짧게 설명. 마지막 단계만 강조색.</p>
+
+  <div class="evolve-flow">
+
+    <!-- Stage 1 — CH02 -->
+    <div class="ev-card">
+      <div class="ev-step">1</div>
+      <div class="ev-meta">CH02 · Docker</div>
+      <div class="ev-name">이해하기</div>
+      <div class="ev-add">컨테이너를 띄운다</div>
+    </div>
+
+    <div class="ev-arrow">→</div>
+
+    <!-- Stage 2 — CH03 -->
+    <div class="ev-card">
+      <div class="ev-step">2</div>
+      <div class="ev-meta">CH03 · Docker</div>
+      <div class="ev-name">다루기</div>
+      <div class="ev-add">여러 개를 한 번에 묶는다</div>
+    </div>
+
+    <div class="ev-arrow">→</div>
+
+    <!-- Stage 3 — CH04 -->
+    <div class="ev-card">
+      <div class="ev-step">3</div>
+      <div class="ev-meta">CH04 · Kubernetes</div>
+      <div class="ev-name">시작하기</div>
+      <div class="ev-add">스스로 살아나게 한다</div>
+    </div>
+
+    <div class="ev-arrow">→</div>
+
+    <!-- Stage 4 — CH05 -->
+    <div class="ev-card">
+      <div class="ev-step">4</div>
+      <div class="ev-meta">CH05 · Kubernetes</div>
+      <div class="ev-name">네트워킹</div>
+      <div class="ev-add">주소를 고정해 길을 낸다</div>
+    </div>
+
+    <div class="ev-arrow">→</div>
+
+    <!-- Stage 5 — CH06 -->
+    <div class="ev-card">
+      <div class="ev-step">5</div>
+      <div class="ev-meta">CH06 · Kubernetes</div>
+      <div class="ev-name">운영하기</div>
+      <div class="ev-add">비밀·데이터를 지키고 통합 운영</div>
+    </div>
+
+  </div>
+
+  <div class="ev-caption">한 단계씩 다음 챕터로 진화하며 마지막 단계에서 K8s 통합 운영에 도달합니다</div>
+</section>
+
+</div>
+</body>
+</html>
