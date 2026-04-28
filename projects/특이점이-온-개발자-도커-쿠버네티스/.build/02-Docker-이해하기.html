@@ -44,7 +44,8 @@
 <p class="thought">'아! 도커는 내 컴퓨터 OS 하나를 여러 컨테이너가 나눠 쓰면서, 각자 격리된 공간에서 따로 돌게 하는 거구나.'</p>
 <h3>2.1.2 IT로 옮긴 구조</h3>
 <p>비유만 머리에 두면 나중에 실제 용어와 헷갈립니다. 오픈이는 이 주방 그림을 IT 구조로 옮겨 그려봤습니다.</p>
-<p>맨 아래에 <strong>하드웨어</strong>, 그 위에 <strong>호스트 OS</strong>, 그 위에 <strong>Docker 엔진</strong>이 있고, Docker 엔진 위에 <strong>컨테이너</strong>가 나란히 떠 있습니다. 각 컨테이너 안에는 애플리케이션(App)과 라이브러리(Library)가 같이 들어갑니다. 주방 비유의 공용 설비가 <strong>호스트 OS</strong>, 각자의 조리대가 <strong>컨테이너</strong>입니다.</p>
+<p>맨 아래에 <strong>하드웨어</strong>, 그 위에 <strong>호스트 OS</strong>, 그 위에 <strong>Docker 엔진</strong>이 있고, Docker 엔진 위에 <strong>컨테이너</strong>가 나란히 떠 있습니다. 각 컨테이너 안에는 애플리케이션(App)과 라이브러리(Library)가 같이 들어갑니다.</p>
+<p>주방 비유의 공용 설비와 그걸 운영하는 주방장이 <strong>호스트 OS</strong> , 각자의 조리대가 <strong>컨테이너</strong>입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너 가상화 3계층 구조: 하드웨어 위에 호스트 OS와 Docker 엔진, 그 위에 컨테이너들">
   <text x="40" y="20" font-size="11" font-weight="700" fill="#7b341e">애플리케이션 계층</text>
@@ -74,17 +75,18 @@
 </svg>
 </div>
 <p class="thought">그림 2-4. 컨테이너 가상화의 전체 구조</p>
+<p>그중 주방장이 OS의 핵심, 곧 <strong>커널</strong>입니다. 요리사들은 주방장의 명령에 따라 움직이고, 어떤 위치에서 어떤 역할을 할지도 주방장이 정합니다.</p>
 <div class="term-box">
 <p><strong>커널(Kernel)</strong>: 운영체제(OS)의 핵심입니다. 프로세스 생성, 메모리 관리, 격리 공간 생성을 담당합니다. Docker의 모든 컨테이너는 호스트 PC의 <strong>같은 리눅스 커널</strong>을 공유하고, 그 하나의 커널이 각 컨테이너에 격리 공간을 할당합니다.</p>
 </div>
-<p>구조의 핵심은 <strong>호스트 OS의 커널 하나를 모든 컨테이너가 공유</strong>한다는 점입니다. VM처럼 OS를 통째로 따로 올리지 않으니 가볍고 빠르게 뜹니다. Docker 엔진은 그 커널에 <strong>&quot;새 격리 공간을 만들어 달라&quot;</strong> 고 요청하는 중개자이고, 실제로 <strong>파일시스템·네트워크·프로세스 공간을 쪼개 주는 일은 커널</strong>이 합니다. 그래서 다른 컨테이너가 다른 앱과 다른 라이브러리를 가져도 충돌하지 않고, 한쪽이 런타임을 업그레이드해도 옆 컨테이너는 영향을 받지 않습니다.</p>
+<p>구조의 핵심은 <strong>호스트 OS의 커널 하나를 모든 컨테이너가 공유</strong>한다는 점입니다. VM처럼 OS를 통째로 따로 올리지 않으니 가볍고 빠르게 뜹니다. Docker 엔진은 그 커널에 <strong>&quot;새 격리 공간을 만들어 달라&quot;</strong> 고 요청을 하면, 실제로 프로세스를 격리하는 일은 <strong>커널</strong>이 합니다. 그래서 다른 컨테이너가 다른 앱과 다른 라이브러리를 가져도 충돌하지 않고, 한쪽이 런타임을 업그레이드해도 옆 컨테이너는 영향을 받지 않습니다.</p>
 <div class="prep-note">
 <p><strong>컨테이너의 격리</strong></p>
 <p>사실 컨테이너 안에서 도는 것은 처음부터 격리된 무언가가 아니라, 호스트 OS 위에서 다른 것들과 함께 도는 <strong>평범한 프로세스</strong>입니다. 그대로 두면 한 컨테이너의 프로세스가 다른 컨테이너의 파일을 들여다보거나, 두 컨테이너가 같은 포트를 두고 충동할 수 있습니다.
-그래서 <strong>리눅스 커널</strong>은 컨테이너마다 <strong>파일시스템</strong>(<code>/bin</code>, <code>/lib</code> 같은 폴더), <strong>네트워크</strong>(IP와 포트), <strong>프로세스 공간</strong>(PID 번호) 세 가지 공간을 따로 만들어 줍니다. 이렇게 세 공간이 컨테이너마다 분리된 상태가 곧 <strong>격리</strong>입니다. 덕분에 한 컨테이너가 라이브러리를 업그레이드해도 다른 컨테이너는 영향이 없고, 두 컨테이너가 같은 포트 번호를 써도 충돌하지 않습니다.</p>
+그래서 <strong>리눅스 커널</strong>은 컨테이너마다 <strong>파일시스템</strong>(<code>/bin</code>, <code>/lib</code> 같은 폴더), <strong>네트워크</strong>(IP와 포트), <strong>프로세스</strong> (PID 번호) 세 가지 공간을 따로 만들어 줍니다. 이렇게 컨테이너마다 세 공간을 따로 갖는 상태가 바로 <strong>격리</strong>입니다.</p>
 </div>
 <h3>2.1.3 컨테이너가 만들어지는 과정</h3>
-<p>오픈이는 이제 컨테이너의 개념을 잡았지만, <strong>어떻게 만들어지는지</strong>까지는 아직 그림이 그려지지 않았습니다. 컨테이너를 실제로 띄우기 전에 한 줄의 명령 뒤에서 무슨 일이 돌아가는지 눈에 들어와 있어야, 나중에 직접 손으로 칠 때 기계적으로 외우지 않고 의미를 이해한 채로 칠 수 있을 것 같았습니다.</p>
+<p>오픈이는 이제 컨테이너의 개념을 잡았지만, <strong>어떻게 만들어지는지</strong>까지는 아직 그림이 그려지지 않았습니다. 컨테이너를 실제로 띄우기 전에 한 줄의 명령 뒤에서 무슨 일이 돌아가는지 눈에 들어와 있어야, 나중에 직접 명령어를 칠 때 기계적으로 외우지 않고 의미를 이해한 채로 칠 수 있을 것 같았습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-9.png" alt="" /></div><p class="thought">그림 2-5. 컨테이너 실행 명령이 커널의 격리 기능을 타고 컨테이너가 되는 흐름</p>
 <ol>
 <li>사용자가 컨테이너를 실행하라는 명령을 친다.</li>
@@ -93,8 +95,8 @@
 <li>커널이 격리 공간(파일시스템/네트워크/프로세스)을 만들고, 그 안에서 새 프로세스를 띄운다.</li>
 <li>이 격리된 프로세스가 곧 <strong>컨테이너</strong>다.</li>
 </ol>
-<p>컨테이너를 실제로 만드는 건 Docker 엔진이 아니라 커널입니다. 커널이 건물 관리인이라면, Docker 엔진은 프런트 직원에 가깝습니다. 입주자(프로세스)가 들어오면 프런트가 관리인에게 방 배정을 요청합니다. 실제로 방을 비우고 열쇠를 건네는 일은 관리인이 합니다.</p>
-<p>오픈이는 노트에 &quot;엔진=프런트, 커널=관리인&quot;이라고 한 줄 적었습니다. 적고 나니 컨테이너의 정체와 만들어지는 과정이 머릿속에서 정리됐습니다.</p>
+<p>컨테이너를 실제로 만드는 건 Docker 엔진이 아니라 커널입니다. 커널이 주방장이라면, Docker 엔진은 홀의 프런트 직원에 가깝습니다. 새 주문이 들어오면 프런트가 주방장에게 전달합니다. 실제로 새 요리사(프로세스)를 불러 작업을 시작시키는 건 주방장이 합니다.</p>
+<p>오픈이는 노트에 &quot;엔진=프런트, 커널=주방장&quot;이라고 한 줄 적었습니다. 적고 나니 컨테이너의 정체와 만들어지는 과정이 머릿속에서 정리됐습니다.</p>
 <p class="thought">'그럼 이 안에서 뭘 실행할지는 어디서 정해지지.'</p>
 <h2>2.2 이미지 — 컨테이너의 설계도</h2>
 <p>컨테이너가 격리된 프로세스라는 건 알았지만, 그 프로세스가 무엇을 실행할지를 결정하는 원본이 따로 있어야 합니다. 그 원본이 <strong>이미지</strong>입니다.</p>
@@ -102,19 +104,19 @@
 <p>이미지는 붕어빵 틀에 가깝습니다. 틀(이미지) 하나로 붕어빵(컨테이너)을 여러 개 찍어낼 수 있고, 틀 자체는 변하지 않습니다. 같은 이미지에서 나온 컨테이너는 어디서 띄우든 똑같은 환경을 가집니다. 이 덕에 &quot;내 PC와 서버 환경이 같다&quot;가 가능합니다. 로컬에서 만든 <strong>이미지</strong>를 서버에서 그대로 꺼내 실행하면, 서버의 런타임 버전이 뭐든 컨테이너는 자기 이미지 안의 런타임으로 돕니다.</p>
 <p>이미지는 <strong>Docker Hub</strong>라는 공용 저장소에서 내려받을 수도 있고, 직접 만들어 올릴 수도 있습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\fig-1-bp-0.png" alt="" /></div><p class="thought">그림 2-7. Docker의 전체 흐름</p>
-<p>이 순환의 핵심은 <strong>이미지가 양 끝을 이어준다</strong>는 점입니다. 한쪽에서 만든 이미지를 Hub에 올려두면, 반대쪽에서 그대로 받아 같은 컨테이너를 띄울 수 있습니다. 내 PC에서 세팅한 환경을 서버에서 재현하는 일도, 팀원끼리 환경을 공유하는 일도 <code>push</code>/<code>pull</code> 두 동작으로 끝납니다. <strong>이미지 받고 → 컨테이너 만들고 → 수정하고 → 다시 이미지로 저장</strong>. Docker의 일상은 대부분 이 네 동작의 반복입니다.</p>
+<p>Docker hub를 활용하면 내 PC에서 세팅한 환경을 서버에서 재현하는 일도, 팀원끼리 환경을 공유하는 일도 가능합니다.</p>
 <div class="tip">
 <p><strong>이미지 레이어</strong></p>
-<p>이미지 안에는 OS 기본 라이브러리, 런타임, 애플리케이션, 설정 파일이 <strong>레이어</strong>로 겹쳐 쌓여 있습니다. 아래 레이어는 재사용되고 캐싱되기 때문에, 앱만 바뀌면 맨 위 레이어만 새로 받으면 됩니다. 이미지 전체를 매번 통째로 내려받지 않아도 되는 이유입니다. 커널은 호스트와 공유하므로 이미지에 들어가지 않습니다. 이게 이미지가 가벼운 이유입니다.</p>
+<p>이미지는 한 덩어리가 아니라 여러 <strong>레이어</strong>가 층층이 쌓인 구조입니다. 아래쪽에는 OS 기본 라이브러리나 런타임처럼 잘 안 바뀌는 부분이 있고, 위쪽에는 애플리케이션 코드처럼 자주 바뀌는 부분이 있습니다. 한 번 받은 아래 레이어는 저장해 두고 다시 쓰기 때문에, 코드만 바뀐 새 버전이 나오면 맨 위 레이어만 새로 받으면 됩니다. 여기에 커널은 호스트와 공유하므로 이미지에 담지 않습니다. 이런 구조 덕에 도커 이미지는 OS 전체를 담는 VM 이미지에 비해 훨씬 가볍습니다.</p>
 </div>
-<p>원리는 잡혔습니다. 이제 Docker를 설치하고 직접 띄워 봅니다.</p>
+<p>원리를 알았으니 이제 Docker를 설치하고 직접 띄워 봅니다.</p>
 <h2>2.3 Docker 설치 — 실습 환경 준비</h2>
 <p>Docker Desktop 설치는 공식 사이트(https://www.docker.com/products/docker-desktop/)에서 OS에 맞는 설치 파일을 받아 기본 옵션대로 설치하면 끝입니다. 오픈이는 설치가 끝난 뒤 터미널에 버전을 찍어봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>version<span class="w">   </span><span class="c1"># Docker 버전 확인</span></div>
-<p>Client와 Server 정보가 둘 다 뜨면 설치가 완료된 겁니다. 오픈이 화면에도 두 블록이 나란히 찍혔습니다.</p>
+<p>Client와 Server 정보가 둘 다 뜨면 설치가 완료된 겁니다.</p>
 <div class="prep-note">
 <p><strong>Windows와 macOS의 내부 리눅스</strong></p>
-<p>Docker는 리눅스 커널의 기능을 쓰기 때문에, 리눅스 커널이 없는 Windows와 macOS에서는 Docker Desktop이 내부에 리눅스 환경을 한 겹 더 띄웁니다. Windows는 <strong>WSL2</strong>(Windows Subsystem for Linux 2)를, macOS는 경량 Linux VM을 씁니다. 사용자 입장에서는 신경 쓸 일이 없지만, 뒤에 나올 네트워크 얘기에서 이 차이가 중요해집니다.</p>
+<p>Docker는 리눅스 커널의 기능을 쓰기 때문에, 리눅스 기반이 아닌 Windows와 macOS에서는 Docker Desktop이 내부에 리눅스 환경을 한 겹 더 띄웁니다. Windows는 <strong>WSL2</strong>(Windows Subsystem for Linux 2)를, macOS는 경량 Linux VM을 씁니다. 사용자 입장에서는 신경 쓸 일이 없지만, 뒤에 나올 네트워크 얘기에서 이 차이가 중요해집니다.</p>
 </div>
 <h2>2.4 Docker CLI — 첫 컨테이너 띄우기</h2>
 <h3>2.4.1 docker pull: 이미지 가져오기</h3>
@@ -123,20 +125,22 @@
 <div class="chapter-image"><img src="..\assets\CH02\chap01-15.png" alt="" /></div><p class="thought">그림 2-8. nginx 이미지 다운로드 결과</p>
 <p>진행 바가 줄줄이 올라가더니 프롬프트가 돌아왔습니다. 이미지가 로컬 저장소에 받아진 것이고, 아직 실행된 건 아닙니다.</p>
 <h3>2.4.2 docker run: 컨테이너 띄우기</h3>
-<p>받아둔 이미지로 컨테이너를 띄워 봤습니다.</p>
+<p>그 다음 다운받은 이미지로 컨테이너를 띄워 봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>nginx<span class="w">   </span><span class="c1"># nginx 컨테이너 실행</span></div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-17.png" alt="" /></div><p class="thought">그림 2-9. nginx 컨테이너 실행</p>
-<p>엔터를 누르자마자 터미널이 뚝 멈췄습니다. 커서가 깜빡이지도 않고, 아무 입력도 받지 않았습니다.</p>
+<p>엔터를 누르자마자 터미널이 뚝 멈췄습니다. 커서가 깜빡이지도 않고, 아무 입력도 되지 않았습니다.</p>
 <p class="thought">'뭐가 잘못된 건가.'</p>
-<p>nginx가 <strong>포그라운드</strong> 상태로 터미널을 점유하고 있었습니다. 전화 통화가 연결된 동안 다른 전화를 받지 못하는 것과 같은 상황입니다. <code>CTRL + C</code>로 빠져나왔습니다.</p>
+<p>이는 컨테이너가 <strong>포그라운드</strong> 상태로 터미널을 점유하고 있기 때문입니다. 통화 중에는 다른 전화를 받을 수 없는 것과 같은 상황입니다.</p>
+<p>우선 오픈이는 터미널에 <code>CTRL + C</code> 를 입력해 빠져나왔습니다.</p>
 <div class="term-box">
 <p><strong>포그라운드(Foreground)</strong>: 프로세스가 터미널을 독점하는 상태입니다. 프로세스가 끝나거나 강제 종료될 때까지 그 터미널로 다른 명령을 내릴 수 없습니다.</p>
 </div>
 <h3>2.4.3 docker run -d: 백그라운드로 띄우기</h3>
-<p>컨테이너는 띄우고 터미널도 같이 쓰려면 <code>-d</code> 옵션이 필요합니다.</p>
+<p class="thought">'컨테이너는 띄운 채로 터미널도 같이 쓰려면 어떻게 해야 하지?'</p>
+<p>이 문제를 풀어주는 게 <code>-d</code> 옵션입니다. <code>-d</code> 옵션을 사용하면 백그라운드 상태에서 프로세스를 실행할 수 있습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>nginx<span class="w">   </span><span class="c1"># -d: detached, 백그라운드 실행</span></div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-18.png" alt="" /></div><p class="thought">그림 2-10. 백그라운드 실행 결과</p>
-<p>이번엔 긴 컨테이너 ID가 한 줄 찍히더니 바로 커서가 돌아왔습니다. 방금 멈췄던 터미널과 대비되면서 <code>-d</code>의 역할이 분명해졌습니다.</p>
+<p>이번엔 컨테이너 ID가 한 줄 찍히더니 바로 커서가 돌아왔습니다. 방금 멈췄던 터미널과 대비되면서 <code>-d</code>의 역할이 분명해졌습니다.</p>
 <p class="thought">'글자 하나로 포그라운드가 백그라운드가 되네.'</p>
 <h3>2.4.4 docker ps: 실행 중인 컨테이너 확인</h3>
 <p>오픈이는 백그라운드에서 돌고 있는 컨테이너가 실제로 살아 있는지 확인했습니다.</p>
@@ -182,45 +186,45 @@
 </tr>
 </tbody>
 </table>
-<p>조회는 <code>ps</code>, 로그는 <code>logs</code>, 내리기는 <code>stop</code>, 지우기는 <code>rm</code>. 이 정도로 묶어두면 필요할 때 찾아 쓸 수 있습니다.</p>
+<p>조회는 <code>ps</code>, 로그는 <code>logs</code>, 내리기는 <code>stop</code>, 지우기는 <code>rm</code>을 씁니다. 이 정도로 묶어두면 필요할 때 찾아 쓸 수 있습니다.</p>
 <p>여기까지 Docker Hub에서 이미지를 받고 실행을 했습니다. 그다음으로 오픈이의 관심은 컨테이너가 외부와 어떻게 통신하는지로 옮겨갔습니다.</p>
 <h2>2.5 통신 — 컨테이너끼리 그리고 외부와 잇기</h2>
 <p>컨테이너 안에서 앱이 돌아도 외부에서 접속할 수 없으면 쓸모가 없습니다. 격리된 프로세스라는 개념은 익혔지만, 이 격리된 것이 바깥과 어떻게 연결되는지를 모르면 컨테이너 내부를 접근할 수 없습니다. 여기서 컨테이너가 어떻게 통신하는지 큰 그림을 잡아보겠습니다.</p>
 <h3>2.5.1 네트워크 한눈에 보기</h3>
 <p>오픈이는 방금 띄운 nginx 컨테이너가 실제로 어떻게 연결되어 있는지 궁금해졌습니다. 격리된 공간이라고 했는데 서로 어떻게 오가고, 외부에서는 어떻게 들어가는지.</p>
-<p>자료를 훑어보니 컨테이너 네트워크는 세 가지로 정리되어 있었습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 길</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>.</p>
-<p>오픈이는 이해를 쉽게 하기 위해 <strong>푸드코트</strong>로 그려 봤습니다. 식당 하나가 컨테이너 하나입니다. 식당끼리는 같은 홀을 통해 연결되고, 외부 손님은 입구 키오스크에 주문을 넣어 해당 식당으로 넘기고, 이름만 아는 식당은 홀의 안내 지도를 보고 찾아갑니다.</p>
-<table>
-<thead>
-<tr>
-<th>통신 방향</th>
-<th>푸드코트에서</th>
-<th>Docker에서</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>식당(컨테이너) ↔ 식당</td>
-<td>같은 홀을 거쳐 서로 연결</td>
-<td>docker0 + veth</td>
-</tr>
-<tr>
-<td>외부 손님 → 식당</td>
-<td>입구 키오스크가 주문을 넘김</td>
-<td>포트포워딩</td>
-</tr>
-<tr>
-<td>이름으로 식당 찾기</td>
-<td>홀의 안내 지도가 이름 → 위치로</td>
-<td>Docker DNS</td>
-</tr>
-</tbody>
-</table>
-<p>이 세 경로를 차례로 풀어보겠습니다.</p>
-<h3>2.5.2 컨테이너끼리 — 푸드코트 주방과 창구</h3>
-<div class="chapter-image"><img src="..\assets\CH02\ch2-step1-namespace1.png" alt="" /></div><p class="thought">그림 2-12. 푸드코트의 식당, 픽업 창구, 홀이 컨테이너 네트워크의 비유</p>
-<p>A, B, C 식당이 벽으로 완전히 분리되어 있습니다. 서로의 내부는 볼 수 없습니다. 대신 각 식당마다 홀 쪽으로 <strong>픽업 창구</strong>가 하나씩 있어서, 음식이 그 창구를 통해 홀로 나갑니다. 주방은 독립이지만 창구와 홀 덕분에 옆 식당과도 오갈 수 있습니다.</p>
-<p>Docker의 네트워크도 이 구조입니다. 컨테이너가 뜰 때 가장 먼저 <strong>독립된 네트워크 공간(주방)</strong> 이 생깁니다. 그다음 그 공간과 호스트를 잇는 <strong>가상 케이블(창구)</strong> 이 생성됩니다. 케이블의 반대쪽 끝은 호스트의 <strong>가상 스위치(홀)</strong> 에 꽂힙니다. 같은 홀에 꽂힌 컨테이너들은 이 홀을 거쳐 서로의 IP로 직접 데이터를 주고받을 수 있습니다.</p>
+<p>자료를 훑어보니 컨테이너 네트워크는 세 가지로 정리되어 있습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 길</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>입니다.</p>
+<p>오픈이는 이해를 쉽게 하기 위해 <strong>푸드코트</strong>로 그려 봤습니다.</p>
+<h3>2.5.2 컨테이너끼리 — 주방 모니터와 통합 전광판</h3>
+<p>A, B, C 식당이 푸드코트에 입점해 있습니다. 식당끼리는 벽으로 완전히 분리되어 있어 서로의 주방을 들여다볼 수 없습니다.</p>
+<p>각 식당의 주방에는 <strong>주방 모니터</strong>가 한 대씩 있고, 푸드코트 한가운데에는 모두가 보는 <strong>통합 전광판</strong>이 걸려 있습니다. 주방 모니터와 전광판은 한 가닥의 <strong>전용 통신 케이블</strong>로 이어져 있고, 모든 식당의 케이블이 전광판 본체에 꽂혀 있습니다. 식당끼리 벽이 막혀 있어도 이 전광판을 통해 서로 정보를 주고받을 수 있습니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="푸드코트 비유 — 식당과 주방 모니터, 통합 전광판이 케이블로 이어진 구조">
+  <text x="380" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">푸드코트 — 주방 모니터와 통합 전광판</text>
+  <rect x="220" y="55" width="320" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="380" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">통합 전광판 본체</text>
+  <rect x="285" y="125" width="30" height="14" rx="3" fill="#fff" stroke="#ff7849"/>
+  <rect x="365" y="125" width="30" height="14" rx="3" fill="#fff" stroke="#ff7849"/>
+  <rect x="445" y="125" width="30" height="14" rx="3" fill="#fff" stroke="#ff7849"/>
+  <path d="M 300 139 L 130 250" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3"/>
+  <path d="M 380 139 L 380 250" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3"/>
+  <path d="M 460 139 L 630 250" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3"/>
+  <text x="395" y="200" font-size="11" fill="#6b7280" font-style="italic">전용 통신 케이블</text>
+  <rect x="40" y="250" width="180" height="110" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="130" y="275" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">A 식당</text>
+  <rect x="80" y="290" width="100" height="50" rx="4" fill="#f5faff" stroke="#1565c0"/>
+  <text x="130" y="320" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">주방 모니터</text>
+  <rect x="290" y="250" width="180" height="110" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="380" y="275" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">B 식당</text>
+  <rect x="330" y="290" width="100" height="50" rx="4" fill="#f5faff" stroke="#1565c0"/>
+  <text x="380" y="320" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">주방 모니터</text>
+  <rect x="540" y="250" width="180" height="110" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="630" y="275" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">C 식당</text>
+  <rect x="580" y="290" width="100" height="50" rx="4" fill="#f5faff" stroke="#1565c0"/>
+  <text x="630" y="320" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">주방 모니터</text>
+</svg>
+</div>
+<p class="thought">그림 2-12. 주방 모니터·전용 통신 케이블·통합 전광판이 컨테이너 네트워크의 비유</p>
+<p>컨테이너가 뜨면 자기만의 Namespace가 새로 생기고 veth pair로 docker0에 연결됩니다. 이 상태에서 같은 docker0에 묶인 컨테이너끼리는 IP 주소로 서로 통신할 수 있습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너 네트워크 격리 구조">
   <defs>
@@ -258,32 +262,6 @@
 </svg>
 </div>
 <p class="thought">그림 2-13. 컨테이너 네트워크 격리 구조</p>
-<table>
-<thead>
-<tr>
-<th>구성 요소</th>
-<th>역할</th>
-<th>푸드코트 비유</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Network Namespace</code></td>
-<td>컨테이너별 독립 네트워크 공간</td>
-<td>식당 주방</td>
-</tr>
-<tr>
-<td><code>veth pair</code></td>
-<td>컨테이너와 호스트를 잇는 가상 케이블</td>
-<td>픽업 창구</td>
-</tr>
-<tr>
-<td><code>docker0</code></td>
-<td>모든 컨테이너 연결이 모이는 브리지</td>
-<td>푸드코트 홀</td>
-</tr>
-</tbody>
-</table>
 <div class="prep-note">
 <p><strong>Network Namespace / veth pair / docker0</strong></p>
 <ul>
@@ -292,8 +270,8 @@
 <li><strong>docker0</strong>: Docker가 호스트에 자동으로 만드는 가상 스위치(브릿지)입니다. 모든 컨테이너의 veth가 여기로 모입니다.</li>
 </ul>
 </div>
-<p class="thought">'각자 주방을 따로 쓰면서 창구를 통해 홀 하나로 모이는 거네. 격리와 연결이 한 구조 안에 같이 들어 있구나.'</p>
-<p>식당-창구-홀은 각각 Namespace, veth, docker0에 대응됩니다. 이렇게 식당에서 홀까지 음식이 나오는 길은 정리됐습니다. 오픈이가 다음으로 알아본 건 손님이 이 홀 안의 식당에 어떻게 주문을 넣느냐였습니다.</p>
+<p class="thought">'각자 주방을 따로 쓰면서 케이블 하나로 전광판 본체에 모이는 거네. 격리와 연결이 한 구조 안에 같이 들어 있구나.'</p>
+<p>식당-케이블-전광판은 각각 Namespace, veth, docker0에 대응됩니다. 이렇게 식당끼리 신호가 오가는 길은 정리됐습니다. 오픈이가 다음으로 알아본 건 외부 손님이 식당에 어떻게 주문을 넣느냐였습니다.</p>
 <h3>2.5.3 외부에서 들어오기 — 입구 키오스크</h3>
 <p>방금 본 docker0는 호스트 안에 있는 <strong>가상 스위치</strong>입니다. 집에서 공유기가 여러 기기를 묶어주는 것과 비슷한 역할을 합니다. 이 스위치를 통해 컨테이너끼리 통신이 가능합니다.</p>
 <p>그런데 외부 사용자가 이 스위치 너머의 특정 컨테이너에 바로 닿는 건 쉽지 않습니다. 이유가 두 가지입니다.</p>
@@ -460,7 +438,7 @@ nginx<span class="w">                </span><span class="c1"># nginx 실행</spa
 <div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>net-tools<span class="w">   </span><span class="c1"># netstat 사용을 위한 net-tools 설치</span>
 netstat<span class="w"> </span>-nlpt<span class="w">              </span><span class="c1"># 열려 있는 TCP 포트 확인</span></div>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-47.png" alt="" /></div><p class="thought">그림 2-20. 포트 상태 확인</p>
-<p>80 포트가 열려 있는 것을 확인했습니다. 이제 브라우저 차례. 주소창에 <code>localhost:80</code>을 쳤습니다.</p>
+<p>80 포트가 열려 있는 것을 확인했습니다. 다음은 브라우저로 접속할 차례입니다. 주소창에 <code>localhost:80</code>을 쳤습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-48.png" alt="" /></div><p class="thought">그림 2-21. nginx 환영 페이지 응답</p>
 <p>익숙한 nginx 환영 페이지가 떴습니다. 컨테이너를 띄울 때 <code>-p 80:80</code>으로 포트를 열어둔 덕에, 컨테이너 안의 nginx와 브라우저가 연결된 것입니다.</p>
 <h3>2.6.3 vim으로 파일 편집</h3>
