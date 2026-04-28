@@ -384,7 +384,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <h3>5.3.2 요청의 여정</h3>
 <p>의문이 풀리고 나니 처음 막혔던 한 줄을 이제 그어 볼 만했습니다. 외부에서 들어온 한 요청이 백엔드 Pod까지 닿는 전체 흐름을 한 단계씩 따라가 봤습니다.</p>
 <p><strong>1단계 — 외부 입구 통과</strong></p>
-<p>브라우저에서 <code>http://localhost/order</code> 같은 주소로 요청을 보내면, 노드에 뚫린 NodePort(또는 클라우드의 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 <code>minikube tunnel</code> 이 바로 이 입구를 호스트와 이어 주는 통로였습니다. 아직 HTTP 본문은 들여다보지 않은 상태입니다.</p>
+<p>브라우저에서 <code>http://localhost/order</code> 같은 주소로 요청을 보내면, 노드에 뚫린 NodePort(또는 클라우드의 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 <code>minikube tunnel</code> 이 바로 이 입구를 호스트와 이어 주는 통로입니다. 아직 HTTP 본문은 들여다보지 않은 상태입니다.</p>
 <div class="chapter-image"><img src="..\assets\CH05\k8s-flow-step1.png" alt="" /></div><p class="thought">그림 5-21. 외부 요청이 NodePort(또는 LoadBalancer)로 진입. 실습에선 `minikube tunnel` 이 이 입구 역할</p>
 <p><strong>2단계 — Ingress Controller까지 배달</strong></p>
 <p>들어온 요청은 kube-proxy가 미리 등록해 둔 iptables 항목을 타고 인그레스 컨트롤러 Pod로 배달됩니다. 패킷의 도착지 IP·Port만 보고 옮길 뿐, HTTP 본문은 아직 들여다보지 않습니다.</p>

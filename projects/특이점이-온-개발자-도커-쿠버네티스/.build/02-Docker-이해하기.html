@@ -18,12 +18,12 @@
 <body>
 <div class="container">
 <h1>Ch.2 Docker 이해하기</h1>
-<p>오픈이는 퇴근하고 집으로 돌아와 커피 한 잔을 옆에 두고 노트북을 열었습니다. 오늘 저녁은 Docker에 씁니다. 목표는 하나입니다.</p>
+<p>오픈이는 퇴근하고 집으로 돌아와 커피 한 잔을 옆에 두고 노트북을 열었습니다. 오늘 저녁의 목표는 하나였습니다.</p>
 <p><strong>Docker가 무엇이고 어떻게 돌아가는지, 개념과 기본 사용법을 손에 익힌다.</strong></p>
-<p>선배가 던져준 단어 하나에 오늘 저녁을 걸었습니다. 그 단어가 Docker였고, 어제까지 오픈이는 이 이름조차 몰랐습니다. 오늘 저녁 안에 다 될 것 같지도 않았지만, 그래도 여기까지 가봐야 이 도구가 정말 현업에서 쓸 만한지 알 수 있었습니다. 설치 버튼에 손이 갔다가 멈췄습니다.</p>
+<p>선배가 던져준 말 하나에 오늘 저녁을 걸었습니다. 오늘 저녁 안에 다 될 것 같지는 않았지만, 어디까지 갈 수 있는지는 보고 싶었습니다. 설치 버튼에 손이 갔다가 멈췄습니다.</p>
 <p class="thought">'명령어를 치기 전에 원리부터 보자.'</p>
 <p>Docker가 환경을 어떻게 다루는지부터 이해해야 뒤에 나올 명령어들이 기계적으로 외워지지 않을 것 같았습니다.</p>
-<h2>2.1 컨테이너는 무엇인가</h2>
+<h2>2.1 가상화 — 가상머신과 컨테이너</h2>
 <h3>2.1.1 주방 네 개 대신 주방 하나</h3>
 <p>우선 컨테이너가 어떤 원리로 돌아가는지 알아보기로 했습니다. 오픈이는 주방에서 요리사 여러 명이 일하는 장면을 떠올려봤습니다.</p>
 <p>한 주방에 요리사 네 명이 있습니다. 네 명이 동시에 요리를 하려면 주방을 어떻게 꾸며야 할까요.</p>
@@ -32,43 +32,71 @@
 <div class="chapter-image"><img src="..\assets\CH02\chap01-6.png" alt="" /></div><p class="thought">그림 2-2. 주방 설비를 통째로 복제하는 첫 번째 방식</p>
 <p>두 번째 방식은 냉장고와 가스레인지 같은 공용 설비는 함께 쓰고, 칼·도마·조리대처럼 개인이 쓸 도구만 각자 챙기는 것입니다. 장비 수는 그대로인데 공간은 네 명이 동시에 쓸 수 있습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-7.png" alt="" /></div><p class="thought">그림 2-3. 공용 설비는 공유하고 개별 공간만 쪼개는 두 번째 방식</p>
-<p>IT에 바로 대응되는 두 가상화 방식이 있습니다. 첫 번째가 <strong>하이퍼바이저 가상화</strong>로 결과물이 <strong>가상 머신(VM)</strong>, 두 번째가 <strong>컨테이너 가상화</strong>로 결과물이 <strong>컨테이너</strong>입니다. 둘을 묶어서 <strong>가상화</strong>라고 부릅니다. 오픈이가 오늘 목표로 잡은 것이 두 번째, 바로 이 <strong>컨테이너</strong>입니다. 공용 설비는 공유하면서 각자 자기 조리대만 따로 가지는 구조라, <strong>같은 OS 위에서 여러 앱이 서로 충돌하지 않고 각자 돌 수 있게</strong> 해 줍니다.</p>
-<div class="term-box">
-<p><strong>하이퍼바이저 가상화</strong>: 하이퍼바이저(가상화 소프트웨어)가 하드웨어 위에 OS를 통째로 따로 올려 독립된 컴퓨터처럼 쓰게 해 주는 방식입니다. 이 방식으로 만들어진 결과물을 <strong>가상 머신(VM)</strong> 이라 부릅니다. 격리가 완전한 대신 OS가 매번 통째로 뜨므로 무겁고 기동이 느립니다.</p>
-</div>
-<div class="term-box">
-<p><strong>컨테이너 가상화</strong>: 호스트 OS의 커널(운영체제의 핵심)을 여러 컨테이너가 공유하고, 파일시스템·네트워크·프로세스 공간만 컨테이너별로 분리하는 방식입니다. 이 방식으로 만들어진 결과물을 <strong>컨테이너</strong>라 부릅니다.</p>
-</div>
+<p>이렇게 하나의 주방을 여러 명이서 사용하는 것 처럼 하나의 컴퓨터를 여러 대로 나눠서 사용하는 IT 기술을 <strong>가상화(Virtualization)</strong> 라고 부릅니다.</p>
 <div class="term-box">
 <p><strong>가상화(Virtualization)</strong>: 하나의 물리 서버를 논리적으로 여러 대처럼 나누어 쓰는 기술입니다. 자원을 효율적으로 쓰면서 서로 다른 환경을 안전하게 격리하는 것이 목적입니다.</p>
 </div>
-<p class="thought">'주방 하나, 조리대 여러 개. 앱도 한 칸씩 쓰면 되는 거네.'</p>
+<p>가상화에도 두 가지 방식이 있습니다. 설비를 통째로 복제하는 쪽이 <strong>하이퍼바이저 가상화</strong>, 공유하는 쪽이 <strong>컨테이너 가상화</strong>입니다. Docker는 두 번째 방식의 도구입니다. 같은 OS 위에서 여러 앱이 서로 충돌하지 않고 각자 돌게 해 줍니다.</p>
+<div class="tip">
+<p><strong>하이퍼바이저 가상화 vs 컨테이너 가상화</strong></p>
+<p><strong>하이퍼바이저 가상화(Hypervisor Virtualization)</strong> 는 하드웨어 위에 OS 자체를 따로 띄우는 방식이고, 결과물은 <strong>가상 머신(VM)</strong> 입니다. 격리는 완전하지만 OS 전체가 새로 떠야 해서 무겁고 기동이 느립니다. 반면 <strong>컨테이너 가상화(Container Virtualization)</strong> 는 호스트 OS의 커널을 공유하면서 파일시스템·네트워크·프로세스 공간만 따로 두는 방식이고, 결과물은 <strong>컨테이너</strong>입니다. 커널을 공유하므로 가볍고 빠르게 뜹니다.</p>
+</div>
+<p class="thought">'아! 도커는 내 컴퓨터 OS 하나를 여러 컨테이너가 나눠 쓰면서, 각자 격리된 공간에서 따로 돌게 하는 거구나.'</p>
 <h3>2.1.2 IT로 옮긴 구조</h3>
 <p>비유만 머리에 두면 나중에 실제 용어와 헷갈립니다. 오픈이는 이 주방 그림을 IT 구조로 옮겨 그려봤습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap02-container.png" alt="" /></div><p class="thought">그림 2-4. 컨테이너 가상화의 전체 구조</p>
-<p>맨 아래에 <strong>하드웨어</strong>, 그 위에 <strong>호스트 OS</strong>, 그 위에 <strong>Docker 엔진</strong>이 올라갑니다. 엔진 위에 컨테이너가 나란히 떠 있습니다. 각 컨테이너 안에는 애플리케이션(App)과 라이브러리(Library)가 같이 들어갑니다. 주방 비유의 공용 설비가 호스트 OS, 각자의 조리대가 컨테이너입니다.</p>
-<p>구조의 핵심은 <strong>호스트 OS의 커널 하나를 모든 컨테이너가 공유</strong>한다는 점입니다. VM처럼 OS를 통째로 따로 올리지 않으니 가볍고 빠르게 뜹니다. Docker 엔진은 그 커널에 &quot;새 격리 공간을 만들어 달라&quot;고 요청하는 중개자이고, 실제로 파일시스템·네트워크·프로세스 공간을 쪼개 주는 일은 커널이 합니다. 그래서 다른 컨테이너가 다른 앱과 다른 라이브러리를 가져도 충돌하지 않고, 한쪽이 런타임을 업그레이드해도 옆 컨테이너는 영향을 받지 않습니다.</p>
+<p>맨 아래에 <strong>하드웨어</strong>, 그 위에 <strong>호스트 OS</strong>, 그 위에 <strong>Docker 엔진</strong>이 있고, Docker 엔진 위에 <strong>컨테이너</strong>가 나란히 떠 있습니다. 각 컨테이너 안에는 애플리케이션(App)과 라이브러리(Library)가 같이 들어갑니다. 주방 비유의 공용 설비가 <strong>호스트 OS</strong>, 각자의 조리대가 <strong>컨테이너</strong>입니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너 가상화 3계층 구조: 하드웨어 위에 호스트 OS와 Docker 엔진, 그 위에 컨테이너들">
+  <text x="40" y="20" font-size="11" font-weight="700" fill="#7b341e">애플리케이션 계층</text>
+  <rect x="40" y="28" width="520" height="106" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <rect x="60" y="44" width="220" height="74" rx="4" fill="#fff7ed" stroke="#fb923c"/>
+  <text x="170" y="61" font-size="11" font-weight="700" fill="#7b341e" text-anchor="middle">컨테이너 1</text>
+  <rect x="74" y="71" width="192" height="18" rx="3" fill="#fff" stroke="#fed7aa"/>
+  <text x="170" y="84" font-size="10" fill="#7b341e" text-anchor="middle">App</text>
+  <rect x="74" y="93" width="192" height="18" rx="3" fill="#fff" stroke="#fed7aa"/>
+  <text x="170" y="106" font-size="10" fill="#7b341e" text-anchor="middle">Library</text>
+  <rect x="300" y="44" width="220" height="74" rx="4" fill="#fff7ed" stroke="#fb923c"/>
+  <text x="410" y="61" font-size="11" font-weight="700" fill="#7b341e" text-anchor="middle">컨테이너 2</text>
+  <rect x="314" y="71" width="192" height="18" rx="3" fill="#fff" stroke="#fed7aa"/>
+  <text x="410" y="84" font-size="10" fill="#7b341e" text-anchor="middle">App</text>
+  <rect x="314" y="93" width="192" height="18" rx="3" fill="#fff" stroke="#fed7aa"/>
+  <text x="410" y="106" font-size="10" fill="#7b341e" text-anchor="middle">Library</text>
+  <text x="40" y="154" font-size="11" font-weight="700" fill="#475569">OS 계층</text>
+  <rect x="40" y="162" width="520" height="84" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+  <rect x="60" y="178" width="480" height="26" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="300" y="196" font-size="11" font-weight="700" fill="#334155" text-anchor="middle">Docker 엔진</text>
+  <rect x="60" y="212" width="480" height="26" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="300" y="230" font-size="11" font-weight="700" fill="#334155" text-anchor="middle">호스트 OS (모든 컨테이너가 커널 공유)</text>
+  <text x="40" y="266" font-size="11" font-weight="700" fill="#475569">하드웨어 계층</text>
+  <rect x="40" y="274" width="520" height="40" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+  <rect x="60" y="284" width="480" height="22" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="300" y="300" font-size="11" font-weight="700" fill="#334155" text-anchor="middle">하드웨어 (CPU · 메모리 · 디스크)</text>
+</svg>
+</div>
+<p class="thought">그림 2-4. 컨테이너 가상화의 전체 구조</p>
+<div class="term-box">
+<p><strong>커널(Kernel)</strong>: 운영체제(OS)의 핵심입니다. 프로세스 생성, 메모리 관리, 격리 공간 생성을 담당합니다. Docker의 모든 컨테이너는 호스트 PC의 <strong>같은 리눅스 커널</strong>을 공유하고, 그 하나의 커널이 각 컨테이너에 격리 공간을 할당합니다.</p>
+</div>
+<p>구조의 핵심은 <strong>호스트 OS의 커널 하나를 모든 컨테이너가 공유</strong>한다는 점입니다. VM처럼 OS를 통째로 따로 올리지 않으니 가볍고 빠르게 뜹니다. Docker 엔진은 그 커널에 <strong>&quot;새 격리 공간을 만들어 달라&quot;</strong> 고 요청하는 중개자이고, 실제로 <strong>파일시스템·네트워크·프로세스 공간을 쪼개 주는 일은 커널</strong>이 합니다. 그래서 다른 컨테이너가 다른 앱과 다른 라이브러리를 가져도 충돌하지 않고, 한쪽이 런타임을 업그레이드해도 옆 컨테이너는 영향을 받지 않습니다.</p>
 <div class="prep-note">
 <p><strong>컨테이너의 격리</strong></p>
-<p>컨테이너마다 <strong>파일시스템</strong>(<code>/bin</code>, <code>/lib</code> 같은 폴더), <strong>네트워크</strong>(IP와 포트), <strong>프로세스 공간</strong>(PID 번호)이 따로 존재합니다. 한 컨테이너가 라이브러리를 업그레이드해도 다른 컨테이너는 영향이 없고, 두 컨테이너가 같은 포트 번호를 써도 충돌하지 않습니다. 이 세 가지 격리는 리눅스 커널이 뒤에서 처리합니다.</p>
+<p>사실 컨테이너 안에서 도는 것은 처음부터 격리된 무언가가 아니라, 호스트 OS 위에서 다른 것들과 함께 도는 <strong>평범한 프로세스</strong>입니다. 그대로 두면 한 컨테이너의 프로세스가 다른 컨테이너의 파일을 들여다보거나, 두 컨테이너가 같은 포트를 두고 충동할 수 있습니다.
+그래서 <strong>리눅스 커널</strong>은 컨테이너마다 <strong>파일시스템</strong>(<code>/bin</code>, <code>/lib</code> 같은 폴더), <strong>네트워크</strong>(IP와 포트), <strong>프로세스 공간</strong>(PID 번호) 세 가지 공간을 따로 만들어 줍니다. 이렇게 세 공간이 컨테이너마다 분리된 상태가 곧 <strong>격리</strong>입니다. 덕분에 한 컨테이너가 라이브러리를 업그레이드해도 다른 컨테이너는 영향이 없고, 두 컨테이너가 같은 포트 번호를 써도 충돌하지 않습니다.</p>
 </div>
-<h3>2.1.3 docker run이 하는 일</h3>
-<p>컨테이너의 정체는 잡혔지만, <strong>어떻게 만들어지는지</strong>까지는 아직 그림이 안 그려져 있었습니다. <code>docker run</code>을 손으로 치기 전에 그 한 줄 뒤에서 무슨 일이 돌아가는지 눈에 들어와 있어야 명령어가 외우기로 떨어지지 않을 것 같았습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-9.png" alt="" /></div><p class="thought">그림 2-5. docker run 명령이 커널의 격리 기능을 타고 컨테이너가 되는 흐름</p>
+<h3>2.1.3 컨테이너가 만들어지는 과정</h3>
+<p>오픈이는 이제 컨테이너의 개념을 잡았지만, <strong>어떻게 만들어지는지</strong>까지는 아직 그림이 그려지지 않았습니다. 컨테이너를 실제로 띄우기 전에 한 줄의 명령 뒤에서 무슨 일이 돌아가는지 눈에 들어와 있어야, 나중에 직접 손으로 칠 때 기계적으로 외우지 않고 의미를 이해한 채로 칠 수 있을 것 같았습니다.</p>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-9.png" alt="" /></div><p class="thought">그림 2-5. 컨테이너 실행 명령이 커널의 격리 기능을 타고 컨테이너가 되는 흐름</p>
 <ol>
-<li>사용자가 <code>docker run &lt;컨테이너명&gt;</code> 명령어를 친다.</li>
+<li>사용자가 컨테이너를 실행하라는 명령을 친다.</li>
 <li><strong>Docker 엔진</strong>이 이 명령을 받고, 로컬에 있는 이미지를 읽는다(없으면 Docker Hub에서 내려받는다).</li>
 <li>Docker 엔진이 <strong>커널</strong>에게 &quot;이 이미지 사양으로 격리된 프로세스 하나 만들어 줘&quot;라고 요청한다.</li>
 <li>커널이 격리 공간(파일시스템/네트워크/프로세스)을 만들고, 그 안에서 새 프로세스를 띄운다.</li>
 <li>이 격리된 프로세스가 곧 <strong>컨테이너</strong>다.</li>
 </ol>
 <p>컨테이너를 실제로 만드는 건 Docker 엔진이 아니라 커널입니다. 커널이 건물 관리인이라면, Docker 엔진은 프런트 직원에 가깝습니다. 입주자(프로세스)가 들어오면 프런트가 관리인에게 방 배정을 요청합니다. 실제로 방을 비우고 열쇠를 건네는 일은 관리인이 합니다.</p>
-<div class="term-box">
-<p><strong>커널(Kernel)</strong>: 운영체제(OS)의 핵심입니다. 프로세스 생성, 메모리 관리, 격리 공간 생성을 담당합니다. Docker의 모든 컨테이너는 호스트 PC의 <strong>같은 리눅스 커널</strong>을 공유합니다. 그 하나의 커널이 각 컨테이너에 격리 공간을 할당합니다.</p>
-</div>
 <p>오픈이는 노트에 &quot;엔진=프런트, 커널=관리인&quot;이라고 한 줄 적었습니다. 적고 나니 컨테이너의 정체와 만들어지는 과정이 머릿속에서 정리됐습니다.</p>
 <p class="thought">'그럼 이 안에서 뭘 실행할지는 어디서 정해지지.'</p>
-<h2>2.2 이미지: 컨테이너의 설계도</h2>
+<h2>2.2 이미지 — 컨테이너의 설계도</h2>
 <p>컨테이너가 격리된 프로세스라는 건 알았지만, 그 프로세스가 무엇을 실행할지를 결정하는 원본이 따로 있어야 합니다. 그 원본이 <strong>이미지</strong>입니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-13.png" alt="" /></div><p class="thought">그림 2-6. 하나의 이미지로 여러 컨테이너를 찍어내는 구조</p>
 <p>이미지는 붕어빵 틀에 가깝습니다. 틀(이미지) 하나로 붕어빵(컨테이너)을 여러 개 찍어낼 수 있고, 틀 자체는 변하지 않습니다. 같은 이미지에서 나온 컨테이너는 어디서 띄우든 똑같은 환경을 가집니다. 이 덕에 &quot;내 PC와 서버 환경이 같다&quot;가 가능합니다. 로컬에서 만든 <strong>이미지</strong>를 서버에서 그대로 꺼내 실행하면, 서버의 런타임 버전이 뭐든 컨테이너는 자기 이미지 안의 런타임으로 돕니다.</p>
@@ -80,7 +108,7 @@
 <p>이미지 안에는 OS 기본 라이브러리, 런타임, 애플리케이션, 설정 파일이 <strong>레이어</strong>로 겹쳐 쌓여 있습니다. 아래 레이어는 재사용되고 캐싱되기 때문에, 앱만 바뀌면 맨 위 레이어만 새로 받으면 됩니다. 이미지 전체를 매번 통째로 내려받지 않아도 되는 이유입니다. 커널은 호스트와 공유하므로 이미지에 들어가지 않습니다. 이게 이미지가 가벼운 이유입니다.</p>
 </div>
 <p>원리는 잡혔습니다. 이제 Docker를 설치하고 직접 띄워 봅니다.</p>
-<h2>2.3 Docker 설치</h2>
+<h2>2.3 Docker 설치 — 실습 환경 준비</h2>
 <p>Docker Desktop 설치는 공식 사이트(https://www.docker.com/products/docker-desktop/)에서 OS에 맞는 설치 파일을 받아 기본 옵션대로 설치하면 끝입니다. 오픈이는 설치가 끝난 뒤 터미널에 버전을 찍어봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>version<span class="w">   </span><span class="c1"># Docker 버전 확인</span></div>
 <p>Client와 Server 정보가 둘 다 뜨면 설치가 완료된 겁니다. 오픈이 화면에도 두 블록이 나란히 찍혔습니다.</p>
@@ -88,7 +116,7 @@
 <p><strong>Windows와 macOS의 내부 리눅스</strong></p>
 <p>Docker는 리눅스 커널의 기능을 쓰기 때문에, 리눅스 커널이 없는 Windows와 macOS에서는 Docker Desktop이 내부에 리눅스 환경을 한 겹 더 띄웁니다. Windows는 <strong>WSL2</strong>(Windows Subsystem for Linux 2)를, macOS는 경량 Linux VM을 씁니다. 사용자 입장에서는 신경 쓸 일이 없지만, 뒤에 나올 네트워크 얘기에서 이 차이가 중요해집니다.</p>
 </div>
-<h2>2.4 Docker CLI 첫 실습</h2>
+<h2>2.4 Docker CLI — 첫 컨테이너 띄우기</h2>
 <h3>2.4.1 docker pull: 이미지 가져오기</h3>
 <p>가장 먼저 오픈이는 Docker Hub에서 이미지를 내려 받았습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>pull<span class="w"> </span>nginx<span class="w">   </span><span class="c1"># nginx 이미지 다운로드</span></div>
@@ -156,7 +184,7 @@
 </table>
 <p>조회는 <code>ps</code>, 로그는 <code>logs</code>, 내리기는 <code>stop</code>, 지우기는 <code>rm</code>. 이 정도로 묶어두면 필요할 때 찾아 쓸 수 있습니다.</p>
 <p>여기까지 Docker Hub에서 이미지를 받고 실행을 했습니다. 그다음으로 오픈이의 관심은 컨테이너가 외부와 어떻게 통신하는지로 옮겨갔습니다.</p>
-<h2>2.5 컨테이너의 통신</h2>
+<h2>2.5 통신 — 컨테이너끼리 그리고 외부와 잇기</h2>
 <p>컨테이너 안에서 앱이 돌아도 외부에서 접속할 수 없으면 쓸모가 없습니다. 격리된 프로세스라는 개념은 익혔지만, 이 격리된 것이 바깥과 어떻게 연결되는지를 모르면 컨테이너 내부를 접근할 수 없습니다. 여기서 컨테이너가 어떻게 통신하는지 큰 그림을 잡아보겠습니다.</p>
 <h3>2.5.1 네트워크 한눈에 보기</h3>
 <p>오픈이는 방금 띄운 nginx 컨테이너가 실제로 어떻게 연결되어 있는지 궁금해졌습니다. 격리된 공간이라고 했는데 서로 어떻게 오가고, 외부에서는 어떻게 들어가는지.</p>
@@ -333,7 +361,7 @@
 </ul>
 </div>
 <p>오픈이는 컨테이너의 통신까지 보고 나니 이제 컨테이너 안이 궁금해졌습니다. 컨테이너는 리눅스 커널이 만든다고 했으니 내부는 리눅스 환경입니다. 컨테이너 안에서 손에 잡히는 작업을 하려면 리눅스 명령어부터 챙겨 가야 했습니다.</p>
-<h2>2.6 컨테이너 안의 리눅스</h2>
+<h2>2.6 컨테이너 내부 — 격리된 작은 리눅스</h2>
 <p>리눅스를 연습하려면 리눅스 배포판이 필요합니다. <strong>Ubuntu</strong>는 가장 널리 쓰이는 배포판 중 하나라 자료가 풍부하고, Docker Hub에 공식 이미지가 올라와 있어서 바로 받아 띄울 수 있습니다. 오픈이는 Ubuntu 컨테이너를 포트까지 열어둔 채로 띄우고 안에 들어가 봤습니다.</p>
 <div class="code-block highlight" data-lang="bash"><span class="c1"># -it: 표준입력 유지(-i) + TTY 연결(-t), -p 80:80: 포트포워딩</span>
 docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>ubuntu</div>
@@ -486,7 +514,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
 <p>컨테이너에서 빠져나올 때는 <code>exit</code>입니다. 그런데 <code>exit</code>를 치고 <code>docker ps</code>를 쳐보니, 방금까지 돌던 컨테이너가 목록에서 사라져 있었습니다.</p>
 <p class="thought">'어? 안에서 나왔을 뿐인데 왜 꺼지지.'</p>
 <p>내부 구조는 익혔는데 <strong>언제 살아 있고 언제 죽는지</strong>는 아직 감이 없다는 뜻이었습니다. 컨테이너가 뜻밖에 꺼지면 곤란하니, 오픈이는 이 규칙부터 정리해보기로 했습니다.</p>
-<h2>2.7 컨테이너 생명주기</h2>
+<h2>2.7 포그라운드와 백그라운드 — 컨테이너가 살아남는 조건</h2>
 <h3>2.7.1 exit vs detach</h3>
 <p>오픈이는 같은 상황을 한 번 더 만들어 차분히 비교했습니다. 이름을 붙여 띄운 뒤 <code>exit</code>로 나와봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--name<span class="w"> </span>dead<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># 실행 후 exit로 나옴</span>
@@ -614,7 +642,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 <p>여기까지 따라오자 컨테이너의 생명 주기는 더 이상 헷갈리지 않았습니다. 그런데 한 가지가 오픈이를 붙잡았습니다. 앞서 Ubuntu 컨테이너에 패키지를 설치하고 파일을 추가했는데, 컨테이너를 내리는 순간 지금까지 한 작업이 사라집니다.</p>
 <p class="thought">내가 수정한 이 상태를 기록해두려면 어떻게 해야 하지?</p>
 <p>필요한 건 <strong>지금 컨테이너 상태를 그대로 기록해 두는 방법</strong>입니다.</p>
-<h2>2.8 commit으로 이미지 만들기</h2>
+<h2>2.8 commit — 실행 중인 컨테이너를 이미지로</h2>
 <p>그 일을 하는 명령이 <code>docker commit</code>입니다. 컨테이너의 현재 상태를 그대로 이미지로 저장합니다.</p>
 <p>지금까지 오픈이는 남이 올려둔 이미지(ubuntu, nginx, tomcat)를 Docker Hub에서 받아 쓰기만 했습니다. 이번엔 반대로, 직접 수정한 컨테이너를 이미지로 만들어 Docker Hub에 올립니다. 다른 컴퓨터에서도 이 이미지 받으면 같은 상태로 쓸 수 있습니다.</p>
 <h3>2.8.1 Tomcat으로 commit 감 잡기</h3>
@@ -648,10 +676,10 @@ docker<span class="w"> </span>push<span class="w"> </span>&lt;본인-dockerhub-i
 <div class="chapter-image"><img src="..\assets\CH02\chap01-70.png" alt="" /></div><p class="thought">그림 2-40. Docker Hub 저장소 확인</p>
 <p>여기까지의 흐름은 간단합니다. 베이스 이미지에서 컨테이너를 띄워 필요한 설정을 추가하고, 그 상태를 <code>commit</code>으로 이미지에 저장해 Hub에 <code>push</code>했습니다. 세팅한 상태를 통째로 복제해서 어디서든 꺼내 쓸 수 있다는 이미지의 성질이 이 흐름에 그대로 들어 있습니다.</p>
 <p>다만 오늘 실습은 index.html 한 줄 수준입니다. 런타임·라이브러리·경로까지 이미지에 제대로 담는 방법은 뒤에서 다시 다룹니다.</p>
-<h2>2.9 데이터 보존: 마운트</h2>
+<h2>2.9 마운트 — 컨테이너가 사라져도 남는 데이터</h2>
 <p>Docker Hub에 이미지를 올리고 한숨 돌리려던 오픈이 머릿속에 한 가지가 걸렸습니다. 이미지에 담긴 건 컨테이너의 초기 상태까지입니다. 컨테이너가 뜬 뒤에 쌓이는 데이터는 이미지 안에 없고, 컨테이너와 함께 사라집니다. DB처럼 실데이터를 계속 쌓는 컨테이너가 내려가는 순간 그 데이터가 통째로 날아갑니다.</p>
 <p class="thought">'컨테이너를 내려도 데이터는 남아 있어야 하는데.'</p>
-<p>해결은 데이터를 컨테이너 바깥에 두는 것이었습니다. 그 방법이 <strong>마운트</strong>입니다.</p>
+<p>해결은 데이터를 컨테이너 바깥에 두는 것입니다. 그 방법이 <strong>마운트</strong>입니다.</p>
 <div class="term-box">
 <p><strong>마운트(Mount)</strong>: 컨테이너 내부의 폴더를 외부 저장소에 <strong>연결</strong>하는 기능입니다. USB를 PC에 꽂으면 PC의 특정 폴더에서 USB 내용이 보이는 것과 같은 원리입니다. 양쪽이 같은 곳을 가리키므로 한쪽의 변경이 반대쪽에도 보이고, 컨테이너를 삭제해도 외부 데이터는 남습니다.</p>
 </div>

@@ -225,7 +225,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <h4>host.docker.internal이 왜 필요했나</h4>
 <p>nginx.conf를 작성하던 오픈이의 눈에 계속 걸리는 지점이 하나 있었습니다. 바로 host.docker.internal:8000이라는 주소입니다. 구조를 가만히 보니 lb 컨테이너가 app1 컨테이너를 직접 부르는 게 아니라, 호스트 PC를 한 번 거쳐서 돌아가는 방식이었습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\ex01-lb-to-host.png" alt="" /></div><p class="thought">그림 3-12. lb 컨테이너 → 호스트 PC → app1 컨테이너로 가는 우회 경로</p>
-<p>이유는 앞서 챕터 2에서 다뤘던 네트워크의 특성 때문이었습니다. 세 컨테이너를 <strong>docker run</strong> 명령어로 각각 따로 실행했기 때문에, 이들은 도커의 기본 네트워크에 속합니다. 이 기본 네트워크 안에서는 컨테이너끼리 서로의 이름(app1, app2 등)을 불러서 통신할 수 있는 기능이 없습니다. 그래서 어쩔 수 없이 &quot;lb → 호스트 포트 → app1&quot;이라는 우회 경로를 선택한 것입니다.</p>
+<p>이유는 앞서 챕터 2에서 다뤘던 네트워크의 특성 때문입니다. 세 컨테이너를 <strong>docker run</strong> 명령어로 각각 따로 실행했기 때문에, 이들은 도커의 기본 네트워크에 속합니다. 이 기본 네트워크 안에서는 컨테이너끼리 서로의 이름(app1, app2 등)을 불러서 통신할 수 있는 기능이 없습니다. 그래서 어쩔 수 없이 &quot;lb → 호스트 포트 → app1&quot;이라는 우회 경로를 선택한 것입니다.</p>
 <div class="term-box">
 <p><strong>host.docker.internal</strong>: 컨테이너 내부에서 '호스트 PC' 그 자체를 가리키는 특수 주소입니다. 컨테이너 안에서 localhost라고 입력하면 호스트 PC가 아닌 <strong>컨테이너 자기 자신을</strong> 가리키게 됩니다. 따라서 호스트 PC에 열려 있는 포트에 접근하려면 이 <strong>별칭을</strong> 사용해야 합니다.</p>
 </div>
@@ -323,9 +323,9 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <p class="thought">'어, 진짜 HIT이 떴네.'</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-34.png" alt="" /></div><p class="thought">그림 3-20. X-Cache-Status: HIT 확인</p>
 <p>실습을 마친 오픈이는 nginx.conf가 결국 <strong>어떤 요청(location)을</strong> <strong>어디로 보낼지(proxy_pass)</strong> , 그리고 <strong>어떤 옵션을 얹을지를</strong> 결정하는 일정한 패턴을 가지고 있다는 사실을 깨달았습니다.</p>
-<h2>3.3 Redis</h2>
+<h2>3.3 Redis — 서버 여러 대가 공유하는 세션 저장소</h2>
 <h3>3.3.1 서버 여러 대면 생기는 세션 문제</h3>
-<p>로드밸런싱으로 부하를 나누는 것까지는 성공했지만, 오픈이는 설계를 검토하다가 또 다른 장벽에 부딪혔습니다. 단순히 서버를 복제해서 늘리는 것만으로는 해결되지 않는 '상태 유지'의 문제였습니다.</p>
+<p>로드밸런싱으로 부하를 나누는 것까지는 성공했지만, 오픈이는 설계를 검토하다가 또 다른 장벽에 부딪혔습니다. 단순히 서버를 복제해서 늘리는 것만으로는 해결되지 않는 '상태 유지'의 문제입니다.</p>
 <p>가장 대표적인 것이 로그인 상태입니다. 사용자가 1번 서버에서 로그인하고 다음 페이지로 넘어갔는데, 로드밸런서가 그 요청을 2번 서버로 보내버리면 갑자기 로그인이 풀리는 현상이 발생합니다.</p>
 <p>원인은 백엔드 서버가 사용자의 상태를 기억하는 방식에 있었습니다. 보통 많은 프레임워크는 로그인 정보를 서버의 개별 메모리에 보관하는데, 이를 **세션(Session)**이라고 부릅니다. 서버가 한 대일 때는 문제가 없지만, 서버가 여러 대로 갈라지는 순간 각 서버의 메모리는 서로의 기록을 모르는 독립된 공간이 됩니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\session-problem.png" alt="" /></div><p class="thought">그림 3-21. 세션 불일치 — 1번 서버에 저장된 세션이 2번 서버엔 없어 로그인 풀림</p>
@@ -445,7 +445,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <span class="k">ENV</span><span class="w"> </span><span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>root1234<span class="w">               </span><span class="c"># root 비밀번호</span>
 <span class="k">ENV</span><span class="w"> </span><span class="nv">MYSQL_DATABASE</span><span class="o">=</span>metadb<span class="w">                      </span><span class="c"># 기본 생성할 데이터베이스 이름</span>
 <span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;--character-set-server=utf8mb4&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--collation-server=utf8mb4_unicode_ci&quot;</span><span class="p">]</span></div>
-<p>Dockerfile에서 눈여겨볼 지점은 두 가지였습니다.</p>
+<p>Dockerfile에서 눈여겨볼 지점은 두 가지입니다.</p>
 <ul>
 <li><strong>/docker-entrypoint-initdb.d</strong> : MySQL 공식 이미지가 제공하는 특수 경로입니다. 여기에 init.sql 파일을 넣어두면 컨테이너가 처음 실행될 때 자동으로 SQL 문을 실행해 테이블과 초기 데이터를 만들어줍니다.</li>
 <li><strong>환경 변수(ENV)</strong> : 네 개의 환경 변수를 통해 계정과 DB 이름을 미리 설정합니다. 실제 접속 시 이 설정값들을 사용하게 됩니다.</li>
@@ -747,7 +747,7 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 <li>응답이 Spring → NGINX → 브라우저로 돌아가 화면에 표시.</li>
 </ol>
 <p>오픈이는 이제 복잡한 다중 컨테이너 환경도 도커 컴포즈를 통해 안정적으로 구성하고 관리할 수 있게 되었습니다. 화면에 뜬 사용자 목록을 보며 오픈이는 기분 좋게 실습을 마무리했습니다.</p>
-<h2>3.7 Docker 네트워크의 진화</h2>
+<h2>3.7 Docker 네트워크 — 기본에서 Compose 자동화까지</h2>
 <p>오픈이는 노트를 다시 펼쳤습니다. 처음 컨테이너 두 개를 띄워 서로 부르려 했을 때부터 docker compose up 한 줄까지, 네트워크가 어떻게 바뀌어 왔는지 한 표로 그려 봤습니다.</p>
 <table>
 <thead>

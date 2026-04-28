@@ -462,7 +462,7 @@ DNS에 박히는 이름은 사실 `order-service` 한 단어가 아니라 `order
 
 **1단계 — 외부 입구 통과**
 
-브라우저에서 `http://localhost/order` 같은 주소로 요청을 보내면, 노드에 뚫린 NodePort(또는 클라우드의 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 `minikube tunnel` 이 바로 이 입구를 호스트와 이어 주는 통로였습니다. 아직 HTTP 본문은 들여다보지 않은 상태입니다.
+브라우저에서 `http://localhost/order` 같은 주소로 요청을 보내면, 노드에 뚫린 NodePort(또는 클라우드의 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 `minikube tunnel` 이 바로 이 입구를 호스트와 이어 주는 통로입니다. 아직 HTTP 본문은 들여다보지 않은 상태입니다.
 
 ![](../assets/CH05/k8s-flow-step1.png)
 
