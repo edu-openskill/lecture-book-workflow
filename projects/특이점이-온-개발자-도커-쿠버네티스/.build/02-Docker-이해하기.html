@@ -32,7 +32,7 @@
 <div class="chapter-image"><img src="..\assets\CH02\chap01-6.png" alt="" /></div><p class="thought">그림 2-2. 주방 설비를 통째로 복제하는 첫 번째 방식</p>
 <p>두 번째 방식은 냉장고와 가스레인지 같은 공용 설비는 함께 쓰고, 칼·도마·조리대처럼 개인이 쓸 도구만 각자 챙기는 것입니다. 장비 수는 그대로인데 공간은 네 명이 동시에 쓸 수 있습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-7.png" alt="" /></div><p class="thought">그림 2-3. 공용 설비는 공유하고 개별 공간만 쪼개는 두 번째 방식</p>
-<p>이렇게 하나의 주방을 여러 명이서 사용하는 것 처럼 하나의 컴퓨터를 여러 대로 나눠서 사용하는 IT 기술을 <strong>가상화(Virtualization)</strong> 라고 부릅니다.</p>
+<p>이렇게 하나의 주방을 여러 명이서 사용하는 것처럼 하나의 컴퓨터를 여러 대로 나눠서 사용하는 IT 기술을 <strong>가상화(Virtualization)</strong> 라고 부릅니다.</p>
 <div class="term-box">
 <p><strong>가상화(Virtualization)</strong>: 하나의 물리 서버를 논리적으로 여러 대처럼 나누어 쓰는 기술입니다. 자원을 효율적으로 쓰면서 서로 다른 환경을 안전하게 격리하는 것이 목적입니다.</p>
 </div>
@@ -79,10 +79,10 @@
 <div class="term-box">
 <p><strong>커널(Kernel)</strong>: 운영체제(OS)의 핵심입니다. 프로세스 생성, 메모리 관리, 격리 공간 생성을 담당합니다. Docker의 모든 컨테이너는 호스트 PC의 <strong>같은 리눅스 커널</strong>을 공유하고, 그 하나의 커널이 각 컨테이너에 격리 공간을 할당합니다.</p>
 </div>
-<p>구조의 핵심은 <strong>호스트 OS의 커널 하나를 모든 컨테이너가 공유</strong>한다는 점입니다. VM처럼 OS를 통째로 따로 올리지 않으니 가볍고 빠르게 뜹니다. Docker 엔진은 그 커널에 <strong>&quot;새 격리 공간을 만들어 달라&quot;</strong> 고 요청을 하면 실제로 프로세스를 격리하는 일은 <strong>커널</strong>이 합니다. 그래서 다른 컨테이너가 다른 앱과 다른 라이브러리를 가져도 충돌하지 않고 한쪽이 런타임을 업그레이드해도 옆 컨테이너는 영향을 받지 않습니다.</p>
+<p>구조의 핵심은 <strong>호스트 OS의 커널 하나를 모든 컨테이너가 공유</strong>한다는 점입니다. VM처럼 OS를 통째로 따로 올리지 않으니 가볍고 빠르게 뜹니다. Docker 엔진이 그 커널에 <strong>&quot;새 격리 공간을 만들어 달라&quot;</strong> 고 요청하면, 실제로 프로세스를 격리하는 일은 <strong>커널</strong>이 합니다. 그래서 다른 컨테이너가 다른 앱과 다른 라이브러리를 가져도 충돌하지 않고 한쪽이 런타임을 업그레이드해도 옆 컨테이너는 영향을 받지 않습니다.</p>
 <div class="prep-note">
 <p><strong>컨테이너의 격리</strong></p>
-<p>사실 컨테이너 안에서 도는 것은 처음부터 격리된 무언가가 아니라, 호스트 OS 위에서 다른 것들과 함께 도는 <strong>평범한 프로세스</strong>입니다. 그대로 두면 한 컨테이너의 프로세스가 다른 컨테이너의 파일을 들여다보거나, 두 컨테이너가 같은 포트를 두고 충동할 수 있습니다.
+<p>사실 컨테이너 안에서 도는 것은 처음부터 격리된 무언가가 아니라, 호스트 OS 위에서 다른 것들과 함께 도는 <strong>평범한 프로세스</strong>입니다. 그대로 두면 한 컨테이너의 프로세스가 다른 컨테이너의 파일을 들여다보거나, 두 컨테이너가 같은 포트를 두고 충돌할 수 있습니다.
 그래서 <strong>리눅스 커널</strong>은 컨테이너마다 <strong>파일시스템</strong>(<code>/bin</code>, <code>/lib</code> 같은 폴더), <strong>네트워크</strong>(IP와 포트), <strong>프로세스</strong> (PID 번호) 세 가지 공간을 따로 만들어 줍니다. 이렇게 컨테이너마다 세 공간을 따로 갖는 상태가 바로 <strong>격리</strong>입니다.</p>
 </div>
 <h3>2.1.3 컨테이너가 만들어지는 과정</h3>
@@ -801,7 +801,7 @@ nginx<span class="w">                </span><span class="c1"># nginx 실행</spa
   </div>
 </div>
 <p class="thought">그림 2-19. nginx 설치와 실행 결과</p>
-<p>설치 로그가 마무리되며 Nginx 설치가 끝났습니다. 오픈이는 설정이 제대로 반영되었는지 확인하기 위해 현재 활성화된 포트를 점검해 보기로 합니다. <code>net-tools</code> 패키지를 추가로 설치한 뒤, 명령어를 입력해 Nginx가 네트워크상에서 정상적으로 대기 중인지 확인합니다.</p>
+<p>설치 로그가 마무리되며 Nginx 설치가 끝났습니다. 오픈이는 설정이 제대로 반영되었는지 확인하기 위해 현재 활성화된 포트를 점검해 보기로 했습니다. <code>net-tools</code> 패키지를 추가로 설치한 뒤, 명령어를 입력해 Nginx가 네트워크상에서 정상적으로 대기 중인지 확인했습니다.</p>
 <div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>net-tools<span class="w">   </span><span class="c1"># net-tools: 네트워크 확인 도구 모음</span>
 netstat<span class="w"> </span>-nlpt<span class="w">              </span><span class="c1"># 열려 있는 TCP 포트 확인</span></div>
 <div class="terminal-log">
@@ -1006,7 +1006,7 @@ docker<span class="w"> </span>ps<span class="w">              </span><span class
 <div class="term-box">
 <p><strong>데몬(Daemon)</strong> : 백그라운드에서 요청을 기다리며 계속 실행되는 프로그램입니다. nginx나 데이터베이스처럼 '서버' 역할을 수행하며, 요청을 기다리는 것 자체가 일이라 터미널이 없어도 종료되지 않습니다.</p>
 </div>
-<p>반면 ubuntu는 <strong>'사용자에게 명령어를 입력받는 것'</strong> 이 목적입니다. 그래서 메인 프로세스인 <strong>bash</strong>는 사용자의 입력을 받는 터미널이 있어야 합니다. 하지만 -d 옵션처럼 입력해 줄 터미널이 연결되지 않은 상태라면, bash는 더 이상 할 일이 없다고 판단해 종료됩니다.</p>
+<p>반면 ubuntu는 <strong>'사용자에게 명령어를 입력받는 것'</strong> 이 목적입니다. 그래서 메인 프로세스인 <strong>bash</strong>는 사용자의 입력을 받는 터미널이 있어야 합니다. <code>-d</code> 옵션을 줘서 터미널이 연결되지 않으면, bash는 더 이상 할 일이 없다고 판단해 종료됩니다.</p>
 <div class="term-box">
 <p><strong>bash(셸)</strong> : 사용자의 명령어를 운영체제에 전달하는 창구입니다. 입력받을 터미널이 없으면 할 일이 사라져 프로세스가 종료됩니다.</p>
 </div>
@@ -1180,9 +1180,9 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 <p>필요한 건 <strong>지금 컨테이너 상태를 그대로 기록해 두는 방법</strong>입니다.</p>
 <h2>2.8 commit — 실행 중인 컨테이너를 이미지로</h2>
 <p>그 일을 하는 명령이 <code>docker commit</code>입니다. 이 명령어는 컨테이너의 현재 상태를 그대로 이미지로 저장합니다.</p>
-<p>지금까지 오픈이는 남이 올려둔 이미지(ubuntu, nginx, tomcat)를 Docker Hub에서 받아 쓰기만 했습니다. 반대로, 직접 수정한 컨테이너를 이미지로 만들어 Docker Hub에 올릴 수도 있습니다. 그러면 다른 컴퓨터에서도 이 이미지 받으면 같은 상태로 쓸 수 있습니다.</p>
+<p>지금까지 오픈이는 남이 올려둔 이미지(ubuntu, nginx, tomcat)를 Docker Hub에서 받아 쓰기만 했습니다. 반대로, 직접 수정한 컨테이너를 이미지로 만들어 Docker Hub에 올릴 수도 있습니다. 그러면 다른 컴퓨터에서도 이 이미지를 받으면 같은 상태로 쓸 수 있습니다.</p>
 <h3>2.8.1 Tomcat으로 commit 실습하기</h3>
-<p>오픈이는 나만의 이미지를 만들기 위해 Tomcat 이미지를 받아 컨테이너를 실행했습니다.</p>
+<p>오픈이는 자기만의 이미지를 만들기 위해 Tomcat 이미지를 받아 컨테이너를 실행했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>tomcat<span class="w">   </span><span class="c1"># 8080 포트로 Tomcat 백그라운드 실행</span></div>
 <p>실행 후 브라우저에서 <strong>localhost:8080</strong> 으로 접속했더니 <strong>404</strong>가 떴습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-58.png" alt="" /></div><p class="thought">그림 2-35. Tomcat 404 에러 화면</p>
@@ -1256,22 +1256,26 @@ docker<span class="w"> </span>push<span class="w"> </span>&lt;본인-dockerhub-i
 <div class="chapter-image"><img src="..\assets\CH02\chap01-70.png" alt="" /></div><p class="thought">그림 2-40. Docker Hub 저장소 확인</p>
 <h2>2.9 마운트 — 컨테이너가 사라져도 남는 데이터</h2>
 <p>Docker Hub에 이미지를 올리고 한숨 돌리려던 오픈이의 머릿속에 문득 한 가지 걱정이 스쳤습니다. 이미지에 담긴 것은 컨테이너의 초기 상태뿐이기 때문입니다.</p>
-<p>컨테이너가 실행된 이후에 새로 쌓이는 데이터들은 이미지에 저장되지 않고, 컨테이너가 삭제되는 순간 함께 사라져 버립니다. 만약 데이터베이스처럼 실시간으로 데이터를 쌓아야 하는 컨테이너가 종료된다면, 그동안 저장했던 데이터들도 통째로 날아가게 됩니다.</p>
+<p>컨테이너가 실행된 뒤 새로 쌓이는 데이터는 이미지에 저장되지 않습니다. 컨테이너가 삭제되는 순간 함께 사라져 버립니다. 데이터베이스처럼 실시간으로 데이터를 쌓는 컨테이너가 삭제되면, 그동안 저장한 데이터도 통째로 날아갑니다.</p>
 <p class="thought">'컨테이너를 내려도 데이터는 남아 있어야 하는데.'</p>
 <p>결국 데이터를 잃지 않으려면 컨테이너 외부에 보관해야 합니다. 이를 위해 컨테이너와 외부 저장소를 연결해주는 기능이 바로 <strong>마운트</strong>입니다.</p>
 <p>Docker의 마운트는 두 가지 방식이 있습니다.</p>
 <h3>2.9.1 바인드 마운트: 호스트 폴더와 직접 연결</h3>
-<p>먼저 해본 방식은 호스트 PC의 특정 폴더를 컨테이너 내부의 경로와 연결하는 <strong>바인드 마운트</strong>입니다. PC의 폴더가 USB라면, 컨테이너는 그 USB를 꽂아서 사용하는 방식입니다.</p>
-<p>양쪽이 같은 데이터를 공유하기 때문에 어느 한쪽에서 파일을 수정하면 반대쪽에서도 즉시 확인됩니다. 무엇보다 USB를 뽑는다고 데이터가 사라지지 않듯, 컨테이너를 삭제해도 파일의 실체는 호스트 PC에 안전하게 남습니다.</p>
+<p>먼저 해본 방식은 호스트 PC의 특정 폴더를 컨테이너 내부의 경로와 연결하는 <strong>바인드 마운트</strong>입니다. USB를 컴퓨터에 꽂으면 그 안의 파일을 그대로 볼 수 있듯, 컨테이너도 호스트 PC의 폴더를 꽂아서 쓰는 방식입니다.</p>
+<p>한쪽에서 파일을 수정하면 다른 쪽에서도 즉시 확인됩니다. USB를 뽑아도 안에 든 파일이 사라지지 않듯, 컨테이너를 삭제해도 파일은 호스트 PC에 그대로 남습니다.</p>
 <div class="term-box">
 <p><strong>바인드 마운트(Bind Mount)</strong> : 호스트 PC의 특정 폴더를 컨테이너 안 경로와 직접 연결하는 마운트 방식입니다. 사용자가 지정한 폴더를 컨테이너가 그대로 빌려 쓰기 때문에, 한쪽의 변경 사항이 실시간으로 양쪽에 반영됩니다. 어느 폴더를 쓸지는 사용자가 직접 지정합니다.</p>
+<p><code>docker run -it --mount type=bind,src=&lt;호스트 경로&gt;,dst=&lt;컨테이너 경로&gt; &lt;이미지&gt;</code> 형태로 명령어를 작성합니다.</p>
 </div>
 <div class="chapter-image"><img src="..\assets\CH02\bind-mount.png" alt="" /></div><p class="thought">그림 2-41. 호스트 폴더와 컨테이너 경로가 같은 데이터를 바라보도록 묶인 상태</p>
-<p>오픈이는 호스트에 폴더를 하나 만들고, 컨테이너 안의 경로와 직접 연결했습니다.</p>
-<div class="code-block highlight" data-lang="bash"><span class="c1"># macOS / Linux</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>~/app/bind<span class="w">                                                        </span><span class="c1"># 호스트 PC에 공유할 폴더 생성</span>
-docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span><span class="nv">$HOME</span>/app/bind,dst<span class="o">=</span>/app/bind<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># 호스트 폴더(src)와 컨테이너 경로(dst)를 연결</span></div>
-<p>컨테이너 안에서 /app/bind/a.txt를 생성한 뒤, 호스트의 폴더를 확인해 보았습니다.</p>
+<p>오픈이는 호스트의 <code>/c/app/bind</code> 경로에 폴더를 하나 만들고, 컨테이너 안의 경로와 직접 연결했습니다.</p>
+<div class="code-block highlight" data-lang="bash"><span class="c1"># 호스트 PC에 공유할 폴더 생성</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>~/app/bind<span class="w">    </span>
+<span class="c1"># 호스트 폴더(src)와 컨테이너 경로(dst)를 연결                                                    </span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span>/c/app/bind,dst<span class="o">=</span>/app/bind<span class="w"> </span>ubuntu<span class="w">   </span></div>
+<p>컨테이너 안에서 <code>a.txt</code>를 만들고, 호스트 쪽 폴더를 확인해 봤습니다.</p>
+<div class="code-block highlight" data-lang="bash">touch<span class="w"> </span>/app/bind/a.txt<span class="w">   </span><span class="c1"># 컨테이너 안에서 파일 생성</span>
+ls<span class="w"> </span>C:/app/bind<span class="w">          </span><span class="c1"># 호스트 터미널에서 확인</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -1288,9 +1292,10 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <h3>2.9.2 볼륨 마운트: Docker가 관리하는 저장소</h3>
 <p>바인드 마운트를 써보니 신경 쓰이는 점이 하나 있었습니다. 호스트의 어느 폴더를 쓸지, 경로를 어떻게 정리해둘지 사용자가 직접 관리해야 한다는 점입니다. 이 일을 Docker에 맡길 수는 없을까.</p>
 <div class="chapter-image"><img src="..\assets\CH02\volume-mount.png" alt="" /></div><p class="thought">그림 2-43. Docker 엔진이 관리하는 내부 저장 공간에 데이터가 저장되는 구조</p>
-<p>두 번째 방식이 그 역할을 합니다. Docker 엔진이 자기 안에 별도 저장 공간을 두고, 사용자는 볼륨에 이름만 붙여 컨테이너와 연결합니다. 실제 저장 위치는 Docker가 맡아서 관리합니다.</p>
+<p>볼륨 마운트가 그 역할을 합니다. Docker 엔진이 자기 안에 별도 저장 공간을 두고, 사용자는 볼륨에 이름만 붙여 컨테이너와 연결합니다. 실제 저장 위치는 Docker가 맡아서 관리합니다.</p>
 <div class="term-box">
 <p><strong>볼륨 마운트(Volume Mount)</strong> : Docker 엔진이 자체적으로 관리하는 저장 공간(볼륨)을 컨테이너에 연결하는 마운트 방식입니다. 사용자는 볼륨 이름만 정하면 되고, 실제 저장 위치는 Docker가 알아서 관리합니다. 컨테이너가 사라져도 볼륨에 담긴 데이터는 그대로 남아 있어, 다른 컨테이너에서 같은 이름으로 다시 연결할 수 있습니다.</p>
+<p><code>docker run -it --mount type=volume,src=&lt;볼륨 이름&gt;,dst=&lt;컨테이너 경로&gt; &lt;이미지&gt;</code> 형태로 명령어를 작성합니다.</p>
 </div>
 <p>오픈이는 <code>metacoding-volume</code>이라는 이름으로 볼륨을 하나 만들면서 ubuntu 컨테이너를 띄웠습니다. 존재하지 않는 볼륨 이름을 주면 Docker가 자동으로 만들어 줍니다.</p>
 <div class="code-block highlight" data-lang="bash"><span class="c1"># 볼륨 마운트로 ubuntu 실행</span>
@@ -1307,12 +1312,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   </div>
 </div>
 <p class="thought">그림 2-44. 볼륨 마운트로 ubuntu 실행</p>
-<p>컨테이너 안에 들어가자 <code>/app/volume</code> 폴더가 자동으로 생성돼 있었습니다.</p>
-<div class="tip">
-<p><strong>볼륨 마운트 vs 바인드 마운트의 초기 처리</strong></p>
-<p>볼륨 마운트는 컨테이너 내부 폴더에 이미 파일이 있다면 그 파일을 새 볼륨으로 복사해 보존해 줍니다. 반면 바인드 마운트는 호스트 폴더 내용으로 내부를 완전히 덮어버리므로 기존 파일이 사라질 수 있습니다.</p>
-</div>
-<p>오픈이는 이 폴더에 빈 파일을 하나 만들고, 컨테이너를 빠져나와 볼륨이 그대로 남아 있는지 확인했습니다.</p>
+<p>컨테이너 안에 들어가자 <code>/app/volume</code> 폴더가 자동으로 만들어져 있었습니다. 오픈이는 이 폴더에 빈 파일을 하나 만들고, 컨테이너를 빠져나와 볼륨이 그대로 남아 있는지 확인했습니다.</p>
 <div class="code-block highlight" data-lang="bash">touch<span class="w"> </span>/app/volume/b.txt<span class="w">   </span><span class="c1"># 볼륨 안에 빈 파일 생성</span>
 <span class="nb">exit</span><span class="w">                      </span><span class="c1"># 컨테이너 종료</span>
 docker<span class="w"> </span>volume<span class="w"> </span>ls<span class="w">          </span><span class="c1"># 볼륨 목록 재확인</span></div>
@@ -1349,7 +1349,7 @@ ls<span class="w"> </span>/app/volume</div>
   </div>
 </div>
 <p class="thought">그림 2-46. 볼륨 데이터 재사용</p>
-<p>방금 전에 만들었던 <code>b.txt</code>가 새 컨테이너 안에서도 그대로 보였습니다. 볼륨이 컨테이너와 독립적으로 유지되기 때문입니다.</p>
+<p>방금 전에 만들었던 <code>b.txt</code>가 새 컨테이너 안에서도 그대로 보였습니다. 컨테이너를 내려도 데이터는 사라지지 않았습니다. 처음 던졌던 걱정이 풀리는 순간이었습니다.</p>
 <h2>이것만은 기억하자</h2>
 <ul>
 <li><strong>컨테이너는 격리된 프로세스입니다.</strong> 파일시스템·네트워크·프로세스 공간만 따로 쪼개고, 커널은 호스트와 공유합니다. VM보다 가볍고 빨리 뜹니다.</li>
@@ -1359,7 +1359,7 @@ ls<span class="w"> </span>/app/volume</div>
 <li><strong>마운트는 컨테이너와 외부 저장소를 잇습니다.</strong> 바인드는 호스트의 특정 폴더를, 볼륨은 Docker 엔진이 관리하는 저장소를 컨테이너에 연결합니다.</li>
 </ul>
 <p>오픈이가 Docker라는 이름을 처음 들은 건 어제 낮이었습니다. 그 사이에 컨테이너로 앱을 돌리고, 이미지로 같은 환경을 어디서든 다시 띄울 줄 알게 됐습니다.</p>
-<p>오픈이는 노트를 훑어보고 노트북 뚜껑을 닫았습니다. 책상 위엔 식은 커피 잔이 남아 있었습니다.</p>
+<p>노트를 훑어보고 노트북 뚜껑을 닫았습니다. 책상 위엔 식은 커피 잔이 남아 있었습니다.</p>
 <p>하지만 앞으로 해결해야 할 과제도 남아 있습니다. 매번 컨테이너에 접속해 수동으로 설정을 변경하고 commit 명령어로 이미지를 기록하는 방식은 비효율적입니다. 나아가 여러 개의 컨테이너를 동시에 실행하고 관리해야 하는 상황도 곧 마주하게 될 것입니다.</p>
 
 </div>
