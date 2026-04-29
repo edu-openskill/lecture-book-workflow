@@ -71,7 +71,30 @@ kubectl apply -f ex13/deploy-ex03.yml
 kubectl exec -it <Pod명> -- env       # Pod 환경 변수 조회
 ```
 
-![](../assets/CH05/chap03-46.png)
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pod</span></div>
+    <div>NAME                                  READY   STATUS    RESTARTS   AGE</div>
+    <div>nginx-config-secret-794499d5d4-c2xmw  1/1     Running   0          11s</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-794499d5d4-c2xmw -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-794499d5d4-c2xmw</div>
+    <div>conn_info=localhost:80</div>
+    <div>conn_url=config.test</div>
+    <div>password=metacoding1234</div>
+    <div>KUBERNETES_PORT_443_TCP_PORT=443</div>
+    <div>KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1</div>
+    <div>KUBERNETES_SERVICE_HOST=10.96.0.1</div>
+    <div>KUBERNETES_SERVICE_PORT=443</div>
+    <div>KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443</div>
+    <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
+  </div>
+</div>
 
 *그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습*
 
@@ -98,7 +121,28 @@ kubectl apply -f ex13/secret-password.yml      # Secret YAML 적용
 kubectl get secret secret-password -o yaml     # 저장된 Secret 내용을 YAML로 조회
 ```
 
-![](../assets/CH05/chap03-48.png)
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get secret secret-password -o yaml</span></div>
+    <div>apiVersion: v1</div>
+    <div>data:</div>
+    <div>&nbsp;&nbsp;password: bWV0YWNvZGluZzEyMzQ=</div>
+    <div>kind: Secret</div>
+    <div>metadata:</div>
+    <div>&nbsp;&nbsp;annotations:</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;kubectl.kubernetes.io/last-applied-configuration: |</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{"apiVersion":"v1","kind":"Secret","metadata":{"annotations":{},"name":"secret-password","namespace":"defaul...</div>
+    <div>&nbsp;&nbsp;creationTimestamp: "2026-03-15T06:30:27Z"</div>
+    <div>&nbsp;&nbsp;name: secret-password</div>
+    <div>&nbsp;&nbsp;namespace: default</div>
+    <div>&nbsp;&nbsp;resourceVersion: "1387"</div>
+  </div>
+</div>
 
 *그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태*
 
@@ -125,7 +169,27 @@ envFrom:
 kubectl apply -f ex13/deploy-ex03.yml   # Secret 연결판 적용
 ```
 
-![](../assets/CH05/13_secret-env.png)
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pod</span></div>
+    <div>NAME                                  READY   STATUS    RESTARTS   AGE</div>
+    <div>nginx-config-secret-7fbccb65f5-zq8nz  1/1     Running   0          51s</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-7fbccb65f5-zq8nz -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-7fbccb65f5-zq8nz</div>
+    <div>TERM=xterm</div>
+    <div>conn_url=config.test</div>
+    <div>password=metacoding1234</div>
+    <div>conn_info=localhost:80</div>
+    <div>KUBERNETES_SERVICE_PORT_HTTPS=443</div>
+    <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
+  </div>
+</div>
 
 *그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습*
 
@@ -337,7 +401,20 @@ kubectl apply -f ex14/volume-pod.yml     # PVC를 마운트한 Pod 생성
 kubectl get pv,pvc                        # PV·PVC가 Bound 됐는지 확인
 ```
 
-![](../assets/CH05/chap03-60.png)
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pv,pvc -o wide</span></div>
+    <div>NAME                          CAPACITY  ACCESS MODES  RECLAIM POLICY  STATUS  CLAIM                S...</div>
+    <div>persistentvolume/volume-pv    1Gi       RWO           Retain          Bound   default/volume-pvc   &lt;unset&gt;</div>
+    <div>NAME                              STATUS  VOLUME      CAPACITY  ACCESS MODES  STORAGECLASS  VOLUMEATTRIBUTESCl...</div>
+    <div>persistentvolumeclaim/volume-pvc  Bound   volume-pv   1Gi       RWO           &lt;unset&gt;                       9s</div>
+  </div>
+</div>
 
 *그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과*
 
@@ -357,7 +434,20 @@ kubectl apply -f ex14/volume-pod.yml           # 같은 PVC를 쓰는 Pod 재생
 kubectl exec -it volume-pod -- ls /mnt/data    # 새 Pod에서 c.txt가 남아 있는지 확인
 ```
 
-![](../assets/CH05/42_volume-pod-preserved.png)
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it volume-pod -- /bin/bash</span></div>
+    <div>root@volume-pod:/#</div>
+    <div><span class="tl-key">root@volume-pod:/#</span> <span class="tl-str">ls /mnt/data</span></div>
+    <div>c.txt</div>
+    <div>root@volume-pod:/#</div>
+  </div>
+</div>
 
 *그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습*
 
@@ -491,7 +581,24 @@ minikube addons enable ingress
 kubectl get pod -n ingress-nginx   # Controller Pod Running 확인
 ```
 
-![](../assets/CH05/chap03-ingress-addon.png)
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">minikube addons enable ingress</span></div>
+    <div>* ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.</div>
+    <div>You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS</div>
+    <div>* After the addon is enabled, please run "minikube tunnel" and your ingress resources would be available at "127.0.0.1"</div>
+    <div>&nbsp;&nbsp;&nbsp;- Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.2</div>
+    <div>&nbsp;&nbsp;&nbsp;- Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.2</div>
+    <div>&nbsp;&nbsp;&nbsp;- Using image registry.k8s.io/ingress-nginx/controller:v1.13.2</div>
+    <div>* Verifying ingress addon...</div>
+    <div>* The 'ingress' addon is enabled</div>
+  </div>
+</div>
 
 *그림 6-11. Nginx Ingress Controller 애드온 설치*
 

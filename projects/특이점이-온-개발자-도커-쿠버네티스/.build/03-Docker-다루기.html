@@ -89,9 +89,39 @@
 <span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/bin/bash&quot;</span><span class="p">]</span><span class="w">                      </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span>bash<span class="w"> </span>실행</div>
 <p>작성한 파일을 저장하고 터미널에서 빌드 명령을 실행했습니다.(터미널은 Dockerfile이 위치하는 곳에서 실행해야 합니다.)</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-vim<span class="w"> </span>.<span class="w">   </span><span class="c1"># . 은 현재 폴더의 Dockerfile을 읽겠다는 뜻</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-7.png" alt="" /></div><p class="thought">그림 3-3. docker build 실행 결과</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t ubuntu-vim .</span></div>
+    <div>#7 naming to docker.io/library/ubuntu-vim:latest done</div>
+    <div>#7 unpacking to docker.io/library/ubuntu-vim:latest</div>
+    <div>#7 unpacking to docker.io/library/ubuntu-vim:latest 2.6s done</div>
+    <div>#7 DONE 9.2s</div>
+  </div>
+</div>
+<p class="thought">그림 3-3. docker build 실행 결과</p>
 <p>화면에 빌드 로그가 한 줄씩 올라가더니 이미지가 완성되었습니다. 새로 만든 이미지로 컨테이너를 띄우자, 별도의 설치 과정 없이도 vim이 즉시 실행되었습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-10.png" alt="" /></div><p class="thought">그림 3-4. vim이 이미 설치된 상태로 컨테이너 실행</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">vim</span></div>
+    <div>a.txt</div>
+    <div>~</div>
+    <div>~</div>
+    <div>~</div>
+    <div>~</div>
+    <div>:wq</div>
+  </div>
+</div>
+<p class="thought">그림 3-4. vim이 이미 설치된 상태로 컨테이너 실행</p>
 <p>지난번만 해도 컨테이너 접속, 업데이트, 설치, 종료, 커밋까지 다섯 단계를 일일이 수동으로 처리해야 했습니다. 하지만 이제는 <strong>Dockerfile 하나와 명령어 한 줄로</strong> 모든 과정이 끝났습니다.</p>
 <p>Dockerfile로 필요한 패키지들은 설치했지만, 내 컴퓨터(호스트)에 있는 소스 코드를 컨테이너 안으로 어떻게 넣어야 할지 궁금해졌습니다. 프로젝트를 실제로 구동하려면 로컬의 파일들을 컨테이너 내부로 옮기는 과정이 반드시 필요했기 때문입니다. 이럴 때 사용하는 지시어가 바로 <strong>WORKDIR</strong>와 <strong>COPY</strong>입니다.</p>
 <p>오픈이는 이 과정을 테스트해 보기 위해, 우선 Dockerfile과 같은 위치에 내용은 비어있는 <strong>index.html</strong> 파일을 하나 만들었습니다.</p>
@@ -106,7 +136,20 @@
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-html<span class="w"> </span>.<span class="w">    </span><span class="c1"># . 은 현재 경로를 기준으로 Dockerfile을 읽어옴</span>
 docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>ubuntu-html<span class="w">       </span><span class="c1"># ubuntu-html 이미지로 컨테이너 실행</span>
 ls</div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-13.png" alt="" /></div><p class="thought">그림 3-6. 실행 결과 확인</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker run -it ubuntu-html</span></div>
+    <div>root@5497d6efff3c:/app#</div>
+    <div><span class="tl-key">root@5497d6efff3c:/app#</span> <span class="tl-str">ls</span></div>
+    <div>index.html</div>
+  </div>
+</div>
+<p class="thought">그림 3-6. 실행 결과 확인</p>
 <p>예상대로 터미널은 접속하자마자 /app 경로를 가리키고 있었고, 그 안에는 index.html이 들어 있었습니다. 직접 들어가서 파일을 옮기거나 환경을 설정할 필요가 없어진 것입니다. 확인을 마친 오픈이는 만족스럽게 exit을 입력하고 컨테이너에서 빠져나왔습니다.</p>
 <h3>3.1.4 CMD와 ENTRYPOINT</h3>
 <p>앞선 실습에서는 CMD를 사용했습니다. 그런데 문법 표를 다시 보니 ENTRYPOINT라는 지시어도 눈에 띄었습니다.</p>
@@ -130,7 +173,21 @@ ls</div>
 <p>Dockerfile에서 지시어 순서는 크게 상관없지만, 최종적으로는 ENTRYPOINT + CMD 조합이 적용됩니다. 오픈이는 이미지를 다시 빌드하고 컨테이너를 띄워봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-entry<span class="w"> </span>.<span class="w">         </span><span class="c1"># 이미지 생성</span>
 docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>ubuntu-entry<span class="w">            </span><span class="c1"># 컨테이너 실행</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-15.png" alt="" /></div><p class="thought">그림 3-7. ENTRYPOINT 실행 결과</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t ubuntu-entry .</span></div>
+    <div>#7 naming to docker.io/library/ubuntu-entry:latest done</div>
+    <div>#7 DONE 0.3s</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">docker run -it ubuntu-entry</span></div>
+    <div>컨테이너 실행 /bin/bash</div>
+  </div>
+</div>
+<p class="thought">그림 3-7. ENTRYPOINT 실행 결과</p>
 <p>결과 화면에는 <strong>'컨테이너 실행 /bin/bash'</strong> 라는 문구가 찍히고 프로세스가 바로 종료되었습니다. ENTRYPOINT가 설정되어 있으면 CMD는 독립적으로 실행되지 않고 뒤에 인자로 붙기 때문입니다. 결국 echo &quot;컨테이너 실행&quot; &quot;/bin/bash&quot;가 실행된 셈인데, echo는 출력 후 자기 할 일을 다하면 바로 종료되는 프로그램이라 컨테이너도 함께 꺼진 것입니다.</p>
 <p>이런 방식은 실제 서비스를 배포할 때 유용합니다. ENTRYPOINT에는 서버 실행 명령어를 고정해두고, CMD에는 상황에 따라 바뀔 수 있는 옵션이나 파일명만 적어두면 이미지를 훨씬 유연하게 재활용할 수 있습니다.</p>
 <p class="thought">'수동으로 한참 동안 치던 설정들이 파일 한 장에 다 담겼네.'</p>
@@ -259,9 +316,43 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>lb<span class="w"> </span>ex02/lb
 docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
 <p>설정을 마치고 브라우저에서 localhost:80/app1에 접속해 보았습니다. 새로고침을 반복해도 화면에 보이는 HTML 내용은 똑같았습니다.</p>
-<p>오픈이는 실제 동작 여부를 확인하기 위해 각 Docker Desktop의 컨테이너 로그를 확인했습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-26.png" alt="" /></div><p class="thought">그림 3-14. 8000 포트 컨테이너 로그에 찍힌 요청</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-27.png" alt="" /></div><p class="thought">그림 3-15. 8001 포트 컨테이너 로그에 찍힌 요청</p>
+<p>오픈이는 실제 동작 여부를 확인하기 위해 <code>docker logs</code>로 각 컨테이너의 로그를 확인했습니다.</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker logs ff8e235c79a2</span></div>
+    <div>2025/11/25 15:09:44 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576</div>
+    <div>2025/11/25 15:09:44 [notice] 1#1: start worker processes</div>
+    <div>2025/11/25 15:09:44 [notice] 1#1: start worker process 16</div>
+    <div>2025/11/25 15:09:44 [notice] 1#1: start worker process 17</div>
+    <div>2025/11/25 15:09:44 [notice] 1#1: start worker process 18</div>
+    <div>...</div>
+    <div>172.17.0.1 - - [25/Nov/2025:15:11:23 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
+    <div>172.17.0.1 - - [25/Nov/2025:15:11:52 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
+  </div>
+</div>
+<p class="thought">그림 3-14. 8000 포트 컨테이너 로그에 찍힌 요청</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker logs 22f65c73f3c5</span></div>
+    <div>2025/11/25 15:09:33 [notice] 1#1: start worker process 20</div>
+    <div>2025/11/25 15:09:33 [notice] 1#1: start worker process 21</div>
+    <div>2025/11/25 15:09:33 [notice] 1#1: start worker process 22</div>
+    <div>...</div>
+    <div>172.17.0.1 - - [25/Nov/2025:15:11:33 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
+    <div>172.17.0.1 - - [25/Nov/2025:15:12:08 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
+  </div>
+</div>
+<p class="thought">그림 3-15. 8001 포트 컨테이너 로그에 찍힌 요청</p>
 <p>새로고침을 할 때마다 요청이 8000번 컨테이너와 8001번 컨테이너로 번갈아 들어오는 것을 눈으로 확인할 수 있었습니다. 설정 파일에 server 줄 하나를 추가했을 뿐인데, NGINX가 알아서 트래픽을 두 대의 서버로 나누어 보내준 것입니다. 별도의 복잡한 세팅 없이도 기본적으로 라운드 로빈 방식이 적용된 결과였습니다.</p>
 <p class="thought">'서버가 100대로 늘어나도 결국 이 파일에 한 줄만 더 추가하면 끝나는 거네. 되게 간단하네?'</p>
 <p>오픈이는 NGINX를 활용한 부하 분산의 편리함을 실감하며 다음 실습으로 넘어갔습니다.</p>
@@ -457,21 +548,107 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <p>오픈이는 ex05 폴더의 파일로 이미지를 빌드하고 컨테이너를 실행했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>db<span class="w"> </span>ex05/db<span class="w">          </span><span class="c1"># ex05/db의 Dockerfile로 db 이미지 빌드</span>
 docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">3306</span>:3306<span class="w"> </span>db<span class="w">     </span><span class="c1"># db 컨테이너를 3306 포트로 실행</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-43.png" alt="" /></div><p class="thought">그림 3-26. MySQL 컨테이너 실행 로그</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t db ./db</span></div>
+    <div>- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "MYSQL_ROOT_PASSWORD") (line 7)</div>
+    <div>View build details: docker-desktop://dashboard/build/desktop-linux/s40kn0konmqqxbyvoabl3c6up</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">docker run -dit -p 3306:3306 db</span></div>
+    <div>ad3d9b0d81fefe86d6185bb1b865545d914f2be742c7046d5c6b1d984c62ff05</div>
+  </div>
+</div>
+<p class="thought">그림 3-26. MySQL 컨테이너 실행 로그</p>
 <p>데이터가 잘 들어갔는지 확인하기 위해 실행 중인 컨테이너 내부로 직접 진입해 보기로 했습니다. docker ps로 컨테이너 ID를 확인한 뒤, docker exec 명령어를 사용했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>ps<span class="w">                    </span><span class="c1"># 실행 중인 컨테이너 확인</span>
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>1fc2<span class="w"> </span>bash<span class="w">   </span><span class="c1"># MySQL 컨테이너 내부 접속</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-44.png" alt="" /></div><p class="thought">그림 3-27. MySQL 컨테이너 내부 진입</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker ps</span></div>
+    <div>CONTAINER ID  IMAGE  COMMAND                 CREATED         STATUS         PORTS                                              NAMES</div>
+    <div>1fc28b1b4a1d  db     "docker-entrypoint.s…"  10 seconds ago  Up 10 seconds  0.0.0.0:3306-&gt;3306/tcp, [::]:3306-&gt;3306/tcp        admiring_burnell</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">docker exec -it 1fc2 bash</span></div>
+    <div>bash-5.1#</div>
+  </div>
+</div>
+<p class="thought">그림 3-27. MySQL 컨테이너 내부 진입</p>
 <p>컨테이너 안에서 MySQL 클라이언트를 실행했습니다. 접속할 때는 Dockerfile에 설정해 둔 계정 정보를 그대로 입력했습니다.</p>
 <div class="code-block highlight" data-lang="bash">mysql<span class="w"> </span>-u<span class="w"> </span>metacoding<span class="w"> </span>-p<span class="w">      </span><span class="c1"># MySQL 접속 (비밀번호 입력 창이 뜨면 metacoding1234 입력)</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-45.png" alt="" /></div><p class="thought">그림 3-28. MySQL 접속 성공</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">bash-5.1#</span> <span class="tl-str">mysql -u metacoding -p</span></div>
+    <div>Enter password:</div>
+    <div>Welcome to the MySQL monitor.  Commands end with ; or \g.</div>
+    <div>mysql&gt;</div>
+  </div>
+</div>
+<p class="thought">그림 3-28. MySQL 접속 성공</p>
 <p>접속 후에는 DB 목록과 테이블, 그리고 초기 데이터를 차례로 조회해 보았습니다.</p>
 <div class="code-block highlight" data-lang="sql"><span class="k">show</span><span class="w"> </span><span class="n">databases</span><span class="p">;</span><span class="w">            </span><span class="c1">-- MySQL 서버에 있는 DB 목록 조회</span>
 <span class="n">use</span><span class="w"> </span><span class="n">metadb</span><span class="p">;</span><span class="w">                </span><span class="c1">-- metadb를 사용할 DB로 선택</span>
 <span class="k">show</span><span class="w"> </span><span class="n">tables</span><span class="p">;</span><span class="w">               </span><span class="c1">-- metadb 안의 테이블 목록 조회</span>
 <span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">user_tb</span><span class="p">;</span><span class="w">     </span><span class="c1">-- user_tb 테이블의 전체 행 조회</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-46.png" alt="" /></div><p class="thought">그림 3-29. 데이터베이스 목록 확인</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-47.png" alt="" /></div><p class="thought">그림 3-30. user_tb 데이터 조회 결과</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">show databases;</span></div>
+    <div>+--------------------+</div>
+    <div>| Database           |</div>
+    <div>+--------------------+</div>
+    <div>| Database           |</div>
+    <div>| information_schema |</div>
+    <div>| metadb             |</div>
+    <div>| performance_schema |</div>
+    <div>+--------------------+</div>
+    <div>3 rows in set (0.01 sec)</div>
+    <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">use metadb;</span></div>
+    <div>Database changed</div>
+    <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">show tables;</span></div>
+    <div>+--------------------+</div>
+    <div>| Tables_in_metadb   |</div>
+    <div>+--------------------+</div>
+    <div>| user_tb            |</div>
+    <div>+--------------------+</div>
+    <div>1 row in set (0.00 sec)</div>
+  </div>
+</div>
+<p class="thought">그림 3-29. 데이터베이스 목록 확인</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">select * from user_tb;</span></div>
+    <div>+----+--------+</div>
+    <div>| id | name   |</div>
+    <div>+----+--------+</div>
+    <div>| 1  | ssar   |</div>
+    <div>| 2  | cos    |</div>
+    <div>+----+--------+</div>
+    <div>2 rows in set (0.00 sec)</div>
+  </div>
+</div>
+<p class="thought">그림 3-30. user_tb 데이터 조회 결과</p>
 <p>init.sql에 적어두었던 초기 데이터들이 테이블에 안전하게 담겨 있는 것을 확인했습니다.</p>
 <p>DB까지 컨테이너로 준비를 마친 오픈이는 터미널의 히스토리를 쭉 올려보다가 멈췄습니다. 지금까지 띄운 컨테이너만 벌써 여러 개인데, 매번 빌드와 실행 명령어를 일일이 입력하는 과정이 번거롭게 느껴졌기 때문입니다.</p>
 <p class="thought">'프론트엔드, 백엔드, DB까지... 이 많은 컨테이너를 한 번에 관리할 수 있는 방법은 없을까?'</p>
@@ -616,7 +793,23 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p class="thought">그림 3-33. Compose가 자동 생성한 네트워크에서 서비스 이름으로 통신</p>
 <p>이제 터미널을 열고 ex06의 docker-compose.yml로 명령어를 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>ex06/docker-compose.yml<span class="w"> </span>up<span class="w">   </span><span class="c1"># 모든 컨테이너 한 번에 실행</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-52.png" alt="" /></div><p class="thought">그림 3-34. docker compose up 실행 결과</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker compose up</span></div>
+    <div>[+] Running 4/4</div>
+    <div> ✓ Network ex06_default   Created</div>
+    <div> ✓ Container ex06-app1-1  Created</div>
+    <div> ✓ Container ex06-app2-1  Created</div>
+    <div> ✓ Container ex06-lb-1    Created</div>
+    <div>Attaching to app1-1, app2-1, lb-1</div>
+  </div>
+</div>
+<p class="thought">그림 3-34. docker compose up 실행 결과</p>
 <p>빌드부터 실행까지 한 번에 끝났습니다. 브라우저 접속 결과는 이전과 똑같았지만, 여러번 치던 명령어가 단 한 줄로 줄어들었습니다.</p>
 <p class="thought">'이걸 두고 왜 그동안 사서 고생을 했지? 진작 이걸로 묶어서 관리할걸.'</p>
 <h3>3.5.4 자주 쓰는 Compose 명령어</h3>
@@ -736,7 +929,33 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 <h3>3.6.4 한 줄로 전체 띄우기</h3>
 <p>오픈이는 터미널에서 ex07의 docker-compose.yml로 서비스를 실행했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>ex07/docker-compose.yml<span class="w"> </span>up<span class="w">   </span><span class="c1"># compose 파일 기반으로 서비스 일괄 실행</span></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-ex07-compose.png" alt="" /></div><p class="thought">그림 3-36. docker compose up 한 줄로 세 컨테이너가 동시에 뜨는 모습</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">docker compose up</span></div>
+    <div>#1 [internal] load local bake definitions</div>
+    <div>#1 reading from stdin 1.78kB 0.0s done</div>
+    <div>#1 DONE 0.0s</div>
+    <div>#2 [backend internal] load build definition from Dockerfile</div>
+    <div>#2 transferring dockerfile: 214B 0.0s done</div>
+    <div>#2 DONE 0.0s</div>
+    <div>#3 [frontend internal] load build definition from Dockerfile</div>
+    <div>#3 transferring dockerfile: 172B 0.0s done</div>
+    <div>#3 DONE 0.0s</div>
+    <div>#4 [db internal] load build definition from Dockerfile</div>
+    <div>#4 transferring dockerfile: 302B 0.0s done</div>
+    <div>#4 DONE 0.0s</div>
+    <div>#5 [frontend internal] load metadata for docker.io/library/nginx:latest</div>
+    <div>#5 DONE 0.1s</div>
+    <div>#6 [db internal] load metadata for docker.io/library/mysql:latest</div>
+    <div>#6 ...</div>
+  </div>
+</div>
+<p class="thought">그림 3-36. docker compose up 한 줄로 세 컨테이너가 동시에 뜨는 모습</p>
 <p>백엔드가 소스를 가져와 빌드하는 과정이 있어 첫 실행 시에는 시간이 다소 걸렸습니다. 빌드가 완료된 후 브라우저에서 localhost:80에 접속하자, DB에서 가져온 사용자 목록이 화면에 나타났습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-58.png" alt="" /></div><p class="thought">그림 3-37. 사용자 목록 조회 성공</p>
 <p>오픈이는 이 시스템 내부에서 일어난 흐름을 다시 정리해 보았습니다.</p>

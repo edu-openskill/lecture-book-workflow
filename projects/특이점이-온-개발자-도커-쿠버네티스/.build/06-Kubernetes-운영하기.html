@@ -65,7 +65,31 @@
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/configmap-conn.yml
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/deploy-ex03.yml
 kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;Pod명&gt;<span class="w"> </span>--<span class="w"> </span>env<span class="w">       </span><span class="c1"># Pod 환경 변수 조회</span></div>
-<div class="chapter-image"><img src="..\assets\CH05\chap03-46.png" alt="" /></div><p class="thought">그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pod</span></div>
+    <div>NAME                                  READY   STATUS    RESTARTS   AGE</div>
+    <div>nginx-config-secret-794499d5d4-c2xmw  1/1     Running   0          11s</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-794499d5d4-c2xmw -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-794499d5d4-c2xmw</div>
+    <div>conn_info=localhost:80</div>
+    <div>conn_url=config.test</div>
+    <div>password=metacoding1234</div>
+    <div>KUBERNETES_PORT_443_TCP_PORT=443</div>
+    <div>KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1</div>
+    <div>KUBERNETES_SERVICE_HOST=10.96.0.1</div>
+    <div>KUBERNETES_SERVICE_PORT=443</div>
+    <div>KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443</div>
+    <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
+  </div>
+</div>
+<p class="thought">그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</p>
 <p>Pod 내부의 환경 변수를 확인하자 conn_info=localhost:80과 같은 값이 나타났습니다. 이미지를 건드리지 않고도 설정값만 외부에서 주입하는 데 성공했습니다.</p>
 <h3>6.1.3 Secret</h3>
 <p>DB 비밀번호도 같은 방식으로 처리할 수 있을지 고민했습니다. 하지만 민감한 정보를 메뉴판처럼 공개된 곳에 적어둘 수는 없었습니다. 이를 위해 별도로 존재하는 리소스가 바로 Secret입니다.</p>
@@ -79,7 +103,29 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <p>stringData를 사용하면 쿠버네티스가 내부적으로 값을 Base64로 인코딩하여 저장합니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/secret-password.yml<span class="w">      </span><span class="c1"># Secret YAML 적용</span>
 kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span>secret-password<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w">     </span><span class="c1"># 저장된 Secret 내용을 YAML로 조회</span></div>
-<div class="chapter-image"><img src="..\assets\CH05\chap03-48.png" alt="" /></div><p class="thought">그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get secret secret-password -o yaml</span></div>
+    <div>apiVersion: v1</div>
+    <div>data:</div>
+    <div>&nbsp;&nbsp;password: bWV0YWNvZGluZzEyMzQ=</div>
+    <div>kind: Secret</div>
+    <div>metadata:</div>
+    <div>&nbsp;&nbsp;annotations:</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;kubectl.kubernetes.io/last-applied-configuration: |</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{"apiVersion":"v1","kind":"Secret","metadata":{"annotations":{},"name":"secret-password","namespace":"defaul...</div>
+    <div>&nbsp;&nbsp;creationTimestamp: "2026-03-15T06:30:27Z"</div>
+    <div>&nbsp;&nbsp;name: secret-password</div>
+    <div>&nbsp;&nbsp;namespace: default</div>
+    <div>&nbsp;&nbsp;resourceVersion: "1387"</div>
+  </div>
+</div>
+<p class="thought">그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</p>
 <p>저장된 결과를 확인하면 password 값이 알 수 없는 문자열로 변환되어 있습니다.</p>
 <div class="prep-note">
 <p><strong>Secret과 Base64</strong></p>
@@ -93,7 +139,28 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretRef</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-password</span><span class="w">   </span><span class="c1"># Secret 연결 (활성화)</span></div>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/deploy-ex03.yml<span class="w">   </span><span class="c1"># Secret 연결판 적용</span></div>
-<div class="chapter-image"><img src="..\assets\CH05\13_secret-env.png" alt="" /></div><p class="thought">그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pod</span></div>
+    <div>NAME                                  READY   STATUS    RESTARTS   AGE</div>
+    <div>nginx-config-secret-7fbccb65f5-zq8nz  1/1     Running   0          51s</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-7fbccb65f5-zq8nz -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-7fbccb65f5-zq8nz</div>
+    <div>TERM=xterm</div>
+    <div>conn_url=config.test</div>
+    <div>password=metacoding1234</div>
+    <div>conn_info=localhost:80</div>
+    <div>KUBERNETES_SERVICE_PORT_HTTPS=443</div>
+    <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
+  </div>
+</div>
+<p class="thought">그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</p>
 <h3>6.1.4 환경 변수 반영을 위한 Pod 재시작</h3>
 <p>오픈이는 ConfigMap이 정말 살아 있는 설정인지 한 번 확인해 보고 싶었습니다. <code>configmap-conn.yml</code>을 열어 <code>conn_info</code>의 포트만 <code>80</code>에서 <code>90</code>으로 살짝 고쳤습니다.</p>
 <p><strong>ex13/configmap-conn.yml</strong> (포트 변경)</p>
@@ -268,7 +335,21 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex14/volume-pvc.yml<span class="w">     </span><span class="c1"># PVC(창고 신청서) 생성</span>
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex14/volume-pod.yml<span class="w">     </span><span class="c1"># PVC를 마운트한 Pod 생성</span>
 kubectl<span class="w"> </span>get<span class="w"> </span>pv,pvc<span class="w">                        </span><span class="c1"># PV·PVC가 Bound 됐는지 확인</span></div>
-<div class="chapter-image"><img src="..\assets\CH05\chap03-60.png" alt="" /></div><p class="thought">그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pv,pvc -o wide</span></div>
+    <div>NAME                          CAPACITY  ACCESS MODES  RECLAIM POLICY  STATUS  CLAIM                S...</div>
+    <div>persistentvolume/volume-pv    1Gi       RWO           Retain          Bound   default/volume-pvc   &lt;unset&gt;</div>
+    <div>NAME                              STATUS  VOLUME      CAPACITY  ACCESS MODES  STORAGECLASS  VOLUMEATTRIBUTESCl...</div>
+    <div>persistentvolumeclaim/volume-pvc  Bound   volume-pv   1Gi       RWO           &lt;unset&gt;                       9s</div>
+  </div>
+</div>
+<p class="thought">그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</p>
 <p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결된 것입니다.</p>
 <p class="thought">'창고와 신청서가 엮였다.'</p>
 <p>확인을 위해 Pod 내부에서 파일을 하나 생성한 뒤, Pod를 삭제하고 다시 생성해 봅니다.</p>
@@ -279,7 +360,21 @@ touch<span class="w"> </span>/mnt/data/c.txt<span class="w">                    
 kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>volume-pod<span class="w">                  </span><span class="c1"># 기존 Pod 삭제</span>
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex14/volume-pod.yml<span class="w">           </span><span class="c1"># 같은 PVC를 쓰는 Pod 재생성</span>
 kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>volume-pod<span class="w"> </span>--<span class="w"> </span>ls<span class="w"> </span>/mnt/data<span class="w">    </span><span class="c1"># 새 Pod에서 c.txt가 남아 있는지 확인</span></div>
-<div class="chapter-image"><img src="..\assets\CH05\42_volume-pod-preserved.png" alt="" /></div><p class="thought">그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it volume-pod -- /bin/bash</span></div>
+    <div>root@volume-pod:/#</div>
+    <div><span class="tl-key">root@volume-pod:/#</span> <span class="tl-str">ls /mnt/data</span></div>
+    <div>c.txt</div>
+    <div>root@volume-pod:/#</div>
+  </div>
+</div>
+<p class="thought">그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</p>
 <p>새로운 Pod가 생성되었음에도 c.txt 파일이 보존되어 있습니다.</p>
 <p>Pod는 교체되었으나 파일의 실체는 PV에 존재하므로 데이터가 유지됩니다. PVC가 새로운 Pod에게도 동일한 창고를 연결해 준 결과입니다.</p>
 <p class="thought">'Pod가 새로 만들어져도 창고는 그대로다. 이제 데이터를 유실할 걱정이 없겠구나.'</p>
@@ -384,7 +479,25 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>start
 minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress
 kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>ingress-nginx<span class="w">   </span><span class="c1"># Controller Pod Running 확인</span></div>
-<div class="chapter-image"><img src="..\assets\CH05\chap03-ingress-addon.png" alt="" /></div><p class="thought">그림 6-11. Nginx Ingress Controller 애드온 설치</p>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">minikube addons enable ingress</span></div>
+    <div>* ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.</div>
+    <div>You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS</div>
+    <div>* After the addon is enabled, please run "minikube tunnel" and your ingress resources would be available at "127.0.0.1"</div>
+    <div>&nbsp;&nbsp;&nbsp;- Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.2</div>
+    <div>&nbsp;&nbsp;&nbsp;- Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.2</div>
+    <div>&nbsp;&nbsp;&nbsp;- Using image registry.k8s.io/ingress-nginx/controller:v1.13.2</div>
+    <div>* Verifying ingress addon...</div>
+    <div>* The 'ingress' addon is enabled</div>
+  </div>
+</div>
+<p class="thought">그림 6-11. Nginx Ingress Controller 애드온 설치</p>
 <p>Minikube는 독립적인 가상 환경에서 작동하는 클러스터라, 로컬 호스트에서 빌드한 이미지를 곧장 인식하지 못합니다. 그래서 별도의 레지스트리를 두지 않고 <strong>minikube image build</strong> 명령으로 Minikube 자체에 이미지를 직접 만들어 두기로 했습니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/db:1<span class="w"> </span>ex15/db<span class="w">              </span><span class="c1"># DB 이미지 빌드</span>
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/backend:1<span class="w"> </span>ex15/backend<span class="w">    </span><span class="c1"># 백엔드 이미지 빌드</span>
