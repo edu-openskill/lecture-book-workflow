@@ -278,25 +278,28 @@ def preprocess_dialogue(md: str) -> str:
 
     md = DIALOGUE_RE.sub(dialogue_sub, md)
 
-    # 내면독백: `*text*` 단독 문단 (단, 바로 앞 라인이 이미지 `![](..)`면 캡션이므로 스킵)
+    # 내면독백: `*text*` 또는 `_text_` 단독 문단 (이탤릭 표기 둘 다 허용 —
+    # 일부 마크다운 포매터가 `*..*`를 `_.._`로 normalize하기 때문).
+    # 단, 바로 앞 라인이 이미지 `![](..)`거나 본문이 `그림 N..` 패턴이면 캡션이므로 스킵.
     lines = md.split("\n")
     out: list[str] = []
     for i, line in enumerate(lines):
         stripped = line.strip()
+        marker = stripped[:1] if stripped else ""
         is_thought = (
-            stripped.startswith("*")
-            and stripped.endswith("*")
-            and not stripped.startswith("**")
-            and not stripped.endswith("**")
+            marker in ("*", "_")
+            and stripped.endswith(marker)
+            and not stripped.startswith(marker * 2)
+            and not stripped.endswith(marker * 2)
             and len(stripped) >= 4
-            and stripped.count("*") == 2
+            and stripped.count(marker) == 2
         )
         if is_thought:
             prev = lines[i - 1].strip() if i > 0 else ""
-            if prev.startswith("!["):
+            inner = stripped[1:-1].strip()
+            if prev.startswith("![") or re.match(r"^그림 \d", inner):
                 out.append(line)
                 continue
-            inner = stripped[1:-1].strip()
             out.append(f'<p class="thought">{inner}</p>')
         else:
             out.append(line)

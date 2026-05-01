@@ -28,6 +28,8 @@
 오픈이는 먼저 일반 설정을 관리하는 ConfigMap을 생성했습니다.
 
 :::tip
+전체 실습 코드는 깃헙을 참고합니다.
+
 **실습 코드 (GitHub)**: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex13
 :::
 
@@ -323,6 +325,8 @@ Pod가 직접 저장 공간을 관리하면 인프라 세부 사항까지 알아
 Pod는 PV를 직접 건드리지 않고 PVC만 붙여 사용합니다. 실제 창고 위치는 PVC가 알아서 연결해 주기 때문에, Pod 입장에서는 "용량이 맞는 저장 공간 하나"가 붙어 있습니다.
 
 :::tip
+전체 실습 코드는 깃헙을 참고합니다.
+
 **실습 코드 (GitHub)**: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex14
 :::
 
@@ -475,6 +479,8 @@ Pod는 교체되었으나 파일의 실체는 PV에 존재하므로 데이터가
 팀장의 말대로 이번 절은 단순한 실습의 연장이 아니었습니다. 그동안 파편화되어 있던 지식들을 하나로 모아, 실제로 살아 움직이는 통합 서비스를 완성하는 '최종 관문'이었습니다. 
 
 :::tip
+전체 실습 코드는 깃헙을 참고합니다.
+
 **실습 코드 (GitHub)**: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15
 :::
 

@@ -30,10 +30,11 @@
 <li><strong>ConfigMap</strong>: 일반적인 설정값을 저장할 때 사용합니다. DB 주소, 접속 URL, 로그 레벨처럼 환경에 따라 변하는 값을 담습니다.</li>
 <li><strong>Secret</strong>: 비밀번호, 토큰, API 키처럼 민감한 정보를 저장할 때 사용합니다. ConfigMap과 구조는 유사하지만, 값이 Base64로 인코딩되어 저장되며 접근 권한이 엄격하게 제한됩니다.</li>
 </ul>
-<div class="chapter-image"><img src="..\assets\CH05\k8s-step4a.png" alt="" /></div><p class="thought">그림 6-1. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</p>
+<div class="chapter-image"><img src="..\assets\CH05\k8s-step4a.png" alt="" /><div class="caption">그림 6-1. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</div></div>
 <h3>6.1.2 ConfigMap</h3>
 <p>오픈이는 먼저 일반 설정을 관리하는 ConfigMap을 생성했습니다.</p>
 <div class="tip">
+<p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex13</p>
 </div>
 <p><strong>ex13/configmap-conn.yml</strong></p>
@@ -89,7 +90,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
     <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
   </div>
 </div>
-<p class="thought">그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</p>
+<p><em>그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</em></p>
 <p>Pod 내부의 환경 변수를 확인하자 conn_info=localhost:80과 같은 값이 나타났습니다. 이미지를 건드리지 않고도 설정값만 외부에서 주입하는 데 성공했습니다.</p>
 <h3>6.1.3 Secret</h3>
 <p>DB 비밀번호도 같은 방식으로 처리할 수 있을지 고민했습니다. 하지만 민감한 정보를 메뉴판처럼 공개된 곳에 적어둘 수는 없었습니다. 이를 위해 별도로 존재하는 리소스가 바로 Secret입니다.</p>
@@ -125,7 +126,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
     <div>&nbsp;&nbsp;resourceVersion: "1387"</div>
   </div>
 </div>
-<p class="thought">그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</p>
+<p><em>그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</em></p>
 <p>저장된 결과를 확인하면 password 값이 알 수 없는 문자열로 변환되어 있습니다.</p>
 <div class="prep-note">
 <p><strong>Secret과 Base64</strong></p>
@@ -160,7 +161,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
     <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
   </div>
 </div>
-<p class="thought">그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</p>
+<p><em>그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</em></p>
 <h3>6.1.4 환경 변수 반영을 위한 Pod 재시작</h3>
 <p>오픈이는 ConfigMap이 정말 살아 있는 설정인지 한 번 확인해 보고 싶었습니다. <code>configmap-conn.yml</code>을 열어 <code>conn_info</code>의 포트만 <code>80</code>에서 <code>90</code>으로 살짝 고쳤습니다.</p>
 <p><strong>ex13/configmap-conn.yml</strong> (포트 변경)</p>
@@ -197,7 +198,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">ConfigMap은 갱신됐지만, 이미 떠 있는 Pod의 환경 변수는 시작 시점에 박힌 값(80)을 그대로 가지고 있습니다.</text>
 </svg>
 </div>
-<p class="thought">그림 6-5. apply 만 한 경우 — ConfigMap 변경이 기존 Pod에는 반영되지 않음</p>
+<p><em>그림 6-5. apply 만 한 경우 — ConfigMap 변경이 기존 Pod에는 반영되지 않음</em></p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="rollout restart로 새 Pod를 띄우면 ConfigMap 새 값이 반영됨">
   <defs>
@@ -225,7 +226,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">새 Pod는 시작 시점에 갱신된 ConfigMap을 읽어 환경 변수에 새 값(90)을 박습니다.</text>
 </svg>
 </div>
-<p class="thought">그림 6-6. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</p>
+<p><em>그림 6-6. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</em></p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">   </span><span class="c1"># Pod 재시작</span></div>
 <p><code>kubectl rollout restart</code>는 여러 Pod를 순차로 교체해 새 값을 안전하게 갈아 끼워 주는 명령입니다. 재시작이 끝나고 다시 환경 변수를 찍어 보니 포트가 <code>90</code>으로 바뀌어 들어와 있었습니다. apply만으로는 절반이고, 반영까지는 재시작이 한 번 더 필요했습니다.</p>
 <p>설정과 민감 정보를 이미지 바깥으로 빼는 일은 끝났습니다. 그러나 Pod 안의 데이터는 아직 그대로였습니다. DB 컨테이너가 재시작되면 회원 정보가 함께 사라지는 문제가 남아 있었습니다.</p>
@@ -268,13 +269,14 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <h3>6.2.2 PV와 PVC</h3>
 <p class="thought">'Volume이 저장 공간이라는 건 알겠는데, PV랑 PVC는 왜 두 개로 나눠져 있지?'</p>
 <p>Pod가 직접 저장 공간을 관리하면 인프라 세부 사항까지 알아야 합니다. Kubernetes는 그래서 저장 공간을 <strong>실제 저장 공간</strong> 과 <strong>사용을 위해 작성하는 신청서</strong> 로 분리해 두었습니다. 한 장 그림으로 보면 관계가 분명해집니다.</p>
-<div class="chapter-image"><img src="..\assets\CH05\k8s-step4b.png" alt="" /></div><p class="thought">그림 6-7. PV는 실제 저장 공간, PVC는 그 공간을 요청하는 신청서</p>
+<div class="chapter-image"><img src="..\assets\CH05\k8s-step4b.png" alt="" /><div class="caption">그림 6-7. PV는 실제 저장 공간, PVC는 그 공간을 요청하는 신청서</div></div>
 <ul>
 <li><strong>PV(PersistentVolume)</strong>: 실제 저장 공간, 즉 <strong>창고</strong>입니다. 용량, 권한, 위치 같은 창고의 사양이 정의됩니다.</li>
 <li><strong>PVC(PersistentVolumeClaim)</strong>: 창고를 쓰겠다고 작성하는 <strong>신청서</strong>입니다. &quot;10Gi짜리 읽기·쓰기 가능한 창고가 필요하다&quot;고 적어 두면, Kubernetes가 조건에 맞는 PV를 찾아 자동으로 PVC와 연결합니다.</li>
 </ul>
 <p>Pod는 PV를 직접 건드리지 않고 PVC만 붙여 사용합니다. 실제 창고 위치는 PVC가 알아서 연결해 주기 때문에, Pod 입장에서는 &quot;용량이 맞는 저장 공간 하나&quot;가 붙어 있습니다.</p>
 <div class="tip">
+<p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex14</p>
 </div>
 <h4>PV 만들기</h4>
@@ -349,7 +351,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pv,pvc<span class="w">
     <div>persistentvolumeclaim/volume-pvc  Bound   volume-pv   1Gi       RWO           &lt;unset&gt;                       9s</div>
   </div>
 </div>
-<p class="thought">그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</p>
+<p><em>그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</em></p>
 <p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결된 것입니다.</p>
 <p class="thought">'창고와 신청서가 엮였다.'</p>
 <p>확인을 위해 Pod 내부에서 파일을 하나 생성한 뒤, Pod를 삭제하고 다시 생성해 봅니다.</p>
@@ -374,7 +376,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
     <div>root@volume-pod:/#</div>
   </div>
 </div>
-<p class="thought">그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</p>
+<p><em>그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</em></p>
 <p>새로운 Pod가 생성되었음에도 c.txt 파일이 보존되어 있습니다.</p>
 <p>Pod는 교체되었으나 파일의 실체는 PV에 존재하므로 데이터가 유지됩니다. PVC가 새로운 Pod에게도 동일한 창고를 연결해 준 결과입니다.</p>
 <p class="thought">'Pod가 새로 만들어져도 창고는 그대로다. 이제 데이터를 유실할 걱정이 없겠구나.'</p>
@@ -385,6 +387,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <div class="dialogue"><span class="speaker">팀장</span>: "부분 실습은 끝났지. 한 번에 연결해 봐야 진짜 실력이 늘어."</div>
 <p>팀장의 말대로 이번 절은 단순한 실습의 연장이 아니었습니다. 그동안 파편화되어 있던 지식들을 하나로 모아, 실제로 살아 움직이는 통합 서비스를 완성하는 '최종 관문'이었습니다.</p>
 <div class="tip">
+<p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15</p>
 </div>
 <h3>6.3.1 전체 그림</h3>
@@ -434,7 +437,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
   <text x="400" y="335" text-anchor="middle" font-size="10" fill="#6b7280">Pod 간 통신은 Service 이름으로 (CoreDNS 자동 변환). MySQL은 PV로 데이터 보존, Secret으로 비밀번호 분리</text>
 </svg>
 </div>
-<p class="thought">그림 6-10. ex15 Kubernetes 웹사이트의 전체 구성</p>
+<p><em>그림 6-10. ex15 Kubernetes 웹사이트의 전체 구성</em></p>
 <p>오픈이는 그림을 따라가며 흐름을 머릿속에 그려 봤습니다. 브라우저의 요청이 Ingress를 통과해 Frontend Service를 거쳐 프런트엔드 Pod에 닿습니다. 사용자가 게시판이나 로그인 버튼을 누르면 프런트엔드의 Nginx가 /api/... 요청을 받아 클러스터 내부의 Backend Service로 넘겨줍니다. 요청을 받은 백엔드 Pod는 로직을 처리하는 과정에서 DB Service와 Redis Service를 호출하여 데이터를 읽고 씁니다.</p>
 <p>그림을 보고 있자니 한 가지가 분명해졌습니다. Pod 사이의 모든 통신이 IP가 아닌 서비스 이름으로 이루어진다는 사실이었습니다. 챕터 5에서 본 클러스터 DNS, 즉 <strong>CoreDNS</strong>가 서비스 이름을 ClusterIP로 변환해 주기 때문에, 복잡한 숫자 주소 대신 <code>db-service</code>, <code>backend-service</code> 같은 직관적인 이름만 챙기면 됩니다.</p>
 <p class="thought">'IP가 어디로 옮겨 다니든 이름만 잡고 있으면 흐름이 안 끊기는구나.'</p>
@@ -497,7 +500,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </
     <div>* The 'ingress' addon is enabled</div>
   </div>
 </div>
-<p class="thought">그림 6-11. Nginx Ingress Controller 애드온 설치</p>
+<p><em>그림 6-11. Nginx Ingress Controller 애드온 설치</em></p>
 <p>Minikube는 독립적인 가상 환경에서 작동하는 클러스터라, 로컬 호스트에서 빌드한 이미지를 곧장 인식하지 못합니다. 그래서 별도의 레지스트리를 두지 않고 <strong>minikube image build</strong> 명령으로 Minikube 자체에 이미지를 직접 만들어 두기로 했습니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/db:1<span class="w"> </span>ex15/db<span class="w">              </span><span class="c1"># DB 이미지 빌드</span>
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/backend:1<span class="w"> </span>ex15/backend<span class="w">    </span><span class="c1"># 백엔드 이미지 빌드</span>
@@ -541,7 +544,7 @@ minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w
 <p>지금까지 만든 리소스는 모두 default라는 기본 공간에 담겨 있었습니다. 그래서 <code>kubectl get</code>을 칠 때마다 이전 실습의 잔해까지 함께 쏟아져 나와 화면이 어수선했습니다.</p>
 <p class="thought">'혼자 연습할 때는 괜찮지만, 여러 팀의 서비스가 같이 돌면 이름이 충돌할 수도 있겠구나.'</p>
 <p>같은 건물이라도 층을 나누어 호실을 관리하듯, 쿠버네티스에서도 공간을 분리할 수 있습니다. Namespace는 하나의 클러스터를 논리적으로 구분해 주는 가상 공간입니다.</p>
-<div class="chapter-image"><img src="..\assets\CH05\k8s-namespace.png" alt="" /></div><p class="thought">그림 6-12. 같은 클러스터 안에서 Namespace가 리소스를 층처럼 분리</p>
+<div class="chapter-image"><img src="..\assets\CH05\k8s-namespace.png" alt="" /><div class="caption">그림 6-12. 같은 클러스터 안에서 Namespace가 리소스를 층처럼 분리</div></div>
 <div class="term-box">
 <p><strong>Namespace</strong>: 리소스를 논리적으로 구분하는 가상 공간입니다. 별도 지정이 없으면 모든 리소스는 <strong>default</strong> 네임스페이스에 소속됩니다.</p>
 </div>
@@ -572,9 +575,9 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <p>로그를 들여다보니 안에서 빌드 작업이 한창이었습니다. 잠시 기다리자 모든 Pod가 Running 상태로 바뀌었고, 오픈이는 외부 접근을 위한 통로를 열었습니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>service<span class="w"> </span>frontend-service<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w"> </span>--url<span class="w">   </span><span class="c1"># 외부 접속 URL 출력</span></div>
 <p>생성된 URL을 브라우저에 입력해 결과를 확인했습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH05\chap03-ingress-result.png" alt="" /></div><p class="thought">그림 6-13. Ingress를 거쳐 웹사이트가 화면에 응답</p>
+<div class="chapter-image"><img src="..\assets\CH05\chap03-ingress-result.png" alt="" /><div class="caption">그림 6-13. Ingress를 거쳐 웹사이트가 화면에 응답</div></div>
 <p>화면에는 데이터베이스에서 불러온 정보와 함께 방문 횟수가 떠 있었습니다. 새로고침을 할 때마다 숫자가 한 칸씩 올라갔습니다. 네 개의 서비스가 서로 이름을 부르며 제대로 맞물려 돌아가고 있다는 증거였습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH05\chap03-ingress-result2.png" alt="" /></div><p class="thought">그림 6-14. 새로고침 시 방문 횟수가 증가</p>
+<div class="chapter-image"><img src="..\assets\CH05\chap03-ingress-result2.png" alt="" /><div class="caption">그림 6-14. 새로고침 시 방문 횟수가 증가</div></div>
 <p>백엔드 두 Pod에 요청이 실제로 분산되는지는 로그로도 확인할 수 있었습니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>backend<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>--prefix<span class="w">   </span><span class="c1"># backend Pod 최근 100줄 (Pod명 표시)</span></div>
 <p>서로 다른 Pod 이름이 앞에 붙은 로그 줄이 번갈아 나타난다면 요청이 두 서버에 분산되어 들어간 것입니다.</p>
