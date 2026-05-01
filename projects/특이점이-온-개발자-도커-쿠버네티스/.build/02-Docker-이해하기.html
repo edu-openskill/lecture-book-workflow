@@ -214,38 +214,38 @@
 <table>
 <thead>
 <tr>
-<th>명령어</th>
-<th>설명</th>
+<th style="text-align:center">명령어</th>
+<th style="text-align:left">설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>docker pull &lt;이미지명&gt;</code></td>
-<td>Docker Hub에서 이미지 다운로드</td>
+<td style="text-align:center"><code>docker pull &lt;이미지명&gt;</code></td>
+<td style="text-align:left">Docker Hub에서 이미지 다운로드</td>
 </tr>
 <tr>
-<td><code>docker images</code></td>
-<td>로컬에 저장된 이미지 목록</td>
+<td style="text-align:center"><code>docker images</code></td>
+<td style="text-align:left">로컬에 저장된 이미지 목록</td>
 </tr>
 <tr>
-<td><code>docker logs &lt;컨테이너ID&gt;</code></td>
-<td>컨테이너 로그 출력</td>
+<td style="text-align:center"><code>docker logs &lt;컨테이너ID&gt;</code></td>
+<td style="text-align:left">컨테이너 로그 출력</td>
 </tr>
 <tr>
-<td><code>docker ps -a</code></td>
-<td>종료된 컨테이너 포함 전체 목록</td>
+<td style="text-align:center"><code>docker ps -a</code></td>
+<td style="text-align:left">종료된 컨테이너 포함 전체 목록</td>
 </tr>
 <tr>
-<td><code>docker stop &lt;컨테이너ID&gt;</code></td>
-<td>실행 중인 컨테이너 종료</td>
+<td style="text-align:center"><code>docker stop &lt;컨테이너ID&gt;</code></td>
+<td style="text-align:left">실행 중인 컨테이너 종료</td>
 </tr>
 <tr>
-<td><code>docker rm &lt;컨테이너ID&gt;</code></td>
-<td>종료된 컨테이너 삭제</td>
+<td style="text-align:center"><code>docker rm &lt;컨테이너ID&gt;</code></td>
+<td style="text-align:left">종료된 컨테이너 삭제</td>
 </tr>
 <tr>
-<td><code>docker rmi &lt;이미지ID&gt;</code></td>
-<td>이미지 삭제</td>
+<td style="text-align:center"><code>docker rmi &lt;이미지ID&gt;</code></td>
+<td style="text-align:left">이미지 삭제</td>
 </tr>
 </tbody>
 </table>
@@ -340,26 +340,26 @@
 <table>
 <thead>
 <tr>
-<th>푸드코트</th>
-<th>IT 용어</th>
-<th>한 줄 설명</th>
+<th style="text-align:center">푸드코트</th>
+<th style="text-align:left">IT 용어</th>
+<th style="text-align:left">한 줄 설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>벽으로 분리된 주방</td>
-<td><strong>Namespace</strong></td>
-<td>컨테이너마다 새로 생기는 격리된 네트워크 공간입니다</td>
+<td style="text-align:center">벽으로 분리된 주방</td>
+<td style="text-align:left"><strong>Namespace</strong></td>
+<td style="text-align:left">컨테이너마다 새로 생기는 격리된 네트워크 공간입니다</td>
 </tr>
 <tr>
-<td>전용 통신 케이블</td>
-<td><strong>veth pair</strong></td>
-<td>격리된 두 공간을 잇는 한 쌍짜리 가상 인터페이스입니다</td>
+<td style="text-align:center">전용 통신 케이블</td>
+<td style="text-align:left"><strong>veth pair</strong></td>
+<td style="text-align:left">격리된 두 공간을 잇는 한 쌍짜리 가상 인터페이스입니다</td>
 </tr>
 <tr>
-<td>주문 전광판</td>
-<td><strong>docker0</strong></td>
-<td>같은 브리지에 묶인 컨테이너 사이로 패킷(데이터 묶음)을 중계하는 가상 브리지입니다</td>
+<td style="text-align:center">주문 전광판</td>
+<td style="text-align:left"><strong>docker0</strong></td>
+<td style="text-align:left">같은 브리지에 묶인 컨테이너 사이로 패킷(데이터 묶음)을 중계하는 가상 브리지입니다</td>
 </tr>
 </tbody>
 </table>
@@ -403,7 +403,8 @@
 <p class="thought">'각자 주방을 따로 쓰면서 케이블 하나로 전광판 본체에 모이는 거네. 격리와 연결이 한 구조 안에 같이 들어 있구나.'</p>
 <p>오픈이가 다음으로 알아본 건 외부 손님이 식당에 어떻게 주문을 넣느냐였습니다.</p>
 <h3>2.5.3 외부에서 들어오기 — 입구 키오스크</h3>
-<p>docker0는 호스트 안의 <strong>가상 스위치</strong>입니다. 집의 공유기가 여러 기기를 한 네트워크로 묶어주듯, docker0도 같은 호스트의 컨테이너들을 한 네트워크로 묶어줍니다. 같은 docker0에 묶인 컨테이너끼리는 IP만 알면 서로 통신할 수 있습니다.</p>
+<p>docker0는 도커가 호스트에 기본으로 만들어 두는 <strong>가상 스위치</strong>입니다. 이 위에서 동작하는 네트워크를 <strong>기본 네트워크</strong>라고 부릅니다. 공유기가 집안 기기를 한 네트워크로 묶어주듯, docker0도 같은 호스트의 컨테이너들을 이 기본 네트워크로 묶어둡니다.</p>
+<p>그래서 <code>docker run</code>으로 컨테이너를 띄우면 별도 옵션을 지정하지 않는 한 자동으로 이 기본 네트워크에 들어갑니다. 같은 네트워크 안에 있으니 IP만 알면 서로 통신할 수 있습니다.</p>
 <p>문제는 공유기 너머, 즉 호스트 PC 바깥에 있는 외부 사용자입니다. 브라우저처럼 외부에서 컨테이너로 바로 접근하기는 어렵습니다. 이유는 두 가지입니다.</p>
 <ul>
 <li>Windows와 macOS는 리눅스 기반 운영체제가 아니어서 Docker Desktop이 OS 내부에 <strong>가상의 리눅스 환경</strong>을 만들고 그 안에서 Docker를 실행합니다. docker0와 컨테이너 IP는 모두 이 가상 리눅스 안에 들어 있어서 호스트(Windows·macOS) 터미널에서는 그 IP로 바로 닿을 수 없습니다.</li>
@@ -469,26 +470,26 @@
 <table>
 <thead>
 <tr>
-<th>푸드코트</th>
-<th>IT 용어</th>
-<th>한 줄 설명</th>
+<th style="text-align:center">푸드코트</th>
+<th style="text-align:left">IT 용어</th>
+<th style="text-align:left">한 줄 설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>입구 키오스크</td>
-<td><strong>포트포워딩</strong></td>
-<td>호스트 PC의 외부 공개 포트로 들어온 요청을 컨테이너 포트로 자동으로 넘기는 메커니즘입니다</td>
+<td style="text-align:center">입구 키오스크</td>
+<td style="text-align:left"><strong>포트포워딩</strong></td>
+<td style="text-align:left">호스트 PC의 외부 공개 포트로 들어온 요청을 컨테이너 포트로 자동으로 넘기는 메커니즘입니다</td>
 </tr>
 <tr>
-<td>키오스크 화면의 매핑</td>
-<td><strong>iptables 규칙(DNAT)</strong></td>
-<td>호스트 포트로 온 요청의 도착지를 컨테이너 포트로 바꿔치기하는 한 줄짜리 변환 규칙입니다</td>
+<td style="text-align:center">키오스크 화면의 매핑</td>
+<td style="text-align:left"><strong>iptables 규칙(DNAT)</strong></td>
+<td style="text-align:left">호스트 포트로 온 요청의 도착지를 컨테이너 포트로 바꿔치기하는 한 줄짜리 변환 규칙입니다</td>
 </tr>
 <tr>
-<td>식당 주방</td>
-<td><strong>컨테이너 포트</strong></td>
-<td>컨테이너 안에서 앱이 듣고 있는 포트(<code>:80</code> 등)입니다</td>
+<td style="text-align:center">식당 주방</td>
+<td style="text-align:left"><strong>컨테이너 포트</strong></td>
+<td style="text-align:left">컨테이너 안에서 앱이 듣고 있는 포트(<code>:80</code> 등)입니다</td>
 </tr>
 </tbody>
 </table>
@@ -614,21 +615,21 @@
 <table>
 <thead>
 <tr>
-<th>푸드코트</th>
-<th>IT 용어</th>
-<th>한 줄 설명</th>
+<th style="text-align:center">푸드코트</th>
+<th style="text-align:left">IT 용어</th>
+<th style="text-align:left">한 줄 설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>안내 지도</td>
-<td><strong>Docker DNS</strong></td>
-<td>컨테이너 이름을 IP로 자동 변환해 주는 내장 DNS(Domain Name System) 서버입니다.</td>
+<td style="text-align:center">안내 지도</td>
+<td style="text-align:left"><strong>Docker DNS</strong></td>
+<td style="text-align:left">컨테이너 이름을 IP로 자동 변환해 주는 내장 DNS(Domain Name System) 서버입니다.</td>
 </tr>
 <tr>
-<td>같은 푸드코트 안</td>
-<td><strong>사용자 정의 네트워크</strong></td>
-<td>같은 네트워크에 묶인 컨테이너끼리만 이름으로 통신할 수 있습니다.</td>
+<td style="text-align:center">같은 푸드코트 안</td>
+<td style="text-align:left"><strong>사용자 정의 네트워크</strong></td>
+<td style="text-align:left">같은 네트워크에 묶인 컨테이너끼리만 이름으로 통신할 수 있습니다.</td>
 </tr>
 </tbody>
 </table>
@@ -691,71 +692,71 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <table>
 <thead>
 <tr>
-<th>용도</th>
-<th>명령</th>
-<th>설명</th>
+<th style="text-align:center">용도</th>
+<th style="text-align:left">명령</th>
+<th style="text-align:left">설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>위치 확인</td>
-<td><code>pwd</code></td>
-<td>현재 위치</td>
+<td style="text-align:center">위치 확인</td>
+<td style="text-align:left"><code>pwd</code></td>
+<td style="text-align:left">현재 위치</td>
 </tr>
 <tr>
-<td>이동</td>
-<td><code>cd &lt;경로&gt;</code></td>
-<td>폴더 이동</td>
+<td style="text-align:center">이동</td>
+<td style="text-align:left"><code>cd &lt;경로&gt;</code></td>
+<td style="text-align:left">폴더 이동</td>
 </tr>
 <tr>
-<td>목록</td>
-<td><code>ls</code>, <code>ls -la</code></td>
-<td>파일/폴더 목록 (숨김 포함)</td>
+<td style="text-align:center">목록</td>
+<td style="text-align:left"><code>ls</code>, <code>ls -la</code></td>
+<td style="text-align:left">파일/폴더 목록 (숨김 포함)</td>
 </tr>
 <tr>
-<td>폴더 생성</td>
-<td><code>mkdir &lt;이름&gt;</code></td>
-<td>폴더 만들기</td>
+<td style="text-align:center">폴더 생성</td>
+<td style="text-align:left"><code>mkdir &lt;이름&gt;</code></td>
+<td style="text-align:left">폴더 만들기</td>
 </tr>
 <tr>
-<td>파일 생성</td>
-<td><code>touch &lt;이름&gt;</code></td>
-<td>빈 파일</td>
+<td style="text-align:center">파일 생성</td>
+<td style="text-align:left"><code>touch &lt;이름&gt;</code></td>
+<td style="text-align:left">빈 파일</td>
 </tr>
 <tr>
-<td>복사</td>
-<td><code>cp &lt;원본&gt; &lt;사본&gt;</code></td>
-<td>파일 복사</td>
+<td style="text-align:center">복사</td>
+<td style="text-align:left"><code>cp &lt;원본&gt; &lt;사본&gt;</code></td>
+<td style="text-align:left">파일 복사</td>
 </tr>
 <tr>
-<td>이동/이름변경</td>
-<td><code>mv &lt;원본&gt; &lt;대상&gt;</code></td>
-<td>이동 또는 rename</td>
+<td style="text-align:center">이동/이름변경</td>
+<td style="text-align:left"><code>mv &lt;원본&gt; &lt;대상&gt;</code></td>
+<td style="text-align:left">이동 또는 rename</td>
 </tr>
 <tr>
-<td>삭제</td>
-<td><code>rm &lt;파일&gt;</code>, <code>rm -r &lt;폴더&gt;</code></td>
-<td>삭제</td>
+<td style="text-align:center">삭제</td>
+<td style="text-align:left"><code>rm &lt;파일&gt;</code>, <code>rm -r &lt;폴더&gt;</code></td>
+<td style="text-align:left">삭제</td>
 </tr>
 <tr>
-<td>패키지 설치</td>
-<td><code>apt update &amp;&amp; apt install -y &lt;이름&gt;</code></td>
-<td>패키지 설치</td>
+<td style="text-align:center">패키지 설치</td>
+<td style="text-align:left"><code>apt update &amp;&amp; apt install -y &lt;이름&gt;</code></td>
+<td style="text-align:left">패키지 설치</td>
 </tr>
 <tr>
-<td>프로세스</td>
-<td><code>ps -ef</code>, <code>kill &lt;PID&gt;</code></td>
-<td>실행 중 프로세스 / 종료</td>
+<td style="text-align:center">프로세스</td>
+<td style="text-align:left"><code>ps -ef</code>, <code>kill &lt;PID&gt;</code></td>
+<td style="text-align:left">실행 중 프로세스 / 종료</td>
 </tr>
 <tr>
-<td>검색</td>
-<td><code>find &lt;경로&gt; -name &lt;이름&gt;</code></td>
-<td>파일 검색</td>
+<td style="text-align:center">검색</td>
+<td style="text-align:left"><code>find &lt;경로&gt; -name &lt;이름&gt;</code></td>
+<td style="text-align:left">파일 검색</td>
 </tr>
 <tr>
-<td>로그</td>
-<td><code>tail -n &lt;수&gt; &lt;파일&gt;</code></td>
-<td>마지막 N줄</td>
+<td style="text-align:center">로그</td>
+<td style="text-align:left"><code>tail -n &lt;수&gt; &lt;파일&gt;</code></td>
+<td style="text-align:left">마지막 N줄</td>
 </tr>
 </tbody>
 </table>
@@ -841,31 +842,31 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
 <table>
 <thead>
 <tr>
-<th>단계</th>
-<th>동작</th>
-<th>키</th>
+<th style="text-align:center">단계</th>
+<th style="text-align:left">동작</th>
+<th style="text-align:left">키</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>파일 열기/생성</td>
-<td><code>vim &lt;파일명&gt;</code></td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">파일 열기/생성</td>
+<td style="text-align:left"><code>vim &lt;파일명&gt;</code></td>
 </tr>
 <tr>
-<td>2</td>
-<td>입력 모드</td>
-<td><code>i</code></td>
+<td style="text-align:center">2</td>
+<td style="text-align:left">입력 모드</td>
+<td style="text-align:left"><code>i</code></td>
 </tr>
 <tr>
-<td>3</td>
-<td>일반 모드로</td>
-<td><code>ESC</code></td>
+<td style="text-align:center">3</td>
+<td style="text-align:left">일반 모드로</td>
+<td style="text-align:left"><code>ESC</code></td>
 </tr>
 <tr>
-<td>4</td>
-<td>저장 후 종료</td>
-<td><code>:wq</code></td>
+<td style="text-align:center">4</td>
+<td style="text-align:left">저장 후 종료</td>
+<td style="text-align:left"><code>:wq</code></td>
 </tr>
 </tbody>
 </table>
@@ -962,21 +963,21 @@ docker<span class="w"> </span>ps<span class="w">                            </sp
 <table>
 <thead>
 <tr>
-<th>방식</th>
-<th>하는 일</th>
-<th>결과</th>
+<th style="text-align:center">방식</th>
+<th style="text-align:left">하는 일</th>
+<th style="text-align:left">결과</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>exit</code></td>
-<td>컨테이너의 메인 프로세스(bash)를 <code>종료</code></td>
-<td>컨테이너가 종료</td>
+<td style="text-align:center"><code>exit</code></td>
+<td style="text-align:left">컨테이너의 메인 프로세스(bash)를 <code>종료</code></td>
+<td style="text-align:left">컨테이너가 종료</td>
 </tr>
 <tr>
-<td><code>CTRL+P → CTRL+Q</code></td>
-<td>터미널과 컨테이너의 <code>연결만 끊음</code></td>
-<td>컨테이너는 살아 있음</td>
+<td style="text-align:center"><code>CTRL+P → CTRL+Q</code></td>
+<td style="text-align:left">터미널과 컨테이너의 <code>연결만 끊음</code></td>
+<td style="text-align:left">컨테이너는 살아 있음</td>
 </tr>
 </tbody>
 </table>
@@ -1156,21 +1157,21 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 <table>
 <thead>
 <tr>
-<th>방식</th>
-<th>동작</th>
-<th>위험성</th>
+<th style="text-align:center">방식</th>
+<th style="text-align:left">동작</th>
+<th style="text-align:left">위험성</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>docker attach &lt;ID&gt;</code></td>
-<td><code>메인 프로세스(PID 1)</code> 에 직접 연결</td>
-<td>잘못 빠져나오면 메인이 종료되고 컨테이너도 꺼짐</td>
+<td style="text-align:center"><code>docker attach &lt;ID&gt;</code></td>
+<td style="text-align:left"><code>메인 프로세스(PID 1)</code> 에 직접 연결</td>
+<td style="text-align:left">잘못 빠져나오면 메인이 종료되고 컨테이너도 꺼짐</td>
 </tr>
 <tr>
-<td><code>docker exec -it &lt;ID&gt; bash</code></td>
-<td><code>새 프로세스</code>를 만들어 접근</td>
-<td>안전. 빠져나와도 메인에 영향 없음</td>
+<td style="text-align:center"><code>docker exec -it &lt;ID&gt; bash</code></td>
+<td style="text-align:left"><code>새 프로세스</code>를 만들어 접근</td>
+<td style="text-align:left">안전. 빠져나와도 메인에 영향 없음</td>
 </tr>
 </tbody>
 </table>

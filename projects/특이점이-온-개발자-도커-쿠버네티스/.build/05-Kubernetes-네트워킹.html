@@ -59,9 +59,9 @@
 <p><strong>Service</strong>: Pod 앞단의 고정 접근점입니다. Pod가 삭제되고 다시 생성되어 IP가 바뀌어도 Service 주소는 바뀌지 않습니다. 뒤에 여러 Pod가 연결되어 있으면 요청을 골고루 나누어 주는 로드밸런싱 기능을 수행합니다.</p>
 </div>
 <h3>5.1.2 Service 생성</h3>
-<blockquote>
-<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex11</p>
-</blockquote>
+<div class="tip">
+<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex11</p>
+</div>
 <p>Service를 실습하려면 대상이 되는 Pod들이 먼저 준비되어야 합니다. 오픈이는 어제 연습하며 작성했던 deploy-ex02.yml을 다시 실행하여 Pod 네 개를 복구했습니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/deploy-ex02.yml<span class="w">   </span><span class="c1">#  Pod 4개 생성</span></div>
 <p>이제 그 앞에 세울 Service YAML로 넘어갑니다.</p>
@@ -100,56 +100,56 @@
 <table>
 <thead>
 <tr>
-<th>타입</th>
-<th>접근 범위</th>
-<th>사용 사례</th>
+<th style="text-align:center">타입</th>
+<th style="text-align:left">접근 범위</th>
+<th style="text-align:left">사용 사례</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ClusterIP</code></td>
-<td>클러스터 내부만</td>
-<td>백엔드·DB 등 외부 노출 불필요한 서비스</td>
+<td style="text-align:center"><code>ClusterIP</code></td>
+<td style="text-align:left">클러스터 내부만</td>
+<td style="text-align:left">백엔드·DB 등 외부 노출 불필요한 서비스</td>
 </tr>
 <tr>
-<td><code>NodePort</code></td>
-<td>노드IP:포트로 외부 접근 가능</td>
-<td>테스트, 개발 환경</td>
+<td style="text-align:center"><code>NodePort</code></td>
+<td style="text-align:left">노드IP:포트로 외부 접근 가능</td>
+<td style="text-align:left">테스트, 개발 환경</td>
 </tr>
 <tr>
-<td><code>LoadBalancer</code></td>
-<td>공인 IP로 외부 접근 가능</td>
-<td>클라우드 운영 환경</td>
+<td style="text-align:center"><code>LoadBalancer</code></td>
+<td style="text-align:left">공인 IP로 외부 접근 가능</td>
+<td style="text-align:left">클라우드 운영 환경</td>
 </tr>
 </tbody>
 </table>
 <table>
 <thead>
 <tr>
-<th>포트 종류</th>
-<th>누구의 포트인가</th>
-<th>역할</th>
-<th>생략 시</th>
+<th style="text-align:center">포트 종류</th>
+<th style="text-align:left">누구의 포트인가</th>
+<th style="text-align:left">역할</th>
+<th style="text-align:left">생략 시</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>nodePort</code></td>
-<td><code>노드(서버) 입장</code>의 포트</td>
-<td>외부에서 노드 IP로 접근할 때 열리는 30000~32767 포트</td>
-<td>30000~32767 중 자동 할당</td>
+<td style="text-align:center"><code>nodePort</code></td>
+<td style="text-align:left"><code>노드(서버) 입장</code>의 포트</td>
+<td style="text-align:left">외부에서 노드 IP로 접근할 때 열리는 30000~32767 포트</td>
+<td style="text-align:left">30000~32767 중 자동 할당</td>
 </tr>
 <tr>
-<td><code>port</code></td>
-<td><code>Service 입장</code>의 포트</td>
-<td>클러스터 내부에서 Service를 부를 때 쓰는 포트</td>
-<td>생략 불가 (필수)</td>
+<td style="text-align:center"><code>port</code></td>
+<td style="text-align:left"><code>Service 입장</code>의 포트</td>
+<td style="text-align:left">클러스터 내부에서 Service를 부를 때 쓰는 포트</td>
+<td style="text-align:left">생략 불가 (필수)</td>
 </tr>
 <tr>
-<td><code>targetPort</code></td>
-<td><code>Pod(컨테이너) 입장</code>의 포트</td>
-<td>실제 컨테이너 안 애플리케이션이 듣고 있는 포트</td>
-<td><code>port</code> 값과 동일하게 설정</td>
+<td style="text-align:center"><code>targetPort</code></td>
+<td style="text-align:left"><code>Pod(컨테이너) 입장</code>의 포트</td>
+<td style="text-align:left">실제 컨테이너 안 애플리케이션이 듣고 있는 포트</td>
+<td style="text-align:left"><code>port</code> 값과 동일하게 설정</td>
 </tr>
 </tbody>
 </table>
@@ -175,26 +175,26 @@
 <table>
 <thead>
 <tr>
-<th>방법</th>
-<th>명령어</th>
-<th>설명</th>
+<th style="text-align:center">방법</th>
+<th style="text-align:left">명령어</th>
+<th style="text-align:left">설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>URL 생성</td>
-<td><code>minikube service &lt;서비스이름&gt; --url</code></td>
-<td>NodePort 혹은 LoadBalancer 타입의 Service에 접근할 수 있는 URL을 생성</td>
+<td style="text-align:center">URL 생성</td>
+<td style="text-align:left"><code>minikube service &lt;서비스이름&gt; --url</code></td>
+<td style="text-align:left">NodePort 혹은 LoadBalancer 타입의 Service에 접근할 수 있는 URL을 생성</td>
 </tr>
 <tr>
-<td>터널 개방</td>
-<td><code>minikube tunnel</code></td>
-<td>LoadBalancer 타입의 Service에 외부 IP를 부여</td>
+<td style="text-align:center">터널 개방</td>
+<td style="text-align:left"><code>minikube tunnel</code></td>
+<td style="text-align:left">LoadBalancer 타입의 Service에 외부 IP를 부여</td>
 </tr>
 <tr>
-<td>포트 포워딩</td>
-<td><code>kubectl port-forward service/&lt;서비스이름&gt; 8080:80</code></td>
-<td>호스트의 8080 포트를 Service의 80 포트로 포워딩</td>
+<td style="text-align:center">포트 포워딩</td>
+<td style="text-align:left"><code>kubectl port-forward service/&lt;서비스이름&gt; 8080:80</code></td>
+<td style="text-align:left">호스트의 8080 포트를 Service의 80 포트로 포워딩</td>
 </tr>
 </tbody>
 </table>
@@ -263,9 +263,9 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <p class="thought">'아, 이게 팀장님이 말한 "경로별로 갈라 주는 친구"구나. 가맹점 번호를 일일이 알려주는 대신, 공식 앱 하나로 다 연결하는 거네.'</p>
 <p>비유만으로는 실감이 오지 않았습니다. 오픈이는 바로 Minikube에 인그레스를 실행 해보기로 했습니다.</p>
-<blockquote>
-<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex12</p>
-</blockquote>
+<div class="tip">
+<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex12</p>
+</div>
 <h3>5.2.3 공식 앱 실행하기</h3>
 <p>공식 문서의 인그레스 페이지를 펼쳐 읽어 내려가려던 중, 문서 첫 줄이 오픈이의 눈에 걸렸습니다.</p>
 <blockquote>
@@ -277,24 +277,24 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <table>
 <thead>
 <tr>
-<th>구성 요소</th>
-<th>역할</th>
-<th>비유</th>
-<th>쿠버네티스 철학</th>
+<th style="text-align:center">구성 요소</th>
+<th style="text-align:left">역할</th>
+<th style="text-align:left">비유</th>
+<th style="text-align:left">쿠버네티스 철학</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Ingress 리소스</code></td>
-<td>어떤 도메인과 URL 경로의 요청을 어떤 Service로 보낼지 정의한 규칙 (YAML)</td>
-<td>공식 앱의 라우팅 규칙</td>
-<td><code>선언</code></td>
+<td style="text-align:center"><code>Ingress 리소스</code></td>
+<td style="text-align:left">어떤 도메인과 URL 경로의 요청을 어떤 Service로 보낼지 정의한 규칙 (YAML)</td>
+<td style="text-align:left">공식 앱의 라우팅 규칙</td>
+<td style="text-align:left"><code>선언</code></td>
 </tr>
 <tr>
-<td><code>Ingress Controller</code></td>
-<td>실제로 외부 요청을 받아 처리하는 소프트웨어</td>
-<td>규칙을 실행하는 공식 앱</td>
-<td><code>집행</code></td>
+<td style="text-align:center"><code>Ingress Controller</code></td>
+<td style="text-align:left">실제로 외부 요청을 받아 처리하는 소프트웨어</td>
+<td style="text-align:left">규칙을 실행하는 공식 앱</td>
+<td style="text-align:left"><code>집행</code></td>
 </tr>
 </tbody>
 </table>
@@ -349,31 +349,31 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <table>
 <thead>
 <tr>
-<th>파일</th>
-<th>종류</th>
-<th>역할</th>
+<th style="text-align:center">파일</th>
+<th style="text-align:left">종류</th>
+<th style="text-align:left">역할</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>order-deploy.yml</code></td>
-<td>Deployment</td>
-<td>주문 응답 Pod — <code>-text=주문 접수 완료</code></td>
+<td style="text-align:center"><code>order-deploy.yml</code></td>
+<td style="text-align:left">Deployment</td>
+<td style="text-align:left">주문 응답 Pod — <code>-text=주문 접수 완료</code></td>
 </tr>
 <tr>
-<td><code>order-service.yml</code></td>
-<td>Service (ClusterIP)</td>
-<td><code>order</code> Pod를 묶는 내부 전용 창구 (port 5678)</td>
+<td style="text-align:center"><code>order-service.yml</code></td>
+<td style="text-align:left">Service (ClusterIP)</td>
+<td style="text-align:left"><code>order</code> Pod를 묶는 내부 전용 창구 (port 5678)</td>
 </tr>
 <tr>
-<td><code>stores-deploy.yml</code></td>
-<td>Deployment</td>
-<td>매장 응답 Pod — <code>-text=매장 선택</code></td>
+<td style="text-align:center"><code>stores-deploy.yml</code></td>
+<td style="text-align:left">Deployment</td>
+<td style="text-align:left">매장 응답 Pod — <code>-text=매장 선택</code></td>
 </tr>
 <tr>
-<td><code>stores-service.yml</code></td>
-<td>Service (ClusterIP)</td>
-<td><code>stores</code> Pod를 묶는 내부 전용 창구 (port 5678)</td>
+<td style="text-align:center"><code>stores-service.yml</code></td>
+<td style="text-align:left">Service (ClusterIP)</td>
+<td style="text-align:left"><code>stores</code> Pod를 묶는 내부 전용 창구 (port 5678)</td>
 </tr>
 </tbody>
 </table>
@@ -505,48 +505,48 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <table>
 <thead>
 <tr>
-<th>단계</th>
-<th>일하는 곳</th>
-<th>진입점/프로그램</th>
-<th>하는 일</th>
-<th>의사결정 기준</th>
+<th style="text-align:center">단계</th>
+<th style="text-align:left">일하는 곳</th>
+<th style="text-align:left">진입점/프로그램</th>
+<th style="text-align:left">하는 일</th>
+<th style="text-align:left">의사결정 기준</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>외부 입구</td>
-<td>Service (NodePort/LoadBalancer)</td>
-<td>외부 요청을 클러스터 안으로 받는다</td>
-<td>노드 IP, 포트</td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">외부 입구</td>
+<td style="text-align:left">Service (NodePort/LoadBalancer)</td>
+<td style="text-align:left">외부 요청을 클러스터 안으로 받는다</td>
+<td style="text-align:left">노드 IP, 포트</td>
 </tr>
 <tr>
-<td>2</td>
-<td>클러스터 안</td>
-<td>kube-proxy (1차)</td>
-<td>Ingress Controller Pod로 요청을 보낸다</td>
-<td>Service ClusterIP, Pod IP 목록</td>
+<td style="text-align:center">2</td>
+<td style="text-align:left">클러스터 안</td>
+<td style="text-align:left">kube-proxy (1차)</td>
+<td style="text-align:left">Ingress Controller Pod로 요청을 보낸다</td>
+<td style="text-align:left">Service ClusterIP, Pod IP 목록</td>
 </tr>
 <tr>
-<td>3</td>
-<td>Ingress Controller + DNS</td>
-<td>Ingress Controller, DNS</td>
-<td>URL을 읽어 백엔드 Service를 정하고, 그 이름을 ClusterIP로 변환</td>
-<td>URL 경로, Host 헤더 → 이름 → ClusterIP</td>
+<td style="text-align:center">3</td>
+<td style="text-align:left">Ingress Controller + DNS</td>
+<td style="text-align:left">Ingress Controller, DNS</td>
+<td style="text-align:left">URL을 읽어 백엔드 Service를 정하고, 그 이름을 ClusterIP로 변환</td>
+<td style="text-align:left">URL 경로, Host 헤더 → 이름 → ClusterIP</td>
 </tr>
 <tr>
-<td>4</td>
-<td>백엔드 노드</td>
-<td>kube-proxy (2차)</td>
-<td>ClusterIP를 살아있는 Pod IP로 바꾼다</td>
-<td>Service ClusterIP, Pod IP 목록</td>
+<td style="text-align:center">4</td>
+<td style="text-align:left">백엔드 노드</td>
+<td style="text-align:left">kube-proxy (2차)</td>
+<td style="text-align:left">ClusterIP를 살아있는 Pod IP로 바꾼다</td>
+<td style="text-align:left">Service ClusterIP, Pod IP 목록</td>
 </tr>
 <tr>
-<td>5</td>
-<td>백엔드 Pod</td>
-<td>애플리케이션</td>
-<td>비즈니스 로직 실행</td>
-<td>요청 데이터</td>
+<td style="text-align:center">5</td>
+<td style="text-align:left">백엔드 Pod</td>
+<td style="text-align:left">애플리케이션</td>
+<td style="text-align:left">비즈니스 로직 실행</td>
+<td style="text-align:left">요청 데이터</td>
 </tr>
 </tbody>
 </table>
@@ -562,41 +562,41 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <table>
 <thead>
 <tr>
-<th>Docker</th>
-<th>Kubernetes</th>
-<th>배운 챕터</th>
+<th style="text-align:center">Docker</th>
+<th style="text-align:left">Kubernetes</th>
+<th style="text-align:left">배운 챕터</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>docker0 (bridge)</td>
-<td>Pod 네트워크 (CNI)</td>
-<td>CH02</td>
+<td style="text-align:center">docker0 (bridge)</td>
+<td style="text-align:left">Pod 네트워크 (CNI)</td>
+<td style="text-align:left">CH02</td>
 </tr>
 <tr>
-<td>iptables DNAT (<code>-p</code> 포트포워딩)</td>
-<td>kube-proxy iptables</td>
-<td>CH02 → CH05</td>
+<td style="text-align:center">iptables DNAT (<code>-p</code> 포트포워딩)</td>
+<td style="text-align:left">kube-proxy iptables</td>
+<td style="text-align:left">CH02 → CH05</td>
 </tr>
 <tr>
-<td>Docker DNS (127.0.0.11)</td>
-<td>CoreDNS</td>
-<td>CH02 → CH05</td>
+<td style="text-align:center">Docker DNS (127.0.0.11)</td>
+<td style="text-align:left">CoreDNS</td>
+<td style="text-align:left">CH02 → CH05</td>
 </tr>
 <tr>
-<td>docker network create</td>
-<td>Service (ClusterIP)</td>
-<td>CH03 → CH05</td>
+<td style="text-align:center">docker network create</td>
+<td style="text-align:left">Service (ClusterIP)</td>
+<td style="text-align:left">CH03 → CH05</td>
 </tr>
 <tr>
-<td>NGINX 경로 라우팅</td>
-<td>Ingress Controller</td>
-<td>CH03 → CH05</td>
+<td style="text-align:center">NGINX 경로 라우팅</td>
+<td style="text-align:left">Ingress Controller</td>
+<td style="text-align:left">CH03 → CH05</td>
 </tr>
 <tr>
-<td>Docker Compose 자동 네트워크</td>
-<td>Service + Service DNS</td>
-<td>CH03 → CH05</td>
+<td style="text-align:center">Docker Compose 자동 네트워크</td>
+<td style="text-align:left">Service + Service DNS</td>
+<td style="text-align:left">CH03 → CH05</td>
 </tr>
 </tbody>
 </table>

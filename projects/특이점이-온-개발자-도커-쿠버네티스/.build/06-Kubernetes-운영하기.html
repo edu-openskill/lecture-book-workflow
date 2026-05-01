@@ -33,9 +33,9 @@
 <div class="chapter-image"><img src="..\assets\CH05\k8s-step4a.png" alt="" /></div><p class="thought">그림 6-1. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</p>
 <h3>6.1.2 ConfigMap</h3>
 <p>오픈이는 먼저 일반 설정을 관리하는 ConfigMap을 생성했습니다.</p>
-<blockquote>
-<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex13</p>
-</blockquote>
+<div class="tip">
+<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex13</p>
+</div>
 <p><strong>ex13/configmap-conn.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
@@ -241,26 +241,26 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <table>
 <thead>
 <tr>
-<th>종류</th>
-<th>설명</th>
-<th>데이터 유지</th>
+<th style="text-align:center">종류</th>
+<th style="text-align:left">설명</th>
+<th style="text-align:left">데이터 유지</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>emptyDir</code></td>
-<td>Pod 생성 시 만들어지는 임시 저장 공간</td>
-<td>Pod 삭제 시 함께 삭제</td>
+<td style="text-align:center"><code>emptyDir</code></td>
+<td style="text-align:left">Pod 생성 시 만들어지는 임시 저장 공간</td>
+<td style="text-align:left">Pod 삭제 시 함께 삭제</td>
 </tr>
 <tr>
-<td><code>hostPath</code></td>
-<td>워커 노드(호스트)의 특정 경로를 Pod에 마운트</td>
-<td>노드에 남지만, Pod가 다른 노드로 이동하면 접근 불가</td>
+<td style="text-align:center"><code>hostPath</code></td>
+<td style="text-align:left">워커 노드(호스트)의 특정 경로를 Pod에 마운트</td>
+<td style="text-align:left">노드에 남지만, Pod가 다른 노드로 이동하면 접근 불가</td>
 </tr>
 <tr>
-<td><code>PV / PVC</code></td>
-<td>클러스터 외부에 영구 저장소를 만들고 요청서(PVC)로 Pod에 연결</td>
-<td>Pod가 삭제되어도 유지</td>
+<td style="text-align:center"><code>PV / PVC</code></td>
+<td style="text-align:left">클러스터 외부에 영구 저장소를 만들고 요청서(PVC)로 Pod에 연결</td>
+<td style="text-align:left">Pod가 삭제되어도 유지</td>
 </tr>
 </tbody>
 </table>
@@ -274,9 +274,9 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <li><strong>PVC(PersistentVolumeClaim)</strong>: 창고를 쓰겠다고 작성하는 <strong>신청서</strong>입니다. &quot;10Gi짜리 읽기·쓰기 가능한 창고가 필요하다&quot;고 적어 두면, Kubernetes가 조건에 맞는 PV를 찾아 자동으로 PVC와 연결합니다.</li>
 </ul>
 <p>Pod는 PV를 직접 건드리지 않고 PVC만 붙여 사용합니다. 실제 창고 위치는 PVC가 알아서 연결해 주기 때문에, Pod 입장에서는 &quot;용량이 맞는 저장 공간 하나&quot;가 붙어 있습니다.</p>
-<blockquote>
-<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex14</p>
-</blockquote>
+<div class="tip">
+<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex14</p>
+</div>
 <h4>PV 만들기</h4>
 <div class="code-block highlight" data-lang="yaml"><span class="c1"># ex14/volume-pv.yml</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -384,9 +384,9 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <p>부분적인 실습은 성공했지만, 전체 시스템이 유기적으로 연결되어 하나의 완성된 웹사이트로 작동하는 모습은 아직 상상하기 어려웠습니다. 확신 없는 표정으로 화면만 응시하던 오픈이의 등 뒤로 팀장의 목소리가 들려왔습니다.</p>
 <div class="dialogue"><span class="speaker">팀장</span>: "부분 실습은 끝났지. 한 번에 연결해 봐야 진짜 실력이 늘어."</div>
 <p>팀장의 말대로 이번 절은 단순한 실습의 연장이 아니었습니다. 그동안 파편화되어 있던 지식들을 하나로 모아, 실제로 살아 움직이는 통합 서비스를 완성하는 '최종 관문'이었습니다.</p>
-<blockquote>
-<p>실습 코드: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15</p>
-</blockquote>
+<div class="tip">
+<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15</p>
+</div>
 <h3>6.3.1 전체 그림</h3>
 <p>오픈이가 펼쳐 본 구성도에는 서비스 네 개가 들어 있었습니다. 프런트엔드(Nginx), 백엔드(Spring Boot), DB(MySQL), 그리고 방문 횟수를 기록할 Redis. Redis가 더해지면서 실제 운영 환경에 한층 더 가까워진 구조였습니다.</p>
 <div class="svg-figure">
@@ -508,31 +508,31 @@ minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w
 <table>
 <thead>
 <tr>
-<th>서비스</th>
-<th>리소스 구성</th>
-<th>추가된 자리가 푸는 문제</th>
+<th style="text-align:center">서비스</th>
+<th style="text-align:left">리소스 구성</th>
+<th style="text-align:left">추가된 자리가 푸는 문제</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Frontend</td>
-<td>Deployment + Service + Ingress</td>
-<td>외부 진입 (챕터 5)</td>
+<td style="text-align:center">Frontend</td>
+<td style="text-align:left">Deployment + Service + Ingress</td>
+<td style="text-align:left">외부 진입 (챕터 5)</td>
 </tr>
 <tr>
-<td>Backend</td>
-<td>Deployment + Service + ConfigMap + Secret</td>
-<td>설정·비밀번호 분리 (6.1)</td>
+<td style="text-align:center">Backend</td>
+<td style="text-align:left">Deployment + Service + ConfigMap + Secret</td>
+<td style="text-align:left">설정·비밀번호 분리 (6.1)</td>
 </tr>
 <tr>
-<td>DB</td>
-<td>Deployment + Service + PV + PVC + Secret</td>
-<td>데이터 영속성 (6.2)</td>
+<td style="text-align:center">DB</td>
+<td style="text-align:left">Deployment + Service + PV + PVC + Secret</td>
+<td style="text-align:left">데이터 영속성 (6.2)</td>
 </tr>
 <tr>
-<td>Redis</td>
-<td>Deployment + Service</td>
-<td>—</td>
+<td style="text-align:center">Redis</td>
+<td style="text-align:left">Deployment + Service</td>
+<td style="text-align:left">—</td>
 </tr>
 </tbody>
 </table>
@@ -585,31 +585,31 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <table>
 <thead>
 <tr>
-<th>명령어</th>
-<th>무엇을 보여주는가</th>
-<th>언제 쓰는가</th>
+<th style="text-align:center">명령어</th>
+<th style="text-align:left">무엇을 보여주는가</th>
+<th style="text-align:left">언제 쓰는가</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>kubectl get &lt;resource&gt;</code></td>
-<td>리소스 목록과 상태 한 줄씩</td>
-<td>가장 먼저 — 살아 있는지, 몇 개인지</td>
+<td style="text-align:center"><code>kubectl get &lt;resource&gt;</code></td>
+<td style="text-align:left">리소스 목록과 상태 한 줄씩</td>
+<td style="text-align:left">가장 먼저 — 살아 있는지, 몇 개인지</td>
 </tr>
 <tr>
-<td><code>kubectl describe &lt;resource&gt; &lt;name&gt;</code></td>
-<td>리소스 상세 + 최근 이벤트</td>
-<td>상태가 이상할 때 — 왜 그 상태인지</td>
+<td style="text-align:center"><code>kubectl describe &lt;resource&gt; &lt;name&gt;</code></td>
+<td style="text-align:left">리소스 상세 + 최근 이벤트</td>
+<td style="text-align:left">상태가 이상할 때 — 왜 그 상태인지</td>
 </tr>
 <tr>
-<td><code>kubectl logs &lt;pod&gt;</code></td>
-<td>컨테이너 표준 출력</td>
-<td>컨테이너는 떴는데 동작이 이상할 때</td>
+<td style="text-align:center"><code>kubectl logs &lt;pod&gt;</code></td>
+<td style="text-align:left">컨테이너 표준 출력</td>
+<td style="text-align:left">컨테이너는 떴는데 동작이 이상할 때</td>
 </tr>
 <tr>
-<td><code>kubectl get events --sort-by=.lastTimestamp</code></td>
-<td>클러스터 최근 이벤트 시간순</td>
-<td>무슨 일이 벌어졌는지 큰 그림</td>
+<td style="text-align:center"><code>kubectl get events --sort-by=.lastTimestamp</code></td>
+<td style="text-align:left">클러스터 최근 이벤트 시간순</td>
+<td style="text-align:left">무슨 일이 벌어졌는지 큰 그림</td>
 </tr>
 </tbody>
 </table>
@@ -619,26 +619,26 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <table>
 <thead>
 <tr>
-<th>STATUS</th>
-<th>뜻</th>
-<th>흔한 원인</th>
+<th style="text-align:center">STATUS</th>
+<th style="text-align:left">뜻</th>
+<th style="text-align:left">흔한 원인</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ImagePullBackOff</code></td>
-<td>이미지를 받지 못해 컨테이너를 못 띄우는 중</td>
-<td>이미지 이름·태그 오타, 사설 레지스트리 인증 누락</td>
+<td style="text-align:center"><code>ImagePullBackOff</code></td>
+<td style="text-align:left">이미지를 받지 못해 컨테이너를 못 띄우는 중</td>
+<td style="text-align:left">이미지 이름·태그 오타, 사설 레지스트리 인증 누락</td>
 </tr>
 <tr>
-<td><code>CrashLoopBackOff</code></td>
-<td>컨테이너가 떴다가 즉시 죽고, K8s가 재시도를 반복 중</td>
-<td>환경 변수 누락, DB 연결 실패, 잘못된 진입점</td>
+<td style="text-align:center"><code>CrashLoopBackOff</code></td>
+<td style="text-align:left">컨테이너가 떴다가 즉시 죽고, K8s가 재시도를 반복 중</td>
+<td style="text-align:left">환경 변수 누락, DB 연결 실패, 잘못된 진입점</td>
 </tr>
 <tr>
-<td><code>Pending</code></td>
-<td>스케줄러가 노드를 못 찾아 Pod가 배치되지 않음</td>
-<td>CPU/메모리 부족, PVC가 아직 Bound 안 됨, 노드 셀렉터 불일치</td>
+<td style="text-align:center"><code>Pending</code></td>
+<td style="text-align:left">스케줄러가 노드를 못 찾아 Pod가 배치되지 않음</td>
+<td style="text-align:left">CPU/메모리 부족, PVC가 아직 Bound 안 됨, 노드 셀렉터 불일치</td>
 </tr>
 </tbody>
 </table>

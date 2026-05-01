@@ -2,17 +2,17 @@
 
 ### 네트워크 만들기
 
-- docker network create myNetwork
+- docker network create ex04-network
 
 ### redis 앱 빌드 및 실행
 
-- docker run -d --name redis --network myNetwork -p 6379:6379 redis
+- docker run -d --name redis --network ex04-network -p 6379:6379 redis
 
 ### api 실행
 
 - docker build -t api ex04/api
-- docker run -d --name api1 --network myNetwork -p 5001:5000 api
-- docker run -d --name api2 --network myNetwork -p 5002:5000 api
+- docker run -d --name api1 --network ex04-network -p 5001:5000 api
+- docker run -d --name api2 --network ex04-network -p 5002:5000 api
 
 ### 실행
 

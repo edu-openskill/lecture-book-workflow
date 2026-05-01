@@ -62,7 +62,7 @@
 </div>
 <p class="thought">그림 3-1. 수동 세팅과 프로비저닝 비교</p>
 <div class="term-box">
-<p><strong>프로비저닝(Provisioning)</strong>: 빈 환경에 운영체제·패키지·설정·코드를 정해진 순서대로 자동으로 깔아 서비스가 실행될 수 있는 상태로 만드는 작업입니다.</p>
+<p><strong>프로비저닝(Provisioning)</strong>: 서비스가 동작할 수 있도록 환경(운영체제·패키지·설정 등)을 갖춰 사용 가능한 상태로 만들어 두는 작업입니다.</p>
 </div>
 <p>도커에서 이 프로비저닝을 담당하는 정의 파일이 바로 <strong>Dockerfile</strong>입니다. 요리 레시피처럼 무엇을 어떤 순서로 준비할지 정확히 적어두면, 도커가 그대로 따라 자동으로 이미지를 만들어 줍니다.</p>
 <div class="term-box">
@@ -139,7 +139,7 @@
 </tr>
 </tbody>
 </table>
-<p>오픈이는 첫 실습으로 Ubuntu 환경에 vim이 미리 설치된 이미지를 직접 만들어보기로 했습니다. 메모장을 열고 아래 내용을 작성했습니다.</p>
+<p>오픈이는 첫 실습으로 Ubuntu 환경에 vim이 미리 설치된 이미지를 직접 만들어보기로 했습니다. 빈 폴더에 확장자 없이 <code>Dockerfile</code>이라는 이름으로 파일을 하나 만들고 아래 내용을 작성했습니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><span class="c"># Dockerfile</span>
 <span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:24.04</span><span class="w">                      </span><span class="c"># 베이스 이미지</span>
 <span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">   </span>#<span class="w"> </span>vim<span class="w"> </span>패키지<span class="w"> </span>설치
@@ -181,10 +181,10 @@
 <p class="thought">그림 3-4. vim이 이미 설치된 상태로 컨테이너 실행</p>
 <p>지난번만 해도 컨테이너 접속, 업데이트, 설치, 종료, 커밋까지 다섯 단계를 일일이 수동으로 처리해야 했습니다. 하지만 이제는 <strong>Dockerfile 하나와 명령어 한 줄로</strong> 모든 과정이 끝났습니다.</p>
 <h3>3.1.4 WORKDIR와 COPY</h3>
-<p>Dockerfile로 필요한 패키지들은 설치했지만, 내 컴퓨터(호스트)에 있는 소스 코드를 컨테이너 안으로 어떻게 넣어야 할지 궁금해졌습니다. 프로젝트를 실제로 구동하려면 로컬의 파일들을 컨테이너 내부로 옮기는 과정이 반드시 필요했기 때문입니다. 이럴 때 사용하는 지시어가 바로 <strong>WORKDIR</strong>와 <strong>COPY</strong>입니다.</p>
+<p>Dockerfile로 패키지 설치는 끝냈지만, 내 로컬에서 개발한 소스 코드는 컨테이너 안으로 어떻게 옮겨야 할지가 다음 의문이었습니다. 프로젝트를 실제로 구동하려면 로컬의 파일들을 컨테이너 내부로 옮기는 과정이 반드시 필요했기 때문입니다. 이럴 때 사용하는 지시어가 바로 <strong>WORKDIR</strong>와 <strong>COPY</strong>입니다.</p>
 <p>오픈이는 이 과정을 테스트해 보기 위해, 우선 Dockerfile과 같은 위치에 내용은 비어있는 <strong>index.html</strong> 파일을 하나 만들었습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-11.png" alt="" /></div><p class="thought">그림 3-5. 폴더 및 파일 구조</p>
-<p>그리고 기존 Dockerfile에 내용을 덧붙였습니다. 작업 디렉토리를 /app으로 지정하고, 로컬의 index.html을 그 안으로 복사하도록 설정했습니다.</p>
+<p>그리고 기존 Dockerfile에 내용을 추가했습니다. 작업 디렉토리를 /app으로 지정하고, 로컬의 index.html을 그 안으로 복사하도록 설정했습니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:24.04</span><span class="w">                      </span><span class="c"># 베이스 이미지</span>
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app                           # 작업 경로를 /app으로 설정</span>
 <span class="k">COPY</span><span class="w"> </span>./index.html<span class="w"> </span>./index.html<span class="w">         </span>#<span class="w"> </span>로컬의<span class="w"> </span>index.html을<span class="w"> </span>컨테이너의<span class="w"> </span>/app으로<span class="w"> </span>복사
@@ -209,8 +209,8 @@ ls</div>
 <p class="thought">그림 3-6. 실행 결과 확인</p>
 <p>예상대로 터미널은 접속하자마자 /app 경로를 가리키고 있었고, 그 안에는 index.html이 들어 있었습니다. 직접 들어가서 파일을 옮기거나 환경을 설정할 필요가 없어진 것입니다. 확인을 마친 오픈이는 만족스럽게 <code>exit</code>을 입력하고 컨테이너에서 빠져나왔습니다.</p>
 <h3>3.1.5 CMD와 ENTRYPOINT</h3>
-<p>오픈이는 챕터 2에서 CMD을 사용해 메인 프로세스를 변경해봤습니다. 그런데 문법 표를 다시 보니 ENTRYPOINT라는 지시어도 눈에 띄었습니다.</p>
-<p class="thought">'둘 다 "실행할 명령" 같은데, 굳이 왜 나눠져 있을까?'</p>
+<p>WORKDIR와 COPY까지 다뤘지만 Dockerfile에는 아직 손대지 않은 지시어가 더 있었습니다. 앞에서 정리한 문법 표를 다시 보면, CMD는 &quot;<strong>기본적으로</strong> 실행되는 명령어&quot;로, ENTRYPOINT는 &quot;<strong>반드시</strong> 실행되는 메인 프로세스&quot;로 적혀 있습니다.</p>
+<p class="thought">'기본 실행과 반드시 실행. 둘 다 어쨌든 실행한다는 말 같은데, 굳이 왜 나눠져 있을까?'</p>
 <p>두 지시어는 성격이 조금 다릅니다. 쉽게 비유하면 <strong>ENTRYPOINT</strong> 는 커피 머신의 <strong>'커피를 내린다'</strong> 는 본질이고, <strong>CMD</strong> 는 따로 주문이 없을 때 기본으로 내려주는 <strong>'아메리카노'</strong> 같은 존재입니다. 손님이 라떼나 에스프레소를 주문하면 기본 메뉴는 다른 음료로 <strong>바뀔 수 있지만</strong>, '커피를 내린다'는 동작 자체는 어떤 주문에서든 <strong>그대로 유지됩니다</strong>.</p>
 <div class="prep-note">
 <p><strong>CMD와 ENTRYPOINT</strong></p>
@@ -440,12 +440,39 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>이런 이유로 nginx에서 백엔드 컨테이너를 부르려면 위치가 늘 일정한 호스트 PC를 한 번 거쳐야 합니다. 그 호스트 PC를 가리키는 주소가 바로 <strong>host.docker.internal</strong>입니다.</p>
 <p>오픈이는 이 우회 방식이 다소 번거롭고 복잡하다는 인상을 받았습니다.</p>
 <p class="thought">매번 호스트를 거쳐 가지 않으려면 어떻게 해야 하지?</p>
-<p>이 문제는 챕터 3.3의 사용자 정의 네트워크에서 해결됩니다.</p>
-<h3>3.2.4 로드밸런싱</h3>
+<h3>3.2.4 사용자 정의 네트워크 — 이름으로 부르기</h3>
+<p class="thought">'지난 예제에서는 호스트 IP를 거쳐서 돌아갔지만, 이번에는 네트워크를 하나 만들어서 이름으로 바로 묶어보자.'</p>
+<p>이 문제를 해결하는 도구가 챕터 2에서 본 <strong>사용자 정의 네트워크(User-defined Network)</strong> 입니다. 챕터 2의 그림 2-17처럼 도커 내부 DNS가 컨테이너 이름을 IP로 자동 변환해 주므로, <code>host.docker.internal</code> 같은 우회 없이 컨테이너 이름을 그대로 쓸 수 있습니다.</p>
+<p>실습에 필요한 네트워크 관련 명령어는 세 가지입니다.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">명령</th>
+<th style="text-align:left">역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>docker network create &lt;이름&gt;</code></td>
+<td style="text-align:left">새 네트워크 생성</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>docker run ... --network &lt;이름&gt;</code></td>
+<td style="text-align:left">컨테이너를 해당 네트워크에 참여</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>docker network ls</code></td>
+<td style="text-align:left">현재 생성된 네트워크 목록 확인</td>
+</tr>
+</tbody>
+</table>
+<p>이 세 명령어로 컨테이너끼리 같은 네트워크에 묶어두면, <code>host.docker.internal</code> 같은 우회 없이 이름만으로 서로를 부를 수 있습니다.</p>
+<p class="thought">'이제 호스트를 우회할 필요가 없어졌네. 지어준 이름으로 바로 부르면 되니까.'</p>
+<h3>3.2.5 로드밸런싱</h3>
 <div class="tip">
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex02</p>
 </div>
-<p>경로에 따라 서버를 나누는 방법은 이제 익혔습니다. 하지만 문득 똑같은 앱을 두 대, 세 대로 복제해서 운영하려면 NGINX 설정을 어떻게 바꿔야 할지 궁금해졌습니다.</p>
+<p>경로 라우팅도 익혔고, 방금 사용자 정의 네트워크로 컨테이너끼리 이름으로 부를 수 있게 됐습니다. 그러다 문득 똑같은 앱을 두 대, 세 대로 복제해서 운영하려면 NGINX 설정을 어떻게 바꿔야 할지 궁금해졌습니다.</p>
 <p class="thought">'업스트림을 여러 개 만들어야 할까? 아니면 하나 안에 서버 주소를 여러 개 넣을 수 있을까?'</p>
 <p>답은 후자입니다. upstream 블록 안에 server 줄을 추가하기만 하면 NGINX가 들어오는 요청을 순차적으로 전달합니다. 마치 카드 딜러가 한 장씩 돌아가며 카드를 나눠주는 것과 비슷합니다. 이러한 방식을 <strong>라운드 로빈(Round Robin)</strong> 이라고 부릅니다.</p>
 <div class="svg-figure">
@@ -478,11 +505,11 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 </svg>
 </div>
 <p class="thought">그림 3-13. 라운드 로빈 로드밸런싱 구조</p>
-<p>이번 실습은 ex02 폴더에 들어 있습니다. 이전 실습과 달라진 점은 크게 세 가지입니다. 똑같은 앱을 여러 대 띄울 것이라 app2 폴더가 사라졌고, nginx.conf에서 app1 그룹에 서버 줄이 늘어났으며, 불필요해진 app2 관련 설정들은 모두 빠졌습니다.</p>
+<p>이번 실습은 ex02 폴더에 들어 있습니다. 이전 실습과 달라진 점은 크게 네 가지입니다. 똑같은 앱을 여러 대 띄울 것이라 app2 폴더가 사라졌고, nginx.conf에서 app1 그룹에 서버 줄이 늘어났습니다. 불필요해진 app2 관련 설정은 모두 빠졌고, 백엔드 주소도 <code>host.docker.internal:포트</code> 대신 <code>컨테이너이름:80</code>으로 바뀌었습니다.</p>
 <p><strong>ex02/lb/nginx.conf</strong></p>
 <div class="code-block highlight" data-lang="nginx"><span class="k">upstream</span><span class="w"> </span><span class="s">app1</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">host.docker.internal</span><span class="p">:</span><span class="mi">8000</span><span class="p">;</span><span class="w">     </span><span class="c1"># 첫 번째 서버</span>
-<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">host.docker.internal</span><span class="p">:</span><span class="mi">8001</span><span class="p">;</span><span class="w">     </span><span class="c1"># 같은 그룹에 두 번째 서버 추가</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">app1-1</span><span class="p">:</span><span class="mi">80</span><span class="p">;</span><span class="w">     </span><span class="c1"># 첫 번째 서버 (컨테이너 이름)</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">app1-2</span><span class="p">:</span><span class="mi">80</span><span class="p">;</span><span class="w">     </span><span class="c1"># 같은 그룹에 두 번째 서버 추가</span>
 <span class="p">}</span>
 
 <span class="k">server</span><span class="w"> </span><span class="p">{</span>
@@ -491,13 +518,20 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://app1/</span><span class="p">;</span><span class="w">          </span><span class="c1"># 자동으로 두 서버에 번갈아 분배 (라운드 로빈)</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<p>오픈이는 같은 이미지를 사용해 컨테이너를 두 번 띄우기로 했습니다. 이때 호스트의 포트만 다르게 지정하여 서로 충돌하지 않게 설정합니다.</p>
-<div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app1<span class="w"> </span>ex02/app1
-docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:80<span class="w"> </span>app1<span class="w">   </span><span class="c1"># 서버 1</span>
-docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">8001</span>:80<span class="w"> </span>app1<span class="w">   </span><span class="c1"># 서버 2 (같은 이미지, 다른 포트)</span>
+<p>오픈이는 같은 이미지를 사용해 컨테이너를 두 번 띄우기로 했습니다. 사용자 정의 네트워크에 묶어두면 호스트 포트를 노출하지 않아도 컨테이너끼리 이름으로 통신할 수 있습니다.</p>
+<div class="code-block highlight" data-lang="bash"><span class="c1"># 1. 사용자 정의 네트워크 생성 (lb·app1-1·app1-2가 모두 이 네트워크에 묶입니다)</span>
+docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>ex02-network
 
+<span class="c1"># 2. app1 이미지 빌드</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app1<span class="w"> </span>ex02/app1
+
+<span class="c1"># 3. 같은 이미지로 컨테이너 두 개 실행 (--name으로 다른 이름을 부여해 도커 DNS에 등록)</span>
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>app1-1<span class="w"> </span>--network<span class="w"> </span>ex02-network<span class="w"> </span>app1<span class="w">   </span><span class="c1"># 서버 1</span>
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>app1-2<span class="w"> </span>--network<span class="w"> </span>ex02-network<span class="w"> </span>app1<span class="w">   </span><span class="c1"># 서버 2</span>
+
+<span class="c1"># 4. lb(NGINX) 빌드 + 실행 (-p로 외부에 80 포트만 노출, 내부 통신은 네트워크 이름으로)</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>lb<span class="w"> </span>ex02/lb
-docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>lb<span class="w"> </span>--network<span class="w"> </span>ex02-network<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
 <p>설정을 마치고 브라우저에서 localhost:80/app1에 접속해 보았습니다. 새로고침을 반복해도 화면에 보이는 HTML 내용은 똑같았습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-21.png" alt="" /></div><p class="thought">그림 3-14. /app1 경로로 접속한 결과 (라운드 로빈)</p>
 <p>오픈이는 실제 동작 여부를 확인하기 위해 <code>docker logs</code>로 각 컨테이너의 로그를 확인했습니다.</p>
@@ -508,18 +542,18 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
     <div class="tl-spacer"></div>
   </div>
   <div class="tl-body">
-    <div><span class="tl-key">$</span> <span class="tl-str">docker logs ff8e235c79a2</span></div>
+    <div><span class="tl-key">$</span> <span class="tl-str">docker logs app1-1</span></div>
     <div>2025/11/25 15:09:44 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576</div>
     <div>2025/11/25 15:09:44 [notice] 1#1: start worker processes</div>
     <div>2025/11/25 15:09:44 [notice] 1#1: start worker process 16</div>
     <div>2025/11/25 15:09:44 [notice] 1#1: start worker process 17</div>
     <div>2025/11/25 15:09:44 [notice] 1#1: start worker process 18</div>
     <div>...</div>
-    <div>172.17.0.1 - - [25/Nov/2025:15:11:23 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
-    <div>172.17.0.1 - - [25/Nov/2025:15:11:52 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
+    <div>172.18.0.4 - - [25/Nov/2025:15:11:23 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.18.0.4"</div>
+    <div>172.18.0.4 - - [25/Nov/2025:15:11:52 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.18.0.4"</div>
   </div>
 </div>
-<p class="thought">그림 3-15. 8000 포트 컨테이너 로그에 찍힌 요청</p>
+<p class="thought">그림 3-15. app1-1 컨테이너 로그에 찍힌 요청</p>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -527,20 +561,20 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
     <div class="tl-spacer"></div>
   </div>
   <div class="tl-body">
-    <div><span class="tl-key">$</span> <span class="tl-str">docker logs 22f65c73f3c5</span></div>
+    <div><span class="tl-key">$</span> <span class="tl-str">docker logs app1-2</span></div>
     <div>2025/11/25 15:09:33 [notice] 1#1: start worker process 20</div>
     <div>2025/11/25 15:09:33 [notice] 1#1: start worker process 21</div>
     <div>2025/11/25 15:09:33 [notice] 1#1: start worker process 22</div>
     <div>...</div>
-    <div>172.17.0.1 - - [25/Nov/2025:15:11:33 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
-    <div>172.17.0.1 - - [25/Nov/2025:15:12:08 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.17.0.1"</div>
+    <div>172.18.0.4 - - [25/Nov/2025:15:11:33 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.18.0.4"</div>
+    <div>172.18.0.4 - - [25/Nov/2025:15:12:08 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.18.0.4"</div>
   </div>
 </div>
-<p class="thought">그림 3-16. 8001 포트 컨테이너 로그에 찍힌 요청</p>
-<p>새로고침을 할 때마다 요청이 8000번 컨테이너와 8001번 컨테이너로 번갈아 들어오는 것을 눈으로 확인할 수 있었습니다. 설정 파일에 server 줄 하나를 추가했을 뿐인데, NGINX가 알아서 트래픽을 두 대의 서버로 나누어 보내준 것입니다. 별도의 복잡한 세팅 없이도 기본적으로 라운드 로빈 방식이 적용된 결과였습니다.</p>
+<p class="thought">그림 3-16. app1-2 컨테이너 로그에 찍힌 요청</p>
+<p>새로고침을 할 때마다 요청이 app1-1과 app1-2 컨테이너로 번갈아 들어오는 것을 눈으로 확인할 수 있었습니다. 설정 파일에 server 줄 하나를 추가했을 뿐인데, NGINX가 알아서 트래픽을 두 대의 서버로 나누어 보내준 것입니다. 별도의 복잡한 세팅 없이도 기본적으로 라운드 로빈 방식이 적용된 결과였습니다.</p>
 <p class="thought">'서버가 늘어나도 upstream에 주소만 추가하면 되네. 되게 간단한대?'</p>
 <p>오픈이는 NGINX를 활용한 부하 분산의 편리함을 실감하며 다음 실습으로 넘어갔습니다.</p>
-<h3>3.2.5 캐싱</h3>
+<h3>3.2.6 캐싱</h3>
 <div class="tip">
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex03</p>
 </div>
@@ -651,26 +685,32 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="p">;</span>
 
 <span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://host.docker.internal:5000</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://api:5000</span><span class="p">;</span>
 <span class="w">        </span><span class="kn">proxy_cache</span><span class="w"> </span><span class="no">off</span><span class="p">;</span><span class="w">                             </span><span class="c1"># 일반 경로는 캐시를 끕니다.</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">/image.png</span><span class="w"> </span><span class="p">{</span><span class="w">                          </span><span class="c1"># 이미지 파일 요청에 대해서만</span>
-<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://host.docker.internal:5000</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://api:5000</span><span class="p">;</span>
 <span class="w">        </span><span class="kn">proxy_cache</span><span class="w"> </span><span class="s">my_cache</span><span class="p">;</span><span class="w">                        </span><span class="c1"># 선언한 캐시 공간을 사용합니다.</span>
 <span class="w">        </span><span class="kn">proxy_cache_valid</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="mi">1m</span><span class="p">;</span><span class="w">                    </span><span class="c1"># 정상 응답(200)을 1분 동안 보관합니다.</span>
 <span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Cache-Status</span><span class="w"> </span><span class="nv">$upstream_cache_status</span><span class="w"> </span><span class="s">always</span><span class="p">;</span><span class="w">  </span><span class="c1"># HIT/MISS 표시</span>
 <span class="w">        </span><span class="kn">proxy_ignore_headers</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">Expires</span><span class="p">;</span><span class="w">  </span><span class="c1"># 백엔드 캐시 헤더 무시 (NGINX 설정 우선)</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<p>오픈이는 터미널을 열고 실습 환경을 실행했습니다.</p>
-<div class="code-block highlight" data-lang="bash"><span class="c1"># api 서버 실행 (Flask — 5000번 포트)</span>
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>api<span class="w"> </span>ex03/api
-docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">5000</span>:5000<span class="w"> </span>api
+<p>오픈이는 터미널을 열고 실습 환경을 실행했습니다. ex02에서 띄워둔 lb 컨테이너가 80 포트를 잡고 있으므로, 새 nginx-cache가 같은 포트를 쓸 수 있도록 먼저 정리하고 시작합니다.</p>
+<div class="code-block highlight" data-lang="bash"><span class="c1"># 0. 이전 실습의 lb 컨테이너 정리 (80 포트 충돌 방지, 없으면 그냥 넘어감)</span>
+docker<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>lb
 
-<span class="c1"># nginx 실행</span>
+<span class="c1"># 1. 사용자 정의 네트워크 생성</span>
+docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>ex03-network
+
+<span class="c1"># 2. api(Flask) 이미지 빌드 + 실행 (외부 포트 노출 없이 네트워크 안에서만 통신)</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>api<span class="w"> </span>ex03/api
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>api<span class="w"> </span>--network<span class="w"> </span>ex03-network<span class="w"> </span>api
+
+<span class="c1"># 3. nginx 캐싱 빌드 + 실행 (-p로 외부에 80 포트만 노출)</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>nginx-cache<span class="w"> </span>ex03/nginx
-docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>nginx-cache</div>
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>nginx-cache<span class="w"> </span>--network<span class="w"> </span>ex03-network<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>nginx-cache</div>
 <p>이제 브라우저에서 localhost:80/image.png를 요청해 보았습니다. 화면에는 이미지가 정상적으로 출력되었습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-32.png" alt="" /></div><p class="thought">그림 3-19. 캐싱 실습 — 이미지 응답</p>
 <p>오픈이는 정확한 확인을 위해 <strong>개발자 도구(F12) &gt; Network</strong> 탭을 열었습니다. 브라우저 자체 캐시가 개입하지 못하도록 <strong>Disable cache</strong> 를 체크한 뒤 응답 헤더를 살폈습니다. 첫 번째 요청에서는 예상대로 <strong>X-Cache-Status</strong> 값이 <strong>MISS</strong>로 찍혔습니다.</p>
@@ -755,63 +795,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <p class="thought">그림 3-23. Redis로 해결 — 세션을 공용 저장소에 보관하여 어느 서버에서든 조회 가능</p>
 <p>1번 서버가 로그인을 처리한 뒤 세션 기록을 Redis에 저장한다고 가정해 봅시다. 그러면 2번 서버로 요청이 왔을 때 Redis를 참조해 로그인 정보를 즉시 확인할 수 있습니다.</p>
 <p>이 구조라면 서버를 여러 대로 늘리더라도 사용자의 로그인 상태를 유지할 수 있습니다.</p>
-<h3>3.3.3 사용자 정의 네트워크 — 이름으로 부르기</h3>
-<p>Redis 컨테이너와 API 컨테이너를 띄우고 나면, 두 컨테이너가 서로를 어떻게 호출할지가 숙제로 남습니다. <strong>host.docker.internal</strong>로 우회하거나 컨테이너 IP를 직접 적는 방법도 있지만, 가장 편한 건 컨테이너 이름을 그대로 주소처럼 쓰는 것입니다.</p>
-<p class="thought">'지난 예제에서는 호스트 IP를 거쳐서 돌아갔지만, 이번에는 네트워크를 하나 만들어서 이름으로 바로 묶어보자.'</p>
-<p>이 문제를 해결하는 도구가 챕터 2에서 본 <strong>사용자 정의 네트워크(User-defined Network)</strong> 입니다. 같은 네트워크에 묶인 컨테이너끼리는 도커 내부 DNS가 이름을 IP로 자동 변환해 주므로, <code>host.docker.internal</code> 같은 우회 없이 컨테이너 이름을 그대로 쓸 수 있습니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="사용자 정의 네트워크에서 이름으로 통신하는 흐름">
-  <defs>
-    <marker id="dn23-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-    <marker id="dn23-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-  </defs>
-  <text x="350" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">사용자 정의 네트워크 — 이름으로 컨테이너 호출</text>
-  <rect x="20" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <text x="100" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">api 컨테이너</text>
-  <text x="100" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.2</text>
-  <rect x="270" y="55" width="160" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="350" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Docker DNS</text>
-  <text x="350" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">127.0.0.11</text>
-  <rect x="520" y="55" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <text x="600" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">redis 컨테이너</text>
-  <text x="600" y="105" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.3</text>
-  <line x1="180" y1="77" x2="270" y2="77" stroke="#475569" stroke-width="1.8" marker-end="url(#dn23-p)"/>
-  <text x="225" y="70" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">1.</tspan> redis의 IP는?</text>
-  <line x1="270" y1="103" x2="180" y2="103" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#dn23-o)"/>
-  <text x="225" y="118" text-anchor="middle" font-size="11" fill="#7b341e"><tspan font-weight="700">2.</tspan> 172.18.0.3</text>
-  <path d="M 100 125 L 100 180 L 600 180 L 600 125" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#dn23-p)"/>
-  <rect x="265" y="168" width="170" height="22" rx="4" fill="#fff"/>
-  <text x="350" y="183" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.18.0.3 으로 요청</text>
-  <text x="350" y="218" text-anchor="middle" font-size="10" fill="#6b7280">사용자 정의 네트워크에서만 자동 DNS가 켜집니다 (기본 docker0에는 없음)</text>
-</svg>
-</div>
-<p class="thought">그림 3-24. 사용자 정의 네트워크 — 같은 네트워크 안의 컨테이너끼리 이름으로 호출</p>
-<p>실습에 필요한 네트워크 관련 명령어는 세 가지입니다.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">명령</th>
-<th style="text-align:left">역할</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center"><code>docker network create &lt;이름&gt;</code></td>
-<td style="text-align:left">새 네트워크 생성</td>
-</tr>
-<tr>
-<td style="text-align:center"><code>docker run ... --network &lt;이름&gt;</code></td>
-<td style="text-align:left">컨테이너를 해당 네트워크에 참여</td>
-</tr>
-<tr>
-<td style="text-align:center"><code>docker network ls</code></td>
-<td style="text-align:left">현재 생성된 네트워크 목록 확인</td>
-</tr>
-</tbody>
-</table>
-<p>오픈이는 답을 찾은 기분이었습니다. 위 세 명령어로 컨테이너끼리 같은 네트워크에 묶어두면, <code>host.docker.internal</code> 같은 우회 없이 이름만으로 서로를 부를 수 있습니다.</p>
-<p class="thought">'이제 호스트를 우회할 필요가 없어졌네. 지어준 이름으로 바로 부르면 되니까.'</p>
-<h3>3.3.4 실습: Redis로 세션 공유</h3>
+<h3>3.3.3 실습: Redis로 세션 공유</h3>
 <div class="tip">
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex04</p>
 </div>
@@ -822,24 +806,21 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 │   ├── Dockerfile       # Python 이미지 + app.py 복사
 │   └── app.py           # Redis에 값을 저장/조회하는 간단한 API
 └── README.md            # 실습 안내</div>
-<p>app.py는 <code>/save</code> 경로로 값을 저장하고 <code>/read</code> 경로로 값을 꺼내는 간단한 서버입니다. Redis 서버와 연결할 통로를 만드는 줄을 살펴보겠습니다.</p>
-<p><strong>ex04/api/app.py</strong> (핵심)</p>
-<div class="code-block highlight" data-lang="python"><span class="kn">import</span><span class="w"> </span><span class="nn">redis</span>
-<span class="c1"># &#39;redis&#39;는 사용자 정의 네트워크 안의 컨테이너 이름</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;redis&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
-<p>이 한 줄은 <code>'redis'</code>라는 이름의 컨테이너에, <code>6379</code> 포트로, <code>0</code>번 데이터베이스에 연결하는 클라이언트 <code>r</code>을 만든다는 뜻입니다. 이후 <code>r.set(키, 값)</code>으로 저장하고 <code>r.get(키)</code>로 꺼낼 때 이 <code>r</code>을 통해 통신합니다. Redis 한 서버 안에는 <code>0</code>부터 <code>15</code>까지 16개의 독립된 데이터베이스가 있어 용도별로 분리할 수 있는데, 별도 지정이 없으면 보통 <code>0</code>번을 씁니다.</p>
-<p>핵심은 <code>host</code>에 IP가 아닌 컨테이너 이름 <code>'redis'</code>를 적었다는 점입니다. 사용자 정의 네트워크 안에서 도커 DNS가 이 이름을 Redis 컨테이너 IP로 자동 변환해 연결해 줍니다.</p>
+<p>app.py는 <code>/save</code> 경로로 값을 저장하고 <code>/read</code> 경로로 값을 꺼내는 간단한 서버입니다. Redis에 연결할 때는 IP가 아니라 <code>'redis'</code>라는 컨테이너 이름을 그대로 씁니다. 같은 사용자 정의 네트워크에 묶여 있어 도커 DNS가 자동으로 IP를 찾아주기 때문입니다.</p>
 <p>오픈이는 네트워크를 먼저 생성한 뒤, 세 컨테이너가 모두 같은 네트워크 안에서 돌아가도록 차례대로 실행했습니다.</p>
-<div class="code-block highlight" data-lang="bash"><span class="c1"># 1. 사용자 정의 네트워크 생성</span>
-docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>myNetwork
+<div class="code-block highlight" data-lang="bash"><span class="c1"># 0. 이전 실습의 nginx-cache 컨테이너 정리 (필요 시)</span>
+docker<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>nginx-cache
+
+<span class="c1"># 1. 사용자 정의 네트워크 생성</span>
+docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>ex04-network
 
 <span class="c1"># 2. Redis 컨테이너 실행 (-p는 호스트에서 확인용으로 노출, 같은 네트워크 내 통신에는 불필요)</span>
-docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>redis<span class="w"> </span>--network<span class="w"> </span>myNetwork<span class="w"> </span>-p<span class="w"> </span><span class="m">6379</span>:6379<span class="w"> </span>redis
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>redis<span class="w"> </span>--network<span class="w"> </span>ex04-network<span class="w"> </span>-p<span class="w"> </span><span class="m">6379</span>:6379<span class="w"> </span>redis
 
 <span class="c1"># 3. API 서버 두 대 실행 (같은 이미지, 다른 포트)</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>api<span class="w"> </span>ex04/api
-docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>api1<span class="w"> </span>--network<span class="w"> </span>myNetwork<span class="w"> </span>-p<span class="w"> </span><span class="m">5001</span>:5000<span class="w"> </span>api
-docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>api2<span class="w"> </span>--network<span class="w"> </span>myNetwork<span class="w"> </span>-p<span class="w"> </span><span class="m">5002</span>:5000<span class="w"> </span>api</div>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>api1<span class="w"> </span>--network<span class="w"> </span>ex04-network<span class="w"> </span>-p<span class="w"> </span><span class="m">5001</span>:5000<span class="w"> </span>api
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>api2<span class="w"> </span>--network<span class="w"> </span>ex04-network<span class="w"> </span>-p<span class="w"> </span><span class="m">5002</span>:5000<span class="w"> </span>api</div>
 <p>이제 데이터가 제대로 공유되는지 확인할 차례입니다.</p>
 <p>먼저 api1 서버(localhost:5001/save)에 접속해 값을 저장했습니다. 그러고 나서 곧바로 api2 서버(localhost:5002/read)로 들어가 조회를 시도했습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-40.png" alt="" /></div><p class="thought">그림 3-25. api1에서 데이터 저장</p>
@@ -880,7 +861,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
     <div class="tl-spacer"></div>
   </div>
   <div class="tl-body">
-    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t db ./db</span></div>
+    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t db ex05/db</span></div>
     <div>- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "MYSQL_ROOT_PASSWORD") (line 7)</div>
     <div>View build details: docker-desktop://dashboard/build/desktop-linux/s40kn0konmqqxbyvoabl3c6up</div>
     <div><span class="tl-key">$</span> <span class="tl-str">docker run -dit -p 3306:3306 db</span></div>
@@ -1124,7 +1105,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <div class="tip">
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex06</p>
 </div>
-<p>오픈이는 이전에 진행했던 ex01 실습(경로 기반 라우팅)을 Compose 방식으로 바꿔보기로 했습니다. 기존의 Dockerfile들은 그대로 두고, 이를 하나로 묶어줄 docker-compose.yml만 새로 작성했습니다.</p>
+<p>오픈이는 이전에 진행했던 ex01 실습(경로 기반 라우팅)을 Compose 방식으로 바꿔보기로 했습니다. ex01의 nginx.conf에는 백엔드 주소가 <code>host.docker.internal:8000/9000</code>으로 적혀 있었는데, Compose가 만든 네트워크에서 이 우회가 어떻게 사라지는지 직접 확인하기 위해서였습니다. 기존 Dockerfile들은 그대로 두고, 이를 하나로 묶어줄 docker-compose.yml만 새로 작성했습니다.</p>
 <p><strong>ex06/docker-compose.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">services</span><span class="p">:</span><span class="w">                          </span><span class="c1"># 컨테이너 단위로 실행할 서비스 묶음</span>
 <span class="w">  </span><span class="nt">app1</span><span class="p">:</span><span class="w">                            </span><span class="c1"># 첫 번째 서비스 이름 (다른 서비스가 부를 때 호스트명이 됨)</span>
@@ -1151,7 +1132,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">ex06-network</span><span class="p">:</span><span class="w">                    </span><span class="c1"># 세 서비스가 공유하는 사용자 정의 네트워크</span></div>
-<p>여기서 결정적인 차이가 생깁니다. <strong>lb/nginx.conf</strong> 설정 파일에서 백엔드 주소를 적을 때, 더 이상 host.docker.internal을 쓸 필요가 없습니다. Compose가 자동으로 만든 네트워크 덕분에 app1:80, <strong>app2:80</strong>처럼 서비스 이름으로 바로 부를 수 있기 때문입니다.</p>
+<p>여기서 결정적인 차이가 생깁니다. ex02·ex03·ex04에서는 실습마다 <code>docker network create ex02-network</code> 같은 명령을 직접 입력했지만, Compose에서는 그 명령조차 따로 칠 필요가 없습니다. docker-compose.yml에 적힌 서비스들을 Compose가 자동으로 한 네트워크에 묶어 주기 때문입니다. <strong>lb/nginx.conf</strong>에서도 백엔드 주소를 <code>app1:80</code>, **<code>app2:80</code>**처럼 서비스 이름으로 바로 부르면 됩니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Compose 네트워크에서 서비스 이름으로 통신">
   <defs>
