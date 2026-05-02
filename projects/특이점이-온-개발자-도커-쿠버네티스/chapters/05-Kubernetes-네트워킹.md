@@ -253,7 +253,7 @@ minikube service nginx-service --url      # Service 접속 URL 출력
 
 ## 5.2 Ingress — 프랜차이즈 공식 앱
 
-### 5.2.1 왜 Service만으로는 부족한가
+### 5.2.1 Service만으로 부족한 지점
 
 Service 덕분에 Pod를 안정적으로 찾아가는 길은 확보했습니다. 오픈이는 뿌듯한 마음으로 동료들에게 자랑했지만, 곧바로 예상치 못한 피드백이 돌아왔습니다.
 

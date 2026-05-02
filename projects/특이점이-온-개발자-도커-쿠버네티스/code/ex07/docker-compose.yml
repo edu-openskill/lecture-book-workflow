@@ -3,10 +3,13 @@ services:
     build:
       context: ./backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/metadb?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root1234
+      # 책 표기를 위한 줄바꿈 (실제는 한 줄)
+      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/metadb\
+        ?useSSL=false\
+        &serverTimezone=UTC\
+        &allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: metacoding
+      SPRING_DATASOURCE_PASSWORD: metacoding1234
     networks:
       - ex07-network
 

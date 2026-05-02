@@ -19,7 +19,7 @@ def index():
 @app.route("/image.png")
 def get_image():
     image_path = os.path.join(os.path.dirname(__file__), "image.png")
-    return send_file(image_path, mimetype="image/png")
+    return send_file(image_path)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

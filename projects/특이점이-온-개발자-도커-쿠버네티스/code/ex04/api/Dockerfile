@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY app.py .
 
-RUN pip install flask && pip install redis
+RUN pip install flask redis
 
 CMD ["python", "app.py"]

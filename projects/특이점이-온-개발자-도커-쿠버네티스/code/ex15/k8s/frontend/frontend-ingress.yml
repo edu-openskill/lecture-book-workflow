@@ -4,6 +4,7 @@ metadata:
   name: frontend-ingress
   namespace: metacoding
 spec:
+  ingressClassName: nginx
   rules:
     - http:
         paths:

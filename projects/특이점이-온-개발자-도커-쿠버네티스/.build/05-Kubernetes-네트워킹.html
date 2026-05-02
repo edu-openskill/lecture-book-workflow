@@ -247,7 +247,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <p>잠시 후 다시 생성된 주소로 브라우저에 접속했습니다. 결과는 예상대로였습니다. Pod가 새로 바뀌었음에도 Nginx 페이지가 표시되었습니다. Service가 고정된 진입점 역할을 충실히 수행하고 있음을 확인했습니다.</p>
 <p class="thought">'와, 진짜네. Pod가 새로 만들어지면 IP가 바뀌었을 텐데. Service가 뒤에서 주소를 알아서 연결해주는구나.'</p>
 <h2>5.2 Ingress — 프랜차이즈 공식 앱</h2>
-<h3>5.2.1 왜 Service만으로는 부족한가</h3>
+<h3>5.2.1 Service만으로 부족한 지점</h3>
 <p>Service 덕분에 Pod를 안정적으로 찾아가는 길은 확보했습니다. 오픈이는 뿌듯한 마음으로 동료들에게 자랑했지만, 곧바로 예상치 못한 피드백이 돌아왔습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "오픈아, 근데 접속할 때마다 이 포트 번호를 외워서 입력해야 돼? 주소만 딱 주면 안 돼?"</div>
 <div class="dialogue"><span class="speaker">팀장</span>: "Service만으로는 URL 경로까지는 못 나눠 주지. 도메인으로 들어온 요청을 경로별로 갈라 주는 친구는 따로 있어."</div>

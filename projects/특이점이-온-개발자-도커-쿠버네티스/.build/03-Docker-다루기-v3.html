@@ -254,7 +254,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <p class="thought">'매번 명령어로 환경을 만들어야 했는데, 이제는 Dockerfile만 빌드하면 자동으로 세팅되네. 이게 프로비저닝이구나.'</p>
 <p>이미지를 자동으로 만드는 준비는 끝났습니다. 이제 진짜 프로젝트를 구성할 차례입니다.</p>
 <h2>3.2 NGINX — 요청을 앞에서 받아 나눠주기</h2>
-<h3>3.2.1 왜 서버 앞에 NGINX를 둘까</h3>
+<h3>3.2.1 NGINX를 서버 앞에 두는 이유</h3>
 <p>오픈이는 화이트보드에 프로젝트 구조를 그려보았습니다. 프론트엔드와 백엔드 컨테이너가 각각 독립적으로 돌아가는 것은 좋았지만, 이 내부의 상세한 주소나 포트를 그대로 외부에 노출하는 방식은 보안상 위험해 보였습니다.</p>
 <p class="thought">'내부 인프라가 어떻게 구성되어 있든 사용자는 하나의 입구로만 들어오게 할 수 없을까? 복잡한 내부 구조는 감추면서 요청만 적절히 배분해 줄 단일 창구가 필요해.'</p>
 <p>자료를 찾던 오픈이의 눈에 들어온 해결책은 도커 명령어를 공부할 때 사용했던 NGINX였습니다.</p>
@@ -718,7 +718,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <p>실습을 마친 오픈이는 nginx.conf의 패턴이 늘 같다는 걸 알아챘습니다. <strong>어떤 요청(location)을</strong> <strong>어디로 보낼지(proxy_pass)</strong>, 그리고 <strong>어떤 옵션을 끼울지</strong> 정하는 흐름이 그것입니다.</p>
 <h2>3.3 Redis — 서버 여러 대가 공유하는 세션 저장소</h2>
 <h3>3.3.1 서버 여러 대면 생기는 세션 문제</h3>
-<p>로드밸런싱으로 부하는 나눴지만, 오픈이는 또 다른 장벽에 부딪혔습니다. 로그인을 하고 페이지를 이동했는데 갑자기 인증 실패가 떴습니다.</p>
+<p>NGINX로 부하 문제는 풀었지만, 오픈이는 곧 다른 장벽에 부딪혔습니다. 로그인을 하고 페이지를 이동했는데 갑자기 인증 실패가 떴습니다.</p>
 <p class="thought">'로그인을 했는데 왜 인증 실패가 뜨지?'</p>
 <p>원인은 로그인 기록이 처음 접속한 서버의 메모리에만 들어 있었기 때문입니다. 서버는 사용자가 로그인하면 그 정보를 자기 메모리에 임시로 저장하는데, 이런 기록을 <strong>세션(Session)</strong> 이라고 부릅니다.</p>
 <div class="term-box">
@@ -748,7 +748,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 </svg>
 </div>
 <p><em>그림 3-22. 세션 불일치 — 1번 서버에 저장된 세션이 2번 서버엔 없어 인증 실패</em></p>
-<h3>3.3.2 Redis는 서버들이 공유하는 칠판</h3>
+<h3>3.3.2 Redis — 서버들의 공유 칠판</h3>
 <p>오픈이가 찾은 답은 간단했습니다. 세션을 각 서버의 메모리가 아니라 모든 서버가 같이 들여다볼 수 있는 외부 저장소에 두는 것입니다.</p>
 <p>이는 개인 노트와 칠판의 차이와 같습니다. 개인 노트에 적은 내용은 본인만 볼 수 있지만, 칠판에 적은 내용은 누구나 볼 수 있습니다. 이 칠판 역할을 하는 대표적인 도구가 바로 <strong>Redis</strong> 입니다.</p>
 <div class="term-box">
@@ -830,7 +830,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 <div class="chapter-image"><img src="..\assets\CH03\chap02-41.png" alt="" /><div class="caption">그림 3-26. api2에서 같은 데이터 조회</div></div>
 <p>결과는 성공적이었습니다. api1에서 저장한 데이터가 api2에서도 그대로 나왔습니다.</p>
 <p>각 서버가 따로 상태를 들고 있을 때 생긴 문제가, 외부 저장소 하나로 한꺼번에 풀린 셈입니다.</p>
-<h2>3.4 MySQL — 영구 데이터는 DB 서버에</h2>
+<h2>3.4 MySQL — 영구 데이터의 자리</h2>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex05</p>
@@ -964,7 +964,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p class="thought">'프론트엔드, 백엔드, DB까지... 이 많은 컨테이너를 한 번에 관리할 수 있는 방법은 없을까?'</p>
 <p>오픈이는 흩어져 있는 컨테이너들을 하나로 묶어 관리할 수 있는 도구를 찾아보기 시작했습니다.</p>
 <h2>3.5 Docker Compose — 여러 컨테이너를 한 번에</h2>
-<h3>3.5.1 docker run을 매번 치는 게 지친다</h3>
+<h3>3.5.1 docker run 반복의 한계</h3>
 <p>실습을 하던 오픈이는 불만이 생겼습니다. 수동 설치가 피곤해서 Dockerfile을 배웠는데, 이제는 그 Dockerfile로 만든 이미지를 일일이 실행하느라 또 다른 수동 작업에 갇힌 기분이었습니다.</p>
 <p class="thought">'몇 개 안되는 Dockerfile을 하나씩 실행하는 것도 힘든데 실무에서는 이걸 어떻게 하나씩 하지?'</p>
 <div class="svg-figure">
@@ -1151,15 +1151,31 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </svg>
 </div>
 <p><em>그림 3-35. 세 컨테이너로 구성되는 웹 애플리케이션 아키텍처</em></p>
-<p>오픈이는 먼저 세 컨테이너가 어떻게 맞물려 도는지 살폈습니다. 요청 한 번이 들어오면 다음 순서로 움직입니다.</p>
-<ol>
-<li><strong>브라우저</strong>: localhost:80으로 접속해 화면(HTML)을 요청합니다.</li>
-<li><strong>NGINX</strong>: 화면을 응답하고, 내부 JS가 보낸 /api/users 요청을 backend로 전달합니다.</li>
-<li><strong>Spring</strong>: db:3306 주소로 MySQL에 접속해 회원 데이터를 조회합니다.</li>
-<li>응답이 Spring → NGINX → 브라우저로 돌아가 화면에 표시됩니다.</li>
-</ol>
+<p>오픈이는 먼저 세 컨테이너가 어떻게 맞물려 도는지 살폈습니다. 각자의 역할은 다음과 같습니다.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">컨테이너</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>NGINX (frontend)</strong></td>
+<td>화면(index.html) 응답 + <code>/api/</code> 요청을 backend 컨테이너로 프록시</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>Spring (backend)</strong></td>
+<td><code>/api/users</code> 요청을 받아 MySQL에서 사용자를 꺼내 JSON 반환</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>MySQL (db)</strong></td>
+<td>회원 데이터 보관 (3.4와 동일 구성)</td>
+</tr>
+</tbody>
+</table>
 <p class="thought">'하나씩 떼어서 연습했던 것들을 이제 하나의 서비스로 합쳐보는 과정이네.'</p>
-<p>오픈이는 ex07 폴더의 파일을 살폈습니다. 백엔드, DB, 프론트엔드가 각자 폴더에 담겨 있고, 이를 docker-compose.yml이 감쌌습니다.</p>
+<p>오픈이는 ex07 폴더의 파일을 살폈습니다. 백엔드, DB, 프론트엔드가 각자 폴더에 담겨 있고, docker-compose.yml로 이 셋을 한 번에 띄우는 구성입니다.</p>
 <div class="code-block highlight" data-lang="text">ex07/
 ├── backend/             # Spring Boot 백엔드
 │   ├── Dockerfile       # JDK 이미지 + entrypoint.sh 복사
@@ -1174,12 +1190,31 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 ├── docker-compose.yml   # 세 서비스 + 네트워크 정의
 └── README.md            # 실습 안내</div>
 <h3>3.6.2 Backend: 시작 시 소스 내려받아 빌드</h3>
-<p>백엔드 설정을 보던 오픈이의 눈에 특이한 부분이 들어왔습니다. 소스 코드를 미리 빌드해 넣어두지 않고, 컨테이너가 뜨는 순간 깃허브에서 코드를 가져와 그 자리에서 빌드하도록 짜여 있었습니다. 이 초기 작업이 <code>entrypoint.sh</code>에 담겨 있습니다.</p>
+<p>backend 폴더를 열어 보던 오픈이의 눈에 특이한 부분이 들어왔습니다. Spring Boot 서버인데도 소스 코드가 폴더에 없었습니다. 대신 Dockerfile 옆에 <code>entrypoint.sh</code>라는 셸 스크립트가 한 장 들어 있었습니다.</p>
+<p>이 스크립트는 컨테이너가 뜨는 순간 깃허브에서 소스를 받아와 그 자리에서 빌드하고 실행하도록 짜여 있었습니다. 한 번 적어두면 누가 어디서 컨테이너를 띄워도 같은 백엔드가 자동으로 올라옵니다.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">파일</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>Dockerfile</strong></td>
+<td>JDK 21 이미지 + git 설치 + entrypoint.sh 실행 지정</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>entrypoint.sh</strong></td>
+<td>컨테이너 시작 시 깃허브에서 소스 받기 + Gradle 빌드 + JAR 실행</td>
+</tr>
+</tbody>
+</table>
 <div class="prep-note">
 <p><strong>Dockerfile vs entrypoint.sh</strong></p>
 <ul>
-<li><strong>Dockerfile</strong> : 이미지 <strong>빌드</strong> 단계. 한 번만 실행되며, 이미지 안에 어떤 파일·도구를 넣을지 정의합니다.</li>
-<li><strong>entrypoint.sh</strong> : 컨테이너 <strong>시작</strong> 단계. 컨테이너가 뜰 때마다 실행되며, 소스 다운로드·빌드·서버 기동처럼 켜지자마자 해야 할 일을 적어둡니다.</li>
+<li><strong>Dockerfile</strong>은 이미지 <strong>빌드</strong> 단계입니다. 컴퓨터를 조립해 셋업하듯, 한 번만 실행되며 이미지 안에 어떤 파일·도구를 넣을지 정의합니다.</li>
+<li><strong>entrypoint.sh</strong>는 컨테이너 <strong>시작</strong> 단계입니다. 컴퓨터를 켤 때마다 자동 실행되는 시작 프로그램처럼, 컨테이너가 뜰 때마다 실행되며 소스 다운로드·빌드·서버 기동처럼 켜지자마자 해야 할 일을 적어둡니다.</li>
 </ul>
 </div>
 <p><strong>ex07/backend/entrypoint.sh</strong></p>
@@ -1196,21 +1231,48 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 <span class="k">COPY</span><span class="w"> </span>entrypoint.sh<span class="w"> </span>/entrypoint.sh<span class="w">                 </span>#<span class="w"> </span>위의<span class="w"> </span>스크립트<span class="w"> </span>복사
 <span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git<span class="w">      </span>#<span class="w"> </span>git<span class="w"> </span>clone에<span class="w"> </span>필요한<span class="w"> </span>git<span class="w"> </span>설치
 <span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/entrypoint.sh&quot;</span><span class="p">]</span><span class="w">                     </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span>스크립트<span class="w"> </span>실행</div>
-<p>빌드되어 실행되는 백엔드 서버 안에는 <code>/api/users</code>로 요청이 오면 DB에서 사용자 목록을 조회해 JSON으로 돌려주는 컨트롤러가 들어 있습니다.</p>
-<p><strong>UserController.java</strong> (참고)</p>
-<div class="code-block highlight" data-lang="java"><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/api/users&quot;</span><span class="p">)</span><span class="w">                         </span><span class="c1">// /api/users 요청 처리</span>
-<span class="kd">public</span><span class="w"> </span><span class="n">ResponseEntity</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="nf">findAll</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">List</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">userRepository</span><span class="p">.</span><span class="na">findAll</span><span class="p">();</span><span class="w">   </span><span class="c1">// DB에서 회원 목록 조회</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Resp</span><span class="p">.</span><span class="na">ok</span><span class="p">(</span><span class="n">users</span><span class="p">);</span><span class="w">                         </span><span class="c1">// JSON 응답 반환</span>
-<span class="p">}</span></div>
-<p>이 컨트롤러가 데이터를 가져오는 DB는 3.4에서 만든 MySQL 컨테이너와 같은 구성을 그대로 사용합니다(같은 이미지·init.sql). 그래서 이번 종합 실습에서는 DB 부분을 따로 다시 다루지 않습니다.</p>
-<div class="tip">
-<p><strong>실제 운영 환경과의 차이</strong></p>
-<p>운영 환경에서는 이미지를 빌드하는 시점에 JAR 파일을 미리 포함시키는 것이 일반적입니다. 여기서는 별도의 로컬 빌드 환경 없이도 누구나 바로 실습할 수 있도록 실행 시점에 빌드하는 방식을 썼습니다.</p>
-</div>
+<p>빌드되어 실행되는 백엔드 서버 자체는 단순합니다. <code>/api/users</code> 요청이 오면 DB에서 회원 목록을 꺼내 JSON으로 돌려주는 컨트롤러 한 개입니다.</p>
 <p class="thought">'이미지에 소스 가져오는 로직을 넣으니, 환경에 상관없이 코드만 있으면 바로 실행해 볼 수 있겠구나.'</p>
-<h3>3.6.3 Frontend: 정적 페이지 + API 프록시</h3>
-<p>오픈이는 이어서 프론트엔드 NGINX 설정을 살폈습니다. <code>/</code>로 들어오는 요청에는 정적 페이지(index.html)를 응답하고, <code>/api/</code>로 들어오는 요청은 백엔드 컨테이너로 넘기는 구조입니다.</p>
+<h3>3.6.3 DB: 3.4와 동일한 MySQL 컨테이너</h3>
+<p>DB 컨테이너는 3.4에서 만든 MySQL 구성을 그대로 사용합니다. 이미지와 init.sql 모두 동일합니다.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">파일</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>Dockerfile</strong></td>
+<td>MySQL 이미지 + 환경 변수(계정·비밀번호·DB명) + init.sql 복사</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>init.sql</strong></td>
+<td>컨테이너 첫 기동 시 자동 실행되어 user_tb 테이블과 초기 데이터 생성</td>
+</tr>
+</tbody>
+</table>
+<h3>3.6.4 Frontend: 정적 페이지 + API 프록시</h3>
+<p>오픈이는 이어서 프론트엔드를 살폈습니다. frontend 폴더의 두 파일은 다음 역할을 합니다.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">파일</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>index.html</strong></td>
+<td>jQuery로 <code>/api/users</code>를 호출해 받은 사용자 목록을 화면에 그림</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>nginx.conf</strong></td>
+<td>정적 페이지(<code>/</code>)는 index.html로, API 요청(<code>/api/</code>)은 backend 컨테이너로 라우팅</td>
+</tr>
+</tbody>
+</table>
 <p><strong>ex07/frontend/nginx.conf</strong></p>
 <div class="code-block highlight" data-lang="nginx"><span class="k">events</span><span class="w"> </span><span class="p">{}</span>
 
@@ -1233,7 +1295,7 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <p>핵심은 백엔드 주소를 IP가 아니라 <code>backend:8080</code>처럼 서비스 이름으로 부른다는 점입니다. Compose가 자동으로 만든 네트워크에서 서비스 이름이 그대로 호스트명으로 통합니다.</p>
-<h3>3.6.4 docker-compose.yml</h3>
+<h3>3.6.5 docker-compose.yml</h3>
 <p>오픈이는 마지막으로 모든 서비스를 연결하는 설정 파일을 작성했습니다.</p>
 <p><strong>ex07/docker-compose.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">services</span><span class="p">:</span>
@@ -1242,9 +1304,13 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 <span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./backend</span><span class="w"> </span><span class="c1"># ./backend 폴더의 Dockerfile로 빌드</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"> </span><span class="c1"># 컨테이너에 주입할 환경 변수</span>
 <span class="w">      </span><span class="c1"># DB 접속 URL (호스트명 db = 아래 db 서비스명)</span>
-<span class="w">      </span><span class="nt">SPRING_DATASOURCE_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://db:3306/metadb?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</span>
-<span class="w">      </span><span class="nt">SPRING_DATASOURCE_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root</span><span class="w"> </span><span class="c1"># DB 계정</span>
-<span class="w">      </span><span class="nt">SPRING_DATASOURCE_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">root1234</span><span class="w"> </span><span class="c1"># DB 비밀번호</span>
+<span class="w">      </span><span class="c1"># 책 표기를 위한 줄바꿈 (실제는 한 줄)</span>
+<span class="w">      </span><span class="nt">SPRING_DATASOURCE_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;jdbc:mysql://db:3306/metadb\</span>
+<span class="w">        </span><span class="s">?useSSL=false\</span>
+<span class="w">        </span><span class="s">&amp;serverTimezone=UTC\</span>
+<span class="w">        </span><span class="s">&amp;allowPublicKeyRetrieval=true&quot;</span>
+<span class="w">      </span><span class="nt">SPRING_DATASOURCE_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metacoding</span><span class="w"> </span><span class="c1"># DB 계정</span>
+<span class="w">      </span><span class="nt">SPRING_DATASOURCE_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metacoding1234</span><span class="w"> </span><span class="c1"># DB 비밀번호</span>
 <span class="w">    </span><span class="nt">networks</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ex07-network</span><span class="w"> </span><span class="c1"># 공용 네트워크 연결</span>
 
@@ -1264,8 +1330,7 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 
 <span class="nt">networks</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">ex07-network</span><span class="p">:</span><span class="w"> </span><span class="c1"># backend·db·frontend가 공유하는 네트워크</span></div>
-<h3>3.6.5 한 줄로 전체 띄우기</h3>
-<p>오픈이는 프로젝트가 있는 ex07로 이동한 후 서비스를 실행했습니다.</p>
+<p>그리고 프로젝트가 있는 ex07로 이동한 후 서비스를 실행했습니다.</p>
 <div class="code-block highlight" data-lang="bash"><span class="nb">cd</span><span class="w"> </span>ex07
 docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w">   </span><span class="c1"># 현재 폴더의 docker-compose.yml 기준으로 일괄 실행</span></div>
 <div class="terminal-log">
@@ -1295,9 +1360,10 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
   </div>
 </div>
 <p><em>그림 3-36. docker compose up 한 줄로 세 컨테이너가 동시에 뜨는 모습</em></p>
-<p>백엔드가 소스를 가져와 빌드하는 과정이 있어 첫 실행 시에는 시간이 다소 걸렸습니다. 빌드가 완료된 후 브라우저에서 localhost:80에 접속하자, DB에서 가져온 사용자 목록이 화면에 나타났습니다.</p>
+<p>백엔드가 소스를 가져와 빌드하는 과정이 있어 첫 실행 시에는 시간이 다소 걸렸습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-58.png" alt="" /><div class="caption">그림 3-37. 사용자 목록 조회 성공</div></div>
-<p>오픈이는 화면에 뜬 사용자 목록을 한참 들여다봤습니다. 컨테이너 여러 개가 한 줄짜리 명령으로 맞물려 돌아간다는 사실이, 손에 익은 도구처럼 자연스럽게 와닿았습니다.</p>
+<p>빌드가 완료된 후 브라우저에서 localhost:80에 접속하자, DB에서 가져온 사용자 목록이 화면에 나타났습니다.</p>
+<p>며칠 전만 해도 프론트엔드·백엔드·DB를 함께 돌릴 방법이 막막해 노트북을 펼치고 부딪치던 오픈이가, 이제는 yml 한 장만 있으면 그 셋을 한 번에 띄울 수 있습니다.</p>
 <h2>이것만은 기억하자</h2>
 <ul>
 <li><strong>Dockerfile</strong>은 환경 구성의 레시피입니다. 한 번 잘 작성해두면 어디서든 동일한 실행 환경을 100% 재현할 수 있습니다.</li>

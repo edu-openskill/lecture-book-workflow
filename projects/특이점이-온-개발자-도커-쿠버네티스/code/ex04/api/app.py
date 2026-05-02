@@ -1,6 +1,5 @@
-from flask import Flask, Response, send_file
+from flask import Flask
 import redis
-import os
 
 app = Flask(__name__)
 
@@ -13,7 +12,7 @@ def save_name():
     r.set("name", "metacoding")
     return "이름이 저장되었습니다."
 
-# 이름 불러오기기
+# 이름 불러오기
 @app.route("/read")
 def read_name():
     value = r.get("name")
