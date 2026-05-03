@@ -723,7 +723,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </div>
 <p><em>그림 5-20. Endpoint Controller가 Pod 변동을 감시해 Pod IP 목록을 갱신합니다</em></p>
 <p>목록만 갱신된다고 요청이 새 Pod로 흘러가지는 않습니다. 가상 주소(ClusterIP)로 들어온 요청을 실제 Pod IP로 보내는 규칙도 같이 갱신되어야 합니다.</p>
-<p>이 일을 맡은 프로그램이 <strong>kube-proxy</strong> 입니다. 클러스터의 모든 노드(서버) 입구에는 들어오고 나가는 짐들을 검사하는 게이트가 있고, kube-proxy는 그 게이트 앞에 &quot;<strong>이 ClusterIP가 적힌 짐은 저 Pod IP로 다시 붙여서 보내라</strong>&quot; 같은 안내문을 붙여 두는 사람입니다. 안내문 묶음이 바로 리눅스 커널이 들고 있는 규칙 목록, <strong>iptables</strong> 입니다. 살아있는 Pod 목록이 바뀌면 안내문에 적힌 Pod IP도 따라서 갱신됩니다.</p>
+<p>이 일을 맡는 게 <strong>kube-proxy</strong> 입니다. 각 노드의 리눅스 커널에는 패킷의 도착지를 변환하는 규칙 목록 <strong>iptables</strong> 가 있고, kube-proxy는 &quot;이 ClusterIP로 향한 요청은 저 Pod IP로 바꿔 보내라&quot;는 항목을 iptables에 등록·갱신합니다. Pod IP 목록이 바뀌면 그에 맞춰 항목 속 Pod IP도 함께 갱신됩니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="패킷은 리눅스 커널이 직접 처리하고, kube-proxy는 옆에서 iptables 규칙만 등록·갱신하는 구조">
   <defs>
@@ -754,16 +754,12 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </svg>
 </div>
 <p><em>그림 5-30. 패킷은 커널이 직접 처리하고, kube-proxy는 옆에서 iptables 항목만 등록·갱신합니다</em></p>
-<div class="prep-note">
-<p><strong>kube-proxy와 iptables</strong></p>
-<p>kube-proxy는 모든 워커 노드에서 동작하며, 리눅스 커널의 네트워크 규칙(iptables)을 관리합니다. 외부에서 들어오는 NodePort 요청이나 내부의 ClusterIP 요청을 가로채서 실제 Pod IP로 연결해 주는 역할을 맡습니다.</p>
-</div>
 <p>첫 번째 의문은 여기서 풀립니다. Pod를 전부 지웠는데도 같은 Service 주소로 새 Pod에 연결된 이유는, Endpoint Controller가 새 Pod를 즉시 Pod IP 목록에 반영했고, kube-proxy가 그 목록을 보고 iptables 항목의 Pod IP를 새 Pod로 교체했기 때문입니다.</p>
 <h4>두 번째 — 이름만 적었는데 진짜 Pod까지 닿는 이유</h4>
 <p>이제 두 번째 의문으로 넘어갑니다. 인그레스 YAML에 <code>order-service</code> 라는 이름만 적었는데 진짜 Pod까지 닿던 일이었습니다.</p>
 <p>인그레스 컨트롤러가 받은 건 <code>order-service</code> 라는 이름이지 IP가 아닙니다. 그런데 kube-proxy가 등록해 둔 iptables 규칙은 ClusterIP로 향한 요청만 가로챕니다. 이름과 ClusterIP 사이를 이어 주는 프로그램이 따로 있어야 합니다.</p>
 <p>그 프로그램이 <strong>DNS</strong> 입니다. 클러스터 안에는 전용 DNS 서버가 떠 있습니다. Service가 만들어지면 그 이름이 DNS에 자동으로 등록되고, 그 이름으로 부르면 DNS가 ClusterIP를 알려 줍니다.</p>
-<p>DNS에 박히는 이름은 사실 <code>order-service</code> 한 단어가 아니라 <code>order-service.default.svc.cluster.local</code> 처럼 네임스페이스와 클러스터 도메인이 붙은 긴 형식입니다. 같은 네임스페이스 안에서는 <code>order-service</code> 한 단어만 적어도 풀어 줍니다. 또한 Pod가 만들어질 때 클러스터 DNS를 가리키는 설정이 안에 자동으로 박혀 있어서, 어떤 Pod든 코드에 이름만 적어도 자연스럽게 클러스터 DNS로 질의가 흘러갑니다.</p>
+<p>Pod가 만들어질 때 클러스터 DNS를 가리키는 설정이 자동으로 주입되므로, 코드에 Service 이름만 적어도 질의가 자연스럽게 클러스터 DNS로 흘러갑니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="클러스터 DNS(CoreDNS)가 Service 이름을 ClusterIP로 변환하는 구조">
   <defs>
@@ -793,10 +789,6 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </svg>
 </div>
 <p><em>그림 5-31. DNS가 Service 이름을 ClusterIP로 변환합니다</em></p>
-<div class="prep-note">
-<p><strong>클러스터 DNS</strong></p>
-<p>쿠버네티스는 클러스터 안에 DNS 서버를 함께 띄워 둡니다. Pod가 다른 Service를 이름으로 부르면 이 DNS가 자동으로 ClusterIP를 알려 줍니다. 별도 설정 없이 기본으로 동작합니다. Docker에서 본 Docker DNS(127.0.0.11)와 같은 역할이고, 쿠버네티스에서는 이 DNS를 <strong>CoreDNS</strong>라 부릅니다.</p>
-</div>
 <p>두 번째 의문도 여기서 풀립니다. 컨트롤러가 <code>order-service</code> 라는 이름으로 백엔드를 부를 때, 먼저 DNS가 이름을 ClusterIP로 바꾸고, 그다음 kube-proxy가 ClusterIP를 살아있는 Pod IP로 바꿉니다. 이름이 Pod까지 닿기까지 두 단계 변환이 일어납니다.</p>
 <p class="thought">'Service 뒤에서 셋이 함께 움직이고 있었구나. Endpoint Controller가 Pod IP 목록을 챙기고, kube-proxy가 길을 깔고, DNS가 이름을 풀고.'</p>
 <h3>5.3.2 요청의 흐름</h3>
