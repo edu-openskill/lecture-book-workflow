@@ -714,15 +714,15 @@ minikube tunnel                         # 별도 터미널에서 실행
 
 오픈이는 브라우저의 요청이 Pod까지 닿는 것을 확인했습니다. 이제 쿠버네티스를 더 이해하기 위해 그 사이에서 일어나는 네트워크 흐름을 들여다보겠습니다.
 
-### 5.3.1 핵심 의문 두 가지
+### 5.3.1 Service의 동작 원리
 
-오픈이는 두 의문을 하나씩 짚어 가며 Service 뒤에서 어떤 프로그램이 무슨 일을 하고 있는지 들여다봤습니다.
+Service 뒷단에서는 세 프로그램이 함께 동작합니다. 차례로 들여다보겠습니다.
 
-#### 첫 번째 — Pod가 바뀌어도 같은 주소로 닿는 이유
+#### Endpoint Controller — Pod IP 목록 유지
 
-먼저 첫 번째 의문부터 살펴봤습니다. Pod를 다 지웠는데도 같은 Service 주소로 새 Pod에 닿던 일이었습니다. Service 주소는 그대로인데 그 뒤의 Pod IP는 분명 바뀌었습니다. "**지금 살아 있는 Pod는 이것들**"이라고 항상 최신으로 유지해 주는 프로그램이 따로 있어야 합니다.
+Pod IP는 재시작될 때마다 바뀝니다. Service 주소가 그대로여도, 뒤에서 누군가가 Pod IP 목록을 항상 최신으로 유지해 줘야 요청이 새 Pod까지 닿습니다.
 
-그 프로그램이 **엔드포인트 컨트롤러(Endpoint Controller)** 입니다. Service의 selector(라벨)에 매칭되는 Pod들을 지켜보다가, Pod가 새로 뜨거나 사라지면 곧바로 해당 Service의 **Pod IP 목록**을 갱신합니다.
+그 역할이 **Endpoint Controller**입니다. Service의 selector(라벨)에 매칭되는 Pod를 감시하고, Pod가 새로 뜨거나 사라지면 해당 Service의 **Pod IP 목록**을 곧바로 갱신합니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Endpoint Controller가 Pod의 변동을 감시해 Service의 Pod IP 목록을 최신으로 유지하는 구조">
@@ -764,6 +764,8 @@ minikube tunnel                         # 별도 터미널에서 실행
 
 목록만 갱신된다고 요청이 새 Pod로 흘러가지는 않습니다. 가상 주소(ClusterIP)로 들어온 요청을 실제 Pod IP로 보내는 규칙도 같이 갱신되어야 합니다.
 
+#### kube-proxy — iptables 규칙 관리
+
 이 일을 맡는 게 **kube-proxy** 입니다. 각 노드의 리눅스 커널에는 패킷의 도착지를 변환하는 규칙 목록 **iptables** 가 있고, kube-proxy는 "이 ClusterIP로 향한 요청은 저 Pod IP로 바꿔 보내라"는 항목을 iptables에 등록·갱신합니다. Pod IP 목록이 바뀌면 그에 맞춰 항목 속 Pod IP도 함께 갱신됩니다.
 
 <div class="svg-figure">
@@ -798,15 +800,13 @@ minikube tunnel                         # 별도 터미널에서 실행
 
 *그림 5-30. 패킷은 커널이 직접 처리하고, kube-proxy는 옆에서 iptables 항목만 등록·갱신합니다*
 
-첫 번째 의문은 여기서 풀립니다. Pod를 전부 지웠는데도 같은 Service 주소로 새 Pod에 연결된 이유는, Endpoint Controller가 새 Pod를 즉시 Pod IP 목록에 반영했고, kube-proxy가 그 목록을 보고 iptables 항목의 Pod IP를 새 Pod로 교체했기 때문입니다.
+두 프로그램이 함께 동작해, Pod가 바뀌어도 같은 Service 주소로 요청이 흘러갑니다. Endpoint Controller가 새 Pod를 즉시 Pod IP 목록에 반영하고, kube-proxy가 그 목록을 보고 iptables 항목의 Pod IP를 새 Pod로 교체합니다.
 
-#### 두 번째 — 이름만 적었는데 진짜 Pod까지 닿는 이유
+#### 클러스터 DNS — 이름을 ClusterIP로 풀이
 
-이제 두 번째 의문으로 넘어갑니다. 인그레스 YAML에 `order-service` 라는 이름만 적었는데 진짜 Pod까지 닿던 일이었습니다.
+kube-proxy가 등록한 iptables 규칙은 ClusterIP로 향한 요청만 가로챕니다. 그런데 Ingress 리소스나 다른 Pod의 코드는 `order-service` 같은 **이름**으로 백엔드를 부릅니다. 이름과 ClusterIP 사이를 이어 주는 프로그램이 따로 있어야 합니다.
 
-인그레스 컨트롤러가 받은 건 `order-service` 라는 이름이지 IP가 아닙니다. 그런데 kube-proxy가 등록해 둔 iptables 규칙은 ClusterIP로 향한 요청만 가로챕니다. 이름과 ClusterIP 사이를 이어 주는 프로그램이 따로 있어야 합니다.
-
-그 프로그램이 **DNS** 입니다. 클러스터 안에는 전용 DNS 서버가 떠 있습니다. Service가 만들어지면 그 이름이 DNS에 자동으로 등록되고, 그 이름으로 부르면 DNS가 ClusterIP를 알려 줍니다.
+그 역할이 **클러스터 DNS** (정식 명칭 **CoreDNS**)입니다. 클러스터 안에는 전용 DNS 서버가 떠 있고, Service가 만들어지면 그 이름이 DNS에 자동으로 등록됩니다. 이름으로 부르면 DNS가 ClusterIP로 응답합니다.
 
 Pod가 만들어질 때 클러스터 DNS를 가리키는 설정이 자동으로 주입되므로, 코드에 Service 이름만 적어도 질의가 자연스럽게 클러스터 DNS로 흘러갑니다.
 
@@ -841,9 +841,9 @@ Pod가 만들어질 때 클러스터 DNS를 가리키는 설정이 자동으로 
 
 *그림 5-31. DNS가 Service 이름을 ClusterIP로 변환합니다*
 
-두 번째 의문도 여기서 풀립니다. 컨트롤러가 `order-service` 라는 이름으로 백엔드를 부를 때, 먼저 DNS가 이름을 ClusterIP로 바꾸고, 그다음 kube-proxy가 ClusterIP를 살아있는 Pod IP로 바꿉니다. 이름이 Pod까지 닿기까지 두 단계 변환이 일어납니다.
+이름으로 백엔드를 부르면 두 단계 변환이 일어납니다. 먼저 DNS가 이름을 ClusterIP로 바꾸고, 이어서 kube-proxy가 ClusterIP를 Pod IP로 바꿉니다.
 
-*'Service 뒤에서 셋이 함께 움직이고 있었구나. Endpoint Controller가 Pod IP 목록을 챙기고, kube-proxy가 길을 깔고, DNS가 이름을 풀고.'*
+*'Endpoint Controller가 Pod IP 목록을 챙기고, kube-proxy가 길을 깔고, DNS가 이름을 푼다. 셋이 이렇게 함께 동작하는구나.'*
 
 ### 5.3.2 요청의 흐름
 
