@@ -18,7 +18,7 @@
 <body>
 <div class="container">
 <h1>Ch.6 Kubernetes 운영하기</h1>
-<p>챕터 4에서 Pod와 Deployment로 같은 서버 네 대를 띄워 봤고, 챕터 5에서는 그 앞에 Service와 Ingress를 두어 IP가 흔들려도 안 흔들리는 진입점을 만들었습니다. 며칠 동안 만들고 지운 Pod와 Service만 한 화면 가득 쌓였습니다. 이제 챕터 3에서 docker-compose로 짰던 통합 프로젝트를 K8s 위로 옮깁니다.</p>
+<p>챕터 4에서 Pod와 Deployment로 같은 서버 네 대를 띄워 봤고, 챕터 5에서는 그 앞에 Service와 Ingress를 두어 IP가 흔들려도 안 흔들리는 진입점을 만들었습니다. 며칠 동안 만들고 지운 Pod와 Service만 한 화면 가득 쌓였습니다. 이제 챕터 3에서 docker-compose로 짰던 통합 프로젝트를 쿠버네티스 위로 옮깁니다.</p>
 <p>오픈이는 새 Deployment YAML을 열었습니다. 백엔드 컨테이너가 DB에 붙으려면 비밀번호가 필요한데, 막상 그 자리에서 커서가 멈췄습니다. 챕터 3에서는 <code>docker-compose.yml</code>에 환경 변수로 그냥 적어 뒀습니다. 로컬에서 돌리던 거라 그래도 됐는데, 운영 환경 YAML에 비밀번호를 박으면 Git 저장소에 그대로 남을 게 분명했습니다. DB 주소처럼 환경마다 달라지는 값도 마찬가지였습니다. 이미지에 박으면 환경이 바뀔 때마다 이미지를 다시 빌드해야 했습니다. 그리고 DB 컨테이너가 재시작되면 데이터가 날아가는 문제도 아직 풀리지 않은 채였습니다.</p>
 <h2>6.1 ConfigMap·Secret — 설정과 비밀번호를 이미지 바깥으로</h2>
 <h3>6.1.1 이미지와 설정의 분리</h3>
@@ -32,11 +32,12 @@
 </ul>
 <div class="chapter-image"><img src="..\assets\CH05\k8s-step4a.png" alt="" /><div class="caption">그림 6-1. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</div></div>
 <h3>6.1.2 ConfigMap</h3>
-<p>오픈이는 먼저 일반 설정을 관리하는 ConfigMap을 생성했습니다.</p>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex13</p>
 </div>
+<p>오픈이는 먼저 일반 설정을 관리하는 ConfigMap을 생성했습니다.</p>
+<p>오픈이는 ex13 폴더를 열어 키-값 두 개를 담은 ConfigMap YAML을 확인했습니다.</p>
 <p><strong>ex13/configmap-conn.yml</strong></p>
 <div class="code-block highlight" data-lang="yaml"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
@@ -267,19 +268,20 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 </table>
 <p>쿠버네티스에서 데이터 보존을 위해 가장 보편적으로 사용하는 방식은 <strong>PV(PersistentVolume)</strong> 와 <strong>PVC(PersistentVolumeClaim)</strong> 입니다.</p>
 <h3>6.2.2 PV와 PVC</h3>
+<div class="tip">
+<p>전체 실습 코드는 깃헙을 참고합니다.</p>
+<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex14</p>
+</div>
 <p class="thought">'Volume이 저장 공간이라는 건 알겠는데, PV랑 PVC는 왜 두 개로 나눠져 있지?'</p>
 <p>Pod가 직접 저장 공간을 관리하면 인프라 세부 사항까지 알아야 합니다. Kubernetes는 그래서 저장 공간을 <strong>실제 저장 공간</strong> 과 <strong>사용을 위해 작성하는 신청서</strong> 로 분리해 두었습니다. 한 장 그림으로 보면 관계가 분명해집니다.</p>
 <div class="chapter-image"><img src="..\assets\CH05\k8s-step4b.png" alt="" /><div class="caption">그림 6-7. PV는 실제 저장 공간, PVC는 그 공간을 요청하는 신청서</div></div>
 <ul>
 <li><strong>PV(PersistentVolume)</strong>: 실제 저장 공간, 즉 <strong>창고</strong>입니다. 용량, 권한, 위치 같은 창고의 사양이 정의됩니다.</li>
-<li><strong>PVC(PersistentVolumeClaim)</strong>: 창고를 쓰겠다고 작성하는 <strong>신청서</strong>입니다. &quot;10Gi짜리 읽기·쓰기 가능한 창고가 필요하다&quot;고 적어 두면, Kubernetes가 조건에 맞는 PV를 찾아 자동으로 PVC와 연결합니다.</li>
+<li><strong>PVC(PersistentVolumeClaim)</strong>: 창고를 쓰겠다고 작성하는 <strong>신청서</strong>입니다. &quot;<strong>10Gi짜리 읽기·쓰기 가능한 창고가 필요하다</strong>&quot;고 적어 두면, Kubernetes가 조건에 맞는 PV를 찾아 자동으로 PVC와 연결합니다.</li>
 </ul>
-<p>Pod는 PV를 직접 건드리지 않고 PVC만 붙여 사용합니다. 실제 창고 위치는 PVC가 알아서 연결해 주기 때문에, Pod 입장에서는 &quot;용량이 맞는 저장 공간 하나&quot;가 붙어 있습니다.</p>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex14</p>
-</div>
+<p>Pod는 PV를 직접 건드리지 않고 PVC만 붙여 사용합니다. 실제 창고 위치는 PVC가 알아서 연결해 주기 때문에, Pod 입장에서는 &quot;<strong>용량이 맞는 저장 공간 하나</strong>&quot;가 붙어 있습니다.</p>
 <h4>PV 만들기</h4>
+<p>오픈이는 ex14 폴더에서 PV YAML부터 펼쳤습니다.</p>
 <div class="code-block highlight" data-lang="yaml"><span class="c1"># ex14/volume-pv.yml</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PersistentVolume</span>
@@ -309,7 +311,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <span class="w">    </span><span class="nt">requests</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1Gi</span>
 <span class="w">  </span><span class="nt">volumeName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">volume-pv</span><span class="w">                </span><span class="c1"># 바인딩할 PV 이름을 수동 지정</span></div>
-<p><code>volumeName</code>은 &quot;이 PVC를 특정 PV에 수동으로 붙이라&quot;는 지정입니다. 위 PV의 <code>metadata.name</code>과 같은 값을 적어 정적 바인딩을 보장합니다.</p>
+<p><code>volumeName</code>은 &quot;<strong>이 PVC를 특정 PV에 수동으로 붙이라</strong>&quot;는 지정입니다. 위 PV의 <code>metadata.name</code>과 같은 값을 적어 정적 바인딩을 보장합니다.</p>
 <div class="prep-note">
 <p><strong>PVC와 PV가 연결 되는 조건</strong></p>
 <p>PVC와 PV가 서로 연결 되려면 세 가지가 맞아야 합니다. 첫째, <strong>읽기·쓰기 방식</strong>(accessModes)이 호환되어야 합니다. 둘째, <strong>저장소 종류 이름</strong>(storageClassName)이 같아야 합니다. 셋째, 신청한 <strong>용량이 창고 용량보다 작거나 같아야</strong> 합니다. 하나라도 어긋나면 PVC는 짝을 못 찾고 <strong>Pending</strong> 상태에 머무릅니다.</p>
@@ -380,16 +382,16 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <p>새로운 Pod가 생성되었음에도 c.txt 파일이 보존되어 있습니다.</p>
 <p>Pod는 교체되었으나 파일의 실체는 PV에 존재하므로 데이터가 유지됩니다. PVC가 새로운 Pod에게도 동일한 창고를 연결해 준 결과입니다.</p>
 <p class="thought">'Pod가 새로 만들어져도 창고는 그대로다. 이제 데이터를 유실할 걱정이 없겠구나.'</p>
-<h2>6.3 통합 실습 — K8s 위에 웹사이트 올리기</h2>
+<h2>6.3 통합 실습 — 쿠버네티스 위에 웹사이트 올리기</h2>
+<div class="tip">
+<p>전체 실습 코드는 깃헙을 참고합니다.</p>
+<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15</p>
+</div>
 <p>오픈이는 그동안 학습한 쿠버네티스의 기본 리소스들을 하나씩 되짚어 보았습니다. 컨테이너를 관리하는 Pod와 Deployment, 그 앞을 지키는 Service와 Ingress, 그리고 방금 배운 설정과 저장소 리소스들까지. 하지만 각각의 개념을 이해하는 것과, 이들을 하나로 엮어 실제 서비스를 구동하는 것은 전혀 다른 차원의 문제처럼 느껴졌습니다.</p>
 <p class="thought">'지금까지는 조각조각 따로 배워서 띄워 본 건데, 이것들을 한꺼번에 올리면 진짜 설계도처럼 맞물려서 돌아갈까?'</p>
 <p>부분적인 실습은 성공했지만, 전체 시스템이 유기적으로 연결되어 하나의 완성된 웹사이트로 작동하는 모습은 아직 상상하기 어려웠습니다. 확신 없는 표정으로 화면만 응시하던 오픈이의 등 뒤로 팀장의 목소리가 들려왔습니다.</p>
 <div class="dialogue"><span class="speaker">팀장</span>: "부분 실습은 끝났지. 한 번에 연결해 봐야 진짜 실력이 늘어."</div>
 <p>팀장의 말대로 이번 절은 단순한 실습의 연장이 아니었습니다. 그동안 파편화되어 있던 지식들을 하나로 모아, 실제로 살아 움직이는 통합 서비스를 완성하는 '최종 관문'이었습니다.</p>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15</p>
-</div>
 <h3>6.3.1 전체 그림</h3>
 <p>오픈이가 펼쳐 본 구성도에는 서비스 네 개가 들어 있었습니다. 프런트엔드(Nginx), 백엔드(Spring Boot), DB(MySQL), 그리고 방문 횟수를 기록할 Redis. Redis가 더해지면서 실제 운영 환경에 한층 더 가까워진 구조였습니다.</p>
 <div class="svg-figure">
@@ -456,7 +458,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 │   └── nginx.conf                    # /api 경로를 backend-service로 프록시
 ├── redis/                            # Redis 이미지
 │   └── Dockerfile                    # redis 공식 이미지 기반
-├── k8s/                              # K8s 리소스 매니페스트
+├── k8s/                              # 쿠버네티스 리소스 매니페스트
 │   ├── namespace.yml                 # ex15 네임스페이스 정의
 │   ├── backend/
 │   │   ├── backend-configmap.yml     # 비밀이 아닌 설정값
@@ -583,7 +585,7 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <p>서로 다른 Pod 이름이 앞에 붙은 로그 줄이 번갈아 나타난다면 요청이 두 서버에 분산되어 들어간 것입니다.</p>
 <p class="thought">'드디어 다 엮였다. 이름만으로 서로를 찾아가는 통합 시스템이라니.'</p>
 <h2>6.4 문제가 생겼을 때 — 디버깅</h2>
-<p>다 엮였다는 만족이 가시기도 전에, 오픈이의 머리 한쪽엔 다른 그림이 떠올랐습니다. 다음 배포에서 한 곳이라도 어긋나면 화면은 빈 상태로 멈출 텐데, 그땐 어디부터 봐야 할까. 운영 환경에 가까워질수록 &quot;어디서 막혔는지&quot;를 빠르게 좁히는 능력이 더 중요합니다. 오픈이는 자주 쓰는 진단 명령어 네 가지와, 입문자가 가장 자주 만나는 에러 세 가지를 따로 정리해 두기로 했습니다.</p>
+<p>다 엮였다는 만족이 가시기도 전에, 오픈이의 머리 한쪽엔 다른 그림이 떠올랐습니다. 다음 배포에서 한 곳이라도 어긋나면 화면은 빈 상태로 멈출 텐데, 그땐 어디부터 봐야 할까. 운영 환경에 가까워질수록 &quot;<strong>어디서 막혔는지</strong>&quot;를 빠르게 좁히는 능력이 더 중요합니다. 오픈이는 자주 쓰는 진단 명령어 네 가지와, 입문자가 가장 자주 만나는 에러 세 가지를 따로 정리해 두기로 했습니다.</p>
 <h3>6.4.1 기본 진단 명령어</h3>
 <table>
 <thead>
@@ -635,7 +637,7 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 </tr>
 <tr>
 <td style="text-align:center"><code>CrashLoopBackOff</code></td>
-<td style="text-align:left">컨테이너가 떴다가 즉시 죽고, K8s가 재시도를 반복 중</td>
+<td style="text-align:left">컨테이너가 떴다가 즉시 죽고, 쿠버네티스가 재시도를 반복 중</td>
 <td style="text-align:left">환경 변수 누락, DB 연결 실패, 잘못된 진입점</td>
 </tr>
 <tr>
@@ -650,7 +652,7 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <p>문제가 생기면 명령어를 무작정 치기보다 순서를 따라가면 빠릅니다. 오픈이는 네 단계를 노트에 적어 뒀습니다.</p>
 <ol>
 <li><strong><code>kubectl get pod -n &lt;ns&gt;</code></strong> — Pod 상태 한 번에 확인. STATUS 칸으로 어디서 막혔는지 추리합니다.</li>
-<li><strong><code>kubectl describe pod &lt;name&gt; -n &lt;ns&gt;</code></strong> — 상세 + 최근 이벤트. &quot;왜 그 상태인지&quot;가 이벤트 줄에 적혀 있습니다.</li>
+<li><strong><code>kubectl describe pod &lt;name&gt; -n &lt;ns&gt;</code></strong> — 상세 + 최근 이벤트. &quot;<strong>왜 그 상태인지</strong>&quot;가 이벤트 줄에 적혀 있습니다.</li>
 <li><strong><code>kubectl logs &lt;name&gt; -n &lt;ns&gt;</code></strong> — 컨테이너가 한 번이라도 떴다면 로그를 봅니다. 환경 변수 누락이나 DB 연결 실패가 보통 여기서 드러납니다.</li>
 <li><strong><code>kubectl get endpoints -n &lt;ns&gt;</code></strong> — Service에 Pod가 연결됐는지 확인. 이 목록이 비어 있으면 Service의 selector가 Pod의 label과 안 맞는 겁니다.</li>
 </ol>
@@ -673,7 +675,7 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <li><strong>NetworkPolicy</strong>: Pod 간 통신 제한</li>
 <li><strong>Helm</strong>: 패키지 관리</li>
 </ul>
-<p>처음부터 모든 걸 알고 시작할 수는 없습니다. 오픈이가 그랬듯, 문제를 만나면서 하나씩 알아 가는 과정입니다. 챕터 1에서 선배가 던졌던 <strong>&quot;환경이 달라서 그래. Docker 한번 알아봐.&quot;</strong> 한 마디가 여기까지 온 출발점이었습니다. 그 한 마디에서 시작해 컨테이너를 띄우고, 서비스를 엮고, 선언 한 줄로 운영 환경을 만드는 자리까지 온 셈입니다.</p>
+<p>처음부터 모든 걸 알고 시작할 수는 없습니다. 오픈이가 그랬듯, 문제를 만나면서 하나씩 알아 가는 과정입니다. 챕터 1에서 선배가 던졌던 &quot;<strong>환경이 달라서 그래. Docker 한번 알아봐.</strong>&quot; 한 마디가 여기까지 온 출발점이었습니다. 그 한 마디에서 시작해 컨테이너를 띄우고, 서비스를 엮고, 선언 한 줄로 운영 환경을 만드는 자리까지 왔습니다.</p>
 
 </div>
 </body>
