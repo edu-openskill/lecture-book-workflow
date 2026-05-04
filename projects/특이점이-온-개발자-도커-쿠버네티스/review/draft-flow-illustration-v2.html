@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>5.3.2 본사 + 가맹점 큰 그림 시안 v2 (콜센터 매핑)</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 1200px; margin: 40px auto; padding: 20px; color: #1f2937; }
+    h1 { color: #1f2937; border-bottom: 2px solid #ff7849; padding-bottom: 8px; }
+    h2 { color: #475569; font-size: 16px; margin-top: 28px; }
+    .svg-figure { margin: 16px 0; padding: 18px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .svg-figure svg { display: block; width: 100%; height: auto; max-width: 100%; }
+    .caption { text-align: center; font-style: italic; color: #475569; margin-top: 10px; font-size: 14px; }
+    .info { background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px 16px; margin: 16px 0; line-height: 1.6; }
+    .check { background: #fefce8; border-left: 4px solid #eab308; padding: 12px 16px; margin: 16px 0; line-height: 1.7; }
+    .diff { background: #fef2f2; border-left: 4px solid #dc2626; padding: 12px 16px; margin: 16px 0; line-height: 1.6; font-size: 14px; }
+    table { border-collapse: collapse; margin: 12px 0; width: 100%; font-size: 13px; }
+    th, td { padding: 7px 12px; border: 1px solid #cbd5e1; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; }
+    del { color: #b91c1c; }
+    ins { color: #047857; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>5.3.2 본사 + 가맹점 큰 그림 시안 v2 (콜센터 매핑)</h1>
+
+  <div class="diff">
+    <strong>v1 → v2 변경 사항</strong><br>
+    Ingress Controller 비유: <del>본사 안내데스크</del> → <ins>본사 콜센터</ins><br>
+    이유: CH04에서 "본사 안내데스크 = Kube API Server"가 이미 자리잡고 있어 충돌.
+    "Service = 가맹점 직통 전화번호"(5.1.1)와의 통화 결을 잇기 위해 콜센터로 변경.
+  </div>
+
+  <div class="info">
+    호텔 단어 폐기. 본사·가맹점 비유 안에서 풀이. <strong>본사 빌딩 단면도(가운데) + 외부 가맹점들(오른쪽)</strong>이 한 도화지에. 본사 안에 정문·안내직원·콜센터·가맹점 명부·본사 인사팀이 모두 자리. 외부 손님은 본사를 거쳐 가맹점에 닿음.
+  </div>
+
+  <h2>매핑 표</h2>
+  <table>
+    <thead><tr><th>K8s</th><th>비유 (본사·가맹점)</th></tr></thead>
+    <tbody>
+      <tr><td>NodePort</td><td>본사 정문</td></tr>
+      <tr><td>kube-proxy(1차)</td><td>본사 안내직원</td></tr>
+      <tr><td>Ingress Controller</td><td><strong>본사 콜센터</strong> ← 변경</td></tr>
+      <tr><td>클러스터 DNS</td><td>가맹점 명부</td></tr>
+      <tr><td>Service</td><td>가맹점 대표 번호</td></tr>
+      <tr><td>kube-proxy(2차)</td><td>가맹점 직원 배정</td></tr>
+      <tr><td>Pod</td><td>가맹점</td></tr>
+      <tr><td>Endpoint Controller</td><td>본사 인사팀</td></tr>
+    </tbody>
+  </table>
+
+  <h2>큰 그림 시안 v2</h2>
+
+  <div class="svg-figure">
+    <svg viewBox="0 0 1200 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="외부 손님이 본사 정문으로 들어와 본사 안내직원·콜센터를 거쳐 가맹점 명부에서 풀린 외부 가맹점에 도달. 본사 인사팀은 백그라운드에서 가맹점 명부 갱신.">
+      <defs>
+        <marker id="all-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+        <marker id="all-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+      </defs>
+      <text x="600" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">본사 (Cluster) — 외부 손님이 가맹점에 닿기까지</text>
+
+      <!-- 외부 손님 -->
+      <circle cx="55" cy="220" r="22" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+      <path d="M 25 250 Q 25 285 55 285 Q 85 285 85 250 L 85 340 L 25 340 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+      <text x="55" y="370" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 손님</text>
+      <text x="55" y="388" text-anchor="middle" font-size="10" fill="#6b7280">브라우저</text>
+
+      <line x1="105" y1="290" x2="155" y2="290" stroke="#ff7849" stroke-width="2.6" marker-end="url(#all-a)"/>
+
+      <!-- 본사 빌딩 지붕 -->
+      <path d="M 165 130 L 825 130 L 790 95 L 200 95 Z" fill="#7b341e" stroke="#475569" stroke-width="1.6"/>
+      <rect x="430" y="100" width="200" height="22" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+      <text x="530" y="116" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">⬤ 본사 (Cluster) ⬤</text>
+
+      <!-- 본사 외벽 -->
+      <rect x="170" y="130" width="660" height="430" fill="#fff" stroke="#475569" stroke-width="2.4"/>
+
+      <!-- 본사 정문 (회전문) -->
+      <rect x="160" y="240" width="22" height="100" fill="#fff4ed" stroke="#7b341e" stroke-width="1.8"/>
+      <circle cx="171" cy="290" r="22" fill="none" stroke="#7b341e" stroke-width="1.4" stroke-dasharray="3,2"/>
+      <line x1="171" y1="268" x2="171" y2="312" stroke="#7b341e" stroke-width="1.2"/>
+      <line x1="149" y1="290" x2="193" y2="290" stroke="#7b341e" stroke-width="1.2"/>
+      <text x="171" y="365" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">본사 정문</text>
+      <text x="171" y="380" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">NodePort</text>
+
+      <line x1="195" y1="290" x2="245" y2="290" stroke="#ff7849" stroke-width="2.4" marker-end="url(#all-a)"/>
+
+      <!-- 본사 안내직원 -->
+      <circle cx="285" cy="252" r="14" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <path d="M 263 272 Q 263 300 285 300 Q 307 300 307 272 L 307 318 L 263 318 Z" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <rect x="312" y="248" width="38" height="20" rx="2" fill="#fff4ed" stroke="#7b341e" stroke-width="1.2"/>
+      <text x="331" y="261" text-anchor="middle" font-size="8" font-weight="700" fill="#7b341e">안내</text>
+      <line x1="312" y1="248" x2="312" y2="282" stroke="#7b341e" stroke-width="1"/>
+      <text x="285" y="345" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">본사 안내직원</text>
+      <text x="285" y="360" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">kube-proxy (1차)</text>
+
+      <line x1="362" y1="290" x2="425" y2="290" stroke="#ff7849" stroke-width="2.4" marker-end="url(#all-a)"/>
+
+      <!-- 본사 콜센터 (헤드셋 직원 + 통화 부스 + 전화기들) -->
+      <!-- 콜센터 사인 보드 -->
+      <rect x="450" y="178" width="170" height="22" rx="2" fill="#7b341e"/>
+      <text x="535" y="194" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">☎ 본사 콜센터 ☎</text>
+
+      <!-- 통화 부스 외곽 -->
+      <rect x="450" y="208" width="170" height="160" rx="4" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
+
+      <!-- 헤드셋 낀 상담원 -->
+      <!-- 머리 -->
+      <circle cx="500" cy="248" r="14" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <!-- 헤드셋 (귀 위 호) -->
+      <path d="M 486 248 Q 486 232 500 232 Q 514 232 514 248" fill="none" stroke="#1565c0" stroke-width="2.4"/>
+      <!-- 헤드셋 귀 패드 좌·우 -->
+      <ellipse cx="486" cy="250" rx="3" ry="5" fill="#1565c0"/>
+      <ellipse cx="514" cy="250" rx="3" ry="5" fill="#1565c0"/>
+      <!-- 마이크 라인 -->
+      <path d="M 514 252 Q 520 258 518 264" fill="none" stroke="#1565c0" stroke-width="1.6"/>
+      <circle cx="518" cy="266" r="2" fill="#1565c0"/>
+      <!-- 몸 -->
+      <path d="M 478 268 Q 478 294 500 294 Q 522 294 522 268 L 522 320 L 478 320 Z" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+
+      <!-- 데스크 (전화기 받침) -->
+      <rect x="460" y="320" width="150" height="40" rx="3" fill="#fff4ed" stroke="#7b341e" stroke-width="1.4"/>
+      <line x1="460" y1="334" x2="610" y2="334" stroke="#7b341e" stroke-width="0.8"/>
+
+      <!-- 전화기 1 -->
+      <rect x="540" y="312" width="22" height="14" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1.2"/>
+      <path d="M 543 314 Q 543 309 550 309 Q 557 309 557 314" fill="none" stroke="#7b341e" stroke-width="1.4"/>
+      <circle cx="546" cy="318" r="0.8" fill="#7b341e"/>
+      <circle cx="551" cy="318" r="0.8" fill="#7b341e"/>
+      <circle cx="556" cy="318" r="0.8" fill="#7b341e"/>
+
+      <!-- 전화기 2 -->
+      <rect x="572" y="312" width="22" height="14" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1.2"/>
+      <path d="M 575 314 Q 575 309 582 309 Q 589 309 589 314" fill="none" stroke="#7b341e" stroke-width="1.4"/>
+      <circle cx="578" cy="318" r="0.8" fill="#7b341e"/>
+      <circle cx="583" cy="318" r="0.8" fill="#7b341e"/>
+      <circle cx="588" cy="318" r="0.8" fill="#7b341e"/>
+
+      <!-- 모니터 (살짝) -->
+      <rect x="463" y="304" width="48" height="20" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1.2"/>
+      <line x1="463" y1="320" x2="511" y2="320" stroke="#7b341e" stroke-width="0.6"/>
+      <text x="487" y="316" text-anchor="middle" font-size="6" font-weight="600" fill="#1565c0">URL</text>
+
+      <!-- 콜센터 라벨 -->
+      <text x="535" y="395" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">본사 콜센터</text>
+      <text x="535" y="410" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">Ingress Controller</text>
+
+      <!-- 콜센터 ↔ 가맹점 명부 점선 -->
+      <line x1="630" y1="270" x2="690" y2="270" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#all-s)"/>
+      <text x="660" y="260" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">"○○ 가맹점?"</text>
+      <line x1="690" y1="298" x2="630" y2="298" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#all-a)"/>
+      <text x="660" y="312" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">"강남점"</text>
+
+      <!-- 가맹점 명부 (책) -->
+      <rect x="690" y="220" width="120" height="120" rx="4" fill="#fff" stroke="#7b341e" stroke-width="1.6"/>
+      <rect x="690" y="220" width="14" height="120" fill="#7b341e"/>
+      <text x="697" y="282" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" transform="rotate(-90 697 282)">DIRECTORY</text>
+      <line x1="715" y1="240" x2="800" y2="240" stroke="#94a3b8" stroke-width="0.6"/>
+      <text x="720" y="254" font-size="8" font-family="monospace" fill="#0f172a">강남점</text>
+      <text x="797" y="254" text-anchor="end" font-size="8" font-family="monospace" font-weight="700" fill="#1565c0">10.96.0.20</text>
+      <line x1="715" y1="262" x2="800" y2="262" stroke="#cbd5e1" stroke-width="0.4"/>
+      <text x="720" y="276" font-size="8" font-family="monospace" fill="#0f172a">홍대점</text>
+      <text x="797" y="276" text-anchor="end" font-size="8" font-family="monospace" font-weight="700" fill="#1565c0">10.96.0.31</text>
+      <line x1="715" y1="284" x2="800" y2="284" stroke="#cbd5e1" stroke-width="0.4"/>
+      <text x="720" y="298" font-size="8" font-family="monospace" fill="#0f172a">판교점</text>
+      <text x="797" y="298" text-anchor="end" font-size="8" font-family="monospace" font-weight="700" fill="#1565c0">10.96.0.42</text>
+      <text x="753" y="370" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">가맹점 명부</text>
+      <text x="753" y="385" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">DNS</text>
+
+      <!-- 본사 인사팀 (백그라운드) -->
+      <rect x="190" y="450" width="220" height="100" rx="6" fill="#fff" stroke="#7b341e" stroke-width="1.6" stroke-dasharray="5,3"/>
+      <circle cx="225" cy="478" r="10" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+      <path d="M 211 494 Q 211 510 225 510 Q 239 510 239 494 L 239 514 L 211 514 Z" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+      <rect x="240" y="468" width="46" height="14" rx="2" fill="#7b341e"/>
+      <text x="263" y="478" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">인사팀</text>
+      <text x="330" y="488" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">본사 인사팀</text>
+      <text x="330" y="504" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">Endpoint Controller</text>
+      <text x="300" y="538" text-anchor="middle" font-size="9" font-style="italic" fill="#94a3b8">백그라운드 · 가맹점 변동 감시 → 명부 갱신</text>
+
+      <!-- 인사팀 → 명부 갱신 점선 -->
+      <line x1="412" y1="470" x2="687" y2="350" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#all-s)"/>
+      <text x="540" y="430" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">명부 갱신</text>
+
+      <!-- 콜센터 → 외부 가맹점 분기 -->
+      <line x1="620" y1="343" x2="870" y2="285" stroke="#ff7849" stroke-width="2.4" stroke-dasharray="4,3" marker-end="url(#all-a)"/>
+      <line x1="620" y1="343" x2="1025" y2="380" stroke="#ff7849" stroke-width="2.4" stroke-dasharray="4,3" marker-end="url(#all-a)"/>
+      <line x1="620" y1="343" x2="870" y2="455" stroke="#ff7849" stroke-width="2.4" stroke-dasharray="4,3" marker-end="url(#all-a)"/>
+      <text x="900" y="370" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">전화 연결</text>
+
+      <!-- 외부 가맹점 1 (강남점) -->
+      <path d="M 870 220 L 1000 220 L 1000 240 L 985 252 L 970 240 L 955 252 L 940 240 L 925 252 L 910 240 L 895 252 L 880 240 L 870 240 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.4"/>
+      <rect x="903" y="225" width="64" height="14" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
+      <text x="935" y="235" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">강남점</text>
+      <rect x="870" y="252" width="130" height="58" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <text x="935" y="280" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">가맹점</text>
+      <text x="935" y="298" text-anchor="middle" font-size="9" font-family="monospace" fill="#6b7280">Pod</text>
+
+      <!-- 외부 가맹점 2 (홍대점) -->
+      <path d="M 1025 320 L 1155 320 L 1155 340 L 1140 352 L 1125 340 L 1110 352 L 1095 340 L 1080 352 L 1065 340 L 1050 352 L 1035 340 L 1025 340 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.4"/>
+      <rect x="1058" y="325" width="64" height="14" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
+      <text x="1090" y="335" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">홍대점</text>
+      <rect x="1025" y="352" width="130" height="58" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <text x="1090" y="380" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">가맹점</text>
+      <text x="1090" y="398" text-anchor="middle" font-size="9" font-family="monospace" fill="#6b7280">Pod</text>
+
+      <!-- 외부 가맹점 3 (판교점) -->
+      <path d="M 870 420 L 1000 420 L 1000 440 L 985 452 L 970 440 L 955 452 L 940 440 L 925 452 L 910 440 L 895 452 L 880 440 L 870 440 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.4"/>
+      <rect x="903" y="425" width="64" height="14" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
+      <text x="935" y="435" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">판교점</text>
+      <rect x="870" y="452" width="130" height="58" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <text x="935" y="480" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">가맹점</text>
+      <text x="935" y="498" text-anchor="middle" font-size="9" font-family="monospace" fill="#6b7280">Pod</text>
+
+      <!-- 인사팀 → 가맹점 감시 (점선) -->
+      <line x1="412" y1="540" x2="870" y2="490" stroke="#475569" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="640" y="525" text-anchor="middle" font-size="9" font-style="italic" fill="#94a3b8">감시</text>
+
+      <!-- 1층 바닥선 -->
+      <line x1="184" y1="560" x2="828" y2="560" stroke="#475569" stroke-width="1.4"/>
+      <line x1="280" y1="562" x2="280" y2="566" stroke="#94a3b8" stroke-width="0.6"/>
+      <line x1="380" y1="562" x2="380" y2="566" stroke="#94a3b8" stroke-width="0.6"/>
+      <line x1="480" y1="562" x2="480" y2="566" stroke="#94a3b8" stroke-width="0.6"/>
+      <line x1="580" y1="562" x2="580" y2="566" stroke="#94a3b8" stroke-width="0.6"/>
+      <line x1="680" y1="562" x2="680" y2="566" stroke="#94a3b8" stroke-width="0.6"/>
+      <line x1="780" y1="562" x2="780" y2="566" stroke="#94a3b8" stroke-width="0.6"/>
+
+      <!-- 하단 보조 -->
+      <text x="600" y="615" text-anchor="middle" font-size="11" font-style="italic" fill="#6b7280">외부 손님은 본사 콜센터를 거쳐 가맹점에 닿음. 본사 인사팀이 가맹점 변동을 감시해 명부를 늘 갱신</text>
+    </svg>
+  </div>
+
+  <div class="caption">그림 안 v2. 본사 빌딩 안 정문·안내직원·콜센터·가맹점 명부, 외부에 위치한 가맹점들. 본사 인사팀은 가맹점 변동을 감시해 명부 갱신</div>
+
+  <div class="check">
+    <strong>v2 점검 포인트</strong>
+    <ul style="margin: 8px 0; line-height: 1.7;">
+      <li>"본사 콜센터"가 헤드셋·전화기·통화 부스로 시각화되어 안내데스크와 구별되는지</li>
+      <li>5.1.1의 "Service = 가맹점 직통 전화번호"와 "콜센터 → 가맹점 전화 연결" 흐름이 자연스럽게 이어지는지</li>
+      <li>CH04의 "Kube API Server = 본사 안내데스크"와 충돌이 없는지 (콜센터는 다른 단어·다른 시각요소)</li>
+      <li>콜센터 ↔ 가맹점 명부 점선 양방향(이름 질의 → 위치 응답)이 자연스러운지</li>
+      <li>콜센터 → 외부 가맹점 3개 분기 화살표 라벨이 "전화 연결"로 통화 결을 살리는지</li>
+      <li>본사 빌딩(가운데) + 외부 가맹점들(오른쪽) 배치는 v1 그대로 유지</li>
+    </ul>
+  </div>
+
+  <p style="color: #6b7280; font-size: 13px; margin-top: 24px;">
+    이 시안 OK면 본문 작업으로 넘어갑니다 — 5.2.2의 "공식 앱" → "본사 콜센터" 본문 다듬기, 5.3.2 STEP 1~5 비유 단락 본사·콜센터·가맹점 안에서 정리.
+  </p>
+</body>
+</html>

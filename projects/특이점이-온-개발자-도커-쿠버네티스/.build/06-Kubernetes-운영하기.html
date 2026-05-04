@@ -91,7 +91,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
     <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
   </div>
 </div>
-<p><em>그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</em></p>
+<div class="caption">그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</div>
 <p>Pod 내부의 환경 변수를 확인하자 conn_info=localhost:80과 같은 값이 나타났습니다. 이미지를 건드리지 않고도 설정값만 외부에서 주입하는 데 성공했습니다.</p>
 <h3>6.1.3 Secret</h3>
 <p>DB 비밀번호도 같은 방식으로 처리할 수 있을지 고민했습니다. 하지만 민감한 정보를 메뉴판처럼 공개된 곳에 적어둘 수는 없었습니다. 이를 위해 별도로 존재하는 리소스가 바로 Secret입니다.</p>
@@ -127,7 +127,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
     <div>&nbsp;&nbsp;resourceVersion: "1387"</div>
   </div>
 </div>
-<p><em>그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</em></p>
+<div class="caption">그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</div>
 <p>저장된 결과를 확인하면 password 값이 알 수 없는 문자열로 변환되어 있습니다.</p>
 <div class="prep-note">
 <p><strong>Secret과 Base64</strong></p>
@@ -162,7 +162,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
     <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
   </div>
 </div>
-<p><em>그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</em></p>
+<div class="caption">그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</div>
 <h3>6.1.4 환경 변수 반영을 위한 Pod 재시작</h3>
 <p>오픈이는 ConfigMap이 정말 살아 있는 설정인지 한 번 확인해 보고 싶었습니다. <code>configmap-conn.yml</code>을 열어 <code>conn_info</code>의 포트만 <code>80</code>에서 <code>90</code>으로 살짝 고쳤습니다.</p>
 <p><strong>ex13/configmap-conn.yml</strong> (포트 변경)</p>
@@ -199,7 +199,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">ConfigMap은 갱신됐지만, 이미 떠 있는 Pod의 환경 변수는 시작 시점에 박힌 값(80)을 그대로 가지고 있습니다.</text>
 </svg>
 </div>
-<p><em>그림 6-5. apply 만 한 경우 — ConfigMap 변경이 기존 Pod에는 반영되지 않음</em></p>
+<div class="caption">그림 6-5. apply 만 한 경우 — ConfigMap 변경이 기존 Pod에는 반영되지 않음</div>
 <div class="svg-figure">
 <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="rollout restart로 새 Pod를 띄우면 ConfigMap 새 값이 반영됨">
   <defs>
@@ -227,7 +227,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">새 Pod는 시작 시점에 갱신된 ConfigMap을 읽어 환경 변수에 새 값(90)을 박습니다.</text>
 </svg>
 </div>
-<p><em>그림 6-6. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</em></p>
+<div class="caption">그림 6-6. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</div>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">   </span><span class="c1"># Pod 재시작</span></div>
 <p><code>kubectl rollout restart</code>는 여러 Pod를 순차로 교체해 새 값을 안전하게 갈아 끼워 주는 명령입니다. 재시작이 끝나고 다시 환경 변수를 찍어 보니 포트가 <code>90</code>으로 바뀌어 들어와 있었습니다. apply만으로는 절반이고, 반영까지는 재시작이 한 번 더 필요했습니다.</p>
 <p>설정과 민감 정보를 이미지 바깥으로 빼는 일은 끝났습니다. 그러나 Pod 안의 데이터는 아직 그대로였습니다. DB 컨테이너가 재시작되면 회원 정보가 함께 사라지는 문제가 남아 있었습니다.</p>
@@ -353,7 +353,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pv,pvc<span class="w">
     <div>persistentvolumeclaim/volume-pvc  Bound   volume-pv   1Gi       RWO           &lt;unset&gt;                       9s</div>
   </div>
 </div>
-<p><em>그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</em></p>
+<div class="caption">그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</div>
 <p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결된 것입니다.</p>
 <p class="thought">'창고와 신청서가 엮였다.'</p>
 <p>확인을 위해 Pod 내부에서 파일을 하나 생성한 뒤, Pod를 삭제하고 다시 생성해 봅니다.</p>
@@ -378,7 +378,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
     <div>root@volume-pod:/#</div>
   </div>
 </div>
-<p><em>그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</em></p>
+<div class="caption">그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</div>
 <p>새로운 Pod가 생성되었음에도 c.txt 파일이 보존되어 있습니다.</p>
 <p>Pod는 교체되었으나 파일의 실체는 PV에 존재하므로 데이터가 유지됩니다. PVC가 새로운 Pod에게도 동일한 창고를 연결해 준 결과입니다.</p>
 <p class="thought">'Pod가 새로 만들어져도 창고는 그대로다. 이제 데이터를 유실할 걱정이 없겠구나.'</p>
@@ -439,7 +439,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
   <text x="400" y="335" text-anchor="middle" font-size="10" fill="#6b7280">Pod 간 통신은 Service 이름으로 (CoreDNS 자동 변환). MySQL은 PV로 데이터 보존, Secret으로 비밀번호 분리</text>
 </svg>
 </div>
-<p><em>그림 6-10. ex15 Kubernetes 웹사이트의 전체 구성</em></p>
+<div class="caption">그림 6-10. ex15 Kubernetes 웹사이트의 전체 구성</div>
 <p>오픈이는 그림을 따라가며 흐름을 머릿속에 그려 봤습니다. 브라우저의 요청이 Ingress를 통과해 Frontend Service를 거쳐 프런트엔드 Pod에 닿습니다. 사용자가 게시판이나 로그인 버튼을 누르면 프런트엔드의 Nginx가 /api/... 요청을 받아 클러스터 내부의 Backend Service로 넘겨줍니다. 요청을 받은 백엔드 Pod는 로직을 처리하는 과정에서 DB Service와 Redis Service를 호출하여 데이터를 읽고 씁니다.</p>
 <p>그림을 보고 있자니 한 가지가 분명해졌습니다. Pod 사이의 모든 통신이 IP가 아닌 서비스 이름으로 이루어진다는 사실이었습니다. 챕터 5에서 본 클러스터 DNS, 즉 <strong>CoreDNS</strong>가 서비스 이름을 ClusterIP로 변환해 주기 때문에, 복잡한 숫자 주소 대신 <code>db-service</code>, <code>backend-service</code> 같은 직관적인 이름만 챙기면 됩니다.</p>
 <p class="thought">'IP가 어디로 옮겨 다니든 이름만 잡고 있으면 흐름이 안 끊기는구나.'</p>
@@ -502,7 +502,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </
     <div>* The 'ingress' addon is enabled</div>
   </div>
 </div>
-<p><em>그림 6-11. Nginx Ingress Controller 애드온 설치</em></p>
+<div class="caption">그림 6-11. Nginx Ingress Controller 애드온 설치</div>
 <p>Minikube는 독립적인 가상 환경에서 작동하는 클러스터라, 로컬 호스트에서 빌드한 이미지를 곧장 인식하지 못합니다. 그래서 별도의 레지스트리를 두지 않고 <strong>minikube image build</strong> 명령으로 Minikube 자체에 이미지를 직접 만들어 두기로 했습니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/db:1<span class="w"> </span>ex15/db<span class="w">              </span><span class="c1"># DB 이미지 빌드</span>
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/backend:1<span class="w"> </span>ex15/backend<span class="w">    </span><span class="c1"># 백엔드 이미지 빌드</span>

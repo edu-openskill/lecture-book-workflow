@@ -430,8 +430,8 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <p class="thought">'그냥 Service에서 경로 라우팅을 하고 싶은데, 설정할 방법이 없는 것 같은데.'</p>
 <p>그 일을 담당하는 리소스가 따로 있습니다. <strong>Ingress</strong> 입니다.</p>
 <h3>5.2.2 Ingress의 역할</h3>
-<p>가맹점이 늘어나면 고객이 직통 번호를 일일이 외우기 어렵습니다. 본사가 <strong>공식 앱</strong>을 하나 만들어 두면, 고객은 앱에서 원하는 메뉴를 고르기만 해도 알맞은 지점으로 자동 연결됩니다.</p>
-<p>Ingress가 이 공식 앱 역할을 합니다. 고객이 <code>http://도메인/order</code>로 접속하면 주문 Service로, <code>http://도메인/stores</code>로 접속하면 매장 Service로 나눠 보냅니다.</p>
+<p>가맹점이 늘어나면 고객이 직통 번호를 일일이 외우기 어렵습니다. 본사가 외부 손님 전화를 받는 <strong>콜센터</strong>를 두면, 손님은 대표번호 한 곳으로 전화해도 적절한 가맹점으로 알아서 연결됩니다.</p>
+<p>Ingress가 이 본사 콜센터 역할을 합니다. 고객이 <code>http://도메인/order</code>로 접속하면 주문 Service로, <code>http://도메인/stores</code>로 접속하면 매장 Service로 나눠 보냅니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ingress가 도메인과 경로를 읽어 적절한 Service로 요청을 분기하는 구조">
   <defs>
@@ -515,19 +515,19 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <tr>
 <td style="text-align:center"><code>Ingress 리소스</code></td>
 <td style="text-align:left">어떤 도메인과 URL 경로의 요청을 어떤 Service로 보낼지 정의한 규칙 (YAML)</td>
-<td style="text-align:left">공식 앱의 라우팅 규칙</td>
+<td style="text-align:left">본사 콜센터의 연결 규칙</td>
 <td style="text-align:left"><code>선언</code></td>
 </tr>
 <tr>
 <td style="text-align:center"><code>Ingress Controller</code></td>
 <td style="text-align:left">실제로 외부 요청을 받아 처리하는 소프트웨어</td>
-<td style="text-align:left">규칙을 실행하는 공식 앱</td>
+<td style="text-align:left">연결 규칙을 실행하는 본사 콜센터</td>
 <td style="text-align:left"><code>집행</code></td>
 </tr>
 </tbody>
 </table>
 <p class="thought">'아, 규칙만 적어 둔다고 알아서 굴러가는 게 아니구나. 그 규칙을 읽고 실제로 실행해 주는 역할이 따로 필요한 거네.'</p>
-<p>이제 오픈이가 실습으로 풀어 갈 순서가 머릿속에 그려졌습니다. 아직 없는 <strong>공식 앱(Ingress Controller)</strong> 부터 실행하고, 그 앱이 연결해 줄 백엔드 두 개를 띄운 다음, 라우팅 규칙을 YAML로 적어 길을 안내하고, 마지막으로 브라우저로 두 경로가 각자 다른 가맹점에 닿는지 확인하는 흐름이었습니다.</p>
+<p>이제 오픈이가 실습으로 풀어 갈 순서가 머릿속에 그려졌습니다. 아직 없는 <strong>본사 콜센터(Ingress Controller)</strong> 부터 실행하고, 그 콜센터가 연결해 줄 백엔드 두 개를 띄운 다음, 라우팅 규칙을 YAML로 적어 길을 안내하고, 마지막으로 브라우저로 두 경로가 각자 다른 가맹점에 닿는지 확인하는 흐름이었습니다.</p>
 <p>오픈이는 Minikube에서 Ingress 컨트롤러를 활성화했습니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress<span class="w">          </span><span class="c1"># Ingress Controller 애드온 활성화</span></div>
 <div class="terminal-log">
@@ -548,7 +548,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
     <div>* The 'ingress' addon is enabled</div>
   </div>
 </div>
-<div class="caption">그림 5-14. minikube에서 ingress 애드온 활성화</div>
+<div class="caption">그림 5-13. minikube에서 ingress 애드온 활성화</div>
 <p>활성화가 끝나자 <code>ingress-nginx</code> 네임스페이스에 컨트롤러 Pod가 떠 있었습니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>ingress-nginx<span class="w">       </span><span class="c1"># 컨트롤러 Pod 확인</span></div>
 <div class="terminal-log">
@@ -565,7 +565,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
     <div>ingress-nginx-controller-9cc49f96f-qrpm7    1/1     Running     0          52m</div>
   </div>
 </div>
-<div class="caption">그림 5-15. Ingress Controller Pod가 Running 상태</div>
+<div class="caption">그림 5-14. Ingress Controller가 Running 상태</div>
 <div class="prep-note">
 <p><strong>운영 환경에서의 Ingress Controller 실행</strong></p>
 <p>미니큐브 addon은 학습용 명령어입니다. 실제 운영에서는 <code>ingress-nginx</code> 같은 컨트롤러를 직접 하거나, 클라우드 환경에서는 클라우드가 제공하는 컨트롤러를 그대로 쓰면 됩니다. 어느 쪽이든 클러스터 안에 컨트롤러 Pod가 떠서 외부 요청을 갈라 주는 모습은 똑같습니다.</p>
@@ -653,7 +653,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
     <div>ex12-ingress   nginx   *                 80      37s</div>
   </div>
 </div>
-<div class="caption">그림 5-16. Ingress 리소스 등록 확인 — ex12-ingress</div>
+<div class="caption">그림 5-15. Ingress 리소스 등록 확인 — ex12-ingress</div>
 <h4>브라우저로 접속</h4>
 <p>Docker 드라이버로 Minikube를 띄운 환경에서는 클러스터가 컨테이너 안에 있어 호스트에서 직접 닿지 않습니다. 이 통로를 뚫어 주는 <code>minikube tunnel</code> 을 별도 터미널에서 띄워 두면, 호스트의 <code>localhost</code> 로 들어온 요청이 Ingress Controller까지 이어집니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>tunnel<span class="w">                         </span><span class="c1"># 별도 터미널에서 실행</span></div>
@@ -670,137 +670,33 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
     <div>* Starting tunnel for service frontend-ingress.</div>
   </div>
 </div>
-<div class="caption">그림 5-17. minikube tunnel 실행으로 외부 접근 경로 확보</div>
+<div class="caption">그림 5-16. minikube tunnel 실행으로 외부 접근 경로 확보</div>
 <p>준비가 끝났으니 브라우저를 열어 두 경로를 차례로 들어가 봤습니다. 먼저 <code>http://localhost/order</code> 를 주소창에 입력하자 주문 페이지 응답이 돌아왔습니다.</p>
 <!-- MOCK: 실제 환경에서 재캡처 후 교체 필요 -->
-<div class="chapter-image"><img src="..\assets\CH05\mock-order-page.png" alt="" /><div class="caption">그림 5-18. <code>/order</code> 접속 결과 — &quot;<strong>주문 접수 완료</strong>&quot;</div></div>
+<div class="chapter-image"><img src="..\assets\CH05\mock-order-page.png" alt="" /><div class="caption">그림 5-17. <code>/order</code> 접속 결과 — &quot;<strong>주문 접수 완료</strong>&quot;</div></div>
 <p>이어서 <code>http://localhost/stores</code> 로 이동하자 이번에는 매장 선택 응답이 떴습니다.</p>
 <!-- MOCK: 실제 환경에서 재캡처 후 교체 필요 -->
-<div class="chapter-image"><img src="..\assets\CH05\mock-stores-page.png" alt="" /><div class="caption">그림 5-19. <code>/stores</code> 접속 결과 — &quot;<strong>매장 선택</strong>&quot;</div></div>
+<div class="chapter-image"><img src="..\assets\CH05\mock-stores-page.png" alt="" /><div class="caption">그림 5-18. <code>/stores</code> 접속 결과 — &quot;<strong>매장 선택</strong>&quot;</div></div>
 <p>같은 도메인인데 뒤의 경로에 따라 응답이 완전히 달라졌습니다. Ingress 규칙대로 컨트롤러가 경로를 읽어 적절한 Service로 요청을 보냈기 때문입니다.</p>
 <p>겉으로 보이는 결과는 매끄러웠지만, 그 사이에서 누가 무엇을 하고 있는지는 아직 손에 잡히지 않았습니다.</p>
 <h2>5.3 브라우저에서 Pod까지의 경로</h2>
 <p>오픈이는 브라우저의 요청이 Pod까지 닿는 것을 확인했습니다. 이제 쿠버네티스를 더 이해하기 위해 그 사이에서 일어나는 네트워크 흐름을 들여다보겠습니다.</p>
-<h3>5.3.1 Service의 동작 원리</h3>
-<p>Service 뒷단에서는 세 프로그램이 함께 동작합니다. 차례로 들여다보겠습니다.</p>
-<h4>Endpoint Controller — Pod IP 목록 유지</h4>
-<p>Pod IP는 재시작될 때마다 바뀝니다. Service 주소가 그대로여도, 뒤에서 누군가가 Pod IP 목록을 항상 최신으로 유지해 줘야 요청이 새 Pod까지 닿습니다.</p>
-<p>그 역할이 <strong>Endpoint Controller</strong>입니다. Service의 selector(라벨)에 매칭되는 Pod를 감시하고, Pod가 새로 뜨거나 사라지면 해당 Service의 <strong>Pod IP 목록</strong>을 곧바로 갱신합니다.</p>
+<h3>5.3.1 요청의 흐름</h3>
+<p>본사 콜센터 안에서 손님 요청이 어떻게 처리되는지 흐름을 따라가 봅니다. 흐름은 크게 세 단계로 나뉩니다.</p>
+<ol>
+<li><strong>진입</strong> — 외부 손님 전화가 본사 콜센터로 이어지는 단계</li>
+<li><strong>부서 결정</strong> — 콜센터 상담원이 어느 부서로 보낼지 결정하는 단계</li>
+<li><strong>직원 응답</strong> — 부서 안 자동 분배가 응대 직원에게 연결되어 응답하는 단계</li>
+</ol>
+<p>각 단계마다 비유로 먼저 풀고, 곧이어 같은 단계의 IT 구조를 짝지어 봅니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Endpoint Controller가 Pod의 변동을 감시해 Service의 Pod IP 목록을 최신으로 유지하는 구조">
-  <defs>
-    <marker id="ec-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-  </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Endpoint Controller — Pod 변동 감시 후 IP 목록 갱신</text>
-  <text x="120" y="50" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">실제 Pod 상태</text>
-  <rect x="40" y="60" width="160" height="32" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="60" y="80" font-size="12" font-weight="700" fill="#0f172a">Pod A</text>
-  <text x="180" y="80" text-anchor="end" font-size="13" font-weight="700" fill="#475569">✓</text>
-  <rect x="40" y="105" width="160" height="32" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4,3"/>
-  <text x="60" y="125" font-size="12" font-weight="700" fill="#94a3b8" text-decoration="line-through">Pod B</text>
-  <text x="180" y="125" text-anchor="end" font-size="13" font-weight="700" fill="#94a3b8">✗</text>
-  <rect x="40" y="150" width="160" height="32" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="60" y="170" font-size="12" font-weight="700" fill="#7b341e">Pod C</text>
-  <text x="180" y="170" text-anchor="end" font-size="13" font-weight="700" fill="#ff7849">+</text>
-  <line x1="205" y1="121" x2="265" y2="121" stroke="#475569" stroke-width="1.6" marker-end="url(#ec-p)"/>
-  <text x="235" y="113" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">감시</text>
-  <rect x="270" y="90" width="130" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="335" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Endpoint</text>
-  <text x="335" y="132" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Controller</text>
-  <text x="335" y="150" text-anchor="middle" font-size="9" fill="#7b341e">감시 → 갱신</text>
-  <line x1="405" y1="121" x2="435" y2="121" stroke="#475569" stroke-width="1.6" marker-end="url(#ec-p)"/>
-  <text x="420" y="113" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">갱신</text>
-  <text x="580" y="50" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Pod IP 목록</text>
-  <rect x="440" y="60" width="280" height="130" rx="8" fill="#fff" stroke="#1565c0" stroke-width="1.6"/>
-  <text x="460" y="90" font-size="13" font-weight="700" fill="#475569">✓</text>
-  <text x="478" y="90" font-size="12" font-weight="600" fill="#0f172a">Pod A · 유지</text>
-  <text x="460" y="120" font-size="13" font-weight="700" fill="#94a3b8">✗</text>
-  <text x="478" y="120" font-size="12" font-weight="600" fill="#94a3b8" text-decoration="line-through">Pod B · 제거됨</text>
-  <text x="460" y="150" font-size="13" font-weight="700" fill="#ff7849">+</text>
-  <text x="478" y="150" font-size="12" font-weight="600" fill="#7b341e">Pod C · 추가됨</text>
-  <text x="580" y="178" text-anchor="middle" font-size="9" font-style="italic" fill="#6b7280">살아있는 Pod IP만 — kube-proxy로 전달</text>
-</svg>
-</div>
-<div class="caption">그림 5-20. Endpoint Controller가 Pod 변동을 감시해 Pod IP 목록을 갱신합니다</div>
-<p>목록만 갱신된다고 요청이 새 Pod로 흘러가지는 않습니다. 가상 주소(ClusterIP)로 들어온 요청을 실제 Pod IP로 보내는 규칙도 같이 갱신되어야 합니다.</p>
-<h4>kube-proxy — iptables 규칙 관리</h4>
-<p>이 일을 맡는 게 <strong>kube-proxy</strong> 입니다. 각 노드의 리눅스 커널에는 패킷의 도착지를 변환하는 규칙 목록 <strong>iptables</strong> 가 있고, kube-proxy는 &quot;이 ClusterIP로 향한 요청은 저 Pod IP로 바꿔 보내라&quot;는 항목을 iptables에 등록·갱신합니다. Pod IP 목록이 바뀌면 그에 맞춰 항목 속 Pod IP도 함께 갱신됩니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="패킷은 리눅스 커널이 직접 처리하고, kube-proxy는 옆에서 iptables 규칙만 등록·갱신하는 구조">
-  <defs>
-    <marker id="kp-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-    <marker id="kp-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-  </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">패킷은 커널이 처리, kube-proxy는 옆에서 규칙만 관리</text>
-  <rect x="40" y="80" width="140" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="110" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Service 주소</text>
-  <text x="110" y="125" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">ClusterIP (가상)</text>
-  <line x1="180" y1="110" x2="225" y2="110" stroke="#475569" stroke-width="1.6" marker-end="url(#kp-p)"/>
-  <rect x="225" y="80" width="240" height="60" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="345" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Linux 커널 (netfilter)</text>
-  <text x="345" y="125" text-anchor="middle" font-size="10" font-family="monospace" fill="#7b341e">iptables 항목 대조 → DNAT</text>
-  <line x1="465" y1="100" x2="510" y2="80" stroke="#475569" stroke-width="1.6" marker-end="url(#kp-p)"/>
-  <line x1="465" y1="120" x2="510" y2="140" stroke="#475569" stroke-width="1.6" marker-end="url(#kp-p)"/>
-  <rect x="515" y="60" width="130" height="40" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="580" y="78" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Pod A</text>
-  <text x="580" y="92" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">Pod IP</text>
-  <rect x="515" y="120" width="130" height="40" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="580" y="138" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Pod B</text>
-  <text x="580" y="152" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">Pod IP</text>
-  <line x1="345" y1="200" x2="345" y2="142" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#kp-r)"/>
-  <text x="365" y="175" font-size="10" font-style="italic" font-weight="600" fill="#475569">규칙 등록·갱신</text>
-  <rect x="225" y="200" width="240" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="345" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">kube-proxy</text>
-  <text x="345" y="240" text-anchor="middle" font-size="10" fill="#475569">패킷에 손대지 않음 · 규칙 관리만</text>
-</svg>
-</div>
-<div class="caption">그림 5-30. 패킷은 커널이 직접 처리하고, kube-proxy는 옆에서 iptables 항목만 등록·갱신합니다</div>
-<p>두 프로그램이 함께 동작해, Pod가 바뀌어도 같은 Service 주소로 요청이 흘러갑니다. Endpoint Controller가 새 Pod를 즉시 Pod IP 목록에 반영하고, kube-proxy가 그 목록을 보고 iptables 항목의 Pod IP를 새 Pod로 교체합니다.</p>
-<h4>클러스터 DNS — 이름을 ClusterIP로 풀이</h4>
-<p>kube-proxy가 등록한 iptables 규칙은 ClusterIP로 향한 요청만 가로챕니다. 그런데 Ingress 리소스나 다른 Pod의 코드는 <code>order-service</code> 같은 <strong>이름</strong>으로 백엔드를 부릅니다. 이름과 ClusterIP 사이를 이어 주는 프로그램이 따로 있어야 합니다.</p>
-<p>그 역할이 <strong>클러스터 DNS</strong> (정식 명칭 <strong>CoreDNS</strong>)입니다. 클러스터 안에는 전용 DNS 서버가 떠 있고, Service가 만들어지면 그 이름이 DNS에 자동으로 등록됩니다. 이름으로 부르면 DNS가 ClusterIP로 응답합니다.</p>
-<p>Pod가 만들어질 때 클러스터 DNS를 가리키는 설정이 자동으로 주입되므로, 코드에 Service 이름만 적어도 질의가 자연스럽게 클러스터 DNS로 흘러갑니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="클러스터 DNS(CoreDNS)가 Service 이름을 ClusterIP로 변환하는 구조">
-  <defs>
-    <marker id="dn-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-    <marker id="dn-g" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-  </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">클러스터 DNS — Service 이름 → ClusterIP 변환</text>
-  <rect x="100" y="50" width="560" height="125" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="380" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">클러스터 DNS (CoreDNS)</text>
-  <line x1="120" y1="85" x2="640" y2="85" stroke="#fcd4bf" stroke-width="0.8"/>
-  <text x="130" y="105" font-family="monospace" font-size="11" fill="#0f172a">order-service.default.svc.cluster.local</text>
-  <text x="630" y="105" text-anchor="end" font-family="monospace" font-size="11" font-weight="700" fill="#1565c0">10.96.0.20</text>
-  <text x="130" y="125" font-family="monospace" font-size="11" fill="#0f172a">payments.default.svc.cluster.local</text>
-  <text x="630" y="125" text-anchor="end" font-family="monospace" font-size="11" font-weight="700" fill="#1565c0">10.96.0.31</text>
-  <text x="130" y="145" font-family="monospace" font-size="11" fill="#0f172a">stores.default.svc.cluster.local</text>
-  <text x="630" y="145" text-anchor="end" font-family="monospace" font-size="11" font-weight="700" fill="#1565c0">10.96.0.42</text>
-  <text x="380" y="166" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">Service 생성 시 자동 등록, 삭제 시 자동 제거</text>
-  <line x1="300" y1="220" x2="300" y2="180" stroke="#475569" stroke-width="1.6" marker-end="url(#dn-r)"/>
-  <text x="285" y="200" text-anchor="end" font-size="10" font-weight="700" fill="#0f172a">① 이름 질의</text>
-  <text x="285" y="215" text-anchor="end" font-size="10" font-style="italic" font-family="monospace" fill="#475569">"order-service?"</text>
-  <line x1="460" y1="180" x2="460" y2="220" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#dn-g)"/>
-  <text x="475" y="200" font-size="10" font-weight="700" fill="#7b341e">② ClusterIP 응답</text>
-  <text x="475" y="215" font-size="10" font-style="italic" font-family="monospace" fill="#7b341e">"10.96.0.20"</text>
-  <rect x="100" y="220" width="560" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="380" y="243" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">호출자 (Pod / Ingress Controller)</text>
-  <text x="380" y="260" text-anchor="middle" font-size="10" fill="#6b7280">Pod 생성 시 /etc/resolv.conf → 클러스터 DNS 자동 설정</text>
-</svg>
-</div>
-<div class="caption">그림 5-31. DNS가 Service 이름을 ClusterIP로 변환합니다</div>
-<p>이름으로 백엔드를 부르면 두 단계 변환이 일어납니다. 먼저 DNS가 이름을 ClusterIP로 바꾸고, 이어서 kube-proxy가 ClusterIP를 Pod IP로 바꿉니다.</p>
-<p class="thought">'Endpoint Controller가 Pod IP 목록을 챙기고, kube-proxy가 길을 깔고, DNS가 이름을 푼다. 셋이 이렇게 함께 동작하는구나.'</p>
-<h3>5.3.2 요청의 흐름</h3>
-<p>의문이 풀리고 나니 처음 막혔던 한 줄을 이제 그어 볼 만했습니다. 외부에서 들어온 한 요청이 백엔드 Pod까지 닿는 전체 흐름을 한 단계씩 따라가 봤습니다. 먼저 다섯 단계가 클러스터 안 어디에서 일어나는지 한 그림으로 그려 두면 다음과 같습니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 1080 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="요청이 Pod까지 닿는 전체 흐름 — 다섯 단계가 클러스터 안에서 일어나는 위치">
+<svg viewBox="0 0 1080 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="요청이 Pod까지 닿는 전체 흐름 — 세 단계가 클러스터 안에서 일어나는 위치">
   <defs>
     <marker id="ov-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
     <marker id="ov-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
     <marker id="ov-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
-  <text x="540" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">전체 흐름 한눈에 — 다섯 단계가 일어나는 위치</text>
+  <text x="540" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">전체 흐름 한눈에 — 세 단계가 일어나는 위치</text>
   <text x="20" y="120" font-size="10" font-weight="600" fill="#475569">로컬호스트</text>
   <rect x="20" y="130" width="130" height="100" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="85" y="186" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Host</text>
@@ -816,13 +712,11 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="302" y="190" text-anchor="middle" font-size="12" font-family="monospace" fill="#7b341e">:9000</text>
   <text x="302" y="234" text-anchor="middle" font-size="9" fill="#7b341e">NodePort Service</text>
   <line x1="370" y1="170" x2="490" y2="170" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <circle cx="430" cy="153" r="11" fill="#ff7849"/>
-  <text x="430" y="157" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
   <rect x="490" y="150" width="100" height="40" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="540" y="174" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Kube Proxy</text>
   <line x1="590" y1="170" x2="640" y2="170" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
   <rect x="640" y="150" width="180" height="40" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="730" y="174" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Ingress Controller Pod</text>
+  <text x="730" y="174" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Ingress Controller</text>
   <rect x="900" y="135" width="140" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
   <text x="970" y="160" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">클러스터 DNS</text>
   <text x="970" y="180" text-anchor="middle" font-size="10" fill="#7b341e">이름 → ClusterIP</text>
@@ -833,15 +727,13 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <line x1="730" y1="190" x2="600" y2="245" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
   <line x1="730" y1="190" x2="850" y2="245" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
   <circle cx="660" cy="218" r="11" fill="#ff7849"/>
-  <text x="660" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
+  <text x="660" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
   <rect x="540" y="262" width="120" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="600" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Service A</text>
+  <text x="600" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">order-service</text>
   <rect x="790" y="262" width="120" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="850" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Service B</text>
+  <text x="850" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">return-service</text>
   <line x1="600" y1="310" x2="600" y2="335" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
   <line x1="850" y1="310" x2="850" y2="335" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <circle cx="730" cy="320" r="11" fill="#ff7849"/>
-  <text x="730" y="324" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
   <rect x="420" y="335" width="600" height="100" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
   <text x="1005" y="350" text-anchor="end" font-size="10" font-weight="700" fill="#94a3b8">L4</text>
   <rect x="490" y="365" width="220" height="55" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
@@ -864,7 +756,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <line x1="855" y1="412" x2="835" y2="450" stroke="#ff7849" stroke-width="2.2" stroke-dasharray="3,2" marker-end="url(#ov-a)"/>
   <line x1="855" y1="412" x2="885" y2="450" stroke="#ff7849" stroke-width="2.2" stroke-dasharray="3,2" marker-end="url(#ov-a)"/>
   <circle cx="730" cy="430" r="11" fill="#ff7849"/>
-  <text x="730" y="434" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text>
+  <text x="730" y="434" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
   <rect x="510" y="453" width="200" height="40" rx="6" fill="none" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3"/>
   <rect x="525" y="461" width="65" height="24" rx="12" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <text x="557" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod A</text>
@@ -881,41 +773,47 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="745" y="547" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">Deployment</text>
 </svg>
 </div>
-<p>다섯 단계는 위 그림에서 ①~⑤ 위치를 차례로 짚어 가는 흐름입니다. 5.2의 비유를 빌리면, 고객이 본사 <strong>공식 앱</strong>(Ingress)으로 주문을 넣을 때 앱 내부에서 일어나는 일을 줌인해서 봅니다. 한 단계씩 비유로 먼저 풀고, 곧이어 같은 단계의 IT 구조를 봅니다.</p>
-<p><strong>1단계 — 외부 입구 통과: 고객이 공식 앱을 연다</strong></p>
-<p>휴대폰을 켠 고객이 본사 공식 앱 아이콘을 누릅니다. 앱은 본사가 외부에 공개해 둔 <strong>공식 입구</strong>(주소·포트)를 통해서만 안으로 들어갈 수 있습니다.</p>
+<div class="caption">그림 5-19. 요청이 Pod까지 닿는 전체 흐름 — 세 단계가 일어나는 위치</div>
+<p><strong>1단계 — 진입: 손님이 본사 대표번호로 전화, 자동 안내가 콜센터로 연결</strong></p>
+<p>외부 손님이 본사 <strong>대표번호</strong>로 전화를 겁니다. <strong>자동 안내</strong>가 곧장 본사 <strong>콜센터</strong>로 연결해 줍니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 1 비유 — 고객이 본사 공식 앱 아이콘을 눌러 앱에 진입">
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 비유 — 외부 손님이 본사 대표번호로 전화, 자동 안내가 콜센터로 연결">
   <defs>
-    <marker id="m1-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="m1n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">고객이 본사 공식 앱 아이콘을 누른다</text>
-  <g transform="translate(80, 90)">
-    <circle cx="40" cy="0" r="20" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-    <path d="M 10 28 Q 10 60 40 60 Q 70 60 70 28 L 70 95 L 10 95 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">외부 손님이 대표번호로 전화 → 자동 안내 → 콜센터</text>
+  <g transform="translate(40, 110)">
+    <circle cx="20" cy="0" r="16" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <path d="M 0 22 Q 0 50 20 50 Q 40 50 40 22 L 40 90 L 0 90 Z" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <rect x="38" y="20" width="22" height="14" rx="2" fill="#1565c0" stroke="#0f3a78" stroke-width="1"/>
+    <path d="M 41 22 Q 41 18 49 18 Q 57 18 57 22" fill="none" stroke="#fff" stroke-width="1.4"/>
   </g>
-  <text x="120" y="210" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">고객</text>
-  <line x1="180" y1="135" x2="290" y2="135" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m1-a)"/>
-  <text x="235" y="124" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">앱 아이콘 누름</text>
-  <g transform="translate(300, 60)">
-    <rect x="0" y="0" width="160" height="160" rx="18" fill="#fff" stroke="#475569" stroke-width="2"/>
-    <rect x="10" y="14" width="140" height="124" rx="3" fill="#fff4ed" stroke="#fbbf24" stroke-width="1.4"/>
-    <circle cx="80" cy="55" r="22" fill="#ff7849"/>
-    <text x="80" y="61" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">앱</text>
-    <text x="80" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">본사 공식 앱</text>
-    <text x="80" y="118" text-anchor="middle" font-size="9" fill="#7b341e">공식 주소·포트</text>
-    <circle cx="80" cy="148" r="7" fill="none" stroke="#475569" stroke-width="1.4"/>
-  </g>
-  <line x1="476" y1="135" x2="556" y2="135" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m1-a)"/>
-  <text x="516" y="124" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">앱 진입</text>
-  <rect x="560" y="80" width="160" height="120" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="640" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">앱 메인 화면</text>
-  <text x="640" y="140" text-anchor="middle" font-size="10" fill="#7b341e">(요청이 본사 안에</text>
-  <text x="640" y="155" text-anchor="middle" font-size="10" fill="#7b341e">도착함)</text>
-  <text x="640" y="180" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">↓ 다음: 안내 직원에게 배달</text>
+  <text x="60" y="220" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">외부 손님</text>
+  <line x1="115" y1="155" x2="170" y2="155" stroke="#ff7849" stroke-width="2.4" marker-end="url(#m1n-a)"/>
+  <text x="142" y="145" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">전화 걸기</text>
+  <rect x="160" y="60" width="620" height="200" rx="10" fill="#fff" stroke="#7b341e" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <text x="470" y="78" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">본사</text>
+  <rect x="180" y="120" width="130" height="70" rx="6" fill="#fff4ed" stroke="#7b341e" stroke-width="1.8"/>
+  <text x="245" y="142" text-anchor="middle" font-size="14" fill="#7b341e">☎</text>
+  <text x="245" y="162" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">본사 대표번호</text>
+  <text x="245" y="180" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">02-000-0000</text>
+  <line x1="310" y1="155" x2="365" y2="155" stroke="#ff7849" stroke-width="2.4" marker-end="url(#m1n-a)"/>
+  <rect x="365" y="115" width="160" height="80" rx="6" fill="#fff4ed" stroke="#7b341e" stroke-width="1.8"/>
+  <rect x="380" y="125" width="130" height="20" rx="2" fill="#7b341e"/>
+  <text x="445" y="140" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">ARS · 자동 안내</text>
+  <text x="445" y="165" text-anchor="middle" font-size="9" fill="#7b341e">"콜센터로</text>
+  <text x="445" y="180" text-anchor="middle" font-size="9" fill="#7b341e">연결합니다..."</text>
+  <line x1="525" y1="155" x2="580" y2="155" stroke="#ff7849" stroke-width="2.4" marker-end="url(#m1n-a)"/>
+  <rect x="580" y="105" width="180" height="100" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="595" y="115" width="150" height="20" rx="2" fill="#7b341e"/>
+  <text x="670" y="130" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">☎ 본사 콜센터 ☎</text>
+  <text x="670" y="160" text-anchor="middle" font-size="10" fill="#7b341e">(전화가 콜센터에</text>
+  <text x="670" y="175" text-anchor="middle" font-size="10" fill="#7b341e">연결됨)</text>
+  <text x="670" y="195" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">↓ 다음: 용건 듣기</text>
 </svg>
 </div>
-<p>이 비유를 IT로 옮기면 두 가지가 짝지어집니다.</p>
+<div class="caption">그림 5-20. 손님이 본사 대표번호로 전화, 자동 안내가 콜센터로 연결</div>
+<p>이 비유를 IT로 옮기면 네 가지가 짝지어집니다.</p>
 <table>
 <thead>
 <tr>
@@ -926,186 +824,108 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">고객</td>
+<td style="text-align:center">외부 손님</td>
 <td style="text-align:left"><strong>외부 호스트</strong></td>
 <td style="text-align:left">클러스터 바깥에서 요청을 보내는 사용자입니다</td>
 </tr>
 <tr>
-<td style="text-align:center">공식 앱 입구 (주소·포트)</td>
+<td style="text-align:center">본사 대표번호</td>
 <td style="text-align:left"><strong>NodePort</strong></td>
 <td style="text-align:left">외부 요청이 클러스터로 진입하는 공개 포트입니다</td>
 </tr>
-</tbody>
-</table>
-<p>브라우저에서 <code>http://localhost/order</code> 같은 주소로 요청을 보내면, 노드에 뚫린 NodePort(또는 클라우드의 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 <code>minikube tunnel</code> 이 바로 이 입구를 호스트와 이어 주는 통로입니다. 아직 HTTP 본문은 들여다보지 않은 상태입니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 1 — 외부 요청이 NodePort 입구로 클러스터에 진입">
-  <defs>
-    <marker id="fl1-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
-    <marker id="fl1-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-  </defs>
-  <rect x="20" y="14" width="142" height="34" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="91" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">STEP 1</text>
-  <text x="91" y="42" text-anchor="middle" font-size="10" fill="#7b341e">진입 (NodePort)</text>
-  <line x1="166" y1="31" x2="178" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl1-d)"/>
-  <rect x="180" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="251" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 2</text>
-  <text x="251" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">배달 (kube-proxy)</text>
-  <line x1="326" y1="31" x2="338" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl1-d)"/>
-  <rect x="340" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="411" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 3</text>
-  <text x="411" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">라우팅 (Ingress + DNS)</text>
-  <line x1="486" y1="31" x2="498" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl1-d)"/>
-  <rect x="500" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="571" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 4</text>
-  <text x="571" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">NAT (kube-proxy 2차)</text>
-  <line x1="646" y1="31" x2="658" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl1-d)"/>
-  <rect x="660" y="14" width="120" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="720" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 5</text>
-  <text x="720" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">도달 (Pod)</text>
-  <text x="40" y="100" font-size="11" font-weight="600" fill="#475569">로컬호스트</text>
-  <rect x="40" y="112" width="140" height="84" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="110" y="160" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Host</text>
-  <line x1="180" y1="154" x2="278" y2="154" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl1-a)"/>
-  <text x="229" y="142" text-anchor="middle" font-size="12" font-family="monospace" font-weight="700" fill="#7b341e">localhost:9000</text>
-  <rect x="288" y="80" width="220" height="170" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="398" y="102" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">클러스터 입구</text>
-  <rect x="316" y="116" width="164" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="398" y="152" text-anchor="middle" font-size="18" font-weight="700" fill="#7b341e">NodePort</text>
-  <text x="398" y="178" text-anchor="middle" font-size="15" font-family="monospace" fill="#7b341e">:9000</text>
-  <text x="398" y="237" text-anchor="middle" font-size="11" fill="#7b341e">NodePort Service</text>
-  <line x1="510" y1="170" x2="568" y2="170" stroke="#cbd5e1" stroke-width="1.4" marker-end="url(#fl1-d)"/>
-  <rect x="568" y="135" width="200" height="80" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
-  <text x="668" y="160" text-anchor="middle" font-size="11" font-style="italic" fill="#94a3b8">다음 단계 (STEP 2)</text>
-  <text x="668" y="182" text-anchor="middle" font-size="13" font-weight="700" fill="#94a3b8">Kube Proxy 가</text>
-  <text x="668" y="200" text-anchor="middle" font-size="12" fill="#94a3b8">Ingress로 배달</text>
-</svg>
-</div>
-<div class="caption">그림 5-32. 외부 요청이 NodePort(또는 LoadBalancer)로 진입. 실습에선 <code>minikube tunnel</code> 이 이 입구 역할</div>
-<p><strong>2단계 — 앱 내부 라우터가 안내 직원에게 배달</strong></p>
-<p>앱에 들어온 요청은 곧장 매장으로 가지 않습니다. 먼저 앱 내부의 <strong>라우터</strong>가 요청을 받아 <strong>메인 화면 안내 직원</strong>에게 넘겨줍니다. 이 라우터는 주소·포트만 보고 옮기는 단순한 배달부 역할입니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 2 비유 — 앱 입구에서 내부 라우터를 거쳐 메인 화면 안내 직원에게 배달">
-  <defs>
-    <marker id="m2-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-  </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">앱 입구 → 내부 라우터 → 메인 화면 안내 직원</text>
-  <rect x="40" y="80" width="160" height="80" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
-  <text x="120" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">앱 입구</text>
-  <text x="120" y="140" text-anchor="middle" font-size="10" fill="#94a3b8">(이전 단계)</text>
-  <line x1="200" y1="120" x2="280" y2="120" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m2-a)"/>
-  <text x="240" y="110" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">전달</text>
-  <rect x="280" y="80" width="180" height="80" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="370" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">내부 라우터</text>
-  <text x="370" y="135" text-anchor="middle" font-size="10" fill="#7b341e">(주소만 보고 배달)</text>
-  <line x1="460" y1="120" x2="540" y2="120" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m2-a)"/>
-  <text x="500" y="110" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">배달</text>
-  <rect x="540" y="60" width="180" height="120" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="630" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">메인 화면</text>
-  <text x="630" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">안내 직원</text>
-  <text x="630" y="148" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">↓ 다음: 주문서 읽기</text>
-</svg>
-</div>
-<p>이 비유를 IT로 옮기면 두 가지가 짝지어집니다.</p>
-<table>
-<thead>
 <tr>
-<th style="text-align:center">비유</th>
-<th style="text-align:left">IT 용어</th>
-<th style="text-align:left">한 줄 설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">내부 라우터</td>
+<td style="text-align:center">본사 자동 안내</td>
 <td style="text-align:left"><strong>kube-proxy(1차)</strong></td>
-<td style="text-align:left">iptables 항목으로 패킷의 도착지를 옮기는 배달부입니다</td>
+<td style="text-align:left">노드 커널의 iptables 규칙을 따라 들어온 요청을 Ingress Controller로 자동 연결하는 라우터입니다</td>
 </tr>
 <tr>
-<td style="text-align:center">메인 화면 안내 직원</td>
-<td style="text-align:left"><strong>Ingress Controller Pod</strong></td>
-<td style="text-align:left">다음 단계에서 URL을 읽고 백엔드를 정하는 컨트롤러 Pod입니다</td>
+<td style="text-align:center">본사 콜센터</td>
+<td style="text-align:left"><strong>Ingress Controller</strong></td>
+<td style="text-align:left">다음 단계에서 URL을 읽는 컨트롤러 Pod입니다</td>
 </tr>
 </tbody>
 </table>
-<p>들어온 요청은 kube-proxy가 미리 등록해 둔 iptables 항목을 타고 인그레스 컨트롤러 Pod로 배달됩니다. 패킷의 도착지 IP·Port만 보고 옮길 뿐, HTTP 본문은 아직 들여다보지 않습니다.</p>
+<p>브라우저에서 <code>http://localhost/order</code> 같은 주소로 요청을 보내면, 노드에 뚫린 NodePort(또는 클라우드의 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 <code>minikube tunnel</code> 이 바로 이 입구를 호스트와 이어 주는 통로입니다. 그 직후 같은 노드의 kube-proxy가 미리 등록해 둔 iptables 항목을 따라 요청을 Ingress Controller로 전달합니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 2 — kube-proxy(1차)가 NodePort로 들어온 요청을 Ingress Controller Pod로 전달">
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 IT — 외부 요청이 NodePort + kube-proxy(1차)를 거쳐 Ingress Controller에 도달">
   <defs>
-    <marker id="fl2-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
-    <marker id="fl2-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="fl1n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
-  <rect x="20" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="91" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 1</text>
-  <text x="91" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">진입 (NodePort)</text>
-  <line x1="166" y1="31" x2="178" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl2-d)"/>
-  <rect x="180" y="14" width="142" height="34" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="251" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">STEP 2</text>
-  <text x="251" y="42" text-anchor="middle" font-size="10" fill="#7b341e">배달 (kube-proxy)</text>
-  <line x1="326" y1="31" x2="338" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl2-d)"/>
-  <rect x="340" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="411" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 3</text>
-  <text x="411" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">라우팅 (Ingress + DNS)</text>
-  <line x1="486" y1="31" x2="498" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl2-d)"/>
-  <rect x="500" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="571" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 4</text>
-  <text x="571" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">NAT (kube-proxy 2차)</text>
-  <line x1="646" y1="31" x2="658" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl2-d)"/>
-  <rect x="660" y="14" width="120" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="720" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 5</text>
-  <text x="720" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">도달 (Pod)</text>
-  <rect x="20" y="135" width="120" height="80" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
-  <text x="80" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="#94a3b8">NodePort</text>
-  <text x="80" y="190" text-anchor="middle" font-size="11" font-family="monospace" fill="#94a3b8">:9000</text>
-  <line x1="142" y1="175" x2="200" y2="175" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl2-a)"/>
-  <text x="171" y="165" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">전달</text>
-  <rect x="200" y="135" width="170" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="285" y="172" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">Kube Proxy</text>
-  <text x="285" y="192" text-anchor="middle" font-size="10" fill="#7b341e">(iptables 규칙)</text>
-  <line x1="370" y1="175" x2="430" y2="175" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl2-a)"/>
-  <text x="400" y="165" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">배달</text>
-  <rect x="430" y="135" width="200" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="530" y="167" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">Ingress Controller</text>
-  <text x="530" y="186" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod</text>
-  <text x="530" y="204" text-anchor="middle" font-size="10" fill="#7b341e">(L7 처리 시작)</text>
-  <rect x="650" y="135" width="130" height="80" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
-  <text x="715" y="160" text-anchor="middle" font-size="10" font-style="italic" fill="#94a3b8">다음 단계</text>
-  <text x="715" y="178" text-anchor="middle" font-size="11" font-weight="700" fill="#94a3b8">URL 읽고</text>
-  <text x="715" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#94a3b8">Service 선택</text>
-  <text x="715" y="210" text-anchor="middle" font-size="9" fill="#94a3b8">(STEP 3)</text>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">외부 요청 → NodePort → kube-proxy(1차) → Ingress Controller</text>
+  <rect x="20" y="120" width="120" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="80" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 호스트</text>
+  <text x="80" y="180" text-anchor="middle" font-size="10" fill="#6b7280">브라우저</text>
+  <line x1="140" y1="160" x2="195" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
+  <text x="167" y="150" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">localhost:9000</text>
+  <rect x="195" y="60" width="585" height="200" rx="10" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <text x="487" y="78" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Kubernetes 클러스터 (워커 노드)</text>
+  <rect x="220" y="120" width="120" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="280" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">NodePort</text>
+  <text x="280" y="170" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">:9000</text>
+  <text x="280" y="190" text-anchor="middle" font-size="9" fill="#7b341e">노드 외벽 진입</text>
+  <line x1="340" y1="160" x2="400" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
+  <text x="370" y="150" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">DNAT</text>
+  <rect x="400" y="120" width="160" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="480" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">kube-proxy (1차)</text>
+  <text x="480" y="170" text-anchor="middle" font-size="9" fill="#7b341e">iptables 규칙 따라</text>
+  <text x="480" y="185" text-anchor="middle" font-size="9" fill="#7b341e">Pod IP로 변환</text>
+  <line x1="560" y1="160" x2="615" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
+  <rect x="615" y="120" width="150" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="690" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress Controller</text>
+  <text x="690" y="180" text-anchor="middle" font-size="9" fill="#7b341e">(L7 처리 시작)</text>
 </svg>
 </div>
-<div class="caption">그림 5-33. iptables 규칙을 따라 Ingress Controller Pod로 전달</div>
-<p><strong>3단계 — 안내 직원이 주문서 읽고 매장 명단으로 매장 결정</strong></p>
-<p>안내 직원이 고객의 <strong>주문서</strong>(URL)를 펼쳐 읽습니다. &quot;<strong>짜장면 주문이네. 어느 매장으로 보낼까?</strong>&quot;라고 본사 <strong>매장 명단</strong>(이름 → 위치)을 조회합니다. 명단이 매장 이름을 매장 위치 번호로 풀어 주면, 직원은 그 위치 번호를 손에 쥐고 다음 단계로 넘깁니다.</p>
+<div class="caption">그림 5-21. NodePort + kube-proxy(1차)가 외부 요청을 Ingress Controller로 전달</div>
+<p><strong>2단계 — 부서 결정: 콜센터 상담원이 부서 명부 보고 부서 대표 내선 알아냄</strong></p>
+<p>콜센터에 도착한 손님 전화를 <strong>상담원</strong>이 받습니다. 손님 용건을 듣고 &quot;<strong>주문 관련이네, 주문 부서로 보내야겠다</strong>&quot;라고 판단합니다. 사내 <strong>부서 명부</strong>(부서 이름 → 대표 내선)를 펼쳐 주문 부서의 대표 내선(예: 1234번)을 확인한 뒤, 그 내선으로 전화를 돌려줍니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 3 비유 — 안내 직원이 주문서를 읽고 매장 명단으로 매장 위치를 풀어 결정">
+<svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 비유 — 콜센터 상담원이 부서 명부에서 결정된 부서의 대표 내선을 조회">
   <defs>
-    <marker id="m3-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="m3-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="m2n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="m2n-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">안내 직원이 주문서 읽고 매장 명단 조회 → 매장 결정</text>
-  <rect x="40" y="80" width="180" height="80" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
-  <text x="130" y="115" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">메인 화면</text>
-  <text x="130" y="133" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">안내 직원</text>
-  <text x="130" y="152" text-anchor="middle" font-size="10" fill="#94a3b8">(주문서 펼침)</text>
-  <line x1="220" y1="105" x2="280" y2="105" stroke="#475569" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#m3-s)"/>
-  <text x="250" y="95" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">"짜장면 매장?"</text>
-  <line x1="280" y1="135" x2="220" y2="135" stroke="#ff7849" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#m3-a)"/>
-  <text x="250" y="150" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">"2층 5호점"</text>
-  <rect x="280" y="80" width="180" height="80" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="370" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">매장 명단</text>
-  <text x="370" y="128" text-anchor="middle" font-size="10" fill="#7b341e">이름 → 위치 번호</text>
-  <text x="370" y="148" text-anchor="middle" font-size="9" fill="#7b341e">(자동 갱신)</text>
-  <text x="130" y="195" text-anchor="middle" font-size="10" font-weight="600" fill="#7b341e">↓ 위치 번호로 분기</text>
-  <line x1="130" y1="200" x2="540" y2="225" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m3-a)"/>
-  <line x1="130" y1="200" x2="660" y2="225" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m3-a)"/>
-  <rect x="500" y="225" width="120" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="560" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">매장 A 위치</text>
-  <rect x="640" y="225" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="690" y="246" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">매장 B 위치</text>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">콜센터 상담원이 부서 명부 조회 → 결정된 부서 대표 내선으로</text>
+  <rect x="20" y="50" width="180" height="130" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+  <rect x="35" y="60" width="150" height="20" rx="2" fill="#94a3b8"/>
+  <text x="110" y="75" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">☎ 본사 콜센터 ☎</text>
+  <g transform="translate(90, 110)">
+    <circle cx="20" cy="0" r="14" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+    <path d="M 6 -6 Q 6 -22 20 -22 Q 34 -22 34 -6" fill="none" stroke="#1565c0" stroke-width="2"/>
+    <ellipse cx="6" cy="-4" rx="3" ry="4" fill="#1565c0"/>
+    <ellipse cx="34" cy="-4" rx="3" ry="4" fill="#1565c0"/>
+    <path d="M -3 22 Q -3 50 20 50 Q 43 50 43 22 L 43 60 L -3 60 Z" fill="#fff" stroke="#94a3b8" stroke-width="1.4"/>
+  </g>
+  <text x="110" y="170" text-anchor="middle" font-size="9" fill="#94a3b8">상담원 (용건 들음)</text>
+  <line x1="205" y1="100" x2="265" y2="100" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#m2n-s)"/>
+  <text x="235" y="90" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">"주문 부서?"</text>
+  <line x1="265" y1="130" x2="205" y2="130" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#m2n-a)"/>
+  <text x="235" y="145" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">"내선 1234"</text>
+  <rect x="265" y="50" width="220" height="140" rx="4" fill="#fff" stroke="#7b341e" stroke-width="1.6"/>
+  <rect x="265" y="50" width="14" height="140" fill="#7b341e"/>
+  <text x="272" y="122" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" transform="rotate(-90 272 122)">DIRECTORY</text>
+  <text x="382" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">부서 명부</text>
+  <line x1="290" y1="80" x2="475" y2="80" stroke="#94a3b8" stroke-width="0.6"/>
+  <rect x="285" y="88" width="195" height="22" rx="2" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="295" y="104" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">▶ 주문 부서</text>
+  <text x="470" y="104" text-anchor="end" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">내선 1234</text>
+  <text x="295" y="129" font-size="9" font-family="monospace" fill="#94a3b8">결제 부서</text>
+  <text x="470" y="129" text-anchor="end" font-size="9" font-family="monospace" fill="#94a3b8">내선 5678</text>
+  <text x="295" y="151" font-size="9" font-family="monospace" fill="#94a3b8">매장 부서</text>
+  <text x="470" y="151" text-anchor="end" font-size="9" font-family="monospace" fill="#94a3b8">내선 9012</text>
+  <text x="295" y="173" font-size="9" font-family="monospace" fill="#94a3b8">CS 부서</text>
+  <text x="470" y="173" text-anchor="end" font-size="9" font-family="monospace" fill="#94a3b8">내선 3456</text>
+  <line x1="490" y1="99" x2="555" y2="99" stroke="#ff7849" stroke-width="2.4" marker-end="url(#m2n-a)"/>
+  <rect x="555" y="78" width="225" height="42" rx="21" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <text x="667" y="104" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">주문 부서 대표 내선 (1234)</text>
+  <rect x="565" y="130" width="205" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  <text x="667" y="148" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">반품 부서 대표 내선 (2345)</text>
+  <rect x="565" y="165" width="205" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  <text x="667" y="183" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">결제 부서 대표 내선 (5678)</text>
+  <rect x="565" y="200" width="205" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  <text x="667" y="218" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">CS 부서 대표 내선 (3456)</text>
 </svg>
 </div>
+<div class="caption">그림 5-22. 콜센터 상담원이 부서 명부에서 주문 부서의 대표 내선을 조회</div>
 <p>이 비유를 IT로 옮기면 세 가지가 짝지어집니다.</p>
 <table>
 <thead>
@@ -1117,17 +937,17 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">안내 직원</td>
+<td style="text-align:center">콜센터 상담원</td>
 <td style="text-align:left"><strong>Ingress Controller</strong></td>
 <td style="text-align:left">URL 경로와 도메인 헤더로 어느 백엔드 Service에 보낼지 정합니다</td>
 </tr>
 <tr>
-<td style="text-align:center">매장 명단 (이름 → 위치)</td>
+<td style="text-align:center">부서 명부 (이름 → 내선)</td>
 <td style="text-align:left"><strong>클러스터 DNS (CoreDNS)</strong></td>
 <td style="text-align:left">Service 이름을 ClusterIP로 풀어 줍니다</td>
 </tr>
 <tr>
-<td style="text-align:center">매장 위치 번호</td>
+<td style="text-align:center">부서 대표 내선</td>
 <td style="text-align:left"><strong>ClusterIP</strong></td>
 <td style="text-align:left">Service의 가상 진입 IP입니다</td>
 </tr>
@@ -1135,81 +955,127 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </table>
 <p>Ingress Controller는 도착한 요청의 HTTP 본문을 읽습니다. URL 경로와 도메인 헤더를 등록된 Ingress 규칙과 대조해 &quot;<strong>이 요청은 <code>order-service</code> 로 보낸다</strong>&quot;고 정합니다. 이름이 정해진 직후, 이름만으로는 패킷을 보낼 수 없으니 클러스터 DNS가 곧바로 <code>order-service</code> 를 ClusterIP로 풀어 줍니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 3 — Ingress Controller가 URL 읽고 Service 선택, DNS가 이름을 ClusterIP로 변환">
+<svg viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 IT — Ingress Controller가 DNS 조회로 결정된 Service의 ClusterIP로 전송">
   <defs>
-    <marker id="fl3-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
-    <marker id="fl3-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="fl3-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="fl2n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="fl2n-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
-  <rect x="20" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="91" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 1</text>
-  <text x="91" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">진입 (NodePort)</text>
-  <line x1="166" y1="31" x2="178" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl3-d)"/>
-  <rect x="180" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="251" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 2</text>
-  <text x="251" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">배달 (kube-proxy)</text>
-  <line x1="326" y1="31" x2="338" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl3-d)"/>
-  <rect x="340" y="14" width="142" height="34" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="411" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">STEP 3</text>
-  <text x="411" y="42" text-anchor="middle" font-size="10" fill="#7b341e">라우팅 (Ingress + DNS)</text>
-  <line x1="486" y1="31" x2="498" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl3-d)"/>
-  <rect x="500" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="571" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 4</text>
-  <text x="571" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">NAT (kube-proxy 2차)</text>
-  <line x1="646" y1="31" x2="658" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl3-d)"/>
-  <rect x="660" y="14" width="120" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="720" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 5</text>
-  <text x="720" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">도달 (Pod)</text>
-  <rect x="20" y="100" width="200" height="80" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
-  <text x="120" y="132" text-anchor="middle" font-size="13" font-weight="700" fill="#94a3b8">Ingress Controller</text>
-  <text x="120" y="152" text-anchor="middle" font-size="11" fill="#94a3b8">Pod</text>
-  <text x="120" y="170" text-anchor="middle" font-size="10" fill="#94a3b8">(URL 읽음)</text>
-  <line x1="220" y1="125" x2="280" y2="125" stroke="#475569" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#fl3-s)"/>
-  <text x="250" y="115" text-anchor="middle" font-size="10" font-style="italic" font-family="monospace" fill="#475569">"order-service?"</text>
-  <line x1="280" y1="155" x2="220" y2="155" stroke="#ff7849" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#fl3-a)"/>
-  <text x="250" y="170" text-anchor="middle" font-size="10" font-style="italic" font-family="monospace" fill="#7b341e">"10.96.0.20"</text>
-  <rect x="280" y="100" width="180" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="370" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">클러스터 DNS</text>
-  <text x="370" y="148" text-anchor="middle" font-size="11" fill="#7b341e">(CoreDNS)</text>
-  <text x="370" y="168" text-anchor="middle" font-size="10" fill="#7b341e">이름 → ClusterIP</text>
-  <text x="120" y="218" text-anchor="middle" font-size="10" font-weight="600" fill="#7b341e">↓ ClusterIP로 분기</text>
-  <line x1="120" y1="225" x2="270" y2="240" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl3-a)"/>
-  <line x1="120" y1="225" x2="510" y2="240" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl3-a)"/>
-  <rect x="270" y="240" width="160" height="40" rx="20" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="350" y="265" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Service A</text>
-  <rect x="510" y="240" width="160" height="40" rx="20" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="590" y="265" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Service B</text>
-  <text x="400" y="305" text-anchor="middle" font-size="10" font-style="italic" fill="#94a3b8">다음 단계 (STEP 4): kube-proxy(2차)가 Pod IP로 변환</text>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Ingress Controller → DNS 조회 → 결정된 Service ClusterIP로 전송</text>
+  <rect x="20" y="55" width="200" height="120" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+  <text x="120" y="95" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Ingress Controller</text>
+  <text x="120" y="115" text-anchor="middle" font-size="11" fill="#6b7280">Pod</text>
+  <text x="120" y="143" text-anchor="middle" font-size="10" fill="#7b341e">URL·Host 읽음</text>
+  <line x1="225" y1="100" x2="285" y2="100" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#fl2n-s)"/>
+  <text x="255" y="90" text-anchor="middle" font-size="9" font-style="italic" font-family="monospace" fill="#475569">"order-service?"</text>
+  <line x1="285" y1="135" x2="225" y2="135" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#fl2n-a)"/>
+  <text x="255" y="150" text-anchor="middle" font-size="9" font-style="italic" font-family="monospace" fill="#7b341e">"10.96.0.20"</text>
+  <rect x="285" y="55" width="220" height="120" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="395" y="95" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">클러스터 DNS</text>
+  <text x="395" y="115" text-anchor="middle" font-size="10" fill="#7b341e">(CoreDNS)</text>
+  <text x="395" y="143" text-anchor="middle" font-size="10" fill="#7b341e">이름 → ClusterIP</text>
+  <line x1="510" y1="99" x2="575" y2="99" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl2n-a)"/>
+  <rect x="575" y="78" width="205" height="42" rx="21" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <text x="677" y="104" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">order-service (10.96.0.20)</text>
+  <rect x="585" y="130" width="185" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  <text x="677" y="148" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">return-service (10.96.0.21)</text>
+  <rect x="585" y="165" width="185" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  <text x="677" y="183" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">payment-service (10.96.0.22)</text>
+  <rect x="585" y="200" width="185" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+  <text x="677" y="218" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">cs-service (10.96.0.23)</text>
+  <text x="400" y="245" text-anchor="middle" font-size="10" font-style="italic" fill="#94a3b8">다음 단계 (3단계): kube-proxy(2차)가 Pod IP로 변환</text>
 </svg>
 </div>
-<div class="caption">그림 5-34. Ingress Controller가 URL을 읽고 Service를 선택, 그 직후 DNS가 이름을 ClusterIP로 변환</div>
-<p><strong>4단계 — 매장 분배 시스템이 매장 직원에게 전달</strong></p>
-<p>매장 위치 번호가 손에 들렸지만 그 매장에는 직원이 여러 명 있을 수 있습니다. 위치 번호를 받은 <strong>매장 분배 시스템</strong>이 살아 있는 매장 직원 중 한 명을 골라 요청을 전달합니다. 분배 시스템은 본사 운영팀이 늘 갱신해 두는 <strong>매장 직원 명단</strong>을 보고 결정합니다.</p>
+<div class="caption">그림 5-23. Ingress Controller가 URL을 읽어 Service를 선택, DNS가 이름을 ClusterIP로 변환</div>
+<p><strong>3단계 — 직원 응답: 부서 자동 분배가 응대 직원 한 명에게 연결, 부서 매니저가 응대 직원 명단 갱신</strong></p>
+<p>부서 대표 내선으로 전화가 들어오면, 부서 안 <strong>자동 전화 분배</strong>가 받아 <strong>응대 가능한 직원</strong> 한 명에게 자동으로 연결합니다. 직원이 응답합니다.</p>
+<p>이 분배가 정확하려면 누군가가 &quot;<strong>지금 응대 가능한 직원이 누구인지</strong>&quot; 명단을 늘 챙겨야 합니다. 그 역할이 <strong>부서 매니저</strong>입니다. 매니저가 팀 <strong>근태 관리</strong>(출퇴근·휴가)로 가용 인력 명단을 정리해, 자동 분배가 살아있는 직원에게만 전화를 돌리도록 받쳐 줍니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 4 비유 — 매장 위치 번호를 받은 분배 시스템이 살아 있는 매장 직원 중 하나를 선택">
+<svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 비유 — 자동 전화 분배가 응대 직원 한 명에게 연결, 부서 매니저가 응대 직원 명단 갱신">
   <defs>
-    <marker id="m4-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="m3n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="m3n-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="m3n-bi" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#7b341e"/></marker>
   </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">매장 위치 번호 → 분배 시스템 → 매장 직원 한 명</text>
-  <rect x="40" y="90" width="160" height="60" rx="30" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
-  <text x="120" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">매장 위치 번호</text>
-  <text x="120" y="138" text-anchor="middle" font-size="10" fill="#94a3b8">(이전 단계)</text>
-  <line x1="200" y1="120" x2="280" y2="120" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m4-a)"/>
-  <text x="240" y="110" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">전달</text>
-  <rect x="280" y="80" width="200" height="100" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="380" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">매장 분배 시스템</text>
-  <text x="380" y="135" text-anchor="middle" font-size="10" fill="#7b341e">살아 있는 매장 직원</text>
-  <text x="380" y="152" text-anchor="middle" font-size="10" fill="#7b341e">명단 확인</text>
-  <text x="380" y="170" text-anchor="middle" font-size="9" fill="#7b341e">(부하 분산)</text>
-  <line x1="480" y1="105" x2="560" y2="80" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m4-a)"/>
-  <line x1="480" y1="135" x2="560" y2="160" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m4-a)"/>
-  <rect x="560" y="60" width="160" height="40" rx="20" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="640" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">매장 직원 1</text>
-  <rect x="560" y="140" width="160" height="40" rx="20" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="640" y="165" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">매장 직원 2</text>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">부서 대표 내선 → 자동 전화 분배 → 응대 직원 응답</text>
+  <!-- 부서 대표 내선 (왼쪽) — 전화기 아이콘 -->
+  <rect x="20" y="80" width="160" height="40" rx="20" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+  <g transform="translate(45, 100)">
+    <rect x="-8" y="-9" width="18" height="18" rx="2" fill="#1565c0"/>
+    <path d="M -5 -7 Q -5 -11 1 -11 Q 7 -11 7 -7" fill="none" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="-3" cy="-2" r="0.8" fill="#fff"/>
+    <circle cx="1" cy="-2" r="0.8" fill="#fff"/>
+    <circle cx="5" cy="-2" r="0.8" fill="#fff"/>
+  </g>
+  <text x="115" y="105" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">부서 대표 내선</text>
+  <line x1="180" y1="100" x2="240" y2="100" stroke="#ff7849" stroke-width="2.4" marker-end="url(#m3n-a)"/>
+  <!-- 주문 부서 큰 박스 + 간판 -->
+  <rect x="240" y="60" width="540" height="180" rx="10" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
+  <rect x="270" y="46" width="120" height="24" rx="3" fill="#7b341e"/>
+  <text x="330" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">━ 주문 부서 ━</text>
+  <!-- 자동 전화 분배 (전화 분배기 아이콘 — 전화기 + 분기) -->
+  <rect x="260" y="90" width="180" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <g transform="translate(285, 130)">
+    <rect x="-10" y="-12" width="26" height="22" rx="3" fill="#1565c0"/>
+    <rect x="-7" y="-9" width="20" height="6" rx="1" fill="#fff"/>
+    <circle cx="-5" cy="2" r="1" fill="#fff"/>
+    <circle cx="0" cy="2" r="1" fill="#fff"/>
+    <circle cx="5" cy="2" r="1" fill="#fff"/>
+    <circle cx="10" cy="2" r="1" fill="#fff"/>
+    <circle cx="-5" cy="6" r="1" fill="#fff"/>
+    <circle cx="0" cy="6" r="1" fill="#fff"/>
+    <circle cx="5" cy="6" r="1" fill="#fff"/>
+    <circle cx="10" cy="6" r="1" fill="#fff"/>
+    <line x1="18" y1="-5" x2="26" y2="-12" stroke="#7b341e" stroke-width="1.2"/>
+    <line x1="18" y1="0" x2="28" y2="0" stroke="#7b341e" stroke-width="1.2"/>
+    <line x1="18" y1="5" x2="26" y2="12" stroke="#7b341e" stroke-width="1.2"/>
+  </g>
+  <text x="380" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">자동 전화 분배</text>
+  <text x="380" y="138" text-anchor="middle" font-size="9" fill="#7b341e">가용 인원 중 자동 분배</text>
+  <text x="380" y="153" text-anchor="middle" font-size="9" fill="#7b341e">→ 한 명에게 연결</text>
+  <rect x="495" y="85" width="270" height="105" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="630" y="103" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">응대 직원 그룹</text>
+  <line x1="440" y1="138" x2="544" y2="138" stroke="#ff7849" stroke-width="2" marker-end="url(#m3n-a)"/>
+  <!-- 응대 직원 (헤드셋 낀 사람 두 명) -->
+  <g transform="translate(560, 138)">
+    <circle cx="0" cy="0" r="11" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
+    <path d="M -11 0 Q -11 -13 0 -13 Q 11 -13 11 0" fill="none" stroke="#1565c0" stroke-width="2"/>
+    <ellipse cx="-11" cy="2" rx="2.5" ry="3.5" fill="#1565c0"/>
+    <ellipse cx="11" cy="2" rx="2.5" ry="3.5" fill="#1565c0"/>
+    <path d="M 11 4 Q 16 8 14 12" fill="none" stroke="#1565c0" stroke-width="1.4"/>
+    <circle cx="14" cy="13" r="1.6" fill="#1565c0"/>
+    <path d="M -3 18 Q -3 32 0 32 Q 3 32 3 18 L 11 32 L -11 32 Z" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
+  </g>
+  <text x="560" y="180" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">직원 1</text>
+  <g transform="translate(700, 138)">
+    <circle cx="0" cy="0" r="11" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
+    <path d="M -11 0 Q -11 -13 0 -13 Q 11 -13 11 0" fill="none" stroke="#1565c0" stroke-width="2"/>
+    <ellipse cx="-11" cy="2" rx="2.5" ry="3.5" fill="#1565c0"/>
+    <ellipse cx="11" cy="2" rx="2.5" ry="3.5" fill="#1565c0"/>
+    <path d="M 11 4 Q 16 8 14 12" fill="none" stroke="#1565c0" stroke-width="1.4"/>
+    <circle cx="14" cy="13" r="1.6" fill="#1565c0"/>
+    <path d="M -3 18 Q -3 32 0 32 Q 3 32 3 18 L 11 32 L -11 32 Z" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
+  </g>
+  <text x="700" y="180" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">직원 2</text>
+  <!-- 부서 매니저 (사람 + 클립보드 명단 아이콘) -->
+  <rect x="20" y="250" width="280" height="80" rx="8" fill="#fff" stroke="#7b341e" stroke-width="2" stroke-dasharray="5,3"/>
+  <g transform="translate(55, 280)">
+    <circle cx="0" cy="0" r="12" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+    <path d="M -3 16 Q -3 32 0 32 Q 3 32 3 16 L 12 32 L -12 32 Z" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+    <rect x="14" y="-6" width="20" height="26" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1.2"/>
+    <rect x="20" y="-9" width="8" height="5" rx="1" fill="#7b341e"/>
+    <line x1="17" y1="3" x2="31" y2="3" stroke="#0f6f3f" stroke-width="0.8"/>
+    <line x1="17" y1="8" x2="31" y2="8" stroke="#dc2626" stroke-width="0.8"/>
+    <line x1="17" y1="13" x2="31" y2="13" stroke="#0f6f3f" stroke-width="0.8"/>
+  </g>
+  <text x="180" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">부서 매니저</text>
+  <text x="180" y="298" text-anchor="middle" font-size="10" fill="#7b341e">팀 근태 관리 (출퇴근·휴가)</text>
+  <text x="180" y="313" text-anchor="middle" font-size="10" fill="#7b341e">→ 가용 인력 명단 관리</text>
+  <line x1="305" y1="248" x2="345" y2="172" stroke="#7b341e" stroke-width="1.4" stroke-dasharray="5,3" marker-start="url(#m3n-bi)" marker-end="url(#m3n-bi)"/>
+  <text x="280" y="215" font-size="9" font-style="italic" fill="#7b341e">watch (구독·알림)</text>
 </svg>
 </div>
-<p>이 비유를 IT로 옮기면 두 가지가 짝지어집니다.</p>
+<div class="caption">그림 5-24. 부서 매니저가 응대 직원 명단을 갱신, 자동 분배가 명단 보고 응대 가능한 직원에게 전화 연결</div>
+<p>이 비유를 IT로 옮기면 네 가지가 짝지어집니다.</p>
 <table>
 <thead>
 <tr>
@@ -1220,180 +1086,68 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">매장 분배 시스템</td>
+<td style="text-align:center">부서 자동 전화 분배</td>
 <td style="text-align:left"><strong>kube-proxy(2차)</strong></td>
 <td style="text-align:left">ClusterIP를 살아있는 Pod IP로 변환하는 L4 로드밸런서입니다</td>
 </tr>
 <tr>
-<td style="text-align:center">매장 직원 명단</td>
-<td style="text-align:left"><strong>Pod IP 목록</strong></td>
+<td style="text-align:center">응대 직원 명단</td>
+<td style="text-align:left"><strong>Pod IP 목록 (EndpointSlice)</strong></td>
 <td style="text-align:left">Service에 묶인 살아있는 백엔드 Pod의 IP 목록입니다</td>
 </tr>
-</tbody>
-</table>
-<p>ClusterIP로 향한 요청은 다시 같은 노드의 kube-proxy(2차)가 가로채, Pod IP 목록에서 살아있는 Pod 중 하나의 IP로 바꿔 보냅니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 4 — kube-proxy(2차)가 ClusterIP를 Pod IP로 변환 (L4 로드밸런싱)">
-  <defs>
-    <marker id="fl4-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
-    <marker id="fl4-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-  </defs>
-  <rect x="20" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="91" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 1</text>
-  <text x="91" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">진입 (NodePort)</text>
-  <line x1="166" y1="31" x2="178" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl4-d)"/>
-  <rect x="180" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="251" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 2</text>
-  <text x="251" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">배달 (kube-proxy)</text>
-  <line x1="326" y1="31" x2="338" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl4-d)"/>
-  <rect x="340" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="411" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 3</text>
-  <text x="411" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">라우팅 (Ingress + DNS)</text>
-  <line x1="486" y1="31" x2="498" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl4-d)"/>
-  <rect x="500" y="14" width="142" height="34" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="571" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">STEP 4</text>
-  <text x="571" y="42" text-anchor="middle" font-size="10" fill="#7b341e">NAT (kube-proxy 2차)</text>
-  <line x1="646" y1="31" x2="658" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl4-d)"/>
-  <rect x="660" y="14" width="120" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="720" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 5</text>
-  <text x="720" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">도달 (Pod)</text>
-  <rect x="100" y="100" width="160" height="40" rx="20" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
-  <text x="180" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">Service A (ClusterIP)</text>
-  <rect x="540" y="100" width="160" height="40" rx="20" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
-  <text x="620" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">Service B (ClusterIP)</text>
-  <line x1="180" y1="142" x2="180" y2="180" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl4-a)"/>
-  <text x="200" y="166" font-size="10" font-style="italic" fill="#7b341e">DNAT</text>
-  <line x1="620" y1="142" x2="620" y2="180" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl4-a)"/>
-  <text x="640" y="166" font-size="10" font-style="italic" fill="#7b341e">DNAT</text>
-  <rect x="60" y="180" width="240" height="100" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="80" y="200" font-size="11" font-weight="700" fill="#7b341e">Node 1</text>
-  <text x="285" y="200" text-anchor="end" font-size="10" font-family="monospace" fill="#7b341e">port :9000</text>
-  <rect x="100" y="215" width="160" height="40" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="180" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube Proxy</text>
-  <text x="180" y="270" text-anchor="middle" font-size="10" fill="#7b341e">→ 살아있는 Pod IP 선택</text>
-  <rect x="500" y="180" width="240" height="100" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="520" y="200" font-size="11" font-weight="700" fill="#7b341e">Node 2</text>
-  <text x="725" y="200" text-anchor="end" font-size="10" font-family="monospace" fill="#7b341e">port :9000</text>
-  <rect x="540" y="215" width="160" height="40" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="620" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube Proxy</text>
-  <text x="620" y="270" text-anchor="middle" font-size="10" fill="#7b341e">→ 살아있는 Pod IP 선택</text>
-  <text x="400" y="305" text-anchor="middle" font-size="10" font-style="italic" fill="#94a3b8">다음 단계 (STEP 5): 선택된 Pod에 도달</text>
-</svg>
-</div>
-<div class="caption">그림 5-35. kube-proxy(2차)가 ClusterIP를 Pod IP로 변환 (L4 로드밸런싱)</div>
-<p><strong>5단계 — 매장 직원이 응답 + 본사 운영팀이 명단 갱신</strong></p>
-<p>매장 직원이 주문을 받아 처리하고 응답을 돌려보냅니다. 그 사이 다섯 단계 내내 보이지 않게 일하는 사람이 있습니다. <strong>본사 운영팀</strong>입니다. 매장 직원이 새로 들어오거나 그만두면 곧바로 매장 직원 명단을 갱신해서, 4단계의 분배 시스템이 늘 살아 있는 직원만 배정하도록 받쳐 줍니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 5 비유 — 매장 직원이 응답하고, 본사 운영팀이 매장 직원 명단을 항상 갱신">
-  <defs>
-    <marker id="m5-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="m5-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-  </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">매장 직원 응답 + 본사 운영팀이 직원 명단 갱신</text>
-  <rect x="40" y="80" width="160" height="60" rx="30" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
-  <text x="120" y="108" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">분배 시스템</text>
-  <text x="120" y="128" text-anchor="middle" font-size="10" fill="#94a3b8">(이전 단계)</text>
-  <line x1="200" y1="110" x2="280" y2="110" stroke="#ff7849" stroke-width="2.6" marker-end="url(#m5-a)"/>
-  <text x="240" y="100" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">배정</text>
-  <rect x="280" y="70" width="280" height="100" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="420" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">매장 직원 그룹</text>
-  <rect x="305" y="110" width="100" height="34" rx="17" fill="#fff" stroke="#ff7849" stroke-width="2"/>
-  <text x="355" y="132" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">직원 1</text>
-  <rect x="435" y="110" width="100" height="34" rx="17" fill="#fff" stroke="#ff7849" stroke-width="2"/>
-  <text x="485" y="132" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">직원 2</text>
-  <text x="420" y="162" text-anchor="middle" font-size="10" fill="#7b341e">주문 처리 → 응답</text>
-  <rect x="40" y="200" width="220" height="60" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="150" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">본사 운영팀</text>
-  <text x="150" y="245" text-anchor="middle" font-size="10" fill="#7b341e">(매장 직원 명단 갱신)</text>
-  <line x1="260" y1="220" x2="370" y2="155" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#m5-s)"/>
-  <text x="310" y="200" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">직원 감시 (입사·퇴사 추적)</text>
-  <rect x="540" y="200" width="200" height="60" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
-  <text x="640" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#94a3b8">분배 시스템</text>
-  <text x="640" y="242" text-anchor="middle" font-size="10" fill="#94a3b8">최신 명단 참조 (4단계)</text>
-  <line x1="260" y1="240" x2="540" y2="240" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#m5-s)"/>
-  <text x="400" y="232" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">갱신된 직원 명단 전달</text>
-</svg>
-</div>
-<p>이 비유를 IT로 옮기면 두 가지가 짝지어집니다.</p>
-<table>
-<thead>
 <tr>
-<th style="text-align:center">비유</th>
-<th style="text-align:left">IT 용어</th>
-<th style="text-align:left">한 줄 설명</th>
+<td style="text-align:center">부서 매니저</td>
+<td style="text-align:left"><strong>Endpoint Controller</strong></td>
+<td style="text-align:left">Pod 변동을 감지해 위 명단을 즉시 갱신하는 컨트롤 플레인 컴포넌트입니다</td>
 </tr>
-</thead>
-<tbody>
 <tr>
-<td style="text-align:center">매장 직원</td>
+<td style="text-align:center">응대 직원</td>
 <td style="text-align:left"><strong>Pod</strong></td>
 <td style="text-align:left">비즈니스 로직을 실행하는 백엔드 인스턴스입니다</td>
 </tr>
-<tr>
-<td style="text-align:center">본사 운영팀</td>
-<td style="text-align:left"><strong>Endpoint Controller</strong></td>
-<td style="text-align:left">Pod 변동을 감시해 Service의 Pod IP 목록을 최신으로 유지합니다</td>
-</tr>
 </tbody>
 </table>
-<p>요청이 백엔드 Pod에 닿습니다. 애플리케이션이 비즈니스 로직을 실행해 응답을 돌려보냅니다. 이 과정 내내 Endpoint Controller는 뒤에서 Pod IP 목록을 최신으로 유지합니다.</p>
+<p>ClusterIP로 향한 요청은 같은 노드의 kube-proxy(2차)가 가로채서, <strong>Pod IP 목록(EndpointSlice)</strong> 에서 살아있는 Pod 중 하나의 IP로 바꿔 보냅니다. 요청이 백엔드 Pod에 닿으면 애플리케이션이 비즈니스 로직을 실행해 응답을 돌려보냅니다.</p>
+<p>이 모든 게 가능한 건 <strong>Endpoint Controller</strong>가 뒤에서 받쳐 주기 때문입니다. Service의 selector(라벨)에 매칭되는 Pod가 새로 뜨거나 죽는 즉시 감지해 Pod IP 목록을 갱신하므로, kube-proxy(2차)가 항상 살아있는 Pod에만 연결됩니다. 만약 이 갱신이 늦어지면 죽은 Pod IP로 트래픽이 흘러가 요청이 실패할 수 있습니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="STEP 5 — 요청이 Pod에 도달, Endpoint Controller는 백그라운드에서 Pod IP 목록 유지">
+<svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 IT — kube-proxy(2차)가 ClusterIP를 Pod IP로 변환, Endpoint Controller가 Pod IP 목록 갱신">
   <defs>
-    <marker id="fl5-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
-    <marker id="fl5-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="fl5-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="fl3n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="fl3n-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="fl3n-bi" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
-  <rect x="20" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="91" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 1</text>
-  <text x="91" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">진입 (NodePort)</text>
-  <line x1="166" y1="31" x2="178" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl5-d)"/>
-  <rect x="180" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="251" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 2</text>
-  <text x="251" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">배달 (kube-proxy)</text>
-  <line x1="326" y1="31" x2="338" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl5-d)"/>
-  <rect x="340" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="411" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 3</text>
-  <text x="411" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">라우팅 (Ingress + DNS)</text>
-  <line x1="486" y1="31" x2="498" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl5-d)"/>
-  <rect x="500" y="14" width="142" height="34" rx="6" fill="#fff" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="571" y="28" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">STEP 4</text>
-  <text x="571" y="42" text-anchor="middle" font-size="10" fill="#94a3b8">NAT (kube-proxy 2차)</text>
-  <line x1="646" y1="31" x2="658" y2="31" stroke="#cbd5e1" stroke-width="1.2" marker-end="url(#fl5-d)"/>
-  <rect x="660" y="14" width="120" height="34" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="720" y="28" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">STEP 5</text>
-  <text x="720" y="42" text-anchor="middle" font-size="10" fill="#7b341e">도달 (Pod)</text>
-  <rect x="20" y="100" width="160" height="80" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
-  <text x="100" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#94a3b8">Node Kube Proxy</text>
-  <text x="100" y="155" text-anchor="middle" font-size="10" fill="#94a3b8">(STEP 4에서 선택한</text>
-  <text x="100" y="170" text-anchor="middle" font-size="10" fill="#94a3b8">Pod IP로 전달)</text>
-  <line x1="180" y1="140" x2="240" y2="140" stroke="#ff7849" stroke-width="2.6" marker-end="url(#fl5-a)"/>
-  <text x="210" y="130" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">전달</text>
-  <rect x="240" y="100" width="280" height="100" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="380" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">백엔드 Pod 그룹</text>
-  <rect x="265" y="140" width="100" height="34" rx="17" fill="#fff" stroke="#ff7849" stroke-width="2"/>
-  <text x="315" y="162" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod A</text>
-  <rect x="395" y="140" width="100" height="34" rx="17" fill="#fff" stroke="#ff7849" stroke-width="2"/>
-  <text x="445" y="162" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod B</text>
-  <text x="380" y="192" text-anchor="middle" font-size="10" fill="#7b341e">애플리케이션 응답</text>
-  <rect x="20" y="230" width="220" height="90" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
-  <text x="130" y="255" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Endpoint Controller</text>
-  <text x="130" y="275" text-anchor="middle" font-size="10" fill="#7b341e">(다섯 단계 내내</text>
-  <text x="130" y="290" text-anchor="middle" font-size="10" fill="#7b341e">백그라운드 동작)</text>
-  <text x="130" y="310" text-anchor="middle" font-size="10" fill="#7b341e">Pod IP 목록 갱신</text>
-  <line x1="245" y1="255" x2="395" y2="180" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#fl5-s)"/>
-  <text x="320" y="220" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">Pod 감시 (살아있는 Pod 추적)</text>
-  <rect x="540" y="230" width="240" height="90" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
-  <text x="660" y="255" text-anchor="middle" font-size="11" font-weight="700" fill="#94a3b8">Kube Proxy</text>
-  <text x="660" y="278" text-anchor="middle" font-size="10" fill="#94a3b8">Endpoint Controller가</text>
-  <text x="660" y="293" text-anchor="middle" font-size="10" fill="#94a3b8">갱신한 Pod IP 목록을</text>
-  <text x="660" y="308" text-anchor="middle" font-size="10" fill="#94a3b8">참조해 라우팅 (STEP 4)</text>
-  <line x1="240" y1="265" x2="540" y2="265" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#fl5-s)"/>
-  <text x="390" y="258" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">Pod IP 목록 참조</text>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">ClusterIP → kube-proxy(2차) DNAT → Pod IP → Pod 응답</text>
+  <rect x="20" y="80" width="160" height="40" rx="20" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+  <text x="100" y="105" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">Service ClusterIP</text>
+  <line x1="180" y1="100" x2="240" y2="100" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl3n-a)"/>
+  <rect x="240" y="60" width="540" height="180" rx="10" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <text x="510" y="78" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">워커 노드</text>
+  <rect x="260" y="90" width="180" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <text x="350" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">kube-proxy (2차)</text>
+  <text x="350" y="138" text-anchor="middle" font-size="9" fill="#7b341e">iptables DNAT</text>
+  <text x="350" y="153" text-anchor="middle" font-size="9" fill="#7b341e">ClusterIP → Pod IP</text>
+  <rect x="495" y="85" width="270" height="105" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="630" y="103" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">백엔드 Pod 그룹</text>
+  <line x1="440" y1="129" x2="532" y2="129" stroke="#ff7849" stroke-width="2" marker-end="url(#fl3n-a)"/>
+  <rect x="522" y="113" width="90" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="567" y="134" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod A</text>
+  <rect x="647" y="113" width="90" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="692" y="134" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod B</text>
+  <text x="630" y="167" text-anchor="middle" font-size="9" fill="#7b341e">애플리케이션 로직 실행 → 응답</text>
+  <rect x="20" y="250" width="260" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2" stroke-dasharray="5,3"/>
+  <text x="150" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Endpoint Controller</text>
+  <text x="150" y="298" text-anchor="middle" font-size="10" fill="#7b341e">Pod 변동 감시</text>
+  <text x="150" y="313" text-anchor="middle" font-size="10" fill="#7b341e">→ Pod IP 목록 갱신</text>
+  <line x1="285" y1="250" x2="345" y2="172" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-start="url(#fl3n-bi)" marker-end="url(#fl3n-bi)"/>
+  <text x="270" y="215" font-size="9" font-style="italic" fill="#475569">watch (구독·알림)</text>
 </svg>
 </div>
-<div class="caption">그림 5-36. Pod 도달. Endpoint Controller는 다섯 단계 내내 백그라운드에서 Pod IP 목록을 최신으로 유지</div>
-<p>다섯 단계를 한 표로 정리하면 다음과 같습니다.</p>
+<div class="caption">그림 5-25. ClusterIP → kube-proxy(2차)가 Pod IP로 변환 → Pod 응답. Endpoint Controller가 Pod IP 목록 갱신</div>
+<div class="prep-note">
+<p><strong>EC와 kube-proxy의 정확한 통신 — API Server가 매개</strong></p>
+<p>엄밀히 말하면 Endpoint Controller가 kube-proxy에게 직접 명단을 주는 게 아닙니다. EC가 EndpointSlice를 갱신하면 그 결과는 <strong>API Server에 저장</strong>되고, 각 노드의 kube-proxy가 API Server를 <strong>watch(구독)</strong> 해서 변경 알림을 받습니다. 즉 두 컴포넌트 사이에 <strong>API Server가 중간 매개체</strong> 역할을 합니다. 비유 그림에서는 이 매개를 생략하고 매니저 ↔ 분배기 양방향 화살표로 단순화했습니다.</p>
+</div>
+<p>세 단계를 한 표로 정리하면 다음과 같습니다.</p>
 <table>
 <thead>
 <tr>
@@ -1406,54 +1160,40 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">1</td>
-<td style="text-align:left">외부 입구</td>
-<td style="text-align:left">Service (NodePort/LoadBalancer)</td>
-<td style="text-align:left">외부 요청을 클러스터 안으로 받는다</td>
-<td style="text-align:left">노드 IP, 포트</td>
+<td style="text-align:center">1 진입</td>
+<td style="text-align:left">클러스터 입구 + 노드</td>
+<td style="text-align:left">NodePort + kube-proxy(1차)</td>
+<td style="text-align:left">외부 요청을 받아 Ingress Controller로 전달</td>
+<td style="text-align:left">노드 IP·포트, ClusterIP, Pod IP 목록</td>
 </tr>
 <tr>
-<td style="text-align:center">2</td>
-<td style="text-align:left">클러스터 안</td>
-<td style="text-align:left">kube-proxy (1차)</td>
-<td style="text-align:left">Ingress Controller Pod로 요청을 보낸다</td>
-<td style="text-align:left">Service ClusterIP, Pod IP 목록</td>
-</tr>
-<tr>
-<td style="text-align:center">3</td>
+<td style="text-align:center">2 부서 결정</td>
 <td style="text-align:left">Ingress Controller + DNS</td>
-<td style="text-align:left">Ingress Controller, DNS</td>
-<td style="text-align:left">URL을 읽어 백엔드 Service를 정하고, 그 이름을 ClusterIP로 변환</td>
+<td style="text-align:left">Ingress Controller, 클러스터 DNS</td>
+<td style="text-align:left">URL 읽고 백엔드 Service 결정, 이름을 ClusterIP로 변환</td>
 <td style="text-align:left">URL 경로, Host 헤더 → 이름 → ClusterIP</td>
 </tr>
 <tr>
-<td style="text-align:center">4</td>
-<td style="text-align:left">백엔드 노드</td>
-<td style="text-align:left">kube-proxy (2차)</td>
-<td style="text-align:left">ClusterIP를 살아있는 Pod IP로 바꾼다</td>
+<td style="text-align:center">3 직원 응답</td>
+<td style="text-align:left">백엔드 노드 + Pod</td>
+<td style="text-align:left">kube-proxy(2차) + Pod, Endpoint Controller</td>
+<td style="text-align:left">ClusterIP를 살아있는 Pod IP로 변환, Pod가 응답</td>
 <td style="text-align:left">Service ClusterIP, Pod IP 목록</td>
-</tr>
-<tr>
-<td style="text-align:center">5</td>
-<td style="text-align:left">백엔드 Pod</td>
-<td style="text-align:left">애플리케이션</td>
-<td style="text-align:left">비즈니스 로직 실행</td>
-<td style="text-align:left">요청 데이터</td>
 </tr>
 </tbody>
 </table>
-<p>같은 다섯 단계지만 보는 정보의 깊이가 다릅니다. 프랜차이즈 비유 안에서는 둘 다 &quot;<strong>라우팅</strong>&quot;으로 묶이는데, 깊이 차이를 또렷이 보려고 잠깐 도로 메타포를 빌려옵니다. <strong>톨게이트</strong>는 차량 번호와 차종(IP·Port)만 확인하고 통과시킵니다. <strong>안내데스크</strong>는 차에 탄 사람의 용건(URL·Host)까지 듣고 적절한 길을 안내합니다. NodePort와 kube-proxy가 톨게이트 역할이라면, Ingress Controller가 안내데스크 역할입니다.</p>
+<p>같은 &quot;전달&quot;처럼 보이지만 단계별로 보는 정보의 깊이가 다릅니다. NodePort와 kube-proxy는 봉투 겉면(IP·Port)만 보고 옮기고, Ingress Controller는 봉투를 열어 안의 내용(URL·Host)까지 읽고 어디로 보낼지 결정합니다.</p>
 <div class="prep-note">
 <p><strong>L4와 L7</strong></p>
-<p>네트워크에서는 IP·Port 같은 봉투 겉면 정보를 다루는 계층을 <strong>L4(전송 계층)</strong> , URL 경로·헤더 같은 봉투 안쪽 정보를 다루는 계층을 <strong>L7(애플리케이션 계층)</strong> 이라고 부릅니다. NodePort와 kube-proxy는 L4 정보로 일하고, 5.3.1에서 본 DNS·Endpoint Controller도 L4 영역에 머무릅니다. 다섯 단계 중 HTTP 본문(L7)까지 들여다보는 프로그램은 Ingress Controller 하나뿐입니다.</p>
+<p>네트워크에서는 IP·Port 같은 봉투 겉면 정보를 다루는 계층을 <strong>L4(전송 계층)</strong> , URL 경로·헤더 같은 봉투 안쪽 정보를 다루는 계층을 <strong>L7(애플리케이션 계층)</strong> 이라고 부릅니다. NodePort와 kube-proxy는 L4 정보로 일하고, 앞서 본 DNS·Endpoint Controller도 L4 영역에 머무릅니다. 세 단계 중 HTTP 본문(L7)까지 들여다보는 프로그램은 Ingress Controller 하나뿐입니다.</p>
 </div>
 <p>따로 보면 복잡해 보이던 프로그램들이 한 줄로 늘어놓이니 그제야 머릿속에서 하나의 흐름으로 묶였습니다.</p>
-<p class="thought">'Service는 통로를 만들고 Ingress는 방향을 잡는다. 그 뒤에서 DNS, Endpoint Controller, kube-proxy가 받아 준다. 각자 맡은 일이 단순하니 관리하기도 편하겠다.'</p>
+<p class="thought">'본사 콜센터가 부서 명부를 펼치고 부서 대표 내선을 부른다. 그 뒤에서 부서 매니저가 직원 상태를 챙긴다. 각자 맡은 일이 단순하니 관리하기도 편하겠다.'</p>
 <h2>이것만은 기억하자</h2>
 <ul>
 <li><strong>Service는 Pod의 변하지 않는 직통 전화번호입니다.</strong> Pod는 소모품이라 IP가 수시로 바뀌지만, Service는 변하지 않는 주소를 제공합니다. 또한 하나의 Service에 여러 Pod를 연결해 요청을 골고루 나누는 로드밸런싱 기능도 수행합니다.</li>
 <li><strong>Service 뒤에서는 세 프로그램이 함께 동작합니다.</strong> 클러스터 DNS는 Service 이름을 ClusterIP로 변환하고, Endpoint Controller는 Service에 연결된 살아있는 Pod IP 목록을 최신으로 유지하며, kube-proxy는 그 목록대로 각 노드 커널에 ClusterIP → Pod IP 규칙을 만듭니다. 이름이 Pod까지 닿기까지 두 단계 변환이 일어납니다.</li>
-<li><strong>Ingress는 프랜차이즈 공식 앱 역할을 합니다.</strong> 숫자(IP/Port)만 보는 Service와 달리, Ingress는 도메인과 URL 경로를 읽고 적절한 Service로 연결하는 라우팅을 담당합니다. 메뉴 구성표 역할의 <strong>리소스(YAML)</strong> 와 앱을 실제로 구동하는 <strong>컨트롤러(S/W)</strong> 가 한 팀으로 움직이며, Minikube에서는 <code>minikube addons enable ingress</code>로 컨트롤러를 먼저 실행해 두어야 동작합니다.</li>
+<li><strong>Ingress는 본사 콜센터 역할을 합니다.</strong> 숫자(IP/Port)만 보는 Service와 달리, Ingress는 도메인과 URL 경로를 읽고 적절한 Service로 연결하는 라우팅을 담당합니다. 라우팅 규칙을 정의하는 <strong>리소스(YAML)</strong> 와 앱을 실제로 구동하는 <strong>컨트롤러(S/W)</strong> 가 한 팀으로 움직이며, Minikube에서는 <code>minikube addons enable ingress</code>로 컨트롤러를 먼저 실행해 두어야 동작합니다.</li>
 </ul>
 <p>네트워크 경로는 이제 완벽히 갖춰졌습니다. 하지만 프로젝트를 쿠버네티스에 실제로 올리려면 아직 해결해야 할 숙제가 남았습니다. DB 비밀번호를 이미지에 직접 포함할 수는 없으며, 컨테이너가 재시작될 때 소중한 데이터가 사라져서도 안 되기 때문입니다.</p>
 <p>다음 챕터에서는 설정값(ConfigMap), 보안 비밀(Secret), 그리고 <strong>데이터의 영속성(Volume)</strong> 을 추가하여 챕터 3에서 만든 통합 구성을 쿠버네티스 위에 완벽하게 구현해 보겠습니다.</p>
