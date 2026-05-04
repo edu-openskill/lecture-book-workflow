@@ -36,11 +36,14 @@
     box-shadow: var(--shadow-figure);
     border: 1px solid var(--color-border-dashed);
   }
-  .chapter-image .caption {
+  /* .caption — 그림 캡션 공용 (PNG 이미지·SVG 다이어그램·터미널 로그 모두) */
+  .caption {
     margin-top: 4px;
+    margin-bottom: 16px;
     color: var(--color-text-secondary);
     font-size: 13px;
     font-style: italic;
+    text-align: center;
   }
   .chapter-image.terminal img { background: #1a202c; }
   .chapter-image.gemini img { max-width: 50%; }

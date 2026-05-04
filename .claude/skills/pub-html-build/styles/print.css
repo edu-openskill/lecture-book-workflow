@@ -192,6 +192,7 @@ h2 { page-break-before: auto; }
   margin-top: -12px;   /* 컴포넌트 margin-bottom과 collapse되어 위로 끌어올림 */
   font-size: 9pt;
   color: #718096;
+  text-align: center;
 }
 
 /* 표지·그림자 제거 (인쇄 선명도) */

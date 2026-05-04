@@ -367,6 +367,30 @@ def wrap_chapter_images(html: str) -> str:
     return html
 
 
+# ========== 다이어그램 캡션 래핑 ===========================================
+DIAGRAM_CAPTION_RE = re.compile(
+    r'(</div>)\s*<p><em>(그림\s+\d+[-\d]*\..*?)</em></p>',
+    re.DOTALL,
+)
+
+
+def wrap_diagram_captions(html: str) -> str:
+    """
+    SVG·터미널 다이어그램 컨테이너 직후의 마크다운 이탤릭 캡션을
+    `<div class="caption">`로 변환. PNG 이미지(`wrap_chapter_images`)와
+    같은 가운데 정렬·작은 회색 이탤릭 스타일을 적용한다.
+
+    매칭 패턴: `</div>` + `<p><em>그림 N-N. ...</em></p>`. 그림 번호 접두로
+    시작하는 이탤릭만 잡으므로 일반 본문 이탤릭은 영향 없음.
+    `wrap_chapter_images`가 PNG 케이스를 먼저 흡수하므로 이 단계에서는
+    svg-figure·terminal-log 등 raw HTML 컨테이너 뒤 캡션만 남는다.
+    """
+    return DIAGRAM_CAPTION_RE.sub(
+        lambda m: f'{m.group(1)}\n<div class="caption">{m.group(2)}</div>',
+        html,
+    )
+
+
 # ========== 챕터 빌드 ======================================================
 @dataclass
 class Chapter:
@@ -409,6 +433,7 @@ def render_chapter(md_path: Path, md_renderer) -> Chapter:
 
     # 4. 이미지 래핑 + 경로 보정
     html = wrap_chapter_images(html)
+    html = wrap_diagram_captions(html)
     html = resolve_image_paths(html, md_path)
 
     # 4. 제목 추출
