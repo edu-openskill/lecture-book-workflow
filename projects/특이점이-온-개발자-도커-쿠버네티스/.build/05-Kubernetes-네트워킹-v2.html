@@ -188,52 +188,53 @@
 <p>실제 운영 환경에서 주로 쓰는 방식입니다. 클라우드 서비스(AWS, GCP 등)를 쓰고 있다면, 쿠버네티스가 알아서 외부용 공인 IP를 발급받아 서비스에 딱 붙여줍니다.</p>
 <p>사용자는 복잡한 노드 IP나 5자리의 포트 번호를 외울 필요가 없습니다. 그저 발급된 대표 IP 하나로 접속하면, LoadBalancer가 여러 노드에 트래픽을 골고루 나눠줍니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LoadBalancer — 클라우드가 공인 IP를 발급해 여러 노드의 Service에 트래픽을 분산하는 구조">
+<svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LoadBalancer — 공인 IP가 각 노드의 kube-proxy를 거쳐 Pod로 분산되며, Service는 클러스터 레벨 논리 리소스로 모든 노드에 걸쳐 존재">
   <defs>
     <marker id="lb-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
   <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">LoadBalancer — 공인 IP 하나로 여러 노드에 분산</text>
-  <rect x="20" y="60" width="120" height="38" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="80" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">User 1</text>
-  <rect x="20" y="115" width="120" height="38" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="80" y="139" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">User 2</text>
-  <rect x="20" y="170" width="120" height="38" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="80" y="194" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">User 3</text>
-  <text x="80" y="232" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">myapp.com</text>
-  <line x1="140" y1="79" x2="240" y2="135" stroke="#475569" stroke-width="1.6" marker-end="url(#lb-p)"/>
-  <line x1="140" y1="134" x2="240" y2="148" stroke="#475569" stroke-width="1.6" marker-end="url(#lb-p)"/>
-  <line x1="140" y1="189" x2="240" y2="160" stroke="#475569" stroke-width="1.6" marker-end="url(#lb-p)"/>
-  <rect x="240" y="100" width="170" height="100" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="6,4"/>
-  <text x="325" y="123" text-anchor="middle" font-size="11" font-weight="600" fill="#7b341e">클라우드 (AWS·GCP)</text>
-  <text x="325" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">LoadBalancer</text>
-  <text x="325" y="180" text-anchor="middle" font-size="10" font-family="monospace" fill="#7b341e">공인 IP</text>
-  <line x1="410" y1="125" x2="475" y2="100" stroke="#475569" stroke-width="1.6" marker-end="url(#lb-p)"/>
-  <line x1="410" y1="150" x2="475" y2="170" stroke="#475569" stroke-width="1.6" marker-end="url(#lb-p)"/>
-  <line x1="410" y1="175" x2="475" y2="240" stroke="#475569" stroke-width="1.6" marker-end="url(#lb-p)"/>
-  <text x="442" y="115" text-anchor="middle" font-size="9" font-style="italic" fill="#6b7280">분산</text>
-  <rect x="465" y="50" width="285" height="240" rx="10" fill="#fff" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="5,3"/>
-  <text x="478" y="70" font-size="11" font-weight="700" fill="#7b341e">Kubernetes 클러스터</text>
-  <rect x="475" y="80" width="265" height="55" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="495" y="102" font-size="11" font-weight="700" fill="#0f172a">Node 1</text>
-  <rect x="555" y="92" width="80" height="32" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
-  <text x="595" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Service</text>
-  <line x1="635" y1="108" x2="660" y2="108" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
-  <rect x="660" y="92" width="60" height="32" rx="4" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <text x="690" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Pod</text>
-  <rect x="475" y="150" width="265" height="55" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="495" y="172" font-size="11" font-weight="700" fill="#0f172a">Node 2</text>
-  <rect x="555" y="162" width="80" height="32" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
-  <text x="595" y="183" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Service</text>
-  <line x1="635" y1="178" x2="660" y2="178" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
-  <rect x="660" y="162" width="60" height="32" rx="4" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <text x="690" y="183" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Pod</text>
-  <rect x="475" y="220" width="265" height="55" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-  <text x="495" y="242" font-size="11" font-weight="700" fill="#0f172a">Node 3</text>
-  <rect x="555" y="232" width="80" height="32" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
-  <text x="595" y="253" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Service</text>
-  <line x1="635" y1="248" x2="660" y2="248" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
-  <rect x="660" y="232" width="60" height="32" rx="4" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <text x="690" y="253" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Pod</text>
+  <rect x="20" y="60" width="100" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="70" y="82" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">User 1</text>
+  <rect x="20" y="118" width="100" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="70" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">User 2</text>
+  <rect x="20" y="176" width="100" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="70" y="198" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">User 3</text>
+  <text x="70" y="225" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">myapp.com</text>
+  <line x1="120" y1="77" x2="148" y2="120" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <line x1="120" y1="135" x2="148" y2="140" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <line x1="120" y1="193" x2="148" y2="165" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <rect x="150" y="100" width="140" height="90" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="6,4"/>
+  <text x="220" y="125" text-anchor="middle" font-size="11" font-weight="600" fill="#7b341e">Cloud Provider</text>
+  <text x="220" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">LoadBalancer</text>
+  <text x="220" y="172" text-anchor="middle" font-size="10" font-family="monospace" fill="#7b341e">공인 IP</text>
+  <rect x="320" y="40" width="420" height="250" rx="10" fill="#fff" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="5,3"/>
+  <text x="333" y="58" font-size="11" font-weight="700" fill="#7b341e">Kubernetes 클러스터</text>
+  <rect x="335" y="70" width="65" height="210" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="367" y="175" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e" transform="rotate(-90 367 175)">Service (논리)</text>
+  <line x1="290" y1="120" x2="423" y2="116" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <line x1="290" y1="145" x2="423" y2="189" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <line x1="290" y1="170" x2="423" y2="262" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <rect x="410" y="75" width="320" height="65" rx="6" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+  <text x="425" y="93" font-size="10" font-weight="700" fill="#0f172a">Node 1</text>
+  <rect x="425" y="100" width="155" height="32" rx="4" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="502" y="120" text-anchor="middle" font-size="10" fill="#475569">kube-proxy (NodePort)</text>
+  <line x1="582" y1="116" x2="600" y2="116" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <rect x="600" y="100" width="80" height="32" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="640" y="120" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod</text>
+  <rect x="410" y="148" width="320" height="65" rx="6" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+  <text x="425" y="166" font-size="10" font-weight="700" fill="#0f172a">Node 2</text>
+  <rect x="425" y="173" width="155" height="32" rx="4" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="502" y="193" text-anchor="middle" font-size="10" fill="#475569">kube-proxy (NodePort)</text>
+  <line x1="582" y1="189" x2="600" y2="189" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <rect x="600" y="173" width="80" height="32" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="640" y="193" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod</text>
+  <rect x="410" y="221" width="320" height="65" rx="6" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+  <text x="425" y="239" font-size="10" font-weight="700" fill="#0f172a">Node 3</text>
+  <rect x="425" y="246" width="155" height="32" rx="4" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="502" y="266" text-anchor="middle" font-size="10" fill="#475569">kube-proxy (NodePort)</text>
+  <line x1="582" y1="262" x2="600" y2="262" stroke="#475569" stroke-width="1.4" marker-end="url(#lb-p)"/>
+  <rect x="600" y="246" width="80" height="32" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="640" y="266" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod</text>
 </svg>
 </div>
 <div class="caption">그림 5-5. LoadBalancer — 클라우드가 공인 IP를 발급하고 여러 노드에 분산</div>
@@ -396,7 +397,7 @@
 <div class="caption">그림 5-8. minikube service URL 생성</div>
 <p>명령을 치자 터미널에 URL 한 줄이 나타나더니 커서가 그대로 멈춰 섰습니다.</p>
 <p class="thought">'어? 왜 프롬프트가 안 나오지? 고장 났나?'</p>
-<p>잠깐 당황했지만, 이 명령은 터미널을 계속 붙잡고 있어야 통로가 유지되는 방식이라는 걸 깨달았습니다. 생성된 URL을 복사해 브라우저에 입력하자, 드디어 기다리던 NGINX 화면이 나타났습니다.</p>
+<p>잠깐 당황했지만, 이 명령은 터미널을 계속 붙잡고 있어야 연결이 유지되는 방식이라는 걸 깨달았습니다. 생성된 URL을 복사해 브라우저에 입력하자, 드디어 기다리던 NGINX 화면이 나타났습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH04\chap03-44.png" alt="" /><div class="caption">그림 5-9. 브라우저에서 nginx 접속 확인</div></div>
 <p>확인이 끝났으니 이제 CTRL + C를 눌러 열려 있던 통로를 닫았습니다. 이제 테스트해 볼 것은 <strong>Pod가 죽어도 Service가 고정 진입점 역할을 제대로 해주는가</strong> 입니다.</p>
 <p>오픈이는 Service가 새 Pod로 연결을 잘 넘겨주는지 확인하기 위해, 현재 실행 중인 모든 Pod를 삭제했습니다.</p>
@@ -568,10 +569,10 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <div class="caption">그림 5-14. Ingress Controller가 Running 상태</div>
 <div class="prep-note">
 <p><strong>운영 환경에서의 Ingress Controller 실행</strong></p>
-<p>미니큐브 addon은 학습용 명령어입니다. 실제 운영에서는 <code>ingress-nginx</code> 같은 컨트롤러를 직접 하거나, 클라우드 환경에서는 클라우드가 제공하는 컨트롤러를 그대로 쓰면 됩니다. 어느 쪽이든 클러스터 안에 컨트롤러 Pod가 떠서 외부 요청을 갈라 주는 모습은 똑같습니다.</p>
+<p>미니큐브 addon은 학습용 명령어입니다. 실제 운영에서는 <code>ingress-nginx</code> 같은 컨트롤러를 직접 설치하거나, 클라우드 환경에서는 클라우드가 제공하는 컨트롤러를 그대로 쓰면 됩니다. 어느 쪽이든 클러스터 안에 컨트롤러 Pod가 떠서 외부 요청을 갈라 주는 모습은 똑같습니다.</p>
 </div>
 <h4>두 서비스 준비</h4>
-<p><code>/order</code>와 <code>/stores</code>로 갈라 받을 백엔드 두 개를 띄웁니다. 둘은 같은 이미지를 쓰고 응답 문구만 다릅니다.</p>
+<p><code>/order</code>와 <code>/stores</code>로 갈라 받을 백엔드 두 개를 띄웁니다. 둘은 같은 이미지를 쓰고 응답 문구만 다릅니다. 이미지는 <code>hashicorp/http-echo</code> 로, 받은 요청에 <code>-text</code> 옵션의 문자열을 그대로 응답합니다.</p>
 <p><code>ex12/</code> 안에는 주문과 매장 각각 <strong>Pod를 띄우는 Deployment</strong> 와 그 Pod를 묶는 <strong>ClusterIP Service</strong> 가 한 쌍씩 들어 있습니다. 잠시 뒤에 작성할 Ingress 규칙도 같은 폴더에 두고, 마지막에 한 번에 적용할 예정입니다.</p>
 <table>
 <thead>
@@ -688,7 +689,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <li><strong>부서 결정</strong> — 콜센터 상담원이 어느 부서로 보낼지 결정하는 단계</li>
 <li><strong>직원 응답</strong> — 부서 안 자동 분배가 응대 직원에게 연결되어 응답하는 단계</li>
 </ol>
-<p>각 단계마다 비유로 먼저 풀고, 곧이어 같은 단계의 IT 구조를 짝지어 봅니다.</p>
+<p>각 단계마다 비유로 먼저 풀고, 곧이어 같은 단계의 IT 구조를 짝지어 봅니다. 흐름 안에서 <strong>kube-proxy</strong> 가 두 번 등장합니다. 같은 프로그램이 노드 안에서 두 시점(NodePort 진입 직후·ClusterIP 처리 시점)에 같은 일(iptables DNAT)을 합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1080 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="요청이 Pod까지 닿는 전체 흐름 — 세 단계가 클러스터 안에서 일어나는 위치">
   <defs>
@@ -709,7 +710,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="302" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">클러스터 입구</text>
   <rect x="252" y="142" width="100" height="70" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
   <text x="302" y="170" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">NodePort</text>
-  <text x="302" y="190" text-anchor="middle" font-size="12" font-family="monospace" fill="#7b341e">:9000</text>
+  <text x="302" y="190" text-anchor="middle" font-size="12" font-family="monospace" fill="#7b341e">:30080</text>
   <text x="302" y="234" text-anchor="middle" font-size="9" fill="#7b341e">NodePort Service</text>
   <line x1="370" y1="170" x2="490" y2="170" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
   <rect x="490" y="150" width="100" height="40" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
@@ -738,12 +739,12 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="1005" y="350" text-anchor="end" font-size="10" font-weight="700" fill="#94a3b8">L4</text>
   <rect x="490" y="365" width="220" height="55" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="505" y="382" font-size="10" font-weight="700" fill="#7b341e">Node 1</text>
-  <text x="695" y="382" text-anchor="end" font-size="9" font-family="monospace" fill="#7b341e">port :9000</text>
+  <text x="695" y="382" text-anchor="end" font-size="9" font-family="monospace" fill="#7b341e">port :30080</text>
   <rect x="555" y="390" width="100" height="22" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
   <text x="605" y="405" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Kube Proxy</text>
   <rect x="740" y="365" width="220" height="55" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="755" y="382" font-size="10" font-weight="700" fill="#7b341e">Node 2</text>
-  <text x="945" y="382" text-anchor="end" font-size="9" font-family="monospace" fill="#7b341e">port :9000</text>
+  <text x="945" y="382" text-anchor="end" font-size="9" font-family="monospace" fill="#7b341e">port :30080</text>
   <rect x="805" y="390" width="100" height="22" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
   <text x="855" y="405" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Kube Proxy</text>
   <rect x="225" y="375" width="120" height="55" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
@@ -836,7 +837,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <tr>
 <td style="text-align:center">본사 자동 안내</td>
 <td style="text-align:left"><strong>kube-proxy(1차)</strong></td>
-<td style="text-align:left">노드 커널의 iptables 규칙을 따라 들어온 요청을 Ingress Controller로 자동 연결하는 라우터입니다</td>
+<td style="text-align:left">노드 커널의 iptables 규칙으로 들어온 요청을 NodePort Service의 backend Pod(여기서는 Ingress Controller Pod)로 전달합니다</td>
 </tr>
 <tr>
 <td style="text-align:center">본사 콜센터</td>
@@ -845,7 +846,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </tr>
 </tbody>
 </table>
-<p>브라우저에서 <code>http://localhost/order</code> 같은 주소로 요청을 보내면, 노드에 뚫린 NodePort(또는 클라우드의 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 <code>minikube tunnel</code> 이 바로 이 입구를 호스트와 이어 주는 통로입니다. 그 직후 같은 노드의 kube-proxy가 미리 등록해 둔 iptables 항목을 따라 요청을 Ingress Controller로 전달합니다.</p>
+<p>브라우저에서 <code>http://localhost/order</code> 로 요청을 보냅니다. 요청은 노드에 뚫린 NodePort(클라우드라면 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 <code>minikube tunnel</code> 이 이 입구를 호스트와 이어 주는 통로입니다. 그 직후 같은 노드의 kube-proxy가 iptables 규칙으로 요청을 NodePort Service의 backend Pod인 Ingress Controller로 DNAT합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 IT — 외부 요청이 NodePort + kube-proxy(1차)를 거쳐 Ingress Controller에 도달">
   <defs>
@@ -856,12 +857,12 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="80" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 호스트</text>
   <text x="80" y="180" text-anchor="middle" font-size="10" fill="#6b7280">브라우저</text>
   <line x1="140" y1="160" x2="195" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
-  <text x="167" y="150" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">localhost:9000</text>
+  <text x="167" y="145" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">localhost:30080</text>
   <rect x="195" y="60" width="585" height="200" rx="10" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
   <text x="487" y="78" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Kubernetes 클러스터 (워커 노드)</text>
   <rect x="220" y="120" width="120" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
   <text x="280" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">NodePort</text>
-  <text x="280" y="170" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">:9000</text>
+  <text x="280" y="170" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">:30080</text>
   <text x="280" y="190" text-anchor="middle" font-size="9" fill="#7b341e">노드 외벽 진입</text>
   <line x1="340" y1="160" x2="400" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
   <text x="370" y="150" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">DNAT</text>
@@ -954,6 +955,10 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </tbody>
 </table>
 <p>Ingress Controller는 도착한 요청의 HTTP 본문을 읽습니다. URL 경로와 도메인 헤더를 등록된 Ingress 규칙과 대조해 &quot;<strong>이 요청은 <code>order-service</code> 로 보낸다</strong>&quot;고 정합니다. 이름이 정해진 직후, 이름만으로는 패킷을 보낼 수 없으니 클러스터 DNS가 곧바로 <code>order-service</code> 를 ClusterIP로 풀어 줍니다.</p>
+<div class="prep-note">
+<p><strong>비유와 실제의 작은 차이</strong></p>
+<p><code>nginx-ingress</code> 같은 실제 컨트롤러는 DNS 조회 대신 <strong>API Server를 watch</strong> 해서 Pod IP 목록을 직접 들고 있다가 곧바로 보내는 경우가 많습니다. DNS 조회는 일반 Pod끼리 Service 이름으로 부를 때 더 자주 쓰입니다.</p>
+</div>
 <div class="svg-figure">
 <svg viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 IT — Ingress Controller가 DNS 조회로 결정된 Service의 ClusterIP로 전송">
   <defs>
@@ -1108,7 +1113,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </tbody>
 </table>
 <p>ClusterIP로 향한 요청은 같은 노드의 kube-proxy(2차)가 가로채서, <strong>Pod IP 목록(EndpointSlice)</strong> 에서 살아있는 Pod 중 하나의 IP로 바꿔 보냅니다. 요청이 백엔드 Pod에 닿으면 애플리케이션이 비즈니스 로직을 실행해 응답을 돌려보냅니다.</p>
-<p>이 모든 게 가능한 건 <strong>Endpoint Controller</strong>가 뒤에서 받쳐 주기 때문입니다. Service의 selector(라벨)에 매칭되는 Pod가 새로 뜨거나 죽는 즉시 감지해 Pod IP 목록을 갱신하므로, kube-proxy(2차)가 항상 살아있는 Pod에만 연결됩니다. 만약 이 갱신이 늦어지면 죽은 Pod IP로 트래픽이 흘러가 요청이 실패할 수 있습니다.</p>
+<p>이 모든 게 가능한 건 <strong>Endpoint Controller</strong>가 뒤에서 받쳐 주기 때문입니다. Service의 selector에 매칭되는 Pod가 새로 뜨거나 죽으면 즉시 감지해 Pod IP 목록을 갱신합니다. 그래야 kube-proxy(2차)가 항상 살아있는 Pod에만 트래픽을 보낼 수 있습니다. 갱신이 늦어지면 죽은 Pod IP로 트래픽이 흘러가 요청이 실패할 수 있습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 IT — kube-proxy(2차)가 ClusterIP를 Pod IP로 변환, Endpoint Controller가 Pod IP 목록 갱신">
   <defs>
