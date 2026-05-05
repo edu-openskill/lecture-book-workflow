@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-config-secret
+  name: nginx-config-secret            # Deployment 이름 (재시작 시 이 이름으로 지목)
 spec:
-  replicas: 1                              # pod 수 지정
+  replicas: 1                          # pod 수 지정
   selector:
     matchLabels:
-      app: nginx                           # 라벨이app : nginx인 pod를 관리
+      app: nginx                       # 'app: nginx' 라벨이 붙은 Pod를 내 관리 대상으로 지정
   template:
     metadata:
       labels:
-        app: nginx                          # pod에 붙일 라벨
+        app: nginx                     # pod에 붙일 라벨
     spec:
       containers:
         - name: nginx-container
           image: nginx:1.20
           envFrom:
             - configMapRef:
-                name: configmap-conn         # ConfigMap 연결
+                name: configmap-conn   # ConfigMap 연결
 #            - secretRef:
-#                name: secret-password        # Secret 연결
+#                name: secret-password   # Secret 연결

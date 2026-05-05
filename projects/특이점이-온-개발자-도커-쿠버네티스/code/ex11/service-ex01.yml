@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: nginx-service
 spec:
-  type: NodePort        # 노드 IP+포트로 외부 접근 가능한 타입
+  type: NodePort        # 노드 IP와 포트로 외부 접근이 가능한 타입
   selector:
-    app: nginx          # 이 라벨을 가진 Pod를 뒤에 붙임
+    app: nginx          # 이 라벨을 가진 Pod들을 뒤에 연결
   ports:
-  - port: 80            # Service 내부 포트 (클러스터 안에서 부를 때)
-    targetPort: 80      # Pod(컨테이너)가 귀를 대고 있는 포트
-    nodePort: 30080     # 노드 IP로 외부에서 접근할 때 열리는 포트 (30000~32767)
+    - port: 80          # 클러스터 내부에서 Service로 진입하는 포트
+      targetPort: 80    # Service가 Pod로 요청을 전달하는 포트
+      nodePort: 30080   # 외부에서 노드로 진입할 때 사용하는 포트 (30000~32767)

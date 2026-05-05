@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deploy     
-spec:                    # pod에 대한 하는 상태 지정
+  name: nginx-deploy
+spec:                    # pod에 대한 상태 지정
   replicas: 1            # 생성할 pod 수 지정
-  selector:             
+  selector:
     matchLabels:
-      app: nginx         # 라벨이 app : nginx인 pod를 관리
+      app: nginx         # 'app: nginx' 라벨이 붙은 Pod를 내 관리 대상으로 지정
   template:
     metadata:
       labels:

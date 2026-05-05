@@ -20,7 +20,7 @@
 
 ### 결과 확인
 
-- kubectl get deploy,pod,service -n metacoding
+- kubectl get deploy,pod,service,ingress -n metacoding
 
 ### 로그 확인
 

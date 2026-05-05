@@ -6,10 +6,10 @@ spec:
   containers:
   - name: nginx-volume
     image: nginx
-    volumeMounts:               # 사용할 볼륨 마운트
+    volumeMounts:
     - name: storage
-      mountPath: /mnt/data      # 컨테이너에서 접근할 볼륨 위
+      mountPath: /mnt/data
   volumes:
   - name: storage
     persistentVolumeClaim:
-      claimName: volume-pvc      # 참조할 PVC
+      claimName: volume-pvc
