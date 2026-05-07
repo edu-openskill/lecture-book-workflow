@@ -565,7 +565,7 @@ Ingress는 두 가지로 분리됩니다. 라우팅 규칙을 적은 **리소스
 | 구성 요소 | 역할 | 비유 | 쿠버네티스 철학 |
 |:---------:|:-----|:-----|:---------------|
 | `Ingress 리소스` | 라우팅 규칙을 정의한 문서 (YAML) | 주소 사전 | `선언` |
-| `Ingress Controller` | 외부 요청을 처리하는 소프트웨어 | 우편물 집중국 본체 | `집행` |
+| `Ingress Controller` | 외부 요청을 처리하는 소프트웨어 | 물류 센터 본체 | `집행` |
 
 *'아, 규칙만 적어 둔다고 알아서 굴러가는 게 아니구나. 그 규칙을 읽고 실제로 실행해 주는 역할이 따로 필요한 거네.'*
 
@@ -757,89 +757,99 @@ minikube tunnel                          # 별도 터미널에서 실행
 자리로 돌아와 흰 종이를 한 장 꺼냈습니다. 통합 사이트의 *브라우저에서 Pod까지* 한 번 죽 그어 봤습니다. 한 자리에 너무 많은 컴포넌트가 모이지 않게, 일을 세 단계로 잘랐습니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 1080 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="요청이 Pod까지 닿는 전체 흐름 — 세 단계가 클러스터 안에서 일어나는 위치">
+<svg viewBox="0 0 1080 530" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="요청이 Pod까지 닿는 전체 흐름 — 1·2·3단계가 일어나는 위치">
   <defs>
-    <marker id="ov-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
     <marker id="ov-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="ov-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="ov-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
   </defs>
   <text x="540" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">전체 흐름 한눈에 — 세 단계가 일어나는 위치</text>
   <text x="20" y="120" font-size="10" font-weight="600" fill="#475569">로컬호스트</text>
   <rect x="20" y="130" width="130" height="100" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="85" y="186" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Host</text>
-  <line x1="150" y1="170" x2="232" y2="170" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <circle cx="190" cy="153" r="11" fill="#ff7849"/>
-  <text x="190" y="157" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
-  <rect x="200" y="80" width="860" height="500" rx="10" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <line x1="150" y1="180" x2="232" y2="180" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <circle cx="190" cy="160" r="11" fill="#ff7849"/>
+  <text x="190" y="164" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <rect x="200" y="80" width="860" height="430" rx="10" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
   <text x="630" y="100" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">쿠버네티스 가상세계 (클러스터)</text>
-  <rect x="235" y="110" width="135" height="135" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="302" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">클러스터 입구</text>
-  <rect x="252" y="142" width="100" height="70" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
-  <text x="302" y="170" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">NodePort</text>
-  <text x="302" y="190" text-anchor="middle" font-size="12" font-family="monospace" fill="#7b341e">:30080</text>
-  <text x="302" y="234" text-anchor="middle" font-size="9" fill="#7b341e">NodePort Service</text>
-  <line x1="370" y1="170" x2="490" y2="170" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <rect x="490" y="150" width="100" height="40" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="540" y="174" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Kube Proxy</text>
-  <line x1="590" y1="170" x2="640" y2="170" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <rect x="640" y="150" width="180" height="40" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="730" y="174" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Ingress Controller</text>
-  <rect x="900" y="135" width="140" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="970" y="160" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">API Server</text>
-  <text x="970" y="180" text-anchor="middle" font-size="10" fill="#7b341e">Ingress·Service·Pod 정보</text>
-  <line x1="822" y1="160" x2="898" y2="155" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#ov-s)"/>
-  <line x1="898" y1="195" x2="822" y2="190" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#ov-a)"/>
-  <rect x="420" y="245" width="600" height="65" rx="32" fill="#f5faff" stroke="#bfdbfe" stroke-width="1"/>
-  <text x="1005" y="260" text-anchor="end" font-size="10" font-weight="700" fill="#94a3b8">L7</text>
-  <line x1="730" y1="190" x2="600" y2="245" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <line x1="730" y1="190" x2="850" y2="245" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <circle cx="660" cy="218" r="11" fill="#ff7849"/>
-  <text x="660" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
-  <text x="600" y="259" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">ClusterIP</text>
-  <rect x="540" y="262" width="120" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="600" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">order-service</text>
-  <text x="850" y="259" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">ClusterIP</text>
-  <rect x="790" y="262" width="120" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="850" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">stores-service</text>
-  <line x1="600" y1="310" x2="600" y2="335" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <line x1="850" y1="310" x2="850" y2="335" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
-  <rect x="420" y="335" width="600" height="100" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
-  <text x="1005" y="350" text-anchor="end" font-size="10" font-weight="700" fill="#94a3b8">L4</text>
-  <rect x="490" y="365" width="220" height="55" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="505" y="382" font-size="10" font-weight="700" fill="#7b341e">Node 1</text>
-  <text x="695" y="382" text-anchor="end" font-size="9" font-family="monospace" fill="#7b341e">port :30080</text>
-  <rect x="555" y="390" width="100" height="22" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
-  <text x="605" y="405" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Kube Proxy</text>
-  <rect x="740" y="365" width="220" height="55" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="755" y="382" font-size="10" font-weight="700" fill="#7b341e">Node 2</text>
-  <text x="945" y="382" text-anchor="end" font-size="9" font-family="monospace" fill="#7b341e">port :30080</text>
-  <rect x="805" y="390" width="100" height="22" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
-  <text x="855" y="405" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Kube Proxy</text>
-  <rect x="225" y="375" width="120" height="55" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="285" y="397" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Endpoint</text>
-  <text x="285" y="412" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Controller</text>
-  <line x1="345" y1="397" x2="555" y2="402" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ov-s)"/>
-  <line x1="345" y1="420" x2="555" y2="473" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ov-s)"/>
-  <line x1="605" y1="412" x2="585" y2="450" stroke="#ff7849" stroke-width="2.2" stroke-dasharray="3,2" marker-end="url(#ov-a)"/>
-  <line x1="605" y1="412" x2="635" y2="450" stroke="#ff7849" stroke-width="2.2" stroke-dasharray="3,2" marker-end="url(#ov-a)"/>
-  <line x1="855" y1="412" x2="835" y2="450" stroke="#ff7849" stroke-width="2.2" stroke-dasharray="3,2" marker-end="url(#ov-a)"/>
-  <line x1="855" y1="412" x2="885" y2="450" stroke="#ff7849" stroke-width="2.2" stroke-dasharray="3,2" marker-end="url(#ov-a)"/>
-  <circle cx="730" cy="430" r="11" fill="#ff7849"/>
-  <text x="730" y="434" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
-  <rect x="510" y="453" width="200" height="40" rx="6" fill="none" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3"/>
-  <rect x="525" y="461" width="65" height="24" rx="12" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="557" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod A</text>
-  <rect x="615" y="461" width="65" height="24" rx="12" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="647" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod A</text>
-  <rect x="760" y="453" width="200" height="40" rx="6" fill="none" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3"/>
-  <rect x="775" y="461" width="65" height="24" rx="12" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="807" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod B</text>
-  <rect x="865" y="461" width="65" height="24" rx="12" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="897" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod B</text>
-  <line x1="610" y1="493" x2="710" y2="525" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
-  <line x1="850" y1="493" x2="780" y2="525" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
-  <rect x="610" y="525" width="270" height="35" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="745" y="547" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">Deployment</text>
+  <!-- 1단계 영역 배경 -->
+  <rect x="220" y="115" width="370" height="125" rx="8" fill="#fffaf0" stroke="#fed7aa" stroke-width="1"/>
+  <text x="405" y="133" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">1단계 진입 <tspan font-size="9" fill="#94a3b8" font-weight="600">[L4]</tspan></text>
+  <!-- NodePort -->
+  <rect x="240" y="148" width="135" height="80" rx="8" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="307" y="178" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">NodePort</text>
+  <text x="307" y="198" text-anchor="middle" font-size="12" font-family="monospace" fill="#7b341e">:30080</text>
+  <text x="307" y="218" text-anchor="middle" font-size="9" fill="#7b341e">노드 외벽 진입</text>
+  <line x1="375" y1="188" x2="430" y2="188" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <!-- kube-proxy (1차) -->
+  <rect x="430" y="160" width="150" height="56" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="505" y="183" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">kube-proxy (1차)</text>
+  <text x="505" y="200" text-anchor="middle" font-size="9" fill="#7b341e">iptables DNAT</text>
+  <line x1="580" y1="188" x2="630" y2="188" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <!-- 2단계 영역 배경 -->
+  <rect x="600" y="115" width="450" height="225" rx="8" fill="#fffaf0" stroke="#fed7aa" stroke-width="1"/>
+  <text x="825" y="133" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">2단계 분류 <tspan font-size="9" fill="#94a3b8" font-weight="600">[L7]</tspan></text>
+  <!-- Ingress Controller -->
+  <rect x="630" y="160" width="180" height="56" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="720" y="182" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress Controller</text>
+  <text x="720" y="200" text-anchor="middle" font-size="9" fill="#7b341e">URL·Host로 Service 결정</text>
+  <!-- API Server (회색 보조) -->
+  <rect x="830" y="156" width="200" height="64" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="930" y="178" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">API Server</text>
+  <text x="930" y="195" text-anchor="middle" font-size="9" fill="#94a3b8">Ingress·Service·</text>
+  <text x="930" y="208" text-anchor="middle" font-size="9" fill="#94a3b8">Endpoints 정보</text>
+  <line x1="810" y1="178" x2="828" y2="178" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ov-s)"/>
+  <line x1="828" y1="200" x2="810" y2="200" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ov-s)"/>
+  <text x="819" y="170" text-anchor="middle" font-size="8" font-style="italic" fill="#94a3b8">watch</text>
+  <!-- Ingress → ClusterIP 분기 -->
+  <line x1="720" y1="216" x2="690" y2="262" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <line x1="720" y1="216" x2="900" y2="262" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <circle cx="660" cy="232" r="11" fill="#ff7849"/>
+  <text x="660" y="236" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
+  <!-- ClusterIP order -->
+  <text x="690" y="259" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">ClusterIP</text>
+  <rect x="620" y="262" width="140" height="38" rx="19" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="690" y="285" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">order-service</text>
+  <!-- ClusterIP stores -->
+  <text x="900" y="259" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">ClusterIP</text>
+  <rect x="830" y="262" width="140" height="38" rx="19" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="900" y="285" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">stores-service</text>
+  <!-- 화살표 → 3단계 -->
+  <line x1="690" y1="300" x2="690" y2="370" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <line x1="900" y1="300" x2="900" y2="370" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <!-- 3단계 영역 배경 -->
+  <rect x="220" y="350" width="830" height="155" rx="8" fill="#fffaf0" stroke="#fed7aa" stroke-width="1"/>
+  <text x="635" y="368" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">3단계 배달 <tspan font-size="9" fill="#94a3b8" font-weight="600">[L4]</tspan></text>
+  <!-- Endpoint Controller (회색 보조) -->
+  <rect x="240" y="385" width="160" height="80" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="320" y="412" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">Endpoint Controller</text>
+  <text x="320" y="430" text-anchor="middle" font-size="9" fill="#94a3b8">Pod 변동 감시</text>
+  <text x="320" y="445" text-anchor="middle" font-size="9" fill="#94a3b8">→ Endpoints 갱신</text>
+  <line x1="395" y1="408" x2="828" y2="200" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+  <!-- kube-proxy (2차) — 두 라인 평행 -->
+  <rect x="620" y="372" width="140" height="44" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="690" y="392" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">kube-proxy (2차)</text>
+  <text x="690" y="408" text-anchor="middle" font-size="9" fill="#7b341e">ClusterIP → Pod IP</text>
+  <rect x="830" y="372" width="140" height="44" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="900" y="392" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">kube-proxy (2차)</text>
+  <text x="900" y="408" text-anchor="middle" font-size="9" fill="#7b341e">ClusterIP → Pod IP</text>
+  <line x1="690" y1="416" x2="690" y2="442" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <line x1="900" y1="416" x2="900" y2="442" stroke="#ff7849" stroke-width="2.4" marker-end="url(#ov-a)"/>
+  <circle cx="795" cy="430" r="11" fill="#ff7849"/>
+  <text x="795" y="434" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
+  <!-- Pod 그룹 1 -->
+  <text x="690" y="445" text-anchor="middle" font-size="8" font-style="italic" fill="#94a3b8">(Deployment 관리)</text>
+  <rect x="620" y="450" width="140" height="42" rx="6" fill="none" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3"/>
+  <rect x="630" y="460" width="58" height="22" rx="11" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="659" y="475" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod A</text>
+  <rect x="692" y="460" width="58" height="22" rx="11" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="721" y="475" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod A</text>
+  <!-- Pod 그룹 2 -->
+  <text x="900" y="445" text-anchor="middle" font-size="8" font-style="italic" fill="#94a3b8">(Deployment 관리)</text>
+  <rect x="830" y="450" width="140" height="42" rx="6" fill="none" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3"/>
+  <rect x="840" y="460" width="58" height="22" rx="11" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="869" y="475" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod B</text>
+  <rect x="902" y="460" width="58" height="22" rx="11" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="931" y="475" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod B</text>
 </svg>
 </div>
 
@@ -849,132 +859,182 @@ minikube tunnel                          # 별도 터미널에서 실행
 
 ### 5.3.1 1단계 진입 - 우체국 입구에서 송장을 붙인다
 
-발신자가 우편을 들고 동네 우체국 **입구**로 들어갑니다. 안쪽 **창구 직원**에게 우편을 맡기면, 직원이 우편에 **송장**을 붙입니다. 송장에는 우편이 어느 물류 센터로 갈지가 새겨집니다. 발신자는 우편이 그 다음 어떻게 옮겨지는지 알 필요가 없습니다.
+발신자가 우편을 들고 동네 **우체국** 입구로 들어갑니다. 우편 봉투에는 동네 우체국으로 가는 외부 주소가 적혀 있습니다. 안쪽 **창구 직원**이 그 외부 주소를 가리고 그 위에 새 **송장**을 붙입니다. 송장에는 바코드가 찍힙니다. 바코드 안에는 우편이 다음으로 갈 **물류 센터의 정보**와 그곳에서 최종 분류될 **목적지 정보**가 함께 들어 있습니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 800 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 비유 — 발신자가 우체국 입구로 들어가 창구 직원에게 우편을 맡기고 직원이 송장을 붙임">
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 비유 — 우편의 외부 주소 위에 새 송장이 덮여 붙어 다음 단계로 흘러 나감">
   <defs>
     <marker id="m1n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
-  <text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">창구 직원이 우편에 송장을 붙이는 순간</text>
-  <!-- 좌측: 우체국 입구 (축소) -->
-  <g transform="translate(20, 130)">
-    <rect x="0" y="0" width="70" height="75" rx="4" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
-    <path d="M -2 0 L 72 0 L 72 -8 L -2 -8 Z" fill="#7b341e"/>
-    <rect x="28" y="30" width="14" height="20" rx="2" fill="#7b341e"/>
-    <text x="35" y="70" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">입구</text>
-  </g>
-  <!-- 발신자 -->
-  <g transform="translate(5, 165)">
-    <circle cx="10" cy="0" r="8" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-    <path d="M 0 10 Q 0 22 10 22 Q 20 22 20 10 L 20 40 L 0 40 Z" fill="#fff4ed" stroke="#475569" stroke-width="1.2"/>
-  </g>
-  <text x="15" y="220" text-anchor="middle" font-size="8" fill="#94a3b8">발신자</text>
-  <!-- 화살표: 입구로 -->
-  <path d="M 20 185 L 95 185" stroke="#ff7849" stroke-width="1.6" marker-end="url(#m1n-a)"/>
-  <!-- 가운데: 창구 카운터 (큼지막하게) -->
-  <g transform="translate(200, 85)">
-    <!-- 카운터 테이블 -->
-    <rect x="0" y="0" width="160" height="100" rx="4" fill="#fff" stroke="#7b341e" stroke-width="2"/>
-    <line x1="0" y1="28" x2="160" y2="28" stroke="#7b341e" stroke-width="1.2"/>
-    <text x="80" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">창구 카운터</text>
-    <!-- 송장 부착 라벨 -->
-    <text x="80" y="-4" text-anchor="middle" font-size="10" font-style="italic" font-weight="700" fill="#dc2626">송장 부착!</text>
-    <!-- 우편 (카운터 가운데에 크게) -->
-    <g transform="translate(18, 45)">
-      <rect x="0" y="0" width="78" height="48" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
-      <line x1="0" y1="0" x2="39" y2="24" stroke="#d97706" stroke-width="1.2"/>
-      <line x1="78" y1="0" x2="39" y2="24" stroke="#d97706" stroke-width="1.2"/>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">우편의 외부 주소 위에 새 송장이 덮어 붙어 다음 단계로 갑니다</text>
+  <!-- 좌측: 외부 주소 우편 -->
+  <g transform="translate(20, 110)">
+    <text x="65" y="-10" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">외부 주소 우편</text>
+    <g transform="translate(8, 22)">
+      <circle cx="0" cy="0" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+      <path d="M -9 9 Q -9 21 0 21 Q 9 21 9 9 L 9 38 L -9 38 Z" fill="#fff4ed" stroke="#475569" stroke-width="1.2"/>
     </g>
-    <!-- 송장 (흰 종이 + 빨간 테두리 + 검은 바코드, 우편 우상단에 비스듬히 붙음) -->
-    <g transform="translate(60, 36) rotate(-6)">
-      <!-- 효과선 (방금 막 붙은 표시) -->
-      <line x1="-3" y1="-4" x2="-7" y2="-10" stroke="#dc2626" stroke-width="1.6"/>
-      <line x1="24" y1="-6" x2="24" y2="-13" stroke="#dc2626" stroke-width="1.6"/>
-      <line x1="50" y1="-4" x2="55" y2="-10" stroke="#dc2626" stroke-width="1.6"/>
-      <!-- 송장 라벨 (흰 종이 + 빨간 테두리) -->
-      <rect x="0" y="0" width="48" height="34" rx="2" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
-      <text x="24" y="10" text-anchor="middle" font-size="7" font-weight="700" fill="#dc2626">송장</text>
-      <line x1="3" y1="13" x2="45" y2="13" stroke="#dc2626" stroke-width="0.4"/>
-      <!-- 바코드 (검은 줄무늬) -->
-      <line x1="5" y1="17" x2="5" y2="30" stroke="#0f172a" stroke-width="0.8"/>
-      <line x1="8" y1="17" x2="8" y2="30" stroke="#0f172a" stroke-width="1.4"/>
-      <line x1="11" y1="17" x2="11" y2="30" stroke="#0f172a" stroke-width="0.6"/>
-      <line x1="14" y1="17" x2="14" y2="30" stroke="#0f172a" stroke-width="1.2"/>
-      <line x1="17" y1="17" x2="17" y2="30" stroke="#0f172a" stroke-width="0.8"/>
-      <line x1="20" y1="17" x2="20" y2="30" stroke="#0f172a" stroke-width="1.4"/>
-      <line x1="23" y1="17" x2="23" y2="30" stroke="#0f172a" stroke-width="0.6"/>
-      <line x1="26" y1="17" x2="26" y2="30" stroke="#0f172a" stroke-width="1.2"/>
-      <line x1="29" y1="17" x2="29" y2="30" stroke="#0f172a" stroke-width="0.8"/>
-      <line x1="32" y1="17" x2="32" y2="30" stroke="#0f172a" stroke-width="1.4"/>
-      <line x1="35" y1="17" x2="35" y2="30" stroke="#0f172a" stroke-width="0.6"/>
-      <line x1="38" y1="17" x2="38" y2="30" stroke="#0f172a" stroke-width="1.2"/>
-      <line x1="41" y1="17" x2="41" y2="30" stroke="#0f172a" stroke-width="0.8"/>
-    </g>
-    <!-- 창구 직원 (오른쪽, 왼팔 뻗어 송장 위에 손) -->
-    <g transform="translate(128, 38)">
-      <!-- 머리 -->
-      <circle cx="0" cy="0" r="11" fill="#fff" stroke="#475569" stroke-width="1.4"/>
-      <!-- 몸 -->
-      <path d="M -14 12 Q -14 32 0 32 Q 14 32 14 12 L 14 52 L -14 52 Z" fill="#fff4ed" stroke="#475569" stroke-width="1.4"/>
-      <!-- 왼팔 (어깨에서 송장 쪽으로 뻗음) -->
-      <line x1="-12" y1="14" x2="-32" y2="20" stroke="#475569" stroke-width="2.6" stroke-linecap="round"/>
-      <!-- 손 (송장 위에 닿음) -->
-      <circle cx="-34" cy="20" r="4.5" fill="#fff4ed" stroke="#475569" stroke-width="1.4"/>
+    <text x="8" y="80" text-anchor="middle" font-size="8" fill="#94a3b8">발신자</text>
+    <g transform="translate(28, 12)">
+      <rect x="0" y="0" width="100" height="62" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+      <line x1="0" y1="0" x2="50" y2="31" stroke="#d97706" stroke-width="1.2"/>
+      <line x1="100" y1="0" x2="50" y2="31" stroke="#d97706" stroke-width="1.2"/>
+      <rect x="14" y="36" width="72" height="22" rx="2" fill="#fff" stroke="#475569" stroke-width="1"/>
+      <text x="50" y="46" text-anchor="middle" font-size="6" fill="#475569">받는 곳</text>
+      <text x="50" y="55" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a">동네 우체국 :30080</text>
     </g>
   </g>
-  <!-- 오른쪽: 다음 단계 -->
-  <g transform="translate(600, 120)">
-    <rect x="0" y="0" width="150" height="105" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4,2"/>
-    <text x="75" y="32" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">다음 단계</text>
-    <text x="75" y="58" text-anchor="middle" font-size="9" fill="#7b341e">물류 센터에서</text>
-    <text x="75" y="75" text-anchor="middle" font-size="9" fill="#7b341e">바코드를</text>
-    <text x="75" y="90" text-anchor="middle" font-size="9" fill="#7b341e">스캔합니다</text>
+  <line x1="170" y1="148" x2="232" y2="148" stroke="#ff7849" stroke-width="2.2" marker-end="url(#m1n-a)"/>
+  <text x="200" y="139" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">우체국으로</text>
+  <!-- 가운데: 우체국 건물 -->
+  <g transform="translate(238, 60)">
+    <rect x="0" y="20" width="320" height="180" rx="3" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
+    <path d="M -3 20 L 323 20 L 323 8 L -3 8 Z" fill="#7b341e"/>
+    <text x="160" y="2" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">우체국</text>
+    <text x="160" y="42" text-anchor="middle" font-size="11" font-style="italic" font-weight="700" fill="#dc2626">외부 주소 가리고 새 송장 덮어붙임</text>
+    <rect x="14" y="120" width="44" height="80" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
+    <rect x="29" y="148" width="14" height="52" fill="#7b341e"/>
+    <text x="36" y="138" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">입구</text>
+    <path d="M 60 155 Q 90 155 108 130" stroke="#ff7849" stroke-width="1.6" marker-end="url(#m1n-a)" fill="none" stroke-dasharray="3,2"/>
+    <rect x="100" y="65" width="200" height="120" rx="3" fill="#fffaf0" stroke="#7b341e" stroke-width="1.4"/>
+    <line x1="100" y1="86" x2="300" y2="86" stroke="#7b341e" stroke-width="1.2"/>
+    <text x="200" y="80" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">창구 카운터</text>
+    <g transform="translate(125, 116)">
+      <rect x="0" y="0" width="110" height="60" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+      <line x1="0" y1="0" x2="55" y2="30" stroke="#d97706" stroke-width="1.2"/>
+      <line x1="110" y1="0" x2="55" y2="30" stroke="#d97706" stroke-width="1.2"/>
+      <rect x="14" y="32" width="82" height="22" rx="2" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+      <line x1="14" y1="32" x2="96" y2="54" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="96" y1="32" x2="14" y2="54" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="55" y="46" text-anchor="middle" font-size="6" fill="#94a3b8">동네 우체국 :30080</text>
+      <g transform="translate(20, -10) rotate(-7)">
+        <rect x="0" y="0" width="68" height="32" rx="2" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+        <text x="34" y="10" text-anchor="middle" font-size="6" font-weight="700" fill="#dc2626">새 송장</text>
+        <line x1="3" y1="13" x2="65" y2="13" stroke="#dc2626" stroke-width="0.4"/>
+        <line x1="6" y1="16" x2="6" y2="29" stroke="#0f172a" stroke-width="1"/>
+        <line x1="10" y1="16" x2="10" y2="29" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="14" y1="16" x2="14" y2="29" stroke="#0f172a" stroke-width="0.7"/>
+        <line x1="18" y1="16" x2="18" y2="29" stroke="#0f172a" stroke-width="1.2"/>
+        <line x1="22" y1="16" x2="22" y2="29" stroke="#0f172a" stroke-width="0.8"/>
+        <line x1="26" y1="16" x2="26" y2="29" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="30" y1="16" x2="30" y2="29" stroke="#0f172a" stroke-width="0.6"/>
+        <line x1="34" y1="16" x2="34" y2="29" stroke="#0f172a" stroke-width="1.2"/>
+        <line x1="38" y1="16" x2="38" y2="29" stroke="#0f172a" stroke-width="0.8"/>
+        <line x1="42" y1="16" x2="42" y2="29" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="46" y1="16" x2="46" y2="29" stroke="#0f172a" stroke-width="0.6"/>
+        <line x1="50" y1="16" x2="50" y2="29" stroke="#0f172a" stroke-width="1.2"/>
+        <line x1="54" y1="16" x2="54" y2="29" stroke="#0f172a" stroke-width="0.8"/>
+        <line x1="58" y1="16" x2="58" y2="29" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="62" y1="16" x2="62" y2="29" stroke="#0f172a" stroke-width="0.6"/>
+      </g>
+      <line x1="34" y1="-4" x2="30" y2="-12" stroke="#dc2626" stroke-width="1.6"/>
+      <line x1="56" y1="-5" x2="56" y2="-14" stroke="#dc2626" stroke-width="1.6"/>
+      <line x1="78" y1="-4" x2="82" y2="-12" stroke="#dc2626" stroke-width="1.6"/>
+    </g>
+    <g transform="translate(265, 100)">
+      <circle cx="0" cy="0" r="8" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+      <path d="M -10 9 Q -10 20 0 20 Q 10 20 10 9 L 10 28 L -10 28 Z" fill="#fff4ed" stroke="#475569" stroke-width="1.2"/>
+      <line x1="-8" y1="14" x2="-30" y2="22" stroke="#475569" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="-32" cy="22" r="4.5" fill="#fff4ed" stroke="#475569" stroke-width="1.2"/>
+    </g>
+    <text x="278" y="92" font-size="8" fill="#94a3b8">창구 직원</text>
   </g>
-  <!-- 흐름 화살표 -->
-  <line x1="385" y1="135" x2="520" y2="135" stroke="#ff7849" stroke-width="2.2" marker-end="url(#m1n-a)"/>
-  <text x="450" y="128" text-anchor="middle" font-size="8" font-style="italic" fill="#7b341e">물류 센터로</text>
+  <line x1="566" y1="148" x2="628" y2="148" stroke="#ff7849" stroke-width="2.4" marker-end="url(#m1n-a)"/>
+  <text x="597" y="139" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">물류 센터로</text>
+  <!-- 우측: 새 송장 우편 (외부 주소 가려진 채 새 송장 덮여 있음) -->
+  <g transform="translate(640, 110)">
+    <text x="65" y="-10" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">새 송장 우편</text>
+    <rect x="11" y="12" width="110" height="62" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+    <line x1="11" y1="12" x2="66" y2="43" stroke="#d97706" stroke-width="1.2"/>
+    <line x1="121" y1="12" x2="66" y2="43" stroke="#d97706" stroke-width="1.2"/>
+    <rect x="25" y="44" width="82" height="22" rx="2" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
+    <line x1="25" y1="44" x2="107" y2="66" stroke="#cbd5e1" stroke-width="1"/>
+    <line x1="107" y1="44" x2="25" y2="66" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="66" y="58" text-anchor="middle" font-size="6" fill="#94a3b8">동네 우체국 :30080</text>
+    <g transform="translate(31, 38) rotate(-5)">
+      <rect x="0" y="0" width="68" height="30" rx="2" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+      <text x="34" y="10" text-anchor="middle" font-size="6" font-weight="700" fill="#dc2626">새 송장</text>
+      <line x1="3" y1="13" x2="65" y2="13" stroke="#dc2626" stroke-width="0.4"/>
+      <line x1="6" y1="16" x2="6" y2="27" stroke="#0f172a" stroke-width="0.9"/>
+      <line x1="10" y1="16" x2="10" y2="27" stroke="#0f172a" stroke-width="1.3"/>
+      <line x1="14" y1="16" x2="14" y2="27" stroke="#0f172a" stroke-width="0.6"/>
+      <line x1="18" y1="16" x2="18" y2="27" stroke="#0f172a" stroke-width="1.1"/>
+      <line x1="22" y1="16" x2="22" y2="27" stroke="#0f172a" stroke-width="0.8"/>
+      <line x1="26" y1="16" x2="26" y2="27" stroke="#0f172a" stroke-width="1.3"/>
+      <line x1="30" y1="16" x2="30" y2="27" stroke="#0f172a" stroke-width="0.5"/>
+      <line x1="34" y1="16" x2="34" y2="27" stroke="#0f172a" stroke-width="1.1"/>
+      <line x1="38" y1="16" x2="38" y2="27" stroke="#0f172a" stroke-width="0.7"/>
+      <line x1="42" y1="16" x2="42" y2="27" stroke="#0f172a" stroke-width="1.3"/>
+      <line x1="46" y1="16" x2="46" y2="27" stroke="#0f172a" stroke-width="0.6"/>
+      <line x1="50" y1="16" x2="50" y2="27" stroke="#0f172a" stroke-width="1.1"/>
+      <line x1="54" y1="16" x2="54" y2="27" stroke="#0f172a" stroke-width="0.8"/>
+      <line x1="58" y1="16" x2="58" y2="27" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="62" y1="16" x2="62" y2="27" stroke="#0f172a" stroke-width="0.6"/>
+    </g>
+  </g>
 </svg>
 </div>
 
-*그림 5-20. 발신자가 우체국 입구에서 창구 직원에게 우편을 맡기면 송장이 붙습니다*
+*그림 5-20. 우체국 창구에서 우편의 외부 주소 위에 새 송장(바코드)이 덮여 붙어 다음 단계로 넘어갑니다*
 
 | 비유 | IT 용어 | 한 줄 설명 |
 |:---:|:---|:---|
 | 발신자 | **외부 호스트** | 브라우저로 요청을 보내는 사용자 |
 | 우체국 입구 | **NodePort** | 노드 외벽의 공개 포트 |
-| 창구 직원 | **kube-proxy (1차)** | iptables 규칙으로 패킷을 받아 다음 단계로 전달 |
-| 송장 | **NAT 변환** | 패킷의 목적지를 Ingress Controller Pod로 변환 |
+| 창구 직원 | **kube-proxy (1차)** | iptables 규칙으로 패킷의 받는 곳을 변환해 다음 단계로 전달 |
+| 송장 | **NAT 변환** | 패킷의 받는 곳을 Ingress Controller의 IP로 변환 |
 
-브라우저가 `http://localhost/order`를 누르면 요청은 노드의 NodePort(`:30080`)로 들어옵니다. 같은 노드의 kube-proxy가 iptables 규칙으로 그 패킷을 가로채 NodePort Service 뒤에 묶인 Ingress Controller Pod로 변환해 보냅니다. 송장이 붙는 단계입니다 — 어디로 갈지를 패킷에 새겨 다음 단계로 넘기는 자리입니다.
+브라우저가 `http://localhost:30080/order`를 누르면 요청은 노드의 NodePort(`:30080`)로 들어옵니다. 같은 노드의 kube-proxy가 iptables 규칙으로 그 패킷의 받는 곳을 NodePort Service 뒤에 묶인 Ingress Controller의 IP로 변환합니다. 변환된 패킷은 같은 노드 안 Ingress Controller로 들어갑니다. 송장이 붙는 단계입니다. 패킷에 어디로 갈지를 새겨 다음 단계로 넘깁니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 IT — 외부 요청이 NodePort + kube-proxy(1차)를 거쳐 Ingress Controller에 도달">
-  <defs>
-    <marker id="fl1n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-  </defs>
-  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">외부 요청 → NodePort → kube-proxy(1차) → Ingress Controller</text>
-  <rect x="20" y="120" width="120" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="80" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 호스트</text>
-  <text x="80" y="180" text-anchor="middle" font-size="10" fill="#6b7280">브라우저</text>
-  <line x1="140" y1="160" x2="195" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
-  <rect x="195" y="60" width="585" height="200" rx="10" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
-  <text x="487" y="78" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Kubernetes 클러스터 (워커 노드)</text>
-  <rect x="220" y="120" width="120" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="280" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">NodePort</text>
-  <text x="280" y="170" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">:30080</text>
-  <text x="280" y="190" text-anchor="middle" font-size="9" fill="#7b341e">노드 외벽 진입</text>
-  <line x1="340" y1="160" x2="400" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
-  <text x="370" y="150" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">DNAT</text>
-  <rect x="400" y="120" width="160" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="480" y="148" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">kube-proxy (1차)</text>
-  <text x="480" y="170" text-anchor="middle" font-size="9" fill="#7b341e">iptables 규칙 따라</text>
-  <text x="480" y="185" text-anchor="middle" font-size="9" fill="#7b341e">Pod IP로 변환</text>
-  <line x1="560" y1="160" x2="615" y2="160" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl1n-a)"/>
-  <rect x="615" y="120" width="150" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="690" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress Controller</text>
-  <text x="690" y="180" text-anchor="middle" font-size="9" fill="#7b341e">(L7 처리 시작)</text>
-  <text x="167" y="145" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">localhost/order</text>
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 IT — 노드 :30080으로 들어온 패킷이 kube-proxy iptables 규칙으로 Ingress Controller Pod IP로 변환">
+<defs>
+<marker id="s21-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+<marker id="s21-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+</defs>
+<text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">노드 :30080으로 들어온 패킷이 kube-proxy를 거쳐 Ingress로 전달됩니다</text>
+<g id="left-section">
+<text x="80" y="92" text-anchor="middle" font-size="8" fill="#94a3b8">사용자 입력</text>
+<text x="80" y="106" text-anchor="middle" font-size="9" font-family="monospace" font-weight="700" fill="#7b341e">http://localhost:30080/order</text>
+<rect x="20" y="115" width="120" height="50" rx="4" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="80" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Host</text>
+<text x="80" y="152" text-anchor="middle" font-size="9" fill="#6b7280">브라우저</text>
+<line x1="140" y1="140" x2="180" y2="140" stroke="#ff7849" stroke-width="2.4" marker-end="url(#s21-arrow)"/>
+<text x="160" y="131" text-anchor="middle" font-size="8" font-style="italic" fill="#7b341e">:30080</text>
+</g>
+<g id="node-section">
+<rect x="186" y="50" width="604" height="180" rx="4" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+<text x="488" y="46" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Kubernetes 클러스터</text>
+<rect x="200" y="112" width="70" height="56" rx="3" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+<text x="235" y="133" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">NodePort</text>
+<text x="235" y="151" text-anchor="middle" font-size="9" font-family="monospace" font-weight="700" fill="#7b341e">:30080</text>
+<line x1="270" y1="140" x2="290" y2="140" stroke="#ff7849" stroke-width="2" marker-end="url(#s21-arrow)"/>
+<rect x="290" y="70" width="260" height="140" rx="4" fill="#fffaf0" stroke="#ff7849" stroke-width="2"/>
+<text x="420" y="89" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">kube-proxy</text>
+<text x="420" y="104" text-anchor="middle" font-size="8" font-style="italic" fill="#94a3b8">iptables NAT 규칙</text>
+<rect x="305" y="118" width="90" height="44" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+<text x="350" y="132" text-anchor="middle" font-size="8" fill="#475569">Node 포트</text>
+<line x1="312" y1="137" x2="388" y2="137" stroke="#cbd5e1" stroke-width="0.6"/>
+<text x="350" y="154" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#0f172a">:30080</text>
+<line x1="395" y1="140" x2="445" y2="140" stroke="#dc2626" stroke-width="2.4" marker-end="url(#s21-red)"/>
+<text x="420" y="131" text-anchor="middle" font-size="9" font-style="italic" font-weight="700" fill="#dc2626">주소 변환</text>
+<rect x="445" y="118" width="85" height="44" rx="3" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+<text x="488" y="132" text-anchor="middle" font-size="8" fill="#dc2626">Ingress IP</text>
+<line x1="452" y1="137" x2="523" y2="137" stroke="#fed7aa" stroke-width="0.6"/>
+<text x="488" y="154" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#dc2626">10.244.0.5:80</text>
+</g>
+<path d="M 525 140 Q 555 140 575 140" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="4,3" fill="none" marker-end="url(#s21-red)"/>
+<text x="550" y="131" text-anchor="middle" font-size="8" font-style="italic" font-weight="700" fill="#dc2626">전달</text>
+<g id="right-section">
+<rect x="580" y="88" width="200" height="104" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+<text x="680" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Ingress Controller</text>
+<rect x="600" y="128" width="160" height="52" rx="2" fill="#fff" stroke="#dc2626" stroke-width="1.6"/>
+<text x="608" y="143" font-size="8" font-weight="600" fill="#7b341e">Ingress IP:</text>
+<text x="752" y="143" text-anchor="end" font-size="10" font-family="monospace" font-weight="700" fill="#dc2626">10.244.0.5:80</text>
+<line x1="608" y1="150" x2="752" y2="150" stroke="#fed7aa" stroke-width="0.6"/>
+<text x="608" y="165" font-size="8" font-weight="600" fill="#7b341e">요청:</text>
+<text x="752" y="165" text-anchor="end" font-size="10" font-family="monospace" font-weight="700" fill="#0f172a">/order</text>
+</g>
 </svg>
 </div>
 
@@ -985,100 +1045,110 @@ minikube tunnel                          # 별도 터미널에서 실행
 송장이 붙은 우편이 **물류 센터**에 도착합니다. 작업자가 송장의 **바코드**를 스캐너로 찍으면 서울 우체국·부산 우체국 가운데 어디로 갈지 자동으로 뜹니다. 어떤 바코드가 어느 우체국으로 가는지는 옆에 비치된 **주소 사전**에 적혀 있습니다. 주소 사전은 우체국 정보가 바뀔 때마다 즉시 고쳐 둡니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 800 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 비유 — 물류 센터에서 작업자가 송장의 바코드를 스캔하고 주소 사전과 대조해 어느 우체국으로 보낼지 결정">
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 비유 — 송장 붙은 우편이 물류 센터에서 바코드를 주소 사전과 대조해 갈 우체국이 결정됨">
   <defs>
     <marker id="m2n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
     <marker id="m2n-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
-  <text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">스캐너가 송장의 바코드를 찍으면 서울 우체국이 결정됩니다</text>
-  <!-- 좌측: 주소 사전 (책) -->
-  <g transform="translate(25, 85)">
-    <rect x="0" y="0" width="105" height="95" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
-    <rect x="0" y="0" width="12" height="95" fill="#7b341e"/>
-    <text x="6" y="50" text-anchor="middle" font-size="6" font-weight="700" fill="#fff" transform="rotate(-90 6 50)">RULES</text>
-    <text x="58" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">주소 사전</text>
-    <line x1="18" y1="24" x2="100" y2="24" stroke="#94a3b8" stroke-width="0.4"/>
-    <text x="20" y="38" font-size="7" fill="#7b341e" font-weight="700">▶ 서울</text>
-    <text x="20" y="52" font-size="7" fill="#94a3b8">  부산</text>
-    <text x="20" y="66" font-size="7" fill="#94a3b8">  대구</text>
-    <text x="20" y="80" font-size="7" fill="#94a3b8">  광주</text>
-  </g>
-  <!-- 가운데: 컨베이어 + 우편 + 스캐너 (핵심 동작) -->
-  <g transform="translate(200, 65)">
-    <!-- 컨베이어 벨트 -->
-    <rect x="0" y="80" width="200" height="20" fill="#e5e7eb" stroke="#7b341e" stroke-width="1.2"/>
-    <line x1="5" y1="82" x2="195" y2="82" stroke="#7b341e" stroke-width="0.6" stroke-dasharray="4,2"/>
-    <!-- 우편 (컨베이어 위) -->
-    <g transform="translate(40, 55)">
-      <rect x="0" y="0" width="50" height="32" rx="1" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
-      <line x1="2" y1="2" x2="25" y2="16" stroke="#d97706" stroke-width="0.8"/>
-      <line x1="50" y1="2" x2="25" y2="16" stroke="#d97706" stroke-width="0.8"/>
-      <!-- 큰 빨간 송장 -->
-      <rect x="28" y="-16" width="45" height="28" rx="2" fill="#dc2626" stroke="#7b341e" stroke-width="1.4"/>
-      <line x1="33" y1="-8" x2="33" y2="6" stroke="#fff" stroke-width="1"/>
-      <line x1="38" y1="-8" x2="38" y2="6" stroke="#0f172a" stroke-width="1.2"/>
-      <line x1="43" y1="-8" x2="43" y2="6" stroke="#fff" stroke-width="0.8"/>
-      <line x1="48" y1="-8" x2="48" y2="6" stroke="#0f172a" stroke-width="1.2"/>
-      <line x1="53" y1="-8" x2="53" y2="6" stroke="#fff" stroke-width="1"/>
-      <line x1="58" y1="-8" x2="58" y2="6" stroke="#0f172a" stroke-width="1"/>
-      <line x1="63" y1="-8" x2="63" y2="6" stroke="#fff" stroke-width="0.8"/>
-      <text x="50.5" y="10" text-anchor="middle" font-size="6" fill="#fff" font-weight="700">송장</text>
-    </g>
-    <!-- 스캐너 (위에서 크게) -->
-    <g transform="translate(110, 15)">
-      <rect x="0" y="0" width="55" height="45" rx="4" fill="#1f2937" stroke="#0f172a" stroke-width="1.4"/>
-      <rect x="8" y="8" width="39" height="18" rx="2" fill="#fef3c7" stroke="#0f172a" stroke-width="1"/>
-      <line x1="13" y1="12" x2="13" y2="22" stroke="#0f172a" stroke-width="0.8"/>
-      <line x1="17" y1="12" x2="17" y2="22" stroke="#0f172a" stroke-width="1.2"/>
-      <line x1="21" y1="12" x2="21" y2="22" stroke="#0f172a" stroke-width="0.6"/>
-      <line x1="25" y1="12" x2="25" y2="22" stroke="#0f172a" stroke-width="1"/>
-      <line x1="29" y1="12" x2="29" y2="22" stroke="#0f172a" stroke-width="0.8"/>
-      <line x1="33" y1="12" x2="33" y2="22" stroke="#0f172a" stroke-width="1.2"/>
-      <line x1="37" y1="12" x2="37" y2="22" stroke="#0f172a" stroke-width="0.6"/>
-      <line x1="41" y1="12" x2="41" y2="22" stroke="#0f172a" stroke-width="1"/>
-      <text x="27.5" y="39" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">SCAN</text>
-    </g>
-    <!-- 스캐너 광선 (굵고 눈에 띄게) -->
-    <line x1="137.5" y1="60" x2="65" y2="87" stroke="#ff7849" stroke-width="2.4" stroke-dasharray="3,2"/>
-    <text x="95" y="65" text-anchor="middle" font-size="9" font-weight="700" fill="#ff7849">바코드</text>
-    <text x="95" y="77" text-anchor="middle" font-size="9" font-weight="700" fill="#ff7849">스캔</text>
-    <!-- 작업자 (스캐너 옆에서 스캔) -->
-    <g transform="translate(155, 88)">
-      <circle cx="0" cy="0" r="9" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-      <path d="M -12 9 Q -12 24 0 24 Q 12 24 12 9 L 12 35 L -12 35 Z" fill="#fff4ed" stroke="#475569" stroke-width="1.2"/>
-      <!-- 손이 스캐너를 쥔 형태 -->
-      <g transform="translate(-5, -5)">
-        <circle cx="0" cy="0" r="2.5" fill="#7b341e"/>
-      </g>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">송장 바코드를 주소 사전과 대조해 갈 우체국이 정해집니다</text>
+  <!-- 좌측: 입력 (송장 붙은 우편 — 1단계 출력과 동일) -->
+  <g transform="translate(20, 97)">
+    <text x="65" y="-10" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">송장 붙은 우편</text>
+    <rect x="13" y="12" width="100" height="62" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+    <line x1="13" y1="12" x2="63" y2="43" stroke="#d97706" stroke-width="1.2"/>
+    <line x1="113" y1="12" x2="63" y2="43" stroke="#d97706" stroke-width="1.2"/>
+    <g transform="translate(53, 50) rotate(-5)">
+      <rect x="0" y="0" width="48" height="30" rx="2" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+      <text x="24" y="10" text-anchor="middle" font-size="7" font-weight="700" fill="#dc2626">송장</text>
+      <line x1="3" y1="13" x2="45" y2="13" stroke="#dc2626" stroke-width="0.3"/>
+      <line x1="6" y1="17" x2="6" y2="26" stroke="#0f172a" stroke-width="0.7"/>
+      <line x1="10" y1="17" x2="10" y2="26" stroke="#0f172a" stroke-width="1.1"/>
+      <line x1="14" y1="17" x2="14" y2="26" stroke="#0f172a" stroke-width="0.6"/>
+      <line x1="18" y1="17" x2="18" y2="26" stroke="#0f172a" stroke-width="0.9"/>
+      <line x1="22" y1="17" x2="22" y2="26" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="26" y1="17" x2="26" y2="26" stroke="#0f172a" stroke-width="0.5"/>
+      <line x1="30" y1="17" x2="30" y2="26" stroke="#0f172a" stroke-width="1"/>
+      <line x1="34" y1="17" x2="34" y2="26" stroke="#0f172a" stroke-width="0.7"/>
+      <line x1="38" y1="17" x2="38" y2="26" stroke="#0f172a" stroke-width="1"/>
+      <line x1="42" y1="17" x2="42" y2="26" stroke="#0f172a" stroke-width="0.6"/>
     </g>
   </g>
-  <text x="235" y="180" text-anchor="middle" font-size="8" fill="#7b341e">작업자</text>
-  <!-- 오른쪽: 우체국 목록 (지도 핀 형태) -->
-  <g transform="translate(600, 85)">
-    <!-- 서울 (강조) -->
-    <g transform="translate(0, 0)">
-      <circle cx="35" cy="15" r="18" fill="#fff4ed" stroke="#ff7849" stroke-width="2.2"/>
-      <text x="35" y="18" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">서울</text>
+  <line x1="170" y1="140" x2="232" y2="140" stroke="#ff7849" stroke-width="2.2" marker-end="url(#m2n-a)"/>
+  <text x="200" y="131" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">물류 센터로</text>
+  <!-- 가운데: 물류 센터 (작업대 + 사전 대조) -->
+  <g transform="translate(238, 60)">
+    <rect x="0" y="20" width="320" height="180" rx="3" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
+    <path d="M -3 20 L 323 20 L 323 8 L -3 8 Z" fill="#7b341e"/>
+    <text x="160" y="2" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">물류 센터</text>
+    <text x="160" y="42" text-anchor="middle" font-size="11" font-style="italic" font-weight="700" fill="#dc2626">바코드 → 주소 사전 대조 → 결정!</text>
+    <!-- 좌: 작업대 위 송장 (바코드 강조) -->
+    <text x="60" y="68" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">송장 바코드</text>
+    <g transform="translate(20, 78)">
+      <rect x="0" y="0" width="80" height="50" rx="2" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
+      <text x="40" y="13" text-anchor="middle" font-size="8" font-weight="700" fill="#dc2626">송장</text>
+      <line x1="4" y1="17" x2="76" y2="17" stroke="#dc2626" stroke-width="0.4"/>
+      <line x1="6" y1="22" x2="6" y2="46" stroke="#0f172a" stroke-width="1"/>
+      <line x1="10" y1="22" x2="10" y2="46" stroke="#0f172a" stroke-width="1.6"/>
+      <line x1="14" y1="22" x2="14" y2="46" stroke="#0f172a" stroke-width="0.7"/>
+      <line x1="18" y1="22" x2="18" y2="46" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="22" y1="22" x2="22" y2="46" stroke="#0f172a" stroke-width="0.8"/>
+      <line x1="26" y1="22" x2="26" y2="46" stroke="#0f172a" stroke-width="1.6"/>
+      <line x1="30" y1="22" x2="30" y2="46" stroke="#0f172a" stroke-width="0.6"/>
+      <line x1="34" y1="22" x2="34" y2="46" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="38" y1="22" x2="38" y2="46" stroke="#0f172a" stroke-width="0.8"/>
+      <line x1="42" y1="22" x2="42" y2="46" stroke="#0f172a" stroke-width="1.6"/>
+      <line x1="46" y1="22" x2="46" y2="46" stroke="#0f172a" stroke-width="0.6"/>
+      <line x1="50" y1="22" x2="50" y2="46" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="54" y1="22" x2="54" y2="46" stroke="#0f172a" stroke-width="0.8"/>
+      <line x1="58" y1="22" x2="58" y2="46" stroke="#0f172a" stroke-width="1.4"/>
+      <line x1="62" y1="22" x2="62" y2="46" stroke="#0f172a" stroke-width="0.7"/>
+      <line x1="66" y1="22" x2="66" y2="46" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="70" y1="22" x2="70" y2="46" stroke="#0f172a" stroke-width="0.6"/>
+      <line x1="74" y1="22" x2="74" y2="46" stroke="#0f172a" stroke-width="1"/>
     </g>
-    <!-- 부산 -->
-    <g transform="translate(0, 50)">
-      <circle cx="35" cy="15" r="15" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
-      <text x="35" y="18" text-anchor="middle" font-size="9" fill="#94a3b8">부산</text>
+    <!-- 대조 화살표 (송장 → 사전) -->
+    <line x1="105" y1="100" x2="155" y2="100" stroke="#ff7849" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#m2n-a)"/>
+    <text x="130" y="92" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">대조</text>
+    <!-- 우: 주소 사전 (펼쳐진 책) -->
+    <g transform="translate(160, 70)">
+      <rect x="0" y="0" width="140" height="100" rx="2" fill="#fffaf0" stroke="#7b341e" stroke-width="1.4"/>
+      <line x1="70" y1="0" x2="70" y2="100" stroke="#7b341e" stroke-width="1.2"/>
+      <text x="70" y="-6" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">주소 사전</text>
+      <text x="6" y="18" font-size="7" fill="#94a3b8">바코드</text>
+      <text x="76" y="18" font-size="7" fill="#94a3b8">→ 우체국</text>
+      <line x1="4" y1="22" x2="66" y2="22" stroke="#94a3b8" stroke-width="0.4"/>
+      <line x1="74" y1="22" x2="136" y2="22" stroke="#94a3b8" stroke-width="0.4"/>
+      <rect x="3" y="26" width="64" height="14" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="8" y="36" font-size="7" font-weight="700" fill="#dc2626">|||| ||||</text>
+      <text x="76" y="36" font-size="7" font-weight="700" fill="#dc2626">▶ 서울</text>
+      <text x="8" y="50" font-size="7" fill="#94a3b8">|||| ||||</text>
+      <text x="76" y="50" font-size="7" fill="#94a3b8">  부산</text>
+      <text x="8" y="64" font-size="7" fill="#94a3b8">|||| ||||</text>
+      <text x="76" y="64" font-size="7" fill="#94a3b8">  대구</text>
+      <text x="8" y="78" font-size="7" fill="#94a3b8">|||| ||||</text>
+      <text x="76" y="78" font-size="7" fill="#94a3b8">  광주</text>
+      <text x="8" y="92" font-size="7" fill="#94a3b8">  ...</text>
     </g>
-    <!-- 대구 -->
-    <g transform="translate(0, 95)">
-      <circle cx="35" cy="15" r="15" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
-      <text x="35" y="18" text-anchor="middle" font-size="9" fill="#94a3b8">대구</text>
-    </g>
-    <!-- 광주 -->
-    <g transform="translate(0, 140)">
-      <circle cx="35" cy="15" r="15" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
-      <text x="35" y="18" text-anchor="middle" font-size="9" fill="#94a3b8">광주</text>
+    <!-- 작업자 손가락 (서울 행 짚음) -->
+    <g transform="translate(220, 96)">
+      <line x1="0" y1="14" x2="14" y2="6" stroke="#475569" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="16" cy="5" r="3" fill="#fff4ed" stroke="#475569" stroke-width="1"/>
     </g>
   </g>
-  <!-- 결정 화살표 -->
-  <line x1="425" y1="110" x2="555" y2="110" stroke="#ff7849" stroke-width="2.2" marker-end="url(#m2n-a)"/>
-  <text x="490" y="102" text-anchor="middle" font-size="9" font-style="italic" font-weight="700" fill="#7b341e">결정!</text>
+  <line x1="566" y1="140" x2="628" y2="140" stroke="#ff7849" stroke-width="2.4" marker-end="url(#m2n-a)"/>
+  <text x="597" y="131" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">서울로</text>
+  <!-- 우측: 출력 (서울 우체국 결정, 나머지는 흐림) -->
+  <g transform="translate(635, 118)">
+    <text x="65" y="-10" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">결정된 우체국</text>
+    <circle cx="65" cy="22" r="22" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
+    <text x="65" y="26" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">서울</text>
+    <circle cx="20" cy="80" r="11" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="20" y="83" text-anchor="middle" font-size="7" fill="#94a3b8">부산</text>
+    <circle cx="65" cy="98" r="11" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="65" y="101" text-anchor="middle" font-size="7" fill="#94a3b8">대구</text>
+    <circle cx="110" cy="80" r="11" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="110" y="83" text-anchor="middle" font-size="7" fill="#94a3b8">광주</text>
+  </g>
 </svg>
 </div>
 
@@ -1086,7 +1156,7 @@ minikube tunnel                          # 별도 터미널에서 실행
 
 | 비유 | IT 용어 | 한 줄 설명 |
 |:---:|:---|:---|
-| 물류 센터 | **Ingress Controller** | URL·Host로 보낼 Service를 결정하는 Pod |
+| 물류 센터 | **Ingress Controller** | URL·Host로 보낼 Service를 결정 |
 | 바코드 | **URL·Host 헤더** | 패킷의 L7 식별 정보 |
 | 주소 사전 | **내부 명단** | API Server를 watch해 받아 둔 Ingress·Service 정보 |
 | 서울 우체국·부산 우체국 | **Service (ClusterIP)** | 셀렉터로 묶인 Pod 그룹의 가상 진입 주소 |
@@ -1094,34 +1164,49 @@ minikube tunnel                          # 별도 터미널에서 실행
 Ingress Controller는 요청의 URL 경로와 Host 헤더를 읽어 등록된 Ingress 규칙과 대조합니다. *"이 요청은 `order-service`다."* 판단이 끝나면 미리 받아 둔 내부 명단에서 `order-service`의 ClusterIP를 곧바로 꺼냅니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 IT — Ingress Controller가 API Server에서 받아 둔 명단으로 결정된 Service의 ClusterIP로 전송">
-  <defs>
-    <marker id="fl2n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="fl2n-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-  </defs>
-  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Ingress Controller → 내부 명단 조회 → 결정된 Service ClusterIP로 전송</text>
-  <rect x="20" y="55" width="220" height="120" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="130" y="95" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">API Server</text>
-  <text x="130" y="115" text-anchor="middle" font-size="10" fill="#7b341e">Ingress·Service·Pod 정보</text>
-  <text x="130" y="143" text-anchor="middle" font-size="10" fill="#7b341e">(미리 받아 둠)</text>
-  <rect x="285" y="55" width="200" height="120" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
-  <text x="385" y="95" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Ingress Controller</text>
-  <text x="385" y="115" text-anchor="middle" font-size="11" fill="#6b7280">Pod</text>
-  <text x="385" y="143" text-anchor="middle" font-size="10" fill="#7b341e">URL·Host 읽음</text>
-  <line x1="285" y1="100" x2="245" y2="100" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#fl2n-s)"/>
-  <text x="265" y="90" text-anchor="middle" font-size="9" font-style="italic" font-family="monospace" fill="#475569">"order-service?"</text>
-  <line x1="245" y1="135" x2="285" y2="135" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#fl2n-a)"/>
-  <text x="265" y="150" text-anchor="middle" font-size="9" font-style="italic" font-family="monospace" fill="#7b341e">"10.96.0.20"</text>
-  <line x1="490" y1="99" x2="575" y2="99" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl2n-a)"/>
-  <rect x="575" y="78" width="205" height="42" rx="21" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
-  <text x="677" y="104" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">order-service (10.96.0.20)</text>
-  <rect x="585" y="130" width="185" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="677" y="148" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">stores-service (10.96.0.21)</text>
-  <rect x="585" y="165" width="185" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="677" y="183" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">payment-service (10.96.0.22)</text>
-  <rect x="585" y="200" width="185" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-  <text x="677" y="218" text-anchor="middle" font-size="10" font-weight="600" fill="#94a3b8">cs-service (10.96.0.23)</text>
-  <text x="400" y="245" text-anchor="middle" font-size="10" font-style="italic" fill="#94a3b8">다음 단계 (3단계): kube-proxy(2차)가 Pod IP로 변환</text>
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 IT — Ingress Controller가 페이로드 /order를 읽고 Ingress 규칙과 대조해 order-service로 결정. API Server가 Ingress 규칙 보관">
+<defs>
+<marker id="s23-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+<marker id="s23-gray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
+</defs>
+<text x="400" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">요청을 읽고 Ingress 규칙과 대조해 어느 Service로 보낼지 결정합니다</text>
+<rect x="60" y="40" width="680" height="230" rx="4" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+<text x="400" y="36" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Kubernetes 클러스터</text>
+<rect x="270" y="50" width="240" height="35" rx="3" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.2"/>
+<text x="390" y="65" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">API Server</text>
+<text x="390" y="78" text-anchor="middle" font-size="8" font-style="italic" fill="#64748b">Ingress 규칙 보관</text>
+<line x1="383" y1="88" x2="383" y2="113" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#s23-gray)"/>
+<line x1="397" y1="113" x2="397" y2="88" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#s23-gray)"/>
+<text x="415" y="103" font-size="8" font-style="italic" fill="#64748b">watch</text>
+<text x="140" y="128" text-anchor="middle" font-size="9" font-weight="700" fill="#475569">도착한 패킷</text>
+<rect x="75" y="143" width="130" height="50" rx="3" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="83" y="159" font-size="8" font-weight="600" fill="#7b341e">Ingress IP:</text>
+<text x="197" y="159" text-anchor="end" font-size="9" font-family="monospace" font-weight="700" fill="#dc2626">10.244.0.5:80</text>
+<line x1="83" y1="164" x2="197" y2="164" stroke="#fed7aa" stroke-width="0.6"/>
+<text x="83" y="179" font-size="8" font-weight="600" fill="#7b341e">요청:</text>
+<text x="197" y="179" text-anchor="end" font-size="9" font-family="monospace" font-weight="700" fill="#0f172a">/order</text>
+<line x1="208" y1="168" x2="262" y2="168" stroke="#ff7849" stroke-width="2.4" marker-end="url(#s23-arrow)"/>
+<rect x="270" y="115" width="240" height="135" rx="4" fill="#fffaf0" stroke="#ff7849" stroke-width="2"/>
+<text x="390" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress Controller</text>
+<text x="390" y="143" text-anchor="middle" font-size="8" font-style="italic" fill="#94a3b8">요청 읽고 규칙 대조</text>
+<rect x="285" y="152" width="210" height="85" rx="2" fill="#fff" stroke="#dc2626" stroke-width="1.4"/>
+<text x="390" y="166" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">Ingress 규칙</text>
+<line x1="295" y1="170" x2="485" y2="170" stroke="#fed7aa" stroke-width="0.6"/>
+<text x="295" y="187" font-size="9" font-family="monospace" fill="#475569">매칭:</text>
+<text x="345" y="187" font-size="10" font-family="monospace" font-weight="700" fill="#0f172a">/order</text>
+<text x="295" y="207" font-size="9" font-family="monospace" fill="#475569">결정:</text>
+<text x="345" y="207" font-size="10" font-family="monospace" font-weight="700" fill="#dc2626">order-service</text>
+<text x="390" y="229" text-anchor="middle" font-size="7" font-style="italic" fill="#94a3b8">/stores → stores-service ...</text>
+<line x1="512" y1="168" x2="565" y2="168" stroke="#ff7849" stroke-width="2.4" marker-end="url(#s23-arrow)"/>
+<text x="538" y="159" text-anchor="middle" font-size="9" font-style="italic" font-weight="700" fill="#7b341e">결정</text>
+<text x="650" y="128" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">결정된 Service</text>
+<rect x="570" y="143" width="160" height="46" rx="23" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+<text x="650" y="161" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">order-service</text>
+<text x="650" y="178" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">10.96.0.20</text>
+<rect x="575" y="195" width="150" height="20" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+<text x="650" y="209" text-anchor="middle" font-size="9" fill="#94a3b8">stores-service</text>
+<rect x="575" y="219" width="150" height="20" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+<text x="650" y="233" text-anchor="middle" font-size="9" fill="#94a3b8">payment-service</text>
 </svg>
 </div>
 
@@ -1129,125 +1214,134 @@ Ingress Controller는 요청의 URL 경로와 Host 헤더를 읽어 등록된 In
 
 ### 5.3.3 3단계 배달 - 집배원이 우편함에 넣는다
 
-**서울 우체국**으로 도착한 우편을 그 동네 **집배원**이 받습니다. 집배원은 우편의 **받는 주소**를 보고 동네 안의 어느 집인지 정해 그 집의 **우편함**에 우편을 넣습니다. 우편함이 우편의 종착지입니다.
+**서울 우체국**으로 도착한 우편을 그 동네 **집배원**이 받습니다. 집배원은 오늘 **배송 목록**을 들고 있습니다. 우편의 행선지를 그 목록과 맞춰 어느 **우편함에** 넣을지 정한 뒤 그 우편함에 우편을 넣습니다. 우편함이 우편의 종착지입니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 비유 — 서울 우체국에서 집배원이 우편을 받아 받는 주소를 보고 각 집의 우편함에 우편을 넣음">
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 비유 — 서울 우체국에 도착한 우편이 받는 주소대로 동네 우편함 B에 들어감">
   <defs>
     <marker id="m3n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
-  <text x="400" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">집배원이 받는 주소를 보고 집 B의 우편함에 우편을 넣습니다</text>
-  <!-- 좌: 서울 우체국 (축소) -->
-  <g transform="translate(15, 140)">
-    <rect x="0" y="0" width="65" height="75" rx="0" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
-    <path d="M -2 0 L 67 0 L 67 -8 L -2 -8 Z" fill="#7b341e"/>
-    <circle cx="32.5" cy="20" r="8" fill="#fff" stroke="#7b341e" stroke-width="1"/>
-    <text x="32.5" y="24" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">▣</text>
-    <rect x="26" y="48" width="13" height="22" fill="#7b341e"/>
-  </g>
-  <!-- 집배원 출발 -->
-  <g transform="translate(105, 155)">
-    <circle cx="0" cy="0" r="9" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-    <path d="M -11 10 Q -11 24 0 24 Q 11 24 11 10 L 11 35 L -11 35 Z" fill="#fff4ed" stroke="#475569" stroke-width="1.2"/>
-    <!-- 가방 -->
-    <rect x="10" y="15" width="15" height="15" rx="1" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
-  </g>
-  <text x="105" y="210" text-anchor="middle" font-size="8" fill="#94a3b8">집배원</text>
-  <!-- 동선 (점선 화살표) -->
-  <path d="M 130 175 Q 280 210 390 180" stroke="#ff7849" stroke-width="2" stroke-dasharray="4,3" fill="none" marker-end="url(#m3n-a)"/>
-  <!-- 받는 주소 확인 (경로 위) -->
-  <g transform="translate(250, 150)">
-    <rect x="0" y="0" width="50" height="30" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1.2"/>
-    <text x="25" y="12" text-anchor="middle" font-size="7" fill="#7b341e">받는 주소</text>
-    <text x="25" y="22" text-anchor="middle" font-size="7" fill="#7b341e">마포 번지 B</text>
-  </g>
-  <!-- 우측: 가구 3채 (집 B에 우편이 들어가는 모습을 중심) -->
-  <!-- 집 A (흐린) -->
-  <g transform="translate(420, 115)">
-    <path d="M 0 32 L 28 2 L 56 32 L 56 88 L 0 88 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-    <rect x="22" y="58" width="10" height="25" fill="#cbd5e1"/>
-    <!-- 우편함 -->
-    <rect x="-12" y="65" width="12" height="12" rx="0.5" fill="#f5f5f5" stroke="#cbd5e1" stroke-width="1"/>
-    <circle cx="-6" cy="71" r="1.5" fill="#cbd5e1"/>
-  </g>
-  <text x="448" y="220" text-anchor="middle" font-size="9" fill="#cbd5e1">집 A</text>
-  <!-- 집 B (강조 - 우편이 들어가는 모습) -->
-  <g transform="translate(545, 100)">
-    <!-- 집 외관 -->
-    <path d="M 0 35 L 32 0 L 64 35 L 64 100 L 0 100 Z" fill="#fef3c7" stroke="#ff7849" stroke-width="2.8"/>
-    <rect x="26" y="65" width="12" height="32" fill="#ff7849"/>
-    <!-- 창 -->
-    <rect x="8" y="48" width="8" height="8" fill="#4da6ff" stroke="#ff7849" stroke-width="0.6"/>
-    <rect x="48" y="48" width="8" height="8" fill="#4da6ff" stroke="#ff7849" stroke-width="0.6"/>
-    <!-- 우편함 (크고 강조) -->
-    <rect x="-18" y="72" width="18" height="18" rx="2" fill="#fef3c7" stroke="#dc2626" stroke-width="2.2"/>
-    <line x1="-18" y1="78" x2="0" y2="78" stroke="#dc2626" stroke-width="1"/>
-    <circle cx="-9" cy="78" r="2" fill="#dc2626"/>
-    <!-- 깃발 (열린 우편함) -->
-    <rect x="-18" y="68" width="4" height="6" fill="#dc2626" stroke="#7b341e" stroke-width="0.6"/>
-    <!-- 우편이 우편함 안으로 들어가는 모습 -->
-    <g transform="translate(-10, 70)">
-      <rect x="0" y="0" width="16" height="10" rx="1" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
-      <line x1="2" y1="1" x2="8" y2="5" stroke="#d97706" stroke-width="0.6"/>
-      <line x1="16" y1="1" x2="8" y2="5" stroke="#d97706" stroke-width="0.6"/>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">집배원이 받는 주소 목록과 우편함을 매칭해 우편함 B에 넣습니다</text>
+  <!-- 좌측: 입력 (서울 우체국에서 막 나온 우편) -->
+  <g transform="translate(20, 94)">
+    <text x="68" y="-10" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">서울 우체국 도착</text>
+    <rect x="3" y="0" width="50" height="60" rx="0" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
+    <path d="M 1 0 L 55 0 L 55 -7 L 1 -7 Z" fill="#7b341e"/>
+    <circle cx="28" cy="14" r="6" fill="#fff" stroke="#7b341e" stroke-width="1"/>
+    <text x="28" y="17" text-anchor="middle" font-size="7" font-weight="700" fill="#7b341e">서울</text>
+    <rect x="22" y="38" width="11" height="22" fill="#7b341e"/>
+    <g transform="translate(60, 22)">
+      <rect x="0" y="0" width="76" height="48" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1.6"/>
+      <line x1="0" y1="0" x2="38" y2="24" stroke="#d97706" stroke-width="1.2"/>
+      <line x1="76" y1="0" x2="38" y2="24" stroke="#d97706" stroke-width="1.2"/>
+      <g transform="translate(38, 24) rotate(-4)">
+        <rect x="0" y="0" width="36" height="22" rx="1.5" fill="#fff" stroke="#dc2626" stroke-width="1.6"/>
+        <text x="18" y="9" text-anchor="middle" font-size="6" font-weight="700" fill="#dc2626">행선지</text>
+        <text x="18" y="18" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a">B</text>
+      </g>
     </g>
   </g>
-  <text x="577" y="220" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">집 B</text>
-  <text x="577" y="237" font-size="9" font-style="italic" font-weight="700" fill="#dc2626">우편함에 넣음</text>
-  <!-- 집 C (흐린) -->
-  <g transform="translate(710, 115)">
-    <path d="M 0 32 L 28 2 L 56 32 L 56 88 L 0 88 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-    <rect x="22" y="58" width="10" height="25" fill="#cbd5e1"/>
-    <!-- 우편함 -->
-    <rect x="-12" y="65" width="12" height="12" rx="0.5" fill="#f5f5f5" stroke="#cbd5e1" stroke-width="1"/>
-    <circle cx="-6" cy="71" r="1.5" fill="#cbd5e1"/>
+  <line x1="170" y1="140" x2="220" y2="140" stroke="#ff7849" stroke-width="2.2" marker-end="url(#m3n-a)"/>
+  <text x="195" y="131" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">배송으로</text>
+  <!-- 집배원 인물 -->
+  <g transform="translate(255, 130)">
+    <circle cx="0" cy="0" r="11" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+    <path d="M -14 14 Q -14 32 0 32 Q 14 32 14 14 L 14 60 L -14 60 Z" fill="#fff4ed" stroke="#475569" stroke-width="1.4"/>
   </g>
-  <text x="738" y="220" text-anchor="middle" font-size="9" fill="#cbd5e1">집 C</text>
+  <text x="255" y="208" text-anchor="middle" font-size="9" font-weight="700" fill="#475569">집배원</text>
+  <!-- 배송 목록 (집배원 옆) -->
+  <rect x="285" y="90" width="115" height="110" rx="2" fill="#fffaf0" stroke="#7b341e" stroke-width="1.4"/>
+  <text x="342" y="83" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">배송 목록</text>
+  <line x1="291" y1="108" x2="394" y2="108" stroke="#94a3b8" stroke-width="0.4"/>
+  <text x="298" y="125" font-size="9" fill="#94a3b8">  A</text>
+  <rect x="291" y="130" width="103" height="18" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="298" y="144" font-size="10" font-weight="700" fill="#dc2626">▶ B</text>
+  <text x="298" y="165" font-size="9" fill="#94a3b8">  C</text>
+  <text x="342" y="190" text-anchor="middle" font-size="6" font-style="italic" fill="#94a3b8">실시간 갱신</text>
+  <!-- 매칭 화살표 -->
+  <line x1="405" y1="140" x2="475" y2="140" stroke="#ff7849" stroke-width="2" stroke-dasharray="3,2" marker-end="url(#m3n-a)"/>
+  <text x="440" y="131" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">매칭</text>
+  <!-- 우편함 3개 (A, B 강조, C) -->
+  <g transform="translate(490, 110)">
+    <rect x="10" y="20" width="70" height="65" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/>
+    <rect x="22" y="28" width="46" height="5" rx="1" fill="#cbd5e1"/>
+    <rect x="80" y="40" width="3" height="18" fill="#cbd5e1"/>
+    <rect x="83" y="40" width="8" height="10" fill="#cbd5e1"/>
+    <text x="45" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#94a3b8">우편함 A</text>
+  </g>
+  <g transform="translate(600, 110)">
+    <rect x="10" y="20" width="70" height="65" rx="6" fill="#fef3c7" stroke="#dc2626" stroke-width="2.6"/>
+    <rect x="22" y="28" width="46" height="5" rx="1" fill="#dc2626"/>
+    <rect x="80" y="40" width="3" height="18" fill="#dc2626"/>
+    <rect x="83" y="40" width="8" height="10" fill="#dc2626"/>
+    <text x="45" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#dc2626">우편함 B</text>
+  </g>
+  <g transform="translate(710, 110)">
+    <rect x="10" y="20" width="70" height="65" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/>
+    <rect x="22" y="28" width="46" height="5" rx="1" fill="#cbd5e1"/>
+    <rect x="80" y="40" width="3" height="18" fill="#cbd5e1"/>
+    <rect x="83" y="40" width="8" height="10" fill="#cbd5e1"/>
+    <text x="45" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#94a3b8">우편함 C</text>
+  </g>
+  <!-- 우편 (우편함 B 슬롯 위로 배송) -->
+  <g transform="translate(623, 118)">
+    <rect x="0" y="0" width="22" height="14" rx="1" fill="#fef3c7" stroke="#d97706" stroke-width="1.4"/>
+    <line x1="2" y1="1" x2="11" y2="7" stroke="#d97706" stroke-width="0.7"/>
+    <line x1="22" y1="1" x2="11" y2="7" stroke="#d97706" stroke-width="0.7"/>
+  </g>
+  <text x="700" y="148" text-anchor="middle" font-size="9" font-style="italic" font-weight="700" fill="#dc2626">배송!</text>
 </svg>
 </div>
 
-*그림 5-24. 서울 우체국에서 집배원이 받는 주소를 보고 우편함에 우편을 넣습니다*
+*그림 5-24. 서울 우체국에서 집배원이 배송 목록을 보고 우편함 B에 우편을 넣습니다*
 
 | 비유 | IT 용어 | 한 줄 설명 |
 |:---:|:---|:---|
-| 서울 우체국 | **Service (ClusterIP)** | 도착한 ClusterIP를 받는 자리 |
+| 서울 우체국 | **Service (ClusterIP)** | 도착한 ClusterIP의 진입점 |
 | 집배원 | **kube-proxy (2차)** | iptables DNAT으로 ClusterIP를 살아있는 Pod IP로 변환 |
-| 받는 주소 | **Endpoints** | Service 셀렉터에 매칭된 살아있는 Pod IP 목록 |
+| 배송 목록 | **Endpoints** | Service 셀렉터에 매칭된 살아있는 Pod IP 목록 |
 | 우편함 | **Pod** | 실제 비즈니스 로직을 처리하는 앱 |
 
-ClusterIP를 향한 요청은 노드의 kube-proxy(2차)가 가로챕니다. Endpoints에 올라 있는 살아있는 Pod 한 대를 골라 그 IP로 바꿔 보냅니다. 요청이 Pod에 닿으면 애플리케이션 로직이 응답을 돌려줍니다. 이 흐름이 어긋나지 않는 이유는 Endpoint Controller가 뒤에서 Endpoints를 계속 손보기 때문입니다. Service의 selector에 매칭되는 Pod가 새로 뜨거나 죽으면 곧바로 감지해 Pod IP 목록에서 빼고 더합니다.
+ClusterIP를 향한 요청은 노드의 kube-proxy(2차)가 가로챕니다. Endpoints에 올라 있는 살아있는 Pod 한 대를 골라 그 IP로 바꿔 보냅니다. 요청이 Pod에 도착하면 애플리케이션 로직이 응답을 돌려줍니다. 이 흐름이 어긋나지 않는 이유는 Endpoint Controller가 뒤에서 Endpoints를 계속 손보기 때문입니다. Service의 selector에 매칭되는 Pod가 새로 뜨거나 죽으면 곧바로 감지해 Pod IP 목록에서 빼고 더합니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 IT — kube-proxy(2차)가 ClusterIP를 Pod IP로 변환, Endpoint Controller가 Pod IP 목록 갱신">
-  <defs>
-    <marker id="fl3n-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="fl3n-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-    <marker id="fl3n-bi" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-  </defs>
-  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">ClusterIP → kube-proxy(2차) DNAT → Pod IP → Pod 응답</text>
-  <rect x="20" y="80" width="160" height="40" rx="20" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
-  <text x="100" y="105" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">Service ClusterIP</text>
-  <line x1="180" y1="100" x2="240" y2="100" stroke="#ff7849" stroke-width="2.4" marker-end="url(#fl3n-a)"/>
-  <rect x="240" y="60" width="540" height="180" rx="10" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
-  <text x="510" y="78" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">워커 노드</text>
-  <rect x="260" y="90" width="180" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
-  <text x="350" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">kube-proxy (2차)</text>
-  <text x="350" y="138" text-anchor="middle" font-size="9" fill="#7b341e">iptables DNAT</text>
-  <text x="350" y="153" text-anchor="middle" font-size="9" fill="#7b341e">ClusterIP → Pod IP</text>
-  <rect x="495" y="85" width="270" height="105" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <text x="630" y="103" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">백엔드 Pod 그룹</text>
-  <line x1="440" y1="129" x2="532" y2="129" stroke="#ff7849" stroke-width="2" marker-end="url(#fl3n-a)"/>
-  <rect x="522" y="113" width="90" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="567" y="134" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod A</text>
-  <rect x="647" y="113" width="90" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="692" y="134" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod B</text>
-  <text x="630" y="167" text-anchor="middle" font-size="9" fill="#7b341e">애플리케이션 로직 실행 → 응답</text>
-  <rect x="20" y="250" width="260" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2" stroke-dasharray="5,3"/>
-  <text x="150" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Endpoint Controller</text>
-  <text x="150" y="298" text-anchor="middle" font-size="10" fill="#7b341e">Pod 변동 감시</text>
-  <text x="150" y="313" text-anchor="middle" font-size="10" fill="#7b341e">→ Pod IP 목록 갱신</text>
-  <line x1="285" y1="250" x2="345" y2="172" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-start="url(#fl3n-bi)" marker-end="url(#fl3n-bi)"/>
-  <text x="270" y="215" font-size="9" font-style="italic" fill="#475569">watch (구독·알림)</text>
+<svg viewBox="0 0 800 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 IT — kube-proxy(2차)가 ClusterIP를 살아있는 Pod IP로 변환해 결정된 Pod로 전달">
+<defs>
+<marker id="s25-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+<marker id="s25-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+<marker id="s25-gray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
+</defs>
+<text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">kube-proxy(2차)가 ClusterIP를 살아있는 Pod IP로 변환해 결정된 Pod로 전달합니다</text>
+<rect x="98" y="50" width="604" height="180" rx="4" fill="#fff" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+<text x="400" y="46" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Kubernetes 클러스터</text>
+<text x="169" y="100" text-anchor="middle" font-size="9" font-weight="700" fill="#475569">도착한 패킷</text>
+<rect x="112" y="115" width="115" height="50" rx="3" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="120" y="131" font-size="8" font-weight="600" fill="#7b341e">ClusterIP:</text>
+<text x="219" y="131" text-anchor="end" font-size="9" font-family="monospace" font-weight="700" fill="#dc2626">10.96.0.20</text>
+<line x1="120" y1="136" x2="219" y2="136" stroke="#fed7aa" stroke-width="0.6"/>
+<text x="120" y="151" font-size="8" font-weight="600" fill="#7b341e">요청:</text>
+<text x="219" y="151" text-anchor="end" font-size="9" font-family="monospace" font-weight="700" fill="#0f172a">/order</text>
+<line x1="230" y1="140" x2="257" y2="140" stroke="#ff7849" stroke-width="2.4" marker-end="url(#s25-arrow)"/>
+<rect x="262" y="70" width="240" height="140" rx="4" fill="#fffaf0" stroke="#ff7849" stroke-width="2"/>
+<text x="382" y="88" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">kube-proxy (2차)</text>
+<text x="382" y="103" text-anchor="middle" font-size="8" font-style="italic" fill="#94a3b8">iptables DNAT</text>
+<rect x="277" y="115" width="210" height="85" rx="2" fill="#fff" stroke="#dc2626" stroke-width="1.4"/>
+<text x="382" y="129" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">Endpoints (살아있는 Pod IP)</text>
+<line x1="287" y1="133" x2="477" y2="133" stroke="#fed7aa" stroke-width="0.6"/>
+<text x="297" y="150" font-size="10" font-family="monospace" fill="#94a3b8">10.244.0.4</text>
+<rect x="287" y="156" width="190" height="20" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+<text x="297" y="170" font-size="10" font-family="monospace" font-weight="700" fill="#dc2626">▶ 10.244.0.5</text>
+<text x="297" y="190" font-size="10" font-family="monospace" fill="#94a3b8">10.244.0.6</text>
+<line x1="504" y1="140" x2="527" y2="140" stroke="#ff7849" stroke-width="2.4" marker-end="url(#s25-arrow)"/>
+<text x="515" y="131" text-anchor="middle" font-size="9" font-style="italic" font-weight="700" fill="#7b341e">전달</text>
+<text x="612" y="100" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">결정된 Pod</text>
+<rect x="532" y="115" width="160" height="46" rx="23" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+<text x="612" y="133" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Pod B</text>
+<text x="612" y="150" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">10.244.0.5</text>
+<rect x="537" y="167" width="150" height="20" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+<text x="612" y="181" text-anchor="middle" font-size="9" fill="#94a3b8">Pod A</text>
+<rect x="537" y="191" width="150" height="20" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+<text x="612" y="205" text-anchor="middle" font-size="9" fill="#94a3b8">Pod C</text>
 </svg>
 </div>
 
@@ -1275,9 +1369,9 @@ ClusterIP를 향한 요청은 노드의 kube-proxy(2차)가 가로챕니다. End
 
 ## 이것만은 기억하자
 
-- **Service는 Pod의 변하지 않는 직통 전화번호입니다.** Pod는 소모품이라 IP가 수시로 바뀌지만, Service는 변하지 않는 주소를 제공하며 트래픽을 골고루 분산합니다.
-- **Service 뒤에는 세 조력자가 있습니다.** 실시간 Pod 명단을 관리하는 **Endpoint Controller**, 명단을 노드에 전파하는 **API Server**, 그리고 실제 길을 닦는 **kube-proxy**가 협력하여 패킷을 배달합니다.
-- **Ingress는 물류 센터입니다.** 숫자(IP·Port)만 보는 Service와 달리, Ingress는 도메인과 URL 경로를 읽고 적절한 Service로 연결하는 라우팅을 담당합니다. 라우팅 규칙을 정의하는 **리소스(YAML)** 와 실제 요청을 처리하는 **컨트롤러(Pod)** 가 한 팀으로 움직입니다.
+- **Service는 Pod의 변하지 않는 고정 진입점입니다.** Pod는 소모품이라 IP가 수시로 바뀌지만, Service는 변하지 않는 주소를 제공하며 트래픽을 분산합니다.
+- **Service 뒤에는 세 컴포넌트가 협력합니다.** 실시간 Pod 명단을 관리하는 **Endpoint Controller**, 명단을 노드에 전파하는 **API Server**, 실제 패킷을 Pod로 전달하는 **kube-proxy**가 함께 트래픽을 처리합니다.
+- **Ingress는 외부 요청을 URL 경로로 분기합니다.** 숫자(IP·Port)만 보는 Service와 달리, Ingress는 도메인과 URL 경로를 읽고 적절한 Service로 연결합니다. 라우팅 규칙을 정의하는 **리소스(YAML)** 와 실제 요청을 처리하는 **컨트롤러(Pod)** 가 함께 동작합니다.
 
 네트워크라는 뼈대는 이제 완벽히 갖춰졌습니다. 하지만 실제 서비스를 운영하려면 DB 비밀번호 같은 보안 정보와, 파드가 사라져도 데이터가 보존되는 영속성 처리가 필수적입니다.
 
