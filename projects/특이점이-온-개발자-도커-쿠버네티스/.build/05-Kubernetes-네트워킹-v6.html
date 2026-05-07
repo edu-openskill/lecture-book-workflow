@@ -33,7 +33,7 @@
 <p>가맹점이 많은 프랜차이즈를 떠올려 보면 이해가 쉽습니다. 매장 직원이 누구로 바뀌든 점장이 자리를 옮기든, 손님은 <strong>브랜드 대표 번호</strong> 하나로 언제든 주문을 넣을 수 있습니다. 직원의 휴대폰 번호가 아니라 매장에 붙박이로 걸려 있는 번호라, 사람이 바뀌어도 그대로 남습니다.</p>
 <p>Service가 클러스터 안에서 같은 자리를 맡습니다. Pod가 죽고 새로 뜨면서 IP가 바뀌어도, 그 앞에 걸린 대표 번호는 흔들리지 않습니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="외부 요청이 Service라는 고정 진입점을 거쳐 여러 Pod로 분배되는 구조">
+<svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="외부 요청이 Service라는 고정 진입점을 거쳐 여러 Pod로 분배되는 구조">
   <defs>
     <marker id="sv-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
@@ -59,15 +59,19 @@
   <rect x="510" y="190" width="180" height="55" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="600" y="212" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Pod 3</text>
   <text x="600" y="230" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">10.0.0.12</text>
+  <line x1="380" y1="170" x2="505" y2="290" stroke="#475569" stroke-width="1.8" marker-end="url(#sv-p)"/>
+  <rect x="510" y="265" width="180" height="55" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="600" y="287" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Pod 4</text>
+  <text x="600" y="305" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">10.0.0.15</text>
 </svg>
 </div>
 <div class="caption">그림 5-1. Service는 Pod IP가 바뀌어도 변하지 않는 고정 주소를 제공</div>
 <h3>5.1.2 Service 생성</h3>
-<p>오픈이는 직접 띄워 보기로 했습니다. 먼저 Pod를 세우고 그 앞에 대표 번호를 답니다.</p>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex11</p>
 </div>
+<p>오픈이는 직접 띄워 보기로 했습니다. 먼저 Pod를 세우고 그 앞에 대표 번호를 답니다.</p>
 <p>오픈이는 <code>ex11</code> 폴더를 열었습니다. 어제 사용했던 <code>deploy-ex02.yml</code>이 그대로 남아 있습니다. 이 파일은 Pod 네 개를 띄우는 Deployment 설정입니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/deploy-ex02.yml<span class="w">   </span><span class="c1"># Pod 4개 생성</span></div>
 <p>오픈이는 다음으로 Service YAML을 살펴봤습니다.</p>
@@ -413,7 +417,7 @@
 <div class="caption">그림 5-8. minikube service URL 생성 결과</div>
 <p>URL이 한 줄 떴고 커서는 그대로 멈춰 있습니다. 이 명령어는 통로를 살려두기 위해 터미널을 점유한 채로 머물러 있습니다. 발급된 주소를 그대로 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 모니터에 가득 찼습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH04\chap03-44.png" alt="" /><div class="caption">그림 5-9. 브라우저에서 nginx 접속 확인</div></div>
-<p>화면을 띄운 김에 한 가지 더 시험해 보고 싶었습니다. <em>Service가 정말 고정 진입점 역할을 하는가.</em> Pod가 죽고 IP가 바뀌어도 같은 주소로 들어와지는지 직접 확인해야 어제의 궁금증이 풀립니다. 오픈이는 통로를 닫고 Pod를 전부 지웠습니다. Deployment가 살아 있으니 곧 새 Pod가 자동으로 올라옵니다.</p>
+<p>화면을 띄운 김에 한 가지 더 시험해 보고 싶었습니다. <em>Service가 정말 고정 진입점 역할을 하는가.</em> Pod가 죽고 IP가 바뀌어도 Service 뒤로 새 Pod가 자동 연결되는지 직접 확인해야 어제의 궁금증이 풀립니다. 오픈이는 통로를 닫고 Pod를 전부 지웠습니다. Deployment가 살아 있으니 곧 새 Pod가 자동으로 올라옵니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>--all<span class="w">                </span><span class="c1"># 모든 Pod 삭제 (Deployment가 자동 재생성)</span>
 minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<span class="w"> </span>--url<span class="w">    </span><span class="c1"># 다시 접속 URL 확인</span></div>
 <div class="terminal-log">
@@ -434,7 +438,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   </div>
 </div>
 <div class="caption">그림 5-10. Pod 삭제 후 Service 접속 확인</div>
-<p>새 URL로 다시 접속해 보니 여전히 NGINX 페이지가 떴습니다. Pod 네 대는 전혀 다른 IP를 들고 새로 태어났는데, Service 뒤에서는 이미 새 식구들과 연결이 끝나 있었습니다.</p>
+<p>새 URL로 접속하니 NGINX 페이지가 그대로 떴습니다. Pod IP가 전부 바뀌었어도 Service는 새 Pod에 이미 연결되어 있었습니다.</p>
 <p class="thought">'와, 진짜네. Pod가 새로 만들어지면 IP가 바뀌었을 텐데. Service가 뒤에서 주소를 알아서 연결해주는구나.'</p>
 <p>오픈이는 동료 자리로 가서 발급받은 URL을 적어 줬습니다. 이번에는 입이 막히지 않았습니다.</p>
 <h2>5.2 Ingress - 도메인 라우팅</h2>
@@ -486,14 +490,14 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <p>Service는 Pod 묶음 하나에 대표 번호를 달고, Ingress는 그 대표 번호 여러 개를 묶어 손님 쪽 진입을 한 곳으로 통일합니다. 한 단계 위에 또 한 명의 문지기를 두는 구조라, 외부 도메인 하나에 여러 Service를 매달 수 있습니다.</p>
 <p class="thought">'외부 진입점 하나로 다 묶을 수 있다는 거네. 직접 띄워 봐야 감이 오겠다.'</p>
 <h3>5.2.3 Ingress 적용하기</h3>
-<p>실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다.</p>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex12</p>
 </div>
+<p>실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다.</p>
 <p>문서의 첫 줄을 읽던 오픈이의 눈이 한 곳에서 멈췄습니다.</p>
 <blockquote>
-<p>&quot;인그레스 컨트롤러가 있어야 인그레스를 충족할 수 있다. 리소스만 생성한다면 효과가 없다.&quot;</p>
+<p>&quot;인그레스 컨트롤러가 있어야 인그레스를 충족할 수 있다. 인그레스 리소스만 생성한다면 효과가 없다.&quot;</p>
 </blockquote>
 <p class="thought">'인그레스 리소스 말고 컨트롤러라는 게 또 따로 있어야 한다고?'</p>
 <p>곰곰이 생각해 보니 콜센터 비유에 그대로 맞아 들어갔습니다. 콜센터가 굴러가려면 두 가지가 같이 있어야 합니다. 하나는 <em>어떤 용건을 어디로 돌릴지</em> 적어둔 연결 규정집입니다. 다른 하나는 그 규정집을 보고 실제로 전화를 받아 돌려주는 상담원입니다. 규정집만 책장에 꽂혀 있고 상담원이 한 명도 없으면, 손님이 아무리 본사 번호로 전화를 걸어도 받는 사람이 없습니다.</p>
@@ -747,8 +751,10 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <line x1="730" y1="190" x2="850" y2="245" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
   <circle cx="660" cy="218" r="11" fill="#ff7849"/>
   <text x="660" y="222" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
+  <text x="600" y="259" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">ClusterIP</text>
   <rect x="540" y="262" width="120" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="600" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">order-service</text>
+  <text x="850" y="259" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">ClusterIP</text>
   <rect x="790" y="262" width="120" height="32" rx="16" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="850" y="283" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">stores-service</text>
   <line x1="600" y1="310" x2="600" y2="335" stroke="#ff7849" stroke-width="2.2" marker-end="url(#ov-a)"/>
@@ -783,7 +789,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="647" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod A</text>
   <rect x="760" y="453" width="200" height="40" rx="6" fill="none" stroke="#ff7849" stroke-width="1.4" stroke-dasharray="4,3"/>
   <rect x="775" y="461" width="65" height="24" rx="12" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="807" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod A</text>
+  <text x="807" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod B</text>
   <rect x="865" y="461" width="65" height="24" rx="12" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <text x="897" y="477" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Pod B</text>
   <line x1="610" y1="493" x2="710" y2="525" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
@@ -794,8 +800,8 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </div>
 <div class="caption">그림 5-19. 요청이 Pod까지 닿는 전체 흐름 - 세 단계가 일어나는 위치</div>
 <p>세 단계는 본사 콜센터의 하루 그대로입니다. 손님 전화가 본사 대표 번호로 걸려 옵니다(1단계). 콜센터 상담원이 용건을 듣고 부서를 정합니다(2단계). 부서 안에서 가용한 직원에게 자동으로 분배됩니다(3단계). 통합 사이트도 똑같습니다. 브라우저가 도메인을 누르면 클러스터 입구를 통과하고, 컨트롤러가 경로를 보고 어느 Service인지 정하고, 그 Service 뒤에서 살아있는 Pod 한 대로 연결됩니다.</p>
-<h3>5.3.1 1단계 진입 - 본사 대표번호로 전화 연결</h3>
-<p>외부 손님이 대표번호(<code>NodePort</code>)로 전화를 걸면, <strong>ARS</strong>(<code>kube-proxy</code>)가 전화를 받아 콜센터(<code>Ingress Controller</code>)로 연결해 줍니다.</p>
+<h3>5.3.1 1단계 진입 - ARS가 콜센터로 연결</h3>
+<p>외부 손님이 본사 <strong>대표번호</strong>(<code>NodePort</code>)로 전화를 겁니다. 신호가 두 번 가기 전에 자동 안내 시스템(<code>kube-proxy</code>)이 전화를 받습니다. <em>&quot;콜센터로 연결합니다.&quot;</em> 안내 멘트가 끝나면 전화는 상담원이 대기 중인 본사 콜센터(<code>Ingress Controller</code>)로 넘어갑니다. 손님은 자기 전화가 어디로 어떻게 옮겨졌는지 알 필요가 없습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 비유 — 외부 손님이 본사 대표번호로 전화, ARS가 콜센터로 연결">
   <defs>
@@ -833,7 +839,6 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </svg>
 </div>
 <div class="caption">그림 5-20. 손님이 본사 대표번호로 전화, ARS가 콜센터로 연결</div>
-<p>이 비유를 IT로 옮기면 네 가지가 짝지어집니다.</p>
 <table>
 <thead>
 <tr>
@@ -846,26 +851,26 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <tr>
 <td style="text-align:center">외부 손님</td>
 <td style="text-align:left"><strong>외부 호스트</strong></td>
-<td style="text-align:left">브라우저를 통해 요청을 보내는 사용자</td>
+<td style="text-align:left">브라우저로 요청을 보내는 사용자</td>
 </tr>
 <tr>
 <td style="text-align:center">본사 대표번호</td>
 <td style="text-align:left"><strong>NodePort</strong></td>
-<td style="text-align:left">클러스터로 진입하기 위한 공개 포트</td>
+<td style="text-align:left">클러스터로 진입하는 공개 포트</td>
 </tr>
 <tr>
 <td style="text-align:center">ARS</td>
 <td style="text-align:left"><strong>kube-proxy (1차)</strong></td>
-<td style="text-align:left">노드 커널의 iptables 규칙으로 들어온 요청을 Ingress Controller Pod로 전달</td>
+<td style="text-align:left">iptables 규칙으로 요청을 Ingress Controller Pod로 전달</td>
 </tr>
 <tr>
 <td style="text-align:center">본사 콜센터</td>
 <td style="text-align:left"><strong>Ingress Controller</strong></td>
-<td style="text-align:left">다음 단계에서 URL을 읽고 판단을 내리는 Pod</td>
+<td style="text-align:left">URL을 읽고 판단할 Pod</td>
 </tr>
 </tbody>
 </table>
-<p>브라우저가 <code>http://localhost/order</code>로 요청을 보냅니다. 요청은 노드에 뚫린 NodePort(클라우드라면 LoadBalancer)를 통해 클러스터 안으로 들어옵니다. 5.2.3에서 띄워 둔 <code>minikube tunnel</code>이 이 입구를 호스트와 이어 주는 통로입니다. 그 직후 같은 노드의 kube-proxy가 iptables 규칙으로 요청을 NodePort Service의 backend Pod인 Ingress Controller로 변환합니다.</p>
+<p>브라우저가 <code>http://localhost/order</code>를 누르면 요청은 노드의 NodePort(<code>:30080</code>)로 들어옵니다. 같은 노드에 상주하던 kube-proxy가 iptables 규칙으로 요청을 가로챕니다. 그리고 NodePort Service 뒤에 묶인 Ingress Controller Pod로 보냅니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 IT — 외부 요청이 NodePort + kube-proxy(1차)를 거쳐 Ingress Controller에 도달">
   <defs>
@@ -892,12 +897,12 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <rect x="615" y="120" width="150" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
   <text x="690" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress Controller</text>
   <text x="690" y="180" text-anchor="middle" font-size="9" fill="#7b341e">(L7 처리 시작)</text>
-  <text x="167" y="145" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">localhost:30080</text>
+  <text x="167" y="145" text-anchor="middle" font-size="10" font-family="monospace" font-weight="700" fill="#7b341e">localhost/order</text>
 </svg>
 </div>
 <div class="caption">그림 5-21. NodePort와 kube-proxy(1차)가 외부 요청을 Ingress Controller로 전달</div>
 <h3>5.3.2 2단계 부서 결정 - 상담원이 담당 부서 확인</h3>
-<p>콜센터 상담원(<code>Ingress Controller</code>)이 요청을 분석합니다. &quot;주문 부서로 가야겠군&quot;이라고 판단하면, 부서 명부(상담원이 미리 들고 있는 부서·내선 안내표)에서 해당 부서의 내선 번호(<code>ClusterIP</code>)를 찾아 전화를 돌려줍니다.</p>
+<p>콜센터에 도착한 전화를 상담원(<code>Ingress Controller</code>)이 받습니다. <em>&quot;주문하러 오셨나요? 매장 문의이신가요?&quot;</em> 손님의 용건을 듣고 어느 부서로 보낼지 정합니다. 그다음 책상 위에 미리 펴 둔 부서 명부에서 해당 부서의 대표 내선(<code>ClusterIP</code>)을 찾아 전화를 돌려 줍니다. 명부는 상담원이 출근할 때 한 번 받아 두는 책자가 아닙니다. 부서가 바뀔 때마다 곧바로 갱신되는 사내 명부입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 비유 — 콜센터 상담원이 부서 명부에서 결정된 부서의 대표 내선을 조회">
   <defs>
@@ -946,7 +951,6 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </svg>
 </div>
 <div class="caption">그림 5-22. 콜센터 상담원이 부서 명부에서 주문 부서의 대표 내선을 조회</div>
-<p>이 비유를 IT로 옮기면 세 가지가 짝지어집니다.</p>
 <table>
 <thead>
 <tr>
@@ -959,12 +963,12 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <tr>
 <td style="text-align:center">콜센터 상담원</td>
 <td style="text-align:left"><strong>Ingress Controller</strong></td>
-<td style="text-align:left">URL 경로와 도메인 헤더로 어느 백엔드 Service에 보낼지 결정</td>
+<td style="text-align:left">URL 경로와 Host로 보낼 Service를 결정</td>
 </tr>
 <tr>
-<td style="text-align:center">부서 명부 (이름 → 내선)</td>
-<td style="text-align:left"><strong>Ingress Controller의 내부 명단</strong></td>
-<td style="text-align:left">API Server를 watch(변경 알림 구독)해서 받아 둔 Service 정보와 Pod IP 명단</td>
+<td style="text-align:center">부서 명부</td>
+<td style="text-align:left"><strong>내부 명단</strong></td>
+<td style="text-align:left">API Server를 watch해 받아 둔 Service·Pod IP</td>
 </tr>
 <tr>
 <td style="text-align:center">부서 대표 내선</td>
@@ -973,11 +977,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </tr>
 </tbody>
 </table>
-<p>Ingress Controller는 도착한 요청의 HTTP 본문을 읽습니다. URL 경로와 도메인 헤더를 등록된 Ingress 규칙과 대조해 &quot;이 요청은 <code>order-service</code>로 보낸다&quot;고 정합니다. 이름이 정해진 직후, Ingress Controller는 미리 받아 둔 내부 명단에서 곧바로 <code>order-service</code>의 ClusterIP를 꺼냅니다.</p>
-<div class="prep-note">
-<p><strong>비유와 실제의 작은 차이</strong></p>
-<p><code>nginx-ingress</code> 같은 실제 컨트롤러는 DNS 조회 대신 API Server를 watch해서 Pod IP 목록을 직접 들고 있다가 곧바로 보내는 경우가 많습니다. DNS 조회는 일반 Pod끼리 Service 이름으로 부를 때 더 자주 쓰입니다.</p>
-</div>
+<p>Ingress Controller는 요청의 URL 경로와 Host 헤더를 읽어 등록된 Ingress 규칙과 대조합니다. <em>&quot;이 요청은 <code>order-service</code>다.&quot;</em> 판단이 끝나면 미리 받아 둔 내부 명단에서 <code>order-service</code>의 ClusterIP를 곧바로 꺼냅니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 IT — Ingress Controller가 API Server에서 받아 둔 명단으로 결정된 Service의 ClusterIP로 전송">
   <defs>
@@ -1011,7 +1011,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </div>
 <div class="caption">그림 5-23. Ingress Controller가 URL을 읽어 Service를 선택, 미리 받아 둔 명단에서 ClusterIP를 꺼냄</div>
 <h3>5.3.3 3단계 직원 응답 - ARS가 응대 직원에게 연결</h3>
-<p>부서 내선으로 전화가 연결되면, <strong>ARS</strong>(<code>kube-proxy</code>)가 현재 응대가 가능한 직원(<code>Pod</code>)에게 최종적으로 전화를 연결합니다. 이때 부서 매니저(<code>Endpoint Controller</code>)는 누가 일하고 있는지(파드의 생사 여부)를 실시간으로 파악해 응대 직원 명단을 항상 최신으로 유지합니다.</p>
+<p>부서 대표 내선으로 전화가 넘어오면 부서 안에도 ARS(<code>kube-proxy</code>)가 한 번 더 등장합니다. 이번 ARS는 그 부서에서 지금 응대가 가능한 직원(<code>Pod</code>) 한 명에게 전화를 연결합니다. 누가 자리에 있고 누가 자리를 비웠는지는 부서 매니저(<code>Endpoint Controller</code>)가 옆에서 챙깁니다. 매니저가 늘 최신 명단을 들고 있기 때문에 ARS는 그 명단을 보고 살아 있는 직원에게만 전화를 돌립니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 비유 — ARS가 응대 직원 한 명에게 연결, 부서 매니저가 응대 직원 명단 갱신">
   <defs>
@@ -1093,7 +1093,6 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </svg>
 </div>
 <div class="caption">그림 5-24. 매니저가 명단을 갱신하면 ARS가 살아있는 직원에게 전화 연결</div>
-<p>이 비유를 IT로 옮기면 네 가지가 짝지어집니다.</p>
 <table>
 <thead>
 <tr>
@@ -1106,17 +1105,17 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <tr>
 <td style="text-align:center">ARS</td>
 <td style="text-align:left"><strong>kube-proxy (2차)</strong></td>
-<td style="text-align:left">ClusterIP를 살아있는 Pod IP로 변환하는 L4 로드밸런서</td>
+<td style="text-align:left">ClusterIP를 살아있는 Pod IP로 바꾸는 L4 로드밸런서</td>
 </tr>
 <tr>
 <td style="text-align:center">응대 직원 명단</td>
 <td style="text-align:left"><strong>Pod IP 명단</strong></td>
-<td style="text-align:left">현재 살아있는 Pod들의 IP 목록 (Endpoint Controller가 관리)</td>
+<td style="text-align:left">Endpoint Controller가 관리하는 살아있는 Pod IP 목록</td>
 </tr>
 <tr>
 <td style="text-align:center">부서 매니저</td>
 <td style="text-align:left"><strong>Endpoint Controller</strong></td>
-<td style="text-align:left">Pod 변동을 감지해 위 명단을 즉시 갱신하는 컨트롤 플레인 컴포넌트</td>
+<td style="text-align:left">Pod 변동을 감지해 명단을 즉시 갱신</td>
 </tr>
 <tr>
 <td style="text-align:center">응대 직원</td>
@@ -1125,8 +1124,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </tr>
 </tbody>
 </table>
-<p>ClusterIP로 향한 요청은 같은 노드의 kube-proxy(2차)가 가로채서, Endpoint Controller가 관리하는 명단의 살아있는 Pod 중 하나의 IP로 바꿔 보냅니다. 요청이 백엔드 Pod에 닿으면 애플리케이션이 비즈니스 로직을 실행해 응답을 돌려보냅니다.</p>
-<p>이 모든 게 가능한 건 Endpoint Controller가 뒤에서 받쳐 주기 때문입니다. Service의 selector에 매칭되는 Pod가 새로 뜨거나 죽으면 즉시 감지해 Pod IP 목록을 갱신합니다. 그래야 kube-proxy(2차)가 항상 살아있는 Pod에만 트래픽을 보낼 수 있습니다. 갱신이 늦어지면 죽은 Pod IP로 트래픽이 흘러가 요청이 실패할 수 있습니다.</p>
+<p>ClusterIP를 향한 요청은 노드의 kube-proxy(2차)가 가로챕니다. 명단에 올라 있는 살아있는 Pod 한 대를 골라 그 IP로 바꿔 보냅니다. 요청이 Pod에 닿으면 애플리케이션 로직이 응답을 돌려줍니다. 이 흐름이 어긋나지 않는 이유는 Endpoint Controller가 뒤에서 명단을 계속 손보기 때문입니다. Service의 selector에 매칭되는 Pod가 새로 뜨거나 죽으면 곧바로 감지해 Pod IP 목록에서 빼고 더합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 IT — kube-proxy(2차)가 ClusterIP를 Pod IP로 변환, Endpoint Controller가 Pod IP 목록 갱신">
   <defs>
@@ -1162,46 +1160,13 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </div>
 <div class="caption">그림 5-25. ClusterIP가 kube-proxy(2차)를 통해 Pod IP로 변환되어 Pod에 응답. Endpoint Controller가 Pod IP 목록을 갱신</div>
 <div class="prep-note">
-<p><strong>Endpoint Controller와 kube-proxy 사이에는 API Server가 있습니다</strong></p>
-<p>엄밀히 말하면 Endpoint Controller가 kube-proxy에게 직접 명단을 주는 게 아닙니다. Endpoint Controller가 명단을 갱신하면 그 결과는 API Server에 저장되고, 각 노드의 kube-proxy가 API Server를 watch(구독)해서 변경 알림을 받습니다. 즉 두 컴포넌트 사이에 API Server가 중간 매개체 역할을 합니다. 비유 그림에서는 이 매개를 생략하고 매니저와 ARS 사이의 양방향 화살표로 단순화했습니다.</p>
+<p><strong>비유에서 단순화한 두 지점 - API Server의 매개</strong></p>
+<p>비유 그림은 흐름을 또렷이 보여주려고 두 곳에서 화살표를 직접 이어 두었습니다. 먼저 2단계입니다. Ingress Controller가 ClusterIP를 곧장 <em>조회</em>하는 것처럼 그렸지만, 실제로는 API Server를 watch(구독)해서 받아 둔 명단을 들고 있다가 즉시 꺼냅니다. 다음은 3단계입니다. 부서 매니저가 ARS에게 명단을 직접 건네주는 것처럼 그렸지만, Endpoint Controller가 갱신한 결과는 API Server에 저장되고 각 노드의 kube-proxy가 API Server를 watch해서 변경 알림을 받습니다. 두 경우 모두 사이에 API Server라는 매개가 끼어 있는데, 비유 그림에서는 이 매개를 생략한 것입니다.</p>
 </div>
-<h3>5.3.4 정보의 깊이 (L4 vs L7)</h3>
-<p>세 단계는 같은 <em>전달</em>처럼 보여도 보는 정보가 다릅니다. 1단계와 3단계는 봉투 겉면만 보고 옮기고, 2단계만 봉투를 열어 안의 글까지 읽습니다. 이 차이를 네트워크에서는 L4와 L7이라는 계층 이름으로 부릅니다.</p>
-<ul>
-<li><strong>L4 (전송 계층)</strong>: 봉투 겉면(IP, Port) 정보만 보고 빠르게 배달합니다 (<code>NodePort</code>, <code>kube-proxy</code>, <code>ClusterIP</code>).</li>
-<li><strong>L7 (응용 계층)</strong>: 봉투 안쪽의 구체적인 용건(URL, Host)까지 읽고 정교하게 판단합니다 (<code>Ingress Controller</code>).</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">단계</th>
-<th style="text-align:left">역할 주체</th>
-<th style="text-align:left">하는 일</th>
-<th style="text-align:left">판단 기준</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center"><strong>1. 진입</strong></td>
-<td style="text-align:left">NodePort + kube-proxy</td>
-<td style="text-align:left">입구 통과 및 인그레스로 전달</td>
-<td style="text-align:left">IP와 포트</td>
-</tr>
-<tr>
-<td style="text-align:center"><strong>2. 결정</strong></td>
-<td style="text-align:left">Ingress Controller + API Server 명단</td>
-<td style="text-align:left">URL 분석 및 서비스 결정</td>
-<td style="text-align:left">URL 경로, Host 헤더</td>
-</tr>
-<tr>
-<td style="text-align:center"><strong>3. 응답</strong></td>
-<td style="text-align:left">kube-proxy + Pod</td>
-<td style="text-align:left">실제 Pod IP로 변환 및 처리</td>
-<td style="text-align:left">실시간 IP 목록</td>
-</tr>
-</tbody>
-</table>
-<p>L4가 빠른 대신 <em>어디로 갈지</em>만 보고, L7은 한 단계 더 들어가 <em>무슨 용건인지</em>까지 본다는 차이입니다. 콜센터로 옮겨 보면, 1단계와 3단계의 ARS는 <em>전화번호</em>만 보고 옮기는 일이고, 2단계의 상담원만 <em>고객의 말</em>을 듣고 부서를 정합니다.</p>
+<div class="prep-note">
+<p><strong>더 깊이 - 1·3단계와 2단계는 보는 정보가 다릅니다 (L4 vs L7)</strong></p>
+<p>같은 <em>전달</em>처럼 보여도 단계마다 들여다보는 깊이가 다릅니다. 1단계와 3단계는 봉투 겉면(IP·Port)만 보고 빠르게 옮기는 L4입니다. 2단계는 봉투를 열어 안의 글(URL·Host)까지 읽는 L7입니다. 콜센터로 옮겨 보면 차이가 또렷합니다. 1·3단계의 ARS는 <em>전화번호</em>만 보고 회선을 돌리고, 2단계의 상담원만 <em>고객의 말</em>을 듣고 부서를 정합니다. L4는 빠르게 옮기고, L7은 한 단계 더 들여다본 다음 결정을 내립니다.</p>
+</div>
 <p>종이 위에 길게 늘어놓은 컴포넌트들이 한 줄로 묶이자, 따로따로 떠 있던 이름들이 머릿속에서 자기 자리를 찾았습니다.</p>
 <p class="thought">'손님 전화는 본사 대표 번호로 들어오고, 콜센터가 부서를 정하고, 부서 매니저가 챙기는 명단대로 직원에게 연결된다. 각자 한 가지 일만 하는데 이게 합쳐지니 전체가 굴러가네.'</p>
 <p>자리에서 일어나기 전 종이 한 구석에 짧게 한 줄을 더 적었습니다. <em>네트워크는 끝났는데, 이걸로 진짜 운영이 되나?</em> 통합 사이트에는 DB 비밀번호도 있고, 매장 데이터도 있습니다. Pod가 한 번 죽고 다시 뜰 때마다 비밀번호가 노출되거나 데이터가 같이 사라진다면, 오늘 만든 문은 무용지물입니다.</p>

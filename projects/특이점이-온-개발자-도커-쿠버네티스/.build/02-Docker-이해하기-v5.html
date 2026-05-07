@@ -25,8 +25,8 @@
 <p class="thought">'명령어부터 치면 그냥 외우게 될 텐데. 원리부터 보자.'</p>
 <p>뒤에 나올 명령어를 기계적으로 입력하지 않으려면 이 도구가 환경을 어떤 방식으로 다루는지부터 짚어 둬야 했습니다.</p>
 <h2>2.1 가상화 - 가상머신과 컨테이너</h2>
-<h3>2.1.1 주방 네 개 대신 주방 하나</h3>
-<p>먼저 컨테이너의 원리부터 정리하기로 했습니다. 자료를 한참 읽다가, 비유 하나를 떠올리면 머리에 남는다는 평소 습관대로 일상의 장면을 끌어와 봤습니다. 머리에 떠오른 그림은 한 주방에 요리사 여러 명이 들어가는 장면이었습니다.</p>
+<h3>2.1.1 한 주방, 네 명의 요리사</h3>
+<p>먼저 컨테이너의 원리부터 정리하기로 했습니다. 자료를 한참 읽다 떠오른 장면은 한 주방에 요리사 여러 명이 들어가는 모습이었습니다.</p>
 <p>한 주방에 요리사 네 명이 있습니다. 네 명이 동시에 요리를 하려면 주방을 어떻게 꾸며야 할까요.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-5.png" alt="" /><div class="caption">그림 2-1. 한 주방에 네 명의 요리사가 있는 상황</div></div>
 <p>첫 번째 방식은 요리사마다 냉장고, 가스레인지, 조리대를 각자 한 세트씩 사주는 것입니다. 이렇게 하면 네 사람이 완전히 독립된 환경에서 요리하지만, 같은 설비를 네 번 갖춰야 하니 비용이 많이 듭니다.</p>
@@ -44,8 +44,8 @@
 </div>
 <p class="thought">'아, 도커는 내 컴퓨터 OS 하나를 여러 컨테이너가 나눠 쓰면서, 각자 격리된 공간에서 따로 돌게 하는 거구나.'</p>
 <h3>2.1.2 IT로 옮긴 구조</h3>
-<p>비유는 머리에 잘 남았습니다. 다만 비유만 들고 있다가는 나중에 진짜 용어와 헷갈릴 게 분명했습니다. 그래서 화면을 새 페이지로 넘기고 주방 그림을 IT 구조로 다시 그려 봤습니다.</p>
-<p>맨 아래에 <strong>하드웨어</strong>, 그 위에 <strong>호스트 OS</strong>, 그 위에 <strong>Docker 엔진</strong>이 있습니다. Docker 엔진 위에 <strong>컨테이너</strong>가 나란히 떠 있고, 각 컨테이너 안에는 애플리케이션(App)과 라이브러리(Library)가 같이 들어갑니다.</p>
+<p>비유로 컨테이너의 원리는 잡혔습니다. 같은 구조를 IT 용어로 옮기면 다음과 같습니다.</p>
+<p>맨 아래에 <strong>하드웨어</strong>가 있고, 그 위에 <strong>호스트 OS와 Docker 엔진</strong>이 한 층(OS 계층)을 이룹니다. 그 위에 <strong>컨테이너</strong>가 나란히 떠 있고, 각 컨테이너 안에는 애플리케이션(App)과 라이브러리(Library)가 같이 들어갑니다.</p>
 <p>주방 비유의 <strong>공용 설비가 호스트 OS</strong>, <strong>각자의 조리대가 컨테이너</strong>입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너 가상화 3계층 구조: 하드웨어 위에 호스트 OS와 Docker 엔진, 그 위에 컨테이너들">
@@ -143,7 +143,7 @@
 <li>이 격리된 프로세스가 곧 <strong>컨테이너</strong>다.</li>
 </ol>
 <p>여기서 짚어 둘 점이 하나 있습니다. 컨테이너를 실제로 만드는 건 Docker 엔진이 아니라 커널입니다. 커널이 주방장이라면, Docker 엔진은 홀의 프런트 직원에 가깝습니다. 새 주문이 들어오면 프런트가 주방장에게 그대로 넘기고, 실제로 새 요리사(프로세스)를 불러 작업을 시작시키는 일은 주방장이 합니다.</p>
-<p>오픈이는 노트 한쪽에 &quot;<strong>엔진=프런트, 커널=주방장</strong>&quot;이라고 한 줄 적었습니다. 적고 나니 컨테이너의 정체와 만들어지는 과정이 머릿속에서 한 번에 정리됐습니다.</p>
+<p>엔진과 커널의 역할 분담이 정리되자 다음 의문이 따라왔습니다.</p>
 <p class="thought">'그럼 이 안에서 뭘 실행할지는 어디서 정해지지.'</p>
 <h2>2.2 이미지 - 컨테이너의 설계도</h2>
 <p>컨테이너가 격리된 프로세스라는 건 알았습니다. 그런데 그 프로세스가 무엇을 실행할지를 결정하는 원본이 따로 있어야 합니다. 그 원본이 <strong>이미지</strong>입니다.</p>
@@ -268,14 +268,18 @@
     <div><span class="tl-key">$</span> <span class="tl-str">docker pull nginx</span></div>
     <div>Using default tag: latest</div>
     <div>latest: Pulling from library/nginx</div>
-    <div>9baba07a35b6: Pulling fs layer</div>
-    <div>ec781dde3f47: Pulling fs layer</div>
-    <div>0289d65812c3: Pulling fs layer</div>
-    <div>4174e33a2c9e: Pulling fs layer</div>
-    <div>6b40784e4837: Pulling fs layer</div>
-    <div>980067d12da2: Pulling fs layer</div>
-    <div>f0b77348d9b0: Pulling fs layer</div>
-    <div>00238b7dc6b2: Download complete</div>
+    <div>9baba07a35b6: Pull complete</div>
+    <div>ec781dde3f47: Pull complete</div>
+    <div>0289d65812c3: Pull complete</div>
+    <div>4174e33a2c9e: Pull complete</div>
+    <div>6b40784e4837: Pull complete</div>
+    <div>980067d12da2: Pull complete</div>
+    <div>f0b77348d9b0: Pull complete</div>
+    <div>00238b7dc6b2: Pull complete</div>
+    <div>Digest: sha256:9b3a2dde20b8a1b5e9f2c4a6d8e0b3f5a7c9e1b3d5f7a9b1c3e5f7a9b1c3e5f7</div>
+    <div>Status: Downloaded newer image for nginx:latest</div>
+    <div>docker.io/library/nginx:latest</div>
+    <div><span class="tl-key">$</span></div>
   </div>
 </div>
 <div class="caption">그림 2-8. nginx 이미지 다운로드 결과</div>
@@ -386,13 +390,13 @@
 </tbody>
 </table>
 <p>조회는 <code>ps</code>, 로그는 <code>logs</code>, 내리기는 <code>stop</code>, 지우기는 <code>rm</code>을 씁니다. 이 정도로 묶어두면 필요할 때 찾아 쓸 수 있습니다.</p>
-<p>여기까지 오픈이는 잠시 의자에 등을 기대고 컵에 식어 있던 커피를 한 모금 마셨습니다. Docker Hub에서 이미지를 받고 컨테이너를 띄우는 데까지는 명령 두 줄이면 충분했습니다. 자료에서 본 것보다 시작은 단순했습니다. 다만 단순함만으로 끝낼 수는 없었습니다. 컨테이너 안에서 nginx가 돌고 있다는 건 알겠는데, 그 안의 페이지를 어떻게 브라우저로 끌고 와야 하는지가 다음 질문이었습니다.</p>
+<p>오픈이는 컨테이너 동작 확인을 위해 브라우저에 <code>localhost</code>를 입력했습니다. 화면은 뜨지 않았습니다.</p>
+<p class="thought">'왜 접속이 안 되지.'</p>
 <h2>2.5 컨테이너 통신</h2>
-<p>컨테이너 안에서 앱이 돌아도 외부에서 접속할 수 없으면 쓸모가 없습니다. 격리된 프로세스라는 개념은 익혔지만, 이 컨테이너가 바깥과 어떻게 연결되는지를 모르면 안에서 도는 앱에 접근할 수 없습니다. 그래서 컨테이너가 어떻게 통신하는지 큰 그림을 잡아 보겠습니다.</p>
+<p>왜 접속이 안 되는지 알려면 컨테이너가 외부와 어떻게 닿는지부터 짚어야 했습니다.</p>
 <h3>2.5.1 네트워크 한눈에 보기</h3>
-<p>오픈이는 방금 띄운 nginx가 어떻게 묶여 있는지부터 그려 보고 싶었습니다. 격리된 공간이라고 해 놓고 실제로는 무엇과 무엇이 연결돼 있는지를 알아야 다음 명령을 칠 때 손이 덜 막힐 것 같았습니다.</p>
-<p>자료를 훑어보니 컨테이너 네트워크는 크게 세 갈래로 정리되어 있었습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 길</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>입니다.</p>
-<p>세 갈래를 한 번에 잡으려면 비유 하나가 필요했습니다. 식당이 여러 개 모여 있는 구조라면 좋겠는데, 떠올린 곳이 <strong>푸드코트</strong>였습니다.</p>
+<p>오픈이가 자료를 펼치니 컨테이너 네트워크가 크게 세 갈래로 갈려 있었습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 길</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>입니다.</p>
+<p>주방 비유로 가상화를 잡았던 것처럼, 이번에는 식당 여러 개가 모인 <strong>푸드코트</strong>로 그려 봤습니다.</p>
 <h3>2.5.2 컨테이너끼리 - 주방 모니터와 주문 전광판</h3>
 <p>A, B, C 식당이 푸드코트에 입점해 있습니다. 식당끼리는 벽으로 완전히 분리되어 있어 서로의 주방을 들여다볼 수 없습니다.</p>
 <p>각 식당의 주방에는 <strong>주방 모니터</strong>가 한 대씩 있고, 푸드코트 한가운데에는 모두가 보는 <strong>주문 전광판</strong>이 걸려 있습니다. 주방 모니터와 전광판은 한 가닥의 <strong>전용 통신 케이블</strong>로 이어져 있고, 모든 식당의 케이블이 전광판 본체에 꽂혀 있습니다. 식당끼리 벽이 막혀 있어도 이 전광판을 거치면 서로의 주문 현황을 알 수 있습니다.</p>
@@ -679,9 +683,8 @@
 </div>
 <div class="caption">그림 2-15. 호스트 포트가 컨테이너 포트로 연결되는 구조</div>
 <p class="thought">'외부에서 들어올 땐 결국 호스트 포트로만 들어오는구나. iptables가 그 안에서 컨테이너 포트로 길을 바꿔주고, 컨테이너 IP는 외부에 노출할 필요가 없네.'</p>
-<p>다음으로 알아본 건 컨테이너끼리 IP가 아닌 이름으로 부르는 방법이었습니다.</p>
 <h3>2.5.4 이름으로 찾기 - 홀의 안내 지도</h3>
-<p>컨테이너끼리 통신하려면 결국 상대 IP를 알아야 합니다. 그런데 컨테이너가 둘, 셋 늘어나면 IP를 일일이 외우고 적어 두는 게 영 번거롭습니다.</p>
+<p>컨테이너끼리 통신하려면 결국 상대 IP를 알아야 합니다. 한두 개라면 IP를 적어 두고 쓸 수 있지만, 수가 늘어나면 일일이 외우는 게 번거로워집니다.</p>
 <p class="thought">'인터넷은 naver.com 같은 도메인 주소만 알면 알아서 연결되잖아. 컨테이너도 이름으로 찾을 수는 없나.'</p>
 <p>푸드코트로 옮겨 보면, 손님은 식당 이름은 알지만 푸드코트 안에서 식당이 어디 있는지는 알 수 없습니다. 그럴 때 홀에 걸린 <strong>안내 지도</strong>에 &quot;<strong>B식당 = 2구역</strong>&quot;이라고 표시되어 있으면, 이름을 보고 위치를 쉽게 찾을 수 있습니다.</p>
 <div class="svg-figure">
@@ -802,7 +805,7 @@
 <div class="caption">그림 2-17. Docker DNS가 이름을 IP로 변환 (사용자 정의 네트워크 한정)</div>
 <p>다만 이 자동 DNS는 <strong>사용자 정의 네트워크(User-defined Network)</strong> 안에서만 켜집니다. 지금까지 본 기본 네트워크(docker0)에서는 작동하지 않습니다. 그래서 사용자가 직접 네트워크를 만들어 컨테이너를 묶어 둬야 이름으로 통신할 수 있습니다. 이 차이는 다음 챕터에서 직접 만들어 보며 확인합니다.</p>
 <p class="thought">'naver.com처럼 컨테이너도 이름으로 부르면 되는구나. IP는 일일이 외울 필요 없겠네.'</p>
-<p>여기까지 정리하니 컨테이너가 어떻게 묶이는지는 그림이 그려졌습니다. 이번엔 컨테이너 한 대 안으로 들어가 보고 싶어졌습니다. 격리된 공간이라고만 했는데, 그 안이 실제로 어떤 모양인지를 한 번 봐 둬야 다음에 새 컨테이너를 띄울 때 망설이지 않을 것 같았습니다.</p>
+<p>오픈이는 여기까지 컨테이너의 통신을 정리했습니다. 이번엔 컨테이너 안에 들어가 어떻게 생겼는지 직접 보기로 했습니다.</p>
 <h2>2.6 컨테이너 내부 - 격리된 작은 리눅스</h2>
 <p>리눅스를 연습하려면 리눅스 환경이 필요합니다. <strong>Ubuntu</strong>는 가장 널리 쓰이는 배포판 중 하나라 자료가 풍부하고, Docker Hub에 공식 이미지가 올라와 있어서 바로 받아 띄울 수 있습니다. 오픈이는 포트포워딩을 사용해 ubuntu 컨테이너 내부로 들어갔습니다.</p>
 <div class="code-block highlight" data-lang="bash"><span class="c1"># -i 입력 받기, -t 터미널 화면, -p 80:80 포트포워딩</span>
@@ -824,7 +827,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <p><strong>쉘(Shell)</strong>: 사용자와 커널 사이에서 명령을 주고받는 프로그램입니다. 사용자가 쉘에 명령을 내리면 쉘이 커널에 그 명령을 전달하고 커널이 프로세스를 만들어 실제 작업을 수행합니다.</p>
 </div>
 <h3>2.6.1 자주 쓰는 리눅스 명령어</h3>
-<p>안으로 들어왔지만 당장 무엇부터 해야 할지 막막했습니다. 명령어를 모르면 실습 도중에 매번 검색하게 되고, 그 사이에 흐름이 끊깁니다. 본격적으로 손을 움직이기 전에 앞으로 자주 쓸 리눅스 명령어부터 한 표로 정리해 뒀습니다.</p>
+<p>오픈이가 정리한 자주 쓰는 리눅스 명령어는 다음과 같습니다.</p>
 <table>
   <colgroup>
     <col style="width:120px">
@@ -859,7 +862,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 </ul>
 </div>
 <h3>2.6.2 실습: 컨테이너 안에 nginx 깔아보기</h3>
-<p>기본 명령어를 손에 익힌 오픈이는, 앞서 도커 이미지로 받아서 실행했던 nginx를 이번엔 직접 설치해 보기로 했습니다. 이미지로 받을 땐 한 줄로 끝났던 과정을 손으로 한 단계씩 밟아 보면, 앞서 익힌 이미지가 무엇을 담고 있었는지가 거꾸로 보입니다.</p>
+<p>기본 명령어를 손에 익힌 오픈이는, 앞서 도커 이미지로 받아 실행했던 nginx를 이번에는 리눅스 환경에 직접 설치해 보기로 했습니다.</p>
 <p>컨테이너 안은 최소 구성이라 필요한 패키지는 직접 설치해야 합니다. 패키지 목록을 갱신한 뒤 nginx를 설치하고 실행했습니다.</p>
 <div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>update<span class="w">           </span><span class="c1"># 최신 패키지 목록으로 업데이트</span>
 apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx<span class="w"> </span><span class="c1"># nginx 설치</span>
@@ -959,7 +962,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
 </tr>
 </tbody>
 </table>
-<p>오픈이는 감을 잡으려고 간단한 파일을 하나 만들어 봤습니다.</p>
+<p>오픈이는 vim으로 간단한 파일을 만들어 봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">vim<span class="w"> </span>test1.txt<span class="w">   </span><span class="c1"># test1.txt 파일 생성</span></div>
 <p><code>i</code>를 눌러 입력 모드로 전환하고 내용을 작성한 뒤 <code>ESC</code> → <code>:wq</code>로 저장합니다.</p>
 <div class="terminal-log">
@@ -993,7 +996,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
 </div>
 <div class="caption">그림 2-23. 파일 내용 출력</div>
 <p>방금 쓴 문장이 그대로 찍혀 나왔습니다.</p>
-<p>그러고 보니 아까 깔았던 nginx의 기본 페이지는 어디에 놓여 있을까 궁금해졌습니다. <code>find</code>로 <code>index.html</code> 파일의 위치를 찾아봤습니다.</p>
+<p>빈 파일은 만들고 봤으니, 이번엔 컨테이너에 깔려 있는 nginx 기본 페이지를 <code>find</code>로 찾아봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">find<span class="w"> </span>/<span class="w"> </span>-name<span class="w"> </span>index.html<span class="w">   </span><span class="c1"># index.html 파일 위치 검색</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -1194,7 +1197,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
   <text x="330" y="172" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">PID 1</text>
   <rect x="500" y="120" width="180" height="70" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <text x="590" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">새 프로세스</text>
-  <text x="590" y="172" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">PID 9</text>
+  <text x="590" y="172" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">PID 12</text>
   <line x1="425" y1="155" x2="495" y2="155" stroke="#9ca3af" stroke-width="1" stroke-dasharray="3,3"/>
   <text x="460" y="148" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">독립</text>
   <text x="460" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">새 프로세스에서 exit해도 메인은 그대로</text>
@@ -1265,8 +1268,8 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 </tr>
 </tbody>
 </table>
-<p class="thought">'attach는 메인, exec는 새 방. 앞으로는 exec만.'</p>
-<p>여기까지 공부하고 나니 컨테이너의 생명 주기는 더는 헷갈리지 않았습니다. 오픈이는 의자에서 일어나 잠깐 어깨를 풀고, 다시 노트북 앞에 앉으면서 한 가지가 마음에 걸렸습니다. 앞서 Ubuntu 컨테이너 안에 패키지를 깔고 파일도 몇 개 만들어 두었습니다. 컨테이너를 내리는 순간 그 작업이 다 사라진다면 다음에 똑같은 걸 또 깔아야 합니다.</p>
+<p class="thought">'attach는 메인 프로세스에 직접 붙는 방식이고, exec는 새 프로세스를 만들어 접근하는 방식이구나. 앞으로는 exec만 써야겠다.'</p>
+<p>여기까지 공부하고 나니 컨테이너의 생명 주기는 더는 헷갈리지 않았습니다. 오픈이는 의자에서 일어나 잠깐 어깨를 풀고 다시 노트북 앞에 앉았습니다. 그러다 한 가지가 마음에 걸렸습니다. 앞서 Ubuntu 컨테이너 안에 패키지를 깔고 파일도 몇 개 만들어 두었습니다. 컨테이너를 내리는 순간 그 작업이 다 사라진다면 다음에 똑같은 걸 또 깔아야 합니다.</p>
 <p class="thought">'내가 수정한 이 상태를 기록해 두려면 어떻게 해야 하지.'</p>
 <p>필요한 건 <strong>지금 컨테이너 상태를 그대로 기록해 두는 방법</strong>입니다.</p>
 <h2>2.8 commit - 실행 중인 컨테이너를 이미지로</h2>
@@ -1349,7 +1352,7 @@ docker<span class="w"> </span>push<span class="w"> </span>&lt;본인-dockerhub-i
 <p>업로드가 완료된 뒤 Docker Hub의 Repositories 탭을 열어 보니 방금 올린 이미지를 확인할 수 있습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-70.png" alt="" /><div class="caption">그림 2-40. Docker Hub 저장소 확인</div></div>
 <h2>2.9 마운트로 데이터 보존</h2>
-<p>Docker Hub에 이미지를 올리고 한숨 돌리려던 오픈이의 머릿속에 한 가지 걱정이 스쳤습니다. 이미지에 담긴 것은 컨테이너의 초기 상태뿐이기 때문입니다.</p>
+<p>한숨 돌리고 계속 공부하던 오픈이는 한 가지를 발견했습니다. 방금 commit으로 만든 이미지에 담기는 건 컨테이너의 초기 상태뿐이라는 점입니다.</p>
 <p>컨테이너가 실행된 뒤 새로 쌓이는 데이터는 이미지에 저장되지 않습니다. 그래서 컨테이너가 삭제되는 순간 함께 사라져 버립니다. 데이터베이스처럼 실시간으로 데이터를 쌓는 컨테이너가 삭제되면, 그동안 저장한 데이터도 통째로 날아갑니다.</p>
 <p class="thought">'컨테이너를 내려도 데이터는 남아 있어야 하는데.'</p>
 <p>결국 데이터를 잃지 않으려면 컨테이너 외부에 보관해야 합니다. 이를 위해 컨테이너와 외부 저장소를 연결해 주는 기능이 바로 <strong>마운트</strong>입니다.</p>
@@ -1520,7 +1523,7 @@ ls<span class="w"> </span>/app/volume</div>
 <li><strong>메인 프로세스가 살아 있어야 컨테이너가 살아 있습니다.</strong> 이미지의 CMD에 앱 실행 명령을 지정해 두는 이유가 여기에 있습니다.</li>
 <li><strong>마운트는 컨테이너와 외부 저장소를 잇습니다.</strong> 바인드는 호스트의 특정 폴더를, 볼륨은 Docker 엔진이 관리하는 저장소를 컨테이너에 연결합니다.</li>
 </ul>
-<p>오픈이는 노트북 옆에 펼쳐 둔 노트를 들여다봤습니다. 어제 지하철에서 적어 둔 단어 세 개 중 'Docker' 옆이 하루 사이에 빽빽해져 있었습니다. 격리, 이미지, 포트포워딩, CMD, 볼륨. 어제 두 시간을 흘려보냈던 그 에러 세 줄도 이제는 어디에 어떤 지점에서 막혔던 건지 짚을 수 있을 것 같았습니다.</p>
+<p>오픈이는 하루 사이에 익힌 키워드를 정리했습니다. 격리, 이미지, 포트포워딩, CMD, 볼륨이 머릿속에 자리를 잡았습니다. 어제 두 시간을 흘려보냈던 그 에러도 이제는 어디에서 막혔던 건지 짚을 수 있을 것 같았습니다.</p>
 <p>다만 한 가지가 남았습니다. 오늘 띄운 건 컨테이너 한 대였습니다. 실제 회사에서 다루는 사내 도구는 화면 하나에도 프론트엔드, 백엔드, 데이터베이스가 같이 굴러갑니다. <code>docker run</code> 명령을 컨테이너마다 따로 친다고 생각하니 명령줄이 길어지는 그림이 먼저 떠올랐습니다.</p>
 <p class="thought">'한 대는 됐다. 그런데 세 대를 함께 띄우려면 이 명령줄을 매번 칠 수는 없을 텐데.'</p>
 <p>식은 커피 잔을 옆으로 밀어두고 노트북 뚜껑을 닫았습니다. 창밖이 어느새 어두워져 있었습니다.</p>

@@ -18,7 +18,12 @@
       "PowerShell(Start-Process \"C:\\\\work_삭제용\\\\book-workflow\\\\projects\\\\특이점이-온-개발자-도커-쿠버네티스\\\\.build\\\\01-왜-컨테이너인가.html\")",
       "Bash(cp .claude/skills/pub-html-build/styles/components.css projects/특이점이-온-개발자-도커-쿠버네티스/.build/styles/components.css)",
       "Bash(PYTHONIOENCODING=utf-8 python .claude/skills/pub-html-build/build_html.py --project-root projects/특이점이-온-개발자-도커-쿠버네티스 --chapter 2)",
-      "Bash(start \"\" \"C:\\\\work_삭제용\\\\book-workflow\\\\projects\\\\특이점이-온-개발자-도커-쿠버네티스\\\\.build\\\\02-Docker-이해하기.html\")"
+      "Bash(start \"\" \"C:\\\\work_삭제용\\\\book-workflow\\\\projects\\\\특이점이-온-개발자-도커-쿠버네티스\\\\.build\\\\02-Docker-이해하기.html\")",
+      "Bash(git checkout *)",
+      "Bash(python .claude/skills/pub-html-build/build_html.py --help)",
+      "Bash(PYTHONIOENCODING=utf-8 python .claude/skills/pub-html-build/build_html.py --project-root projects/특이점이-온-개발자-도커-쿠버네티스 --chapter 1)",
+      "PowerShell(Start-Process chrome \"C:\\\\work_삭제용\\\\book-workflow\\\\projects\\\\특이점이-온-개발자-도커-쿠버네티스\\\\.build\\\\02-Docker-이해하기-v5.html\")",
+      "Bash(PYTHONIOENCODING=utf-8 python .claude/skills/pub-html-build/build_html.py --project-root projects/특이점이-온-개발자-도커-쿠버네티스 --chapter 3)"
     ]
   }
 }
