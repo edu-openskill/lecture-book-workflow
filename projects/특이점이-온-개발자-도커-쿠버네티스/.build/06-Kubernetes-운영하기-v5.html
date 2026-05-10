@@ -19,7 +19,7 @@
 <div class="container">
 <h1>Ch.6 Kubernetes 운영하기</h1>
 <p>목요일 오후, 회의실 한쪽에서 팀장이 화이트보드 앞에 서 있었습니다. 챕터 5에서 IP가 흔들려도 끊기지 않는 진입점을 만들어 둔 며칠이 지난 참이었습니다. 보드 위에는 챕터 3에서 docker-compose로 짰던 통합 사이트의 골격이 그대로 그려져 있었습니다. 프론트엔드와 백엔드, 그리고 그 뒤의 DB 한 덩어리.</p>
-<div class="dialogue"><span class="speaker">팀장</span>: "구성 잘 잡았네요. 그럼 챕터 3에서 docker-compose로 짰던 그 통합 사이트, 이번엔 쿠버네티스 위에 올려볼래요?"</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "구성 잘 잡았네요. 그럼 챕터 3에서 docker-compose로 짰던 그 통합 사이트, 이번엔 쿠버네티스 위에 올려 볼래요?"</div>
 <p>오픈이는 펜을 든 채 잠시 멈칫했습니다. Pod 하나, Service 하나는 깔끔하게 띄울 수 있습니다. 그런데 프론트엔드·백엔드·DB가 한 덩어리로 묶인 사이트를 그대로 옮기려고 하니, 어디부터 손대야 할지 막막했습니다. docker-compose로 띄울 때 짚지 않고 지나갔던 두 가지가 한꺼번에 도드라졌습니다.</p>
 <p>먼저 DB 비밀번호가 마음에 걸렸습니다. 챕터 3에서는 <code>docker-compose.yml</code>에 환경 변수로 그냥 적어 뒀습니다. 로컬에서만 돌리는 것이라 그래도 됐습니다. 운영 환경 YAML에 같은 식으로 적으면 비밀번호가 Git 저장소에 그대로 올라갑니다. DB 주소나 접속 URL처럼 환경마다 달라지는 값도 마찬가지입니다. 그렇다고 이미지에 박아 두자니 환경이 바뀔 때마다 이미지를 다시 빌드해야 합니다.</p>
 <p>데이터 쪽은 한 단계 더 무거운 문제였습니다. 챕터 4에서 Deployment가 죽은 Pod를 곧장 살려 주는 모습을 봤기 때문에, 같은 일이 DB Pod에서 벌어지면 어떻게 되는지가 또렷이 보였습니다. 코드는 다시 띄우면 그만입니다. 그 안에 쌓아 둔 회원 정보와 게시글은 새 Pod로 따라오지 않습니다.</p>
@@ -171,7 +171,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <p>저장된 결과를 보니 <code>password</code> 값이 알 수 없는 문자열로 변환되어 있습니다.</p>
 <div class="prep-note">
 <p><strong>Secret과 Base64</strong></p>
-<p>Secret의 Base64 처리는 암호화가 아닌 단순 인코딩입니다. 따라서 누구나 디코딩하여 원문을 확인할 수 있습니다. 실제 보안은 RBAC(역할 기반 접근 제어)을 통한 조회 권한 제한, etcd 저장소 암호화 등을 통해 확보해야 합니다. 여기서는 '일반 설정과 민감 정보를 구분하여 관리한다'는 개념이 중요합니다.</p>
+<p>Secret의 Base64 처리는 암호화가 아닌 단순 인코딩입니다. 따라서 누구나 디코딩하여 원문을 확인할 수 있습니다. 여기서는 '일반 설정과 민감 정보를 구분하여 관리한다'는 개념이 중요합니다.</p>
 </div>
 <p>Pod에 주입하는 방식은 ConfigMap과 동일합니다. 앞서 작성해 둔 <code>deploy-ex03.yml</code>을 다시 열어 <code>envFrom</code> 아래의 <code>secretRef</code> 두 줄에 걸린 <code>#</code> 주석을 풀어 줍니다. <code>secretRef</code>를 활성화하면 쿠버네티스가 실행 시점에 Base64 인코딩을 디코딩해 환경 변수로 넣어 줍니다.</p>
 <p><strong>ex13/deploy-ex03.yml</strong> (Secret 연결 활성화)</p>
@@ -269,7 +269,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 </div>
 <div class="caption">그림 6-6. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</div>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">   </span><span class="c1"># Pod 재시작</span></div>
-<p><code>kubectl rollout restart</code>는 여러 Pod를 순차로 교체해 새 값을 반영하는 명령입니다. 재시작이 끝나고 다시 환경 변수를 찍어 보니 포트가 <code>90</code>으로 바뀌어 들어와 있었습니다. apply는 ConfigMap을 갱신할 뿐, 실제 Pod까지 반영되려면 재시작이 한 번 더 필요합니다.</p>
+<p><code>kubectl rollout restart</code>는 여러 Pod를 순차로 교체해 새 값을 반영하는 명령입니다. 재시작이 끝나고 다시 환경 변수를 찍어 보니 포트가 <code>90</code>으로 바뀌어 있었습니다. apply는 ConfigMap을 갱신할 뿐, 실제 Pod까지 반영되려면 재시작이 한 번 더 필요합니다.</p>
 <p>설정과 비밀번호를 이미지 바깥으로 빼는 일은 끝났습니다. 노트에 적어 둔 두 단어 중 첫 번째 매듭이 풀렸지만, 한 가지가 더 남아 있습니다. 비밀번호로 잠가 두는 DB의 데이터가 아직 그대로였습니다.</p>
 <h2>6.2 Volume - 데이터의 영속성 확보</h2>
 <h3>6.2.1 Pod의 휘발성 문제</h3>
@@ -344,7 +344,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <li>**PV(PersistentVolume)**는 실제 저장 공간, 즉 <strong>창고</strong>입니다. 용량, 권한, 위치 같은 창고의 사양이 정의됩니다.</li>
 <li>**PVC(PersistentVolumeClaim)**는 창고를 쓰겠다고 작성하는 <strong>신청서</strong>입니다. &quot;<strong>1Gi짜리 읽기·쓰기 가능한 창고가 필요하다</strong>&quot;고 적어 두면, Kubernetes가 조건에 맞는 PV를 찾아 자동으로 PVC와 연결합니다.</li>
 </ul>
-<p>Pod는 PV를 직접 건드리지 않고 PVC만 붙여 사용합니다. 실제 창고 위치는 PVC가 알아서 연결해 주기 때문에, Pod 입장에서는 &quot;<strong>용량이 맞는 저장 공간 하나</strong>&quot;가 붙어 있습니다.</p>
+<p>Pod는 PV를 직접 건드리지 않고 PVC만 붙여 사용합니다. 실제 창고 위치는 PVC가 알아서 연결해 주기 때문에, Pod 입장에서는 &quot;<strong>용량이 맞는 저장 공간 하나</strong>&quot;만 보입니다.</p>
 <h4>PV 만들기</h4>
 <p>오픈이는 ex14 폴더에서 PV YAML부터 펼쳤습니다.</p>
 <div class="code-block highlight" data-lang="yaml"><span class="c1"># ex14/volume-pv.yml</span>
@@ -384,7 +384,6 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <div class="prep-note">
 <p><strong>PVC와 PV가 연결되는 조건</strong></p>
 <p>PVC와 PV가 서로 연결되려면 세 가지가 맞아야 합니다. 첫째, <strong>읽기·쓰기 방식</strong>(accessModes)이 호환되어야 합니다. 둘째, <strong>저장소 종류 이름</strong>(storageClassName)이 같아야 합니다. 셋째, 신청한 <strong>용량이 창고 용량보다 작거나 같아야</strong> 합니다. 하나라도 어긋나면 PVC는 짝을 못 찾고 <strong>Pending</strong> 상태에 머무릅니다.</p>
-<p>accessModes에는 한 노드의 Pod가 읽기·쓰기로 마운트하는 <strong>ReadWriteOnce(RWO)</strong>, 여러 노드에서 읽기 전용으로 마운트하는 <strong>ReadOnlyMany(ROX)</strong>, 여러 노드에서 동시에 읽기·쓰기로 마운트하는 <strong>ReadWriteMany(RWX)</strong> 가 있습니다. 이번 실습은 단일 노드(Minikube) 환경이라 RWO를 씁니다.</p>
 </div>
 <h4>Pod에 연결</h4>
 <p>Pod 설정의 <code>volumes</code>에서 PVC를 선언하고, <code>volumeMounts</code>를 통해 컨테이너 내부 경로에 마운트합니다.</p>
@@ -450,8 +449,8 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 </div>
 <div class="caption">그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</div>
 <p>새로 띄운 Pod 안에서 <code>ls</code>를 쳤는데 <code>c.txt</code>가 그대로 보였습니다. Pod는 통째로 한 번 사라졌다가 새로 태어났는데, 파일은 PV 안에 머물러 있었습니다. PVC가 새 Pod에도 똑같은 창고를 다시 연결해 준 결과입니다.</p>
-<p class="thought">'Pod가 새로 만들어져도 창고는 그대로구나. 이제 데이터를 유실할 걱정이 없겠다.'</p>
-<p>회의실 화이트보드에 적어 둔 두 단어, <strong>설정·비밀번호</strong>와 <strong>데이터</strong>가 이로써 모두 그어졌습니다. 챕터 3의 통합 사이트를 K8s 위에 올리는 데 필요한 매듭은 다 풀렸습니다.</p>
+<p class="thought">'Pod가 새로 만들어져도 창고는 그대로구나. 이제 데이터가 사라질 걱정이 없겠다.'</p>
+<p>회의실 화이트보드에 적어 둔 두 단어, <strong>설정·비밀번호</strong>와 <strong>데이터</strong> 위에 줄이 그어졌습니다.</p>
 <h2>6.3 통합 실습 - 쿠버네티스 위에 웹사이트 올리기</h2>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>

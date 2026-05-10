@@ -310,7 +310,7 @@
 <div class="caption">그림 2-9. nginx 컨테이너 실행</div>
 <p>엔터를 누르자마자 터미널이 뚝 멈췄습니다. 커서가 깜빡이지도 않고 아무 입력도 받지 않았습니다.</p>
 <p class="thought">'뭐가 잘못된 건가.'</p>
-<p>이는 컨테이너가 <strong>포그라운드</strong> 상태로 터미널을 점유하고 있기 때문입니다. 통화 중에는 다른 전화를 받을 수 없는 것과 같은 상황입니다.</p>
+<p>이는 컨테이너가 <strong>포그라운드</strong> 상태로 터미널을 점유하고 있기 때문입니다. 통화 중일 때는 다른 전화를 받을 수 없는 것과 같습니다.</p>
 <p>우선 터미널에 <code>CTRL + C</code>를 입력해 빠져나왔습니다.</p>
 <div class="term-box">
 <p><strong>포그라운드(Foreground)</strong>: 프로세스가 터미널을 독점하는 상태입니다. 프로세스가 끝나거나 강제 종료될 때까지 그 터미널로 다른 명령을 내릴 수 없습니다.</p>
@@ -395,7 +395,7 @@
 <h2>2.5 컨테이너 통신</h2>
 <p>왜 접속이 안 되는지 알려면 컨테이너가 외부와 어떻게 닿는지부터 짚어야 했습니다.</p>
 <h3>2.5.1 네트워크 한눈에 보기</h3>
-<p>오픈이가 자료를 펼치니 컨테이너 네트워크가 크게 세 갈래로 갈려 있었습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 길</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>입니다.</p>
+<p>오픈이가 자료를 펼치니 컨테이너 네트워크가 크게 세 가지로 나뉘어 있었습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 길</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>입니다.</p>
 <p>주방 비유로 가상화를 잡았던 것처럼, 이번에는 식당 여러 개가 모인 <strong>푸드코트</strong>로 그려 봤습니다.</p>
 <h3>2.5.2 컨테이너끼리 - 주방 모니터와 주문 전광판</h3>
 <p>A, B, C 식당이 푸드코트에 입점해 있습니다. 식당끼리는 벽으로 완전히 분리되어 있어 서로의 주방을 들여다볼 수 없습니다.</p>
@@ -547,7 +547,7 @@
 <p>그래서 <code>docker run</code>으로 컨테이너를 띄우면 별도 옵션을 지정하지 않는 한 자동으로 이 기본 네트워크에 들어갑니다. 같은 네트워크 안에 있으니 IP만 알면 서로 통신할 수 있습니다.</p>
 <p>문제는 공유기 너머, 즉 호스트 PC 바깥에 있는 외부 사용자입니다. 브라우저처럼 외부에서 컨테이너로 바로 접근하기는 어렵습니다. 이유는 두 가지입니다.</p>
 <ul>
-<li>Windows와 macOS는 리눅스 기반 운영체제가 아니어서 Docker Desktop이 OS 내부에 <strong>가상의 리눅스 환경</strong>을 만들고 그 안에서 Docker를 실행합니다. docker0와 컨테이너 IP는 모두 이 가상 리눅스 안에 들어 있어서 호스트(Windows·macOS) 터미널에서는 그 IP로 바로 닿을 수 없습니다.</li>
+<li>Windows·macOS에서는 Docker가 가상 리눅스 안에서 돌기 때문에 docker0와 컨테이너 IP가 호스트 터미널에서는 보이지 않습니다.</li>
 <li>설령 리눅스 환경이라 해도 외부 사용자는 컨테이너의 내부 IP를 알 수 없습니다. 컨테이너가 뜰 때마다 IP가 바뀌기도 하고 바깥으로 공개된 주소도 아니기 때문입니다.</li>
 </ul>
 <p>따라서 외부에서 컨테이너로 들어오는 <strong>별도의 통로</strong>가 필요합니다.</p>
@@ -823,9 +823,6 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 </div>
 <div class="caption">그림 2-18. Ubuntu 컨테이너 안으로 들어간 상태</div>
 <p>프롬프트가 <code>root@...#</code> 모양으로 바뀌었습니다. 방금까지는 호스트의 터미널이었는데, 이제는 컨테이너 안의 쉘입니다. 호스트와는 분리된 공간에 들어와 있다는 감각이 손끝에 옵니다.</p>
-<div class="tip">
-<p><strong>쉘(Shell)</strong>: 사용자와 커널 사이에서 명령을 주고받는 프로그램입니다. 사용자가 쉘에 명령을 내리면 쉘이 커널에 그 명령을 전달하고 커널이 프로세스를 만들어 실제 작업을 수행합니다.</p>
-</div>
 <h3>2.6.1 자주 쓰는 리눅스 명령어</h3>
 <p>오픈이가 정리한 자주 쓰는 리눅스 명령어는 다음과 같습니다.</p>
 <table>
@@ -928,7 +925,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
 <div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">   </span><span class="c1"># 터미널 편집기 vim 설치</span></div>
 <div class="tip">
 <p><strong>설치 중 시간대 선택 화면</strong></p>
-<p>apt install vim 도중 Geographic area와 Time zone을 선택하는 화면이 나옵니다. 이때 <strong>Asia</strong>, <strong>Seoul</strong>을 각각 선택합니다. 이 설정은 컨테이너 안의 시간 표시와 로그 시각 기준이 되어, 한국 시간으로 동작하게 만들어 줍니다.</p>
+<p>apt install vim 도중 Geographic area와 Time zone을 선택하는 화면이 나옵니다. 이때 <strong>Asia</strong>, <strong>Seoul</strong>을 각각 선택합니다.</p>
 </div>
 <p>vim의 사용 명령어는 다음과 같습니다.</p>
 <table>
@@ -1103,7 +1100,7 @@ docker<span class="w"> </span>ps<span class="w">              </span><span class
 <div class="term-box">
 <p><strong>bash(셸)</strong>: 사용자의 명령어를 운영체제에 전달하는 창구입니다. 입력받을 터미널이 없으면 할 일이 사라져 프로세스가 종료됩니다.</p>
 </div>
-<p>ubuntu를 백그라운드로 살리려면 <code>-dit</code>(<code>-d</code> 백그라운드, <code>-i</code> 입력 받기, <code>-t</code> 터미널 화면)을 쓰거나 메인 프로세스를 다른 걸로 바꿔야 합니다.</p>
+<p>ubuntu를 백그라운드로 살리려면 <code>-dit</code>(<code>-d</code> 백그라운드, <code>-i</code> 입력 받기, <code>-t</code> 터미널 화면)을 쓰거나 메인 프로세스를 다른 것으로 바꿔야 합니다.</p>
 <h3>2.7.3 CMD로 메인 프로세스 바꾸기</h3>
 <p>이번에는 ubuntu의 메인 프로세스를 유지하기 위해 메인 프로세스를 바꾸는 테스트를 해 보기로 했습니다. bash 대신 <strong>sleep 1000</strong> 을 메인으로 지정했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>ubuntu<span class="w"> </span>sleep<span class="w"> </span><span class="m">1000</span><span class="w">   </span><span class="c1"># bash 대신 sleep을 메인으로</span>
@@ -1130,7 +1127,7 @@ docker<span class="w"> </span>ps<span class="w">                         </span>
 <p><strong>CMD</strong>: 컨테이너가 시작될 때 실행되는 <strong>기본 프로세스</strong>를 정의하는 설정입니다. <code>docker run &lt;이미지&gt; &lt;CMD옵션&gt;</code> 형태로 직접 주면 이미지의 메인 프로세스 대신 CMD에 넣은 설정으로 덮어씁니다.</p>
 </div>
 <h3>2.7.4 attach vs exec</h3>
-<p>오픈이는 백그라운드로 띄운 컨테이너에 다시 들어가는 방법이 궁금해졌습니다. 자료를 살펴보니 두 갈래가 있었습니다. 메인 프로세스에 직접 연결하는 <code>attach</code>와, 새 프로세스를 하나 더 띄우는 <code>exec</code>입니다. 결과는 비슷해 보이지만 내부에서 일어나는 일이 다르다고 해서, 두 방법을 직접 비교해 봤습니다.</p>
+<p>오픈이는 백그라운드로 띄운 컨테이너에 다시 들어가는 방법이 궁금해졌습니다. 자료를 살펴보니 두 가지가 있었습니다. 메인 프로세스에 직접 연결하는 <code>attach</code>와, 새 프로세스를 하나 더 띄우는 <code>exec</code>입니다. 결과는 비슷해 보이지만 내부에서 일어나는 일이 다르다고 해서, 두 방법을 직접 비교해 봤습니다.</p>
 <p>먼저 <code>attach</code>는 컨테이너 안에서 이미 돌고 있는 메인 프로세스를 연결합니다. 같은 프로세스를 공유하기 때문에 여기서 잘못 빠져나와 프로세스를 종료하면 컨테이너 전체가 같이 꺼집니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="docker attach가 컨테이너의 메인 프로세스(PID 1)에 직접 연결되는 구조">

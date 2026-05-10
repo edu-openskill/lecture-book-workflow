@@ -15,7 +15,6 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from urllib.parse import quote
 
 
 PAGEDJS_CDN = "https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"
@@ -33,7 +32,7 @@ def render_pdf(html_path: Path, pdf_path: Path, pagedjs: bool) -> None:
     from playwright.sync_api import sync_playwright
 
     pdf_path.parent.mkdir(parents=True, exist_ok=True)
-    url = "file://" + quote(str(html_path.resolve()))
+    url = html_path.resolve().as_uri()
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
