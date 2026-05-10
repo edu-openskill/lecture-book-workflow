@@ -1,0 +1,10 @@
+direction: right
+
+ORCH: orchestrator { style.fill: "#ffffff"; style.stroke: "#333333" }
+O: order { style.fill: "#ffffff"; style.stroke: "#333333" }
+P: product { style.fill: "#ffffff"; style.stroke: "#333333" }
+D: delivery { style.fill: "#ffffff"; style.stroke: "#333333" }
+
+ORCH -> O: 주문 취소 { style.stroke: "#cc0000" }
+ORCH -> P: 재고 복구 { style.stroke: "#cc0000" }
+ORCH -> D: 배달 취소 { style.stroke: "#cc0000" }

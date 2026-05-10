@@ -1,0 +1,17 @@
+shape: sequence_diagram
+
+order
+orchestrator
+product
+delivery
+
+order -> orchestrator: "주문 생성됨"
+orchestrator -> product: "재고 차감"
+product -> orchestrator: "차감 완료" {
+  style.stroke-dash: 3
+}
+orchestrator -> delivery: "배달 생성"
+delivery -> orchestrator: "생성 완료" {
+  style.stroke-dash: 3
+}
+orchestrator -> order: "주문 완료"

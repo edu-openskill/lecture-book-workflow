@@ -1,0 +1,29 @@
+direction: right
+
+Orch: 오케스트레이터 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+D: 배달 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Driver: 배달 기사 {
+  shape: person
+  style.fill: "#f0f0f0"
+  style.stroke: "#333333"
+}
+
+Orch -> D: "① 배달 생성 명령 → PENDING 저장" {
+  style.stroke: "#4a90d9"
+}
+
+Driver -> D: "② 배달 완료 API → COMPLETED 변경" {
+  style.stroke: "#333333"
+}
+
+D -> Orch: "③ 배달 완료 이벤트" {
+  style.stroke: "#333333"
+}

@@ -1,0 +1,52 @@
+direction: right
+
+R: 외부 요청 {
+  shape: oval
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+ING: Ingress {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+SVC: Service {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+P: Pod {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+CM: ConfigMap / Secret {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+D: Deployment {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+R -> ING: 라우팅 {
+  style.stroke: "#333333"
+}
+
+ING -> SVC: 트래픽 전달 {
+  style.stroke: "#333333"
+}
+
+SVC -> P: 고정 DNS {
+  style.stroke: "#333333"
+}
+
+CM -> D: 환경변수 주입 {
+  style.stroke: "#333333"
+}
+
+D -> P: Pod 생성 {
+  style.stroke: "#333333"
+}

@@ -1,0 +1,104 @@
+{
+  "project": "처음-만나는-MSA",
+  "title": "",
+  "status": "in_progress",
+  "current_step": "step_1_seed",
+  "created_at": "2026-03-14",
+  "updated_at": "2026-03-14",
+
+  "steps": {
+    "step_1_seed": {
+      "name": "씨앗",
+      "status": "done",
+      "artifact": "planning/seed-v1.md",
+      "artifact_version": 1,
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_2_code": {
+      "name": "코드 해부",
+      "status": "done",
+      "artifact": "planning/code-analysis-v1.md",
+      "artifact_version": 1,
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_3_scenario": {
+      "name": "시나리오+버전",
+      "status": "done",
+      "artifact": "planning/scenario-v1.md",
+      "artifact_version": 1,
+      "versions_created": ["v0.1", "v0.2", "v0.3", "v0.4"],
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_4_outline": {
+      "name": "뼈대",
+      "status": "done",
+      "artifact": "planning/outline-v1.md",
+      "artifact_version": 1,
+      "gap_analysis": "done",
+      "review": {
+        "insight": null,
+        "audit": null
+      },
+      "questions_pending": 0
+    },
+    "step_5_chapters": {
+      "name": "챕터 집필",
+      "status": "pending",
+      "chapters": []
+    },
+    "step_6_prologue": {
+      "name": "프롤로그+로드맵",
+      "status": "pending",
+      "artifacts": {
+        "prologue": null,
+        "roadmap": null
+      },
+      "review": {
+        "audit": null
+      }
+    },
+    "step_7_finish": {
+      "name": "마무리",
+      "status": "pending",
+      "artifacts": {
+        "preface": null,
+        "afterword": null,
+        "appendix": null
+      },
+      "final_title": null,
+      "total_pages": null,
+      "review": {
+        "audit": null
+      }
+    }
+  },
+
+  "_chapter_template": {
+    "id": "CH01",
+    "title": "",
+    "version": "v0.1",
+    "status": "pending",
+    "artifact": null,
+    "review": {
+      "insight": null,
+      "intent_watch": null,
+      "audit": null
+    },
+    "questions_pending": 0
+  },
+
+  "_status_values": ["pending", "in_progress", "done", "review"],
+  "_review_values": [null, "pass", "conditional_pass", "fail"]
+}

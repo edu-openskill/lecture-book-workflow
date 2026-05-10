@@ -1,0 +1,29 @@
+shape: sequence_diagram
+
+주문
+상품
+배달
+
+주문 -> 상품: "① 재고 감소 요청"
+주문."productDecreased = true" {
+  style.fill: "#fffde7"
+  style.stroke: "#cccc88"
+  style.border-radius: 20
+}
+상품 -> 주문: "② 성공" {
+  style.stroke-dash: 3
+}
+주문 -> 배달: "③ 배달 생성 요청"
+주문."deliveryCreated = true" {
+  style.fill: "#fffde7"
+  style.stroke: "#cccc88"
+  style.border-radius: 20
+}
+배달 -> 주문: "④ 성공" {
+  style.stroke-dash: 3
+}
+주문."주문 완료 (COMPLETED) 반환" {
+  style.fill: "#fffde7"
+  style.stroke: "#cccc88"
+  style.border-radius: 6
+}

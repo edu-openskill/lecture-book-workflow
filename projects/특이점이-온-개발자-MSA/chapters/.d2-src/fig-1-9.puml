@@ -1,0 +1,39 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #ffffff
+skinparam roundcorner 8
+skinparam shadowing false
+skinparam diagramBorderColor transparent
+skinparam diagramBorderThickness 0
+
+skinparam participant {
+  BorderColor #333333
+  BackgroundColor #eeeeee
+  FontSize 13
+  FontColor #333333
+  Padding 8
+}
+
+skinparam sequence {
+  ArrowColor #555555
+  ArrowThickness 1.5
+  LifeLineBorderColor #bbbbbb
+  ArrowFontSize 11
+  ArrowFontColor #444444
+}
+
+participant "오케스트레이터" as Orch
+participant "상품" as P
+participant "배달" as D
+participant "주문" as O
+
+Orch -> P: ① 재고 차감
+P --> Orch: ② 성공
+
+Orch -> D: ③ 배달 생성
+D --> Orch: ④ 실패
+
+Orch -[#cc0000]> P: ⑤ 재고 원복 (자동 롤백)
+Orch -[#cc0000]> O: ⑥ 주문 취소
+
+@enduml

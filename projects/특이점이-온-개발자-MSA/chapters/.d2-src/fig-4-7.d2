@@ -1,0 +1,8 @@
+direction: right
+
+O: 주문 { style.fill: "#ffffff"; style.stroke: "#333333" }
+Orch: 오케스트레이터 { style.fill: "#ffffff"; style.stroke: "#333333" }
+P: 상품 { style.fill: "#ffffff"; style.stroke: "#333333" }
+
+O -> Orch: 주문 생성 { style.stroke: "#333333" }
+Orch -> P: 재고 감소 명령 { style.stroke: "#333333" }

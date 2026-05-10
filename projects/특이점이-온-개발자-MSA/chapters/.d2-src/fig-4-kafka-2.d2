@@ -1,0 +1,13 @@
+direction: right
+
+cluster: "클러스터 A (CLUSTER_ID: aaa)" {
+  style.fill: "#f5f5f5"
+  style.stroke: "#333333"
+  style.font-size: 13
+  style.bold: false
+
+  n1: "NODE_ID: 1" { style.fill: "#ffffff"; style.stroke: "#333333"; style.bold: false }
+  n2: "NODE_ID: 2" { style.fill: "#ffffff"; style.stroke: "#333333"; style.bold: false }
+
+  n1 <-> n2: kafka-service:9093 { style.stroke: "#333333" }
+}

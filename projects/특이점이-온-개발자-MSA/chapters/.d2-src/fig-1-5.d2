@@ -1,0 +1,37 @@
+direction: right
+
+Client: 클라이언트 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Order: 주문 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Product: 상품 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Delivery: 배달 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Client -> Order: 주문 생성 {
+  style.stroke: "#333333"
+}
+
+Order -> Product: 재고 차감 {
+  style.stroke: "#333333"
+}
+
+Order -> Delivery: 배달 생성 {
+  style.stroke: "#333333"
+}
+
+Order -> Client: 주문 완료 {
+  style.stroke: "#333333"
+}

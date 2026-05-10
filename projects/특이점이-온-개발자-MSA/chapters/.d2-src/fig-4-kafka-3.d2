@@ -1,0 +1,8 @@
+direction: right
+
+client: "클라이언트\n(order, product, delivery)" { style.fill: "#ffffff"; style.stroke: "#333333"; style.bold: false }
+svc: "kafka-service:9092\n(KAFKA_ADVERTISED_LISTENERS)" { style.fill: "#ffffff"; style.stroke: "#333333"; style.bold: false }
+kafka: Kafka { style.fill: "#ffffff"; style.stroke: "#333333"; style.bold: false }
+
+client -> svc { style.stroke: "#333333" }
+svc -> kafka { style.stroke: "#333333" }

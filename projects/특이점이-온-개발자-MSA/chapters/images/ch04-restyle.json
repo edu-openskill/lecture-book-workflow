@@ -1,0 +1,68 @@
+{
+  "title": "실행결과",
+  "screenshots": [
+    {
+      "file": "chap04-1.png",
+      "blocks": [
+        {
+          "cmd": "kubectl create namespace metacoding",
+          "output": "namespace/metacoding created"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/kafka",
+          "output": "deployment.apps/kafka-deploy created\nservice/kafka-service created"
+        },
+        {
+          "cmd": "kubectl wait --for=condition=ready pod -l app=kafka -n metacoding --timeout=120s",
+          "output": "pod/kafka-deploy-69fc99fc86-85vhw condition met"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/db",
+          "output": "configmap/db-configmap created\ndeployment.apps/db-deploy created\nsecret/db-secret created\nservice/db-service created"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/order",
+          "output": "configmap/order-configmap created\ndeployment.apps/order-deploy created\nsecret/order-secret created\nservice/order-service created"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/product",
+          "output": "configmap/product-configmap created\ndeployment.apps/product-deploy created\nsecret/product-secret created\nservice/product-service created"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/user",
+          "output": "configmap/user-configmap created\ndeployment.apps/user-deploy created\nsecret/user-secret created\nservice/user-service created"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/delivery",
+          "output": "configmap/delivery-configmap created\ndeployment.apps/delivery-deploy created\nsecret/delivery-secret created\nservice/delivery-service created"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/gateway",
+          "output": "deployment.apps/gateway-deploy created\nservice/gateway-service created\ningress.networking.k8s.io/gateway-ingress created"
+        },
+        {
+          "cmd": "kubectl apply -f k8s/orchestrator",
+          "output": "configmap/orchestrator-configmap created\ndeployment.apps/orchestrator-deploy created"
+        }
+      ]
+    },
+    {
+      "file": "chap04-2.png",
+      "blocks": [
+        {
+          "cmd": "kubectl get pods -n metacoding",
+          "output": "NAME                                    READY   STATUS    RESTARTS       AGE\ndb-deploy-5c94cbfb5f-sbjdj              1/1     Running   0              3m48s\ndelivery-deploy-56cfc89bdd-5znd7        1/1     Running   1 (102s ago)   3m46s\ngateway-deploy-5d4c49c94c-v568l         1/1     Running   0              3m45s\nkafka-deploy-69fc99fc86-85vhw           1/1     Running   0              4m37s\norchestrator-deploy-65bdd754c6-wstwj    1/1     Running   0              3m44s\norder-deploy-665d89c8fc-tnntz           1/1     Running   1 (110s ago)   3m48s\nproduct-deploy-6f5745c6b9-vww6r         1/1     Running   1 (103s ago)   3m47s\nuser-deploy-5d786978bd-vlm8w            1/1     Running   1 (112s ago)   3m47s"
+        }
+      ]
+    },
+    {
+      "file": "chap04-3.png",
+      "blocks": [
+        {
+          "cmd": "minikube service gateway-service -n metacoding --url",
+          "output": "http://127.0.0.1:3116\n! windows 에서 Docker 드라이버를 사용하고 있기 때문에, 터미널을 열어야 실행할 수 있습니다."
+        }
+      ]
+    }
+  ]
+}

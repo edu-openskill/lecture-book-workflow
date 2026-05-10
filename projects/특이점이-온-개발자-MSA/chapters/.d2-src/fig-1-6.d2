@@ -1,0 +1,46 @@
+direction: right
+
+Client: 클라이언트 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Order: 주문 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Orch: 오케스트레이터 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Product: 상품 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Delivery: 배달 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Client -> Order: 주문 생성 {
+  style.stroke: "#333333"
+}
+
+Order -> Orch: Kafka {
+  style.stroke: "#333333"
+}
+
+Orch -> Product: Kafka {
+  style.stroke: "#333333"
+}
+
+Orch -> Delivery: Kafka {
+  style.stroke: "#333333"
+}
+
+Order -> Client: WebSocket 알림 {
+  style.stroke: "#333333"
+}

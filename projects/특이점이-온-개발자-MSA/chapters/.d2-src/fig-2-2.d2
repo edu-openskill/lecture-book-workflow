@@ -1,0 +1,35 @@
+shape: sequence_diagram
+
+주문
+상품
+배달
+
+주문 -> 상품: "① 재고 감소 요청"
+주문."productDecreased = true" {
+  style.fill: "#fffde7"
+  style.stroke: "#cccc88"
+  style.border-radius: 20
+}
+상품 -> 주문: "② 성공" {
+  style.stroke-dash: 3
+}
+주문 -> 배달: "③ 배달 생성 요청"
+배달 -> 주문: "④ 실패" {
+  style.stroke: "#cc0000"
+}
+주문."catch → productDecreased 확인" {
+  style.fill: "#fffde7"
+  style.stroke: "#cccc88"
+  style.border-radius: 20
+}
+주문 -> 상품: "⑤ 재고 복구 요청 (보상)" {
+  style.stroke: "#cc0000"
+}
+상품 -> 주문: "⑥ 성공" {
+  style.stroke-dash: 3
+}
+주문."Exception500 반환\n(데이터 일관성 유지)" {
+  style.fill: "#fff0f0"
+  style.stroke: "#cc0000"
+  style.border-radius: 6
+}

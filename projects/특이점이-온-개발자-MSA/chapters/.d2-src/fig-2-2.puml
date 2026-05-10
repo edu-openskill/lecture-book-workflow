@@ -1,0 +1,47 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #ffffff
+skinparam roundcorner 8
+skinparam shadowing false
+skinparam diagramBorderColor transparent
+skinparam diagramBorderThickness 0
+
+skinparam participant {
+  BorderColor #333333
+  BackgroundColor #eeeeee
+  FontSize 13
+  FontColor #333333
+  Padding 8
+}
+
+skinparam sequence {
+  ArrowColor #555555
+  ArrowThickness 1.5
+  LifeLineBorderColor #bbbbbb
+  ArrowFontSize 11
+  ArrowFontColor #444444
+}
+
+skinparam noteFontSize 11
+
+
+
+participant "주문" as O
+participant "상품" as P
+participant "배달" as D
+
+O -> P: ① 재고 감소 요청
+P --> O: ② 성공
+note left: productDecreased = true
+
+O -> D: ③ 배달 생성 요청
+D -[#cc0000]-> O: ④ 실패
+
+note over O: catch → productDecreased 확인
+
+O -[#cc0000]> P: ⑤ 재고 복구 요청 (보상)
+P --> O: ⑥ 성공
+
+note over O: Exception500 반환\n(데이터 일관성 유지)
+
+@enduml

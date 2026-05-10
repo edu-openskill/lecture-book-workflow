@@ -1,0 +1,79 @@
+direction: right
+
+classes: {
+  gw: {
+    style: {
+      fill: "#e8e8e8"
+      stroke: black
+      stroke-width: 1
+      border-radius: 6
+      font-size: 13
+    }
+  }
+  svc: {
+    style: {
+      fill: white
+      stroke: black
+      stroke-width: 1
+      border-radius: 6
+      font-size: 13
+    }
+  }
+}
+
+req: "클라이언트 요청" {
+  style: {
+    fill: transparent
+    stroke: transparent
+    font-size: 13
+    bold: true
+  }
+}
+
+gateway: "Gateway (NGINX :80)" {
+  class: gw
+
+  location: " " {
+    style: {
+      fill: transparent
+      stroke: transparent
+      font-size: 10
+    }
+
+    l1: "/login\n/api/users" { class: svc }
+    l2: "/api/orders" { class: svc }
+    l3: "/api/products" { class: svc }
+    l4: "/api/deliveries" { class: svc }
+  }
+}
+
+services: " " {
+  direction: down
+  style: {
+    fill: transparent
+    stroke: transparent
+    font-size: 8
+  }
+
+  user: "user-service\n:8083" { class: svc }
+  order: "order-service\n:8081" { class: svc }
+  product: "product-service\n:8082" { class: svc }
+  delivery: "delivery-service\n:8084" { class: svc }
+}
+
+req -> gateway: "" {
+  style.font-size: 11
+}
+
+gateway.location.l1 -> services.user: "upstream" {
+  style.font-size: 11
+}
+gateway.location.l2 -> services.order: "upstream" {
+  style.font-size: 11
+}
+gateway.location.l3 -> services.product: "upstream" {
+  style.font-size: 11
+}
+gateway.location.l4 -> services.delivery: "upstream" {
+  style.font-size: 11
+}

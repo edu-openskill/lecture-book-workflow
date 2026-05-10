@@ -1,0 +1,12 @@
+direction: right
+
+D: 배달 { style.fill: "#ffffff"; style.stroke: "#333333" }
+Orch: 오케스트레이터 { style.fill: "#ffffff"; style.stroke: "#333333" }
+C: 주문 완료 명령 { style.fill: "#ffffff"; style.stroke: "#333333" }
+R1: 재고 복구 명령 { style.fill: "#e8e8e8"; style.stroke: "#cc0000" }
+R2: 주문 취소 명령 { style.fill: "#e8e8e8"; style.stroke: "#cc0000" }
+
+D -> Orch: 배달 생성 결과 { style.stroke: "#333333" }
+Orch -> C: 성공 { style.stroke: "#333333" }
+Orch -> R1: 실패 { style.stroke: "#cc0000" }
+Orch -> R2: 실패 { style.stroke: "#cc0000" }

@@ -1,0 +1,11 @@
+{
+  "title": "실행결과",
+  "screenshots": [
+    {
+      "file": "chap05-1.png",
+      "blocks": [
+        {"cmd": "kubectl get pods -n metacoding", "output": "NAME                                    READY   STATUS    RESTARTS       AGE\ndb-deploy-5c94cbfb5f-rr6nk              1/1     Running   0              3m7s\ndelivery-deploy-56cfc89bdd-rsqt4        1/1     Running   1 (63s ago)    3m3s\nfrontend-deploy-66b885b47-g9mpw         1/1     Running   0              3m1s\ngateway-deploy-5d4c49c94c-snm6w         1/1     Running   1 (2m58s ago)  3m6s\nkafka-deploy-69fc99fc86-fwpt8           1/1     Running   0              3m9s\norchestrator-deploy-65bdd754c6-kbb5c    1/1     Running   0              3m2s\norder-deploy-665d89c8fc-vjw9k           1/1     Running   1 (73s ago)    3m6s\nproduct-deploy-6f5745c6b9-hwcbr         1/1     Running   1 (71s ago)    3m5s\nuser-deploy-5d786978bd-bgbkz            1/1     Running   1 (69s ago)    3m4s"}
+      ]
+    }
+  ]
+}

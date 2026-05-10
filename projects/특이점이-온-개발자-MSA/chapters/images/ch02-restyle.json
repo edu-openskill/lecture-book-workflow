@@ -1,0 +1,11 @@
+{
+  "title": "실행결과",
+  "screenshots": [
+    {
+      "file": "chap02-1.png",
+      "blocks": [
+        {"cmd": "docker compose up", "output": "#1 [internal] load local bake definitions\n#1 reading from stdin 2.08kB 0.0s done\n#1 DONE 0.0s\n\n#2 [order-service internal] load build definition from Dockerfile\n#2 transferring dockerfile: 30B\n#2 transferring dockerfile: 194B 0.0s done\n#2 DONE 0.2s\n\n#3 [product-service internal] load build definition from Dockerfile\n#3 transferring dockerfile: 194B 0.0s done\n#3 DONE 0.2s\n\n#4 [order-service internal] load metadata for docker.io/library/gradle:8.14-jdk21\n#4 ...\n\n#5 [user-service internal] load build definition from Dockerfile\n#5 transferring dockerfile: 194B done\n#5 DONE 0.2s\n\n#6 [delivery-service internal] load build definition from Dockerfile\n#6 transferring dockerfile: 194B done\n#6 DONE 0.2s\n\n#4 [delivery-service internal] load metadata for docker.io/library/gradle:8.14-jdk21"}
+      ]
+    }
+  ]
+}

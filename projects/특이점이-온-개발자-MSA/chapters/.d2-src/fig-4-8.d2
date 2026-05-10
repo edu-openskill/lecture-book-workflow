@@ -1,0 +1,12 @@
+direction: right
+
+P: 상품 { style.fill: "#ffffff"; style.stroke: "#333333" }
+Orch: 오케스트레이터 { style.fill: "#ffffff"; style.stroke: "#333333" }
+D: 배달 생성 명령 { style.fill: "#ffffff"; style.stroke: "#333333" }
+R1: 재고 복구 명령 { style.fill: "#e8e8e8"; style.stroke: "#cc0000" }
+R2: 주문 취소 명령 { style.fill: "#e8e8e8"; style.stroke: "#cc0000" }
+
+P -> Orch: 재고 감소 결과 { style.stroke: "#333333" }
+Orch -> D: 모든 상품 성공 { style.stroke: "#333333" }
+Orch -> R1: 하나라도 실패 { style.stroke: "#cc0000" }
+Orch -> R2: 하나라도 실패 { style.stroke: "#cc0000" }

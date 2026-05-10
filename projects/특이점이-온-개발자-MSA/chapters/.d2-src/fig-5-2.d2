@@ -1,0 +1,19 @@
+direction: right
+
+Orch: 오케스트레이터 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+D: 배달 {
+  style.fill: "#ffffff"
+  style.stroke: "#333333"
+}
+
+Orch -> D: "① 배달 생성 명령" {
+  style.stroke: "#4a90d9"
+}
+
+D -> Orch: "② 즉시 COMPLETED 반환" {
+  style.stroke: "#333333"
+}
