@@ -38,7 +38,7 @@
 <p>오픈이는 화면을 다시 들여다봤습니다.</p>
 <p class="thought">'바깥이라면 어디에 두어야 하지?'</p>
 <p>설정값과 비밀번호를 따로 보관할 전용 공간이 필요했습니다. 쿠버네티스에는 이미 그 자리가 마련되어 있었습니다. 가맹점 한쪽에 공용 메뉴판을 걸어 두고, 비밀 레시피는 같은 가맹점 안에 따로 두는 방식입니다. 메뉴를 바꿀 때마다 주방까지 새로 들일 필요는 없습니다. 메뉴판과 레시피만 갈아 끼우면 됩니다. 쿠버네티스에서도 같은 발상으로 두 자리가 나뉘어 있습니다.</p>
-<p>이 역할을 맡는 리소스는 두 가지입니다.</p>
+<p>이 일을 맡는 리소스는 두 가지입니다.</p>
 <ul>
 <li><strong>ConfigMap</strong>은 일반적인 설정값을 저장할 때 사용합니다. DB 주소, 접속 URL, 로그 레벨처럼 환경에 따라 변하는 값을 담습니다.</li>
 <li><strong>Secret</strong>은 비밀번호, 토큰, API 키처럼 민감한 정보를 저장할 때 사용합니다. ConfigMap과 구조는 비슷하지만, 값이 Base64로 인코딩되어 저장되며 접근 권한이 엄격하게 제한됩니다.</li>
@@ -276,7 +276,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <div class="caption">그림 6-7. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</div>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">   </span><span class="c1"># Pod 재시작</span></div>
 <p><code>kubectl rollout restart</code>는 여러 Pod를 순차로 교체해 새 값을 반영하는 명령입니다. 재시작이 끝나고 다시 환경 변수를 찍어 보니 포트가 <code>90</code>으로 바뀌어 있었습니다. apply는 ConfigMap을 갱신할 뿐, 실제 Pod까지 반영되려면 재시작이 한 번 더 필요합니다.</p>
-<p>설정과 비밀번호를 이미지 바깥으로 빼는 일은 끝났습니다. 노트에 적어 둔 두 단어 중 첫 번째 매듭이 풀렸지만, 한 가지가 더 남아 있습니다. 비밀번호로 잠가 두는 DB의 데이터가 아직 그대로였습니다.</p>
+<p>설정과 비밀번호를 이미지 바깥으로 빼는 일은 끝났습니다. 노트에 적어 둔 두 단어 중 첫 번째 문제가 풀렸지만, 한 가지가 더 남아 있습니다. 비밀번호로 잠가 두는 DB의 데이터가 아직 그대로였습니다.</p>
 <h2>6.2 Volume - 데이터의 영속성 확보</h2>
 <h3>6.2.1 Pod의 휘발성 문제</h3>
 <p>설정 분리는 끝났고, 남은 건 데이터였습니다. 챕터 4에서 본 그 자동 복구가 DB Pod에서는 다른 문제를 만듭니다. Pod는 기본적으로 <strong>휘발성</strong>이라, 안에서 만든 파일은 Pod 수명과 함께 사라집니다. 회원 가입과 게시글이 매일 쌓이는 DB가 이런 식으로 휘발되면 운영을 할 수가 없습니다.</p>
@@ -462,7 +462,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15</p>
 </div>
-<p>다음 날 아침, 오픈이는 자리에 앉자마자 노트를 펼쳤습니다. 며칠 전 회의실에서 팀장이 의뢰한 챕터 3 그 사이트를 K8s 위에 올릴 차례였습니다. 매듭은 풀렸고, 도구는 쥐고 있었습니다. 이번 챕터에서는 그동안 따로따로 익힌 도구들이 한 사이트에서 한꺼번에 만납니다. 챕터 4·5에서 본 Pod·Deployment·Service·Ingress에, 이번 챕터에서 새로 더한 ConfigMap·Secret과 PV·PVC가 합쳐집니다.</p>
+<p>다음 날 아침, 오픈이는 자리에 앉자마자 노트를 펼쳤습니다. 며칠 전 회의실에서 팀장이 의뢰한 챕터 3 그 사이트를 K8s 위에 올릴 차례였습니다. 준비는 끝났고, 도구는 쥐고 있었습니다. 이번 챕터에서는 그동안 따로따로 익힌 도구들이 한 사이트에서 한꺼번에 만납니다. 챕터 4·5에서 본 Pod·Deployment·Service·Ingress에, 이번 챕터에서 새로 더한 ConfigMap·Secret과 PV·PVC가 합쳐집니다.</p>
 <p class="thought">'지금까지는 따로따로 띄워 본 건데, 이것들이 한꺼번에 올라가도 진짜 설계도처럼 맞물려 돌아갈까?'</p>
 <p>부분 실습은 잘 됐습니다. 그런데 전체 시스템이 한 덩어리로 살아 움직이는 모습은 아직 머릿속에 잘 그려지지 않았습니다. 화면을 응시하던 오픈이의 등 뒤로 팀장의 목소리가 들려왔습니다.</p>
 <div class="dialogue"><span class="speaker">팀장</span>: "부분 실습은 끝났죠. 한 번에 연결해 봐야 진짜 실력이 늘어요."</div>
@@ -610,7 +610,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Namespace</span>
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metacoding</span></div>
-<p>이후 만들어지는 모든 리소스는 metacoding이라는 독립된 영역에 자리를 잡습니다.</p>
+<p>이후 만들어지는 모든 리소스는 metacoding이라는 독립된 영역에 들어갑니다.</p>
 <h4>① Frontend</h4>
 <p>오픈이는 frontend 폴더부터 펼쳤습니다. 외부에서 들어오는 모든 요청이 처음 닿는 입구를 정의하는 폴더였습니다. 핵심은 단일 path로 모든 요청을 잡아 frontend-service로 넘기는 <code>frontend-ingress.yml</code>입니다.</p>
 <p><strong>ex15/k8s/frontend/frontend-ingress.yml</strong></p>
