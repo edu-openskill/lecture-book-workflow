@@ -43,7 +43,7 @@
     font-style: italic;
   }
   .chapter-image.terminal img { background: #1a202c; }
-  .chapter-image.gemini img { max-width: 50%; }
+  .chapter-image.gemini img { max-width: 70%; }
   .chapter-image.diagram img { max-width: 100%; }
 
   /* 코드블록 — 라이트 모드 */

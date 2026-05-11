@@ -80,6 +80,97 @@
 <div class="term-box">
 <p><strong>커널(Kernel)</strong>: 운영체제(OS)의 핵심입니다. 프로세스 생성, 메모리 관리, 격리 공간 생성을 담당합니다. Docker의 모든 컨테이너는 호스트 PC의 <strong>같은 리눅스 커널</strong>을 공유하고, 그 하나의 커널이 각 컨테이너에 격리 공간을 할당합니다.</p>
 </div>
+<div class="svg-figure">
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="커널은 OS의 핵심으로, 사용자 앱과 하드웨어 사이에서 프로세스·파일시스템·네트워크 같은 시스템 자원을 관리하는 중재자">
+  <defs>
+    <marker id="kn-d" markerWidth="8" markerHeight="8" refX="6" refY="2.5" orient="auto"><path d="M0,0 L0,5 L6,2.5 z" fill="#475569"/></marker>
+  </defs>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">커널 — OS의 핵심, 앱과 하드웨어 사이의 중재자</text>
+  <g transform="translate(240, 40)">
+    <rect x="0" y="0" width="56" height="42" rx="3" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <rect x="4" y="4" width="48" height="28" fill="#e0e7ff"/>
+    <rect x="22" y="32" width="12" height="6" fill="#475569"/>
+    <rect x="14" y="38" width="28" height="3" fill="#475569"/>
+    <text x="28" y="60" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">앱</text>
+  </g>
+  <g transform="translate(504, 40)">
+    <rect x="0" y="0" width="56" height="42" rx="3" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <rect x="4" y="4" width="48" height="28" fill="#e0e7ff"/>
+    <rect x="22" y="32" width="12" height="6" fill="#475569"/>
+    <rect x="14" y="38" width="28" height="3" fill="#475569"/>
+    <text x="28" y="60" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">앱</text>
+  </g>
+  <line x1="262" y1="110" x2="262" y2="138" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="274" y1="138" x2="274" y2="110" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="526" y1="110" x2="526" y2="138" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="538" y1="138" x2="538" y2="110" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <rect x="120" y="140" width="560" height="160" rx="10" fill="#fff" stroke="#ff7849" stroke-width="2.4"/>
+  <g transform="translate(332, 163)">
+    <path d="M 30 48 Q 8 48 10 30 Q 8 12 30 14 Q 38 -4 60 4 Q 82 -6 96 10 Q 124 10 124 30 Q 128 50 102 50 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  </g>
+  <text x="400" y="225" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">커널</text>
+  <text x="400" y="240" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">OS의 핵심</text>
+  <line x1="140" y1="252" x2="660" y2="252" stroke="#fed7aa" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="400" y="266" text-anchor="middle" font-size="9" font-style="italic" fill="#94a3b8">관리하는 것</text>
+  <g transform="translate(210, 273)">
+    <rect x="0" y="0" width="40" height="28" rx="3" fill="#fff7ed" stroke="#ff7849" stroke-width="1.4"/>
+    <line x1="8" y1="8" x2="32" y2="8" stroke="#7b341e" stroke-width="1.4"/>
+    <line x1="8" y1="14" x2="32" y2="14" stroke="#7b341e" stroke-width="1.4"/>
+    <line x1="8" y1="20" x2="32" y2="20" stroke="#7b341e" stroke-width="1.4"/>
+    <circle cx="5" cy="8" r="1.4" fill="#7b341e"/>
+    <circle cx="5" cy="14" r="1.4" fill="#7b341e"/>
+    <circle cx="5" cy="20" r="1.4" fill="#7b341e"/>
+  </g>
+  <text x="230" y="316" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">프로세스</text>
+  <g transform="translate(380, 273)">
+    <path d="M 0 8 L 0 28 L 40 28 L 40 4 L 16 4 L 12 8 Z" fill="#fff7ed" stroke="#ff7849" stroke-width="1.4"/>
+    <line x1="0" y1="10" x2="40" y2="10" stroke="#ff7849" stroke-width="0.8"/>
+  </g>
+  <text x="400" y="316" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">파일시스템</text>
+  <g transform="translate(550, 273)">
+    <rect x="0" y="0" width="40" height="28" rx="3" fill="#fff7ed" stroke="#ff7849" stroke-width="1.4"/>
+    <circle cx="10" cy="9" r="3" fill="#7b341e"/>
+    <circle cx="30" cy="9" r="3" fill="#7b341e"/>
+    <circle cx="20" cy="21" r="3" fill="#7b341e"/>
+    <line x1="10" y1="9" x2="30" y2="9" stroke="#7b341e" stroke-width="1.2"/>
+    <line x1="10" y1="9" x2="20" y2="21" stroke="#7b341e" stroke-width="1.2"/>
+    <line x1="30" y1="9" x2="20" y2="21" stroke="#7b341e" stroke-width="1.2"/>
+  </g>
+  <text x="570" y="316" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">네트워크</text>
+  <line x1="224" y1="332" x2="224" y2="358" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="236" y1="358" x2="236" y2="332" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="394" y1="332" x2="394" y2="358" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="406" y1="358" x2="406" y2="332" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="564" y1="332" x2="564" y2="358" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <line x1="576" y1="358" x2="576" y2="332" stroke="#475569" stroke-width="1.4" marker-end="url(#kn-d)"/>
+  <g transform="translate(210, 358)">
+    <rect x="0" y="0" width="40" height="32" rx="2" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <rect x="6" y="6" width="28" height="20" fill="#e2e8f0" stroke="#475569" stroke-width="0.8"/>
+    <line x1="0" y1="10" x2="-4" y2="10" stroke="#475569" stroke-width="1.4"/>
+    <line x1="0" y1="20" x2="-4" y2="20" stroke="#475569" stroke-width="1.4"/>
+    <line x1="40" y1="10" x2="44" y2="10" stroke="#475569" stroke-width="1.4"/>
+    <line x1="40" y1="20" x2="44" y2="20" stroke="#475569" stroke-width="1.4"/>
+  </g>
+  <text x="230" y="406" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">CPU</text>
+  <g transform="translate(380, 358)">
+    <rect x="0" y="0" width="40" height="32" rx="2" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <rect x="4" y="6" width="6" height="16" fill="#cbd5e1"/>
+    <rect x="13" y="6" width="6" height="16" fill="#cbd5e1"/>
+    <rect x="22" y="6" width="6" height="16" fill="#cbd5e1"/>
+    <rect x="31" y="6" width="6" height="16" fill="#cbd5e1"/>
+    <line x1="0" y1="28" x2="40" y2="28" stroke="#475569" stroke-width="0.6"/>
+  </g>
+  <text x="400" y="406" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">메모리</text>
+  <g transform="translate(550, 358)">
+    <ellipse cx="20" cy="6" rx="18" ry="4" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+    <path d="M 2 6 L 2 26 Q 20 30 38 26 L 38 6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+    <ellipse cx="20" cy="14" rx="18" ry="3" fill="none" stroke="#475569" stroke-width="0.8"/>
+    <ellipse cx="20" cy="22" rx="18" ry="3" fill="none" stroke="#475569" stroke-width="0.8"/>
+  </g>
+  <text x="570" y="406" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">디스크</text>
+</svg>
+</div>
+<div class="caption">그림 2-5. 커널은 OS의 핵심으로, 앱과 하드웨어 사이에서 시스템 자원을 관리합니다</div>
 <p>이 구조의 핵심은 <strong>호스트 OS의 커널 하나를 모든 컨테이너가 공유</strong>한다는 점입니다. VM처럼 OS를 통째로 따로 올리지 않으니 가볍고 빠르게 뜹니다. Docker 엔진이 그 커널에 &quot;<strong>새 격리 공간을 만들어 달라</strong>&quot;고 요청하면, 실제로 프로세스를 격리하는 일은 <strong>커널</strong>이 합니다. 그래서 컨테이너마다 다른 앱과 다른 라이브러리를 가져도 충돌하지 않고, 한쪽이 런타임을 업그레이드해도 옆 컨테이너는 영향을 받지 않습니다.</p>
 <div class="prep-note">
 <p><strong>컨테이너의 격리</strong></p>
@@ -134,7 +225,7 @@
   <text x="654" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">컨테이너</text>
 </svg>
 </div>
-<div class="caption">그림 2-5. 컨테이너 실행 명령이 커널의 격리 기능을 타고 컨테이너가 되는 흐름</div>
+<div class="caption">그림 2-6. 컨테이너 실행 명령이 커널의 격리 기능을 타고 컨테이너가 되는 흐름</div>
 <ol>
 <li>사용자가 컨테이너를 실행하라는 명령을 친다.</li>
 <li><strong>Docker 엔진</strong>이 이 명령을 받고, 로컬에 있는 이미지를 읽는다(없으면 Docker Hub에서 내려받는다).</li>
@@ -196,7 +287,7 @@
   <text x="478" y="222" font-size="13" font-weight="700" fill="#7b341e">컨테이너 3</text>
 </svg>
 </div>
-<div class="caption">그림 2-6. 하나의 이미지로 여러 컨테이너를 찍어내는 구조</div>
+<div class="caption">그림 2-7. 하나의 이미지로 여러 컨테이너를 찍어내는 구조</div>
 <p>이미지는 붕어빵 틀에 가깝습니다. 틀(이미지) 하나로 붕어빵(컨테이너)을 여러 개 찍어낼 수 있고, 틀 자체는 변하지 않습니다. 그래서 같은 이미지에서 나온 컨테이너는 어디서 띄우든 똑같은 환경을 가집니다. 이 덕분에 &quot;<strong>내 PC와 서버 환경이 같다</strong>&quot;가 가능합니다. 로컬에서 만든 이미지를 서버에서 그대로 꺼내 실행하면 서버의 런타임 버전이 무엇이든 컨테이너는 자기 이미지 안의 런타임으로 돕니다.</p>
 <div class="term-box">
 <p><strong>이미지(Image)</strong>: 컨테이너를 만드는 데 필요한 파일시스템과 실행 정보가 한 덩어리로 묶인 읽기 전용 패키지입니다. 애플리케이션 코드, 라이브러리, 설정, 실행 명령이 함께 들어 있어 어디서 띄우든 동일한 환경이 만들어집니다.</p>
@@ -239,7 +330,7 @@
   <text x="526" y="124" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">저장</text>
 </svg>
 </div>
-<div class="caption">그림 2-7. Docker의 전체 흐름</div>
+<div class="caption">그림 2-8. Docker의 전체 흐름</div>
 <p>Docker Hub를 활용하면 내 PC에서 세팅한 환경을 서버에서 재현하는 일도, 팀원끼리 환경을 공유하는 일도 가능합니다.</p>
 <div class="tip">
 <p><strong>이미지 레이어</strong></p>
@@ -282,7 +373,7 @@
     <div><span class="tl-key">$</span></div>
   </div>
 </div>
-<div class="caption">그림 2-8. nginx 이미지 다운로드 결과</div>
+<div class="caption">그림 2-9. nginx 이미지 다운로드 결과</div>
 <p>진행 바가 줄줄이 올라가더니 프롬프트가 돌아왔습니다. 이미지가 로컬 저장소에 내려와 있을 뿐, 아직 실행된 건 아닙니다.</p>
 <h3>2.4.2 docker run: 컨테이너 띄우기</h3>
 <p>이어서 다운받은 이미지로 컨테이너를 띄워 봤습니다.</p>
@@ -307,7 +398,7 @@
     <div>2026/03/17 10:38:22 [notice] 1#1: using the "epoll" event method</div>
   </div>
 </div>
-<div class="caption">그림 2-9. nginx 컨테이너 실행</div>
+<div class="caption">그림 2-10. nginx 컨테이너 실행</div>
 <p>엔터를 누르자마자 터미널이 뚝 멈췄습니다. 커서가 깜빡이지도 않고 아무 입력도 받지 않았습니다.</p>
 <p class="thought">'뭐가 잘못된 건가.'</p>
 <p>이는 컨테이너가 <strong>포그라운드</strong> 상태로 터미널을 점유하고 있기 때문입니다. 통화 중일 때는 다른 전화를 받을 수 없는 것과 같습니다.</p>
@@ -330,7 +421,7 @@
     <div>4932c46c66589dc651efd5e50a8773d6d077f8a1e005f177385f8e0cc115ad7d</div>
   </div>
 </div>
-<div class="caption">그림 2-10. 백그라운드 실행 결과</div>
+<div class="caption">그림 2-11. 백그라운드 실행 결과</div>
 <p>이번엔 컨테이너 ID가 한 줄 찍히더니 바로 커서가 돌아왔습니다. 방금 멈췄던 터미널과 대비되면서 <code>-d</code>의 역할이 분명해졌습니다.</p>
 <p class="thought">'글자 하나로 포그라운드가 백그라운드가 되네.'</p>
 <h3>2.4.4 docker ps: 실행 중인 컨테이너 확인</h3>
@@ -348,7 +439,7 @@
     <div>4932c46c6658   nginx   "/docker-entrypoint...."  1 second ago  Up Less than a second          dazzling_carso</div>
   </div>
 </div>
-<div class="caption">그림 2-11. 컨테이너 목록 조회</div>
+<div class="caption">그림 2-12. 컨테이너 목록 조회</div>
 <p>목록에 방금 띄운 nginx가 한 줄 찍혔습니다.</p>
 <h3>2.4.5 자주 쓰는 명령어</h3>
 <table>
@@ -475,7 +566,7 @@
   <line x1="660" y1="404" x2="660" y2="408" stroke="#9ca3af" stroke-width="0.6"/>
 </svg>
 </div>
-<div class="caption">그림 2-12. 주방 모니터·전용 통신 케이블·주문 전광판이 컨테이너 네트워크의 비유</div>
+<div class="caption">그림 2-13. 주방 모니터·전용 통신 케이블·주문 전광판이 컨테이너 네트워크의 비유</div>
 <p>이 비유를 IT로 옮기면 세 가지가 짝지어집니다.</p>
 <table>
 <thead>
@@ -539,7 +630,7 @@
   <text x="510" y="200" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">veth pair</text>
 </svg>
 </div>
-<div class="caption">그림 2-13. 컨테이너 네트워크 격리 구조</div>
+<div class="caption">그림 2-14. 컨테이너 네트워크 격리 구조</div>
 <p class="thought">'각자 주방을 따로 쓰면서 케이블 하나로 전광판 본체에 모이는 거네. 격리와 연결이 한 구조 안에 같이 들어 있구나.'</p>
 <p>다음으로 알아본 건 외부 손님이 식당에 어떻게 주문을 넣느냐였습니다.</p>
 <h3>2.5.3 외부에서 들어오기 - 입구 키오스크</h3>
@@ -605,7 +696,7 @@
   <line x1="660" y1="342" x2="660" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
 </svg>
 </div>
-<div class="caption">그림 2-14. 입구 키오스크가 손님의 주문을 각 식당으로 넘겨주는 비유</div>
+<div class="caption">그림 2-15. 입구 키오스크가 손님의 주문을 각 식당으로 넘겨주는 비유</div>
 <p>이 비유를 IT로 옮기면 세 가지가 짝지어집니다.</p>
 <table>
 <thead>
@@ -681,7 +772,7 @@
   <text x="680" y="190" text-anchor="middle" font-size="9" font-family="monospace" fill="#6b7280">172.17.0.2</text>
 </svg>
 </div>
-<div class="caption">그림 2-15. 호스트 포트가 컨테이너 포트로 연결되는 구조</div>
+<div class="caption">그림 2-16. 호스트 포트가 컨테이너 포트로 연결되는 구조</div>
 <p class="thought">'외부에서 들어올 땐 결국 호스트 포트로만 들어오는구나. iptables가 그 안에서 컨테이너 포트로 길을 바꿔주고, 컨테이너 IP는 외부에 노출할 필요가 없네.'</p>
 <h3>2.5.4 이름으로 찾기 - 홀의 안내 지도</h3>
 <p>컨테이너끼리 통신하려면 결국 상대 IP를 알아야 합니다. 한두 개라면 IP를 적어 두고 쓸 수 있지만, 수가 늘어나면 일일이 외우는 게 번거로워집니다.</p>
@@ -749,7 +840,7 @@
   <line x1="660" y1="342" x2="660" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
 </svg>
 </div>
-<div class="caption">그림 2-16. 안내 지도가 이름을 위치로 바꿔주는 비유</div>
+<div class="caption">그림 2-17. 안내 지도가 이름을 위치로 바꿔주는 비유</div>
 <p>이 비유를 IT로 옮기면 두 가지가 짝지어집니다.</p>
 <table>
 <thead>
@@ -802,7 +893,7 @@
   <text x="350" y="178" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.17.0.3 으로 요청</text>
 </svg>
 </div>
-<div class="caption">그림 2-17. Docker DNS가 이름을 IP로 변환 (사용자 정의 네트워크 한정)</div>
+<div class="caption">그림 2-18. Docker DNS가 이름을 IP로 변환 (사용자 정의 네트워크 한정)</div>
 <p>다만 이 자동 DNS는 <strong>사용자 정의 네트워크(User-defined Network)</strong> 안에서만 켜집니다. 지금까지 본 기본 네트워크(docker0)에서는 작동하지 않습니다. 그래서 사용자가 직접 네트워크를 만들어 컨테이너를 묶어 둬야 이름으로 통신할 수 있습니다. 이 차이는 다음 챕터에서 직접 만들어 보며 확인합니다.</p>
 <p class="thought">'naver.com처럼 컨테이너도 이름으로 부르면 되는구나. IP는 일일이 외울 필요 없겠네.'</p>
 <p>오픈이는 여기까지 컨테이너의 통신을 정리했습니다. 이번엔 컨테이너 안에 들어가 어떻게 생겼는지 직접 보기로 했습니다.</p>
@@ -821,7 +912,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
     <div>root@c0b6dd5261d8:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-18. Ubuntu 컨테이너 안으로 들어간 상태</div>
+<div class="caption">그림 2-19. Ubuntu 컨테이너 안으로 들어간 상태</div>
 <p>프롬프트가 <code>root@...#</code> 모양으로 바뀌었습니다. 방금까지는 호스트의 터미널이었는데, 이제는 컨테이너 안의 쉘입니다. 호스트와는 분리된 공간에 들어와 있다는 감각이 손끝에 옵니다.</p>
 <h3>2.6.1 자주 쓰는 리눅스 명령어</h3>
 <p>오픈이가 정리한 자주 쓰는 리눅스 명령어는 다음과 같습니다.</p>
@@ -890,8 +981,8 @@ nginx<span class="w">                </span><span class="c1"># nginx 실행</spa
     <div><span class="tl-key">root@c0b6dd5261d8:/#</span> <span class="tl-str">nginx</span></div>
   </div>
 </div>
-<div class="caption">그림 2-19. nginx 설치와 실행 결과</div>
-<p>설치 로그가 마무리되며 Nginx 설치가 끝났습니다. 설정이 제대로 반영됐는지 확인하기 위해 현재 활성화된 포트를 점검해 보기로 했습니다. <code>net-tools</code> 패키지를 추가로 설치한 뒤, 명령어를 입력해 Nginx가 네트워크상에서 정상적으로 대기 중인지 확인했습니다.</p>
+<div class="caption">그림 2-20. nginx 설치와 실행 결과</div>
+<p>설치 로그가 마무리되며 nginx 설치가 끝났습니다. 설정이 제대로 반영됐는지 확인하기 위해 현재 활성화된 포트를 점검해 보기로 했습니다. <code>net-tools</code> 패키지를 추가로 설치한 뒤, 명령어를 입력해 nginx가 네트워크상에서 정상적으로 대기 중인지 확인했습니다.</p>
 <div class="code-block highlight" data-lang="bash">apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>net-tools<span class="w">   </span><span class="c1"># net-tools: 네트워크 확인 도구 모음</span>
 netstat<span class="w"> </span>-nlpt<span class="w">              </span><span class="c1"># 열려 있는 TCP 포트 확인</span></div>
 <div class="terminal-log">
@@ -916,9 +1007,9 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
     <div>tcp6    0      0      :::80              :::*                LISTEN   348/nginx: master p</div>
   </div>
 </div>
-<div class="caption">그림 2-20. 포트 상태 확인</div>
+<div class="caption">그림 2-21. 포트 상태 확인</div>
 <p>80 포트가 열려 있는 것을 확인했습니다. 다음은 브라우저로 접속할 차례입니다. 주소창에 <code>localhost:80</code>을 쳤습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-48.png" alt="" /><div class="caption">그림 2-21. nginx 환영 페이지 응답</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-48.png" alt="" /><div class="caption">그림 2-22. nginx 환영 페이지 응답</div></div>
 <p>익숙한 nginx 환영 페이지가 떴습니다. 컨테이너를 띄울 때 <code>-p 80:80</code>으로 포트를 열어 둔 덕에, 컨테이너 안의 nginx와 브라우저가 연결된 것입니다.</p>
 <h3>2.6.3 vim으로 파일 편집</h3>
 <p>서버 설치를 마쳤더라도 운영하다 보면 설정 파일을 수정해야 할 일이 생기기 마련입니다. 리눅스에서 파일을 편집하려면 전용 편집기가 필요한데, <strong>Vim</strong>을 선택해 설치했습니다.</p>
@@ -977,7 +1068,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
     <div>:wq</div>
   </div>
 </div>
-<div class="caption">그림 2-22. vim 편집 화면</div>
+<div class="caption">그림 2-23. vim 편집 화면</div>
 <p>저장이 잘 됐는지 <code>cat</code>으로 내용을 확인했습니다.</p>
 <div class="code-block highlight" data-lang="bash">cat<span class="w"> </span>test1.txt<span class="w">   </span><span class="c1"># 파일 내용 출력</span></div>
 <div class="terminal-log">
@@ -991,7 +1082,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
     <div>hello docker</div>
   </div>
 </div>
-<div class="caption">그림 2-23. 파일 내용 출력</div>
+<div class="caption">그림 2-24. 파일 내용 출력</div>
 <p>방금 쓴 문장이 그대로 찍혀 나왔습니다.</p>
 <p>빈 파일은 만들고 봤으니, 이번엔 컨테이너에 깔려 있는 nginx 기본 페이지를 <code>find</code>로 찾아봤습니다.</p>
 <div class="code-block highlight" data-lang="bash">find<span class="w"> </span>/<span class="w"> </span>-name<span class="w"> </span>index.html<span class="w">   </span><span class="c1"># index.html 파일 위치 검색</span></div>
@@ -1006,7 +1097,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
     <div>/usr/share/nginx/html/index.html</div>
   </div>
 </div>
-<div class="caption">그림 2-24. 파일 검색 결과</div>
+<div class="caption">그림 2-25. 파일 검색 결과</div>
 <p>컨테이너에서 빠져나올 때는 <code>exit</code>입니다. 그런데 <code>exit</code>를 치고 <code>docker ps</code>를 쳐 보니, 방금까지 돌던 ubuntu 컨테이너가 목록에서 사라져 있었습니다.</p>
 <p class="thought">'어? 안에서 나왔을 뿐인데 왜 꺼지지.'</p>
 <p>내부 구조는 익혔지만 <strong>언제 살아 있고 언제 죽는지</strong>는 아직 감이 없다는 뜻이었습니다. 컨테이너가 뜻밖에 꺼지면 곤란하니, 이 규칙부터 정리해 보기로 했습니다.</p>
@@ -1029,7 +1120,7 @@ docker<span class="w"> </span>ps<span class="w">                            </sp
     <div>CONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES</div>
   </div>
 </div>
-<div class="caption">그림 2-25. exit로 빠져나오면 컨테이너가 종료</div>
+<div class="caption">그림 2-26. exit로 빠져나오면 컨테이너가 종료</div>
 <p>예상대로 dead는 목록에 없었습니다.</p>
 <p><code>exit</code> 말고 다른 방식이 있는지 찾아봤습니다. <code>CTRL+P → CTRL+Q</code>를 쓰면 컨테이너는 그대로 두고 쉘만 빠져나올 수 있습니다. 같은 방식으로 한 번 더 띄우고 이 조합으로 빠져나왔습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--name<span class="w"> </span>alive<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># CTRL+P → CTRL+Q로 나옴</span>
@@ -1047,7 +1138,7 @@ docker<span class="w"> </span>ps<span class="w">                            </sp
     <div>17943f60b5cd   ubuntu   "/bin/bash"   Less than a second ago   Up Less than a second          alive</div>
   </div>
 </div>
-<div class="caption">그림 2-26. CTRL+P → CTRL+Q로는 컨테이너가 유지</div>
+<div class="caption">그림 2-27. CTRL+P → CTRL+Q로는 컨테이너가 유지</div>
 <p>이번에는 alive가 살아 있었습니다. 같은 <code>docker run</code>인데 나오는 방식에 따라 결과가 갈렸습니다.</p>
 <table>
 <thead>
@@ -1088,7 +1179,7 @@ docker<span class="w"> </span>ps<span class="w">              </span><span class
     <div>CONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES</div>
   </div>
 </div>
-<div class="caption">그림 2-27. ubuntu는 -d만으로는 바로 종료</div>
+<div class="caption">그림 2-28. ubuntu는 -d만으로는 바로 종료</div>
 <p class="thought">'어 왜 실행 목록에 없지?'</p>
 <p>실행 중인 프로세스 목록에 ubuntu가 없었습니다. 컨테이너가 실행되자마자 바로 종료됐기 때문입니다. 반면 이전에 실습했던 nginx는 똑같은 -d 옵션으로도 잘 돌아갔습니다.</p>
 <p>원인을 찾다 <strong>메인 프로세스</strong>의 개념을 알게 되었습니다. 도커 컨테이너는 시작과 동시에 실행되는 메인 프로세스가 종료되면 컨테이너도 함께 종료됩니다. 이 관점에서 두 이미지를 비교해 보니 차이가 분명했습니다.</p>
@@ -1121,7 +1212,7 @@ docker<span class="w"> </span>ps<span class="w">                         </span>
     <div>46ef77d616b4   nginx    "/docker-entrypoint...."  5 seconds ago            Up 4 seconds            80/tcp   vil</div>
   </div>
 </div>
-<div class="caption">그림 2-28. CMD를 sleep으로 바꾸면 유지</div>
+<div class="caption">그림 2-29. CMD를 sleep으로 바꾸면 유지</div>
 <p>이번엔 ubuntu가 목록에 남아 있었습니다. sleep은 터미널이 없어도 1000초 동안 할 일이 있는 프로세스이기 때문입니다. 이렇게 기본 실행 명령을 덮어쓰는 것이 <strong>CMD</strong>입니다.</p>
 <div class="term-box">
 <p><strong>CMD</strong>: 컨테이너가 시작될 때 실행되는 <strong>기본 프로세스</strong>를 정의하는 설정입니다. <code>docker run &lt;이미지&gt; &lt;CMD옵션&gt;</code> 형태로 직접 주면 이미지의 메인 프로세스 대신 CMD에 넣은 설정으로 덮어씁니다.</p>
@@ -1150,7 +1241,7 @@ docker<span class="w"> </span>ps<span class="w">                         </span>
   <text x="520" y="216" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c">주의: 메인 프로세스 종료 시 컨테이너도 종료</text>
 </svg>
 </div>
-<div class="caption">그림 2-29. attach는 이미 떠 있는 PID 1 프로세스에 터미널을 직접 꽂는 방식</div>
+<div class="caption">그림 2-30. attach는 이미 떠 있는 PID 1 프로세스에 터미널을 직접 꽂는 방식</div>
 <p>컨테이너의 메인 프로세스는 PID 1로 식별됩니다.</p>
 <p>먼저 ubuntu를 백그라운드로 띄우고, 그 컨테이너에 <code>docker attach</code>로 접속했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>ubuntu<span class="w">  </span><span class="c1"># ubuntu 백그라운드 실행</span>
@@ -1172,7 +1263,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
     <div>root@d2b18acc2cf0:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-30. attach로 접근</div>
+<div class="caption">그림 2-31. attach로 접근</div>
 <p>ubuntu의 입력 터미널이 나타났습니다. <code>attach</code>는 <strong>메인 프로세스</strong>에 직접 연결되므로, 여러 터미널에서 붙어도 모두 같은 화면을 공유합니다. 다만 이 상태에서 잘못 빠져나와 메인 프로세스를 종료하면 컨테이너 전체가 꺼집니다. 그래서 <code>CTRL+P → CTRL+Q</code>로 안전하게 빠져나왔습니다.</p>
 <p>이번에는 같은 컨테이너에 <code>exec</code>로 다시 들어가 봤습니다.</p>
 <div class="svg-figure">
@@ -1200,7 +1291,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
   <text x="460" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">새 프로세스에서 exit해도 메인은 그대로</text>
 </svg>
 </div>
-<div class="caption">그림 2-31. exec는 컨테이너 안에 새 bash 프로세스를 띄우고 내 터미널에 연결하는 방식</div>
+<div class="caption">그림 2-32. exec는 컨테이너 안에 새 bash 프로세스를 띄우고 내 터미널에 연결하는 방식</div>
 <p>그림처럼 <code>exec</code>는 메인 프로세스에 직접 연결하는 대신, 컨테이너 안에 <strong>별도의 bash 프로세스를 새로 하나 띄우고</strong> 거기에 내 터미널을 연결합니다. 메인 프로세스와 분리되어 있어 이쪽에서 <code>exit</code>로 나와도 메인 프로세스는 종료되지 않습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>d2b1<span class="w"> </span>bash<span class="w">   </span><span class="c1"># 실행 중인 컨테이너에 새 bash 접속</span></div>
 <div class="terminal-log">
@@ -1214,7 +1305,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
     <div>root@d2b18acc2cf0:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-32. exec로 접근</div>
+<div class="caption">그림 2-33. exec로 접근</div>
 <p><code>exec</code>가 정말 새 프로세스를 만드는지 눈으로 확인하고 싶어서, 호스트에서 터미널을 하나 더 열고 컨테이너 내부의 프로세스 목록을 찍어 봤습니다.</p>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -1226,7 +1317,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
     <div><span class="tl-key">$</span> C:\Users\82105&gt;</div>
   </div>
 </div>
-<div class="caption">그림 2-33. 호스트에서 새 터미널 창 실행</div>
+<div class="caption">그림 2-34. 호스트에서 새 터미널 창 실행</div>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>d2b1<span class="w"> </span>ps<span class="w"> </span>aux<span class="w">   </span><span class="c1"># 컨테이너 내부 프로세스 목록 확인</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -1242,7 +1333,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
     <div>root  21   63.6  0.0   7888  4096  ?      Rs    03:34  0:00  ps aux</div>
   </div>
 </div>
-<div class="caption">그림 2-34. 프로세스 목록 확인</div>
+<div class="caption">그림 2-35. 프로세스 목록 확인</div>
 <p><strong>PID 1</strong>이 컨테이너의 메인 프로세스이고, <strong>PID 12</strong>가 방금 <code>exec</code>로 만들어진 프로세스입니다. 두 프로세스는 같은 컨테이너 안에서 환경을 공유하지만 터미널 세션은 서로 독립입니다. 그래서 <code>exec</code>에서 선언한 임시 변수가 메인 프로세스 세션에서는 보이지 않고, 반대도 마찬가지입니다.</p>
 <table>
 <thead>
@@ -1276,7 +1367,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 <p>자기만의 이미지를 만들기 위해 Tomcat 이미지를 받아 컨테이너를 실행했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>tomcat<span class="w">   </span><span class="c1"># 8080 포트로 Tomcat 백그라운드 실행</span></div>
 <p>실행 후 브라우저에서 <strong>localhost:8080</strong> 으로 접속했더니 <strong>404</strong>가 떴습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-58.png" alt="" /><div class="caption">그림 2-35. Tomcat 404 에러 화면</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-58.png" alt="" /><div class="caption">그림 2-36. Tomcat 404 에러 화면</div></div>
 <p class="thought">'연결은 된 거 같은데 왜 404 에러가 뜨지?'</p>
 <p>이유는 Docker Hub에서 내려받은 Tomcat 이미지의 <code>webapps/</code> 폴더가 비어 있어, 기본 응답 페이지인 <code>webapps/ROOT/index.html</code>이 없기 때문입니다.</p>
 <p>오픈이는 이 경로에 index.html을 직접 만들어 보기로 했습니다.</p>
@@ -1286,7 +1377,7 @@ mkdir<span class="w"> </span>ROOT<span class="w"> </span><span class="o">&amp;&a
 apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">       </span><span class="c1"># 패키지 목록 갱신 후 vim 편집기 설치</span>
 vim<span class="w"> </span>index.html<span class="w">                         </span><span class="c1"># index.html 파일을 만들고 간단한 HTML 작성 후 저장</span></div>
 <p>vim 패키지로 index.html 생성 및 저장을 마치고 <strong>localhost:8080</strong> 으로 다시 접속했더니 방금 만든 페이지가 응답되었습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-65.png" alt="" /><div class="caption">그림 2-36. index.html 응답 확인</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-65.png" alt="" /><div class="caption">그림 2-37. index.html 응답 확인</div></div>
 <p>이제 <code>docker commit &lt;컨테이너ID&gt; &lt;본인-dockerhub-id&gt;/&lt;이미지이름&gt;</code> 형식으로 명령어를 입력해 현재 상태를 기록합니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>commit<span class="w"> </span>5fcd<span class="w"> </span>coderyu5523/tomcat<span class="w">   </span><span class="c1"># 현재 컨테이너 상태를 새 이미지로 저장</span></div>
 <div class="terminal-log">
@@ -1300,7 +1391,7 @@ vim<span class="w"> </span>index.html<span class="w">                         </
     <div>sha256:0f8181585ca9e7f2b68c623f0ce6d64f5fddfeb19076c7c0e82e55ca4629cfbb</div>
   </div>
 </div>
-<div class="caption">그림 2-37. 이미지 커밋 완료 화면</div>
+<div class="caption">그림 2-38. 이미지 커밋 완료 화면</div>
 <p>저장된 이미지가 목록에 잘 들어갔는지 확인했습니다.</p>
 <div class="code-block highlight" data-lang="bash">docker<span class="w"> </span>images<span class="w">   </span><span class="c1"># 로컬에 저장된 이미지 목록 확인</span></div>
 <div class="terminal-log">
@@ -1316,7 +1407,7 @@ vim<span class="w"> </span>index.html<span class="w">                         </
     <div>tomcat                latest  f1e6c9d4a7b8   2 weeks ago     489MB</div>
   </div>
 </div>
-<div class="caption">그림 2-38. 로컬 이미지 목록에 새 이미지 추가 확인</div>
+<div class="caption">그림 2-39. 로컬 이미지 목록에 새 이미지 추가 확인</div>
 <p>내가 만든 이미지를 목록에서 확인할 수 있습니다.</p>
 <div class="term-box">
 <p><strong>레포지토리(Repository)와 태그(Tag)</strong>: <code>docker images</code> 결과의 <code>REPOSITORY</code> 칸은 이미지 이름(<code>coderyu5523/tomcat</code> 같은 사용자명/이미지명 형식), <code>TAG</code> 칸은 같은 이미지의 버전 라벨입니다. 태그를 명시하지 않으면 자동으로 <code>latest</code>가 붙습니다. 같은 레포지토리에 여러 태그를 두어 버전을 구분할 수 있습니다(예: <code>myapp:v1</code>, <code>myapp:v2</code>).</p>
@@ -1345,9 +1436,9 @@ docker<span class="w"> </span>push<span class="w"> </span>&lt;본인-dockerhub-i
     <div>cc1e0a391268: Waiting</div>
   </div>
 </div>
-<div class="caption">그림 2-39. docker push 실행 결과</div>
+<div class="caption">그림 2-40. docker push 실행 결과</div>
 <p>업로드가 완료된 뒤 Docker Hub의 Repositories 탭을 열어 보니 방금 올린 이미지를 확인할 수 있습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-70.png" alt="" /><div class="caption">그림 2-40. Docker Hub 저장소 확인</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-70.png" alt="" /><div class="caption">그림 2-41. Docker Hub 저장소 확인</div></div>
 <h2>2.9 마운트로 데이터 보존</h2>
 <p>한숨 돌리고 계속 공부하던 오픈이는 한 가지를 발견했습니다. 방금 commit으로 만든 이미지에 담기는 건 컨테이너의 초기 상태뿐이라는 점입니다.</p>
 <p>컨테이너가 실행된 뒤 새로 쌓이는 데이터는 이미지에 저장되지 않습니다. 그래서 컨테이너가 삭제되는 순간 함께 사라져 버립니다. 데이터베이스처럼 실시간으로 데이터를 쌓는 컨테이너가 삭제되면, 그동안 저장한 데이터도 통째로 날아갑니다.</p>
@@ -1389,7 +1480,7 @@ docker<span class="w"> </span>push<span class="w"> </span>&lt;본인-dockerhub-i
   <text x="380" y="172" text-anchor="middle" font-size="10" font-style="italic" fill="#b91c1c">직접 연결</text>
 </svg>
 </div>
-<div class="caption">그림 2-41. 호스트 폴더와 컨테이너 경로가 같은 데이터를 바라보도록 묶인 상태</div>
+<div class="caption">그림 2-42. 호스트 폴더와 컨테이너 경로가 같은 데이터를 바라보도록 묶인 상태</div>
 <p>오픈이는 호스트의 <code>/c/app/bind</code> 경로에 폴더를 하나 만들고, 컨테이너 안의 경로와 직접 연결했습니다.</p>
 <div class="code-block highlight" data-lang="bash"><span class="c1"># 호스트 PC에 공유할 폴더 생성</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/c/app/bind
@@ -1422,7 +1513,7 @@ ls<span class="w"> </span>/c/app/bind<span class="w">          </span><span clas
     <div>a.txt</div>
   </div>
 </div>
-<div class="caption">그림 2-42. 호스트 PC에서 같은 파일이 보이는 것을 확인</div>
+<div class="caption">그림 2-43. 호스트 PC에서 같은 파일이 보이는 것을 확인</div>
 <p>같은 파일이 양쪽에 있었습니다. 호스트에서 소스 코드를 고치면 컨테이너에 바로 반영되는 구조라, 개발할 때 쓰기 딱 맞는 방식입니다.</p>
 <h3>2.9.2 볼륨 마운트: Docker가 관리하는 저장소</h3>
 <p>바인드 마운트를 써 보니 신경 쓰이는 점이 하나 있었습니다. 호스트의 어느 폴더를 쓸지, 경로를 어떻게 정리해 둘지 사용자가 직접 관리해야 한다는 점입니다. 이 일을 Docker에 맡길 수는 없을까.</p>
@@ -1453,7 +1544,7 @@ ls<span class="w"> </span>/c/app/bind<span class="w">          </span><span clas
   <text x="380" y="172" text-anchor="middle" font-size="10" font-style="italic" fill="#b91c1c">Docker 관리</text>
 </svg>
 </div>
-<div class="caption">그림 2-43. Docker 엔진이 관리하는 내부 저장 공간에 데이터가 저장되는 구조</div>
+<div class="caption">그림 2-44. Docker 엔진이 관리하는 내부 저장 공간에 데이터가 저장되는 구조</div>
 <p>볼륨 마운트가 그 역할을 합니다. Docker 엔진이 자기 안에 별도 저장 공간을 두고, 사용자는 볼륨에 이름만 붙여 컨테이너와 연결합니다. 그래서 실제 저장 위치는 Docker가 맡아서 관리합니다.</p>
 <div class="term-box">
 <p><strong>볼륨 마운트(Volume Mount)</strong>: Docker 엔진이 자체적으로 관리하는 저장 공간(볼륨)을 컨테이너에 연결하는 마운트 방식입니다. 사용자는 볼륨 이름만 정하면 되고, 실제 저장 위치는 Docker가 알아서 관리합니다. 컨테이너가 사라져도 볼륨에 담긴 데이터는 그대로 남아 있어, 다른 컨테이너에서 같은 이름으로 다시 연결할 수 있습니다.</p>
@@ -1473,7 +1564,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
     <div>root@d6f096d57b3e:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-44. 볼륨 마운트로 ubuntu 실행</div>
+<div class="caption">그림 2-45. 볼륨 마운트로 ubuntu 실행</div>
 <p>컨테이너 안에 들어가자 <code>/app/volume</code> 폴더가 자동으로 만들어져 있었습니다. 오픈이는 이 폴더에 빈 파일을 하나 만들고, 컨테이너를 빠져나와 볼륨이 그대로 남아 있는지 확인했습니다.</p>
 <div class="code-block highlight" data-lang="bash">touch<span class="w"> </span>/app/volume/b.txt<span class="w">   </span><span class="c1"># 볼륨 안에 빈 파일 생성</span>
 <span class="nb">exit</span><span class="w">                      </span><span class="c1"># 컨테이너 종료</span>
@@ -1492,7 +1583,7 @@ docker<span class="w"> </span>volume<span class="w"> </span>ls<span class="w">  
     <div>local     metacoding-volume</div>
   </div>
 </div>
-<div class="caption">그림 2-45. 컨테이너가 사라져도 볼륨은 유지</div>
+<div class="caption">그림 2-46. 컨테이너가 사라져도 볼륨은 유지</div>
 <p>컨테이너는 사라졌지만 볼륨은 목록에 그대로 남아 있었습니다. 이어서 같은 볼륨을 연결해 새 컨테이너를 다시 띄웠습니다.</p>
 <div class="code-block highlight" data-lang="bash"><span class="c1"># 같은 볼륨으로 새 컨테이너 실행</span>
 docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>metacoding-volume,dst<span class="o">=</span>/app/volume<span class="w"> </span>ubuntu
@@ -1510,7 +1601,7 @@ ls<span class="w"> </span>/app/volume</div>
     <div>b.txt</div>
   </div>
 </div>
-<div class="caption">그림 2-46. 볼륨 데이터 재사용</div>
+<div class="caption">그림 2-47. 볼륨 데이터 재사용</div>
 <p>방금 전에 만들었던 <code>b.txt</code>가 새 컨테이너 안에서도 그대로 보였습니다. 컨테이너를 내려도 데이터는 사라지지 않았습니다. 처음 던졌던 걱정 한 줄이 풀렸습니다.</p>
 <h2>이것만은 기억하자</h2>
 <ul>

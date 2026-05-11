@@ -163,7 +163,7 @@ h2 { page-break-before: auto; }
   border-radius: 8px;
 }
 .chapter-image.gemini img {
-  max-width: 50%;
+  max-width: 70%;
   max-height: 8cm;
 }
 .chapter-image.diagram img {

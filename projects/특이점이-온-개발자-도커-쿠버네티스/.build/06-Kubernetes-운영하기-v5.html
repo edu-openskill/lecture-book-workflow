@@ -21,10 +21,11 @@
 <p>목요일 오후, 회의실 한쪽에서 팀장이 화이트보드 앞에 서 있었습니다. 챕터 5에서 IP가 흔들려도 끊기지 않는 진입점을 만들어 둔 며칠이 지난 참이었습니다. 보드 위에는 챕터 3에서 docker-compose로 짰던 통합 사이트의 골격이 그대로 그려져 있었습니다. 프론트엔드와 백엔드, 그리고 그 뒤의 DB 한 덩어리.</p>
 <div class="dialogue"><span class="speaker">팀장</span>: "구성 잘 잡았네요. 그럼 챕터 3에서 docker-compose로 짰던 그 통합 사이트, 이번엔 쿠버네티스 위에 올려 볼래요?"</div>
 <p>오픈이는 펜을 든 채 잠시 멈칫했습니다. Pod 하나, Service 하나는 깔끔하게 띄울 수 있습니다. 그런데 프론트엔드·백엔드·DB가 한 덩어리로 묶인 사이트를 그대로 옮기려고 하니, 어디부터 손대야 할지 막막했습니다. docker-compose로 띄울 때 짚지 않고 지나갔던 두 가지가 한꺼번에 도드라졌습니다.</p>
-<p>먼저 DB 비밀번호가 마음에 걸렸습니다. 챕터 3에서는 <code>docker-compose.yml</code>에 환경 변수로 그냥 적어 뒀습니다. 로컬에서만 돌리는 것이라 그래도 됐습니다. 운영 환경 YAML에 같은 식으로 적으면 비밀번호가 Git 저장소에 그대로 올라갑니다. DB 주소나 접속 URL처럼 환경마다 달라지는 값도 마찬가지입니다. 그렇다고 이미지에 박아 두자니 환경이 바뀔 때마다 이미지를 다시 빌드해야 합니다.</p>
+<p>먼저 DB 비밀번호가 마음에 걸렸습니다. 챕터 3에서 MySQL 컨테이너를 띄울 때 Dockerfile의 ENV에 비밀번호를 적었더니 빌드 도중 <em>민감한 정보는 ENV에 넣지 말라</em>는 경고가 떴던 게 떠올랐습니다. 그때는 학습용이라 그대로 뒀지만, 운영에서는 이대로 갈 수 없습니다. 이미지에 박아 두면 환경이 바뀔 때마다 이미지를 다시 빌드해야 하고, 그렇다고 운영 YAML에 환경 변수로 옮겨 적으면 비밀번호가 Git 저장소에 그대로 올라갑니다. DB 주소나 접속 URL처럼 환경마다 달라지는 값도 마찬가지입니다.</p>
 <p>데이터 쪽은 한 단계 더 무거운 문제였습니다. 챕터 4에서 Deployment가 죽은 Pod를 곧장 살려 주는 모습을 봤기 때문에, 같은 일이 DB Pod에서 벌어지면 어떻게 되는지가 또렷이 보였습니다. 코드는 다시 띄우면 그만입니다. 그 안에 쌓아 둔 회원 정보와 게시글은 새 Pod로 따라오지 않습니다.</p>
 <p>회의실에서 자리로 돌아온 오픈이는 펜으로 노트에 두 단어를 적어 두었습니다. <strong>설정·비밀번호</strong>, 그리고 <strong>데이터</strong>. 두 매듭이 풀려야 챕터 3의 통합 사이트를 K8s 위로 옮길 수 있겠다는 그림이 머리에 그려졌습니다.</p>
 <p class="thought">'두 매듭만 풀면 되는 거구나.'</p>
+<div class="chapter-image gemini"><img src="..\assets\CH06\gemini\01_prologue-secret-leaks-to-git.png" alt="운영 YAML에 적은 비밀번호가 Git에 그대로 올라간다" /><div class="caption">그림 6-1. 운영 YAML에 적은 비밀번호가 Git 저장소에 그대로 올라간다</div></div>
 <p>오픈이의 한숨 소리에, 옆자리 선배가 의자를 굴려 다가왔습니다.</p>
 <h2>6.1 ConfigMap·Secret - 설정과 비밀번호를 이미지 바깥으로</h2>
 <h3>6.1.1 이미지와 설정의 분리</h3>
@@ -64,7 +65,7 @@
   <text x="375" y="180" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">비밀 설정 주입</text>
 </svg>
 </div>
-<div class="caption">그림 6-1. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</div>
+<div class="caption">그림 6-2. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</div>
 <div class="term-box">
 <p><strong>ConfigMap</strong>은 환경에 따라 달라지는 일반 설정값을 키-값 쌍으로 저장하는 리소스입니다. Pod에 환경 변수나 파일로 주입하여 이미지 재빌드 없이 설정을 바꿀 수 있습니다.</p>
 <p><strong>Secret</strong>은 비밀번호·토큰·키처럼 민감한 정보를 별도로 분리해 저장하는 리소스입니다. 값은 Base64로 인코딩되어 저장되며, RBAC으로 조회 권한을 제한할 수 있습니다.</p>
@@ -127,7 +128,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
     <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
   </div>
 </div>
-<div class="caption">그림 6-2. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</div>
+<div class="caption">그림 6-3. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</div>
 <p>Pod 내부의 환경 변수를 확인하니 <code>conn_info=localhost:80</code>처럼 ConfigMap에 적어 둔 값이 그대로 들어와 있었습니다. 이미지를 건드리지 않고도 설정값만 바깥에서 주입하는 데 성공했습니다.</p>
 <h3>6.1.3 Secret</h3>
 <div class="tip">
@@ -167,7 +168,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
     <div>&nbsp;&nbsp;resourceVersion: "1387"</div>
   </div>
 </div>
-<div class="caption">그림 6-3. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</div>
+<div class="caption">그림 6-4. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</div>
 <p>저장된 결과를 보니 <code>password</code> 값이 알 수 없는 문자열로 변환되어 있습니다.</p>
 <div class="prep-note">
 <p><strong>Secret과 Base64</strong></p>
@@ -202,7 +203,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
     <div>KUBERNETES_PORT=tcp://10.96.0.1:443</div>
   </div>
 </div>
-<div class="caption">그림 6-4. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</div>
+<div class="caption">그림 6-5. 환경 변수 목록에 Secret의 값이 평문으로 들어와 있는 모습</div>
 <h3>6.1.4 환경 변수 반영을 위한 Pod 재시작</h3>
 <p>여기까지 잘 돌아간다 싶었던 차에, 오픈이는 ConfigMap이 정말 살아 있는 설정인지 한 번 흔들어 보고 싶었습니다. <code>configmap-conn.yml</code>을 열어 <code>conn_info</code>의 포트만 <code>80</code>에서 <code>90</code>으로 살짝 고쳤습니다.</p>
 <p><strong>ex13/configmap-conn.yml</strong> (포트 변경)</p>
@@ -222,24 +223,24 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   <text x="20" y="24" font-size="14" font-weight="800" fill="#7b341e">✗  apply 만 한 경우 — Pod에 반영 안 됨</text>
   <rect x="20" y="60" width="200" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="120" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">ConfigMap</text>
-  <text x="120" y="110" text-anchor="middle" font-size="12" font-family="monospace" fill="#475569">port: 90</text>
+  <text x="120" y="110" text-anchor="middle" font-size="11" font-family="monospace" fill="#475569">conn_info: localhost:90</text>
   <text x="120" y="128" text-anchor="middle" font-size="10" fill="#6b7280">(수정 후)</text>
   <line x1="220" y1="100" x2="300" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#g65a-p)"/>
   <text x="260" y="92" text-anchor="middle" font-size="11" fill="#475569" font-family="monospace">kubectl apply</text>
   <rect x="300" y="60" width="200" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <text x="400" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube API Server</text>
-  <text x="400" y="110" text-anchor="middle" font-size="11" fill="#7b341e">port: 90 저장됨</text>
+  <text x="400" y="110" text-anchor="middle" font-size="10" fill="#7b341e">conn_info: localhost:90 저장됨</text>
   <text x="400" y="128" text-anchor="middle" font-size="10" fill="#7b341e">(여기까진 OK)</text>
   <line x1="500" y1="100" x2="580" y2="100" stroke="#ff7849" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#g65a-x)"/>
   <text x="540" y="92" text-anchor="middle" font-size="13" fill="#7b341e" font-weight="800">✗ 연결 안 됨</text>
   <rect x="580" y="60" width="200" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6" stroke-dasharray="4,3"/>
   <text x="680" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">기존 Pod</text>
-  <text x="680" y="110" text-anchor="middle" font-size="12" font-family="monospace" fill="#7b341e">env: port=80</text>
+  <text x="680" y="110" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">env: conn_info=localhost:80</text>
   <text x="680" y="128" text-anchor="middle" font-size="10" fill="#7b341e">(옛 값 유지)</text>
-  <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">ConfigMap은 갱신됐지만, 이미 떠 있는 Pod의 환경 변수는 시작 시점에 박힌 값(80)을 그대로 가지고 있습니다.</text>
+  <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">ConfigMap은 갱신됐지만, 이미 떠 있는 Pod의 환경 변수는 시작 시점에 박힌 값(localhost:80)을 그대로 가지고 있습니다.</text>
 </svg>
 </div>
-<div class="caption">그림 6-5. apply 만 한 경우 - ConfigMap 변경이 기존 Pod에는 반영되지 않음</div>
+<div class="caption">그림 6-6. apply 만 한 경우 - ConfigMap 변경이 기존 Pod에는 반영되지 않음</div>
 <div class="svg-figure">
 <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="rollout restart로 새 Pod를 띄우면 ConfigMap 새 값이 반영됨">
   <defs>
@@ -249,25 +250,25 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   <text x="20" y="24" font-size="14" font-weight="800" fill="#1e40af">✓  rollout restart 까지 한 경우 — 새 Pod에 반영 OK</text>
   <rect x="20" y="60" width="200" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="120" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">ConfigMap</text>
-  <text x="120" y="110" text-anchor="middle" font-size="12" font-family="monospace" fill="#475569">port: 90</text>
+  <text x="120" y="110" text-anchor="middle" font-size="11" font-family="monospace" fill="#475569">conn_info: localhost:90</text>
   <text x="120" y="128" text-anchor="middle" font-size="10" fill="#6b7280">(수정 후)</text>
   <line x1="220" y1="100" x2="300" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#g65a-p)"/>
   <text x="260" y="92" text-anchor="middle" font-size="11" fill="#475569" font-family="monospace">kubectl apply</text>
   <rect x="300" y="60" width="200" height="80" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <text x="400" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube API Server</text>
-  <text x="400" y="110" text-anchor="middle" font-size="11" fill="#7b341e">port: 90 저장됨</text>
+  <text x="400" y="110" text-anchor="middle" font-size="10" fill="#7b341e">conn_info: localhost:90 저장됨</text>
   <text x="400" y="128" text-anchor="middle" font-size="10" fill="#7b341e">(저장 OK)</text>
   <line x1="500" y1="100" x2="580" y2="100" stroke="#1565c0" stroke-width="2" marker-end="url(#g65b-g)"/>
   <text x="540" y="92" text-anchor="middle" font-size="11" fill="#1e40af" font-weight="700">rollout restart</text>
   <text x="540" y="118" text-anchor="middle" font-size="10" fill="#1e40af">(새 Pod 생성)</text>
   <rect x="580" y="60" width="200" height="80" rx="8" fill="#dbeafe" stroke="#1565c0" stroke-width="1.8"/>
   <text x="680" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#1e40af">새 Pod</text>
-  <text x="680" y="110" text-anchor="middle" font-size="12" font-family="monospace" fill="#1e40af">env: port=90</text>
+  <text x="680" y="110" text-anchor="middle" font-size="11" font-family="monospace" fill="#1e40af">env: conn_info=localhost:90</text>
   <text x="680" y="128" text-anchor="middle" font-size="10" fill="#1e40af">(새 값 박힘)</text>
-  <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">새 Pod는 시작 시점에 갱신된 ConfigMap을 읽어 환경 변수에 새 값(90)을 박습니다.</text>
+  <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">새 Pod는 시작 시점에 갱신된 ConfigMap을 읽어 환경 변수에 새 값(localhost:90)을 박습니다.</text>
 </svg>
 </div>
-<div class="caption">그림 6-6. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</div>
+<div class="caption">그림 6-7. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</div>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">   </span><span class="c1"># Pod 재시작</span></div>
 <p><code>kubectl rollout restart</code>는 여러 Pod를 순차로 교체해 새 값을 반영하는 명령입니다. 재시작이 끝나고 다시 환경 변수를 찍어 보니 포트가 <code>90</code>으로 바뀌어 있었습니다. apply는 ConfigMap을 갱신할 뿐, 실제 Pod까지 반영되려면 재시작이 한 번 더 필요합니다.</p>
 <p>설정과 비밀번호를 이미지 바깥으로 빼는 일은 끝났습니다. 노트에 적어 둔 두 단어 중 첫 번째 매듭이 풀렸지만, 한 가지가 더 남아 있습니다. 비밀번호로 잠가 두는 DB의 데이터가 아직 그대로였습니다.</p>
@@ -339,7 +340,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   </g>
 </svg>
 </div>
-<div class="caption">그림 6-7. PV는 실제 저장 공간, PVC는 그 공간을 요청하는 신청서</div>
+<div class="caption">그림 6-8. PV는 실제 저장 공간, PVC는 그 공간을 요청하는 신청서</div>
 <ul>
 <li>**PV(PersistentVolume)**는 실제 저장 공간, 즉 <strong>창고</strong>입니다. 용량, 권한, 위치 같은 창고의 사양이 정의됩니다.</li>
 <li>**PVC(PersistentVolumeClaim)**는 창고를 쓰겠다고 작성하는 <strong>신청서</strong>입니다. &quot;<strong>1Gi짜리 읽기·쓰기 가능한 창고가 필요하다</strong>&quot;고 적어 두면, Kubernetes가 조건에 맞는 PV를 찾아 자동으로 PVC와 연결합니다.</li>
@@ -422,7 +423,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pv,pvc<span class="w">
     <div>persistentvolumeclaim/volume-pvc  Bound   volume-pv   1Gi       RWO           &lt;unset&gt;                       9s</div>
   </div>
 </div>
-<div class="caption">그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</div>
+<div class="caption">그림 6-9. PV와 PVC가 Bound 상태로 연결된 결과</div>
 <p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결된 것입니다.</p>
 <p class="thought">'창고와 신청서가 엮였구나.'</p>
 <p>확인을 위해 Pod 내부에서 파일을 하나 만든 뒤, Pod를 삭제하고 다시 띄워 보겠습니다.</p>
@@ -447,7 +448,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
     <div>root@volume-pod:/#</div>
   </div>
 </div>
-<div class="caption">그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</div>
+<div class="caption">그림 6-10. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</div>
 <p>새로 띄운 Pod 안에서 <code>ls</code>를 쳤는데 <code>c.txt</code>가 그대로 보였습니다. Pod는 통째로 한 번 사라졌다가 새로 태어났는데, 파일은 PV 안에 머물러 있었습니다. PVC가 새 Pod에도 똑같은 창고를 다시 연결해 준 결과입니다.</p>
 <p class="thought">'Pod가 새로 만들어져도 창고는 그대로구나. 이제 데이터가 사라질 걱정이 없겠다.'</p>
 <p>회의실 화이트보드에 적어 둔 두 단어, <strong>설정·비밀번호</strong>와 <strong>데이터</strong> 위에 줄이 그어졌습니다.</p>
@@ -525,7 +526,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
   <text x="835" y="284" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Redis Pod</text>
 </svg>
 </div>
-<div class="caption">그림 6-10. ex15 Kubernetes 웹사이트의 전체 구성</div>
+<div class="caption">그림 6-11. ex15 Kubernetes 웹사이트의 전체 구성</div>
 <p>오픈이는 그림을 따라가며 흐름을 머릿속에 그려 봤습니다. 브라우저의 요청이 Ingress를 통과해 Frontend Service를 거쳐 프론트엔드 Pod에 닿습니다. 사용자가 게시판이나 로그인 버튼을 누르면 프론트엔드의 Nginx가 <code>/api/...</code> 요청을 받아 클러스터 내부의 Backend Service로 넘겨줍니다. 요청을 받은 백엔드 Pod는 로직을 처리하는 과정에서 DB Service와 Redis Service를 호출하여 데이터를 읽고 씁니다.</p>
 <p>그림을 보고 있자니 한 가지가 분명해졌습니다. Pod 사이의 모든 통신이 IP가 아닌 서비스 이름으로 이루어진다는 사실이었습니다. 챕터 5에서 본 클러스터 DNS, 즉 <strong>CoreDNS</strong>가 서비스 이름을 ClusterIP로 변환해 주기 때문에, 복잡한 숫자 주소 대신 <code>db-service</code>, <code>backend-service</code> 같은 직관적인 이름만 챙기면 됩니다.</p>
 <p class="thought">'IP가 어디로 옮겨 다니든 이름만 잡고 있으면 흐름이 안 끊기는구나.'</p>
@@ -594,7 +595,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
   <text x="560" y="215" text-anchor="middle" font-size="12" font-weight="700" fill="#1e40af">Deployment</text>
 </svg>
 </div>
-<div class="caption">그림 6-11. 같은 클러스터 안에서 Namespace가 리소스를 층처럼 분리</div>
+<div class="caption">그림 6-12. 같은 클러스터 안에서 Namespace가 리소스를 층처럼 분리</div>
 <div class="term-box">
 <p><strong>Namespace</strong>는 리소스를 논리적으로 구분하는 가상 공간입니다. 별도 지정이 없으면 모든 리소스는 <strong>default</strong> 네임스페이스에 소속됩니다.</p>
 </div>
@@ -801,7 +802,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </
     <div>* The 'ingress' addon is enabled</div>
   </div>
 </div>
-<div class="caption">그림 6-12. Nginx Ingress Controller 애드온 설치</div>
+<div class="caption">그림 6-13. Nginx Ingress Controller 애드온 설치</div>
 <p>Minikube는 독립적인 가상 환경에서 작동하는 클러스터라, 로컬 호스트에서 빌드한 이미지를 곧장 인식하지 못합니다. 그래서 별도의 레지스트리를 두지 않고 <code>minikube image build</code> 명령으로 Minikube 자체에 이미지를 직접 만들어 두기로 했습니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/db:1<span class="w"> </span>ex15/db<span class="w">              </span><span class="c1"># DB 이미지 빌드</span>
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/backend:1<span class="w"> </span>ex15/backend<span class="w">    </span><span class="c1"># 백엔드 이미지 빌드</span>
@@ -818,9 +819,9 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <p>로그를 들여다보니 안에서 Gradle 빌드가 한창이었습니다. 잠시 기다리자 모든 Pod가 Running 상태로 바뀌었고, 오픈이는 외부 접근을 위한 통로를 열었습니다. 챕터 5에서처럼 별도 터미널에서 <code>minikube tunnel</code>을 실행하면 Ingress 입구가 <code>localhost</code>로 이어집니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>tunnel<span class="w">                       </span><span class="c1"># 새 터미널에서 실행 (관리자 권한 요구)</span></div>
 <p>브라우저에서 <code>http://localhost</code>로 접속해 결과를 확인했습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH06\chap03-ingress-result.png" alt="" /><div class="caption">그림 6-13. Ingress를 거쳐 웹사이트가 화면에 응답</div></div>
+<div class="chapter-image"><img src="..\assets\CH06\chap03-ingress-result.png" alt="" /><div class="caption">그림 6-14. Ingress를 거쳐 웹사이트가 화면에 응답</div></div>
 <p>화면에는 데이터베이스에서 불러온 정보와 함께 방문 횟수가 떠 있었습니다. 새로고침을 할 때마다 숫자가 한 칸씩 올라갔습니다. 네 개의 서비스가 서로 이름을 부르며 제대로 맞물려 돌아가고 있다는 증거였습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH06\chap03-ingress-result2.png" alt="" /><div class="caption">그림 6-14. 새로고침 시 방문 횟수가 증가</div></div>
+<div class="chapter-image"><img src="..\assets\CH06\chap03-ingress-result2.png" alt="" /><div class="caption">그림 6-15. 새로고침 시 방문 횟수가 증가</div></div>
 <p>백엔드 두 Pod에 요청이 실제로 분산되는지는 로그로도 확인할 수 있었습니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>backend<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>--prefix<span class="w">   </span><span class="c1"># backend Pod 최근 100줄 (Pod명 표시)</span></div>
 <p>서로 다른 Pod 이름이 앞에 붙은 로그 줄이 번갈아 나타난다면 요청이 두 서버에 분산되어 들어간 것입니다.</p>

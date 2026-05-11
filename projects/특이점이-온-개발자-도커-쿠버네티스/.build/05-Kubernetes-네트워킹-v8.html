@@ -24,6 +24,7 @@
 <p>오픈이는 입을 떼려다 말았습니다. 정작 그 한마디가 막혔습니다.</p>
 <p class="thought">'어, 어디로 들어가지...'</p>
 <p><code>kubectl get pods</code>를 다시 두드렸습니다. Pod 네 대가 각자 다른 IP를 들고 줄지어 떠 있었습니다. 어제는 잘 돌아간다는 사실에만 들떠 있었는데, 막상 누군가에게 들어가는 문을 보여 주려니 손에 잡히는 주소가 한 개도 없었습니다.</p>
+<div class="chapter-image gemini"><img src="..\assets\CH05\gemini\01_prologue-no-fixed-address.png" alt="동료가 주소를 물었는데 답을 못 한 오픈이" /><div class="caption">그림 5-1. 동료가 주소를 물었는데 손에 잡히는 답이 한 줄도 없던 아침</div></div>
 <p>게다가 Pod IP는 재시작 때마다 바뀝니다. 동료에게 IP 한 줄을 적어 주는 순간, Pod가 한 번이라도 죽었다 살아나면 그 주소는 사라진 번호가 됩니다.</p>
 <p class="thought">'도커 때 Nginx 한 대를 앞에 세웠던 것처럼, 변하지 않는 문 하나가 있어야 하는데.'</p>
 <p>오픈이는 다시 공식 문서를 펼쳤습니다.</p>
@@ -65,7 +66,7 @@
   <text x="600" y="305" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">10.0.0.15</text>
 </svg>
 </div>
-<div class="caption">그림 5-1. Service는 Pod IP가 바뀌어도 변하지 않는 고정 주소를 제공</div>
+<div class="caption">그림 5-2. Service는 Pod IP가 바뀌어도 변하지 않는 고정 주소를 제공</div>
 <h3>5.1.2 Service 생성</h3>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
@@ -119,7 +120,7 @@
   <text x="722" y="208" text-anchor="end" font-size="11" font-weight="700" fill="#94a3b8">제외</text>
 </svg>
 </div>
-<div class="caption">그림 5-2. selector가 지정한 라벨(app: nginx)을 가진 Pod만 매칭하고 다른 라벨은 제외</div>
+<div class="caption">그림 5-3. selector가 지정한 라벨(app: nginx)을 가진 Pod만 매칭하고 다른 라벨은 제외</div>
 <p>라벨이 일치하는 Pod 두 대만 Service 뒤로 묶이고, 다른 라벨이 붙은 Pod는 명단에서 빠집니다. 어제 Deployment를 만들 때 <code>app: nginx</code> 라벨을 매겼던 이유가 여기서 회수됩니다. 그 라벨이 오늘은 Service의 식구 명부 역할을 합니다.</p>
 <h3>5.1.3 Service 타입과 접근 범위</h3>
 <p>YAML을 다 작성하기 전에 오픈이는 <code>type: NodePort</code> 한 줄에서 멈췄습니다.</p>
@@ -162,7 +163,7 @@
   <text x="690" y="200" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Pod B</text>
 </svg>
 </div>
-<div class="caption">그림 5-3. ClusterIP는 외부 요청은 닿지 못하고 내부 Pod끼리만 통신</div>
+<div class="caption">그림 5-4. ClusterIP는 외부 요청은 닿지 못하고 내부 Pod끼리만 통신</div>
 <h4>② NodePort</h4>
 <p>이번 실습에서 사용한 방식입니다. 노드(서버) 자체에 특정 포트를 열어 외부에서 들어올 수 있게 합니다.</p>
 <p>YAML에 <code>nodePort: 30080</code>이라고 적으면 노드의 30080번 포트가 열립니다. 그 포트로 들어온 요청이 클러스터 내부의 Service로 흘러갑니다. 옆문 비밀번호 30080을 아는 손님만 들어올 수 있는 구조입니다. 다만 서비스가 늘어날수록 비밀번호가 30080, 30081, 30082처럼 줄줄이 늘어나서, 누가 어느 문을 쓰는지 외우는 일이 만만치 않아집니다.</p>
@@ -193,7 +194,7 @@
   <text x="645" y="180" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Pod B</text>
 </svg>
 </div>
-<div class="caption">그림 5-4. NodePort는 노드의 특정 포트로 외부 접근을 허용</div>
+<div class="caption">그림 5-5. NodePort는 노드의 특정 포트로 외부 접근을 허용</div>
 <h4>③ LoadBalancer</h4>
 <p>실제 운영 환경에서 가장 흔히 쓰는 방식입니다. AWS나 GCP 같은 클라우드 위에서 돌리는 클러스터라면, 쿠버네티스가 클라우드 사업자에게 공인 IP 하나를 발급받아 Service에 붙여 줍니다. 사용자는 30080 같은 포트 번호를 따로 외울 필요가 없고, 발급된 IP나 도메인 하나로 곧장 들어옵니다.</p>
 <p>다만 사용자 눈에 보이지 않는 안쪽에서는 NodePort와 ClusterIP가 함께 만들어집니다. LoadBalancer 타입은 그 위에 공인 IP를 한 겹 더 얹은 형태로, 외부 트래픽은 공인 IP → 노드의 NodePort → kube-proxy → Pod 순으로 흘러갑니다.</p>
@@ -248,7 +249,7 @@
   <text x="640" y="266" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Pod</text>
 </svg>
 </div>
-<div class="caption">그림 5-5. LoadBalancer는 클라우드가 공인 IP를 발급해 여러 노드에 분산</div>
+<div class="caption">그림 5-6. LoadBalancer는 클라우드가 공인 IP를 발급해 여러 노드에 분산</div>
 <p>세 타입의 차이를 한 표로 정리하면 다음과 같습니다.</p>
 <table>
 <thead>
@@ -319,7 +320,7 @@
   <text x="190" y="200" text-anchor="middle" font-size="12" font-family="monospace" font-weight="700" fill="#7b341e">노드IP:30080</text>
 </svg>
 </div>
-<div class="caption">그림 5-6. 노드 안에 NodePort, Service, Pod가 자리하고 외부 사용자가 NodePort로 진입해 Service를 거쳐 Pod 안 컨테이너에 닿는 구조</div>
+<div class="caption">그림 5-7. 노드 안에 NodePort, Service, Pod가 자리하고 외부 사용자가 NodePort로 진입해 Service를 거쳐 Pod 안 컨테이너에 닿는 구조</div>
 <table>
 <thead>
 <tr>
@@ -365,7 +366,7 @@
     <div>service/nginx-service created</div>
   </div>
 </div>
-<div class="caption">그림 5-7. Service 생성 결과</div>
+<div class="caption">그림 5-8. Service 생성 결과</div>
 <p><code>nginx-service created</code>라는 한 줄이 떴습니다. 이제 동료에게 보여줄 주소가 생긴 것 같았습니다. 오픈이는 곧장 브라우저를 열고 <code>localhost:30080</code>을 입력했습니다.</p>
 <p>화면이 멈춰 있었습니다. 빈 페이지가 한참 동안 그대로였습니다.</p>
 <p class="thought">'분명 30080 포트를 열었는데 왜 안 들어가지.'</p>
@@ -406,9 +407,9 @@
     <div>! windows 에서 Docker 드라이버를 사용하고 있기 때문에, 터미널을 열어야 실행할 수 있습니다.</div>
   </div>
 </div>
-<div class="caption">그림 5-8. minikube service URL 생성 결과</div>
+<div class="caption">그림 5-9. minikube service URL 생성 결과</div>
 <p>URL이 한 줄 떴고 커서는 그대로 멈춰 있습니다. 이 명령어는 통로를 살려두기 위해 터미널을 점유한 채로 머물러 있습니다. 발급된 주소를 그대로 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 모니터에 가득 찼습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH04\chap03-44.png" alt="" /><div class="caption">그림 5-9. 브라우저에서 nginx 접속 확인</div></div>
+<div class="chapter-image"><img src="..\assets\CH04\chap03-44.png" alt="" /><div class="caption">그림 5-10. 브라우저에서 nginx 접속 확인</div></div>
 <p>이번엔 Pod 변동을 시험해 볼 차례였습니다. Pod가 죽고 IP가 바뀌어도 Service 뒤로 새 Pod가 자동 연결되는지 직접 보기로 했습니다. 오픈이는 통로를 닫고 Pod를 전부 지웠습니다. Deployment가 살아 있으니 곧 새 Pod가 자동으로 올라왔습니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>--all<span class="w">                </span><span class="c1"># 모든 Pod 삭제 (Deployment가 자동 재생성)</span>
 minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<span class="w"> </span>--url<span class="w">    </span><span class="c1"># 다시 접속 URL 확인</span></div>
@@ -429,7 +430,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
     <div>! windows 에서 Docker 드라이버를 사용하고 있기 때문에, 터미널을 열어야 실행할 수 있습니다.</div>
   </div>
 </div>
-<div class="caption">그림 5-10. Pod 삭제 후 Service 접속 확인</div>
+<div class="caption">그림 5-11. Pod 삭제 후 Service 접속 확인</div>
 <p>새 URL로 접속하니 NGINX 페이지가 그대로 떴습니다. Pod IP가 전부 바뀌었어도 Service는 새 Pod에 이미 연결되어 있었습니다.</p>
 <p class="thought">'와, 진짜네. Pod가 새로 만들어지면 IP가 바뀌었을 텐데. Service가 뒤에서 주소를 알아서 연결해주는구나.'</p>
 <h2>5.2 Ingress - 도메인 라우팅</h2>
@@ -472,7 +473,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   <text x="645" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">stores-service</text>
 </svg>
 </div>
-<div class="caption">그림 5-11. Ingress가 도메인과 경로를 읽어 요청을 적절한 Service로 연결하는 구조</div>
+<div class="caption">그림 5-12. Ingress가 도메인과 경로를 읽어 요청을 적절한 Service로 연결하는 구조</div>
 <div class="term-box">
 <p><strong>Ingress</strong>: 클러스터 외부의 HTTP/HTTPS 요청을 도메인과 URL 경로 기준으로 내부 Service에 연결하는 라우팅 규칙입니다. Service가 개별 Pod 그룹의 고정 주소를 제공한다면, Ingress는 여러 Service를 하나의 진입점으로 묶어 줍니다.</p>
 </div>
@@ -520,7 +521,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   <text x="180" y="268" text-anchor="middle" font-size="10" fill="#475569">Service 분기</text>
 </svg>
 </div>
-<div class="caption">그림 5-12. Ingress 리소스(YAML)와 Ingress Controller(Pod) — 둘 다 있어야 라우팅이 작동합니다</div>
+<div class="caption">그림 5-13. Ingress 리소스(YAML)와 Ingress Controller(Pod) — 둘 다 있어야 라우팅이 작동합니다</div>
 <p class="thought">'아, 규칙만 적어 둔다고 알아서 굴러가는 게 아니구나. 그 규칙을 읽고 실제로 실행해 주는 역할이 따로 필요한 거네.'</p>
 <p>실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다. 미니큐브는 Ingress Controller를 애드온 형태로 한 번에 띄울 수 있는 명령어를 제공합니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress<span class="w">           </span><span class="c1"># 인그레스 애드온 활성화</span></div>
@@ -542,7 +543,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
     <div>* The 'ingress' addon is enabled</div>
   </div>
 </div>
-<div class="caption">그림 5-13. minikube에서 ingress 애드온 활성화 과정</div>
+<div class="caption">그림 5-14. minikube에서 ingress 애드온 활성화 과정</div>
 <p>마지막 줄에 <code>'ingress' addon is enabled</code>가 떴습니다. 컨트롤러 Pod가 실제로 떠 있는지 한 번 더 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>ingress-nginx<span class="w">        </span><span class="c1"># 컨트롤러 Pod 확인</span></div>
 <div class="terminal-log">
@@ -559,7 +560,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
     <div>ingress-nginx-controller-9cc49f96f-qrpm7    1/1     Running     0          52m</div>
   </div>
 </div>
-<div class="caption">그림 5-14. Ingress Controller Pod가 Running 상태임을 확인</div>
+<div class="caption">그림 5-15. Ingress Controller Pod가 Running 상태임을 확인</div>
 <p><code>ingress-nginx-controller</code>가 <code>1/1 Running</code> 상태입니다. 물류 센터가 가동되어 우편을 받을 준비를 마쳤다는 뜻입니다.</p>
 <h4>① 두 서비스 준비</h4>
 <p>이제 들어온 요청을 받아 처리할 Service를 띄울 차례입니다. 주문 쪽과 매장 쪽을 각각 ClusterIP Service로 만들겠습니다. 두 Service는 같은 이미지(<code>hashicorp/http-echo</code>)를 쓰는데, <code>-text</code> 옵션으로 응답 문구만 달리 줍니다. 주문 쪽은 <code>&quot;주문 접수 완료&quot;</code>, 매장 쪽은 <code>&quot;매장 선택&quot;</code>이 돌아옵니다.</p>
@@ -644,7 +645,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
     <div>ex12-ingress   nginx   *                 80      37s</div>
   </div>
 </div>
-<div class="caption">그림 5-15. Ingress 리소스 등록 확인</div>
+<div class="caption">그림 5-16. Ingress 리소스 등록 확인</div>
 <h4>③ 브라우저로 접속</h4>
 <p>가상 세계와 원활히 통신하기 위해 별도 터미널에서 <code>minikube tunnel</code>을 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash">minikube<span class="w"> </span>tunnel<span class="w">                          </span><span class="c1"># 별도 터미널에서 실행</span></div>
@@ -661,23 +662,23 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
     <div>* Starting tunnel for service ex12-ingress.</div>
   </div>
 </div>
-<div class="caption">그림 5-16. minikube tunnel 실행 화면</div>
+<div class="caption">그림 5-17. minikube tunnel 실행 화면</div>
 <p>이 명령은 Ingress의 80·443 포트를 호스트로 노출해 브라우저에서 <code>localhost</code>로 바로 접속할 수 있게 해 줍니다. 이제 경로별로 직접 접속해 보겠습니다.</p>
 <ul>
 <li><code>http://localhost/order</code> → &quot;주문 접수 완료&quot;</li>
 <li><code>http://localhost/stores</code> → &quot;매장 선택&quot;</li>
 </ul>
 <!-- [CAPTURE NEEDED: 브라우저에서 http://localhost/order 접속 시 "주문 접수 완료" 응답 확인 화면. 자산 경로: assets/CH05/mock-order-page.png] -->
-<div class="chapter-image"><img src="..\assets\CH05\mock-order-page.png" alt="" /><div class="caption">그림 5-17. /order 접속 결과 - &quot;주문 접수 완료&quot;</div></div>
+<div class="chapter-image"><img src="..\assets\CH05\mock-order-page.png" alt="" /><div class="caption">그림 5-18. /order 접속 결과 - &quot;주문 접수 완료&quot;</div></div>
 <!-- [CAPTURE NEEDED: 브라우저에서 http://localhost/stores 접속 시 "매장 선택" 응답 확인 화면. 자산 경로: assets/CH05/mock-stores-page.png] -->
-<div class="chapter-image"><img src="..\assets\CH05\mock-stores-page.png" alt="" /><div class="caption">그림 5-18. /stores 접속 결과 - &quot;매장 선택&quot;</div></div>
+<div class="chapter-image"><img src="..\assets\CH05\mock-stores-page.png" alt="" /><div class="caption">그림 5-19. /stores 접속 결과 - &quot;매장 선택&quot;</div></div>
 <p>같은 도메인인데 뒤에 붙는 경로 한 글자에 따라 응답이 갈라집니다. <code>localhost</code> 한 곳으로만 들어오는데도 누른 경로에 따라 주문 Service와 매장 Service로 정확히 갈라집니다. Ingress가 URL 경로를 읽고 알맞은 Service로 트래픽을 분기해 준 결과입니다.</p>
 <p>동료가 등 뒤로 와서 화면을 들여다봤습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "이번엔 주소 하나만 알려 주면 되는 거예요?"</div>
 <p>오픈이는 <code>localhost/order</code>와 <code>localhost/stores</code>를 차례로 적어 줬습니다. 이번에는 포트 번호도 없고, 따로 외울 IP도 없었습니다.</p>
 <h3>5.2.4 Service와 Ingress가 보는 정보가 다른 이유</h3>
 <p>오픈이는 두 리소스가 같은 트래픽을 다루는데 보는 정보가 다르다는 점이 궁금했습니다. 우편 한 통이 떠올랐습니다.</p>
-<p>우편 위 <strong>받는 곳 주소</strong>는 사람이 눈으로 읽는 위치 정보입니다. <strong>송장</strong>은 우체국이 시스템에 등록한 뒤 출력해 붙이는 바코드 라벨입니다. 분류 라인·도착 우체국 코드 같은 시스템적 분류 정보가 구조화되어 있어 스캐너로만 읽힙니다. 두 정보는 같은 우편 위에 있지만 누가 읽는지와 들이는 손이 다릅니다.</p>
+<p>우편 봉투에 붙은 <strong>송장</strong>에는 두 가지 정보가 함께 적혀 있습니다. 위쪽의 <strong>받는 곳 주소</strong>는 사람이 눈으로 읽는 위치 정보이고, 아래쪽의 <strong>송장 바코드</strong>는 우체국이 시스템에 등록한 뒤 출력해 붙인 시스템적 분류 코드입니다. 분류 라인·도착 우체국 코드 같은 정보가 구조화되어 있어 스캐너로만 읽힙니다. 두 정보는 같은 송장 위에 있지만 누가 읽는지와 들이는 손이 다릅니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 305" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="우편 위 송장에 받는 곳 주소(눈으로 읽음)와 바코드(스캐너로 읽음)가 함께 있고, Service는 받는 곳 주소만, Ingress는 바코드까지 읽음">
   <defs>
@@ -767,8 +768,8 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <line x1="630" y1="188" x2="572" y2="220" stroke="#ff7849" stroke-width="2.4" marker-end="url(#lbl-orange)"/>
 </svg>
 </div>
-<div class="caption">그림 5-19. 우편 위 송장에 받는 곳 주소와 바코드가 함께 있고, Service는 받는 곳 주소만, Ingress는 바코드까지 읽습니다</div>
-<p>네트워크 패킷도 이 두 정보를 닮았습니다. <strong>Service</strong>는 <em>받는 곳 주소</em>에 해당하는 IP·포트만 보고 일합니다. 모든 노드 커널의 iptables 규칙으로 분류·전달합니다. <strong>Ingress</strong>는 한 단계 더 들어가, <em>송장 바코드</em>에 해당하는 도메인·URL 경로까지 읽고 어느 Service로 보낼지 결정합니다. 별도 Pod 안 HTTP 서버가 이 일을 합니다.</p>
+<div class="caption">그림 5-20. 우편 위 송장에 받는 곳 주소와 바코드가 함께 있고, Service는 받는 곳 주소만, Ingress는 바코드까지 읽습니다</div>
+<p>이 우편의 두 라벨을 그대로 네트워크 패킷에 옮겨 볼 수 있습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="실제 패킷의 두 정보 — TCP/IP 헤더(IP·포트)와 HTTP 페이로드(Host·URL). Service는 TCP/IP 헤더만, Ingress는 HTTP 페이로드까지 읽음">
   <defs>
@@ -816,7 +817,59 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <line x1="630" y1="198" x2="568" y2="194" stroke="#ff7849" stroke-width="2.4" marker-end="url(#it-orange)"/>
 </svg>
 </div>
-<div class="caption">그림 5-20. 실제 패킷에 TCP/IP 헤더와 HTTP 페이로드가 함께 들어 있고, Service는 헤더만, Ingress는 페이로드까지 읽습니다</div>
+<div class="caption">그림 5-21. 실제 패킷에 TCP/IP 헤더와 HTTP 페이로드가 함께 들어 있고, Service는 헤더만, Ingress는 페이로드까지 읽습니다</div>
+<p>패킷 안의 정보는 종류별로 층이 나뉩니다. TCP/IP 헤더의 받는 IP·포트는 <strong>전송 계층(L4)</strong> 정보이고, HTTP 페이로드의 URL·Host는 <strong>응용 계층(L7)</strong> 정보입니다. 네트워크 통신은 OSI 모델에서 일곱 계층으로 나뉘는데, 이번 챕터에서 마주치는 정보는 그중 두 종류입니다.</p>
+<p>네트워크는 책임을 계층으로 나누어 처리합니다. L4의 책임은 패킷을 어느 컴퓨터의 어느 프로세스로 보낼지까지입니다. IP가 컴퓨터를, 포트가 그 안의 프로세스를 가리키므로, L4는 받는 IP·포트 두 정보만 있으면 임무가 끝납니다. L7의 책임은 한 걸음 더 나아갑니다. 같은 IP·포트로 들어온 요청이라도 안의 메시지에 따라 갈래가 갈라져야 하기 때문입니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 IP·포트로 들어온 두 패킷이 안의 URL에 따라 다른 Service로 갈라지는 구조">
+  <defs>
+    <marker id="cs21-arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">같은 IP·포트로 들어온 두 패킷이 안의 URL로 갈라집니다</text>
+  <text x="190" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#1f2937">패킷 1</text>
+  <rect x="80" y="56" width="220" height="120" rx="4" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <rect x="88" y="64" width="204" height="46" rx="3" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="96" y="78" font-size="9" font-weight="700" fill="#475569">TCP/IP 헤더</text>
+  <text x="284" y="78" text-anchor="end" font-size="9" font-weight="700" fill="#94a3b8">L4</text>
+  <text x="96" y="93" font-size="10" font-family="monospace" fill="#0f172a">받는 IP: 10.96.0.20</text>
+  <text x="96" y="106" font-size="10" font-family="monospace" fill="#0f172a">받는 Port: 80</text>
+  <rect x="88" y="116" width="204" height="52" rx="3" fill="#fff7ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="96" y="130" font-size="9" font-weight="700" fill="#dc2626">HTTP 페이로드</text>
+  <text x="284" y="130" text-anchor="end" font-size="9" font-weight="700" fill="#dc2626">L7</text>
+  <text x="96" y="146" font-size="10" font-family="monospace" font-weight="700" fill="#0f172a">GET /order</text>
+  <text x="96" y="160" font-size="10" font-family="monospace" fill="#475569">Host: localhost</text>
+  <text x="610" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#1f2937">패킷 2</text>
+  <rect x="500" y="56" width="220" height="120" rx="4" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <rect x="508" y="64" width="204" height="46" rx="3" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="516" y="78" font-size="9" font-weight="700" fill="#475569">TCP/IP 헤더</text>
+  <text x="704" y="78" text-anchor="end" font-size="9" font-weight="700" fill="#94a3b8">L4</text>
+  <text x="516" y="93" font-size="10" font-family="monospace" fill="#0f172a">받는 IP: 10.96.0.20</text>
+  <text x="516" y="106" font-size="10" font-family="monospace" fill="#0f172a">받는 Port: 80</text>
+  <rect x="508" y="116" width="204" height="52" rx="3" fill="#fff7ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="516" y="130" font-size="9" font-weight="700" fill="#dc2626">HTTP 페이로드</text>
+  <text x="704" y="130" text-anchor="end" font-size="9" font-weight="700" fill="#dc2626">L7</text>
+  <text x="516" y="146" font-size="10" font-family="monospace" font-weight="700" fill="#0f172a">GET /stores</text>
+  <text x="516" y="160" font-size="10" font-family="monospace" fill="#475569">Host: localhost</text>
+  <rect x="320" y="84" width="160" height="26" rx="13" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="400" y="101" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">TCP/IP 헤더 동일</text>
+  <line x1="40" y1="200" x2="760" y2="200" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="6,4"/>
+  <text x="400" y="218" text-anchor="middle" font-size="10" font-style="italic" fill="#64748b">L4 시야 한계 — 여기까지만 보면 두 패킷이 똑같습니다</text>
+  <line x1="190" y1="230" x2="190" y2="266" stroke="#ff7849" stroke-width="1.8" marker-end="url(#cs21-arrow)"/>
+  <line x1="610" y1="230" x2="610" y2="266" stroke="#ff7849" stroke-width="1.8" marker-end="url(#cs21-arrow)"/>
+  <text x="155" y="252" text-anchor="end" font-size="9" font-style="italic" fill="#7b341e">L7이 페이로드 읽음</text>
+  <text x="645" y="252" font-size="9" font-style="italic" fill="#7b341e">L7이 페이로드 읽음</text>
+  <rect x="120" y="274" width="140" height="44" rx="22" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="190" y="294" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">order-service</text>
+  <text x="190" y="310" text-anchor="middle" font-size="9" fill="#7b341e">/order 패킷 도착</text>
+  <rect x="540" y="274" width="140" height="44" rx="22" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="610" y="294" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">stores-service</text>
+  <text x="610" y="310" text-anchor="middle" font-size="9" fill="#7b341e">/stores 패킷 도착</text>
+  <text x="400" y="335" text-anchor="middle" font-size="10" fill="#64748b">→ 둘을 구분하려면 안의 URL(L7)을 봐야 합니다</text>
+</svg>
+</div>
+<div class="caption">그림 5-22. 같은 IP·포트로 들어온 두 패킷이 안의 URL로 갈라집니다</div>
+<p>위 그림처럼 두 요청이 같은 IP·포트로 들어와도 안의 URL이 다르면 갈 곳이 갈라집니다. L4는 받는 IP·포트만으로 임무가 끝나므로 둘을 구분할 수 없고, L7이 페이로드를 읽어야 분기가 됩니다.</p>
+<p>이 두 책임을 누가 맡는지 보면 깔끔하게 나뉩니다. <strong>Service</strong>는 L4 책임만 맡습니다. 받는 IP·포트만 보고 모든 노드 커널의 iptables 규칙으로 분류·전달합니다. <strong>Ingress</strong>는 L7 책임까지 맡습니다. 별도 Pod 안의 HTTP 서버가 URL·Host를 파싱해 어느 Service로 보낼지 결정합니다.</p>
 <table>
 <thead>
 <tr>
@@ -830,6 +883,11 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <td style="text-align:center">보는 정보</td>
 <td style="text-align:left">받는 곳 주소 (IP·포트)</td>
 <td style="text-align:left">송장 바코드 (URL·Host)</td>
+</tr>
+<tr>
+<td style="text-align:center">맡는 책임</td>
+<td style="text-align:left">L4 (전송 계층)</td>
+<td style="text-align:left">L7 (응용 계층)</td>
 </tr>
 <tr>
 <td style="text-align:center">일하는 위치</td>
@@ -922,13 +980,13 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="945" y="348" font-size="9" font-style="italic" fill="#94a3b8">watch</text>
 </svg>
 </div>
-<div class="caption">그림 5-21. 요청이 Pod까지 닿는 전체 흐름 - 세 단계가 일어나는 위치</div>
+<div class="caption">그림 5-23. 요청이 Pod까지 닿는 전체 흐름 - 세 단계가 일어나는 위치</div>
 <div class="term-box">
 <p><strong>kube-proxy</strong>: 모든 노드(서버)에 항상 떠 있는 프로그램입니다. 들어온 요청의 받는 주소가 살아있는 Pod의 주소로 바뀌도록 iptables 규칙을 미리 깔아 두고 갱신합니다.</p>
 </div>
 <p>이 흐름을 우체국에 우편을 보내는 예시를 통해 단계별로 살펴보겠습니다.</p>
-<h3>5.3.1 1단계 진입 - 우체국 입구에서 송장을 붙인다</h3>
-<p>발신자가 우편을 들고 동네 <strong>우체국</strong> 입구로 들어갑니다. 우편 봉투에는 동네 우체국으로 가는 외부 주소가 적혀 있습니다. 안쪽 <strong>창구 직원</strong>이 그 외부 주소를 가리고 그 위에 새 <strong>송장</strong>을 붙입니다. 새 송장 바코드에는 우편이 <strong>다음으로 갈 물류 센터의 라우팅 코드</strong>가 들어 있습니다. 우편에 적힌 받는 사람·주소는 그대로 따라가며 최종 목적지를 알려 줍니다.</p>
+<h3>5.3.1 1단계 진입 - 중앙 우체국 입구에서 송장을 붙인다</h3>
+<p>발신자가 우편을 들고 <strong>중앙 우체국</strong> 입구로 들어갑니다. 우편 봉투에는 중앙 우체국으로 가는 외부 주소가 적혀 있습니다. 안쪽 <strong>창구 직원</strong>이 그 외부 주소를 가리고 그 위에 새 <strong>송장</strong>을 붙입니다. 새 송장에는 우편이 <strong>다음으로 갈 물류 센터의 라우팅 코드</strong>가 들어 있습니다. 우편에 적힌 받는 사람·주소는 그대로 따라가며 최종 목적지를 알려 줍니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 비유 — 우편의 외부 주소 위에 새 송장이 덮여 붙어 다음 단계로 흘러 나감">
   <defs>
@@ -949,16 +1007,16 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
       <line x1="100" y1="0" x2="50" y2="31" stroke="#d97706" stroke-width="1.2"/>
       <rect x="14" y="36" width="72" height="22" rx="2" fill="#fff" stroke="#475569" stroke-width="1"/>
       <text x="50" y="46" text-anchor="middle" font-size="6" fill="#475569">받는 곳</text>
-      <text x="50" y="55" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a">동네 우체국 :30080</text>
+      <text x="50" y="55" text-anchor="middle" font-size="7" font-weight="700" fill="#0f172a">중앙 우체국 :30080</text>
     </g>
   </g>
   <line x1="170" y1="148" x2="232" y2="148" stroke="#1f2937" stroke-width="1.4" marker-end="url(#m1n-a)"/>
-  <text x="200" y="139" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">우체국으로</text>
+  <text x="200" y="139" text-anchor="middle" font-size="9" font-style="italic" fill="#7b341e">중앙 우체국으로</text>
   <!-- 가운데: 우체국 건물 -->
   <g transform="translate(238, 60)">
     <rect x="0" y="20" width="320" height="180" rx="3" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
     <path d="M -3 20 L 323 20 L 323 8 L -3 8 Z" fill="#7b341e"/>
-    <text x="160" y="2" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">우체국</text>
+    <text x="160" y="2" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">중앙 우체국</text>
     <text x="160" y="42" text-anchor="middle" font-size="11" font-style="italic" font-weight="700" fill="#dc2626">외부 주소 가리고 새 송장 덮어붙임</text>
     <rect x="14" y="120" width="44" height="80" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
     <rect x="29" y="148" width="14" height="52" fill="#7b341e"/>
@@ -974,7 +1032,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
       <rect x="14" y="32" width="82" height="22" rx="2" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
       <line x1="14" y1="32" x2="96" y2="54" stroke="#cbd5e1" stroke-width="1"/>
       <line x1="96" y1="32" x2="14" y2="54" stroke="#cbd5e1" stroke-width="1"/>
-      <text x="55" y="46" text-anchor="middle" font-size="6" fill="#94a3b8">동네 우체국 :30080</text>
+      <text x="55" y="46" text-anchor="middle" font-size="6" fill="#94a3b8">중앙 우체국 :30080</text>
       <g transform="translate(20, -10) rotate(-7)">
         <rect x="0" y="0" width="68" height="32" rx="2" fill="#fff" stroke="#dc2626" stroke-width="2.2"/>
         <text x="34" y="10" text-anchor="middle" font-size="6" font-weight="700" fill="#dc2626">새 송장</text>
@@ -1018,7 +1076,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
     <rect x="25" y="44" width="82" height="22" rx="2" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8"/>
     <line x1="25" y1="44" x2="107" y2="66" stroke="#cbd5e1" stroke-width="1"/>
     <line x1="107" y1="44" x2="25" y2="66" stroke="#cbd5e1" stroke-width="1"/>
-    <text x="66" y="58" text-anchor="middle" font-size="6" fill="#94a3b8">동네 우체국 :30080</text>
+    <text x="66" y="58" text-anchor="middle" font-size="6" fill="#94a3b8">중앙 우체국 :30080</text>
     <g transform="translate(31, 38) rotate(-5)">
       <rect x="0" y="0" width="68" height="30" rx="2" fill="#fff" stroke="#dc2626" stroke-width="2"/>
       <text x="34" y="10" text-anchor="middle" font-size="6" font-weight="700" fill="#dc2626">새 송장</text>
@@ -1042,7 +1100,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   </g>
 </svg>
 </div>
-<div class="caption">그림 5-22. 우체국 창구에서 우편의 외부 주소 위에 새 송장(바코드)이 덮여 붙어 다음 단계로 넘어갑니다</div>
+<div class="caption">그림 5-24. 중앙 우체국 창구에서 우편의 외부 주소 위에 새 송장이 덮여 붙어 다음 단계로 넘어갑니다</div>
 <table>
 <thead>
 <tr>
@@ -1058,7 +1116,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <td style="text-align:left">브라우저로 요청을 보내는 사용자</td>
 </tr>
 <tr>
-<td style="text-align:center">우체국 입구</td>
+<td style="text-align:center">중앙 우체국 입구</td>
 <td style="text-align:left"><strong>NodePort</strong></td>
 <td style="text-align:left">각 노드의 공개 포트</td>
 </tr>
@@ -1126,7 +1184,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </g>
 </svg>
 </div>
-<div class="caption">그림 5-23. NodePort와 kube-proxy(1차)가 외부 요청을 Ingress Controller로 전달</div>
+<div class="caption">그림 5-25. NodePort와 kube-proxy(1차)가 외부 요청을 Ingress Controller로 전달</div>
 <h3>5.3.2 2단계 분류 - 물류 센터가 바코드를 보고 어디로 보낼지 정한다</h3>
 <p>송장이 붙은 우편이 <strong>물류 센터</strong>에 도착합니다. 작업자가 송장의 <strong>바코드</strong>를 스캐너로 찍으면 시스템이 옆에 비치된 <strong>분류 규칙</strong>에 따라 어느 우체국으로 갈지 곧장 알려 줍니다.</p>
 <div class="svg-figure">
@@ -1231,7 +1289,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   </g>
 </svg>
 </div>
-<div class="caption">그림 5-24. 물류 센터가 송장의 바코드를 찍고 어느 우체국으로 보낼지 정합니다</div>
+<div class="caption">그림 5-26. 물류 센터가 송장의 바코드를 찍고 어느 우체국으로 보낼지 정합니다</div>
 <table>
 <thead>
 <tr>
@@ -1310,7 +1368,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <text x="650" y="233" text-anchor="middle" font-size="9" fill="#94a3b8">payment-service</text>
 </svg>
 </div>
-<div class="caption">그림 5-25. Ingress Controller가 URL을 읽어 Service를 선택, 미리 받아 둔 분류 규칙에서 ClusterIP를 꺼냄</div>
+<div class="caption">그림 5-27. Ingress Controller가 URL을 읽어 Service를 선택, 미리 받아 둔 분류 규칙에서 ClusterIP를 꺼냄</div>
 <h3>5.3.3 3단계 배달 - 집배원이 우편함에 넣는다</h3>
 <p><strong>서울 우체국</strong>으로 도착한 우편을 그 동네 <strong>집배원</strong>이 받습니다. 집배원은 오늘 <strong>배송 목록</strong>을 들고 있습니다. 우편의 행선지를 그 목록과 맞춰 어느 <strong>우편함에</strong> 넣을지 정한 뒤 그 우편함에 우편을 넣습니다. 우편함이 우편의 종착지입니다.</p>
 <div class="svg-figure">
@@ -1389,7 +1447,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
   <text x="700" y="148" text-anchor="middle" font-size="9" font-style="italic" font-weight="700" fill="#dc2626">배송!</text>
 </svg>
 </div>
-<div class="caption">그림 5-26. 서울 우체국에서 집배원이 배송 목록을 보고 우편함 B에 우편을 넣습니다</div>
+<div class="caption">그림 5-28. 서울 우체국에서 집배원이 배송 목록을 보고 우편함 B에 우편을 넣습니다</div>
 <table>
 <thead>
 <tr>
@@ -1470,7 +1528,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 </g>
 </svg>
 </div>
-<div class="caption">그림 5-27. kube-proxy(2차)가 미리 받아 둔 Pod 목록에서 살아있는 Pod IP를 골라 변환해 Pod로 전달</div>
+<div class="caption">그림 5-29. kube-proxy(2차)가 미리 받아 둔 Pod 목록에서 살아있는 Pod IP를 골라 변환해 Pod로 전달</div>
 <p class="thought">'우편이 입구에 들어와 송장이 붙고, 물류 센터에서 바코드를 보고 우체국이 정해지고, 그 동네 집배원이 우편함에 넣는다. 각자 한 가지 일만 하는데 이게 합쳐지니 전체가 굴러가네.'</p>
 <h2>이것만은 기억하자</h2>
 <ul>
