@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="./styles/fonts.css">
 <link rel="stylesheet" href="./styles/tokens.css">
 
+<link rel="stylesheet" href="./tokens.css">
+
 <link rel="stylesheet" href="./styles/base.css">
 <link rel="stylesheet" href="./styles/components.css">
 <link rel="stylesheet" href="./styles/diagrams.css">
@@ -85,11 +87,71 @@
 </div>
 <h2>3.2 UseCase - 왜 인터페이스인가</h2>
 <p>클린 아키텍처에서 컨트롤러는 구현체가 아닌 <strong>UseCase 인터페이스</strong>에 의존합니다. 구현체가 바뀌어도 컨트롤러는 수정할 필요가 없고, 테스트할 때도 가짜 구현체를 쉽게 넣을 수 있습니다.</p>
-<!-- image-prompt: Minimal black line drawing on white background, icon-like simplicity, 4:3 aspect ratio, 800x600px. A universal power adapter analogy. Left side: two different plug types (US and EU style) labeled "구현체 A", "구현체 B". Center: a universal adapter socket labeled "UseCase 인터페이스". Right side: a laptop labeled "Controller". The adapter connects different plugs to the same device. Shows the concept of interface abstraction. -->
-<div class="chapter-image gemini"><img src="..\chapters\assets\CH03\gemini\01_power-adapter.png" alt="" /><div class="caption">그림 3-1. UseCase 인터페이스 - 전원 어댑터 비유</div></div>
+<div class="svg-figure">
+<svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UseCase 인터페이스 - 전원 어댑터 비유: 두 가지 구현체 플러그가 한 어댑터를 거쳐 Controller에 연결되는 구조">
+  <text x="400" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">UseCase 인터페이스 — 전원 어댑터 비유</text>
+  <text x="160" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">구현체 A</text>
+  <line x1="60" y1="145" x2="115" y2="145" stroke="#0f172a" stroke-width="1.6"/>
+  <path d="M115 118 Q115 113 120 113 L185 113 Q190 113 190 118 L190 172 Q190 177 185 177 L120 177 Q115 177 115 172 Z" fill="#fff" stroke="#0f172a" stroke-width="1.6"/>
+  <rect x="190" y="124" width="32" height="7" fill="#0f172a"/>
+  <rect x="190" y="159" width="32" height="7" fill="#0f172a"/>
+  <text x="160" y="235" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">구현체 B</text>
+  <line x1="60" y1="275" x2="115" y2="275" stroke="#0f172a" stroke-width="1.6"/>
+  <path d="M115 248 Q115 243 120 243 L185 243 Q190 243 190 248 L190 302 Q190 307 185 307 L120 307 Q115 307 115 302 Z" fill="#fff" stroke="#0f172a" stroke-width="1.6"/>
+  <line x1="190" y1="265" x2="218" y2="265" stroke="#0f172a" stroke-width="3"/>
+  <line x1="190" y1="285" x2="218" y2="285" stroke="#0f172a" stroke-width="3"/>
+  <circle cx="222" cy="265" r="5" fill="#0f172a"/>
+  <circle cx="222" cy="285" r="5" fill="#0f172a"/>
+  <line x1="222" y1="145" x2="330" y2="185" stroke="#0f172a" stroke-width="1.4"/>
+  <line x1="227" y1="275" x2="330" y2="225" stroke="#0f172a" stroke-width="1.4"/>
+  <text x="400" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">UseCase 인터페이스</text>
+  <rect x="330" y="115" width="140" height="180" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="2" stroke-dasharray="6,4"/>
+  <path d="M390 145 Q400 142 410 145 Q420 149 420 158 Q420 167 410 170 Q400 173 390 170 Q380 167 380 158 Q380 149 390 145 Z" fill="#fff" stroke="#3730a3" stroke-width="1.4"/>
+  <ellipse cx="395" cy="158" rx="4" ry="6" fill="#fff" stroke="#3730a3" stroke-width="1"/>
+  <ellipse cx="405" cy="158" rx="4" ry="6" fill="#fff" stroke="#3730a3" stroke-width="1"/>
+  <circle cx="395" cy="200" r="4" fill="#3730a3"/>
+  <circle cx="405" cy="200" r="4" fill="#3730a3"/>
+  <path d="M376 232 L390 240 L385 254 L371 246 Z" fill="#fff" stroke="#3730a3" stroke-width="1.4"/>
+  <path d="M424 232 L410 240 L415 254 L429 246 Z" fill="#fff" stroke="#3730a3" stroke-width="1.4"/>
+  <line x1="470" y1="205" x2="565" y2="205" stroke="#0f172a" stroke-width="1.4"/>
+  <text x="650" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Controller</text>
+  <path d="M580 115 L720 115 L720 215 L580 215 Z" fill="#fff" stroke="#0f172a" stroke-width="1.6"/>
+  <rect x="590" y="124" width="120" height="80" rx="2" fill="#fff" stroke="#0f172a" stroke-width="1"/>
+  <circle cx="650" cy="120" r="1.5" fill="#0f172a"/>
+  <path d="M565 215 L735 215 L725 245 L575 245 Z" fill="#fff" stroke="#0f172a" stroke-width="1.6"/>
+  <rect x="638" y="226" width="24" height="6" rx="1" fill="#0f172a"/>
+</svg>
+</div>
+<div class="caption">그림 3-1. UseCase 인터페이스 - 전원 어댑터 비유</div>
 <p>코드로 옮기면 이렇게 됩니다.</p>
-<!-- image-prompt: Minimal black line drawing on white background, 4:3 aspect ratio, 800x600px. Top row: three boxes side by side — "OrderServiceV1 (H2 개발용)", "OrderServiceV2 (MySQL 운영용)", "MockOrderService (테스트용)". All three have downward arrows pointing to a single center box in the middle row: "CreateOrderUseCase (약속: '주문을 생성한다')" with a dashed border to indicate it is an interface. Below that, one downward arrow to a bottom box: "OrderController (구현체가 무엇인지 몰라도 된다)". Layout is vertically centered, three-tier: implementations on top, interface in middle, controller at bottom. Clean lines, no fill, no colors. -->
-<div class="chapter-image gemini"><img src="..\chapters\assets\CH03\gemini\02_usecase-deps.png" alt="" /><div class="caption">그림 3-2. 챕터 2 vs 챕터 3 의존 구조 비교</div></div>
+<div class="svg-figure">
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="UseCase 인터페이스 의존 구조: 세 구현체가 UseCase 인터페이스를 향하고 Controller는 그 인터페이스만 안다">
+  <defs>
+    <marker id="c3f2-g" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="400" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">UseCase 인터페이스 의존 구조</text>
+  <rect x="60" y="60" width="200" height="80" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="160" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">OrderServiceV1</text>
+  <text x="160" y="118" text-anchor="middle" font-size="12" fill="#3730a3">(H2 개발용)</text>
+  <rect x="300" y="60" width="200" height="80" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="400" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">OrderServiceV2</text>
+  <text x="400" y="118" text-anchor="middle" font-size="12" fill="#3730a3">(MySQL 운영용)</text>
+  <rect x="540" y="60" width="200" height="80" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="640" y="95" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">MockOrderService</text>
+  <text x="640" y="118" text-anchor="middle" font-size="12" fill="#3730a3">(테스트용)</text>
+  <line x1="160" y1="140" x2="320" y2="235" stroke="#475569" stroke-width="1.6" marker-end="url(#c3f2-g)"/>
+  <line x1="400" y1="140" x2="400" y2="235" stroke="#475569" stroke-width="1.6" marker-end="url(#c3f2-g)"/>
+  <line x1="640" y1="140" x2="480" y2="235" stroke="#475569" stroke-width="1.6" marker-end="url(#c3f2-g)"/>
+  <rect x="260" y="240" width="280" height="90" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4"/>
+  <text x="400" y="278" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">CreateOrderUseCase</text>
+  <text x="400" y="302" text-anchor="middle" font-size="12" fill="#3730a3">(약속: '주문을 생성한다')</text>
+  <line x1="400" y1="330" x2="400" y2="395" stroke="#475569" stroke-width="1.6" marker-end="url(#c3f2-g)"/>
+  <rect x="180" y="400" width="440" height="80" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="400" y="435" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">OrderController</text>
+  <text x="400" y="458" text-anchor="middle" font-size="12" fill="#3730a3">(구현체가 무엇인지 몰라도 된다)</text>
+</svg>
+</div>
+<div class="caption">그림 3-2. 챕터 2 vs 챕터 3 의존 구조 비교</div>
 <div class="code-block highlight" data-lang="text"><div class="cb-title">의존 구조 비교</div>[2장 구조 - 직접 의존]
 
 OrderController ──────▶ OrderService (구현체)
@@ -354,12 +416,12 @@ OrderController ──────▶ CreateOrderUseCase (인터페이스)
   <line x1="410" y1="145" x2="570" y2="120" stroke="#475569" stroke-width="1.6" marker-end="url(#k3-p)"/>
   <line x1="410" y1="165" x2="570" y2="200" stroke="#475569" stroke-width="1.6" marker-end="url(#k3-p)"/>
   <text x="490" y="120" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">Pod 연결</text>
-  <rect x="570" y="100" width="120" height="50" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="630" y="122" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod 1</text>
-  <text x="630" y="138" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
-  <rect x="570" y="180" width="120" height="50" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
-  <text x="630" y="202" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod 2</text>
-  <text x="630" y="218" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
+  <rect x="570" y="100" width="120" height="50" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="630" y="122" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Pod 1</text>
+  <text x="630" y="138" text-anchor="middle" font-size="10" fill="#3730a3">컨테이너 실행</text>
+  <rect x="570" y="180" width="120" height="50" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="630" y="202" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Pod 2</text>
+  <text x="630" y="218" text-anchor="middle" font-size="10" fill="#3730a3">컨테이너 실행</text>
   <rect x="720" y="140" width="100" height="50" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
   <text x="770" y="162" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Deployment</text>
   <text x="770" y="178" text-anchor="middle" font-size="9" fill="#3730a3">Pod 생성·관리</text>
