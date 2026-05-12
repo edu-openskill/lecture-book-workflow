@@ -517,3 +517,179 @@
 - 마지막 카드만 강조색으로 칠하기: 전체가 한 흐름이라 마지막만 다르면 시각이 깨진다. 모든 카드 같은 스타일
 - `.ev-arrow`에 `→` 외 다른 기호: `▶`·`>` 등은 시각 무게가 달라 카드와 어긋난다. 항상 `→`
 - `.ev-meta`에 챕터 번호만(예: "CH02") 적기: 기술 컨텍스트(`Docker`·`Kubernetes`)가 빠지면 PART 구분이 사라진다. `CH02 · Docker` 형식 유지
+
+---
+
+### `.state-lifecycle`
+
+**언제 쓰는가**: 도메인 객체의 상태 전이(예: 배달 PENDING → COMPLETED)를 좌→우 흐름으로. 각 상태 박스 사이의 화살표 위에 트리거(자동 전이 / API 호출 / 외부 이벤트)를 라벨로 표시. 2~5단계 전이에 적합.
+
+**사용 챕터**: MSA 책 CH05 §5.3 (그림 5-2 챕터 4 흐름, 그림 5-3 챕터 5 흐름)
+
+**HTML 사용 예**:
+
+```html
+<div class="state-lifecycle">
+  <div class="sl-title">챕터 5의 배달 흐름</div>
+  <div class="sl-flow">
+    <div class="sl-state">
+      <div class="sl-tag">생성</div>
+      <div class="sl-desc">배달 생성 요청</div>
+    </div>
+    <div class="sl-arrow">
+      <span class="sl-arrow-line">→</span>
+      <span class="sl-arrow-lbl">자동 전이</span>
+    </div>
+    <div class="sl-state">
+      <div class="sl-tag">PENDING</div>
+      <div class="sl-desc">배달 대기 상태</div>
+    </div>
+    <div class="sl-arrow">
+      <span class="sl-arrow-line">→</span>
+      <span class="sl-arrow-lbl">배달 기사<br>완료 API 호출</span>
+    </div>
+    <div class="sl-state sl-final">
+      <div class="sl-tag">COMPLETED</div>
+      <div class="sl-desc">배달 완료</div>
+    </div>
+  </div>
+</div>
+```
+
+**렌더 CSS**: `styles/diagrams.css` MSA 블록 (`.state-lifecycle`, `.sl-title`, `.sl-flow`, `.sl-state`, `.sl-state.sl-final`, `.sl-tag`, `.sl-desc`, `.sl-arrow`, `.sl-arrow-line`, `.sl-arrow-lbl`)
+
+**변형**: `.sl-state.sl-final` modifier로 종료 상태를 인디고 채움 + 흰 글씨 태그로 강조. 화살표 라벨은 두 줄까지 가능(`<br>`로 끊기).
+
+**피해야 할 것**
+- 6단계 이상 전이: 가로 폭이 모자라 줄바꿈 발생. 5단계 이하 권장. 더 많은 단계는 `.evolve-flow`나 `.rag-pipeline-box`로
+- 양방향 화살표: 상태 전이는 단방향(시간순)이 원칙. 되돌리는 흐름이 있으면 별도 도식
+- `.sl-final`을 중간 상태에 적용 금지: 종료 상태(최종 도달) 전용
+
+---
+
+### `.saga-flow`
+
+**언제 쓰는가**: 분산 트랜잭션의 Saga 패턴 두 가지(Choreography 직선형 / Orchestration 허브-스포크)를 한 컴포넌트로 표현. Choreography는 서비스 박스 가로 일렬 + 박스 사이 양방향 화살표(순행/보상). Orchestration은 가운데 hub(`.sf-hub`)에 명령/이벤트가 모이는 구조.
+
+**사용 챕터**: MSA 책 CH01 §1.4.3, CH04 §4.3
+
+**HTML 사용 예** (Choreography):
+
+```html
+<div class="saga-flow">
+  <div class="sf-title">Choreography Saga — 서비스 간 직접 호출과 보상</div>
+  <div class="sf-row">
+    <div class="sf-node"><div class="sf-tag">Order</div><div class="sf-desc">주문 생성</div></div>
+    <div class="sf-arrow">
+      <span class="sf-fwd">→ 재고 감소</span>
+      <span class="sf-bwd">← 재고 복구 (보상)</span>
+    </div>
+    <div class="sf-node"><div class="sf-tag">Product</div><div class="sf-desc">재고 차감</div></div>
+    <div class="sf-arrow">
+      <span class="sf-fwd">→ 배달 생성</span>
+      <span class="sf-bwd">← 배달 취소 (보상)</span>
+    </div>
+    <div class="sf-node"><div class="sf-tag">Delivery</div><div class="sf-desc">배달 생성</div></div>
+  </div>
+  <div class="sf-note">중앙 조율자 없이 서비스끼리 직접 호출. 실패 시 이전 서비스에 직접 보상 요청.</div>
+</div>
+```
+
+Orchestration 변형은 `.sf-stack`(세로) + `.sf-node.sf-hub`(가운데 오렌지) + `.sf-arrow.sf-arrow-line`(↕ + command/event 라벨)으로.
+
+**렌더 CSS**: `styles/diagrams.css` MSA 블록 (`.saga-flow`, `.sf-title`, `.sf-row`, `.sf-stack`, `.sf-node`, `.sf-node.sf-hub`, `.sf-tag`, `.sf-desc`, `.sf-arrow`, `.sf-fwd`, `.sf-bwd`, `.sf-arrow-line`, `.sf-arrow-lbl`, `.sf-note`)
+
+**변형**: `.sf-fwd`(인디고)는 순행 호출, `.sf-bwd`(오렌지 warm)는 보상 흐름. 색만 봐도 진행 vs 롤백이 구분된다. `.sf-hub`는 Orchestration 패턴 전용 — Choreography에서는 hub 없음.
+
+**피해야 할 것**
+- Choreography에서 hub 사용 금지: hub 없음이 Choreography의 정의
+- Orchestration에서 양방향 화살표(`.sf-fwd`/`.sf-bwd`) 직접 사용 금지: Orchestration은 hub-spoke이므로 `↕`(command/event) 하나로 표현
+- 4개 이상 서비스 가로 나열: 가로 폭 부족. 3~4개 이하 권장
+
+---
+
+### `.seq-diagram`
+
+**언제 쓰는가**: 다수 actor 사이의 시간순 메시지 교환을 표 형식으로. UML 시퀀스 다이어그램의 단순화 버전(생명선·활성 박스 없이 번호 + From→To + 메시지). 주문 성공 / 실패 / 단계별 처리 흐름 등 시간 흐름이 핵심일 때.
+
+**사용 챕터**: MSA 책 CH02 §2.6 (그림 2-1, 2-2), CH04 §4.3 (그림 4-5, 4-6), §4.6 (그림 4-7, 4-8, 4-9)
+
+**HTML 사용 예**:
+
+```html
+<div class="seq-diagram">
+  <div class="sd-title">주문 성공 흐름 — Orchestration Saga</div>
+  <div class="sd-lifelines">
+    <div class="sd-actor"><div class="sd-tag">Order</div></div>
+    <div class="sd-actor sd-hub"><div class="sd-tag">Orchestrator</div></div>
+    <div class="sd-actor"><div class="sd-tag">Product</div></div>
+    <div class="sd-actor"><div class="sd-tag">Delivery</div></div>
+  </div>
+  <div class="sd-steps">
+    <div class="sd-step">
+      <div class="sd-num">1</div>
+      <div class="sd-from-to">Order → Orch.</div>
+      <div class="sd-msg">order-created 발행</div>
+    </div>
+    <div class="sd-step sd-fail">
+      <div class="sd-num">2</div>
+      <div class="sd-from-to">Delivery → Orch.</div>
+      <div class="sd-msg">delivery-created {success: false}</div>
+    </div>
+  </div>
+</div>
+```
+
+**렌더 CSS**: `styles/diagrams.css` MSA 블록 (`.seq-diagram`, `.sd-title`, `.sd-lifelines`, `.sd-actor`, `.sd-actor.sd-hub`, `.sd-tag`, `.sd-steps`, `.sd-step`, `.sd-step.sd-fail`, `.sd-num`, `.sd-from-to`, `.sd-msg`)
+
+**변형**:
+- `.sd-actor.sd-hub` — 중심 조율자(Orchestrator) actor를 오렌지 태그로 강조
+- `.sd-step.sd-fail` — 실패·롤백 단계를 warm 배경 + 번호도 오렌지로
+- `.sd-num`에 `2a`·`2b` 형식 허용 (분기 표시)
+
+**피해야 할 것**
+- actor 5명 초과: 가로 폭이 줄어 lifeline 라벨 잘림. 4명 이하 권장
+- 단계 10개 초과: 한 시퀀스가 너무 길면 절을 나눠 별도 도식으로
+- 단계 번호 없이 메시지만 나열: 시간 순서가 핵심이므로 번호 필수
+
+---
+
+### `.kafka-topic-flow`
+
+**언제 쓰는가**: Kafka 메시지 큐 개념(Producer → Topic → Consumer)을 한 줄로. 토픽 내부에 메시지 셀(`.ktf-msg`)이 일렬로 쌓여 있는 모습을 보여줘 "큐"임을 시각적으로 전달. 컨슈머 그룹 변형은 `.ktf-group` + `.ktf-instance`(active / skip)로 라우팅 패턴을 보여준다.
+
+**사용 챕터**: MSA 책 CH04 §4.2.1 (그림 4-2 메시지 큐 개념, 그림 4-3 컨슈머 그룹)
+
+**HTML 사용 예** (기본 흐름):
+
+```html
+<div class="kafka-topic-flow">
+  <div class="ktf-title">메시지 큐 개념 — Producer · Topic · Consumer</div>
+  <div class="ktf-row">
+    <div class="ktf-node"><div class="ktf-tag">Producer</div><div class="ktf-desc">order-service</div></div>
+    <div class="ktf-arrow">→</div>
+    <div class="ktf-topic">
+      <div class="ktf-tag">Topic</div>
+      <div class="ktf-name">order-created</div>
+      <div class="ktf-msgs">
+        <span class="ktf-msg">msg1</span>
+        <span class="ktf-msg">msg2</span>
+        <span class="ktf-msg">…</span>
+      </div>
+    </div>
+    <div class="ktf-arrow">→</div>
+    <div class="ktf-node"><div class="ktf-tag">Consumer</div><div class="ktf-desc">orchestrator</div></div>
+  </div>
+</div>
+```
+
+컨슈머 그룹 변형은 `.ktf-node` 자리에 `.ktf-group`(점선 박스 + `.ktf-group-lbl` 그룹 이름 + `.ktf-group-row` 안에 `.ktf-instance.ktf-active`/`.ktf-skip`).
+
+**렌더 CSS**: `styles/diagrams.css` MSA 블록 (`.kafka-topic-flow`, `.ktf-title`, `.ktf-row`, `.ktf-node`, `.ktf-topic`, `.ktf-tag`, `.ktf-name`, `.ktf-desc`, `.ktf-msgs`, `.ktf-msg`, `.ktf-arrow`, `.ktf-group`, `.ktf-group-lbl`, `.ktf-group-row`, `.ktf-instance`, `.ktf-instance.ktf-active`, `.ktf-instance.ktf-skip`)
+
+**변형**: 토픽 박스는 오렌지(`.ktf-topic` — Kafka 색 통일). 메시지 셀(`.ktf-msg`)은 모노스페이스로 작은 칸. 컨슈머 그룹의 `.ktf-skip`은 취소선으로 "전달 안 됨"을 표현.
+
+**피해야 할 것**
+- 토픽 박스에 메시지를 8개 이상 나열: 가로 폭 초과. 3~4개 + `…`로 생략
+- `.ktf-active` 없이 `.ktf-skip`만 표시: 그룹 라우팅의 핵심은 "어디로 전달되는지". active와 skip을 함께 표시해야 의미 전달
+- Producer·Consumer 양쪽에 오렌지 색 적용 금지: 오렌지는 Kafka 토픽 전용. 클라이언트(서비스)는 인디고

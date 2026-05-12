@@ -49,6 +49,12 @@
   - `.lvl-lbl` — 행 사이 흐름 라벨
   - `.col-a .core > .loop-inner + .engine-inner` — Executor 내부 ReAct + RAG 엔진 중첩
   - `.stores .st` · `.caption`
+- `.k8s-resources` — Kubernetes 리소스 관계도 (MSA CH03 §3.6.1). Ingress·Service·Pod·Deployment·ConfigMap·Secret 관계. 상세: [`fullmap/README.md`](fullmap/README.md)
+  - `.kr-title` · `.kr-stack` · `.kr-row` · `.kr-node` · `.kr-tag` · `.kr-desc` · `.kr-arrow` · `.kr-arrow-lbl`
+- `.svc-arch` — 4서비스 마이크로서비스 아키텍처 (MSA CH01 §1.3). 동기 REST / Kafka 비동기 두 토폴로지. 상세: [`fullmap/README.md`](fullmap/README.md)
+  - `.sa-title` · `.sa-layout` · `.sa-row` · `.sa-node` · `.sa-node.sa-primary` · `.sa-node.sa-hub` · `.sa-tag` · `.sa-desc` · `.sa-arrow` · `.sa-arrow-line` · `.sa-arrow-lbl` · `.sa-note`
+- `.kafka-cluster` — Kafka 브로커 클러스터 + Listener (MSA CH04 §4.7.1). 상세: [`fullmap/README.md`](fullmap/README.md)
+  - `.kc-title` · `.kc-cluster` · `.kc-cluster-id` · `.kc-brokers` · `.kc-broker` · `.kc-tag` · `.kc-desc` · `.kc-listeners` · `.kc-listener` · `.kc-listener-lbl` · `.kc-listener-val` · `.kc-clients` · `.kc-client` · `.kc-arrow` · `.kc-note`
 
 ### cards
 개별 카드 단위.
@@ -77,6 +83,14 @@
 - `.journey-roadmap`, `.roadmap-line`, `.roadmap-part`, `.roadmap-node`, `.node-dot`, `.node-icon`, `.node-title`, `.node-story` (CH01)
 - `.qr-flow`, `.qr-pool`, `.qr-pool-label`, `.qr-out`, `.qr-up` (+ `.qr-up-1`/`.qr-up-2`), `.qr-up-stem`, `.qr-up-label`, `.qr-node` (+ `.qr-input`/`.qr-final`), `.qr-stage-num`, `.qr-arrow-h` (+ `.dashed`), `.qr-arrow-lbl`, `.qr-input-col`/`.qr-arrow-1~4`/`.qr-stage-1~3`/`.qr-final-col` (CH06 QueryRouter 3단계)
 - `.eng-pipe` + `.ep-head`, `.ep-tag`, `.ep-name`, `.ep-body`, `.ep-port` (+ `.in`/`.out`), `.ep-port-lbl`/`-rule`/`-name`/`-arrow`, `.ep-chambers`, `.ep-stages`, `.ep-stage` (+ `.ep-stage-num`/`-name`/`-fn`), `.ep-caption` (CH11 §11.2 6-stage 엔진 파이프라인)
+- `.state-lifecycle` — 도메인 상태 전이 (MSA CH05 §5.3). 2~5단계 좌→우 흐름. 상세: [`pipelines/README.md`](pipelines/README.md)
+  - `.sl-title` · `.sl-flow` · `.sl-state` · `.sl-state.sl-final` · `.sl-tag` · `.sl-desc` · `.sl-arrow` · `.sl-arrow-line` · `.sl-arrow-lbl`
+- `.saga-flow` — Saga 패턴 (Choreography 직선 / Orchestration 허브). MSA CH01 §1.4.3, CH04 §4.3. 상세: [`pipelines/README.md`](pipelines/README.md)
+  - `.sf-title` · `.sf-row` · `.sf-stack` · `.sf-node` · `.sf-node.sf-hub` · `.sf-tag` · `.sf-desc` · `.sf-arrow` · `.sf-fwd` · `.sf-bwd` · `.sf-arrow-line` · `.sf-arrow-lbl` · `.sf-note`
+- `.seq-diagram` — 시퀀스 다이어그램(시간순 메시지). MSA CH02 §2.6, CH04 §4.3·4.6. 상세: [`pipelines/README.md`](pipelines/README.md)
+  - `.sd-title` · `.sd-lifelines` · `.sd-actor` · `.sd-actor.sd-hub` · `.sd-tag` · `.sd-steps` · `.sd-step` · `.sd-step.sd-fail` · `.sd-num` · `.sd-from-to` · `.sd-msg`
+- `.kafka-topic-flow` — Producer · Topic · Consumer (+ 컨슈머 그룹). MSA CH04 §4.2.1. 상세: [`pipelines/README.md`](pipelines/README.md)
+  - `.ktf-title` · `.ktf-row` · `.ktf-node` · `.ktf-topic` · `.ktf-tag` · `.ktf-name` · `.ktf-desc` · `.ktf-msgs` · `.ktf-msg` · `.ktf-arrow` · `.ktf-group` · `.ktf-group-lbl` · `.ktf-group-row` · `.ktf-instance` · `.ktf-instance.ktf-active` · `.ktf-instance.ktf-skip`
 
 ### terminals
 셸/서버 로그 창 재현.
@@ -117,6 +131,16 @@
 | CH06 | qr-flow (QueryRouter 3단계), proc-compare (@tool vs MCP), rl-caption (ReAct 루프), arch-fullmap |
 | CH07 | rc-timeline, ec-cabinet, wrapper-arch, cache-diff |
 | CH08~10 | arch-fullmap 주로 |
+
+### MSA 책 (특이점이-온-개발자-MSA)
+
+| 챕터 | 주요 컴포넌트 |
+|-----|--------------|
+| CH01 | svc-arch (그림 1-5, 1-6), saga-flow (그림 1-8, 1-9), evolve-flow (그림 1-10) |
+| CH02 | seq-diagram (그림 2-1, 2-2), terminal-log (그림 2-3) |
+| CH03 | k8s-resources / svg-figure (그림 3-3), terminal-log (그림 3-4~3-7) |
+| CH04 | kafka-topic-flow (그림 4-2, 4-3), seq-diagram (그림 4-5~4-9), kafka-cluster (그림 4-10, 4-11), terminal-log (그림 4-12, 4-13, 4-17) |
+| CH05 | state-lifecycle (그림 5-2, 5-3), terminal-log (그림 5-4) |
 
 ## 주의사항 (네임스페이스)
 

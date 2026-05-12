@@ -1,0 +1,12 @@
+/* MSA 책 전용 오버라이드 */
+
+/* terminal 캡처 이미지 크기 통일
+   PNG 원본이 557~1475로 크기가 들쭉날쭉하므로 본문에서 같은 폭으로 보이도록 강제 */
+.chapter-image.terminal {
+  max-width: 720px;
+  margin: 24px auto;
+}
+.chapter-image.terminal img {
+  width: 100%;
+  height: auto;
+}
