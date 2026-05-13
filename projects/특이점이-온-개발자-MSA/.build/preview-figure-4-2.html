@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 4-2 — 안 1 시간 스냅샷 vs 안 2 오프셋 마커</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 40px; background: #f8fafc; max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 20px; color: #0f172a; margin-bottom: 8px; }
+  h2 { font-size: 16px; color: #1f2937; margin-top: 48px; margin-bottom: 4px; padding-top: 32px; border-top: 2px dashed #cbd5e1; }
+  .meta { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+  .svg-figure { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 8px; }
+  .caption { text-align: center; font-style: italic; color: #475569; margin-top: 0; margin-bottom: 12px; font-size: 13px; }
+  .note { font-size: 13px; color: #475569; line-height: 1.6; }
+  .pros { font-size: 12px; color: #047857; margin-bottom: 4px; }
+  .cons { font-size: 12px; color: #b45309; }
+</style>
+</head>
+<body>
+  <h1>그림 4-2 — 영속성과 시간 디커플링을 시각으로 표현하는 두 방식</h1>
+
+  <!-- 안 1: 시간 스냅샷 -->
+  <h2>안 1 — 시간 스냅샷 (T1 → T2)</h2>
+  <div class="meta">같은 토픽을 두 시점에 보여줘서, Consumer α가 읽었는데도 편지 개수가 그대로임을 직접 비교</div>
+  <div class="svg-figure">
+  <svg viewBox="0 0 1080 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="시간 스냅샷: T1 시점에 Consumer α가 읽기 전 토픽 상태와, T2 시점에 읽은 후 토픽 상태를 비교하면 편지 5장이 그대로 남아 있다">
+    <defs>
+      <marker id="a1-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+      <marker id="a1-g" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
+    </defs>
+    <text x="540" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">시점 T1 — Consumer가 읽기 전</text>
+
+    <!-- T1: Producer → Topic → Consumer (꺼짐) -->
+    <g>
+      <rect x="20" y="50" width="140" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <text x="90" y="78" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Producer</text>
+      <rect x="115" y="86" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+      <path d="M 115 86 L 130 96 L 145 86" fill="none" stroke="#475569" stroke-width="1"/>
+
+      <line x1="160" y1="80" x2="218" y2="80" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#a1-a)"/>
+
+      <rect x="220" y="50" width="640" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+      <rect x="220" y="40" width="640" height="20" rx="5" fill="#ff7849"/>
+      <text x="540" y="54" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic A — 편지 5장 보관</text>
+      <g transform="translate(265 70)">
+        <rect x="0" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 0 0 L 30 16 L 60 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="80" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 80 0 L 110 16 L 140 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="160" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 160 0 L 190 16 L 220 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="240" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 240 0 L 270 16 L 300 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="320" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 320 0 L 350 16 L 380 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+      </g>
+
+      <rect x="920" y="50" width="140" height="60" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="990" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#94a3b8">Consumer α</text>
+      <text x="990" y="94" text-anchor="middle" font-size="10" fill="#94a3b8" font-style="italic">아직 꺼짐</text>
+    </g>
+
+    <!-- 시간 흐름 화살표 -->
+    <line x1="540" y1="170" x2="540" y2="220" stroke="#475569" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#a1-g)"/>
+    <text x="555" y="200" font-size="11" font-style="italic" fill="#475569">시간 흐름 (α가 깨어나서 읽음)</text>
+
+    <text x="540" y="258" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">시점 T2 — Consumer가 읽은 후</text>
+
+    <!-- T2: 토픽 그대로 + Consumer (사본 가짐) -->
+    <g>
+      <rect x="20" y="280" width="140" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6" stroke-dasharray="3 3" opacity="0.5"/>
+      <text x="90" y="308" text-anchor="middle" font-size="12" font-weight="700" fill="#94a3b8">Producer</text>
+      <text x="90" y="324" text-anchor="middle" font-size="9" fill="#94a3b8" font-style="italic">이미 보냄</text>
+
+      <rect x="220" y="280" width="640" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+      <rect x="220" y="270" width="640" height="20" rx="5" fill="#ff7849"/>
+      <text x="540" y="284" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic A — 편지 5장 그대로!</text>
+      <g transform="translate(265 300)">
+        <rect x="0" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 0 0 L 30 16 L 60 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="80" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 80 0 L 110 16 L 140 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="160" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 160 0 L 190 16 L 220 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="240" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 240 0 L 270 16 L 300 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <rect x="320" y="0" width="60" height="32" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 320 0 L 350 16 L 380 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+      </g>
+
+      <line x1="860" y1="310" x2="918" y2="310" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#a1-a)"/>
+
+      <rect x="920" y="280" width="140" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <text x="990" y="304" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Consumer α</text>
+      <rect x="975" y="312" width="30" height="14" rx="1" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+      <path d="M 975 312 L 990 322 L 1005 312" fill="none" stroke="#ff7849" stroke-width="1"/>
+      <text x="1020" y="324" font-size="9" fill="#7b341e" font-style="italic">사본</text>
+    </g>
+
+    <!-- 핵심 시각 신호: 빨간 박스로 강조 -->
+    <rect x="215" y="350" width="650" height="56" rx="6" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.4"/>
+    <text x="540" y="375" text-anchor="middle" font-size="13" font-weight="700" fill="#854d0e">T1과 T2의 토픽을 비교하면 편지 5장 그대로</text>
+    <text x="540" y="395" text-anchor="middle" font-size="11" fill="#854d0e">Consumer는 사본만 가져갔다 · α가 꺼져 있었던 동안에도 편지는 안 사라졌다</text>
+  </svg>
+  </div>
+  <div class="caption">안 1. 시간 스냅샷 — T1 토픽과 T2 토픽이 동일하다는 것이 한눈에 비교됨</div>
+  <div class="pros">✓ "안 사라졌다"가 두 스냅샷의 비교로 직접 보임. 시간 흐름이 명시적</div>
+  <div class="cons">△ 그림 분량이 큼 (2단). T1/T2 두 번 그려야 함</div>
+
+
+  <!-- 안 2: 오프셋 마커 -->
+  <h2>안 2 — 오프셋 마커</h2>
+  <div class="meta">각 Consumer가 토픽의 어디까지 읽었는지를 마커로 표시. 마커는 옮겨지지만 토픽 안 편지는 그대로</div>
+  <div class="svg-figure">
+  <svg viewBox="0 0 1080 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="오프셋 마커: 두 Consumer가 토픽의 다른 위치까지 읽었고, β는 꺼져 있지만 토픽 안 편지 8장은 그대로 남아 있다">
+    <defs>
+      <marker id="a2-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+      <marker id="a2-up" markerWidth="9" markerHeight="9" refX="4" refY="0" orient="auto"><path d="M 4 0 L 0 9 L 8 9 Z" fill="#7b341e"/></marker>
+      <marker id="a2-up-g" markerWidth="9" markerHeight="9" refX="4" refY="0" orient="auto"><path d="M 4 0 L 0 9 L 8 9 Z" fill="#94a3b8"/></marker>
+    </defs>
+    <text x="540" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">오프셋 — Consumer는 자기가 어디까지 읽었는지 기억한다</text>
+
+    <!-- Producer -->
+    <rect x="20" y="80" width="140" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <text x="90" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Producer</text>
+    <rect x="115" y="116" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+    <path d="M 115 116 L 130 126 L 145 116" fill="none" stroke="#475569" stroke-width="1"/>
+
+    <line x1="160" y1="110" x2="218" y2="110" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#a2-a)"/>
+
+    <!-- Topic -->
+    <rect x="220" y="80" width="640" height="120" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <rect x="220" y="70" width="640" height="20" rx="5" fill="#ff7849"/>
+    <text x="540" y="84" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic A — 편지 8장 (편지는 그대로 보존)</text>
+
+    <!-- 편지 8장 (offset 0~7) -->
+    <g transform="translate(245 100)">
+      <g><rect x="0" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 0 0 L 35 21 L 70 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="35" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 0</text></g>
+      <g><rect x="78" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 78 0 L 113 21 L 148 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="113" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 1</text></g>
+      <g><rect x="156" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 156 0 L 191 21 L 226 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="191" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 2</text></g>
+      <g><rect x="234" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 234 0 L 269 21 L 304 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="269" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 3</text></g>
+      <g><rect x="312" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 312 0 L 347 21 L 382 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="347" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 4</text></g>
+      <g><rect x="390" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 390 0 L 425 21 L 460 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="425" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 5</text></g>
+      <g><rect x="468" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 468 0 L 503 21 L 538 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="503" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 6</text></g>
+      <g><rect x="546" y="0" width="70" height="42" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+        <path d="M 546 0 L 581 21 L 616 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+        <text x="581" y="58" text-anchor="middle" font-size="9" fill="#9a3412" font-family="monospace">offset 7</text></g>
+    </g>
+
+    <!-- 오프셋 마커 (Consumer α: offset 5, Consumer β: offset 2) -->
+    <!-- α 마커 (offset 5 다음 = 6 위치) - 살아있음 -->
+    <line x1="748" y1="240" x2="748" y2="208" stroke="#7b341e" stroke-width="1.8" marker-end="url(#a2-up)"/>
+    <text x="748" y="258" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">α의 오프셋</text>
+    <text x="748" y="272" text-anchor="middle" font-size="9" fill="#9a3412">offset 5까지 읽음</text>
+
+    <!-- β 마커 (offset 2 다음 = 3 위치) - 꺼짐 -->
+    <line x1="436" y1="240" x2="436" y2="208" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="3 2" marker-end="url(#a2-up-g)"/>
+    <text x="436" y="258" text-anchor="middle" font-size="10" font-weight="700" fill="#94a3b8">β의 오프셋</text>
+    <text x="436" y="272" text-anchor="middle" font-size="9" fill="#94a3b8">offset 2 (꺼짐, 정지)</text>
+
+    <!-- α 와 β로 가는 화살표 -->
+    <line x1="860" y1="120" x2="918" y2="100" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#a2-a)"/>
+    <line x1="860" y1="160" x2="918" y2="200" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 3"/>
+
+    <!-- Consumer α -->
+    <rect x="920" y="70" width="140" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <text x="990" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Consumer α</text>
+    <text x="990" y="115" text-anchor="middle" font-size="10" fill="#7b341e">offset 5</text>
+
+    <!-- Consumer β (꺼짐) -->
+    <rect x="920" y="180" width="140" height="60" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="990" y="204" text-anchor="middle" font-size="12" font-weight="700" fill="#94a3b8">Consumer β</text>
+    <text x="990" y="222" text-anchor="middle" font-size="10" fill="#94a3b8" font-style="italic">꺼짐 · offset 2</text>
+
+    <!-- 핵심 시각 신호 -->
+    <rect x="220" y="310" width="640" height="56" rx="6" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.4"/>
+    <text x="540" y="335" text-anchor="middle" font-size="13" font-weight="700" fill="#854d0e">Consumer가 읽어도 토픽 안 편지 8장은 그대로</text>
+    <text x="540" y="355" text-anchor="middle" font-size="11" fill="#854d0e">α의 오프셋만 옮겨갔다 · β는 꺼져 있어도 자기 오프셋(2)에 멈춰 있어 깨어나면 이어서 읽는다</text>
+  </svg>
+  </div>
+  <div class="caption">안 2. 오프셋 마커 — 각 Consumer는 자기 오프셋만 옮길 뿐, 토픽 안 편지는 안 사라진다</div>
+  <div class="pros">✓ "오프셋" 개념(책 본문 L134) 그대로 시각화. 한 그림에 모두 담김. β가 꺼져 있어도 자기 자리에서 이어 읽을 수 있음이 보임</div>
+  <div class="cons">△ 두 Consumer가 같은 토픽을 다른 오프셋으로 읽는 모습이 컨슈머 그룹(4.2.2) 개념과 살짝 혼동될 수 있음 (실제로는 다른 컨슈머 그룹)</div>
+</body>
+</html>

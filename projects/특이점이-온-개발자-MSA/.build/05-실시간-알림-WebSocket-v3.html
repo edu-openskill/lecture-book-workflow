@@ -53,7 +53,8 @@
 <div class="dialogue"><span class="speaker">선배</span>: "그럼 WebSocket을 붙여 봐요. 서버가 먼저 사용자에게 말을 걸 수 있게 통로를 열어주는 거예요."</div>
 <h2>5.1 챕터 4가 남긴 두 가지 숙제</h2>
 <p>챕터 4를 마치면서 두 가지 한계를 이야기했습니다.</p>
-<p><strong>첫 번째</strong>: 사용자가 주문 완료를 알려면 직접 계속 조회해야 합니다. 동기 방식이라면 응답에 결과가 바로 담겨오지만, 비동기 방식에서는 결과가 나중에 정해집니다. 주문 직후 <code>PENDING</code> 상태를 받는 사용자는 &quot;언제 완료되지?&quot;라며 새로고침을 반복합니다. 음식 배달 앱에서 &quot;지금 어디쯤이지?&quot; 궁금해서 5초마다 앱을 열어보는 상황과 같습니다. 앱이 알아서 알려주면 좋겠지만, 그런 기능이 아직 없으니 직접 확인하는 수밖에 없습니다. 이것을 <strong>폴링(Polling)</strong> 이라고 합니다.</p>
+<p><strong>첫 번째</strong>: 음식 배달 앱에서 &quot;지금 어디쯤이지?&quot; 궁금해서 5초마다 앱을 여는 상황과 비슷합니다. 앱이 알아서 알려주지 않으니 직접 확인하는 수밖에 없습니다.</p>
+<p>사용자가 주문 완료를 알려면 직접 계속 조회해야 합니다. 동기 방식이라면 응답에 결과가 바로 담겨오지만, 비동기 방식에서는 결과가 나중에 정해집니다. 주문 직후 <code>PENDING</code> 상태를 받는 사용자는 &quot;언제 완료되지?&quot;라며 새로고침을 반복합니다. 이것을 <strong>폴링(Polling)</strong> 이라고 합니다.</p>
 <div class="term-box">
 <p><strong>폴링(Polling)이란?</strong> 클라이언트가 서버에 주기적으로 &quot;변경된 거 있어?&quot; 하고 반복 요청하여 상태를 확인하는 방식입니다. 서버가 먼저 알려주지 않으므로, 변화가 없어도 계속 요청이 발생합니다.</p>
 </div>
@@ -140,26 +141,21 @@
         └── DeliveryEventProducer.java       ← [작성] publishDeliveryCompleted() 추가</div>
 <h3>5.4.2 Delivery 엔티티 상태 전이</h3>
 <p>배달 생성 시 상태를 <code>PENDING</code>으로 저장하고, 배달 기사가 완료 처리 시 <code>COMPLETED</code>로 전이합니다. 이전에는 생성과 동시에 <code>complete()</code>를 호출했지만, 이제는 명시적인 API 호출이 있어야 완료됩니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">domain/Delivery.java. 배달 상태 전이 (PENDING → COMPLETED)</div><span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery_tb&quot;</span><span class="p">)</span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Delivery</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// 2장 Delivery.java 참조 — 필드 동일</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title">domain/Delivery.java. 배달 상태 전이 (PENDING → COMPLETED)</div><span class="c1">// Delivery 클래스 외피·필드·@Table 생략 — 2장과 동일</span>
 
-<span class="w">    </span><span class="c1">// 배달 주소 검증</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">validateAddress</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">address</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">address</span><span class="p">.</span><span class="na">isBlank</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;배달 주소는 필수입니다.&quot;</span><span class="p">);</span>
-<span class="w">        </span><span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">validateAddress</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">address</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">address</span><span class="p">.</span><span class="na">isBlank</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;배달 주소는 필수입니다.&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 
-<span class="w">    </span><span class="c1">// 배달 생성 시 PENDING 상태 (배달 완료 API 대기)</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Delivery</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Delivery</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">PENDING</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Delivery</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Delivery</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">PENDING</span><span class="p">);</span><span class="w">  </span><span class="c1">// 2장의 즉시 COMPLETED와 달리 PENDING</span>
+<span class="p">}</span>
 
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">complete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">COMPLETED</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">complete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">COMPLETED</span><span class="p">;</span>
+<span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
 <span class="p">}</span></div>
 <p>이번 챕터에서도 배달 취소 흐름은 다루지 않으므로 <code>cancel()</code> 메서드는 도입하지 않습니다. 주문 롤백이 발생하면 <code>cancel-order-command</code>로 주문만 취소되고, 이미 만들어진 배달은 PENDING 상태로 남습니다. 배달 라이프사이클은 PENDING → COMPLETED 한 방향만 가집니다.</p>
 <p>아래 메서드를 DeliveryService에 추가합니다. 배달 상태를 COMPLETED로 변경하고 Kafka 이벤트를 발행합니다.</p>
@@ -190,7 +186,7 @@
 <h2>5.5 orchestrator - delivery-completed 처리 추가</h2>
 <p>챕터 5에서는 배달 생성(<code>delivery-created</code>) 성공 시 바로 완료하지 않고 대기합니다. 이후 배달 완료(<code>delivery-completed</code>) 이벤트를 받았을 때 비로소 주문 완료 명령(<code>complete-order-command</code>)을 발행합니다.</p>
 <h3>5.5.1 deliveryCreated 수정 - 성공 시 대기</h3>
-<p>챕터 4에서는 배달 생성 성공 시 즉시 주문 완료 명령(<code>complete-order-command</code>)을 발행했지만, 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.</p>
+<p>챕터 4에서는 배달 생성이 성공하면 즉시 주문 완료 명령(<code>complete-order-command</code>)을 발행했습니다. 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>의 <code>deliveryCreated</code>를 아래처럼 수정합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> handler/OrderOrchestrator.java. deliveryCreated - 성공 시 대기</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deliveryCreated</span><span class="p">(</span><span class="n">DeliveryCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -299,11 +295,10 @@
     └── usecase/
         └── OrderService.java              ← [작성] completeOrder에 WebSocket Push 추가</div>
 <h3>5.6.2 의존성 추가</h3>
-<p><code>build.gradle</code>에 websocket이 추가됩니다.</p>
-<div class="code-block highlight" data-lang="gradle"><div class="cb-title">order-service/build.gradle. WebSocket 의존성 추가</div>implementation 'org.springframework.boot:spring-boot-starter-websocket'</div>
+<p>order-service <code>build.gradle</code> 의존성에 <code>spring-boot-starter-websocket</code>을 추가합니다.</p>
 <h3>5.6.3 WebSocket 설정</h3>
-<p>WebSocketConfig는 WebSocket 기능을 활성화하고, 클라이언트가 <code>/api/ws/orders</code>로 실시간 연결할 수 있도록 엔드포인트를 등록합니다.
-클라이언트가 이 엔드포인트로 연결한 뒤 <code>/topic/orders/{userId}</code> 채널을 구독하면, 서버가 해당 채널로 보낸 메시지를 실시간으로 수신할 수 있습니다.</p>
+<p>WebSocketConfig는 WebSocket 기능을 활성화하고, 클라이언트가 <code>/api/ws/orders</code>로 실시간 연결할 수 있도록 엔드포인트를 등록합니다. 클라이언트가 이 엔드포인트로 연결한 뒤 <code>/topic/orders/{userId}</code> 채널을 구독하면, 서버가 해당 채널로 보낸 메시지를 실시간으로 수신할 수 있습니다.</p>
+<p>초인종 비유로 돌아오면, <code>/api/ws/orders</code>는 초인종 본체이고 <code>/topic/orders/{userId}</code>는 사용자별 채널 번호입니다. 사용자가 자기 채널을 구독해 두면, 서버가 그 채널로 보낸 메시지가 즉시 사용자 화면에 도착합니다.</p>
 <p><code>core/config/WebSocketConfig.java</code>를 열고 아래 클래스를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 6</span> core/config/WebSocketConfig.java. STOMP WebSocket 설정</div><span class="nd">@Configuration</span>
 <span class="nd">@EnableWebSocketMessageBroker</span><span class="w"> </span><span class="c1">// STOMP WebSocket 브로커 활성화</span>
@@ -371,7 +366,8 @@ gateway/
 <span class="p">});</span></div>
 <p><code>SockJS</code>로 WebSocket 연결을 만들고, <code>STOMP</code>로 <code>/topic/orders/{userId}</code> 채널을 구독합니다. 서버가 이 채널로 메시지를 보내면 콜백이 실행되어 화면에 주문 완료를 표시합니다.</p>
 <h3>5.6.8 nginx.conf - WebSocket 프록시 설정</h3>
-<p>Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다. <code>/api/ws/</code> 경로에 <strong>Upgrade 헤더</strong> 를 설정하여 &quot;이 연결은 WebSocket이니 끊지 말라&quot;고 알려줘야 합니다.</p>
+<p>일반 HTTP는 요청-응답 한 쌍으로 끝나는 일회성 통신입니다. Nginx가 응답 후 연결을 닫아버리기 때문에, Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다.</p>
+<p><code>/api/ws/</code> 경로에 <strong>Upgrade 헤더</strong> 를 설정하여 &quot;이 연결은 WebSocket이니 끊지 말라&quot;고 알려줘야 합니다.</p>
 <div class="term-box">
 <p><strong>Nginx WebSocket 프록시(Upgrade 헤더)란?</strong> Nginx가 WebSocket 연결을 프록시할 때 필요한 설정입니다. nginx 설정에 <code>upgrade 헤더</code>를 설정하여 HTTP 연결을 WebSocket 프로토콜로 전환(upgrade)하도록 백엔드에 전달합니다.</p>
 </div>
@@ -383,14 +379,7 @@ gateway/
 <span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Upgrade</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span><span class="w">   </span><span class="c1"># 클라이언트의 Upgrade 헤더 전달</span>
 <span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">&quot;upgrade&quot;</span><span class="p">;</span><span class="w">    </span><span class="c1"># 연결을 WebSocket으로 전환</span>
 <span class="p">}</span></div>
-<p>gateway-service의 nginx 설정도 동일하게 <code>upgrade 헤더</code>를 추가합니다.</p>
-<div class="code-block highlight" data-lang="nginx"><div class="cb-title">gateway/nginx.conf. WebSocket 추가분</div><span class="c1"># 기존 location 블록들에 추가</span>
-<span class="k">location</span><span class="w"> </span><span class="s">/api/ws/</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://order-service</span><span class="p">;</span>
-<span class="w">    </span><span class="kn">proxy_http_version</span><span class="w"> </span><span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
-<span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Upgrade</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span>
-<span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">&quot;upgrade&quot;</span><span class="p">;</span>
-<span class="p">}</span></div>
+<p>gateway-service의 nginx 설정에도 위와 동일한 <code>upgrade 헤더</code> 4줄을 <code>/api/ws/</code> location 블록에 추가합니다 (<code>proxy_pass</code>만 <code>order-service</code>로). 자세한 내용은 GitHub <code>ex04/gateway/nginx.conf</code> 참조.</p>
 <h2>5.7 전체 시스템 통합 테스트</h2>
 <p>모든 구현이 완료됐습니다. 이제 전체 시스템을 실행하고 처음부터 끝까지 한 번에 흐름을 확인합니다.</p>
 <h3>5.7.1 K8s 매니페스트</h3>

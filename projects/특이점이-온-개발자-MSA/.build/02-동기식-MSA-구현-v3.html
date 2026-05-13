@@ -120,7 +120,8 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </div>
 <p>각 서비스는 독립된 Gradle 프로젝트입니다. 하나의 서비스를 배포할 때 다른 서비스를 건드릴 필요가 없습니다. 디렉토리 구조와 패키지 구조는 준비하기에서 미리 살펴봤습니다. <code>core/</code> 패키지에는 JWT, 예외 처리, 표준 응답 등 모든 서비스에 공통으로 필요한 코드가 들어갑니다.</p>
 <h2>2.2 공통 설정 - 모든 서비스가 공유하는 뼈대</h2>
-<p>서비스 구조를 잡았으니, 먼저 공통 기반을 만들겠습니다. MSA에서는 서비스마다 서버가 다르므로 세션을 공유할 수 없습니다. 대신 JWT 토큰을 발급하고, 각 서비스가 토큰만 검증하는 방식을 사용합니다. 4개 서비스 모두 JWT 인증, 표준 응답 형식, 예외 처리가 필요합니다. 이를 <code>core/</code> 패키지에 모아 두면, 각 서비스는 비즈니스 로직에 집중할 수 있습니다.</p>
+<p>서비스 구조를 잡았으니, 먼저 공통 기반을 만들겠습니다. MSA에서는 서비스마다 서버가 다르므로 세션을 공유할 수 없습니다. 대신 JWT 토큰을 발급하고, 각 서비스가 토큰만 검증하는 방식을 사용합니다.</p>
+<p>4개 서비스 모두 JWT 인증, 표준 응답 형식, 예외 처리가 필요합니다. 이를 <code>core/</code> 패키지에 모아 두면, 각 서비스는 비즈니스 로직에 집중할 수 있습니다.</p>
 <p>각 컴포넌트의 역할은 다음과 같습니다.</p>
 <table>
 <thead>
@@ -176,44 +177,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tr>
 </tbody>
 </table>
-<h3>2.3.1 User 엔티티</h3>
-<p><code>username</code>은 유니크 제약으로 중복 가입을 방지합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">users/User.java. User 엔티티</div><span class="nd">@NoArgsConstructor</span>
-<span class="nd">@Getter</span>
-<span class="nd">@Entity</span>
-<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;user_tb&quot;</span><span class="p">)</span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">User</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nd">@Id</span>
-<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="nd">@Column</span><span class="p">(</span><span class="n">unique</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">username</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">email</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">password</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">roles</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updatedAt</span><span class="p">;</span>
-
-<span class="w">    </span><span class="nd">@Builder</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">User</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">email</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">password</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">roles</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">username</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">email</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">email</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">password</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">roles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">roles</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">createdAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span></div>
-<h3>2.3.2 더미 데이터</h3>
-<p>개발 환경에서는 H2 in-memory DB에 자동으로 테스트 데이터를 삽입합니다. <code>db/data.sql</code>에 ssar, cos, love 세 계정이 등록됩니다.</p>
-<div class="code-block highlight" data-lang="sql"><div class="cb-title">resources/db/data.sql. 회원 더미 데이터</div><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">user_tb</span><span class="w"> </span><span class="p">(</span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">email</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">,</span><span class="w"> </span><span class="n">roles</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span>
-<span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;ssar&#39;</span><span class="p">,</span><span class="s1">&#39;ssar@metacoding.com&#39;</span><span class="p">,</span><span class="s1">&#39;1234&#39;</span><span class="p">,</span><span class="s1">&#39;USER&#39;</span><span class="p">,</span><span class="n">now</span><span class="p">(),</span><span class="n">now</span><span class="p">());</span>
-
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">user_tb</span><span class="w"> </span><span class="p">(</span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">email</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">,</span><span class="w"> </span><span class="n">roles</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span>
-<span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;cos&#39;</span><span class="p">,</span><span class="s1">&#39;cos@metacoding.com&#39;</span><span class="p">,</span><span class="s1">&#39;1234&#39;</span><span class="p">,</span><span class="s1">&#39;USER&#39;</span><span class="p">,</span><span class="n">now</span><span class="p">(),</span><span class="n">now</span><span class="p">());</span>
-
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">user_tb</span><span class="w"> </span><span class="p">(</span><span class="n">username</span><span class="p">,</span><span class="w"> </span><span class="n">email</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">,</span><span class="w"> </span><span class="n">roles</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span>
-<span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;love&#39;</span><span class="p">,</span><span class="s1">&#39;love@metacoding.com&#39;</span><span class="p">,</span><span class="s1">&#39;1234&#39;</span><span class="p">,</span><span class="s1">&#39;USER&#39;</span><span class="p">,</span><span class="n">now</span><span class="p">(),</span><span class="n">now</span><span class="p">());</span></div>
+<p><code>username</code>은 유니크 제약으로 중복 가입을 방지합니다. 더미 데이터는 ssar, cos, love 세 계정이 H2 in-memory DB에 자동 삽입됩니다. 엔티티·서비스·SQL 등 자세한 코드는 GitHub 레포 <code>ex01/user/</code> 참조.</p>
 <h2>2.4 상품 서비스 - 재고를 관리하다</h2>
 <p>상품 서비스는 상품 목록 조회와 재고 증감을 담당합니다. 주문 서비스가 주문을 생성할 때 이 서비스의 재고 감소 API를 호출하고, 주문이 취소되거나 실패하면 재고 증가 API로 되돌립니다.</p>
 <table>
@@ -233,75 +197,16 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <tr>
 <td>PUT</td>
 <td>/api/products/{productId}/decrease</td>
-<td>재고 감소</td>
+<td>재고 감소 (보상 시 호출됨)</td>
 </tr>
 <tr>
 <td>PUT</td>
 <td>/api/products/{productId}/increase</td>
-<td>재고 증가</td>
+<td>재고 증가 (보상 시 호출됨)</td>
 </tr>
 </tbody>
 </table>
-<h3>2.4.1 Product 엔티티</h3>
-<p><code>decreaseQuantity</code>와 <code>increaseQuantity</code> 메서드로 재고 증감 로직이 엔티티에 캡슐화되어 있습니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">products/Product.java. Product 엔티티</div><span class="nd">@NoArgsConstructor</span>
-<span class="nd">@Getter</span>
-<span class="nd">@Entity</span>
-<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;product_tb&quot;</span><span class="p">)</span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Product</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nd">@Id</span>
-<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">productName</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updatedAt</span><span class="p">;</span>
-
-<span class="w">    </span><span class="nd">@Builder</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">Product</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">productName</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">productName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">productName</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">quantity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">price</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">price</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">createdAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">decreaseQuantity</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">quantity</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">increaseQuantity</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">quantity</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span></div>
-<h3>2.4.2 ProductService</h3>
-<p>재고 감소 전 상품 존재 여부와 가격 일치 여부를 검증합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">products/ProductService.java. 재고 감소 메서드</div><span class="nd">@Transactional</span>
-<span class="kd">public</span><span class="w"> </span><span class="n">ProductResponse</span><span class="w"> </span><span class="nf">decreaseQuantity</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">Product</span><span class="w"> </span><span class="n">findProduct</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">productRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">productId</span><span class="p">)</span>
-<span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception404</span><span class="p">(</span><span class="s">&quot;상품이 없습니다.&quot;</span><span class="p">));</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">findProduct</span><span class="p">.</span><span class="na">getQuantity</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">quantity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;상품 재고가 부족합니다.&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">price</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">findProduct</span><span class="p">.</span><span class="na">getPrice</span><span class="p">()))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;상품 가격이 일치하지 않습니다.&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="n">findProduct</span><span class="p">.</span><span class="na">decreaseQuantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">);</span><span class="w">  </span><span class="c1">// 재고 감소</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ProductResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">findProduct</span><span class="p">);</span>
-<span class="p">}</span></div>
-<h3>2.4.3 더미 데이터</h3>
-<p><code>db/data.sql</code>에 MacBook Pro(재고 10, 250만원), iPhone 15(재고 0 품절, 130만원), AirPods(재고 10, 30만원)가 등록됩니다. 2.7 실행 시나리오에서 품절 상품으로 주문했을 때 보상 트랜잭션이 어떻게 동작하는지 확인합니다.</p>
-<div class="code-block highlight" data-lang="sql"><div class="cb-title">resources/db/data.sql. 상품 더미 데이터</div><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">product_tb</span><span class="w"> </span><span class="p">(</span><span class="n">product_name</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span>
-<span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;MacBook Pro&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2500000</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span><span class="w"> </span><span class="n">now</span><span class="p">());</span>
-
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">product_tb</span><span class="w"> </span><span class="p">(</span><span class="n">product_name</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span>
-<span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;iPhone 15&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1300000</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span><span class="w"> </span><span class="n">now</span><span class="p">());</span>
-
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">product_tb</span><span class="w"> </span><span class="p">(</span><span class="n">product_name</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span>
-<span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;AirPods&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">300000</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span><span class="w"> </span><span class="n">now</span><span class="p">());</span></div>
+<p>재고 감소 시 상품 존재 여부와 가격 일치를 검증합니다. 더미 데이터는 MacBook Pro(재고 10), iPhone 15(재고 0, 품절), AirPods(재고 10)이며, 2.7 시나리오에서 품절 상품으로 주문해 보상 트랜잭션을 확인합니다. 엔티티·서비스·SQL 등 자세한 코드는 GitHub 레포 <code>ex01/product/</code> 참조.</p>
 <h2>2.5 배달 서비스 - 배달을 생성하고 취소하다</h2>
 <p>배달 서비스는 배달 생성과 취소를 담당합니다. 이번 챕터에서는 배달 생성과 동시에 완료 처리합니다. PENDING 상태로 생성한 뒤 즉시 COMPLETED로 전이하므로, 실질적으로 COMPLETED 또는 CANCELLED 두 상태만 관찰됩니다.</p>
 <table>
@@ -316,7 +221,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <tr>
 <td>POST</td>
 <td>/api/deliveries</td>
-<td>배달 생성</td>
+<td>배달 생성 + 즉시 완료</td>
 </tr>
 <tr>
 <td>GET</td>
@@ -326,80 +231,11 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <tr>
 <td>PUT</td>
 <td>/api/deliveries/{orderId}</td>
-<td>배달 취소</td>
+<td>배달 취소 (보상 시 호출됨)</td>
 </tr>
 </tbody>
 </table>
-<h3>2.5.1 Delivery 엔티티</h3>
-<p>상태는 <code>PENDING → COMPLETED</code> 또는 <code>PENDING → CANCELLED</code>로 전이되며, <code>create()</code>, <code>complete()</code>, <code>cancel()</code> 메서드로 캡슐화되어 있습니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">deliveries/Delivery.java. Delivery 엔티티</div><span class="nd">@NoArgsConstructor</span>
-<span class="nd">@Getter</span>
-<span class="nd">@Entity</span>
-<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery_tb&quot;</span><span class="p">)</span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Delivery</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nd">@Id</span>
-<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
-<span class="w">    </span><span class="nd">@Enumerated</span><span class="p">(</span><span class="n">EnumType</span><span class="p">.</span><span class="na">STRING</span><span class="p">)</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updatedAt</span><span class="p">;</span>
-
-<span class="w">    </span><span class="nd">@Builder</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">Delivery</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="w"> </span><span class="n">status</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">orderId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderId</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">createdAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Delivery</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Delivery</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">PENDING</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">complete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">COMPLETED</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">cancel</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">CANCELLED</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span></div>
-<h3>2.5.2 DeliveryService</h3>
-<p><code>createDelivery</code>는 배달을 생성하고 즉시 완료 처리합니다. <code>cancelDelivery</code>는 주문 취소 시 호출되며, 이미 취소된 배달에 대한 중복 요청을 방어합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">deliveries/DeliveryService.java. 배달 생성·취소 메서드</div><span class="nd">@Transactional</span>
-<span class="kd">public</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="w"> </span><span class="nf">createDelivery</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// 1. 배달 생성</span>
-<span class="w">    </span><span class="n">Delivery</span><span class="w"> </span><span class="n">createdDelivery</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deliveryRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">Delivery</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">));</span>
-<span class="w">    </span><span class="c1">// 2. 주소 검증</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">address</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">address</span><span class="p">.</span><span class="na">isBlank</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;배달 주소는 필수입니다.&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="c1">// 3. 배달 완료</span>
-<span class="w">    </span><span class="n">createdDelivery</span><span class="p">.</span><span class="na">complete</span><span class="p">();</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">createdDelivery</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="nd">@Transactional</span>
-<span class="kd">public</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="w"> </span><span class="nf">cancelDelivery</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">Delivery</span><span class="w"> </span><span class="n">findDelivery</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deliveryRepository</span><span class="p">.</span><span class="na">findByOrderId</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span>
-<span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception404</span><span class="p">(</span><span class="s">&quot;배달 정보를 조회할 수 없습니다.&quot;</span><span class="p">));</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">findDelivery</span><span class="p">.</span><span class="na">getStatus</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">CANCELLED</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;배달이 이미 취소되었습니다.&quot;</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="n">findDelivery</span><span class="p">.</span><span class="na">cancel</span><span class="p">();</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">findDelivery</span><span class="p">);</span>
-<span class="p">}</span></div>
-<h3>2.5.3 더미 데이터</h3>
-<p>주문 3건에 대한 배달 데이터가 등록됩니다. 모두 완료 상태입니다.</p>
-<div class="code-block highlight" data-lang="sql"><div class="cb-title">resources/db/data.sql. 배달 더미 데이터</div><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">delivery_tb</span><span class="w"> </span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Addr 1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;COMPLETED&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">NOW</span><span class="p">(),</span><span class="w"> </span><span class="n">NOW</span><span class="p">());</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">delivery_tb</span><span class="w"> </span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Addr 2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;COMPLETED&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">NOW</span><span class="p">(),</span><span class="w"> </span><span class="n">NOW</span><span class="p">());</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">delivery_tb</span><span class="w"> </span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Addr 3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;COMPLETED&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">NOW</span><span class="p">(),</span><span class="w"> </span><span class="n">NOW</span><span class="p">());</span></div>
+<p>배달 취소는 주문 실패 시 보상 호출로 들어오며, 이미 취소된 배달에 대한 중복 요청은 방어합니다. 엔티티·서비스·SQL 등 자세한 코드는 GitHub 레포 <code>ex01/delivery/</code> 참조.</p>
 <p class="thought">회원, 상품, 배달까지는 각자 제 일만 하면 된다. 진짜 문제는 이것들을 엮는 주문 서비스다.</p>
 <div class="dialogue"><span class="speaker">오픈이</span>: "재고를 줄인 다음에 배달 만들다가 실패하면요?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "그때를 대비해서 되돌리는 코드를 직접 짜는 거예요. 어디까지 진행됐는지 기록해 뒀다가, 실패하면 역순으로 취소해요."</div>
@@ -433,105 +269,93 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </table>
 <p>먼저 주문과 주문 상품을 표현하는 엔티티부터 살펴보겠습니다.</p>
 <h3>2.6.1 Order 엔티티</h3>
-<p>주문은 사용자(<code>userId</code>)와 상품 한 건(<code>productId</code>, <code>quantity</code>, <code>price</code>)을 담습니다. 상태는 <code>PENDING → COMPLETED</code> 또는 <code>PENDING → CANCELLED</code>로 전이되며, <code>create()</code>, <code>complete()</code>, <code>cancel()</code> 메서드로 캡슐화되어 있습니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">orders/Order.java. Order 엔티티</div><span class="nd">@NoArgsConstructor</span>
-<span class="nd">@Getter</span>
-<span class="nd">@Entity</span>
-<span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;order_tb&quot;</span><span class="p">)</span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Order</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nd">@Id</span>
-<span class="w">    </span><span class="nd">@GeneratedValue</span><span class="p">(</span><span class="n">strategy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GenerationType</span><span class="p">.</span><span class="na">IDENTITY</span><span class="p">)</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">;</span>
-<span class="w">    </span><span class="nd">@Enumerated</span><span class="p">(</span><span class="n">EnumType</span><span class="p">.</span><span class="na">STRING</span><span class="p">)</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">OrderStatus</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updatedAt</span><span class="p">;</span>
-
-<span class="w">    </span><span class="nd">@Builder</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="nf">Order</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">OrderStatus</span><span class="w"> </span><span class="n">status</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">userId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">userId</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">productId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">productId</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">quantity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">price</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">price</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">createdAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="c1">// 주문 생성</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Order</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Order</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">OrderStatus</span><span class="p">.</span><span class="na">PENDING</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="c1">// 주문 완료</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">complete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OrderStatus</span><span class="p">.</span><span class="na">COMPLETED</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="c1">// 주문 취소</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">cancel</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OrderStatus</span><span class="p">.</span><span class="na">CANCELLED</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span></div>
+<p>주문은 사용자(<code>userId</code>)와 상품 한 건(<code>productId</code>, <code>quantity</code>, <code>price</code>)을 담습니다. 상태는 <code>PENDING → COMPLETED</code> 또는 <code>PENDING → CANCELLED</code>로 전이됩니다.</p>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>타입</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>int</td>
+<td>PK, AUTO_INCREMENT</td>
+</tr>
+<tr>
+<td>userId</td>
+<td>int</td>
+<td>주문자</td>
+</tr>
+<tr>
+<td>productId, quantity, price</td>
+<td>int, int, Long</td>
+<td>단일 상품 정보</td>
+</tr>
+<tr>
+<td>status</td>
+<td>OrderStatus</td>
+<td>PENDING / COMPLETED / CANCELLED</td>
+</tr>
+<tr>
+<td>createdAt, updatedAt</td>
+<td>LocalDateTime</td>
+<td>타임스탬프</td>
+</tr>
+</tbody>
+</table>
+<p>상태 전이는 <code>create()</code>, <code>complete()</code>, <code>cancel()</code> 메서드로 캡슐화되어 있습니다. 전체 코드는 GitHub 레포 <code>ex01/order/.../orders/Order.java</code> 참조.</p>
 <h3>2.6.2 더미 데이터</h3>
-<p>사용자별 주문 3건(완료·취소·대기)을 등록합니다. 한 행에 상품 정보까지 함께 들어갑니다.</p>
-<div class="code-block highlight" data-lang="sql"><div class="cb-title">resources/db/data.sql. 주문 더미 데이터</div><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">order_tb</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">product_id</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2500000</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;COMPLETED&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span><span class="w"> </span><span class="n">now</span><span class="p">());</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">order_tb</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">product_id</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">300000</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;CANCELLED&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span><span class="w"> </span><span class="n">now</span><span class="p">());</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">order_tb</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">product_id</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1300000</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;PENDING&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span><span class="w"> </span><span class="n">now</span><span class="p">());</span></div>
+<p>사용자별 주문 3건(완료·취소·대기)을 등록합니다. 한 행에 상품 정보까지 함께 들어갑니다. 상세 SQL은 GitHub 레포 <code>ex01/order/.../db/data.sql</code> 참조.</p>
 <h3>2.6.3 OrderRequest, OrderResponse</h3>
-<p>주문 API의 요청·응답 DTO입니다. 요청은 상품 정보(<code>productId</code>, <code>quantity</code>, <code>price</code>)와 배달 주소(<code>address</code>)를 한 번에 받습니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">orders/OrderRequest.java. 요청 DTO</div><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">OrderRequest</span><span class="p">(</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">,</span>
-<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">address</span>
-<span class="p">)</span><span class="w"> </span><span class="p">{}</span></div>
-<p>응답은 저장된 Order의 필드를 그대로 펼쳐서 반환합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">orders/OrderResponse.java. 응답 DTO</div><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">OrderResponse</span><span class="p">(</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">id</span><span class="p">,</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span>
-<span class="w">    </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">,</span>
-<span class="w">    </span><span class="n">OrderStatus</span><span class="w"> </span><span class="n">status</span><span class="p">,</span>
-<span class="w">    </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">createdAt</span><span class="p">,</span>
-<span class="w">    </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updatedAt</span>
-<span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">from</span><span class="p">(</span><span class="n">Order</span><span class="w"> </span><span class="n">order</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">OrderResponse</span><span class="p">(</span>
-<span class="w">            </span><span class="n">order</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span><span class="w"> </span><span class="n">order</span><span class="p">.</span><span class="na">getUserId</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">order</span><span class="p">.</span><span class="na">getProductId</span><span class="p">(),</span><span class="w"> </span><span class="n">order</span><span class="p">.</span><span class="na">getQuantity</span><span class="p">(),</span><span class="w"> </span><span class="n">order</span><span class="p">.</span><span class="na">getPrice</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">order</span><span class="p">.</span><span class="na">getStatus</span><span class="p">(),</span><span class="w"> </span><span class="n">order</span><span class="p">.</span><span class="na">getCreatedAt</span><span class="p">(),</span><span class="w"> </span><span class="n">order</span><span class="p">.</span><span class="na">getUpdatedAt</span><span class="p">()</span>
-<span class="w">        </span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span></div>
+<p>주문 API의 요청·응답 DTO입니다. 둘 다 <code>record</code>로 정의되어 있습니다.</p>
+<p><strong>OrderRequest</strong> — 요청은 상품 정보와 배달 주소를 한 번에 받습니다.</p>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>타입</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>productId</td>
+<td>int</td>
+<td>상품 ID</td>
+</tr>
+<tr>
+<td>quantity</td>
+<td>int</td>
+<td>수량</td>
+</tr>
+<tr>
+<td>price</td>
+<td>Long</td>
+<td>단가</td>
+</tr>
+<tr>
+<td>address</td>
+<td>String</td>
+<td>배달 주소</td>
+</tr>
+</tbody>
+</table>
+<p><strong>OrderResponse</strong> — 저장된 Order의 필드(<code>id</code>, <code>userId</code>, <code>productId</code>, <code>quantity</code>, <code>price</code>, <code>status</code>, <code>createdAt</code>, <code>updatedAt</code>)를 그대로 펼쳐 반환합니다. <code>from(Order)</code> 정적 팩토리로 Order 엔티티에서 생성합니다.</p>
+<p>전체 코드는 GitHub <code>ex01/order/.../orders/</code> 참조.</p>
 <h3>2.6.4 보상 트랜잭션 - 실패하면 되돌린다</h3>
 <p>엔티티가 준비되었으니, 이제 주문 서비스의 진짜 역할을 살펴봅니다. 주문 서비스는 상품 서비스와 배달 서비스를 <strong>직접 호출</strong>합니다. 그런데 서비스를 호출하면 반드시 이 질문과 마주합니다.</p>
 <blockquote>
 <p>&quot;재고는 줄였는데, 배달 생성이 실패하면 어떻게 하죠?&quot;</p>
 </blockquote>
-<p>단일 서비스였다면 DB 트랜잭션이 자동으로 롤백해줍니다. 하지만 이미 상품 서비스에 보낸 HTTP 요청은 되돌릴 수 없습니다. 우리가 직접 &quot;재고를 다시 늘려줘&quot;라는 HTTP 요청을 보내야 합니다. 이것이 <strong>보상 트랜잭션</strong>입니다. 챕터 1에서 소개한 Choreography Saga를 직접 HTTP 호출로 구현하는 방식입니다. 주문 서비스가 직접 각 서비스를 호출하고, 실패 시 역순으로 보상합니다.</p>
+<p>이미 발송한 택배를 취소하려면 받는 사람에게 직접 &quot;되돌려달라&quot;고 요청해야 합니다. MSA의 보상도 마찬가지입니다.</p>
+<p>단일 서비스였다면 DB 트랜잭션이 자동으로 롤백해줍니다. 하지만 이미 상품 서비스에 보낸 HTTP 요청은 되돌릴 수 없습니다. 우리가 직접 &quot;재고를 다시 늘려줘&quot;라는 HTTP 요청을 보내야 합니다. 이것이 <strong>보상 트랜잭션</strong>입니다. 챕터 1에서 소개한 대로, 주문 서비스가 직접 각 서비스를 호출하고 실패 시 역순으로 보상하는 방식입니다.</p>
 <h3>2.6.5 보상 트랜잭션 설계</h3>
-<p>코드를 작성하기 전, 어느 단계에서 실패하면 무엇을 되돌려야 하는지 먼저 그려 보겠습니다.</p>
-<div class="code-block highlight" data-lang="text">주문 생성 흐름 (단계별 보상):
-
-1단계: 재고 감소 (상품 서비스)
-   └─ 실패 → 보상 없음 (아직 아무 일도 안 했으므로)
-
-2단계: 배달 생성 (배달 서비스)
-   └─ 실패 → 보상: 재고 복구 (1단계 되돌리기)
-
-3단계: 주문 완료
-   └─ 실패 → 보상: 배달 취소 + 재고 복구 (2, 1단계 되돌리기)
-
-4단계: 성공 응답 반환</div>
-<p>핵심 아이디어는 <strong>진행 상태를 플래그로 추적</strong>하는 것입니다. <code>productDecreased</code>와 <code>deliveryCreated</code> 두 boolean 변수가 각각 1단계(재고 감소), 2단계(배달 생성)의 성공 여부를 기록합니다. 예외가 발생했을 때 이 플래그를 보고, 어디까지 진행됐는지 확인한 뒤 역순으로 되돌립니다.</p>
+<p>핵심 아이디어는 <strong>진행 상태를 플래그로 추적</strong>하는 것입니다. 주문 PENDING 저장 → 재고 감소 → 배달 생성 → 주문 완료 순서로 진행되며, <code>productDecreased</code>와 <code>deliveryCreated</code> 두 boolean 변수가 각각 재고 감소·배달 생성의 성공 여부를 기록합니다.</p>
+<p>예외가 발생하면 이 플래그를 보고 켜진 단계만 골라 역순으로 외부 서비스를 보상하고, 마지막 <code>throw</code>로 <code>@Transactional</code>이 주문 row 자체를 롤백합니다.</p>
+<p>정상 흐름은 다음 절의 그림 2-1, 실패 흐름은 그림 2-2에서 시퀀스로 살펴봅니다.</p>
 <h3>2.6.6 주문 성공 시</h3>
 <div class="svg-figure">
 <svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 성공 시퀀스: Order가 Product·Delivery를 차례로 동기 호출하고 응답을 기다리는 흐름">
@@ -565,7 +389,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 *그림 2-1. 주문 성공 흐름*
 <h3>2.6.7 주문 실패 시</h3>
 <div class="svg-figure">
-<svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구·주문 취소를 역순으로 실행">
+<svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구와 주문 트랜잭션 롤백을 역순으로 실행">
   <defs>
     <marker id="c2f2-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
     <marker id="c2f2-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
@@ -589,13 +413,13 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
   <line x1="170" y1="320" x2="438" y2="320" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f2-o)"/>
   <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c">④ 재고 복구 요청 (보상)</text>
   <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#ff7849" stroke-width="1.6" marker-end="url(#c2f2-o)"/>
-  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#c2410c">⑤ 주문 취소 (CANCELLED)</text>
+  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#c2410c">⑤ 주문 트랜잭션 롤백</text>
   <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (오렌지)</text>
 </svg>
 </div>
 *그림 2-2. 주문 실패 시 보상 트랜잭션 흐름*
 <h3>2.6.8 RestClient - JWT 헤더를 실어 다른 서비스를 호출하다</h3>
-<p>주문 서비스가 다른 서비스를 호출할 때 필요한 RestClient를 먼저 설정합니다. 인터셉터는 HTTP 요청이 나갈 때 자동으로 JWT 토큰을 챙겨 붙여주는 장치입니다. 택배를 보낼 때 보내는 사람 정보를 매번 적는 대신, 스티커를 자동으로 붙여주는 것과 같습니다. RestClient에 인터셉터(<code>ClientHttpRequestInterceptor</code>)를 등록하면 외부 API를 호출할 때 Authorization 헤더가 자동으로 전달되어 하위 서비스의 JWT 인증을 통과합니다.</p>
+<p>주문 서비스가 다른 서비스를 호출할 때 필요한 RestClient를 먼저 설정합니다. 인터셉터는 HTTP 요청이 나갈 때 자동으로 JWT 토큰을 챙겨 붙여주는 장치입니다. RestClient에 인터셉터(<code>ClientHttpRequestInterceptor</code>)를 등록하면 외부 API를 호출할 때 Authorization 헤더가 자동으로 전달되어 하위 서비스의 JWT 인증을 통과합니다. 택배를 보낼 때 보내는 사람 정보를 매번 적는 대신, 스티커를 자동으로 붙여주는 것과 비슷합니다.</p>
 <p><code>core/config/RestClientConfig.java</code>를 열고 아래 코드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> core/config/RestClientConfig.java. JWT 헤더 전달 인터셉터</div><span class="nd">@Configuration</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RestClientConfig</span><span class="w"> </span><span class="p">{</span>
@@ -722,15 +546,10 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception500</span><span class="p">(</span><span class="s">&quot;주문 생성 중 오류가 발생했습니다: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
+<p>참고로 catch 마지막의 <code>throw</code>로 <code>@Transactional</code>이 주문 트랜잭션까지 함께 롤백합니다. 외부 서비스는 보상 호출, 주문 row는 트랜잭션 롤백으로 정리되며, 실제 동작은 2.7.5 시나리오 3에서 확인합니다.</p>
 <p>OrderService의 나머지 두 메서드입니다. <code>findById</code>는 주문 한 건을 조회합니다. <code>cancelOrder</code>는 createOrder의 역과정으로, 재고 복구(<code>increaseQuantity</code>) → 배달 취소(<code>cancelDelivery</code>) → 주문 상태 변경(<code>cancel()</code>) 순서로 처리합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">orders/OrderService.java. 주문 조회·취소 메서드</div><span class="c1">// 주문 조회</span>
-<span class="kd">public</span><span class="w"> </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">findById</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">Order</span><span class="w"> </span><span class="n">findOrder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span>
-<span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception404</span><span class="p">(</span><span class="s">&quot;주문을 찾을 수 없습니다.&quot;</span><span class="p">));</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">OrderResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">findOrder</span><span class="p">);</span>
-<span class="p">}</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title">orders/OrderService.java. cancelOrder - 보상 호출 흐름</div><span class="c1">// findById(int orderId) — 단순 조회 메서드, 생략</span>
 
-<span class="c1">// 주문 취소</span>
 <span class="nd">@Transactional</span>
 <span class="kd">public</span><span class="w"> </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">cancelOrder</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Order</span><span class="w"> </span><span class="n">findOrder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span>
@@ -738,28 +557,17 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">findOrder</span><span class="p">.</span><span class="na">getStatus</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">OrderStatus</span><span class="p">.</span><span class="na">CANCELLED</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;주문이 이미 취소되었습니다.&quot;</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="c1">// 상품 재고 복구</span>
-<span class="w">    </span><span class="n">productClient</span><span class="p">.</span><span class="na">increaseQuantity</span><span class="p">(</span>
+<span class="w">    </span><span class="n">productClient</span><span class="p">.</span><span class="na">increaseQuantity</span><span class="p">(</span><span class="w">  </span><span class="c1">// 재고 복구</span>
 <span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">ProductRequest</span><span class="p">(</span><span class="n">findOrder</span><span class="p">.</span><span class="na">getProductId</span><span class="p">(),</span><span class="w"> </span><span class="n">findOrder</span><span class="p">.</span><span class="na">getQuantity</span><span class="p">(),</span><span class="w"> </span><span class="n">findOrder</span><span class="p">.</span><span class="na">getPrice</span><span class="p">())</span>
 <span class="w">    </span><span class="p">);</span>
-<span class="w">    </span><span class="c1">// 배달 취소</span>
-<span class="w">    </span><span class="n">deliveryClient</span><span class="p">.</span><span class="na">cancelDelivery</span><span class="p">(</span><span class="n">orderId</span><span class="p">);</span>
-<span class="w">    </span><span class="c1">// 주문 취소</span>
-<span class="w">    </span><span class="n">findOrder</span><span class="p">.</span><span class="na">cancel</span><span class="p">();</span>
+<span class="w">    </span><span class="n">deliveryClient</span><span class="p">.</span><span class="na">cancelDelivery</span><span class="p">(</span><span class="n">orderId</span><span class="p">);</span><span class="w">  </span><span class="c1">// 배달 취소</span>
+<span class="w">    </span><span class="n">findOrder</span><span class="p">.</span><span class="na">cancel</span><span class="p">();</span><span class="w">                       </span><span class="c1">// 주문 상태 변경</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">OrderResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">findOrder</span><span class="p">);</span>
 <span class="p">}</span></div>
 <h2>2.7 Docker Compose - 네 개의 서비스를 한 번에 실행하다</h2>
 <p>코드가 완성되었습니다. 이제 직접 실행하여 보상 트랜잭션이 작동하는 것을 눈으로 확인해 봅니다.</p>
 <h3>2.7.1 서비스 실행</h3>
-<p>각 서비스의 Dockerfile은 동일한 구조입니다. 4개 서비스 모두 아래와 같습니다.</p>
-<p>스프링 프로젝트를 컨테이너 내에서 실행하는 Dockerfile입니다.</p>
-<div class="code-block highlight" data-lang="dockerfile"><div class="cb-title">Dockerfile. 4개 서비스 공통</div><span class="k">FROM</span><span class="w"> </span><span class="s">eclipse-temurin:21-jdk</span><span class="w">          </span><span class="c"># JDK 21 베이스 이미지</span>
-<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app                         # 작업 디렉토리 설정</span>
-<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.<span class="w">                             </span>#<span class="w"> </span>프로젝트<span class="w"> </span>파일<span class="w"> </span>복사
-<span class="k">RUN</span><span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>gradlew<span class="w">                 </span>#<span class="w"> </span>Gradle<span class="w"> </span>Wrapper<span class="w"> </span>실행<span class="w"> </span>권한<span class="w"> </span>부여
-<span class="k">RUN</span><span class="w"> </span>./gradlew<span class="w"> </span>bootJar<span class="w"> </span>-x<span class="w"> </span><span class="nb">test</span><span class="w">        </span>#<span class="w"> </span>테스트<span class="w"> </span>생략,<span class="w"> </span>JAR<span class="w"> </span>빌드
-<span class="k">RUN</span><span class="w"> </span>cp<span class="w"> </span>build/libs/*.jar<span class="w"> </span>app.jar<span class="w">      </span>#<span class="w"> </span>빌드된<span class="w"> </span>JAR를<span class="w"> </span>app.jar로<span class="w"> </span>복사
-<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;java&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-jar&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.jar&quot;</span><span class="p">]</span><span class="w">  </span>#<span class="w"> </span>JAR<span class="w"> </span>실행</div>
+<p>각 서비스의 Dockerfile은 동일한 구조로, JDK 21 베이스 이미지에서 <code>gradle bootJar</code>로 빌드해 실행합니다. 전체 내용은 GitHub 레포의 각 서비스 <code>Dockerfile</code> 참조.</p>
 <p><code>ex01</code> 디렉토리의 <code>docker-compose.yml</code>로 4개 서비스를 한 번에 실행합니다.</p>
 <p>4개 서비스 구조가 동일하므로, 주문 서비스만 예시로 보여줍니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title">docker-compose.yml. 4개 서비스 동시 실행</div><span class="nt">services</span><span class="p">:</span>
@@ -835,7 +643,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "전부 띄웠는데, 진짜 되돌아가는지 어떻게 확인하죠?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "품절 상품을 주문해 봐요. 그러면 작성한 보상 코드가 돌아가는 걸 눈으로 볼 수 있어요."</div>
 <h3>2.7.3 시나리오 1: 정상 주문</h3>
-<p>먼저 로그인하여 JWT 토큰을 받습니다. 이때 콘텐츠 종류(Content-Type)를 <code>application/json</code>으로 설정해야 합니다. 이는 서버에게 &quot;내가 보내는 데이터는 JSON 형식이다&quot;라고 알려주는 것입니다.</p>
+<p>먼저 로그인하여 JWT 토큰을 받습니다. 이때 콘텐츠 종류(Content-Type)를 <code>application/json</code>으로 설정해야 합니다. 이 헤더는 서버에게 &quot;내가 보내는 데이터는 JSON 형식이다&quot;라고 알리는 역할을 합니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8083/login</span>
 
 <span class="p">{</span>
@@ -879,7 +687,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <!-- terminal-prompt: Hoppscotch showing POST request to http://localhost:8081/api/orders with iPhone 15 (productId:2). Response 500 with JSON body: {"status":500,"msg":"주문 생성 중 오류가 발생했습니다: 상품 재고가 부족합니다.","body":null}. -->
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\11_stockout-error.png" alt="" /><div class="caption">그림 2-11. 재고 부족 시 에러 응답</div></div>
 <h3>2.7.5 시나리오 3: 주소 누락</h3>
-<p>이번에는 주소를 빈 문자열로 보내 보겠습니다. 주문 자체는 재고 차감까지 진행되지만, 배달 서비스에서 주소가 없으므로 실패합니다. 이때 보상 트랜잭션이 작동하여 차감된 재고가 복구됩니다.</p>
+<p>이번에는 주소를 빈 문자열로 보내 보겠습니다. 주문 자체는 재고 차감까지 진행되지만, 배달 서비스에서 주소가 없으므로 실패합니다. 이때 보상 트랜잭션이 작동하여 차감된 재고가 복구되고, 주문 row는 트랜잭션 롤백으로 처음부터 없던 일처럼 DB에서 사라집니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
 
 <span class="p">{</span>
@@ -900,14 +708,15 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <p class="thought">품절 상품을 주문하니까 에러가 나고, 재고가 자동으로 복구됐다. 된다!</p>
 <div class="dialogue"><span class="speaker">선배</span>: "잘 됐네요. 근데 한 가지 더 생각해 봐요. 상품 서비스가 느려지면 주문 서비스는 어떻게 될까요?"</div>
 <p class="thought">...아. 전화를 걸고 기다리니까, 상대가 느리면 나도 느려지는 거잖아.</p>
-<p>보상 트랜잭션 덕분에 데이터 일관성을 유지할 수 있었습니다. 하지만 이 구조에는 눈에 잘 보이지 않는 문제가 있습니다. 모든 서비스 호출이 동기적이라 상품 서비스가 1초 걸리면 주문 서비스도 1초를 기다리고, 보상 트랜잭션 코드가 비즈니스 로직과 섞여 try-catch 중첩이 점점 깊어집니다. 게다가 지금은 로컬에서만 실행되니, 실제 운영 서버에 올리려면 배포 방법을 별도로 고민해야 합니다.</p>
+<p>보상 트랜잭션 덕분에 데이터 일관성을 유지할 수 있었습니다. 하지만 이 구조에는 눈에 잘 보이지 않는 문제가 몇 가지 있습니다. 모든 서비스 호출이 동기적이라 상품 서비스가 1초 걸리면 주문 서비스도 1초를 기다립니다. 보상 트랜잭션 코드도 비즈니스 로직과 섞이면서 try-catch 중첩이 깊어집니다.</p>
+<p>실패한 주문은 트랜잭션 롤백으로 row 자체가 사라지므로 &quot;어떤 주문이 왜 실패했는지&quot; 이력도 남지 않습니다. 게다가 지금은 로컬에서만 실행되니, 실제 운영 서버에 올리려면 배포 방법을 별도로 고민해야 합니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
-<li>4개의 Spring Boot 서비스를 독립적으로 실행하고 REST로 연결했습니다.</li>
-<li>JWT 인증 필터를 구현하여 모든 서비스가 독립적으로 토큰을 검증합니다.</li>
-<li>주문 서비스에서 RestClient 인터셉터로 Authorization 헤더를 하위 서비스에 자동 전달합니다.</li>
-<li>플래그 기반 보상 트랜잭션으로 주문 실패 시 재고와 배달을 원상복구합니다.</li>
+<li>MSA에서 분산 트랜잭션은 자동으로 풀리지 않습니다. 실패를 감지한 쪽이 직접 보상 호출을 보내야 합니다.</li>
+<li>4개 서비스를 REST로 연결하고, JWT 인증 헤더를 RestClient 인터셉터로 자동 전달했습니다.</li>
+<li>플래그 기반 보상 트랜잭션으로 외부 서비스(재고와 배달)를 원상복구했습니다.</li>
+<li>이 구조의 한계는 다음 챕터 운영 환경에서, 그다음 챕터 비동기 전환에서 차례로 해소됩니다.</li>
 </ul>
 <p>코드 구조가 복잡해지는 것도 문제지만, 더 근본적인 문제는 <strong>운영 가능한 형태로 만들어야 한다</strong>는 것입니다. 다음 챕터에서는 코드 구조를 Clean Architecture로 개선하고, Kubernetes로 배포하는 방법을 배웁니다.</p>
 </div>

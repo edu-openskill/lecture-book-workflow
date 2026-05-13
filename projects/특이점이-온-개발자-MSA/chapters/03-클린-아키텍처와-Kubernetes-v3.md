@@ -51,11 +51,11 @@ Docker Desktop이 "Engine running" 상태인지 확인하고, Minikube가 설치
 
 챕터 2에서 4개 서비스가 REST로 통신하는 시스템을 만들었습니다. 동작은 합니다. 하지만 실제 서비스로 운영하기에는 두 가지 문제가 있습니다.
 
-**첫 번째 문제: 코드 구조**. OrderController는 OrderService에 직접 의존합니다. 나중에 OrderService를 교체하거나 가짜 데이터(Mock)로 바꿔 테스트하려면 Controller 코드도 건드려야 합니다. 서비스가 많아질수록 이 결합이 코드 전체를 딱딱하게 만듭니다.
+**첫 번째 문제: 코드 구조**. OrderController는 OrderService에 직접 의존합니다. 콘센트와 가전을 어댑터 없이 직접 납땜한 상태와 같습니다. 나중에 OrderService를 교체하거나 가짜 데이터(Mock)로 바꿔 테스트하려면 Controller 코드도 건드려야 합니다. 서비스가 많아질수록 이 결합이 코드 전체를 딱딱하게 만듭니다.
 
-**두 번째 문제: 운영 환경**. 챕터 2에서는 H2 인메모리 DB로 로컬에서만 실행했습니다. 실제 운영에서는 MySQL 같은 영구 저장소를 사용하고, DB 접속 정보나 비밀키 같은 설정값을 코드가 아닌 외부에서 주입받아야 합니다.
+**두 번째 문제: 운영 환경**. 챕터 2에서는 H2 인메모리 DB로 로컬에서만 실행했습니다. 내 노트북에서만 돌아가는 시스템이라, 노트북을 끄면 모든 게 사라집니다. 실제 운영에서는 MySQL 같은 영구 저장소를 사용하고, DB 접속 정보나 비밀키 같은 설정값을 코드가 아닌 외부에서 주입받아야 합니다.
 
-이번 챕터는 이 두 숙제를 동시에 해결하는 이야기입니다. 코드 구조는 **클린 아키텍처(UseCase 인터페이스)** 로, 운영 환경은 **Kubernetes**로 해결합니다. 챕터 2의 Docker Compose는 서비스를 한 번에 띄우기엔 편하지만, 서비스가 죽으면 직접 다시 띄워야 하고 특정 서비스만 늘리기도 어렵습니다. Kubernetes는 이런 부분을 자동으로 처리합니다.
+이번 챕터는 이 두 숙제를 동시에 해결하는 이야기입니다. 코드 구조는 **클린 아키텍처(UseCase 인터페이스)** 로, 운영 환경은 **Kubernetes**로 해결합니다. 챕터 2의 Docker Compose는 서비스를 한 번에 띄우기엔 편합니다. 그러나 서비스가 죽으면 직접 다시 띄워야 하고, 특정 서비스만 늘리기도 어렵습니다. Kubernetes는 이런 부분을 자동으로 처리합니다.
 
 :::note
 **챕터 2에서 단순화한 Order 모델(주문 1건에 상품 1개)은 이번 챕터에서도 그대로 가져갑니다.** 이 챕터의 초점은 **코드 구조와 운영 환경**이므로, 도메인은 챕터 2를 그대로 두고 패키지 분리·DB·배포만 진화시킵니다.
@@ -79,24 +79,6 @@ Docker Desktop이 "Engine running" 상태인지 확인하고, Minikube가 설치
 <!-- image-prompt: Minimal black line drawing on white background, 4:3 aspect ratio, 800x600px. Top row: three boxes side by side — "OrderServiceV1 (H2 개발용)", "OrderServiceV2 (MySQL 운영용)", "MockOrderService (테스트용)". All three have downward arrows pointing to a single center box in the middle row: "CreateOrderUseCase (약속: '주문을 생성한다')" with a dashed border to indicate it is an interface. Below that, one downward arrow to a bottom box: "OrderController (구현체가 무엇인지 몰라도 된다)". Layout is vertically centered, three-tier: implementations on top, interface in middle, controller at bottom. Clean lines, no fill, no colors. -->
 ![](assets/CH03/gemini/02_usecase-deps.png)
 *그림 3-2. 챕터 2 vs 챕터 3 의존 구조 비교*
-
-```text 의존 구조 비교
-[2장 구조 - 직접 의존]
-
-OrderController ──────▶ OrderService (구현체)
-
-문제: OrderService 구현체가 변경되면 OrderController도 영향을 받을 수 있다.
-
-
-[3장 구조 - 인터페이스 의존]
-
-OrderController ──────▶ CreateOrderUseCase (인터페이스)
-                                 ▲
-                          OrderService (구현체)
-
-장점: OrderController는 인터페이스만 알면 된다.
-     구현체를 교체해도 컨트롤러 코드는 변경이 없다.
-```
 
 **"무엇을 할 것인가"(UseCase 인터페이스)** 와 **"어떻게 할 것인가"(Service 구현체)** 를 분리하는 것이 핵심입니다.
 
@@ -157,35 +139,26 @@ ex02/order/src/main/java/com/metacoding/order/
 
 ### 3.3.2 UseCase 인터페이스 정의
 
-주문 생성·조회·취소를 각각 별도 인터페이스로 표현합니다. 인터페이스 하나가 하나의 행위(Use Case)를 표현하도록 합니다.
+주문 생성·조회·취소를 각각 별도 인터페이스로 표현합니다. 각 인터페이스는 메서드 하나만 가집니다. 그림 3-1의 어댑터 비유로 돌아오면, 각 `UseCase` 인터페이스는 콘센트 모양 하나하나이고, `OrderService`는 거기에 꽂히는 플러그입니다.
 
-```java usecase/. UseCase 인터페이스 3종
-public interface CreateOrderUseCase {
-    OrderResponse createOrder(int userId, int productId, int quantity, Long price, String address);
-}
+| UseCase | 메서드 | 역할 |
+|---|---|---|
+| `CreateOrderUseCase` | `createOrder` | 주문 생성 |
+| `GetOrderUseCase` | `findById` | 주문 조회 |
+| `CancelOrderUseCase` | `cancelOrder` | 주문 취소 |
 
-public interface GetOrderUseCase {
-    OrderResponse findById(int orderId);
-}
-
-public interface CancelOrderUseCase {
-    OrderResponse cancelOrder(int orderId);
-}
-```
+모두 `OrderResponse`를 반환합니다. 전체 인터페이스 정의는 GitHub `ex02/order/.../usecase/` 참조.
 
 ### 3.3.3 엔티티의 비즈니스 로직
 
 **"주문이 취소 가능한가?"** 같은 비즈니스 규칙은 서비스가 아닌 엔티티에 둡니다. 엔티티 메서드로 캡슐화하면 어디서 호출하든 동일한 규칙이 적용됩니다.
 
-```java domain/Order.java. validateCancelable 추가
-public class Order {
-    // 2장 Order.java 참조 — 필드 및 create(), complete(), cancel() 동일
+```java domain/Order.java. validateCancelable (Order 클래스에 메서드 추가)
+// Order 클래스 외피·필드·create()·complete()·cancel() 생략 — 2장과 동일
 
-    // 비즈니스 규칙을 엔티티에 위임 (3장에서 추가)
-    public void validateCancelable() {
-        if (this.status == OrderStatus.CANCELLED) {
-            throw new Exception400("주문이 이미 취소되었습니다.");
-        }
+public void validateCancelable() {
+    if (this.status == OrderStatus.CANCELLED) {
+        throw new Exception400("주문이 이미 취소되었습니다.");
     }
 }
 ```
@@ -201,16 +174,13 @@ OrderService는 세 UseCase 인터페이스를 구현하고, 내부에서 도메
 
 ```java usecase/OrderService.java. UseCase 인터페이스 구현
 @Service
-@Transactional(readOnly = true)                    // 1. 클래스 레벨 읽기 전용 트랜잭션
+@Transactional(readOnly = true)
 public class OrderService implements CreateOrderUseCase, GetOrderUseCase, CancelOrderUseCase {
-    // 2. UseCase 인터페이스를 구현
 
     @Override
-    @Transactional                                 // 쓰기 메서드만 오버라이드
+    @Transactional
     public OrderResponse cancelOrder(int orderId) {
-        // ...
-        findOrder.cancel();                        // 3. cancel() 내부에서 검증 후 취소
-        // ...
+        // ... findOrder.cancel() 내부에서 검증 후 취소 ...
     }
 }
 ```
@@ -224,17 +194,17 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase, Cancel
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
-    private final CreateOrderUseCase createOrderUseCase;   // 구현체가 아닌 인터페이스 주입
+    private final CreateOrderUseCase createOrderUseCase;
     private final GetOrderUseCase getOrderUseCase;
     private final CancelOrderUseCase cancelOrderUseCase;
 
     @PostMapping
     public ResponseEntity<?> createOrder(...) {
-        return Resp.ok(createOrderUseCase.createOrder(...));  // 인터페이스 메서드 호출
+        return Resp.ok(createOrderUseCase.createOrder(...));
     }
 
-    // GET /{orderId} — 주문 조회
-    // PUT /{orderId} — 주문 취소
+    // @GetMapping("/{orderId}") — 동일 패턴, 생략
+    // @PutMapping("/{orderId}") — 동일 패턴, 생략
 }
 ```
 
@@ -284,15 +254,7 @@ spring.jpa.hibernate.ddl-auto=${DDL_AUTO:validate}
 # 생략...
 ```
 
-MySQL을 사용하려면 build.gradle에 드라이버 의존성을 추가해야 합니다.
-
-```gradle build.gradle. MySQL 드라이버 추가
-dependencies {
-    // 생략...
-    runtimeOnly 'com.mysql:mysql-connector-j'   // 신규 추가
-    // 생략...
-}
-```
+MySQL을 사용하려면 `build.gradle` 의존성에 `mysql-connector-j`를 추가합니다.
 
 
 ## 3.5 Docker - 이미지 빌드와 인프라 구성
@@ -302,7 +264,7 @@ dependencies {
 
 ### 3.5.1 Nginx - API Gateway 라우팅
 
-챕터 2에서는 각 서비스 포트(8081~8084)로 직접 접근했습니다. 서비스가 늘어나면 클라이언트가 포트를 전부 알아야 하므로, 하나의 진입점으로 통합합니다. Nginx를 API Gateway로 두면, 클라이언트는 **하나의 진입점(80번 포트)** 으로 요청하고 URL 경로에 따라 적절한 서비스로 라우팅됩니다.
+챕터 2에서는 각 서비스 포트(8081~8084)로 직접 접근했습니다. 서비스가 늘어나면 클라이언트가 포트를 전부 알아야 하므로, 하나의 진입점으로 통합합니다. Nginx를 API Gateway로 두면, 클라이언트는 **하나의 진입점(80번 포트)** 으로 요청하고 URL 경로에 따라 적절한 서비스로 라우팅됩니다. 챕터 1의 개별 상점 비유로 돌아오면, 매장마다 다른 주소를 외울 필요 없이 안내데스크 하나에 물어보면 알맞은 매장으로 안내해주는 셈입니다.
 
 ```text gateway/ 디렉토리
 gateway/
@@ -310,46 +272,19 @@ gateway/
 └── nginx.conf        # URL 경로별 라우팅 설정 [참고]
 ```
 
-Dockerfile은 Nginx를 설치하고, 우리가 작성한 설정 파일을 넣어주는 역할입니다.
+Dockerfile은 경량 `nginx:alpine` 이미지에 우리가 작성한 `nginx.conf`를 복사해 80 포트로 띄우는 표준 패턴입니다. 자세한 내용은 GitHub `ex02/gateway/Dockerfile` 참조.
 
-```dockerfile gateway/Dockerfile. Nginx 이미지 빌드
-FROM nginx:alpine                          # 경량 Nginx 이미지
-COPY nginx.conf /etc/nginx/nginx.conf      # 라우팅 설정 파일 복사
-EXPOSE 80                                  # 게이트웨이 포트
-CMD ["nginx", "-g", "daemon off;"]         # 포그라운드 실행
-```
+nginx.conf는 URL 경로별로 어느 서비스로 보낼지 결정합니다. 라우팅 규칙은 다음과 같습니다.
 
-nginx.conf는 어떤 URL이 들어오면 어느 서비스로 보낼지를 정하는 설정 파일입니다.
+| URL 경로 | 라우팅 대상 |
+|---|---|
+| `/login` | user-service:8083 |
+| `/api/users` | user-service:8083 |
+| `/api/products` | product-service:8082 |
+| `/api/orders` | order-service:8081 |
+| `/api/deliveries` | delivery-service:8084 |
 
-```nginx gateway/nginx.conf. URL 경로별 라우팅
-events {}
-
-http {
-    # 각 서비스를 upstream 블록으로 등록
-    upstream user-service {
-        server user-service:8083;      # K8s 내부 DNS로 서비스 접근
-    }
-    # product-service(8082), order-service(8081), delivery-service(8084)도 동일 패턴
-
-    server {
-        listen 80;                     # 게이트웨이 진입점
-        server_name localhost;
-
-        # URL 경로별로 요청을 해당 서비스로 분기
-        location /login {
-            proxy_pass http://user-service;
-        }
-
-        location /api/users {
-            proxy_pass http://user-service;
-        }
-        # /api/products → product-service, /api/orders → order-service,
-        # /api/deliveries → delivery-service도 동일 패턴
-    }
-}
-```
-
-`upstream` 블록에 4개 서비스를 등록하고, `location`으로 URL 경로를 분기합니다. `user-service`, `order-service` 같은 이름은 Kubernetes가 내부 DNS로 자동 해석하므로, IP 주소를 직접 지정할 필요가 없습니다.
+`user-service`, `order-service` 같은 이름은 Kubernetes가 내부 DNS로 자동 해석하므로 IP 주소를 직접 지정할 필요가 없습니다. 전체 nginx 설정은 GitHub `ex02/gateway/nginx.conf` 참조.
 
 ### 3.5.2 MySQL - 데이터베이스 인프라
 
@@ -367,31 +302,30 @@ db/
 └── init.sql     # [참고] 테이블 생성 + 더미 데이터
 ```
 
-```dockerfile db/Dockerfile. MySQL 이미지
-FROM mysql                          # MySQL 공식 이미지
-COPY init.sql /docker-entrypoint-initdb.d  # 컨테이너 최초 시작 시 자동 실행
-CMD ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
-```
+MySQL 공식 이미지에 `init.sql`을 `docker-entrypoint-initdb.d`에 복사해 자동 실행시키는 표준 패턴입니다. 자세한 내용은 GitHub `ex02/db/Dockerfile` 참조.
 
 루트 비밀번호·데이터베이스 이름·접속 계정 같은 민감 정보는 Dockerfile에 직접 박지 않고 K8s `db-secret.yml`에서 환경변수로 주입합니다. 같은 이미지를 환경(개발/운영)마다 다른 비밀로 띄울 수 있고, 비밀이 이미지 레이어에 남지 않습니다.
 
 `init.sql`은 서비스별 테이블 생성과 더미 데이터 삽입을 담당합니다. 챕터 2의 H2 `data.sql`은 INSERT만 있었지만, MySQL은 자동으로 테이블을 만들어주지 않으므로 CREATE TABLE도 포함합니다. 챕터 2에서 Order 모델을 단일 상품으로 단순화했으므로 테이블도 4개입니다.
 
-```sql db/init.sql. 테이블 생성 + 더미 데이터
--- 테이블 생성 (4개 서비스의 4개 테이블)
-CREATE TABLE user_tb ( id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, ... );
-CREATE TABLE product_tb ( id INT AUTO_INCREMENT PRIMARY KEY, product_name VARCHAR(50), quantity INT, price BIGINT, ... );
-CREATE TABLE order_tb ( id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, product_id INT, quantity INT, price BIGINT, status VARCHAR(50), ... );
-CREATE TABLE delivery_tb ( id INT AUTO_INCREMENT PRIMARY KEY, order_id INT, address VARCHAR(50), status VARCHAR(50), ... );
+| 테이블 | 핵심 필드 |
+|---|---|
+| `user_tb` | id, username(UNIQUE), email, password, roles |
+| `product_tb` | id, product_name, quantity, price |
+| `order_tb` | id, user_id, product_id, quantity, price, status |
+| `delivery_tb` | id, order_id, address, status |
 
--- 더미 데이터 (2장과 동일)
-```
+더미 데이터는 2장과 동일합니다. 전체 SQL은 GitHub `ex02/db/init.sql` 참조.
 
 *Docker Compose로 한 번에 띄우는 건 편한데, 서비스가 죽으면 내가 직접 다시 띄워야 한다.*
 
 **선배**: "Kubernetes는 원하는 상태를 적어두면, 알아서 그 상태를 유지해줘요. 서비스가 죽으면 자동으로 다시 띄우고요."
 
 ## 3.6 Kubernetes - YAML로 선언하는 배포
+
+:::note
+**5종 매니페스트(ConfigMap·Secret·Deployment·Service·Ingress)의 개념은 도커&쿠버네티스 책 5장에서 다뤘습니다.** 여기서는 이 책의 시스템(MSA 4서비스 + Gateway + DB)에 어떻게 적용되는지 매니페스트 위주로 살펴봅니다.
+:::
 
 ### 3.6.1 매니페스트 구조 설계
 
@@ -602,6 +536,12 @@ Ingress는 **클러스터 외부에서 들어오는 요청을 내부 Service로 
 
 나머지 서비스(product, user, delivery)도 동일한 패턴입니다.
 
+*매니페스트 5종으로 4개 서비스가 K8s 위에서 돌아가는 구조가 다 그려졌다.*
+
+**오픈이**: "이거 다 적용하면 클러스터에 다 뜨는 거죠?"
+
+**선배**: "네, 이제 Minikube 띄우고 적용해 봐요."
+
 ## 3.7 Minikube - 실행 및 결과 확인
 
 ### 3.7.1 Minikube 시작
@@ -682,7 +622,7 @@ kubectl apply -f k8s/user
 kubectl apply -f k8s/delivery
 kubectl apply -f k8s/gateway
 
-# 4. Ingress 활성화 (Minikube에서는 애드온 활성화 필요)
+# 4. Ingress Controller 활성화 (도커&쿠버네티스 5.2.3 참조)
 minikube addons enable ingress
 ```
 
@@ -738,7 +678,70 @@ kubectl get pods -n metacoding
 *그림 3-7. Pod 상태 확인*
 
 
-모든 Pod가 `Running` 상태가 되면 배포 완료입니다.
+모든 Pod가 `Running` 상태가 되면 배포 완료입니다. 지금 클러스터 안에 떠 있는 모양을 한 장으로 정리하면 아래와 같습니다.
+
+<div class="svg-figure">
+<svg viewBox="0 0 1080 580" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 3 통합 토폴로지: 외부 Host에서 Ingress와 gateway-service(Nginx)를 거쳐 4개 서비스로 분기하고, 4개 서비스가 공유 MySQL을 사용하는 구조">
+  <defs>
+    <marker id="ch03topo-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1f2937"/></marker>
+  </defs>
+  <text x="540" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">챕터 3 전체 구조 — Ingress · API Gateway · 4개 서비스 · 공유 MySQL</text>
+  <rect x="30" y="250" width="120" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="90" y="278" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Host</text>
+  <text x="90" y="296" text-anchor="middle" font-size="10" fill="#6b7280">브라우저·Hoppscotch</text>
+  <line x1="150" y1="280" x2="218" y2="135" stroke="#1f2937" stroke-width="1.4" marker-end="url(#ch03topo-a)"/>
+  <text x="178" y="200" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">minikube tunnel</text>
+  <rect x="200" y="60" width="850" height="500" rx="12" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <text x="220" y="80" font-size="11" font-style="italic" font-weight="700" fill="#475569">쿠버네티스 클러스터 · 네임스페이스 metacoding</text>
+  <rect x="540" y="100" width="170" height="50" rx="8" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="625" y="122" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Ingress</text>
+  <text x="625" y="138" text-anchor="middle" font-size="10" fill="#7b341e">gateway-ingress</text>
+  <line x1="625" y1="150" x2="625" y2="186" stroke="#1f2937" stroke-width="1.6" marker-end="url(#ch03topo-a)"/>
+  <rect x="490" y="190" width="270" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="625" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">gateway-service (Nginx)</text>
+  <text x="625" y="234" text-anchor="middle" font-size="10" fill="#7b341e">API Gateway · :80</text>
+  <text x="625" y="250" text-anchor="middle" font-size="9" font-family="monospace" fill="#9a3412">/login · /api/users · /api/products · /api/orders · /api/deliveries</text>
+  <line x1="555" y1="260" x2="320" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch03topo-a)"/>
+  <line x1="600" y1="260" x2="490" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch03topo-a)"/>
+  <line x1="650" y1="260" x2="760" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch03topo-a)"/>
+  <line x1="695" y1="260" x2="930" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch03topo-a)"/>
+  <rect x="240" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="320" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">user-service</text>
+  <text x="320" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8083 · ClusterIP</text>
+  <line x1="260" y1="370" x2="380" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="270" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="320" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">user-pod</text>
+  <rect x="410" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="490" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">product-service</text>
+  <text x="490" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8082 · ClusterIP</text>
+  <line x1="430" y1="370" x2="550" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="440" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="490" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">product-pod</text>
+  <rect x="680" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="760" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">order-service</text>
+  <text x="760" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8081 · ClusterIP</text>
+  <line x1="700" y1="370" x2="820" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="710" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="760" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">order-pod</text>
+  <rect x="850" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="930" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">delivery-service</text>
+  <text x="930" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8084 · ClusterIP</text>
+  <line x1="870" y1="370" x2="990" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="880" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="930" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">delivery-pod</text>
+  <line x1="320" y1="420" x2="600" y2="466" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch03topo-a)"/>
+  <line x1="490" y1="420" x2="620" y2="466" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch03topo-a)"/>
+  <line x1="760" y1="420" x2="640" y2="466" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch03topo-a)"/>
+  <line x1="930" y1="420" x2="660" y2="466" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch03topo-a)"/>
+  <rect x="500" y="470" width="280" height="70" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="640" y="494" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">db-service (MySQL)</text>
+  <text x="640" y="513" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:3306 · 4개 서비스가 metadb를 공유</text>
+  <text x="640" y="531" text-anchor="middle" font-size="9" fill="#9a3412">학습 편의용 단일 인스턴스</text>
+</svg>
+</div>
+*그림 3-8. 챕터 3 통합 토폴로지 - Host에서 Pod까지의 전체 경로*
+
+외부에서 들어온 요청은 Ingress에서 받아 gateway-service(Nginx)로 전달되고, Nginx의 URL 경로 규칙에 따라 4개의 ClusterIP 서비스 중 하나로 분기됩니다. 각 서비스 뒤에는 Pod 한 개씩이 매달려 있고, 4개 Pod 모두 같은 MySQL 인스턴스의 `metadb`를 공유합니다.
 
 ### 3.7.5 서비스 접근
 
@@ -752,7 +755,7 @@ minikube tunnel
 
 <!-- terminal-prompt: Hoppscotch showing POST request to the minikube gateway URL with /api/orders path. Bearer token set. JSON body with productId:1, quantity:1, price:2500000, address:"Addr 4". Response 200 OK with order status "COMPLETED". -->
 ![](assets/CH03/terminal/08_order-result.png)
-*그림 3-8. 주문 결과 확인*
+*그림 3-9. 주문 결과 확인*
 
 
 

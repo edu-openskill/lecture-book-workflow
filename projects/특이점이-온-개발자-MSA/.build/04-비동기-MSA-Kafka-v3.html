@@ -57,7 +57,7 @@
 <h2>4.1 한 서비스의 장애가 전체를 멈추다</h2>
 <p>챕터 3을 마치면서 이런 질문을 남겼습니다. <strong>&quot;product-service가 잠깐 다운되면 어떻게 되나?&quot;</strong></p>
 <p>답은 단순합니다. order-service도 주문을 처리할 수 없게 됩니다. order-service가 product-service를 직접 HTTP로 호출하기 때문입니다. 하나가 느려지면 다른 하나도 기다립니다. 하나가 멈추면 다른 하나도 멈춥니다.</p>
-<p>생각해 보면 이것은 MSA의 목표, 즉 <strong>&quot;각 서비스를 독립적으로 배포하고 장애를 격리한다&quot;</strong> 에 정면으로 위배됩니다.</p>
+<p>이것은 MSA의 목표인 <strong>&quot;각 서비스를 독립적으로 배포하고 장애를 격리한다&quot;</strong> 와 정면으로 충돌합니다.</p>
 <h3>4.1.1 카운터 대기 vs 진동벨</h3>
 <p>카페에서 커피를 주문하는 두 가지 방식으로 비교하겠습니다.</p>
 <!-- image-prompt: Minimal black line drawing on white background, split comparison, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Separated by a simple vertical line in the middle, no X mark. Left side, title "동기 (카운터 대기)": barista behind counter making coffee, one customer standing at counter waiting, four or five more customers queued behind in a long line looking bored. All frozen/blocked. Right side, title "비동기 (진동벨)": same cafe counter with barista, but the customer has walked away to a table, sitting with a laptop and a small vibration buzzer on the table. A wavy line from the buzzer indicating it will ring. No speech bubbles, no annotation text, no checklists. Clean lines, no colors. -->
@@ -83,38 +83,103 @@
 <div class="term-box">
 <p><strong>컨슈머(Consumer)란?</strong> 토픽에서 메시지를 읽는(구독하는) 쪽입니다. 우체통에서 편지를 꺼내 읽는 사람에 해당합니다.</p>
 </div>
-<!-- image-prompt: Minimal black line drawing on white background, horizontal flow diagram, 4:3 aspect ratio, 800x400px. Left: a box labeled "프로듀서 (order-service)". Arrow pointing right into center area: a large rounded rectangle labeled "Kafka 브로커" at top. Inside it, a smaller rectangle labeled "[토픽: order-created]" containing a horizontal row of small square cells like a conveyor belt — cells labeled "msg1", "msg2", "msg3", "...", "..." showing messages queued inside the topic. Right: an arrow from the topic pointing right to a box labeled "컨슈머 (orchestrator)". Clean lines, no colors. -->
 <div class="svg-figure">
-<svg viewBox="0 0 1000 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="메시지 큐 개념: Producer가 Topic에 메시지를 쌓고 Consumer가 차례로 읽음">
+<svg viewBox="0 0 1080 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kafka 저장소 구조: 여러 발행자가 토픽(우체통)에 편지(메시지)를 넣고, 여러 구독자가 각자의 토픽에서 편지를 꺼내 읽는다">
   <defs>
     <marker id="c4f2-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
-  <text x="500" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">메시지 큐 개념 — Producer · Topic · Consumer</text>
-  <rect x="40" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="130" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">PRODUCER</text>
-  <text x="130" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">order-service</text>
-  <line x1="220" y1="130" x2="318" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="269" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">publish</text>
-  <rect x="320" y="70" width="360" height="120" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="500" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">TOPIC</text>
-  <text x="500" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">order-created</text>
-  <rect x="345" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#ff7849"/>
-  <text x="374" y="166" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">msg1</text>
-  <rect x="408" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#ff7849"/>
-  <text x="437" y="166" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">msg2</text>
-  <rect x="471" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#ff7849"/>
-  <text x="500" y="166" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">msg3</text>
-  <rect x="534" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#ff7849"/>
-  <text x="563" y="166" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">msg4</text>
-  <text x="625" y="165" text-anchor="middle" font-size="14" fill="#9a3412">…</text>
-  <line x1="680" y1="130" x2="778" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="729" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">consume</text>
-  <rect x="780" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="870" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">CONSUMER</text>
-  <text x="870" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">orchestrator</text>
+  <text x="540" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Kafka — 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소</text>
+  <rect x="20" y="90" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="100" y="113" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER A</text>
+  <text x="100" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">발행자</text>
+  <rect x="135" y="142" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 135 142 L 150 152 L 165 142" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="20" y="185" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="100" y="208" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER B</text>
+  <text x="100" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">발행자</text>
+  <rect x="135" y="237" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 135 237 L 150 247 L 165 237" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="20" y="280" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="100" y="303" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER C</text>
+  <text x="100" y="325" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">발행자</text>
+  <rect x="135" y="332" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 135 332 L 150 342 L 165 332" fill="none" stroke="#475569" stroke-width="1"/>
+  <line x1="180" y1="125" x2="245" y2="155" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="180" y1="220" x2="245" y2="225" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="180" y1="315" x2="245" y2="295" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <rect x="240" y="60" width="600" height="320" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <text x="540" y="84" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kafka 브로커 — 분산 메시지 저장소</text>
+  <rect x="270" y="110" width="540" height="60" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <rect x="270" y="100" width="540" height="20" rx="5" fill="#ff7849"/>
+  <text x="540" y="114" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic A</text>
+  <rect x="290" y="124" width="50" height="3" rx="1" fill="#7b341e"/>
+  <g transform="translate(355 138)">
+    <rect x="0" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 0 0 L 22 11 L 44 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="50" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 50 0 L 72 11 L 94 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="100" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 100 0 L 122 11 L 144 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="150" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 150 0 L 172 11 L 194 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="200" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 200 0 L 222 11 L 244 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="250" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 250 0 L 272 11 L 294 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="300" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 300 0 L 322 11 L 344 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="350" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 350 0 L 372 11 L 394 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+  </g>
+  <rect x="270" y="200" width="540" height="60" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <rect x="270" y="190" width="540" height="20" rx="5" fill="#ff7849"/>
+  <text x="540" y="204" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic B</text>
+  <rect x="290" y="214" width="50" height="3" rx="1" fill="#7b341e"/>
+  <g transform="translate(355 228)">
+    <rect x="0" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 0 0 L 22 11 L 44 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="50" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 50 0 L 72 11 L 94 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="100" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 100 0 L 122 11 L 144 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="150" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 150 0 L 172 11 L 194 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="200" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 200 0 L 222 11 L 244 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+  </g>
+  <rect x="270" y="290" width="540" height="60" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <rect x="270" y="280" width="540" height="20" rx="5" fill="#ff7849"/>
+  <text x="540" y="294" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic C</text>
+  <rect x="290" y="304" width="50" height="3" rx="1" fill="#7b341e"/>
+  <g transform="translate(355 318)">
+    <rect x="0" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 0 0 L 22 11 L 44 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="50" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 50 0 L 72 11 L 94 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="100" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 100 0 L 122 11 L 144 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+  </g>
+  <line x1="835" y1="140" x2="900" y2="125" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="835" y1="225" x2="900" y2="220" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="835" y1="315" x2="900" y2="315" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <rect x="900" y="90" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="980" y="113" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">CONSUMER α</text>
+  <text x="980" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
+  <rect x="1015" y="142" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 1015 142 L 1030 152 L 1045 142" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="900" y="185" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="980" y="208" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">CONSUMER β</text>
+  <text x="980" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
+  <rect x="1015" y="237" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 1015 237 L 1030 247 L 1045 237" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="900" y="280" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="980" y="303" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">CONSUMER γ</text>
+  <text x="980" y="325" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
+  <rect x="1015" y="332" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 1015 332 L 1030 342 L 1045 332" fill="none" stroke="#475569" stroke-width="1"/>
 </svg>
 </div>
-*그림 4-2. 메시지 큐 개념*
+*그림 4-2. Kafka - 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소*
 <p>Kafka의 중요한 특성은, 컨슈머가 메시지를 읽어도 토픽에서 <strong>삭제되지 않는다</strong>는 점입니다. 보존 기간(기본 7일)이 지나야 삭제됩니다. 컨슈머는 오프셋(자신이 어디까지 읽었는지 기록한 위치)을 기억하기 때문에 재시작 후에도 읽지 않은 메시지부터 이어서 처리할 수 있습니다.</p>
 <div class="prep-note">
 <p><strong>RabbitMQ 같은 전통적인 메시지 큐는 컨슈머가 메시지를 읽으면 큐에서 바로 삭제됩니다.</strong> 반면 <strong>Kafka</strong>는 읽어도 메시지가 남아 있습니다. 덕분에 여러 컨슈머가 같은 메시지를 각자의 속도로 읽을 수 있고, 장애 후 재처리도 가능합니다.</p>
@@ -151,7 +216,7 @@
 *그림 4-3. 컨슈머 그룹*
 <h3>4.2.3 이번 챕터에서 사용하는 토픽 맵</h3>
 <p>이번 챕터에서 사용하는 Kafka 토픽 전체를 먼저 봅니다. 처음에는 낯설어 보이지만, 구현 과정에서 하나씩 다루게 됩니다.</p>
-<p>총 8개의 토픽을 사용합니다. <code>command</code>가 붙은 토픽은 orchestrator가 각 서비스에 내리는 명령입니다. <code>command</code>가 없는 토픽은 각 서비스가 처리 결과를 orchestrator에 보고하는 이벤트입니다.</p>
+<p>총 8개의 토픽을 사용합니다. <code>command</code>가 붙은 토픽은 orchestrator가 각 서비스에 내리는 명령입니다. <code>command</code>가 없는 토픽은 각 서비스가 처리 결과를 orchestrator에 보고하는 이벤트입니다. 표는 위 5개(정상 주문 흐름)와 아래 3개(롤백 흐름)로 나뉩니다.</p>
 <table>
 <thead>
 <tr>
@@ -218,9 +283,33 @@
 <div class="dialogue"><span class="speaker">오픈이</span>: "메시지 방식으로 바꾸니까, 전체 흐름을 누가 관리해야 할지 모르겠어요."</div>
 <div class="dialogue"><span class="speaker">선배</span>: "오케스트레이터를 만드는 거예요. 지휘자가 전체 악보를 보고 순서를 정하는 것처럼, 각 서비스는 자기 일만 하고 결과만 보고하게 해요."</div>
 <h2>4.3 Orchestration Saga - 지휘자가 흐름을 조율하다</h2>
-<p>Saga를 구현하는 방식은 크게 두 가지입니다. 각 서비스가 이벤트를 보고 스스로 다음 서비스를 호출하는 Choreography, 중앙 지휘자가 순서를 정하는 Orchestration입니다. 이 책에서는 워크플로우 상태를 한 곳에서 추적하고 실패 시 정확한 롤백이 가능한 Orchestration을 선택합니다. <strong>지휘자(orchestrator)</strong> 가 전체 흐름을 중앙에서 관리합니다. 각 서비스는 명령을 받아 처리하고 결과를 보고할 뿐, 다음 단계가 무엇인지 알 필요가 없습니다. 지휘자만 전체 악보를 알고 있습니다.</p>
+<p>챕터 2에서는 주문 서비스가 다른 서비스를 직접 호출하고 직접 보상했습니다. 실패가 발생하면 주문 row 자체가 트랜잭션 롤백으로 사라져, &quot;어떤 주문이 왜 실패했는지&quot; 이력조차 남지 않았습니다. 이제 중앙에 지휘자를 두는 방식, <strong>Orchestration Saga</strong>로 넘어갑니다. 워크플로우 상태를 한 곳에서 추적하므로 실패 시 정확한 롤백이 가능합니다. 주문도 명시적으로 CANCELLED 상태로 남아 실패 이력까지 보존됩니다.</p>
+<p><strong>지휘자(orchestrator)</strong> 가 전체 흐름을 중앙에서 관리합니다. 각 서비스는 명령을 받아 처리하고 결과를 보고할 뿐, 다음 단계가 무엇인지 알 필요가 없습니다. 지휘자만 전체 악보를 알고 있습니다.</p>
 <!-- image-prompt: Clean black line drawing on white background, simplified orchestra illustration, 4:3 aspect ratio, 800x600px. No stage, no curtains, no background. Center: a conductor on a small podium holding a baton and a score labeled "SAGA", drawn in a clean cartoon style (not stick figures — simple but with body proportions, hair, clothing outlines). Three musicians sitting around the conductor with recognizable instruments and music stands labeled "ORDER", "PRODUCT", "DELIVERY". Blue curved arrows from conductor to each musician labeled "command". Green curved arrows from each musician back labeled "result". Simple cartoon style like a textbook illustration — more detailed than stick figures but less detailed than realistic. No shading, no colors except blue and green arrows. -->
 <div class="chapter-image gemini"><img src="..\chapters\assets\CH04\gemini\04_orchestra.png" alt="" /><div class="caption">그림 4-4. Orchestration Saga 구조</div></div>
+<p><strong>참고: Choreography Saga - 또 다른 Saga 구현 방식</strong></p>
+<p>이 책에서는 다루지 않지만, Saga 패턴에는 <strong>Choreography</strong>라는 또 다른 방식이 있습니다. 중앙 지휘자 없이 각 서비스가 이벤트를 발행·구독하면서 다음 단계를 스스로 진행합니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 1080 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Choreography Saga 이벤트 체인: 각 서비스가 이벤트를 발행하면 다음 서비스가 구독해 자신의 일을 진행">
+  <defs>
+    <marker id="c4-chor-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="540" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Choreography Saga — 서비스가 이벤트를 발행하면 다음 서비스가 구독</text>
+  <rect x="40" y="80" width="200" height="60" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="140" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">order-service</text>
+  <line x1="240" y1="110" x2="418" y2="110" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4-chor-o)"/>
+  <text x="329" y="100" text-anchor="middle" font-size="12" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">order-created</text>
+  <rect x="420" y="80" width="220" height="60" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="530" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">product-service</text>
+  <line x1="640" y1="110" x2="818" y2="110" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4-chor-o)"/>
+  <text x="729" y="100" text-anchor="middle" font-size="12" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">product-decreased</text>
+  <rect x="820" y="80" width="220" height="60" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="930" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">delivery-service</text>
+  <text x="540" y="180" text-anchor="middle" font-size="12" fill="#6b7280" font-style="italic">각 서비스는 다음 단계가 누구인지 모름 · 이벤트만 발행</text>
+</svg>
+</div>
+*그림 4-5. Choreography Saga 이벤트 체인 - 각 서비스가 이벤트를 발행하면 다음 서비스가 구독*
+<p>각 서비스는 <strong>다음 단계가 누구인지 모릅니다</strong>. 이벤트만 던지고, 구독하는 쪽이 알아서 일을 이어갑니다. 단순한 흐름에선 가볍지만, 단계가 늘어나거나 보상이 복잡해질수록 전체 워크플로우가 여러 서비스에 흩어져 추적이 어렵습니다. 그래서 이 책은 상태를 한 곳(orchestrator)에서 추적할 수 있는 Orchestration을 선택했습니다.</p>
 <h3>4.3.1 주문 요청 성공 흐름</h3>
 <p>주문이 정상적으로 처리되는 흐름입니다. 클라이언트가 주문을 요청하면, orchestrator가 재고 감소 → 배달 생성 → 주문 완료 순서로 각 서비스에 명령을 보냅니다. 모든 단계가 성공하면 주문 상태가 COMPLETED로 바뀝니다.</p>
 <div class="svg-figure">
@@ -257,7 +346,7 @@
   <text x="540" y="445" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">각 메시지는 Kafka 토픽을 거쳐 전달 · 인디고: command, 오렌지 점선: event</text>
 </svg>
 </div>
-*그림 4-5. 주문 성공 흐름 (Orchestration Saga)*
+*그림 4-6. 주문 성공 흐름 (Orchestration Saga)*
 <table>
 <thead>
 <tr>
@@ -352,7 +441,7 @@
   <text x="540" y="405" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패 감지 후 Orchestrator가 자동으로 보상 명령을 역순으로 발행</text>
 </svg>
 </div>
-*그림 4-6. 주문 실패 시 롤백 흐름*
+*그림 4-7. 주문 실패 시 롤백 흐름*
 <p><strong>재고 감소 실패 시</strong></p>
 <p>재고가 부족하면 product-service가 실패를 보고합니다. 차감 자체가 실패했으니 복구할 재고가 없습니다. 주문만 취소합니다.</p>
 <table>
@@ -438,21 +527,38 @@
 <p><strong>REST로 주문을 취소하는 엔드포인트는 사라집니다.</strong> 주문 취소는 orchestrator가 발행한 <code>cancel-order-command</code>를 OrderCommandConsumer가 받아 처리합니다.</p>
 </div>
 <h3>4.4.2 의존성 추가</h3>
-<p><code>spring-boot-starter-kafka</code> 한 줄을 추가합니다. JSON 직렬화에 필요한 <code>jackson-databind</code>는 spring-boot-starter-kafka가 transitive로 끌고 오므로 따로 명시하지 않습니다.</p>
-<p>챕터 3 <code>build.gradle</code>에 다음 한 줄을 추가합니다.</p>
-<div class="code-block highlight" data-lang="gradle"><div class="cb-title">build.gradle. Kafka 의존성 추가</div>implementation 'org.springframework.boot:spring-boot-starter-kafka'</div>
+<p><code>spring-boot-starter-kafka</code> 한 줄을 추가합니다.</p>
+<p>챕터 3 <code>build.gradle</code> 의존성에 <code>spring-boot-starter-kafka</code>를 추가합니다.</p>
 <h3>4.4.3 Kafka 설정</h3>
 <p><code>application-dev.properties</code>와 <code>application-prod.properties</code> 모두에 Kafka 설정을 추가합니다. Kafka 주소는 환경변수로 주입받습니다.</p>
 <div class="prep-note">
 <p><strong><code>group-id</code>는 컨슈머 그룹 이름입니다.</strong> 같은 그룹끼리는 메시지를 나눠 받고, 다른 그룹이면 같은 메시지를 각각 받습니다.</p>
 </div>
-<div class="code-block highlight" data-lang="properties"><div class="cb-title">application-prod.properties. Kafka 설정</div><span class="c1"># ===== Kafka =====</span>
-<span class="na">spring.kafka.bootstrap-servers</span><span class="o">=</span><span class="s">${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}</span>
-<span class="na">spring.kafka.consumer.group-id</span><span class="o">=</span><span class="s">order-service                    # 이 서비스의 컨슈머 그룹 이름</span>
-<span class="c1"># 생략 ...</span></div>
-<p>dev와 prod의 Kafka 설정은 동일합니다. <code>bootstrap-servers</code>의 기본값이 <code>localhost:9092</code>이므로 로컬에서는 그대로, K8s에서는 환경변수로 Kafka 주소를 주입합니다.</p>
+<p><code>application-prod.properties</code>에 Kafka 설정 두 줄을 추가합니다.</p>
+<table>
+<thead>
+<tr>
+<th>키</th>
+<th>값</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spring.kafka.bootstrap-servers</code></td>
+<td><code>${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}</code></td>
+<td>Kafka 브로커 주소. K8s에서 환경변수로 주입, 기본값 <code>localhost:9092</code></td>
+</tr>
+<tr>
+<td><code>spring.kafka.consumer.group-id</code></td>
+<td><code>order-service</code></td>
+<td>이 서비스의 컨슈머 그룹 이름</td>
+</tr>
+</tbody>
+</table>
+<p>dev와 prod의 Kafka 설정은 동일합니다.</p>
 <h3>4.4.4 KafkaConfig : JSON 메시지 변환</h3>
-<p><code>JacksonJsonMessageConverter</code> 빈을 등록합니다. 이 설정은 모든 Kafka 사용 서비스(order, product, delivery, orchestrator)에 동일하게 추가합니다.</p>
+<p>Kafka는 메시지를 바이트로 주고받기 때문에 Java 객체를 그대로 보낼 수 없습니다. 택배를 보내기 전에 짐을 박스에 포장하듯, 객체를 JSON 문자열로 변환(직렬화)했다가 받는 쪽에서 다시 객체로 되돌립니다. <code>JacksonJsonMessageConverter</code> 빈이 이 변환을 자동으로 처리합니다. 이 설정은 모든 Kafka 사용 서비스(order, product, delivery, orchestrator)에 동일하게 추가합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title">core/config/KafkaConfig.java. JSON 메시지 변환 빈</div><span class="nd">@Configuration</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">KafkaConfig</span><span class="w"> </span><span class="p">{</span>
 
@@ -462,15 +568,7 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <h3>4.4.5 이벤트 DTO</h3>
-<p>Kafka 메시지로 전송할 데이터를 DTO로 정의합니다. 주문 1건에 상품 1건이라는 챕터 02의 단순화 가정을 그대로 가져가므로, 이벤트도 record 한 줄짜리 단순한 형태입니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">adapter/message/OrderCreatedEvent.java. 주문 생성 이벤트 DTO</div><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">OrderCreatedEvent</span><span class="p">(</span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">,</span>
-<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">address</span>
-<span class="p">)</span><span class="w"> </span><span class="p">{}</span></div>
+<p>Kafka 메시지로 전송할 데이터를 DTO로 정의합니다. 이번 챕터에서 쓰는 모든 DTO는 <code>record</code>로 단순하게 정의되며, 8개 토픽 전체 DTO 목록은 다음 절 4.5.2의 표에서 한 번에 정리합니다.</p>
 <h3>4.4.6 KafkaTemplate : 메시지 발행</h3>
 <p>이벤트를 Kafka 토픽으로 발행하는 프로듀서입니다. <code>KafkaTemplate</code>이 직렬화와 전송을 처리합니다.</p>
 <p><code>adapter/producer/OrderEventProducer.java</code>를 열고 아래 코드를 작성합니다.</p>
@@ -486,7 +584,8 @@
 <span class="p">}</span></div>
 <p>이번 챕터에서 order-service가 직접 발행하는 이벤트는 <code>order-created</code> 하나입니다. 주문 취소는 orchestrator가 결정해서 <code>cancel-order-command</code>를 보내고, order-service는 그 명령을 받아 상태만 바꿉니다.</p>
 <h3>4.4.7 OrderService 변경 : 핵심 차이</h3>
-<p>이전 챕터와 비교하여 가장 크게 달라지는 부분은 동기 호출 대신 Kafka 이벤트를 발행하고 즉시 PENDING 상태로 반환한다는 점입니다.
+<p>이전 챕터와 가장 크게 달라진 점은 두 가지입니다. 동기 호출이 Kafka 이벤트 발행으로 바뀌었고, 응답은 즉시 PENDING 상태로 돌아갑니다.</p>
+<p>사용자는 PENDING 응답만 받고, 실제 처리는 백그라운드에서 진행됩니다. 그렇다면 처리 결과(COMPLETED 또는 CANCELLED)는 사용자에게 어떻게 알려야 할까요? 이 숙제는 챕터 5에서 WebSocket으로 풀어냅니다.
 아래 createOrder 메서드를 구현합니다.</p>
 <p><code>usecase/OrderService.java</code>를 열고 아래 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/OrderService.java. createOrder - Kafka 이벤트 발행으로 교체</div><span class="nd">@Override</span>
@@ -595,6 +694,7 @@
 <p>product-service와 delivery-service의 Consumer/Producer는 order-service와 동일한 패턴을 따릅니다.</p>
 <h2>4.6 orchestrator - 워크플로우 조율 서비스 구현</h2>
 <p>orchestrator는 이번 챕터에서 <strong>새로 추가되는 서비스</strong>입니다. REST API는 없고, Kafka 이벤트만 처리합니다. order, product, delivery 서비스의 Kafka 흐름을 중앙에서 조율하는 지휘자입니다.</p>
+<p>지휘자가 손에 든 것은 두 가지뿐입니다. 악보와 신호입니다. 악보는 전체 흐름을 기록한 <code>WorkflowState</code>이고, 신호는 각 서비스에 보내는 Kafka 메시지입니다. 아래 패키지 구조도 이 두 가지에 맞춰 <code>message/</code>와 <code>handler/</code>로 나뉩니다.</p>
 <h3>4.6.1 패키지 구조</h3>
 <div class="code-block highlight" data-lang="text"><div class="cb-title">orchestrator/ 패키지 구조</div>orchestrator/src/main/java/.../
 ├── message/
@@ -609,11 +709,7 @@
 └── handler/
     └── OrderOrchestrator.java               ← [작성] 전체 워크플로우 조율</div>
 <h3>4.6.2 의존성</h3>
-<p>Kafka 메시지를 주고받기 위해 <code>spring-boot-starter-kafka</code>를 추가합니다. JSON 직렬화 라이브러리(<code>jackson-databind</code>)는 spring-boot-starter-kafka가 transitive 의존성으로 끌고 오므로 따로 명시하지 않습니다.</p>
-<div class="code-block highlight" data-lang="gradle"><div class="cb-title">orchestrator/build.gradle. Kafka 의존성</div>dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.springframework.boot:spring-boot-starter-kafka'
-}</div>
+<p>orchestrator는 새 서비스라 <code>build.gradle</code> 의존성에 <code>spring-boot-starter</code>와 <code>spring-boot-starter-kafka</code> 두 개를 추가합니다.</p>
 <h3>4.6.3 OrderOrchestrator</h3>
 <p>OrderOrchestrator는 세 단계로 동작합니다.</p>
 <ol>
@@ -621,16 +717,29 @@
 <li><strong>productDecreased</strong> --- 재고 감소 결과를 받아, 성공이면 배달 생성 명령을, 실패면 주문 취소 명령을 발행합니다.</li>
 <li><strong>deliveryCreated</strong> --- 배달 생성 결과를 받아, 성공이면 주문 완료 명령을, 실패면 재고 복구 + 주문 취소 명령을 발행합니다.</li>
 </ol>
-<p>각 단계를 하나씩 살펴보겠습니다.</p>
-<p><code>handler/OrderOrchestrator.java</code>를 열고 아래 클래스 골격을 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> handler/OrderOrchestrator.java. 클래스 골격</div><span class="nd">@Component</span>
+<p>각 단계를 살펴보기 전에, 진행 상태를 보관할 자료구조부터 정의합니다. orchestrator는 주문 한 건의 진행 상태를 <strong>메모리</strong>에 보관해야 합니다. 배달 생성이 실패했을 때 차감된 재고를 되돌리려면, 어떤 상품을 얼마에 얼마큼 차감했는지 알고 있어야 하기 때문입니다.</p>
+<div class="term-box">
+<p><strong>WorkflowState란?</strong> orchestrator가 주문 한 건의 진행 상태를 추적하기 위해 사용하는 내부 객체입니다. 주문 ID, 배달 주소, 그리고 차감 대상 상품 정보(productId, quantity, price)를 보관합니다.</p>
+</div>
+<p><code>handler/OrderOrchestrator.java</code>를 열고 클래스 골격과 WorkflowState 내부 클래스를 함께 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> handler/OrderOrchestrator.java. 클래스 골격 + WorkflowState</div><span class="nd">@Component</span>
 <span class="nd">@RequiredArgsConstructor</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderOrchestrator</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">KafkaTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kafkaTemplate</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">WorkflowState</span><span class="o">&gt;</span><span class="w"> </span><span class="n">states</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ConcurrentHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">  </span><span class="c1">// Kafka 리스너가 멀티스레드로 동작하므로 동시성 보장 필요</span>
 
-<span class="w">    </span><span class="c1">// 아래 1~3단계 메서드와 WorkflowState 내부 클래스를 추가</span>
+<span class="w">    </span><span class="c1">// 아래 1~3단계 메서드를 추가</span>
+
+<span class="w">    </span><span class="nd">@Data</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WorkflowState</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
+<p><code>WorkflowState</code>는 <code>ConcurrentHashMap</code>에 저장되므로 orchestrator Pod가 재시작되면 진행 중인 워크플로우는 소멸합니다. 실무에서는 DB나 Redis에 상태를 저장합니다. 단일 상품 가정 덕분에 상태도 단순해서, 차감한 정보 그대로 들고 있다가 롤백 시점에 IncreaseProductCommand로 돌려보내면 됩니다.</p>
 <h3>4.6.4 1단계 - 주문 생성 이벤트 수신 (orderCreated)</h3>
 <div class="svg-figure">
 <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 시퀀스: order-created 수신 후 WorkflowState 생성, decrease-product-command 발행">
@@ -656,7 +765,7 @@
   <text x="569" y="257" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">③ decrease-product-command</text>
 </svg>
 </div>
-*그림 4-7. 1단계 - 주문 생성 이벤트 수신*
+*그림 4-8. 1단계 - 주문 생성 이벤트 수신*
 <p><code>handler/OrderOrchestrator.java</code>에 1단계 리스너를 추가합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 5</span> handler/OrderOrchestrator.java. 1단계 - orderCreated</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">orderCreated</span><span class="p">(</span><span class="n">OrderCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -675,7 +784,7 @@
 <span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">DecreaseProductCommand</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">price</span><span class="p">())</span>
 <span class="w">    </span><span class="p">);</span>
 <span class="p">}</span></div>
-<p>orchestrator가 주문 생성(<code>order-created</code>) 이벤트를 받으면, 주문 ID별로 <code>WorkflowState</code>를 생성합니다. <code>WorkflowState</code>는 메모리(<code>ConcurrentHashMap</code>)에 저장되므로 orchestrator Pod가 재시작되면 진행 중인 워크플로우는 소멸합니다. 실무에서는 DB나 Redis에 상태를 저장하는 방식을 사용합니다. 그리고 재고 감소 명령(<code>decrease-product-command</code>)을 발행합니다.</p>
+<p>orchestrator가 주문 생성(<code>order-created</code>) 이벤트를 받으면 주문 ID별로 <code>WorkflowState</code>를 생성하고, 재고 감소 명령(<code>decrease-product-command</code>)을 발행합니다.</p>
 <h3>4.6.5 2단계 - 재고 차감 결과 수신 (productDecreased)</h3>
 <div class="svg-figure">
 <svg viewBox="0 0 1080 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 시퀀스: product-decreased 결과에 따라 성공이면 배달 생성, 실패면 주문 취소">
@@ -704,7 +813,7 @@
   <text x="604" y="272" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">②b 실패 → cancel-order-command (재고 복구 불필요)</text>
 </svg>
 </div>
-*그림 4-8. 2단계 - 재고 차감 결과 수신*
+*그림 4-9. 2단계 - 재고 차감 결과 수신*
 <p><code>handler/OrderOrchestrator.java</code>에 2단계 리스너를 추가합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 6</span> handler/OrderOrchestrator.java. 2단계 - productDecreased</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;product-decreased&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">productDecreased</span><span class="p">(</span><span class="n">ProductDecreasedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -762,7 +871,7 @@
   <text x="604" y="337" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">②c 실패 → cancel-order-command → CANCELLED</text>
 </svg>
 </div>
-*그림 4-9. 3단계 - 배달 생성 결과 수신*
+*그림 4-10. 3단계 - 배달 생성 결과 수신*
 <p><code>handler/OrderOrchestrator.java</code>에 3단계 리스너를 추가합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 7</span> handler/OrderOrchestrator.java. 3단계 - deliveryCreated</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deliveryCreated</span><span class="p">(</span><span class="n">DeliveryCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -795,21 +904,6 @@
 <span class="w">    </span><span class="n">states</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">orderId</span><span class="p">);</span><span class="w"> </span><span class="c1">// 워크플로우 종료</span>
 <span class="p">}</span></div>
 <p>배달 생성이 실패하면 이전 단계에서 차감했던 재고를 복구하고 주문을 취소합니다. 성공하면 주문 완료 명령을 발행합니다. 단일 상품 모델이라 복구할 재고도 하나뿐입니다.</p>
-<h3>4.6.7 WorkflowState - 주문별 진행 상태 추적</h3>
-<p>orchestrator는 진행 중인 주문의 상태를 <strong>메모리</strong>에 보관합니다. 배달 생성 실패 시 차감된 재고를 다시 늘리려면, 어떤 상품을 얼마에 얼마큼 차감했는지를 알고 있어야 하기 때문입니다.</p>
-<div class="term-box">
-<p><strong>WorkflowState란?</strong> orchestrator가 주문 한 건의 진행 상태를 추적하기 위해 사용하는 내부 객체입니다. 주문 ID, 배달 주소, 그리고 차감 대상 상품 정보(productId, quantity, price)를 보관합니다.</p>
-</div>
-<p><code>handler/OrderOrchestrator.java</code>에 내부 클래스를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 8</span> handler/OrderOrchestrator.java. WorkflowState 내부 클래스</div><span class="nd">@Data</span>
-<span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WorkflowState</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">;</span>
-<span class="p">}</span></div>
-<p>단일 상품 가정 덕분에 상태도 단순해집니다. &quot;어떤 상품이 처리 완료됐는지&quot; 같은 추적 자료구조 없이, 차감한 정보 그대로를 들고 있다가 롤백 시점에 그대로 IncreaseProductCommand로 돌려보내면 됩니다.</p>
 <p>모든 서비스의 Kafka 연동 코드가 완성됐습니다. 이제 Kubernetes에 Kafka와 orchestrator를 추가하고 전체 시스템을 배포합니다.</p>
 <h2>4.7 Kubernetes - Kafka와 orchestrator 배포</h2>
 <p>챕터 3과 비교하여 이번 챕터에서 K8s에 새로 추가되는 것은 <strong>Kafka</strong>와 <strong>orchestrator</strong> 두 가지입니다. 기존 서비스의 ConfigMap에도 Kafka 주소를 추가해야 합니다.</p>
@@ -860,7 +954,7 @@
   <text x="500" y="320" text-anchor="middle" font-size="12" fill="#475569">단일 브로커이므로 컨트롤러가 자기 자신과만 통신합니다. 멀티 브로커일 때 같은 CLUSTER_ID를 가진 노드가 동기화됩니다.</text>
 </svg>
 </div>
-*그림 4-10. CLUSTER_ID로 Kafka 브로커들을 하나의 클러스터로 묶습니다. 단일 브로커 실습에서는 컨트롤러가 자기 자신(localhost:9093)과만 통신합니다*
+*그림 4-11. CLUSTER_ID로 Kafka 브로커들을 하나의 클러스터로 묶습니다. 단일 브로커 실습에서는 컨트롤러가 자기 자신(localhost:9093)과만 통신합니다*
 <p><strong>KAFKA_ADVERTISED_LISTENERS</strong>는 클라이언트가 Kafka에 접근할 때 사용하는 주소입니다. 각 서비스의 ConfigMap에 설정하는 <code>KAFKA_BOOTSTRAP_SERVERS: kafka-service:9092</code>가 이 주소를 가리킵니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1000 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KAFKA_ADVERTISED_LISTENERS: 4개의 클라이언트 서비스가 kafka-service:9092 주소로 브로커에 접근">
@@ -893,52 +987,45 @@
   <text x="500" y="425" text-anchor="middle" font-size="12" fill="#475569">클라이언트의 KAFKA_BOOTSTRAP_SERVERS 값은 브로커의 ADVERTISED_LISTENERS 값과 일치해야 합니다.</text>
 </svg>
 </div>
-*그림 4-11. 클라이언트는 KAFKA_ADVERTISED_LISTENERS에 지정된 kafka-service:9092로 Kafka에 접근합니다*
-<p>Kafka를 KRaft 모드로 실행하는 Deployment입니다. 각 옵션의 역할은 주석을 참고합니다.</p>
-<div class="code-block highlight" data-lang="yaml"><div class="cb-title">kafka-deploy.yml. KRaft 모드 Kafka 브로커</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka-deploy</span>
-<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metacoding</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka</span>
-<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka</span>
-<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">confluentinc/cp-kafka:7.5.0</span>
-<span class="w">          </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9092</span><span class="w">  </span><span class="c1"># 클라이언트 통신용 (외부에 노출)</span>
-<span class="w">          </span><span class="nt">env</span><span class="p">:</span>
-<span class="w">            </span><span class="c1"># 1. 클러스터 및 노드 식별</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CLUSTER_ID</span><span class="w">                       </span><span class="c1"># 같은 값을 가진 Kafka 서버끼리 클러스터로 묶인다</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AbijZYk0QOm5p852kOMSIg&quot;</span><span class="w">        </span><span class="c1"># 클러스터 고유 UUID</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_NODE_ID</span><span class="w">                    </span><span class="c1"># 이 Kafka 서버의 고유 번호 (겹치면 안 됨)</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="w">                             </span><span class="c1"># 첫 번째 서버이므로 1</span>
-<span class="w">            </span><span class="c1"># 2. 역할 지정</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_PROCESS_ROLES</span><span class="w">              </span><span class="c1"># 이 Kafka 서버가 맡는 역할을 지정</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;broker,controller&quot;</span><span class="w">             </span><span class="c1"># broker: 메시지 저장/전달, controller: 토픽 목록 등 내부 정보 관리</span>
-<span class="w">            </span><span class="c1"># 3. 포트 정의 및 역할별 포트 지정</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_LISTENERS</span><span class="w">                  </span><span class="c1"># Kafka가 수신할 포트를 정의</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093&quot;</span><span class="w"> </span><span class="c1"># PLAINTEXT 9092는 외부, CONTROLLER 9093은 내부용</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_INTER_BROKER_LISTENER_NAME</span><span class="w"> </span><span class="c1"># Kafka끼리 메시지를 복제할 때 사용할 포트 지정 (9092)</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;PLAINTEXT&quot;</span><span class="w">                     </span><span class="c1"># KAFKA_LISTENERS에서 정의한 프로토콜</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_CONTROLLER_LISTENER_NAMES</span><span class="w">  </span><span class="c1"># Kafka끼리 토픽 목록 등을 동기화할 때 사용할 포트 지정 (9093)</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;CONTROLLER&quot;</span><span class="w">                    </span><span class="c1"># KAFKA_LISTENERS에서 정의한 리스너 이름 (내부 관리용 9093)</span>
-<span class="w">            </span><span class="c1"># 4. 외부 접근 및 서버 간 통신 주소</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_ADVERTISED_LISTENERS</span><span class="w">       </span><span class="c1"># 클라이언트가 Kafka에 접근할 주소를 지정</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;PLAINTEXT://kafka-service:9092&quot;</span><span class="w"> </span><span class="c1"># ConfigMap의 KAFKA_BOOTSTRAP_SERVERS와 일치</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_CONTROLLER_QUORUM_VOTERS</span><span class="w">   </span><span class="c1"># 컨트롤러 정족수(quorum)를 이루는 노드 주소록</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1@localhost:9093&quot;</span><span class="w">              </span><span class="c1"># 단일 브로커이므로 자기 자신만 등록</span>
-<span class="w">            </span><span class="c1"># 5. 싱글 브로커 환경 설정(replicas: 1일 때)</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR</span><span class="w">   </span><span class="c1"># 메시지를 몇 대의 서버에 복제할지 설정</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="w">                                     </span><span class="c1"># 서버가 1대이므로 1 (기본값은 3)</span></div>
+*그림 4-12. 클라이언트는 KAFKA_ADVERTISED_LISTENERS에 지정된 kafka-service:9092로 Kafka에 접근합니다*
+<p>Kafka를 KRaft 모드로 실행하는 Deployment의 환경변수는 5그룹으로 묶입니다.</p>
+<table>
+<thead>
+<tr>
+<th>그룹</th>
+<th>역할</th>
+<th>단일 브로커 설정값</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 식별</td>
+<td>클러스터 UUID + 노드 번호</td>
+<td><code>CLUSTER_ID</code> = UUID, <code>KAFKA_NODE_ID</code> = 1</td>
+</tr>
+<tr>
+<td>2. 역할</td>
+<td>broker와 controller 겸용</td>
+<td><code>KAFKA_PROCESS_ROLES</code> = broker,controller</td>
+</tr>
+<tr>
+<td>3. 포트</td>
+<td>클라이언트용 9092 + 컨트롤러용 9093</td>
+<td><code>KAFKA_LISTENERS</code>로 두 포트 정의</td>
+</tr>
+<tr>
+<td>4. 주소</td>
+<td>클라이언트가 접근하는 주소</td>
+<td><code>KAFKA_ADVERTISED_LISTENERS</code> = kafka-service:9092</td>
+</tr>
+<tr>
+<td>5. 복제</td>
+<td>메시지를 복제할 서버 수</td>
+<td><code>KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR</code> = 1</td>
+</tr>
+</tbody>
+</table>
+<p>그룹 1과 그룹 4는 앞의 그림 4-11, 4-12에서 시각화했습니다. 그룹 2·3·5는 단일 브로커 실습에 맞춘 기본 설정이라 그대로 두면 됩니다. 전체 매니페스트와 정확한 옵션 값은 GitHub 레포 <code>k8s/kafka/kafka-deploy.yml</code>에서 확인합니다.</p>
 <p>Kafka Pod에 접근할 수 있도록 K8s Service를 정의합니다. 컨트롤러용 9093 포트는 컨테이너 안에서만 쓰이므로 Service에는 클라이언트용 9092만 노출합니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title">kafka-service.yml. 브로커 포트 노출</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
@@ -975,16 +1062,7 @@
 </tbody>
 </table>
 <h3>4.7.3 기존 서비스 ConfigMap 수정</h3>
-<p>기존 서비스(order, product, delivery)의 ConfigMap에 Kafka 접속 주소를 추가합니다. 주문 서비스의 예시입니다.</p>
-<div class="code-block highlight" data-lang="yaml"><div class="cb-title">order-configmap.yml. Kafka 접속 주소 추가</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ConfigMap</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">order-configmap</span>
-<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metacoding</span>
-<span class="nt">data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">DB_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jdbc:mysql://db-service:3306/metadb?useSSL=false&amp;serverTimezone=UTC&amp;useLegacyDatetimeCode=false&amp;allowPublicKeyRetrieval=true</span>
-<span class="w">  </span><span class="nt">DB_DRIVER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">com.mysql.cj.jdbc.Driver</span>
-<span class="w">  </span><span class="nt">SPRING_KAFKA_BOOTSTRAP_SERVERS</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka-service:9092</span><span class="w">  </span><span class="c1"># Kafka 접속 주소 추가</span></div>
+<p>기존 서비스(order, product, delivery)의 ConfigMap <code>data:</code> 섹션에 <code>SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-service:9092</code> 한 줄을 추가합니다. 챕터 3에서 본 ConfigMap 형식 그대로입니다.</p>
 <h2>4.8 실행 및 결과 확인</h2>
 <h3>4.8.1 이미지 빌드</h3>
 <p>Minikube 내부에 이미지를 빌드합니다. 챕터 3 대비 orchestrator 서비스가 새로 추가됩니다.</p>
@@ -1035,7 +1113,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
     <div class="tl-divider"><span class="tl-val">9개 Deployment + 8개 Service 배포 완료</span><span class="tl-cursor"></span></div>
   </div>
 </div>
-*그림 4-12. Kafka 및 서비스 배포 실행*
+*그림 4-13. Kafka 및 서비스 배포 실행*
 <p>모든 Pod가 Running 상태인지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 상태 확인</div>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>metacoding</div>
 <!-- terminal-prompt: Terminal output of "kubectl get pods -n metacoding" command. All pods (db, gateway, order, product, user, delivery, kafka, orchestrator) showing Running status with 1/1 Ready. -->
@@ -1058,7 +1136,98 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
     <div class="tl-divider"><span class="tl-val">8개 Pod Running (Kafka + orchestrator 추가)</span><span class="tl-cursor"></span></div>
   </div>
 </div>
-*그림 4-13. Pod 상태 확인 (kubectl get pods)*
+*그림 4-14. Pod 상태 확인 (kubectl get pods)*
+<p>챕터 3 끝에서 본 토폴로지에 Kafka 브로커와 orchestrator가 더해지면 다음과 같은 모양이 됩니다. 동기 HTTP 흐름은 그대로 유지되고, Kafka 메시지 채널이 옆에 따로 붙는 구조입니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 4 통합 토폴로지: 챕터 3 구조에 Kafka 브로커와 orchestrator가 추가되어 order·product·delivery 서비스와 orchestrator가 Kafka로 메시지를 주고받는 구조">
+  <defs>
+    <marker id="ch04topo-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1f2937"/></marker>
+    <marker id="ch04topo-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="600" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">챕터 4 전체 구조 — Kafka 브로커와 orchestrator가 추가됨</text>
+  <rect x="30" y="260" width="120" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="90" y="288" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Host</text>
+  <text x="90" y="306" text-anchor="middle" font-size="10" fill="#6b7280">브라우저·Hoppscotch</text>
+  <rect x="200" y="60" width="970" height="620" rx="12" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <text x="220" y="82" font-size="11" font-style="italic" font-weight="700" fill="#475569">쿠버네티스 클러스터 · 네임스페이스 metacoding</text>
+  <line x1="150" y1="290" x2="453" y2="140" stroke="#1f2937" stroke-width="1.4" marker-end="url(#ch04topo-a)"/>
+  <text x="220" y="225" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">minikube tunnel</text>
+  <rect x="450" y="100" width="170" height="50" rx="8" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+  <text x="535" y="122" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Ingress</text>
+  <text x="535" y="138" text-anchor="middle" font-size="10" fill="#7b341e">gateway-ingress</text>
+  <line x1="535" y1="150" x2="535" y2="186" stroke="#1f2937" stroke-width="1.6" marker-end="url(#ch04topo-a)"/>
+  <rect x="400" y="190" width="270" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="535" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">gateway-service (Nginx)</text>
+  <text x="535" y="234" text-anchor="middle" font-size="10" fill="#7b341e">API Gateway · :80</text>
+  <text x="535" y="250" text-anchor="middle" font-size="9" font-family="monospace" fill="#9a3412">/login · /api/users · /api/products · /api/orders · /api/deliveries</text>
+  <line x1="460" y1="260" x2="280" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch04topo-a)"/>
+  <line x1="500" y1="260" x2="450" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch04topo-a)"/>
+  <line x1="570" y1="260" x2="640" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch04topo-a)"/>
+  <line x1="610" y1="260" x2="810" y2="316" stroke="#1f2937" stroke-width="1.2" marker-end="url(#ch04topo-a)"/>
+  <rect x="200" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="280" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">user-service</text>
+  <text x="280" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8083</text>
+  <line x1="220" y1="370" x2="340" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="230" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="280" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">user-pod</text>
+  <rect x="370" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="450" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">product-service</text>
+  <text x="450" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8082</text>
+  <line x1="390" y1="370" x2="510" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="400" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="450" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">product-pod</text>
+  <rect x="560" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="640" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">order-service</text>
+  <text x="640" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8081</text>
+  <line x1="580" y1="370" x2="700" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="590" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="640" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">order-pod</text>
+  <rect x="730" y="320" width="160" height="100" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="810" y="343" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">delivery-service</text>
+  <text x="810" y="360" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:8084</text>
+  <line x1="750" y1="370" x2="870" y2="370" stroke="#fed7aa" stroke-width="1"/>
+  <rect x="760" y="378" width="100" height="32" rx="16" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="810" y="399" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">delivery-pod</text>
+  <line x1="280" y1="420" x2="500" y2="565" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch04topo-a)"/>
+  <line x1="450" y1="420" x2="520" y2="565" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch04topo-a)"/>
+  <line x1="640" y1="420" x2="540" y2="565" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch04topo-a)"/>
+  <line x1="810" y1="420" x2="560" y2="565" stroke="#1f2937" stroke-width="1.1" stroke-dasharray="4,3" marker-end="url(#ch04topo-a)"/>
+  <rect x="400" y="570" width="280" height="70" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="540" y="594" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">db-service (MySQL)</text>
+  <text x="540" y="613" text-anchor="middle" font-size="10" font-family="monospace" fill="#9a3412">:3306 · 4개 서비스가 metadb를 공유</text>
+  <rect x="930" y="180" width="210" height="240" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="1035" y="204" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">Kafka 브로커</text>
+  <text x="1035" y="222" text-anchor="middle" font-size="10" font-family="monospace" fill="#4f46e5">kafka-service:9092</text>
+  <text x="1035" y="240" text-anchor="middle" font-size="9" fill="#4f46e5">KRaft · 단일 브로커</text>
+  <line x1="950" y1="252" x2="1120" y2="252" stroke="#c7d2fe" stroke-width="0.8"/>
+  <text x="1035" y="270" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">order-created</text>
+  <text x="1035" y="285" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">decrease-product-command</text>
+  <text x="1035" y="300" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">product-decreased</text>
+  <text x="1035" y="315" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">create-delivery-command</text>
+  <text x="1035" y="330" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">delivery-created</text>
+  <text x="1035" y="345" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">complete-order-command</text>
+  <text x="1035" y="360" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">cancel-order-command</text>
+  <text x="1035" y="375" text-anchor="middle" font-size="9" font-family="monospace" fill="#4f46e5">increase-product-command</text>
+  <text x="1035" y="400" text-anchor="middle" font-size="9" font-style="italic" fill="#4f46e5">총 8개 토픽</text>
+  <rect x="930" y="450" width="210" height="100" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="1035" y="475" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">orchestrator</text>
+  <text x="1035" y="491" text-anchor="middle" font-size="10" fill="#4f46e5">중앙 지휘자 · REST 없음</text>
+  <line x1="950" y1="500" x2="1120" y2="500" stroke="#c7d2fe" stroke-width="0.8"/>
+  <rect x="970" y="510" width="130" height="32" rx="16" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="1035" y="531" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">orchestrator-pod</text>
+  <line x1="530" y1="375" x2="928" y2="300" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ch04topo-i)"/>
+  <line x1="928" y1="320" x2="530" y2="395" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ch04topo-i)"/>
+  <line x1="720" y1="375" x2="928" y2="270" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ch04topo-i)"/>
+  <line x1="928" y1="285" x2="720" y2="395" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ch04topo-i)"/>
+  <line x1="890" y1="375" x2="928" y2="345" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ch04topo-i)"/>
+  <line x1="928" y1="360" x2="890" y2="395" stroke="#4f46e5" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ch04topo-i)"/>
+  <line x1="1045" y1="420" x2="1045" y2="448" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#ch04topo-i)"/>
+  <line x1="1025" y1="450" x2="1025" y2="422" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#ch04topo-i)"/>
+  <text x="600" y="668" text-anchor="middle" font-size="12" font-style="italic" fill="#475569">검은 실선: 동기 HTTP · 인디고 점선: Kafka 메시지(publish · subscribe)</text>
+</svg>
+</div>
+*그림 4-15. 챕터 4 통합 토폴로지 - 챕터 3에 Kafka 브로커와 orchestrator가 추가된 모습*
+<p>챕터 3의 동기 HTTP 흐름(검은 실선)은 그대로 살아 있습니다. 사용자가 보내는 HTTP 요청은 여전히 Ingress → gateway-service → 각 마이크로서비스를 거칩니다. 달라진 점은 그 옆에 <strong>Kafka 채널(인디고 점선)</strong> 이 별도로 흐른다는 사실입니다. order·product·delivery 세 서비스는 Kafka로 이벤트를 주고받습니다. orchestrator는 오직 Kafka로만 통신하고, user-service는 Kafka를 사용하지 않습니다.</p>
 <h3>4.8.3 서비스 접근</h3>
 <p>Ingress를 통해 외부에서 접속하려면 <code>minikube tunnel</code>을 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 외부 접근 터널</div>minikube<span class="w"> </span>tunnel</div>
@@ -1074,11 +1243,11 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <span class="w">  </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Addr 4&quot;</span>
 <span class="p">}</span></div>
 <!-- terminal-prompt: HTTP client (IntelliJ or Postman) showing POST /api/orders response. JSON body with order status "PENDING". -->
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\14_order-pending.png" alt="" /><div class="caption">그림 4-14. 주문 생성 응답 (PENDING 상태)</div></div>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\14_order-pending.png" alt="" /><div class="caption">그림 4-16. 주문 생성 응답 (PENDING 상태)</div></div>
 <p>챕터 3과 다르게 즉시 <code>PENDING</code> 상태로 반환됩니다. Kafka 이벤트가 처리되면 상태가 <code>COMPLETED</code>로 변경됩니다. 잠시 후 주문 상태를 다시 조회합니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/api/orders/4</span></div>
 <!-- terminal-prompt: HTTP client showing GET /api/orders/4 response. JSON body with order status changed to "COMPLETED". -->
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\15_order-completed.png" alt="" /><div class="caption">그림 4-15. 주문 완료 확인 (COMPLETED 상태)</div></div>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\15_order-completed.png" alt="" /><div class="caption">그림 4-17. 주문 완료 확인 (COMPLETED 상태)</div></div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "PENDING이었다가 COMPLETED로 바뀌었어요! 그런데 롤백도 자동으로 되나요?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "품절 상품으로 주문해 봐요. orchestrator 로그를 보면 보일 거예요."</div>
 <h3>4.8.5 롤백 확인 - 품절 상품 주문</h3>
@@ -1092,7 +1261,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <span class="w">  </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Addr 5&quot;</span>
 <span class="p">}</span></div>
 <!-- terminal-prompt: HTTP client showing POST /api/orders response for out-of-stock product (productId=2). JSON body with order status "PENDING". -->
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\16_stockout-order.png" alt="" /><div class="caption">그림 4-16. 품절 상품 주문 요청</div></div>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\16_stockout-order.png" alt="" /><div class="caption">그림 4-18. 품절 상품 주문 요청</div></div>
 <p>잠시 후 상태를 확인하면 <code>CANCELLED</code>가 됩니다.</p>
 <div class="code-block highlight" data-lang="JSON"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/api/orders/5</span></div>
 <p>orchestrator 로그에서 롤백 과정을 확인할 수 있습니다.</p>
@@ -1112,7 +1281,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
     <div class="tl-divider"><span class="tl-val">롤백 완료 · 주문 CANCELLED</span><span class="tl-cursor"></span></div>
   </div>
 </div>
-*그림 4-17. orchestrator 롤백 로그 확인*
+*그림 4-19. orchestrator 롤백 로그 확인*
 <p>테스트가 끝났으면 이번 챕터에서 실행한 리소스를 정리합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 리소스 정리</div>kubectl<span class="w"> </span>delete<span class="w"> </span>all<span class="w"> </span>--all<span class="w"> </span>-n<span class="w"> </span>metacoding</div>
 <p class="thought">상품 서비스를 꺼봤다. 주문 서비스는 멀쩡히 돌아갔고, 메시지는 Kafka에 쌓였다. 다시 켜자 밀려 있던 메시지가 순서대로 처리됐다. 단순히 서비스를 나눈 것을 넘어, 진정한 독립을 이룬 기분이다.</p>
