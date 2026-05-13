@@ -175,11 +175,7 @@ cd ex04
 *그림 5-3. 챕터 5의 배달 흐름 - 배달 기사 완료 API 호출 후 COMPLETED*
 
 
-이제 세 곳을 수정합니다.
-
-1. delivery-service에 배달 완료 API를 추가합니다.
-2. orchestrator가 `delivery-completed` 토픽을 처리하도록 합니다.
-3. order-service에 WebSocket Push를 구현합니다.
+이제 세 곳을 수정해야 합니다. delivery-service에 배달 완료 API를 추가하고, orchestrator에 배달 완료(`delivery-completed`) 토픽 처리를 추가하고, order-service에 WebSocket Push를 구현합니다.
 
 
 ## 5.4 delivery-service - 배달 완료 API 추가
@@ -281,7 +277,7 @@ public void publishDeliveryCompleted(DeliveryCompletedEvent event) {  // 추가
 
 ### 5.5.1 deliveryCreated 수정 - 성공 시 대기
 
-챕터 4에서는 배달 생성이 성공하면 즉시 주문 완료 명령(`complete-order-command`)을 발행했습니다. 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.
+챕터 4에서는 배달 생성 성공 시 즉시 주문 완료 명령(`complete-order-command`)을 발행했지만, 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.
 
 `handler/OrderOrchestrator.java`의 `deliveryCreated`를 아래처럼 수정합니다.
 
@@ -468,9 +464,7 @@ stomp.connect({}, function () {
 
 ### 5.6.8 nginx.conf - WebSocket 프록시 설정
 
-일반 HTTP는 요청-응답 한 쌍으로 끝나는 일회성 통신입니다. Nginx가 응답 후 연결을 닫아버리기 때문에, Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다.
-
-`/api/ws/` 경로에 **Upgrade 헤더** 를 설정하여 "이 연결은 WebSocket이니 끊지 말라"고 알려줘야 합니다.
+Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다. `/api/ws/` 경로에 **Upgrade 헤더** 를 설정하여 "이 연결은 WebSocket이니 끊지 말라"고 알려줘야 합니다.
 
 :::term-box
 **Nginx WebSocket 프록시(Upgrade 헤더)란?** Nginx가 WebSocket 연결을 프록시할 때 필요한 설정입니다. nginx 설정에 `upgrade 헤더`를 설정하여 HTTP 연결을 WebSocket 프로토콜로 전환(upgrade)하도록 백엔드에 전달합니다.

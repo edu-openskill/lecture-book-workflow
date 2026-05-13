@@ -153,7 +153,12 @@ desc: 챕터 5의 사건-깨달음-결과 한 장 요약.
 </svg>
 </div>
 <div class="caption">그림 5-3. 챕터 5의 배달 흐름 - 배달 기사 완료 API 호출 후 COMPLETED</div>
-<p>이제 세 곳을 수정해야 합니다. delivery-service에 배달 완료 API를 추가하고, orchestrator에 배달 완료(<code>delivery-completed</code>) 토픽 처리를 추가하고, order-service에 WebSocket Push를 구현합니다.</p>
+<p>이제 세 곳을 수정합니다.</p>
+<ol>
+<li>delivery-service에 배달 완료 API를 추가합니다.</li>
+<li>orchestrator가 <code>delivery-completed</code> 토픽을 처리하도록 합니다.</li>
+<li>order-service에 WebSocket Push를 구현합니다.</li>
+</ol>
 <h2>5.4 delivery-service - 배달 완료 API 추가</h2>
 <h3>5.4.1 패키지 구조</h3>
 <div class="code-block highlight" data-lang="text"><div class="cb-title">delivery-service/ 패키지 구조</div>delivery-service/src/main/java/.../
@@ -221,7 +226,7 @@ desc: 챕터 5의 사건-깨달음-결과 한 장 요약.
 <h2>5.5 orchestrator - delivery-completed 처리 추가</h2>
 <p>챕터 5에서는 배달 생성(<code>delivery-created</code>) 성공 시 바로 완료하지 않고 대기합니다. 이후 배달 완료(<code>delivery-completed</code>) 이벤트를 받았을 때 비로소 주문 완료 명령(<code>complete-order-command</code>)을 발행합니다.</p>
 <h3>5.5.1 deliveryCreated 수정 - 성공 시 대기</h3>
-<p>챕터 4에서는 배달 생성 성공 시 즉시 주문 완료 명령(<code>complete-order-command</code>)을 발행했지만, 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.</p>
+<p>챕터 4에서는 배달 생성이 성공하면 즉시 주문 완료 명령(<code>complete-order-command</code>)을 발행했습니다. 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>의 <code>deliveryCreated</code>를 아래처럼 수정합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> handler/OrderOrchestrator.java. deliveryCreated - 성공 시 대기</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deliveryCreated</span><span class="p">(</span><span class="n">DeliveryCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -402,7 +407,8 @@ gateway/
 <span class="p">});</span></div>
 <p><code>SockJS</code>로 WebSocket 연결을 만들고, <code>STOMP</code>로 <code>/topic/orders/{userId}</code> 채널을 구독합니다. 서버가 이 채널로 메시지를 보내면 콜백이 실행되어 화면에 주문 완료를 표시합니다.</p>
 <h3>5.6.8 nginx.conf - WebSocket 프록시 설정</h3>
-<p>Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다. <code>/api/ws/</code> 경로에 <strong>Upgrade 헤더</strong> 를 설정하여 &quot;이 연결은 WebSocket이니 끊지 말라&quot;고 알려줘야 합니다.</p>
+<p>일반 HTTP는 요청-응답 한 쌍으로 끝나는 일회성 통신입니다. Nginx가 응답 후 연결을 닫아버리기 때문에, Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다.</p>
+<p><code>/api/ws/</code> 경로에 <strong>Upgrade 헤더</strong> 를 설정하여 &quot;이 연결은 WebSocket이니 끊지 말라&quot;고 알려줘야 합니다.</p>
 <div class="term-box">
 <p><strong>Nginx WebSocket 프록시(Upgrade 헤더)란?</strong> Nginx가 WebSocket 연결을 프록시할 때 필요한 설정입니다. nginx 설정에 <code>upgrade 헤더</code>를 설정하여 HTTP 연결을 WebSocket 프로토콜로 전환(upgrade)하도록 백엔드에 전달합니다.</p>
 </div>

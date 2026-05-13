@@ -74,7 +74,7 @@ catch (...) {                   ← 보상하러 다시 product로
 <div class="dialogue"><span class="speaker">선배</span>: "서로 직접 전화를 걸어서 기다려주니까 그래요. 이제 전화를 끊고 <strong>메시지를 남기는</strong> 방식으로 바꿔 봐요. Kafka라는 녀석이 있어요."</div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "메시지요?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "주문은 진동벨을 받고 자리에 앉아요. 재고 담당자는 자기 일이 끝나면 다음 사람에게 벨을 울리고요. 누가 잠깐 자리를 비워도 메시지가 사라지지 않아요."</div>
-<p>생각해 보면 챕터 3에서 마주친 30초 다운은 <strong>MSA의 목표</strong>, 즉 <em>&quot;각 서비스를 독립적으로 배포하고 장애를 격리한다&quot;</em> 에 정면으로 위배되는 일이었습니다. 직접 호출하는 한 격리는 환상입니다.</p>
+<p>챕터 3에서 마주친 30초 다운은 <strong>MSA의 목표</strong>인 <em>&quot;각 서비스를 독립적으로 배포하고 장애를 격리한다&quot;</em> 와 정면으로 충돌합니다. 직접 호출하는 한 격리는 환상입니다.</p>
 <h3>4.1.1 카운터 대기 vs 진동벨</h3>
 <p>카페에서 커피를 주문하는 두 가지 방식으로 비교하겠습니다.</p>
 <!-- image-prompt: Minimal black line drawing on white background, split comparison, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Separated by a simple vertical line in the middle, no X mark. Left side, title "동기 (카운터 대기)": barista behind counter making coffee, one customer standing at counter waiting, four or five more customers queued behind in a long line looking bored. All frozen/blocked. Right side, title "비동기 (진동벨)": same cafe counter with barista, but the customer has walked away to a table, sitting with a laptop and a small vibration buzzer on the table. A wavy line from the buzzer indicating it will ring. No speech bubbles, no annotation text, no checklists. Clean lines, no colors. -->
@@ -101,36 +101,102 @@ catch (...) {                   ← 보상하러 다시 product로
 <p><strong>컨슈머(Consumer)란?</strong> 토픽에서 메시지를 읽는(구독하는) 쪽입니다. 우체통에서 편지를 꺼내 읽는 사람에 해당합니다.</p>
 </div>
 <div class="svg-figure">
-<svg viewBox="0 0 1000 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="메시지 큐 개념: Producer가 Topic에 메시지를 쌓고 Consumer가 차례로 읽음">
+<svg viewBox="0 0 1080 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kafka 저장소 구조: 여러 발행자가 토픽(우체통)에 편지(메시지)를 넣고, 여러 구독자가 각자의 토픽에서 편지를 꺼내 읽는다">
   <defs>
     <marker id="c4f2-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
-  <text x="500" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">메시지 큐 개념 — Producer · Topic · Consumer</text>
-  <rect x="40" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="130" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">PRODUCER</text>
-  <text x="130" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">order-service</text>
-  <line x1="220" y1="130" x2="318" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="269" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">publish</text>
-  <rect x="320" y="70" width="360" height="120" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="500" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">TOPIC</text>
-  <text x="500" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">order-created</text>
-  <rect x="345" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="374" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg1</text>
-  <rect x="408" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="437" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg2</text>
-  <rect x="471" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="500" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg3</text>
-  <rect x="534" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="563" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg4</text>
-  <text x="625" y="165" text-anchor="middle" font-size="14" fill="#475569">…</text>
-  <line x1="680" y1="130" x2="778" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="729" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">consume</text>
-  <rect x="780" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="870" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">CONSUMER</text>
-  <text x="870" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">orchestrator</text>
+  <text x="540" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Kafka — 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소</text>
+  <rect x="20" y="90" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="100" y="113" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER A</text>
+  <text x="100" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">발행자</text>
+  <rect x="135" y="142" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 135 142 L 150 152 L 165 142" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="20" y="185" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="100" y="208" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER B</text>
+  <text x="100" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">발행자</text>
+  <rect x="135" y="237" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 135 237 L 150 247 L 165 237" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="20" y="280" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="100" y="303" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER C</text>
+  <text x="100" y="325" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">발행자</text>
+  <rect x="135" y="332" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 135 332 L 150 342 L 165 332" fill="none" stroke="#475569" stroke-width="1"/>
+  <line x1="180" y1="125" x2="245" y2="155" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="180" y1="220" x2="245" y2="225" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="180" y1="315" x2="245" y2="295" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <rect x="240" y="60" width="600" height="320" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <text x="540" y="84" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kafka 브로커 — 분산 메시지 저장소</text>
+  <rect x="270" y="110" width="540" height="60" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <rect x="270" y="100" width="540" height="20" rx="5" fill="#ff7849"/>
+  <text x="540" y="114" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic A</text>
+  <rect x="290" y="124" width="50" height="3" rx="1" fill="#7b341e"/>
+  <g transform="translate(355 138)">
+    <rect x="0" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 0 0 L 22 11 L 44 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="50" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 50 0 L 72 11 L 94 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="100" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 100 0 L 122 11 L 144 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="150" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 150 0 L 172 11 L 194 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="200" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 200 0 L 222 11 L 244 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="250" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 250 0 L 272 11 L 294 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="300" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 300 0 L 322 11 L 344 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="350" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 350 0 L 372 11 L 394 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+  </g>
+  <rect x="270" y="200" width="540" height="60" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <rect x="270" y="190" width="540" height="20" rx="5" fill="#ff7849"/>
+  <text x="540" y="204" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic B</text>
+  <rect x="290" y="214" width="50" height="3" rx="1" fill="#7b341e"/>
+  <g transform="translate(355 228)">
+    <rect x="0" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 0 0 L 22 11 L 44 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="50" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 50 0 L 72 11 L 94 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="100" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 100 0 L 122 11 L 144 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="150" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 150 0 L 172 11 L 194 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="200" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 200 0 L 222 11 L 244 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+  </g>
+  <rect x="270" y="290" width="540" height="60" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <rect x="270" y="280" width="540" height="20" rx="5" fill="#ff7849"/>
+  <text x="540" y="294" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="monospace">Topic C</text>
+  <rect x="290" y="304" width="50" height="3" rx="1" fill="#7b341e"/>
+  <g transform="translate(355 318)">
+    <rect x="0" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 0 0 L 22 11 L 44 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="50" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 50 0 L 72 11 L 94 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+    <rect x="100" y="0" width="44" height="22" rx="1.5" fill="#fff4ed" stroke="#ff7849" stroke-width="1"/>
+    <path d="M 100 0 L 122 11 L 144 0" fill="none" stroke="#ff7849" stroke-width="1"/>
+  </g>
+  <line x1="835" y1="140" x2="900" y2="125" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="835" y1="225" x2="900" y2="220" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <line x1="835" y1="315" x2="900" y2="315" stroke="#4f46e5" stroke-width="1.4" marker-end="url(#c4f2-i)"/>
+  <rect x="900" y="90" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="980" y="113" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">CONSUMER α</text>
+  <text x="980" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
+  <rect x="1015" y="142" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 1015 142 L 1030 152 L 1045 142" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="900" y="185" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="980" y="208" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">CONSUMER β</text>
+  <text x="980" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
+  <rect x="1015" y="237" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 1015 237 L 1030 247 L 1045 237" fill="none" stroke="#475569" stroke-width="1"/>
+  <rect x="900" y="280" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="980" y="303" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">CONSUMER γ</text>
+  <text x="980" y="325" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
+  <rect x="1015" y="332" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
+  <path d="M 1015 332 L 1030 342 L 1045 332" fill="none" stroke="#475569" stroke-width="1"/>
 </svg>
 </div>
-<div class="caption">그림 4-2. 메시지 큐 개념</div>
+*그림 4-2. Kafka - 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소*
 <p>Kafka의 중요한 특성은, 컨슈머가 메시지를 읽어도 토픽에서 <strong>삭제되지 않는다</strong>는 점입니다. 보존 기간(기본 7일)이 지나야 삭제됩니다. 컨슈머는 오프셋(자신이 어디까지 읽었는지 기록한 위치)을 기억하기 때문에 재시작 후에도 읽지 않은 메시지부터 이어서 처리할 수 있습니다.</p>
 <div class="prep-note">
 <p><strong>RabbitMQ 같은 전통적인 메시지 큐는 컨슈머가 메시지를 읽으면 큐에서 바로 삭제됩니다.</strong> 반면 <strong>Kafka</strong>는 읽어도 메시지가 남아 있습니다. 덕분에 여러 컨슈머가 같은 메시지를 각자의 속도로 읽을 수 있고, 장애 후 재처리도 가능합니다.</p>
@@ -524,8 +590,8 @@ catch (...) {                   ← 보상하러 다시 product로
 <span class="p">}</span></div>
 <p>이번 챕터에서 order-service가 직접 발행하는 이벤트는 <code>order-created</code> 하나입니다. 주문 취소는 orchestrator가 결정해서 <code>cancel-order-command</code>를 보내고, order-service는 그 명령을 받아 상태만 바꿉니다.</p>
 <h3>4.4.7 OrderService 변경 - 핵심 차이</h3>
-<p>이전 챕터와 비교하여 가장 크게 달라지는 부분은 동기 호출 대신 Kafka 이벤트를 발행하고 즉시 PENDING 상태로 반환한다는 점입니다.
-아래 createOrder 메서드를 구현합니다.</p>
+<p>이전 챕터와 가장 크게 달라지는 부분은 두 가지입니다. 동기 호출 대신 Kafka 이벤트를 발행합니다. 그리고 즉시 PENDING 상태로 반환합니다. 사용자는 PENDING만 받고, 실제 처리는 백그라운드에서 진행됩니다. 처리 결과(COMPLETED 또는 CANCELLED)는 챕터 5에서 WebSocket으로 풀어냅니다.</p>
+<p>아래 createOrder 메서드를 구현합니다.</p>
 <p><code>usecase/OrderService.java</code>를 열고 아래 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/OrderService.java. createOrder - Kafka 이벤트 발행으로 교체</div><span class="nd">@Override</span>
 <span class="nd">@Transactional</span>

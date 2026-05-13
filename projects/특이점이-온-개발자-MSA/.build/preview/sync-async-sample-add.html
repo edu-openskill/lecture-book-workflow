@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>요소 추가 시안 (A1+A2 / B1+B2)</title>
+<style>
+body { font-family: -apple-system, "Pretendard", "Segoe UI", sans-serif; max-width: 1100px; margin: 40px auto; padding: 0 24px 80px; color: #0f172a; background: #f8fafc; }
+h1 { font-size: 22px; margin-bottom: 6px; }
+h2 { font-size: 17px; margin-top: 32px; color: #3730a3; border-bottom: 2px solid #eef2ff; padding-bottom: 6px; }
+.note { color: #6b7280; font-size: 14px; margin-bottom: 16px; }
+.figure { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 12px 0; }
+.figure svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.cap { color: #6b7280; font-size: 13px; text-align: center; margin-top: 8px; font-style: italic; }
+.tag { display: inline-block; background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+.tag.g { background: #d1fae5; color: #065f46; }
+</style>
+</head>
+<body>
+<h1>요소 추가 시안 - 기존 그림 그대로 + 요소만 추가</h1>
+<p class="note">SVG 골격은 그대로 두고 <b>대기 배지·응답 점선·자유 배지·Kafka 토픽 박스</b>만 박은 시안입니다.</p>
+
+<h2>그림 1-8 (동기 REST) · 추가 요소 <span class="tag">A1 대기 배지</span> <span class="tag">A2 응답 점선</span></h2>
+<div class="figure">
+<svg viewBox="0 0 1040 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="동기 REST 직접 호출 + 대기 배지·응답 점선 추가">
+  <defs>
+    <marker id="x8-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="x8-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
+    <marker id="x8-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="520" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">동기 REST - 서비스끼리 직접 호출과 보상</text>
+
+  <!-- Order 박스 (기존 + 빨강 테두리·busy 라벨) -->
+  <rect x="60" y="80" width="200" height="100" rx="10" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+  <text x="160" y="118" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Order</text>
+  <text x="160" y="150" text-anchor="middle" font-size="14" fill="#475569">주문 서비스</text>
+
+  <!-- A1: 시계 + 응답 대기 배지 -->
+  <rect x="50" y="50" width="220" height="26" rx="13" fill="#fef3c7" stroke="#c2410c" stroke-width="1.4"/>
+  <circle cx="72" cy="63" r="8" fill="#fff" stroke="#c2410c" stroke-width="1.4"/>
+  <line x1="72" y1="63" x2="72" y2="58" stroke="#c2410c" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="72" y1="63" x2="76" y2="66" stroke="#c2410c" stroke-width="1.4" stroke-linecap="round"/>
+  <text x="160" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#c2410c">⏸ 응답 대기 (blocked)</text>
+
+  <!-- Product 박스 -->
+  <rect x="420" y="80" width="200" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="520" y="118" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Product</text>
+  <text x="520" y="150" text-anchor="middle" font-size="14" fill="#475569">상품 서비스</text>
+
+  <!-- Delivery 박스 -->
+  <rect x="780" y="80" width="200" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="880" y="118" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">Delivery</text>
+  <text x="880" y="150" text-anchor="middle" font-size="14" fill="#475569">배달 서비스</text>
+
+  <!-- 요청 화살표 (실선) -->
+  <line x1="264" y1="105" x2="416" y2="105" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#x8-p)"/>
+  <text x="340" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">재고 감소</text>
+  <line x1="624" y1="105" x2="776" y2="105" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#x8-p)"/>
+  <text x="700" y="97" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">배달 생성</text>
+
+  <!-- A2: 정상 응답 화살표 (회색 점선, 보상 점선과 구분) -->
+  <line x1="416" y1="130" x2="264" y2="130" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3,3" marker-end="url(#x8-r)"/>
+  <text x="340" y="142" text-anchor="middle" font-size="11" font-style="italic" fill="#64748b">응답 (대기 후)</text>
+  <line x1="776" y1="130" x2="624" y2="130" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3,3" marker-end="url(#x8-r)"/>
+  <text x="700" y="142" text-anchor="middle" font-size="11" font-style="italic" fill="#64748b">응답 (대기 후)</text>
+
+  <!-- 보상 화살표 (기존 점선, 색 다름) -->
+  <line x1="416" y1="160" x2="264" y2="160" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#x8-o)"/>
+  <text x="340" y="172" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">재고 복구 (보상)</text>
+  <line x1="776" y1="160" x2="624" y2="160" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#x8-o)"/>
+  <text x="700" y="172" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">배달 취소 (보상)</text>
+
+  <!-- 하단 italic -->
+  <text x="520" y="230" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">Order는 두 응답을 모두 받을 때까지 멈춤 · 실패 시 거꾸로 직접 보상 요청</text>
+</svg>
+<div class="cap">그림 1-8. 동기 REST - 서비스 간 직접 호출과 보상</div>
+</div>
+<p class="note"><b>추가된 시각 요소:</b> Order 박스 위 노란 "⏸ 응답 대기" 배지 (시계 아이콘) + 빨강 테두리. 회색 점선 응답 화살표(보상 화살표와 색·길이로 구분). "왕복 = 동기"가 한눈에.</p>
+
+<h2>그림 1-9 (비동기 Kafka) · 추가 요소 <span class="tag g">B1 자유 배지</span> <span class="tag g">B2 Kafka 토픽 박스</span></h2>
+<div class="figure">
+<svg viewBox="0 0 1080 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="비동기 Kafka 지휘자 + 자유 배지·Kafka 토픽 박스 추가">
+  <defs>
+    <marker id="x9-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="x9-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="540" y="32" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">비동기 Kafka - 지휘자가 흐름을 조율</text>
+
+  <!-- Orchestrator (기존) -->
+  <rect x="340" y="80" width="400" height="120" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="540" y="125" text-anchor="middle" font-size="24" font-weight="700" fill="#3730a3">Orchestrator</text>
+  <text x="540" y="155" text-anchor="middle" font-size="14" fill="#3730a3">중앙 지휘자</text>
+  <text x="540" y="180" text-anchor="middle" font-size="12" fill="#475569">전체 워크플로우 추적 · 명령 발행</text>
+
+  <!-- command / event 화살표 -->
+  <line x1="480" y1="205" x2="480" y2="240" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#x9-p)"/>
+  <text x="455" y="225" text-anchor="end" font-size="14" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">command</text>
+  <line x1="600" y1="240" x2="600" y2="207" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#x9-o)"/>
+  <text x="625" y="225" text-anchor="start" font-size="14" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">event</text>
+
+  <!-- B2: Kafka 토픽 박스 (Orchestrator와 서비스 사이) -->
+  <rect x="80" y="245" width="920" height="50" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="120" y="277" font-size="13" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">Kafka 토픽</text>
+  <!-- 메시지 슬롯들 -->
+  <rect x="220" y="255" width="60" height="30" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1.2"/>
+  <text x="250" y="274" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">order</text>
+  <rect x="300" y="255" width="80" height="30" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1.2"/>
+  <text x="340" y="274" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">decrease</text>
+  <rect x="400" y="255" width="80" height="30" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1.2"/>
+  <text x="440" y="274" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">decreased</text>
+  <rect x="500" y="255" width="80" height="30" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1.2"/>
+  <text x="540" y="274" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">create</text>
+  <rect x="600" y="255" width="80" height="30" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1.2"/>
+  <text x="640" y="274" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">created</text>
+  <rect x="700" y="255" width="80" height="30" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1.2"/>
+  <text x="740" y="274" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">complete</text>
+  <rect x="800" y="255" width="40" height="30" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1.2" stroke-dasharray="2,2"/>
+  <text x="820" y="275" text-anchor="middle" font-size="14" fill="#94a3b8">…</text>
+  <text x="940" y="277" font-size="11" font-style="italic" fill="#7b341e">메시지 큐</text>
+
+  <!-- Microservices 박스 -->
+  <rect x="60" y="320" width="960" height="140" rx="14" fill="#fff" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="4,3"/>
+  <text x="540" y="343" text-anchor="middle" font-size="13" font-weight="700" fill="#64748b">Microservices — 서비스끼리는 서로 호출하지 않는다</text>
+
+  <!-- Order (B1 자유 배지 적용) -->
+  <rect x="100" y="360" width="260" height="90" rx="10" fill="#fff" stroke="#059669" stroke-width="2"/>
+  <text x="230" y="395" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Order</text>
+  <text x="230" y="418" text-anchor="middle" font-size="13" fill="#475569">주문 서비스</text>
+  <text x="230" y="438" text-anchor="middle" font-size="11" fill="#6b7280">자기 일만 + 결과 보고</text>
+
+  <!-- B1: 자유 배지 -->
+  <rect x="115" y="475" width="230" height="26" rx="13" fill="#d1fae5" stroke="#059669" stroke-width="1.4"/>
+  <text x="138" y="492" font-size="14" font-weight="700" fill="#059669">✓</text>
+  <text x="230" y="493" text-anchor="middle" font-size="12" font-weight="700" fill="#059669">발행 즉시 자유</text>
+
+  <!-- Product -->
+  <rect x="410" y="360" width="260" height="90" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="540" y="395" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Product</text>
+  <text x="540" y="418" text-anchor="middle" font-size="13" fill="#475569">상품 서비스</text>
+  <text x="540" y="438" text-anchor="middle" font-size="11" fill="#6b7280">자기 일만 + 결과 보고</text>
+
+  <!-- Delivery -->
+  <rect x="720" y="360" width="260" height="90" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="850" y="395" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Delivery</text>
+  <text x="850" y="418" text-anchor="middle" font-size="13" fill="#475569">배달 서비스</text>
+  <text x="850" y="438" text-anchor="middle" font-size="11" fill="#6b7280">자기 일만 + 결과 보고</text>
+
+  <!-- 하단 italic -->
+  <text x="540" y="510" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">Orchestrator가 명령을 내리고 결과를 받아 다음 단계를 결정 · 서비스끼리 직접 호출 없음</text>
+</svg>
+<div class="cap">그림 1-9. 비동기 Kafka - 지휘자가 흐름을 조율하는 구조</div>
+</div>
+<p class="note"><b>추가된 시각 요소:</b> Kafka 토픽 박스(주황색, 메시지 슬롯이 줄지어 쌓이는 모습) + Order 박스 아래 초록 "✓ 발행 즉시 자유" 배지 + Order 박스 초록 테두리. 메시지 큐가 시각으로 들어와 비동기 매개체가 보입니다.</p>
+
+</body>
+</html>
