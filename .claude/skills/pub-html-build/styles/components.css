@@ -409,6 +409,11 @@
   }
   .prep-section-md h3:first-of-type { margin-top: 6px; }
   .prep-section-md p { margin-bottom: 10px; font-size: 14.5px; }
+  /* prep 박스 안 표는 내용에 맞춰 자동 폭 (URL이 두 줄로 깨지지 않게) */
+  .prep-section-md table { table-layout: auto; }
+  .prep-section-md table td:first-child,
+  .prep-section-md table th:first-child { white-space: nowrap; }
+  .prep-section-md table td code { white-space: nowrap; }
   .prep-section-md ol,
   .prep-section-md ul { padding-left: 22px; margin: 8px 0 12px; }
   .prep-section-md ol li,

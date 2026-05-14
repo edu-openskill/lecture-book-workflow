@@ -103,7 +103,6 @@ Kafka의 구조는 우체통과 비슷합니다. 메시지를 보내는 사람�
   <defs>
     <marker id="c4f2-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
-<<<<<<< HEAD
   <text x="540" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Kafka — 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소</text>
   <rect x="20" y="90" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="100" y="113" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER A</text>
@@ -193,31 +192,6 @@ Kafka의 구조는 우체통과 비슷합니다. 메시지를 보내는 사람�
   <text x="980" y="325" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
   <rect x="1015" y="332" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
   <path d="M 1015 332 L 1030 342 L 1045 332" fill="none" stroke="#475569" stroke-width="1"/>
-=======
-  <text x="500" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">메시지 큐 개념 — Producer · Topic · Consumer</text>
-  <rect x="40" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="130" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">PRODUCER</text>
-  <text x="130" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">order-service</text>
-  <line x1="220" y1="130" x2="318" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="269" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">publish</text>
-  <rect x="320" y="70" width="360" height="120" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="500" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">TOPIC</text>
-  <text x="500" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">order-created</text>
-  <rect x="345" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="374" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg1</text>
-  <rect x="408" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="437" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg2</text>
-  <rect x="471" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="500" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg3</text>
-  <rect x="534" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="563" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg4</text>
-  <text x="625" y="165" text-anchor="middle" font-size="14" fill="#475569">…</text>
-  <line x1="680" y1="130" x2="778" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="729" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">consume</text>
-  <rect x="780" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="870" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">CONSUMER</text>
-  <text x="870" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">orchestrator</text>
->>>>>>> c9c4f1c51c1c069af0038f04396392d7ddc57852
 </svg>
 </div>
 *그림 4-2. Kafka - 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소*
@@ -241,11 +215,11 @@ product-service를 2대로 늘려서 운영한다고 가정해 보겠습니다. 
     <marker id="c4f3-x" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#9ca3af"/></marker>
   </defs>
   <text x="500" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">컨슈머 그룹 — 메시지는 그룹 안 한 인스턴스에만 전달</text>
-  <rect x="40" y="100" width="300" height="120" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="190" y="130" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">TOPIC</text>
-  <text x="190" y="156" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">decrease-product-command</text>
-  <rect x="155" y="175" width="70" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="190" y="195" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg</text>
+  <rect x="40" y="100" width="300" height="120" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="190" y="130" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">TOPIC</text>
+  <text x="190" y="156" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">decrease-product-command</text>
+  <rect x="155" y="175" width="70" height="30" rx="4" fill="#fff" stroke="#ff7849"/>
+  <text x="190" y="195" text-anchor="middle" font-size="11" fill="#7b341e" font-family="JetBrains Mono, monospace">msg</text>
   <line x1="340" y1="160" x2="430" y2="160" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f3-i)"/>
   <text x="385" y="150" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">deliver</text>
   <rect x="440" y="60" width="520" height="200" rx="14" fill="#fff" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="6 4"/>
@@ -254,7 +228,7 @@ product-service를 2대로 늘려서 운영한다고 가정해 보겠습니다. 
   <text x="575" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#4338ca">인스턴스 A</text>
   <text x="575" y="173" text-anchor="middle" font-size="22" font-weight="700" fill="#4338ca">처리 담당</text>
   <text x="575" y="206" text-anchor="middle" font-size="12" fill="#4338ca">메시지 수신 ✓</text>
-  <rect x="720" y="110" width="210" height="120" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <rect x="720" y="110" width="210" height="120" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5 4"/>
   <text x="825" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#94a3b8">인스턴스 B</text>
   <text x="825" y="173" text-anchor="middle" font-size="22" font-weight="700" fill="#94a3b8">대기</text>
   <text x="825" y="206" text-anchor="middle" font-size="12" fill="#94a3b8">전달 안 됨 ✗</text>
@@ -332,13 +306,13 @@ product-service를 2대로 늘려서 운영한다고 가정해 보겠습니다. 
 <svg viewBox="0 0 1080 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 성공 시퀀스: Orchestrator가 Order, Product, Delivery에 차례로 command와 event를 주고받음">
   <defs>
     <marker id="c4f5-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-    <marker id="c4f5-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="c4f5-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
   <text x="540" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">주문 성공 흐름 — Orchestration Saga</text>
   <rect x="40" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="130" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Order</text>
-  <rect x="280" y="60" width="200" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="380" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Orchestrator</text>
+  <rect x="280" y="60" width="200" height="50" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="380" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Orchestrator</text>
   <rect x="560" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="650" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
   <rect x="830" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
@@ -347,19 +321,19 @@ product-service를 2대로 늘려서 운영한다고 가정해 보겠습니다. 
   <line x1="380" y1="110" x2="380" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="650" y1="110" x2="650" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="920" y1="110" x2="920" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <line x1="130" y1="150" x2="378" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
-  <text x="254" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① order-created 발행</text>
+  <line x1="130" y1="150" x2="378" y2="150" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
+  <text x="254" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">① order-created 발행</text>
   <line x1="380" y1="200" x2="558" y2="200" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f5-i)"/>
   <text x="469" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">② decrease-product-command</text>
-  <line x1="650" y1="250" x2="382" y2="250" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
-  <text x="516" y="242" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">③ product-decreased</text>
+  <line x1="650" y1="250" x2="382" y2="250" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
+  <text x="516" y="242" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">③ product-decreased</text>
   <line x1="380" y1="300" x2="828" y2="300" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f5-i)"/>
   <text x="604" y="292" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">④ create-delivery-command</text>
-  <line x1="920" y1="350" x2="382" y2="350" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
-  <text x="651" y="342" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">⑤ delivery-created</text>
+  <line x1="920" y1="350" x2="382" y2="350" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
+  <text x="651" y="342" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">⑤ delivery-created</text>
   <line x1="380" y1="400" x2="132" y2="400" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f5-i)"/>
   <text x="256" y="392" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">⑥ complete-order-command</text>
-  <text x="540" y="445" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">각 메시지는 Kafka 토픽을 거쳐 전달 · 실선: command, 점선: event</text>
+  <text x="540" y="445" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">각 메시지는 Kafka 토픽을 거쳐 전달 · 인디고: command, 오렌지 점선: event</text>
 </svg>
 </div>
 *그림 4-6. 주문 성공 흐름 (Orchestration Saga)*
@@ -382,13 +356,13 @@ product-service를 2대로 늘려서 운영한다고 가정해 보겠습니다. 
 <svg viewBox="0 0 1080 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 롤백 시퀀스: 배달 생성 실패 후 재고 복구·주문 취소 보상">
   <defs>
     <marker id="c4f6-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-    <marker id="c4f6-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="c4f6-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
   <text x="540" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">주문 실패 시 롤백 흐름 — 배달 생성 실패 예시</text>
   <rect x="40" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="130" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Order</text>
-  <rect x="280" y="60" width="200" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="380" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Orchestrator</text>
+  <rect x="280" y="60" width="200" height="50" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="380" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Orchestrator</text>
   <rect x="560" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="650" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
   <rect x="830" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
@@ -397,10 +371,10 @@ product-service를 2대로 늘려서 운영한다고 가정해 보겠습니다. 
   <line x1="380" y1="110" x2="380" y2="390" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="650" y1="110" x2="650" y2="390" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="920" y1="110" x2="920" y2="390" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <line x1="650" y1="150" x2="382" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f6-o)"/>
-  <text x="516" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① product-decreased {success}</text>
-  <line x1="920" y1="210" x2="382" y2="210" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f6-o)"/>
-  <text x="651" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">② delivery-created {success: false}</text>
+  <line x1="650" y1="150" x2="382" y2="150" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f6-o)"/>
+  <text x="516" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">① product-decreased {success}</text>
+  <line x1="920" y1="210" x2="382" y2="210" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f6-o)"/>
+  <text x="651" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">② delivery-created {success: false}</text>
   <line x1="380" y1="270" x2="558" y2="270" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f6-i)"/>
   <text x="469" y="262" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">③ increase-product-command (보상)</text>
   <line x1="380" y1="335" x2="132" y2="335" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f6-i)"/>
@@ -697,22 +671,22 @@ public class OrderOrchestrator {
 <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 시퀀스: order-created 수신 후 WorkflowState 생성, decrease-product-command 발행">
   <defs>
     <marker id="c4f7-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-    <marker id="c4f7-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="c4f7-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
   <text x="440" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">1단계 — 주문 생성 이벤트 수신</text>
   <rect x="60" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="150" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Order</text>
-  <rect x="330" y="60" width="200" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="430" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Orchestrator</text>
+  <rect x="330" y="60" width="200" height="50" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="430" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Orchestrator</text>
   <rect x="620" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="710" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
   <line x1="150" y1="110" x2="150" y2="290" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="430" y1="110" x2="430" y2="290" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="710" y1="110" x2="710" y2="290" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <line x1="150" y1="150" x2="428" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f7-o)"/>
-  <text x="289" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① order-created 발행</text>
-  <path d="M430 200 L490 200 L490 218 L432 218" fill="none" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f7-o)"/>
-  <text x="500" y="213" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">② WorkflowState 생성</text>
+  <line x1="150" y1="150" x2="428" y2="150" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f7-o)"/>
+  <text x="289" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">① order-created 발행</text>
+  <path d="M430 200 L490 200 L490 218 L432 218" fill="none" stroke="#7b341e" stroke-width="1.6" marker-end="url(#c4f7-o)"/>
+  <text x="500" y="213" text-anchor="start" font-size="13" font-weight="600" fill="#7b341e">② WorkflowState 생성</text>
   <line x1="430" y1="265" x2="708" y2="265" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f7-i)"/>
   <text x="569" y="257" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">③ decrease-product-command</text>
 </svg>
@@ -749,13 +723,13 @@ orchestrator가 주문 생성(`order-created`) 이벤트를 받으면 주문 ID�
 <svg viewBox="0 0 1080 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 시퀀스: product-decreased 결과에 따라 성공이면 배달 생성, 실패면 주문 취소">
   <defs>
     <marker id="c4f8-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-    <marker id="c4f8-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="c4f8-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
   <text x="540" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">2단계 — 재고 차감 결과 수신</text>
   <rect x="40" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="130" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
-  <rect x="290" y="60" width="200" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="390" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Orchestrator</text>
+  <rect x="290" y="60" width="200" height="50" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="390" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Orchestrator</text>
   <rect x="570" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="660" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Delivery</text>
   <rect x="820" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
@@ -764,12 +738,12 @@ orchestrator가 주문 생성(`order-created`) 이벤트를 받으면 주문 ID�
   <line x1="390" y1="110" x2="390" y2="310" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="660" y1="110" x2="660" y2="310" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="910" y1="110" x2="910" y2="310" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <line x1="130" y1="150" x2="388" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f8-o)"/>
-  <text x="259" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① product-decreased {success}</text>
+  <line x1="130" y1="150" x2="388" y2="150" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f8-o)"/>
+  <text x="259" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">① product-decreased {success}</text>
   <line x1="390" y1="215" x2="568" y2="215" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f8-i)"/>
   <text x="479" y="207" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">②a 성공 → create-delivery-command</text>
-  <line x1="390" y1="280" x2="818" y2="280" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f8-o)"/>
-  <text x="604" y="272" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">②b 실패 → cancel-order-command (재고 복구 불필요)</text>
+  <line x1="390" y1="280" x2="818" y2="280" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f8-o)"/>
+  <text x="604" y="272" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">②b 실패 → cancel-order-command (재고 복구 불필요)</text>
 </svg>
 </div>
 *그림 4-9. 2단계 - 재고 차감 결과 수신*
@@ -813,13 +787,13 @@ public void productDecreased(ProductDecreasedEvent event) {
 <svg viewBox="0 0 1080 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 시퀀스: delivery-created 결과에 따라 성공이면 주문 완료, 실패면 재고 복구·주문 취소">
   <defs>
     <marker id="c4f9-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-    <marker id="c4f9-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="c4f9-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
   <text x="540" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">3단계 — 배달 생성 결과 수신</text>
   <rect x="40" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="130" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Delivery</text>
-  <rect x="290" y="60" width="200" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="390" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Orchestrator</text>
+  <rect x="290" y="60" width="200" height="50" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="390" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Orchestrator</text>
   <rect x="570" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="660" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
   <rect x="820" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
@@ -828,14 +802,14 @@ public void productDecreased(ProductDecreasedEvent event) {
   <line x1="390" y1="110" x2="390" y2="370" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="660" y1="110" x2="660" y2="370" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="910" y1="110" x2="910" y2="370" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <line x1="130" y1="150" x2="388" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f9-o)"/>
-  <text x="259" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① delivery-created {success}</text>
+  <line x1="130" y1="150" x2="388" y2="150" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f9-o)"/>
+  <text x="259" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">① delivery-created {success}</text>
   <line x1="390" y1="215" x2="818" y2="215" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f9-i)"/>
   <text x="604" y="207" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">②a 성공 → complete-order-command → COMPLETED</text>
-  <line x1="390" y1="285" x2="568" y2="285" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f9-o)"/>
-  <text x="479" y="277" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">②b 실패 → increase-product-command (보상)</text>
-  <line x1="390" y1="345" x2="818" y2="345" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f9-o)"/>
-  <text x="604" y="337" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">②c 실패 → cancel-order-command → CANCELLED</text>
+  <line x1="390" y1="285" x2="568" y2="285" stroke="#ff7849" stroke-width="1.6" marker-end="url(#c4f9-o)"/>
+  <text x="479" y="277" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">②b 실패 → increase-product-command (보상)</text>
+  <line x1="390" y1="345" x2="818" y2="345" stroke="#ff7849" stroke-width="1.6" marker-end="url(#c4f9-o)"/>
+  <text x="604" y="337" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c" font-family="JetBrains Mono, monospace">②c 실패 → cancel-order-command → CANCELLED</text>
 </svg>
 </div>
 *그림 4-10. 3단계 - 배달 생성 결과 수신*
@@ -902,10 +876,10 @@ Kafka 서버 1대에만 메시지를 저장하면, 그 서버가 죽었을 때 �
     <marker id="c4f10-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
   <text x="500" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">CLUSTER_ID로 Kafka 브로커를 하나의 클러스터로 묶습니다</text>
-  <rect x="60" y="70" width="880" height="220" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" stroke-dasharray="6 4"/>
-  <text x="500" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">CLUSTER_ID: AbijZYk0QOm5p852kOMSIg</text>
-  <rect x="380" y="130" width="240" height="120" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="1.6"/>
-  <text x="500" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">BROKER #1</text>
+  <rect x="60" y="70" width="880" height="220" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="500" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">CLUSTER_ID: AbijZYk0QOm5p852kOMSIg</text>
+  <rect x="380" y="130" width="240" height="120" rx="10" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="500" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">BROKER #1</text>
   <text x="500" y="186" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a" font-family="JetBrains Mono, monospace">KAFKA_NODE_ID = 1</text>
   <text x="500" y="216" text-anchor="middle" font-size="13" fill="#475569">실습용 단일 브로커</text>
   <text x="500" y="238" text-anchor="middle" font-size="11" fill="#94a3b8" font-family="JetBrains Mono, monospace">localhost:9093</text>
@@ -942,10 +916,10 @@ Kafka 서버 1대에만 메시지를 저장하면, 그 서버가 죽었을 때 �
   <line x1="600" y1="140" x2="520" y2="225" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f11-i)"/>
   <line x1="820" y1="140" x2="550" y2="225" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f11-i)"/>
   <text x="650" y="180" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">KAFKA_BOOTSTRAP_SERVERS</text>
-  <rect x="220" y="240" width="560" height="150" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" stroke-dasharray="6 4"/>
-  <text x="500" y="270" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">KAFKA_ADVERTISED_LISTENERS</text>
-  <rect x="340" y="290" width="320" height="80" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="1.6"/>
-  <text x="500" y="318" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">BROKER</text>
+  <rect x="220" y="240" width="560" height="150" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="500" y="270" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">KAFKA_ADVERTISED_LISTENERS</text>
+  <rect x="340" y="290" width="320" height="80" rx="10" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="500" y="318" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">BROKER</text>
   <text x="500" y="345" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a" font-family="JetBrains Mono, monospace">PLAINTEXT://kafka-service:9092</text>
   <text x="500" y="425" text-anchor="middle" font-size="12" fill="#475569">클라이언트의 KAFKA_BOOTSTRAP_SERVERS 값은 브로커의 ADVERTISED_LISTENERS 값과 일치해야 합니다.</text>
 </svg>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CH02 그림 2-2 비교 — 베이스 / book_v7 / polish / 합친 결과</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", "Apple SD Gothic Neo", sans-serif; max-width: 1100px; margin: 24px auto; padding: 0 24px; color: #0f172a; background: #f8fafc; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 17px; margin-top: 32px; padding: 10px 14px; border-left: 4px solid #4f46e5; background: #fff; }
+  h2.base { border-left-color: #9ca3af; }
+  h2.bv7 { border-left-color: #4f46e5; }
+  h2.polish { border-left-color: #ff7849; }
+  h2.merged { border-left-color: #16a34a; }
+  .svg-figure { background: #fff; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; }
+  .meta { color: #475569; font-size: 13px; margin: 4px 0 14px; }
+  .note { background: #fff7ed; border: 1px solid #ff7849; border-radius: 6px; padding: 8px 12px; margin-top: 8px; font-size: 13px; color: #7b341e; }
+  .ok { background: #ecfdf5; border-color: #16a34a; color: #14532d; }
+</style>
+</head>
+<body>
+
+<h1>CH02 그림 2-2 — 4개 시안 비교</h1>
+<p class="meta">베이스 / book_v7 / polish / 합친 결과(book_v7 색 + polish 텍스트)</p>
+
+<h2 class="base">A. 베이스 (어제 오후 6시 상태)</h2>
+<p class="meta">색: 오렌지 · 텍스트: 영문 Saga + "주문 취소 (CANCELLED)"</p>
+<div class="svg-figure">
+<svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구·주문 취소를 역순으로 실행">
+  <defs>
+    <marker id="A-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="A-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="440" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">주문 실패 시 보상 트랜잭션 — 배달 실패 후 역순 복구</text>
+  <rect x="80" y="60" width="180" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="170" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Order</text>
+  <rect x="350" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="440" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
+  <rect x="620" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="710" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Delivery</text>
+  <line x1="170" y1="110" x2="170" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="440" y1="110" x2="440" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="710" y1="110" x2="710" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="170" y1="150" x2="438" y2="150" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#A-i)"/>
+  <text x="304" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 재고 차감 요청</text>
+  <line x1="440" y1="200" x2="172" y2="200" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#A-i)"/>
+  <text x="306" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">② 차감 성공 응답</text>
+  <line x1="170" y1="255" x2="708" y2="255" stroke="#ff7849" stroke-width="1.6" marker-end="url(#A-o)"/>
+  <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c">③ 배달 생성 요청 → 실패</text>
+  <line x1="170" y1="320" x2="438" y2="320" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#A-o)"/>
+  <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c">④ 재고 복구 요청 (보상)</text>
+  <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#ff7849" stroke-width="1.6" marker-end="url(#A-o)"/>
+  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#c2410c">⑤ 주문 취소 (CANCELLED)</text>
+  <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (오렌지)</text>
+</svg>
+</div>
+
+<h2 class="bv7">B. book_v7 (어제 밤 변경 — 색 통일)</h2>
+<p class="meta">색: 인디고로 통일 · 텍스트: 그대로 · footer "(오렌지)" → "(점선)"</p>
+<div class="svg-figure">
+<svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구·주문 취소를 역순으로 실행">
+  <defs>
+    <marker id="B-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="B-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="440" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">주문 실패 시 보상 트랜잭션 — 배달 실패 후 역순 복구</text>
+  <rect x="80" y="60" width="180" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="170" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Order</text>
+  <rect x="350" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="440" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
+  <rect x="620" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="710" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Delivery</text>
+  <line x1="170" y1="110" x2="170" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="440" y1="110" x2="440" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="710" y1="110" x2="710" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="170" y1="150" x2="438" y2="150" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#B-i)"/>
+  <text x="304" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 재고 차감 요청</text>
+  <line x1="440" y1="200" x2="172" y2="200" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#B-i)"/>
+  <text x="306" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">② 차감 성공 응답</text>
+  <line x1="170" y1="255" x2="708" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#B-o)"/>
+  <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">③ 배달 생성 요청 → 실패</text>
+  <line x1="170" y1="320" x2="438" y2="320" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#B-o)"/>
+  <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">④ 재고 복구 요청 (보상)</text>
+  <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#B-o)"/>
+  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">⑤ 주문 취소 (CANCELLED)</text>
+  <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (점선)</text>
+</svg>
+</div>
+
+<h2 class="polish">C. polish (오늘 검수 — 텍스트 보강)</h2>
+<p class="meta">색: 베이스 그대로 오렌지 · aria-label 보강 · ⑤ "주문 트랜잭션 롤백"으로 정정</p>
+<div class="svg-figure">
+<svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구와 주문 트랜잭션 롤백을 역순으로 실행">
+  <defs>
+    <marker id="C-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="C-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="440" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">주문 실패 시 보상 트랜잭션 — 배달 실패 후 역순 복구</text>
+  <rect x="80" y="60" width="180" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="170" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Order</text>
+  <rect x="350" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="440" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
+  <rect x="620" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="710" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Delivery</text>
+  <line x1="170" y1="110" x2="170" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="440" y1="110" x2="440" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="710" y1="110" x2="710" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="170" y1="150" x2="438" y2="150" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#C-i)"/>
+  <text x="304" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 재고 차감 요청</text>
+  <line x1="440" y1="200" x2="172" y2="200" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#C-i)"/>
+  <text x="306" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">② 차감 성공 응답</text>
+  <line x1="170" y1="255" x2="708" y2="255" stroke="#ff7849" stroke-width="1.6" marker-end="url(#C-o)"/>
+  <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c">③ 배달 생성 요청 → 실패</text>
+  <line x1="170" y1="320" x2="438" y2="320" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#C-o)"/>
+  <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c">④ 재고 복구 요청 (보상)</text>
+  <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#ff7849" stroke-width="1.6" marker-end="url(#C-o)"/>
+  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#c2410c">⑤ 주문 트랜잭션 롤백</text>
+  <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (오렌지)</text>
+</svg>
+</div>
+
+<h2 class="merged">D. 합친 결과 (book_v7 색 + polish 텍스트)</h2>
+<p class="meta">색: book_v7 인디고 · aria-label/⑤ 텍스트: polish 정정 · footer: book_v7 "(점선)"</p>
+<div class="svg-figure">
+<svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구와 주문 트랜잭션 롤백을 역순으로 실행">
+  <defs>
+    <marker id="D-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="D-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="440" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">주문 실패 시 보상 트랜잭션 — 배달 실패 후 역순 복구</text>
+  <rect x="80" y="60" width="180" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="170" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">Order</text>
+  <rect x="350" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="440" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Product</text>
+  <rect x="620" y="60" width="180" height="50" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="710" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Delivery</text>
+  <line x1="170" y1="110" x2="170" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="440" y1="110" x2="440" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="710" y1="110" x2="710" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <line x1="170" y1="150" x2="438" y2="150" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#D-i)"/>
+  <text x="304" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 재고 차감 요청</text>
+  <line x1="440" y1="200" x2="172" y2="200" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#D-i)"/>
+  <text x="306" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">② 차감 성공 응답</text>
+  <line x1="170" y1="255" x2="708" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#D-o)"/>
+  <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">③ 배달 생성 요청 → 실패</text>
+  <line x1="170" y1="320" x2="438" y2="320" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#D-o)"/>
+  <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">④ 재고 복구 요청 (보상)</text>
+  <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#D-o)"/>
+  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">⑤ 주문 트랜잭션 롤백</text>
+  <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (점선)</text>
+</svg>
+</div>
+
+<p class="note ok"><strong>D안</strong>이 사용자 결정대로 합친 결과입니다. 이 모습으로 적용해도 될지 확인 부탁드립니다.</p>
+
+</body>
+</html>

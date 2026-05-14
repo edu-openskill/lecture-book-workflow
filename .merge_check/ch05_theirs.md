@@ -101,10 +101,10 @@ cd ex04
   <text x="300" y="176" text-anchor="middle" font-size="12" fill="#475569">배달 생성 요청</text>
   <line x1="420" y1="140" x2="578" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f2-i)"/>
   <text x="499" y="128" text-anchor="middle" font-size="12" font-weight="600" fill="#4f46e5">자동 전이</text>
-  <rect x="580" y="90" width="240" height="100" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="700" y="124" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">FINAL</text>
-  <text x="700" y="152" text-anchor="middle" font-size="20" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">COMPLETED</text>
-  <text x="700" y="176" text-anchor="middle" font-size="12" fill="#475569">즉시 완료 처리</text>
+  <rect x="580" y="90" width="240" height="100" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="700" y="124" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">FINAL</text>
+  <text x="700" y="152" text-anchor="middle" font-size="20" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">COMPLETED</text>
+  <text x="700" y="176" text-anchor="middle" font-size="12" fill="#9a3412">즉시 완료 처리</text>
 </svg>
 </div>
 *그림 5-2. 챕터 4의 배달 흐름 - 생성 즉시 완료 처리*
@@ -133,10 +133,10 @@ cd ex04
   <line x1="600" y1="150" x2="738" y2="150" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f3-i)"/>
   <text x="669" y="135" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5">배달 기사</text>
   <text x="669" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5">완료 API 호출</text>
-  <rect x="740" y="100" width="220" height="100" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="850" y="134" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">FINAL</text>
-  <text x="850" y="162" text-anchor="middle" font-size="20" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">COMPLETED</text>
-  <text x="850" y="186" text-anchor="middle" font-size="12" fill="#475569">배달 완료</text>
+  <rect x="740" y="100" width="220" height="100" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="850" y="134" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">FINAL</text>
+  <text x="850" y="162" text-anchor="middle" font-size="20" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">COMPLETED</text>
+  <text x="850" y="186" text-anchor="middle" font-size="12" fill="#9a3412">배달 완료</text>
 </svg>
 </div>
 *그림 5-3. 챕터 5의 배달 흐름 - 배달 기사 완료 API 호출 후 COMPLETED*

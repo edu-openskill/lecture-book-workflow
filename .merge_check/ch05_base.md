@@ -44,9 +44,7 @@ cd ex04
 
 챕터 4를 마치면서 두 가지 한계를 이야기했습니다.
 
-**첫 번째**: 음식 배달 앱에서 "지금 어디쯤이지?" 궁금해서 5초마다 앱을 여는 상황과 비슷합니다. 앱이 알아서 알려주지 않으니 직접 확인하는 수밖에 없습니다.
-
-사용자가 주문 완료를 알려면 직접 계속 조회해야 합니다. 동기 방식이라면 응답에 결과가 바로 담겨오지만, 비동기 방식에서는 결과가 나중에 정해집니다. 주문 직후 `PENDING` 상태를 받는 사용자는 "언제 완료되지?"라며 새로고침을 반복합니다. 이것을 **폴링(Polling)** 이라고 합니다.
+**첫 번째**: 사용자가 주문 완료를 알려면 직접 계속 조회해야 합니다. 동기 방식이라면 응답에 결과가 바로 담겨오지만, 비동기 방식에서는 결과가 나중에 정해집니다. 주문 직후 `PENDING` 상태를 받는 사용자는 "언제 완료되지?"라며 새로고침을 반복합니다. 음식 배달 앱에서 "지금 어디쯤이지?" 궁금해서 5초마다 앱을 열어보는 상황과 같습니다. 앱이 알아서 알려주면 좋겠지만, 그런 기능이 아직 없으니 직접 확인하는 수밖에 없습니다. 이것을 **폴링(Polling)** 이라고 합니다.
 
 :::term-box
 **폴링(Polling)이란?** 클라이언트가 서버에 주기적으로 "변경된 거 있어?" 하고 반복 요청하여 상태를 확인하는 방식입니다. 서버가 먼저 알려주지 않으므로, 변화가 없어도 계속 요청이 발생합니다.
@@ -101,10 +99,10 @@ cd ex04
   <text x="300" y="176" text-anchor="middle" font-size="12" fill="#475569">배달 생성 요청</text>
   <line x1="420" y1="140" x2="578" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f2-i)"/>
   <text x="499" y="128" text-anchor="middle" font-size="12" font-weight="600" fill="#4f46e5">자동 전이</text>
-  <rect x="580" y="90" width="240" height="100" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="700" y="124" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">FINAL</text>
-  <text x="700" y="152" text-anchor="middle" font-size="20" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">COMPLETED</text>
-  <text x="700" y="176" text-anchor="middle" font-size="12" fill="#475569">즉시 완료 처리</text>
+  <rect x="580" y="90" width="240" height="100" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="700" y="124" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">FINAL</text>
+  <text x="700" y="152" text-anchor="middle" font-size="20" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">COMPLETED</text>
+  <text x="700" y="176" text-anchor="middle" font-size="12" fill="#9a3412">즉시 완료 처리</text>
 </svg>
 </div>
 *그림 5-2. 챕터 4의 배달 흐름 - 생성 즉시 완료 처리*
@@ -133,10 +131,10 @@ cd ex04
   <line x1="600" y1="150" x2="738" y2="150" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f3-i)"/>
   <text x="669" y="135" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5">배달 기사</text>
   <text x="669" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5">완료 API 호출</text>
-  <rect x="740" y="100" width="220" height="100" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="850" y="134" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">FINAL</text>
-  <text x="850" y="162" text-anchor="middle" font-size="20" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">COMPLETED</text>
-  <text x="850" y="186" text-anchor="middle" font-size="12" fill="#475569">배달 완료</text>
+  <rect x="740" y="100" width="220" height="100" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="850" y="134" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">FINAL</text>
+  <text x="850" y="162" text-anchor="middle" font-size="20" font-weight="700" fill="#7b341e" font-family="JetBrains Mono, monospace">COMPLETED</text>
+  <text x="850" y="186" text-anchor="middle" font-size="12" fill="#9a3412">배달 완료</text>
 </svg>
 </div>
 *그림 5-3. 챕터 5의 배달 흐름 - 배달 기사 완료 API 호출 후 COMPLETED*
@@ -170,21 +168,26 @@ delivery-service/src/main/java/.../
 배달 생성 시 상태를 `PENDING`으로 저장하고, 배달 기사가 완료 처리 시 `COMPLETED`로 전이합니다. 이전에는 생성과 동시에 `complete()`를 호출했지만, 이제는 명시적인 API 호출이 있어야 완료됩니다.
 
 ```java domain/Delivery.java. 배달 상태 전이 (PENDING → COMPLETED)
-// Delivery 클래스 외피·필드·@Table 생략 — 2장과 동일
+@Table(name = "delivery_tb")
+public class Delivery {
+    // 2장 Delivery.java 참조 — 필드 동일
 
-public static void validateAddress(String address) {
-    if (address == null || address.isBlank()) {
-        throw new Exception400("배달 주소는 필수입니다.");
+    // 배달 주소 검증
+    public static void validateAddress(String address) {
+        if (address == null || address.isBlank()) {
+            throw new Exception400("배달 주소는 필수입니다.");
+        }
     }
-}
 
-public static Delivery create(int orderId, String address) {
-    return new Delivery(orderId, address, DeliveryStatus.PENDING);  // 2장의 즉시 COMPLETED와 달리 PENDING
-}
+    // 배달 생성 시 PENDING 상태 (배달 완료 API 대기)
+    public static Delivery create(int orderId, String address) {
+        return new Delivery(orderId, address, DeliveryStatus.PENDING);
+    }
 
-public void complete() {
-    this.status = DeliveryStatus.COMPLETED;
-    this.updatedAt = LocalDateTime.now();
+    public void complete() {
+        this.status = DeliveryStatus.COMPLETED;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
 ```
 
@@ -239,7 +242,7 @@ public void publishDeliveryCompleted(DeliveryCompletedEvent event) {  // 추가
 
 ### 5.5.1 deliveryCreated 수정 - 성공 시 대기
 
-챕터 4에서는 배달 생성이 성공하면 즉시 주문 완료 명령(`complete-order-command`)을 발행했습니다. 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.
+챕터 4에서는 배달 생성 성공 시 즉시 주문 완료 명령(`complete-order-command`)을 발행했지만, 챕터 5에서는 배달 완료를 기다리기 위해 아무것도 발행하지 않습니다.
 
 `handler/OrderOrchestrator.java`의 `deliveryCreated`를 아래처럼 수정합니다.
 
@@ -317,13 +320,16 @@ order-service/
 
 ### 5.6.2 의존성 추가
 
-order-service `build.gradle` 의존성에 `spring-boot-starter-websocket`을 추가합니다.
+ `build.gradle`에 websocket이 추가됩니다.
+
+```gradle order-service/build.gradle. WebSocket 의존성 추가
+implementation 'org.springframework.boot:spring-boot-starter-websocket'
+```
 
 ### 5.6.3 WebSocket 설정
 
-WebSocketConfig는 WebSocket 기능을 활성화하고, 클라이언트가 `/api/ws/orders`로 실시간 연결할 수 있도록 엔드포인트를 등록합니다. 클라이언트가 이 엔드포인트로 연결한 뒤 `/topic/orders/{userId}` 채널을 구독하면, 서버가 해당 채널로 보낸 메시지를 실시간으로 수신할 수 있습니다.
-
-초인종 비유로 돌아오면, `/api/ws/orders`는 초인종 본체이고 `/topic/orders/{userId}`는 사용자별 채널 번호입니다. 사용자가 자기 채널을 구독해 두면, 서버가 그 채널로 보낸 메시지가 즉시 사용자 화면에 도착합니다.
+WebSocketConfig는 WebSocket 기능을 활성화하고, 클라이언트가 `/api/ws/orders`로 실시간 연결할 수 있도록 엔드포인트를 등록합니다.
+ 클라이언트가 이 엔드포인트로 연결한 뒤 `/topic/orders/{userId}` 채널을 구독하면, 서버가 해당 채널로 보낸 메시지를 실시간으로 수신할 수 있습니다.
 
 `core/config/WebSocketConfig.java`를 열고 아래 클래스를 작성합니다.
 
@@ -423,9 +429,7 @@ stomp.connect({}, function () {
 
 ### 5.6.8 nginx.conf - WebSocket 프록시 설정
 
-일반 HTTP는 요청-응답 한 쌍으로 끝나는 일회성 통신입니다. Nginx가 응답 후 연결을 닫아버리기 때문에, Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다.
-
-`/api/ws/` 경로에 **Upgrade 헤더** 를 설정하여 "이 연결은 WebSocket이니 끊지 말라"고 알려줘야 합니다.
+Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다. `/api/ws/` 경로에 **Upgrade 헤더** 를 설정하여 "이 연결은 WebSocket이니 끊지 말라"고 알려줘야 합니다.
 
 :::term-box
 **Nginx WebSocket 프록시(Upgrade 헤더)란?** Nginx가 WebSocket 연결을 프록시할 때 필요한 설정입니다. nginx 설정에 `upgrade 헤더`를 설정하여 HTTP 연결을 WebSocket 프로토콜로 전환(upgrade)하도록 백엔드에 전달합니다.
@@ -443,7 +447,17 @@ location /api/ws/ {
 }
 ```
 
-gateway-service의 nginx 설정에도 위와 동일한 `upgrade 헤더` 4줄을 `/api/ws/` location 블록에 추가합니다 (`proxy_pass`만 `order-service`로). 자세한 내용은 GitHub `ex04/gateway/nginx.conf` 참조.
+gateway-service의 nginx 설정도 동일하게 `upgrade 헤더`를 추가합니다.
+
+```nginx gateway/nginx.conf. WebSocket 추가분
+# 기존 location 블록들에 추가
+location /api/ws/ {
+    proxy_pass http://order-service;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+```
 
 ## 5.7 전체 시스템 통합 테스트
 

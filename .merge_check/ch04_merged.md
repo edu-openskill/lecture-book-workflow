@@ -103,7 +103,6 @@ Kafka의 구조는 우체통과 비슷합니다. 메시지를 보내는 사람�
   <defs>
     <marker id="c4f2-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
-<<<<<<< HEAD
   <text x="540" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Kafka — 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소</text>
   <rect x="20" y="90" width="160" height="70" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="100" y="113" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">PRODUCER A</text>
@@ -193,31 +192,6 @@ Kafka의 구조는 우체통과 비슷합니다. 메시지를 보내는 사람�
   <text x="980" y="325" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">구독자</text>
   <rect x="1015" y="332" width="30" height="14" rx="1" fill="#fff" stroke="#475569" stroke-width="1"/>
   <path d="M 1015 332 L 1030 342 L 1045 332" fill="none" stroke="#475569" stroke-width="1"/>
-=======
-  <text x="500" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">메시지 큐 개념 — Producer · Topic · Consumer</text>
-  <rect x="40" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="130" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">PRODUCER</text>
-  <text x="130" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">order-service</text>
-  <line x1="220" y1="130" x2="318" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="269" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">publish</text>
-  <rect x="320" y="70" width="360" height="120" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="500" y="100" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">TOPIC</text>
-  <text x="500" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3" font-family="JetBrains Mono, monospace">order-created</text>
-  <rect x="345" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="374" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg1</text>
-  <rect x="408" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="437" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg2</text>
-  <rect x="471" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="500" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg3</text>
-  <rect x="534" y="146" width="58" height="30" rx="4" fill="#fff" stroke="#4f46e5"/>
-  <text x="563" y="166" text-anchor="middle" font-size="11" fill="#3730a3" font-family="JetBrains Mono, monospace">msg4</text>
-  <text x="625" y="165" text-anchor="middle" font-size="14" fill="#475569">…</text>
-  <line x1="680" y1="130" x2="778" y2="130" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f2-i)"/>
-  <text x="729" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">consume</text>
-  <rect x="780" y="80" width="180" height="100" rx="10" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="870" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">CONSUMER</text>
-  <text x="870" y="148" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">orchestrator</text>
->>>>>>> c9c4f1c51c1c069af0038f04396392d7ddc57852
 </svg>
 </div>
 *그림 4-2. Kafka - 이름 붙은 우체통(토픽)이 여러 개 있는 메시지 저장소*

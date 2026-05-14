@@ -604,19 +604,19 @@ public void createOrder() {
     <marker id="c1f9c-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
     <marker id="c1f9c-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
-<<<<<<< HEAD
-  <text x="540" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">지휘자가 흐름을 조율</text>
-  <rect x="340" y="80" width="400" height="120" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="540" y="125" text-anchor="middle" font-size="24" font-weight="700" fill="#7b341e">Orchestrator</text>
-  <text x="540" y="155" text-anchor="middle" font-size="14" fill="#7b341e">중앙 지휘자</text>
-  <text x="540" y="180" text-anchor="middle" font-size="12" fill="#9a3412">전체 워크플로우 추적 · 명령 발행</text>
-=======
+<<<<<<< book_v7
   <text x="540" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Orchestration Saga — 지휘자가 흐름을 조율</text>
   <rect x="340" y="80" width="400" height="120" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
   <text x="540" y="125" text-anchor="middle" font-size="24" font-weight="700" fill="#3730a3">Orchestrator</text>
   <text x="540" y="155" text-anchor="middle" font-size="14" fill="#3730a3">중앙 지휘자</text>
   <text x="540" y="180" text-anchor="middle" font-size="12" fill="#475569">전체 워크플로우 추적 · 명령 발행</text>
->>>>>>> c9c4f1c51c1c069af0038f04396392d7ddc57852
+=======
+  <text x="540" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">지휘자가 흐름을 조율</text>
+  <rect x="340" y="80" width="400" height="120" rx="14" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="540" y="125" text-anchor="middle" font-size="24" font-weight="700" fill="#7b341e">Orchestrator</text>
+  <text x="540" y="155" text-anchor="middle" font-size="14" fill="#7b341e">중앙 지휘자</text>
+  <text x="540" y="180" text-anchor="middle" font-size="12" fill="#9a3412">전체 워크플로우 추적 · 명령 발행</text>
+>>>>>>> polish
   <line x1="480" y1="205" x2="480" y2="270" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c1f9c-p)"/>
   <text x="455" y="245" text-anchor="end" font-size="14" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">command</text>
   <text x="455" y="263" text-anchor="end" font-size="11" fill="#4f46e5" font-style="italic">"이것 해라"</text>

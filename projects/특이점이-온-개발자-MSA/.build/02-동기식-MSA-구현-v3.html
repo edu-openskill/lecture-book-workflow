@@ -392,7 +392,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구와 주문 트랜잭션 롤백을 역순으로 실행">
   <defs>
     <marker id="c2f2-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-    <marker id="c2f2-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="c2f2-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
   <text x="440" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">주문 실패 시 보상 트랜잭션 — 배달 실패 후 역순 복구</text>
   <rect x="80" y="60" width="180" height="50" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
@@ -408,6 +408,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
   <text x="304" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 재고 차감 요청</text>
   <line x1="440" y1="200" x2="172" y2="200" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f2-i)"/>
   <text x="306" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">② 차감 성공 응답</text>
+<<<<<<< HEAD
   <line x1="170" y1="255" x2="708" y2="255" stroke="#ff7849" stroke-width="1.6" marker-end="url(#c2f2-o)"/>
   <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#c2410c">③ 배달 생성 요청 → 실패</text>
   <line x1="170" y1="320" x2="438" y2="320" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f2-o)"/>
@@ -415,6 +416,15 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
   <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#ff7849" stroke-width="1.6" marker-end="url(#c2f2-o)"/>
   <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#c2410c">⑤ 주문 트랜잭션 롤백</text>
   <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (오렌지)</text>
+=======
+  <line x1="170" y1="255" x2="708" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f2-o)"/>
+  <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">③ 배달 생성 요청 → 실패</text>
+  <line x1="170" y1="320" x2="438" y2="320" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f2-o)"/>
+  <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">④ 재고 복구 요청 (보상)</text>
+  <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f2-o)"/>
+  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">⑤ 주문 취소 (CANCELLED)</text>
+  <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (점선)</text>
+>>>>>>> c9c4f1c51c1c069af0038f04396392d7ddc57852
 </svg>
 </div>
 *그림 2-2. 주문 실패 시 보상 트랜잭션 흐름*
