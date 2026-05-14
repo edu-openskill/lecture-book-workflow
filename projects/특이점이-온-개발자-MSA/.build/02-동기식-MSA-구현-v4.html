@@ -23,6 +23,53 @@
 <blockquote>
 <p>이 챕터의 전체 소스코드는 <strong>https://github.com/metacoding-12-msa/ex01</strong> 에서 확인할 수 있습니다.</p>
 </blockquote>
+<div class="svg-figure">
+<svg viewBox="0 0 1020 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 2 한눈에 보기: 1단계는 클라이언트가 User에 로그인하여 JWT를 받고, 2단계는 클라이언트가 Order에 주문을 요청하면 Order가 Product와 Delivery를 동기 호출하고 응답을 받은 뒤 클라이언트에 주문 완료를 응답하는 흐름. 모든 서비스는 Docker Compose로 묶여 있음">
+  <defs>
+    <marker id="c2f0-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="510" y="26" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">챕터 2 한눈에 보기 — 로그인부터 주문까지</text>
+  <rect x="230" y="50" width="760" height="400" rx="14" fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="6,4"/>
+  <text x="250" y="70" font-size="12" font-weight="700" fill="#3730a3">Docker Compose · msa-network</text>
+  <text x="40" y="95" font-size="13" font-weight="700" fill="#475569">1단계 — 로그인</text>
+  <rect x="40" y="105" width="140" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="110" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
+  <text x="110" y="157" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
+  <rect x="380" y="105" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="470" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">User</text>
+  <text x="470" y="157" text-anchor="middle" font-size="12" fill="#6b7280">:8083 회원</text>
+  <text x="40" y="225" font-size="13" font-weight="700" fill="#475569">2단계 — 주문 생성</text>
+  <rect x="40" y="235" width="140" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="110" y="265" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
+  <text x="110" y="287" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
+  <rect x="380" y="235" width="180" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="470" y="265" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
+  <text x="470" y="287" text-anchor="middle" font-size="12" fill="#3730a3">:8081 주문</text>
+  <rect x="680" y="130" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="770" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Product</text>
+  <text x="770" y="182" text-anchor="middle" font-size="12" fill="#6b7280">:8082 상품</text>
+  <rect x="680" y="340" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="770" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Delivery</text>
+  <text x="770" y="392" text-anchor="middle" font-size="12" fill="#6b7280">:8084 배달</text>
+  <line x1="180" y1="125" x2="378" y2="125" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="279" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 로그인 (POST /login)</text>
+  <line x1="378" y1="155" x2="182" y2="155" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="280" y="170" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">② JWT 응답</text>
+  <line x1="180" y1="255" x2="378" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="279" y="248" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">③ 주문 생성 (JWT 첨부)</text>
+  <line x1="560" y1="245" x2="678" y2="165" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">④ 재고 차감</text>
+  <line x1="678" y1="185" x2="562" y2="265" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑤ 차감 응답</text>
+  <line x1="560" y1="285" x2="678" y2="365" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="315" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">⑥ 배달 생성</text>
+  <line x1="678" y1="385" x2="562" y2="305" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="355" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑦ 생성 응답</text>
+  <line x1="378" y1="285" x2="182" y2="285" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="280" y="305" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑧ 주문 완료 응답</text>
+</svg>
+</div>
+<div class="caption">그림 2-1. 챕터 2 한눈에 보기 - 로그인부터 주문까지</div>
 <div class="goal-box">
 <p>이번 챕터가 끝나면</p>
 <ul>
@@ -127,53 +174,6 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <p>챕터 1에서 설계한 네 개의 서비스(회원, 상품, 주문, 배달)를 이제 직접 만들어 보겠습니다.</p>
 <p><strong>주문 서비스</strong>가 두 서비스를 엮는 자리입니다. 주문을 생성하려면 상품 서비스에서 재고를 줄이고, 배달 서비스에서 배달을 만들어야 합니다. 즉 주문 서비스가 두 서비스를 직접 호출해야 합니다.</p>
 <p>각 서비스는 독립된 스프링 프로젝트입니다. 하나의 서비스를 배포할 때 다른 서비스를 건드릴 필요가 없습니다. 디렉토리 구조와 패키지 구조는 준비하기에서 미리 살펴봤습니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 1020 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 2 한눈에 보기: 1단계는 클라이언트가 User에 로그인하여 JWT를 받고, 2단계는 클라이언트가 Order에 주문을 요청하면 Order가 Product와 Delivery를 동기 호출하고 응답을 받은 뒤 클라이언트에 주문 완료를 응답하는 흐름. 모든 서비스는 Docker Compose로 묶여 있음">
-  <defs>
-    <marker id="c2f0-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-  </defs>
-  <text x="510" y="26" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">챕터 2 한눈에 보기 — 로그인부터 주문까지</text>
-  <rect x="230" y="50" width="760" height="400" rx="14" fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="6,4"/>
-  <text x="250" y="70" font-size="12" font-weight="700" fill="#3730a3">Docker Compose · msa-network</text>
-  <text x="40" y="95" font-size="13" font-weight="700" fill="#475569">1단계 — 로그인</text>
-  <rect x="40" y="105" width="140" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="110" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
-  <text x="110" y="157" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
-  <rect x="380" y="105" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="470" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">User</text>
-  <text x="470" y="157" text-anchor="middle" font-size="12" fill="#6b7280">:8083 회원</text>
-  <text x="40" y="225" font-size="13" font-weight="700" fill="#475569">2단계 — 주문 생성</text>
-  <rect x="40" y="235" width="140" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="110" y="265" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
-  <text x="110" y="287" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
-  <rect x="380" y="235" width="180" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="470" y="265" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
-  <text x="470" y="287" text-anchor="middle" font-size="12" fill="#3730a3">:8081 주문</text>
-  <rect x="680" y="130" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="770" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Product</text>
-  <text x="770" y="182" text-anchor="middle" font-size="12" fill="#6b7280">:8082 상품</text>
-  <rect x="680" y="340" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="770" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Delivery</text>
-  <text x="770" y="392" text-anchor="middle" font-size="12" fill="#6b7280">:8084 배달</text>
-  <line x1="180" y1="125" x2="378" y2="125" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="279" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 로그인 (POST /login)</text>
-  <line x1="378" y1="155" x2="182" y2="155" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="280" y="170" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">② JWT 응답</text>
-  <line x1="180" y1="255" x2="378" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="279" y="248" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">③ 주문 생성 (JWT 첨부)</text>
-  <line x1="560" y1="245" x2="678" y2="165" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">④ 재고 차감</text>
-  <line x1="678" y1="185" x2="562" y2="265" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑤ 차감 응답</text>
-  <line x1="560" y1="285" x2="678" y2="365" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="315" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">⑥ 배달 생성</text>
-  <line x1="678" y1="385" x2="562" y2="305" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="355" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑦ 생성 응답</text>
-  <line x1="378" y1="285" x2="182" y2="285" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="280" y="305" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑧ 주문 완료 응답</text>
-</svg>
-</div>
-<div class="caption">그림 2-1. 챕터 2 한눈에 보기 - 로그인부터 주문까지</div>
 <h2>2.2 공통 설정 - 모든 서비스가 공유하는 뼈대</h2>
 <p>MSA에서는 서비스마다 서버가 다르므로 세션을 공유할 수 없습니다. 대신 JWT 토큰을 발급하고, 각 서비스가 토큰만 검증하는 방식을 사용합니다.</p>
 <p>4개 서비스 모두 JWT 인증, 표준 응답 형식, 예외 처리가 필요합니다. 이를 <code>core/</code> 패키지에 모아 두면, 각 서비스는 비즈니스 로직에 집중할 수 있습니다.</p>
