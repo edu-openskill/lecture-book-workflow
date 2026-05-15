@@ -23,14 +23,105 @@
 <blockquote>
 <p>이 챕터의 전체 소스코드는 <strong>https://github.com/metacoding-12-msa/ex03</strong> 에서 확인할 수 있습니다.</p>
 </blockquote>
-<!-- [FLOW CARD: ch4-arc]
-path: assets/CH04/diagram/00_ch4-arc.png
-desc: 챕터 4의 사건-깨달음-결과 한 장 요약.
-  사건: product-service Pod이 30초 살아나는 동안 order-service까지 모두 504로 막힘. try/catch 보상 코드가 단계마다 깊어지고 있음.
-  깨달음: 두 서비스가 직접 전화를 걸어 기다리는 구조 자체가 원인. 메시지를 사이에 두면 한쪽이 죽어도 다른 쪽은 살아간다.
-  결과: REST 호출을 Kafka 이벤트로 교체하고, 흐름은 orchestrator가 지휘. ex03 — 한 서비스가 잠시 죽어도 주문이 멈추지 않는다.
--->
-<div class="chapter-image diagram"><img src="..\chapters\assets\CH04\diagram\00_ch4-arc.png" alt="" /><div class="caption">그림 4-0. 챕터 4 한눈에 보기</div></div>
+<div class="svg-figure">
+<svg viewBox="0 0 1200 880" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 4 한눈에 보기: 챕터 3과 동일하게 Client는 클러스터 밖에 있고, 1단계 로그인은 Client가 Ingress·Gateway를 거쳐 User에 로그인하고 JWT를 응답받는다. 2단계 주문은 Client가 Ingress·Gateway를 거쳐 Order에 동기 REST로 주문하고 즉시 PENDING을 응답받는다. 그 뒤 Order·Product·Delivery 세 서비스는 가운데 Orchestrator와 event·command를 주고받고, Orchestrator가 그 모든 메시지를 아래 Kafka 토픽으로 비동기 전달한다. 서비스끼리는 직접 호출하지 않는다.">
+  <defs>
+    <marker id="c4f0-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="600" y="26" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">챕터 4 한눈에 보기 — 1단계 로그인은 챕터 3과 동일, 2단계 주문은 Kafka 비동기</text>
+  <rect x="200" y="58" width="980" height="760" rx="14" fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="6,4"/>
+  <text x="220" y="78" font-size="12" font-weight="700" fill="#3730a3">Kubernetes 클러스터 · metacoding</text>
+  <text x="36" y="98" font-size="13" font-weight="700" fill="#475569">1단계 — 로그인</text>
+  <rect x="20" y="108" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="90" y="141" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
+  <text x="90" y="164" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
+  <rect x="290" y="108" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="360" y="141" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Ingress</text>
+  <text x="360" y="164" text-anchor="middle" font-size="12" fill="#6b7280">외부 진입점</text>
+  <rect x="510" y="108" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="580" y="141" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Gateway</text>
+  <text x="580" y="164" text-anchor="middle" font-size="12" fill="#6b7280">Nginx 라우팅</text>
+  <rect x="720" y="108" width="170" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="805" y="141" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">User</text>
+  <text x="805" y="164" text-anchor="middle" font-size="12" fill="#6b7280">:8083 회원</text>
+  <line x1="160" y1="140" x2="288" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="225" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">1. 요청</text>
+  <line x1="430" y1="140" x2="508" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="470" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">2. 라우팅</text>
+  <line x1="650" y1="140" x2="718" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="685" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">3. 로그인</text>
+  <line x1="718" y1="168" x2="652" y2="168" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="685" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">4. 응답</text>
+  <line x1="508" y1="168" x2="432" y2="168" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="470" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">5. 응답</text>
+  <line x1="288" y1="168" x2="162" y2="168" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="225" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">6. JWT 응답</text>
+  <text x="36" y="258" font-size="13" font-weight="700" fill="#475569">2단계 — 주문 생성</text>
+  <rect x="20" y="268" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="90" y="301" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
+  <text x="90" y="324" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
+  <rect x="290" y="268" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="360" y="301" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Ingress</text>
+  <text x="360" y="324" text-anchor="middle" font-size="12" fill="#6b7280">외부 진입점</text>
+  <rect x="510" y="268" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="580" y="301" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Gateway</text>
+  <text x="580" y="324" text-anchor="middle" font-size="12" fill="#6b7280">Nginx 라우팅</text>
+  <line x1="160" y1="300" x2="288" y2="300" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="225" y="292" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">7. 요청</text>
+  <line x1="430" y1="300" x2="508" y2="300" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="470" y="292" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">8. 라우팅</text>
+  <line x1="560" y1="348" x2="390" y2="430" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="450" y="392" text-anchor="end" font-size="13" font-weight="600" fill="#4f46e5">9. 주문 생성</text>
+  <line x1="430" y1="430" x2="600" y2="348" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="536" y="392" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">10. 응답</text>
+  <line x1="508" y1="326" x2="432" y2="326" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="470" y="342" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">11. 응답</text>
+  <line x1="288" y1="326" x2="162" y2="326" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="225" y="342" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">12. PENDING 응답</text>
+  <rect x="300" y="430" width="170" height="80" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="385" y="463" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
+  <text x="385" y="486" text-anchor="middle" font-size="12" fill="#3730a3">:8081 주문</text>
+  <rect x="560" y="430" width="170" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="645" y="463" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Product</text>
+  <text x="645" y="486" text-anchor="middle" font-size="12" fill="#6b7280">:8082 상품</text>
+  <rect x="820" y="430" width="170" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="905" y="463" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Delivery</text>
+  <text x="905" y="486" text-anchor="middle" font-size="12" fill="#6b7280">:8084 배달</text>
+  <rect x="320" y="588" width="620" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
+  <text x="630" y="622" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
+  <text x="630" y="646" text-anchor="middle" font-size="12" font-weight="600" fill="#312e81">흐름을 결정하는 지휘자</text>
+  <text x="630" y="664" text-anchor="middle" font-size="11" fill="#3730a3">event를 받아 다음 command를 발행 (서비스는 명령 못 냄)</text>
+  <rect x="360" y="716" width="540" height="68" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="360" y="716" width="540" height="20" fill="#ff7849"/>
+  <text x="630" y="731" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 모든 메시지가 토픽을 거쳐 비동기로 전달</text>
+  <rect x="410" y="746" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M410 746 L448 759 L486 746" fill="none" stroke="#ff7849" stroke-width="1"/>
+  <rect x="530" y="746" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M530 746 L568 759 L606 746" fill="none" stroke="#ff7849" stroke-width="1"/>
+  <rect x="650" y="746" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M650 746 L688 759 L726 746" fill="none" stroke="#ff7849" stroke-width="1"/>
+  <rect x="770" y="746" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M770 746 L808 759 L846 746" fill="none" stroke="#ff7849" stroke-width="1"/>
+  <line x1="370" y1="512" x2="370" y2="586" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="356" y="552" text-anchor="end" font-size="12" font-weight="600" fill="#3730a3"><tspan font-size="17" font-weight="700">❶</tspan> 주문 생성 발행</text>
+  <line x1="400" y1="586" x2="400" y2="512" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="414" y="552" text-anchor="start" font-size="12" font-weight="600" fill="#4f46e5"><tspan font-size="17" font-weight="700">❻</tspan> 주문 완료 명령</text>
+  <line x1="630" y1="512" x2="630" y2="586" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="616" y="552" text-anchor="end" font-size="12" font-weight="600" fill="#3730a3"><tspan font-size="17" font-weight="700">❸</tspan> 재고 차감 결과</text>
+  <line x1="660" y1="586" x2="660" y2="512" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="674" y="552" text-anchor="start" font-size="12" font-weight="600" fill="#4f46e5"><tspan font-size="17" font-weight="700">❷</tspan> 재고 차감 명령</text>
+  <line x1="890" y1="512" x2="890" y2="586" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="876" y="552" text-anchor="end" font-size="12" font-weight="600" fill="#3730a3"><tspan font-size="17" font-weight="700">❺</tspan> 배달 생성 결과</text>
+  <line x1="920" y1="586" x2="920" y2="512" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f0-a)"/>
+  <text x="934" y="552" text-anchor="start" font-size="12" font-weight="600" fill="#4f46e5"><tspan font-size="17" font-weight="700">❹</tspan> 배달 생성 명령</text>
+  <line x1="615" y1="676" x2="615" y2="714" stroke="#4f46e5" stroke-width="2.4" marker-end="url(#c4f0-a)"/>
+  <text x="603" y="699" text-anchor="end" font-size="12" font-weight="700" fill="#4f46e5">발행</text>
+  <line x1="645" y1="714" x2="645" y2="678" stroke="#4f46e5" stroke-width="2.4" stroke-dasharray="4,3" marker-end="url(#c4f0-a)"/>
+  <text x="657" y="699" text-anchor="start" font-size="12" font-weight="700" fill="#3730a3">구독</text>
+  <text x="600" y="844" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">1단계 로그인은 챕터 3과 동일(①~⑥) · 2단계 진입(⑦⑧⑨⑩) 뒤 서비스가 Orchestrator와 event·command를 주고받고 Kafka 토픽으로 비동기 전달 (서비스끼리 직접 호출 없음)</text>
+</svg>
+</div>
+<div class="caption">그림 4-0. 챕터 4 한눈에 보기 - 서비스·Orchestrator·Kafka 3층 구조</div>
 <div class="goal-box">
 <p>이번 챕터가 끝나면</p>
 <ul>
@@ -46,9 +137,20 @@ desc: 챕터 4의 사건-깨달음-결과 한 장 요약.
 <h3>1. 소스 코드 클론</h3>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 레포 클론</div>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-12-msa/ex03.git
 <span class="nb">cd</span><span class="w"> </span>ex03</div>
-<h3>2. Kafka</h3>
+<h3>2. 파일 구조</h3>
+<div class="code-block highlight" data-lang="text"><div class="cb-title">ex03 디렉토리</div>ex03/
+├── order/              # 포트 8081
+├── product/            # 포트 8082
+├── user/               # 포트 8083
+├── delivery/           # 포트 8084
+├── orchestrator/       # Kafka 워크플로우 조율 (이번 챕터 신규)
+├── gateway/            # Nginx API Gateway
+├── db/                 # MySQL
+└── k8s/                # Kubernetes 매니페스트 (kafka 포함)</div>
+<p>서비스마다 패키지 구조가 다르므로, 서비스별 상세 구조는 각 실습 직전(4.4.1·4.5.1·4.6.1)에서 다룹니다.</p>
+<h3>3. Kafka</h3>
 <p>이 챕터는 Kafka를 별도로 설치하지 않습니다. Kubernetes 매니페스트(<code>k8s/kafka/</code>)로 Minikube 안에 띄우므로, 챕터 3에서 준비한 Docker Desktop과 Minikube만 있으면 됩니다.</p>
-<h3>3. 실습 순서</h3>
+<h3>4. 실습 순서</h3>
 <ol>
 <li>order-service의 REST 호출을 Kafka 이벤트 발행으로 교체</li>
 <li>product-service · delivery-service에 Kafka Consumer/Producer 추가</li>
@@ -60,21 +162,14 @@ desc: 챕터 4의 사건-깨달음-결과 한 장 요약.
 <p><strong>이번 챕터는 책에서 가장 복잡한 내용을 다룹니다.</strong> 여러 서비스가 동시에 Kafka 메시지를 주고받으며 상태가 바뀝니다. 전체 토픽맵(4.2.3)과 흐름 표(4.3.1~4.3.2)를 먼저 훑어보고 시작하면 길을 잃지 않습니다.</p>
 </div>
 </div>
-<h2>4.1 30초의 정적</h2>
-<p>배포 다음 날 오전이었습니다. 모니터링 대시보드에서 5xx 그래프가 짧게 솟구쳤습니다. product-service Pod이 OOM으로 한 번 죽었다가 K8s가 새로 띄우는 그 <strong>30초</strong> 사이였습니다. 챕터 3에서 그토록 자랑하던 자동 복구. 그런데 그 30초 동안 들어온 주문 요청은 전부 504로 떨어졌습니다. 재고 조회·차감 호출이 product-service에 도달하지 못해서, 호출하던 order-service까지 함께 멈춘 것이었습니다.</p>
-<p class="thought">Pod은 살아났는데 왜 주문이 죽었지?</p>
-<p>오픈이는 <code>OrderService.createOrder</code> 메서드를 다시 열어봤습니다.</p>
-<pre><code>productClient.decrease(...);    ← 여기서 30초 기다림
-deliveryClient.create(...);     ← 거기서 또 실패하면
-catch (...) {                   ← 보상하러 다시 product로
-    productClient.increase(...);
-}
-</code></pre>
-<p>한 서비스가 잠시 죽었을 뿐인데 호출 사슬 전체가 같이 멈춥니다. 그리고 그 멈춤을 막으려고 만든 try/catch 보상 코드가, 단계가 늘어날수록 점점 깊어지고 있었습니다. 챕터 2에서 두 단계로 끝났던 보상 블록은, 새 비즈니스 요구가 들어올 때마다 한 칸씩 더 들여쓰기되고 있습니다.</p>
+<h2>4.1 동기 호출의 한계 - 한 서비스가 멈추면 전체가 멈춘다</h2>
+<p>배포 다음 날 오전이었습니다. 모니터링 대시보드에서 에러 그래프가 짧게 솟구쳤습니다. product-service Pod이 OOM으로 한 번 죽었다가 K8s가 새로 띄우는 그 <strong>30초</strong> 사이였습니다. 챕터 3에서 그토록 자랑하던 자동 복구. 그런데 그 30초 동안 들어온 주문 요청은 전부 실패했습니다. 재고 조회·차감 호출이 product-service에 도달하지 못해서, 호출하던 order-service의 주문 처리까지 통째로 터진 것이었습니다.</p>
+<p class="thought">서로 동기적으로 호출하니까, 하나가 죽으면 그 주문이 통째로 실패하는구나.</p>
+<p>그 멈춤을 막으려고 만든 try/catch 보상 코드는, 단계가 늘어날수록 점점 깊어지고 있었습니다. 챕터 2에서 두 단계로 끝났던 보상 블록은, 새 비즈니스 요구가 들어올 때마다 한 칸씩 더 들여쓰기되고 있습니다.</p>
 <div class="dialogue"><span class="speaker">선배</span>: "서로 직접 전화를 걸어서 기다려주니까 그래요. 이제 전화를 끊고 <strong>메시지를 남기는</strong> 방식으로 바꿔 봐요. Kafka라는 녀석이 있어요."</div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "메시지요?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "주문은 진동벨을 받고 자리에 앉아요. 재고 담당자는 자기 일이 끝나면 다음 사람에게 벨을 울리고요. 누가 잠깐 자리를 비워도 메시지가 사라지지 않아요."</div>
-<p>챕터 3에서 마주친 30초 다운은 <strong>MSA의 목표</strong>인 <em>&quot;각 서비스를 독립적으로 배포하고 장애를 격리한다&quot;</em> 와 정면으로 충돌합니다. 직접 호출하는 한 격리는 환상입니다.</p>
+<p>방금 마주친 30초 다운은 <strong>MSA의 목표</strong>인 <em>&quot;각 서비스를 독립적으로 배포하고 장애를 격리한다&quot;</em> 와 정면으로 충돌합니다. 직접 호출하는 한 격리는 환상입니다.</p>
 <h3>4.1.1 카운터 대기 vs 진동벨</h3>
 <p>카페에서 커피를 주문하는 두 가지 방식으로 비교하겠습니다.</p>
 <!-- image-prompt: Minimal black line drawing on white background, split comparison, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Separated by a simple vertical line in the middle, no X mark. Left side, title "동기 (카운터 대기)": barista behind counter making coffee, one customer standing at counter waiting, four or five more customers queued behind in a long line looking bored. All frozen/blocked. Right side, title "비동기 (진동벨)": same cafe counter with barista, but the customer has walked away to a table, sitting with a laptop and a small vibration buzzer on the table. A wavy line from the buzzer indicating it will ring. No speech bubbles, no annotation text, no checklists. Clean lines, no colors. -->
@@ -325,17 +420,17 @@ catch (...) {                   ← 보상하러 다시 product로
   <line x1="650" y1="110" x2="650" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="920" y1="110" x2="920" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="130" y1="150" x2="378" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
-  <text x="254" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① order-created 발행</text>
+  <text x="254" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">1. order-created 발행</text>
   <line x1="380" y1="200" x2="558" y2="200" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f5-i)"/>
-  <text x="469" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">② decrease-product-command</text>
+  <text x="469" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">2. decrease-product-command</text>
   <line x1="650" y1="250" x2="382" y2="250" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
-  <text x="516" y="242" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">③ product-decreased</text>
+  <text x="516" y="242" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">3. product-decreased</text>
   <line x1="380" y1="300" x2="828" y2="300" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f5-i)"/>
-  <text x="604" y="292" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">④ create-delivery-command</text>
+  <text x="604" y="292" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">4. create-delivery-command</text>
   <line x1="920" y1="350" x2="382" y2="350" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f5-o)"/>
-  <text x="651" y="342" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">⑤ delivery-created</text>
+  <text x="651" y="342" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">5. delivery-created</text>
   <line x1="380" y1="400" x2="132" y2="400" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f5-i)"/>
-  <text x="256" y="392" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">⑥ complete-order-command</text>
+  <text x="256" y="392" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">6. complete-order-command</text>
   <text x="540" y="445" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">각 메시지는 Kafka 토픽을 거쳐 전달 · 실선: command, 점선: event</text>
 </svg>
 </div>
@@ -424,13 +519,13 @@ catch (...) {                   ← 보상하러 다시 product로
   <line x1="650" y1="110" x2="650" y2="390" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="920" y1="110" x2="920" y2="390" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="650" y1="150" x2="382" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f6-o)"/>
-  <text x="516" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① product-decreased {success}</text>
+  <text x="516" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">1. product-decreased {success}</text>
   <line x1="920" y1="210" x2="382" y2="210" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f6-o)"/>
-  <text x="651" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">② delivery-created {success: false}</text>
+  <text x="651" y="202" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">2. delivery-created {success: false}</text>
   <line x1="380" y1="270" x2="558" y2="270" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f6-i)"/>
-  <text x="469" y="262" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">③ increase-product-command (보상)</text>
+  <text x="469" y="262" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">3. increase-product-command (보상)</text>
   <line x1="380" y1="335" x2="132" y2="335" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f6-i)"/>
-  <text x="256" y="327" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">④ cancel-order-command → CANCELLED</text>
+  <text x="256" y="327" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">4. cancel-order-command → CANCELLED</text>
   <text x="540" y="405" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패 감지 후 Orchestrator가 자동으로 보상 명령을 역순으로 발행</text>
 </svg>
 </div>
@@ -499,7 +594,8 @@ catch (...) {                   ← 보상하러 다시 product로
 <h3>4.4.1 패키지 구조</h3>
 <div class="code-block highlight" data-lang="text"><div class="cb-title">order-service/ 패키지 구조</div>order-service/src/main/
 ├── resources/
-│   └── application-prod.properties      ← [참고] Kafka 설정 추가
+│   ├── application-dev.properties       ← [참고] Kafka 설정 추가 (H2 로컬)
+│   └── application-prod.properties      ← [참고] Kafka 설정 추가 (MySQL 운영)
 └── java/.../
     ├── adapter/
     │   ├── message/
@@ -521,10 +617,10 @@ catch (...) {                   ← 보상하러 다시 product로
 </div>
 <h3>4.4.2 의존성 추가</h3>
 <p><code>spring-boot-starter-kafka</code> 한 줄을 추가합니다. JSON 직렬화에 필요한 <code>jackson-databind</code>는 spring-boot-starter-kafka가 transitive로 끌고 오므로 따로 명시하지 않습니다.</p>
-<p>챕터 3 <code>build.gradle</code>에 다음 한 줄을 추가합니다.</p>
+<p>각 서비스의 <code>build.gradle</code>에 다음 한 줄을 추가합니다.</p>
 <div class="code-block highlight" data-lang="gradle"><div class="cb-title">build.gradle. Kafka 의존성 추가</div>implementation 'org.springframework.boot:spring-boot-starter-kafka'</div>
 <h3>4.4.3 Kafka 설정</h3>
-<p><code>application-dev.properties</code>와 <code>application-prod.properties</code> 모두에 Kafka 설정을 추가합니다. Kafka 주소는 환경변수로 주입받습니다.</p>
+<p>각 서비스의 <code>src/main/resources/application-dev.properties</code>와 <code>application-prod.properties</code> 모두에 Kafka 설정을 추가합니다. Kafka 주소는 환경변수로 주입받습니다.</p>
 <div class="prep-note">
 <p><strong><code>group-id</code>는 컨슈머 그룹 이름입니다.</strong> 같은 그룹끼리는 메시지를 나눠 받고, 다른 그룹이면 같은 메시지를 각각 받습니다.</p>
 </div>
@@ -753,11 +849,11 @@ catch (...) {                   ← 보상하러 다시 product로
   <line x1="430" y1="110" x2="430" y2="290" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="710" y1="110" x2="710" y2="290" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="150" y1="150" x2="428" y2="150" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c4f7-o)"/>
-  <text x="289" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">① order-created 발행</text>
+  <text x="289" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3" font-family="JetBrains Mono, monospace">1. order-created 발행</text>
   <path d="M430 200 L490 200 L490 218 L432 218" fill="none" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f7-o)"/>
-  <text x="500" y="213" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">② WorkflowState 생성</text>
+  <text x="500" y="213" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">2. WorkflowState 생성</text>
   <line x1="430" y1="265" x2="708" y2="265" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c4f7-i)"/>
-  <text x="569" y="257" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">③ decrease-product-command</text>
+  <text x="569" y="257" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5" font-family="JetBrains Mono, monospace">3. decrease-product-command</text>
 </svg>
 </div>
 <div class="caption">그림 4-7. 1단계 - 주문 생성 이벤트 수신</div>

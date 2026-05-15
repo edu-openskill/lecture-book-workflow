@@ -52,21 +52,21 @@
   <text x="770" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Delivery</text>
   <text x="770" y="392" text-anchor="middle" font-size="12" fill="#6b7280">:8084 배달</text>
   <line x1="180" y1="125" x2="378" y2="125" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="279" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 로그인 (POST /login)</text>
+  <text x="279" y="118" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">1. 로그인 (POST /login)</text>
   <line x1="378" y1="155" x2="182" y2="155" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="280" y="170" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">② JWT 응답</text>
+  <text x="280" y="170" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">2. JWT 응답</text>
   <line x1="180" y1="255" x2="378" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="279" y="248" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">③ 주문 생성 (JWT 첨부)</text>
+  <text x="279" y="248" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">3. 주문 생성 (JWT 첨부)</text>
   <line x1="560" y1="245" x2="678" y2="165" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">④ 재고 차감</text>
+  <text x="619" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">4. 재고 차감</text>
   <line x1="678" y1="185" x2="562" y2="265" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑤ 차감 응답</text>
+  <text x="619" y="240" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">5. 차감 응답</text>
   <line x1="560" y1="285" x2="678" y2="365" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="315" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">⑥ 배달 생성</text>
+  <text x="619" y="315" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">6. 배달 생성</text>
   <line x1="678" y1="385" x2="562" y2="305" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="619" y="355" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑦ 생성 응답</text>
+  <text x="619" y="355" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">7. 생성 응답</text>
   <line x1="378" y1="285" x2="182" y2="285" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
-  <text x="280" y="305" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">⑧ 주문 완료 응답</text>
+  <text x="280" y="305" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">8. 주문 완료 응답</text>
 </svg>
 </div>
 <div class="caption">그림 2-1. 챕터 2 한눈에 보기 - 로그인부터 주문까지</div>
@@ -491,15 +491,15 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
   <line x1="440" y1="110" x2="440" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="710" y1="110" x2="710" y2="430" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <line x1="170" y1="150" x2="438" y2="150" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f2-i)"/>
-  <text x="304" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">① 재고 차감 요청</text>
+  <text x="304" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">1. 재고 차감 요청</text>
   <line x1="440" y1="200" x2="172" y2="200" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f2-i)"/>
-  <text x="306" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">② 차감 성공 응답</text>
+  <text x="306" y="192" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">2. 차감 성공 응답</text>
   <line x1="170" y1="255" x2="708" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f2-o)"/>
-  <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">③ 배달 생성 요청 → 실패</text>
+  <text x="439" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">3. 배달 생성 요청 → 실패</text>
   <line x1="170" y1="320" x2="438" y2="320" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f2-o)"/>
-  <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">④ 재고 복구 요청 (보상)</text>
+  <text x="304" y="312" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">4. 재고 복구 요청 (보상)</text>
   <path d="M170 380 L230 380 L230 398 L172 398" fill="none" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f2-o)"/>
-  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">⑤ 주문 트랜잭션 롤백</text>
+  <text x="240" y="393" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">5. 주문 트랜잭션 롤백</text>
   <text x="440" y="448" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">실패가 발생하면 이미 진행된 단계를 역순으로 보상 (점선)</text>
 </svg>
 </div>
