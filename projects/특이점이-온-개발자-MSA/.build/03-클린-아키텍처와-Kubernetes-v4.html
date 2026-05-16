@@ -126,16 +126,15 @@
 ├── gateway/            # Nginx API Gateway
 ├── db/                 # MySQL Dockerfile
 └── k8s/                # Kubernetes 매니페스트</div>
-<div class="code-block highlight" data-lang="text"><div class="cb-title">주문 서비스 패키지 구조 (3장에서 재구성)</div>src/main/java/com/metacoding/order/
+<div class="code-block highlight" data-lang="text"><div class="cb-title">주문 서비스 패키지 구조 (챕터 3에서 재구성)</div>src/main/java/com/metacoding/order/
 ├── domain/         # 엔티티 + 비즈니스 규칙
 ├── repository/     # Spring Data JPA
 ├── usecase/        # UseCase 인터페이스 + 서비스 코드
 ├── web/            # 컨트롤러 + DTO
 ├── adapter/        # 외부 서비스 클라이언트 (order 전용)
-└── core/           # JWT, 예외처리 (2장과 동일)
+└── core/           # JWT, 예외처리 (챕터 2와 동일)
 src/main/resources/
-├── application-dev.properties    # H2 (로컬 개발)
-└── application-prod.properties   # MySQL (K8s 운영)</div>
+└── application.properties        # DB·JWT 설정 (값은 환경변수로 주입)</div>
 <div class="prep-note">
 <p><strong>user/product/delivery도 동일한 구조이며, adapter/ 패키지만 order 전용입니다.</strong></p>
 </div>
@@ -283,9 +282,9 @@ src/main/resources/
 <h3>3.3.2 엔티티의 비즈니스 로직 — DDD의 핵심</h3>
 <p><strong>&quot;주문이 취소 가능한가?&quot;</strong> 같은 비즈니스 규칙은 서비스가 아닌 엔티티에 둡니다. 엔티티 메서드로 캡슐화하면 어디서 호출하든 동일한 규칙이 적용되고, 새 규칙이 들어와도 도메인 메서드만 손대면 됩니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title">domain/Order.java. validateCancelable 추가</div><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Order</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// 2장 Order.java 참조 — 필드 및 create(), complete(), cancel() 동일</span>
+<span class="w">    </span><span class="c1">// 챕터 2 Order.java 참조 — 필드·create()·complete() 동일, cancel()은 validateCancelable() 호출 추가</span>
 
-<span class="w">    </span><span class="c1">// 비즈니스 규칙을 엔티티에 위임 (3장에서 추가)</span>
+<span class="w">    </span><span class="c1">// 비즈니스 규칙을 엔티티에 위임 (챕터 3에서 추가)</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">validateCancelable</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">OrderStatus</span><span class="p">.</span><span class="na">CANCELLED</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;주문이 이미 취소되었습니다.&quot;</span><span class="p">);</span>
@@ -299,7 +298,8 @@ src/main/resources/
 <li><strong>UseCase 인터페이스 구현</strong>. 서비스가 직접 메서드를 노출하지 않고, <code>CreateOrderUseCase</code> 등 인터페이스를 구현합니다.</li>
 <li><strong>비즈니스 규칙을 엔티티에 위임</strong>. 챕터 2에서 서비스의 <code>if</code>문으로 처리하던 검증을 도메인 객체의 메서드로 이동합니다.</li>
 </ol>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">usecase/OrderService.java. UseCase 인터페이스 구현</div><span class="nd">@Service</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title">usecase/OrderService.java. UseCase 인터페이스 구현</div><span class="nd">@RequiredArgsConstructor</span>
+<span class="nd">@Service</span>
 <span class="nd">@Transactional</span><span class="p">(</span><span class="n">readOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="w">                    </span><span class="c1">// 1. 클래스 레벨 읽기 전용 트랜잭션</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">CreateOrderUseCase</span><span class="p">,</span><span class="w"> </span><span class="n">GetOrderUseCase</span><span class="p">,</span><span class="w"> </span><span class="n">CancelOrderUseCase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 2. UseCase 인터페이스를 구현</span>

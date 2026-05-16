@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>컨슈머 그룹 샘플 v6</title>
+<style>
+  body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:#f4f5f7;margin:0;padding:40px;color:#0f172a}
+  .wrap{max-width:980px;margin:0 auto}
+  .svg-figure{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;margin-bottom:8px}
+  .caption{text-align:center;font-style:italic;color:#475569;font-size:14px;margin-top:6px}
+  h1{font-size:16px;color:#475569;font-weight:600;margin:0 0 20px}
+  svg{display:block;width:100%;height:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>샘플 v7 — 메시지 1건 + 재고 결과로 차이를 못박기</h1>
+
+<div class="svg-figure">
+<svg viewBox="0 0 980 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨슈머 그룹 비교: 그룹으로 안 묶으면 두 컨슈머가 같은 메시지를 각각 처리해 재고가 두 번 깎이고, 같은 컨슈머 그룹으로 묶으면 한 컨슈머만 처리해 재고가 한 번만 깎인다">
+  <defs>
+    <marker id="cg" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="490" y="32" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">컨슈머 그룹 — 같은 메시지를 두 번 처리하지 않게 묶는다</text>
+
+  <!-- ===== 위: 안 묶으면 ===== -->
+  <text x="36" y="70" font-size="15" font-weight="700" fill="#0f172a">그룹으로 안 묶으면</text>
+  <rect x="36" y="86" width="150" height="96" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <rect x="36" y="86" width="150" height="26" fill="#ff7849"/>
+  <text x="111" y="104" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">토픽 · 분류함</text>
+  <rect x="58" y="124" width="106" height="44" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.4"/>
+  <path d="M58 124 L111 148 L164 124" fill="none" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="111" y="152" text-anchor="middle" font-size="11.5" font-weight="700" fill="#9a3412">재고 1 차감</text>
+
+  <g transform="translate(300 74)">
+    <path d="M30 24 Q44 12 58 24 Z" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="22" y1="24" x2="66" y2="24" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="44" cy="42" r="14" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M16 104 Q16 64 44 64 Q72 64 72 104" fill="#fff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="40" y1="66" x2="74" y2="98" stroke="#4f46e5" stroke-width="2"/>
+    <rect x="60" y="92" width="40" height="32" rx="4" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M60 100 L100 100" stroke="#4f46e5" stroke-width="1.6"/>
+    <rect x="74" y="86" width="12" height="8" rx="2" fill="#4f46e5"/>
+  </g>
+  <text x="354" y="216" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">컨슈머 A</text>
+  <text x="354" y="234" text-anchor="middle" font-size="11.5" fill="#4f46e5">처리</text>
+
+  <g transform="translate(440 74)">
+    <path d="M30 24 Q44 12 58 24 Z" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="22" y1="24" x2="66" y2="24" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="44" cy="42" r="14" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M16 104 Q16 64 44 64 Q72 64 72 104" fill="#fff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="40" y1="66" x2="74" y2="98" stroke="#4f46e5" stroke-width="2"/>
+    <rect x="60" y="92" width="40" height="32" rx="4" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M60 100 L100 100" stroke="#4f46e5" stroke-width="1.6"/>
+    <rect x="74" y="86" width="12" height="8" rx="2" fill="#4f46e5"/>
+  </g>
+  <text x="494" y="216" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">컨슈머 B</text>
+  <text x="494" y="234" text-anchor="middle" font-size="11.5" fill="#4f46e5">처리</text>
+
+  <path d="M186 138 Q250 130 314 140" fill="none" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#cg)"/>
+  <path d="M186 160 Q330 196 454 140" fill="none" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#cg)"/>
+
+  <rect x="620" y="98" width="324" height="92" rx="10" fill="#fff" stroke="#e7d9a8" stroke-width="1.6"/>
+  <text x="640" y="132" font-size="14" fill="#0f172a">둘 다 같은 메시지를 처리해서</text>
+  <text x="640" y="162" font-size="17" font-weight="700" fill="#9a3412">상품 재고 10 → 8 (두 번 깎임)</text>
+
+  <line x1="36" y1="270" x2="944" y2="270" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- ===== 아래: 같은 컨슈머 그룹으로 묶으면 ===== -->
+  <text x="36" y="318" font-size="15" font-weight="700" fill="#0f172a">같은 컨슈머 그룹으로 묶으면</text>
+  <rect x="36" y="334" width="150" height="96" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <rect x="36" y="334" width="150" height="26" fill="#ff7849"/>
+  <text x="111" y="352" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">토픽 · 분류함</text>
+  <rect x="58" y="372" width="106" height="44" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.4"/>
+  <path d="M58 372 L111 396 L164 372" fill="none" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="111" y="400" text-anchor="middle" font-size="11.5" font-weight="700" fill="#9a3412">재고 1 차감</text>
+
+  <rect x="262" y="306" width="300" height="216" rx="14" fill="#fff" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6 5"/>
+  <text x="412" y="330" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">하나의 컨슈머 그룹</text>
+
+  <g transform="translate(296 350)">
+    <path d="M30 24 Q44 12 58 24 Z" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="22" y1="24" x2="66" y2="24" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="44" cy="42" r="14" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M16 104 Q16 64 44 64 Q72 64 72 104" fill="#fff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="40" y1="66" x2="74" y2="98" stroke="#4f46e5" stroke-width="2"/>
+    <rect x="60" y="92" width="40" height="32" rx="4" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M60 100 L100 100" stroke="#4f46e5" stroke-width="1.6"/>
+    <rect x="74" y="86" width="12" height="8" rx="2" fill="#4f46e5"/>
+  </g>
+  <text x="350" y="492" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">컨슈머 A</text>
+  <text x="350" y="510" text-anchor="middle" font-size="11.5" fill="#4f46e5">이 메시지 처리</text>
+
+  <g transform="translate(440 350)" opacity="0.5">
+    <path d="M30 24 Q44 12 58 24 Z" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="22" y1="24" x2="66" y2="24" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="44" cy="42" r="14" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M16 104 Q16 64 44 64 Q72 64 72 104" fill="#fff" stroke="#94a3b8" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="40" y1="66" x2="74" y2="98" stroke="#94a3b8" stroke-width="2"/>
+    <rect x="60" y="92" width="40" height="32" rx="4" fill="#f1f5f9" stroke="#94a3b8" stroke-width="2"/>
+  </g>
+  <text x="494" y="492" text-anchor="middle" font-size="13" font-weight="700" fill="#94a3b8">컨슈머 B</text>
+  <text x="494" y="510" text-anchor="middle" font-size="11.5" fill="#94a3b8">이 메시지는 안 받음</text>
+
+  <path d="M186 386 Q240 380 290 388" fill="none" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#cg)"/>
+
+  <rect x="620" y="350" width="324" height="92" rx="10" fill="#fff" stroke="#e7d9a8" stroke-width="1.6"/>
+  <text x="640" y="384" font-size="14" fill="#0f172a">그룹 안 한 명만 처리해서</text>
+  <text x="640" y="414" font-size="17" font-weight="700" fill="#3730a3">상품 재고 10 → 9 (한 번만)</text>
+</svg>
+</div>
+<div class="caption">그림 4-4(샘플). 컨슈머 그룹 - 안 묶으면 재고가 두 번 깎이고, 같은 그룹으로 묶으면 한 번만 깎인다</div>
+
+</div>
+</body>
+</html>

@@ -412,7 +412,7 @@ public OrderResponse createOrder(int userId, int productId, int quantity, Long p
 | JAR 빌드 | `gradlew bootJar` | 실행 가능한 단일 JAR 파일을 생성합니다. |
 | 실행 | `java -jar` | 컨테이너가 시작될 때 JAR를 자동 실행합니다. |
 
-`ex01` 디렉토리의 `docker-compose.yml`이 4개 서비스를 한 번에 묶어 실행합니다. 네 서비스 모두 같은 패턴이고, 빌드 컨텍스트와 포트만 다릅니다.
+`ex01` 디렉토리의 `docker-compose.yml`이 4개 서비스를 한 번에 묶어 실행합니다. 네 서비스 모두 같은 패턴이고, 빌드 컨텍스트와 포트만 다릅니다. H2 접속 정보는 네 서비스에 환경변수로 동일하게 주입됩니다.
 
 | 서비스 | build.context | 호스트:컨테이너 포트 | 네트워크 |
 |---|---|---|---|

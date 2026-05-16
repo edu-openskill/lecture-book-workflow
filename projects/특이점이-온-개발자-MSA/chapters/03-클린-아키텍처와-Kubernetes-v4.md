@@ -117,17 +117,16 @@ ex02/
 └── k8s/                # Kubernetes 매니페스트
 ```
 
-```text 주문 서비스 패키지 구조 (3장에서 재구성)
+```text 주문 서비스 패키지 구조 (챕터 3에서 재구성)
 src/main/java/com/metacoding/order/
 ├── domain/         # 엔티티 + 비즈니스 규칙
 ├── repository/     # Spring Data JPA
 ├── usecase/        # UseCase 인터페이스 + 서비스 코드
 ├── web/            # 컨트롤러 + DTO
 ├── adapter/        # 외부 서비스 클라이언트 (order 전용)
-└── core/           # JWT, 예외처리 (2장과 동일)
+└── core/           # JWT, 예외처리 (챕터 2와 동일)
 src/main/resources/
-├── application-dev.properties    # H2 (로컬 개발)
-└── application-prod.properties   # MySQL (K8s 운영)
+└── application.properties        # DB·JWT 설정 (값은 환경변수로 주입)
 ```
 
 :::note
@@ -301,9 +300,9 @@ public interface CreateOrderUseCase {
 
 ```java domain/Order.java. validateCancelable 추가
 public class Order {
-    // 2장 Order.java 참조 — 필드 및 create(), complete(), cancel() 동일
+    // 챕터 2 Order.java 참조 — 필드·create()·complete() 동일, cancel()은 validateCancelable() 호출 추가
 
-    // 비즈니스 규칙을 엔티티에 위임 (3장에서 추가)
+    // 비즈니스 규칙을 엔티티에 위임 (챕터 3에서 추가)
     public void validateCancelable() {
         if (this.status == OrderStatus.CANCELLED) {
             throw new Exception400("주문이 이미 취소되었습니다.");
@@ -322,6 +321,7 @@ OrderService는 세 UseCase 인터페이스를 구현하고, 내부에서 도메
 2. **비즈니스 규칙을 엔티티에 위임**. 챕터 2에서 서비스의 `if`문으로 처리하던 검증을 도메인 객체의 메서드로 이동합니다.
 
 ```java usecase/OrderService.java. UseCase 인터페이스 구현
+@RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)                    // 1. 클래스 레벨 읽기 전용 트랜잭션
 public class OrderService implements CreateOrderUseCase, GetOrderUseCase, CancelOrderUseCase {

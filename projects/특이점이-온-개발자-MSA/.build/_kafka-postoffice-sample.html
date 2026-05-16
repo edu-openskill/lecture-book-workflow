@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Kafka 우체국 단계별 샘플</title>
+<style>
+  body{font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;background:#f4f5f7;margin:0;padding:40px;color:#0f172a}
+  .wrap{max-width:1100px;margin:0 auto}
+  .svg-figure{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:28px;margin-bottom:8px}
+  .caption{text-align:center;font-style:italic;color:#475569;font-size:14px;margin-top:6px}
+  h1{font-size:16px;color:#475569;font-weight:600;margin:0 0 20px}
+  svg{display:block;width:100%;height:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>샘플 v4 — 숫자 제거, 프로듀서·집배원 아이콘 교체</h1>
+
+<div class="svg-figure">
+<svg viewBox="0 0 1180 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kafka 우체국: 프로듀서가 편지를 부치면 우체국이 이름 붙은 분류함에 보관하고 집배원(컨슈머)이 자기 분류함에서 가져간다">
+  <defs>
+    <marker id="ka" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="kb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker>
+  </defs>
+
+  <text x="590" y="38" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">Kafka 우체국 — 부치고 · 보관되고 · 집배원이 가져간다</text>
+
+  <!-- ===== 프로듀서 (발송처) : 우편함에 편지를 넣는 모습 ===== -->
+  <g transform="translate(58 196)">
+    <!-- 우편함 기둥 -->
+    <rect x="46" y="78" width="8" height="40" fill="#4f46e5"/>
+    <!-- 우편함 몸통 -->
+    <rect x="14" y="34" width="72" height="48" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M14 46 Q14 34 26 34 L74 34 Q86 34 86 46" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <rect x="30" y="42" width="40" height="5" rx="2" fill="#4f46e5"/>
+    <!-- 들어가는 편지 -->
+    <g transform="translate(34 6)">
+      <rect x="0" y="0" width="34" height="22" rx="2" fill="#fff" stroke="#4f46e5" stroke-width="1.6" transform="rotate(-12 17 11)"/>
+      <path d="M0 0 L17 12 L34 0" fill="none" stroke="#4f46e5" stroke-width="1.6" transform="rotate(-12 17 11)"/>
+    </g>
+  </g>
+  <text x="108" y="340" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">프로듀서</text>
+  <text x="108" y="362" text-anchor="middle" font-size="12.5" fill="#64748b">발송처</text>
+
+  <!-- 이동 중인 편지 -->
+  <g transform="translate(196 240)">
+    <rect x="0" y="0" width="40" height="26" rx="3" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+    <path d="M0 0 L20 15 L40 0" fill="none" stroke="#4f46e5" stroke-width="1.5"/>
+  </g>
+
+  <!-- ===== 우체국 (Kafka) : 가로로 넓은 건물 ===== -->
+  <path d="M300 156 L590 116 L880 156 Z" fill="#ffedd5" stroke="#ff7849" stroke-width="2.4" stroke-linejoin="round"/>
+  <rect x="300" y="156" width="580" height="248" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <rect x="300" y="156" width="580" height="34" fill="#ff7849"/>
+  <text x="590" y="179" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">우체국 · KAFKA</text>
+
+  <g>
+    <rect x="324" y="214" width="166" height="118" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="407" y="238" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412" font-family="monospace">토픽 A</text>
+    <rect x="382" y="262" width="50" height="34" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.2"/>
+    <path d="M382 262 L407 281 L432 262" fill="none" stroke="#ff7849" stroke-width="1.2"/>
+
+    <rect x="507" y="214" width="166" height="118" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="590" y="238" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412" font-family="monospace">토픽 B</text>
+    <rect x="565" y="262" width="50" height="34" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.2"/>
+    <path d="M565 262 L590 281 L615 262" fill="none" stroke="#ff7849" stroke-width="1.2"/>
+
+    <rect x="690" y="214" width="166" height="118" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="773" y="238" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412" font-family="monospace">토픽 C</text>
+    <rect x="748" y="262" width="50" height="34" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.2"/>
+    <path d="M748 262 L773 281 L798 262" fill="none" stroke="#ff7849" stroke-width="1.2"/>
+  </g>
+  <text x="590" y="356" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412">이름 붙은 분류함 · 토픽</text>
+
+  <!-- ===== 컨슈머 (집배원) : 가방 멘 사람, 단순화 ===== -->
+  <g transform="translate(998 206)">
+    <!-- 챙모자 -->
+    <path d="M30 24 Q44 12 58 24 Z" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="22" y1="24" x2="66" y2="24" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- 머리 -->
+    <circle cx="44" cy="42" r="14" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <!-- 어깨/몸 -->
+    <path d="M16 104 Q16 64 44 64 Q72 64 72 104" fill="#fff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+    <!-- 어깨끈 -->
+    <line x1="40" y1="66" x2="74" y2="98" stroke="#4f46e5" stroke-width="2"/>
+    <!-- 우편 가방 -->
+    <rect x="60" y="92" width="40" height="32" rx="4" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M60 100 L100 100" stroke="#4f46e5" stroke-width="1.6"/>
+    <rect x="74" y="86" width="12" height="8" rx="2" fill="#4f46e5"/>
+  </g>
+  <text x="1042" y="362" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">컨슈머</text>
+  <text x="1042" y="384" text-anchor="middle" font-size="12.5" fill="#64748b">집배원</text>
+
+  <!-- ===== 단계 화살표 (숫자 없음, 키워드만) ===== -->
+  <line x1="246" y1="253" x2="296" y2="253" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#ka)"/>
+  <text x="220" y="226" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4f46e5">부치기</text>
+
+
+  <line x1="884" y1="253" x2="990" y2="253" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#kb)"/>
+  <text x="937" y="226" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3730a3">가져가기</text>
+</svg>
+</div>
+<div class="caption">그림 4-3(샘플). Kafka 우체국 - 부치고, 보관·분류되고, 집배원이 가져간다</div>
+
+</div>
+</body>
+</html>
