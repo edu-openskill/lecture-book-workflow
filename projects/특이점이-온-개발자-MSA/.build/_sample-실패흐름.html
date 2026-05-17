@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 — MSA CH04 실패 흐름 (편지 누적·비활성 패턴 4-6~4-11 동일)</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+<link rel="stylesheet" href="./tokens.css">
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+
+<style>
+  body { background:#f1f5f9; }
+  .smplhd { max-width:1600px; margin:24px auto 0; padding:0 24px; }
+  .smplhd h1 { font-size:22px; margin-bottom:6px; }
+  .smplhd p { color:#475569; font-size:14px; margin:0; }
+  .cmp { max-width:1600px; margin:18px auto; padding:0 24px; display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:start; }
+  .col { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 24px 28px; }
+  .col.now { border-top:5px solid #94a3b8; }
+  .col.new { border-top:5px solid #4f46e5; }
+  .col-tag { display:inline-block; font-size:12px; font-weight:700; letter-spacing:.04em; padding:4px 12px; border-radius:999px; margin:14px 0 6px; }
+  .col.now .col-tag { background:#f1f5f9; color:#475569; }
+  .col.new .col-tag { background:#eef2ff; color:#3730a3; }
+  .why { background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 14px; font-size:13.5px; color:#78350f; margin:10px 0 20px; }
+  .why b { color:#92400e; }
+  .col .svg-figure { margin:14px 0 4px; }
+</style>
+</head>
+<body>
+
+<div class="smplhd">
+  <h1>MSA CH04 실패 흐름 — 제안 (편지 누적·비활성 패턴을 그림 4-6~4-11과 동일하게)</h1>
+  <p>왼쪽 현재 v4 / 오른쪽 제안. 오른쪽 Kafka 띠는 정상 흐름 그림처럼 <b>지나온 편지가 비활성으로 남고</b> 현재 단계만 활성(주황+뱃지)입니다. 품절 시나리오(상품이 재고 차감 실패를 알림 → 재고 복구 없이 주문 취소).</p>
+</div>
+
+<div class="cmp">
+
+<!-- ========== 현재 v4 ========== -->
+<div class="col now">
+<span class="col-tag">현재 · v4</span>
+
+<h3>4.3.2 주문 요청 실패 흐름 (롤백)</h3>
+<p>중간에 실패가 발생하면 orchestrator가 이미 처리된 단계를 역순으로 되돌립니다. 핵심은 <strong>"이미 처리된 것만 롤백"</strong> 한다는 점입니다.</p>
+
+<div class="svg-figure">
+<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="현재 롤백 1단계: 재고 복구">
+  <defs><marker id="o1a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  <marker id="o1b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker></defs>
+  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 1단계 — 재고 복구 명령 발행 → 상품 서비스 수신</text>
+  <rect x="345" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="430" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Order</text>
+  <text x="430" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8081 주문</text>
+  <rect x="575" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="660" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Product</text>
+  <text x="660" y="116" text-anchor="middle" font-size="12" fill="#3730a3">:8082 상품</text>
+  <rect x="805" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="890" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Delivery</text>
+  <text x="890" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8084 배달</text>
+  <rect x="280" y="250" width="780" height="120" rx="9" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="280" y="250" width="780" height="22" fill="#ff7849"/>
+  <text x="670" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 재고 복구 명령이 발행됨</text>
+  <rect x="575" y="290" width="170" height="42" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.8"/>
+  <path d="M575 290 L660 311 L745 290" fill="none" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="660" y="350" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9a3412">increase-product-command (보상)</text>
+  <circle cx="727" cy="298" r="10" fill="#ff7849"/><text x="727" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <rect x="300" y="480" width="760" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
+  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
+  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">실패 감지 후 재고 복구 명령 발행</text>
+  <line x1="660" y1="478" x2="660" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#o1a)"/>
+  <text x="682" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">1. 재고 복구 명령 발행</text>
+  <line x1="660" y1="248" x2="660" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#o1b)"/>
+  <text x="682" y="200" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">2. 상품 서비스가 수신해 재고 복구</text>
+  <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
+  <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 1단계</text>
+  <text x="1146" y="124" font-size="20" font-weight="700" fill="#0f172a">1. 재고 복구 명령 발행</text>
+  <text x="1146" y="158" font-size="18" fill="#475569">오케스트레이터가 실패를 감지해</text>
+  <text x="1146" y="185" font-size="18" fill="#475569">재고 복구 명령을 카프카에 발행합니다.</text>
+  <text x="1146" y="252" font-size="20" font-weight="700" fill="#0f172a">2. 상품 서비스가 수신해 재고 복구</text>
+  <text x="1146" y="286" font-size="18" fill="#475569">상품 서비스가 메시지를 받아</text>
+  <text x="1146" y="313" font-size="18" fill="#475569">차감했던 재고를 원복합니다.</text>
+</svg>
+</div>
+<div class="caption">그림 4-12. 롤백 1단계 — 재고 복구</div>
+
+<div class="svg-figure" style="margin-top:18px">
+<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="현재 롤백 2단계: 주문 취소">
+  <defs><marker id="o2a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  <marker id="o2b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker></defs>
+  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 2단계 — 주문 취소 명령 발행 → 주문 서비스 수신</text>
+  <rect x="345" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="430" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
+  <text x="430" y="116" text-anchor="middle" font-size="12" fill="#3730a3">:8081 주문</text>
+  <rect x="575" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="660" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Product</text>
+  <text x="660" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8082 상품</text>
+  <rect x="805" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="890" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Delivery</text>
+  <text x="890" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8084 배달</text>
+  <rect x="280" y="250" width="780" height="120" rx="9" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="280" y="250" width="780" height="22" fill="#ff7849"/>
+  <text x="670" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 주문 취소 명령이 발행됨</text>
+  <rect x="575" y="290" width="170" height="42" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.8"/>
+  <path d="M575 290 L660 311 L745 290" fill="none" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="660" y="350" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9a3412">cancel-order-command (보상)</text>
+  <circle cx="727" cy="298" r="10" fill="#ff7849"/><text x="727" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <rect x="300" y="480" width="760" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
+  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
+  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">재고 복구 후 주문 취소 명령 발행</text>
+  <line x1="660" y1="478" x2="660" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#o2a)"/>
+  <text x="682" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">1. 주문 취소 명령 발행</text>
+  <line x1="660" y1="248" x2="430" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#o2b)"/>
+  <text x="555" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">2. 주문 서비스가 수신해 CANCELLED 처리</text>
+  <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
+  <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 2단계</text>
+  <text x="1146" y="124" font-size="20" font-weight="700" fill="#0f172a">1. 주문 취소 명령 발행</text>
+  <text x="1146" y="158" font-size="18" fill="#475569">오케스트레이터가 주문 취소 명령을</text>
+  <text x="1146" y="185" font-size="18" fill="#475569">카프카에 발행합니다.</text>
+  <text x="1146" y="252" font-size="20" font-weight="700" fill="#0f172a">2. 주문 서비스가 CANCELLED</text>
+  <text x="1146" y="286" font-size="18" fill="#475569">주문 서비스가 메시지를 받아</text>
+  <text x="1146" y="313" font-size="18" fill="#475569">주문 상태를 CANCELLED로 변경합니다.</text>
+</svg>
+</div>
+<div class="caption">그림 4-13. 롤백 2단계 — 주문 취소</div>
+
+<div class="why"><b>현재 문제</b> · Kafka 띠에 활성 편지 1개만 — 정상 흐름(4-6~4-11)의 누적·비활성 패턴과 다름 · 그림 4-12(재고 복구 발생)가 품절 검증·그림 4-20과 어긋남 · 누가 실패를 알렸는지 없음</div>
+</div>
+
+<!-- ========== 제안: 편지 누적·비활성 패턴 동일 ========== -->
+<div class="col new">
+<span class="col-tag">제안 · 편지 누적·비활성 (4-6~4-11과 동일)</span>
+
+<h3>4.3.2 주문 요청 실패 흐름 (롤백)</h3>
+<p>오케스트레이터는 실패를 스스로 알지 못합니다. 일을 맡은 서비스가 <strong>결과를 이벤트로 돌려보내야</strong> 합니다. 품절이면 재고 차감에 실패한 상품 서비스가 그 결과를 알리고, 오케스트레이터는 <strong>이미 처리된 단계만</strong> 역순으로 되돌립니다. 재고가 차감된 적이 없으니 되돌릴 재고도 없어, 재고 복구는 건너뛰고 주문만 취소합니다.</p>
+
+<div class="svg-figure">
+<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤백 실패 알림: 상품이 재고 차감 실패 결과를 이벤트로 알리고 오케스트레이터가 받는다. Kafka 띠에는 지나온 편지가 비활성으로 남고 재고 차감 이벤트만 활성이다.">
+  <defs><marker id="r1a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker>
+  <marker id="r1f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker></defs>
+  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 · 실패 알림 — 상품이 재고 차감 실패를 오케스트레이터에 알린다</text>
+  <rect x="345" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="430" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Order</text>
+  <text x="430" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8081 주문</text>
+  <rect x="575" y="64" width="170" height="70" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.8"/>
+  <text x="660" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#b91c1c">Product</text>
+  <text x="660" y="114" text-anchor="middle" font-size="11.5" fill="#b91c1c">재고 차감 실패 (품절)</text>
+  <rect x="805" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
+  <text x="890" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#cbd5e1">Delivery</text>
+  <text x="890" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">관여 안 함</text>
+  <rect x="280" y="250" width="780" height="120" rx="9" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="280" y="250" width="780" height="22" fill="#ff7849"/>
+  <text x="670" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 토픽을 거쳐 결과가 오간다</text>
+  <rect x="300" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M300 290 L355 311 L410 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
+  <text x="355" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">주문 생성 이벤트</text>
+  <rect x="425" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M425 290 L480 311 L535 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
+  <text x="480" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">재고 차감 명령</text>
+  <rect x="550" y="290" width="110" height="42" rx="3" fill="#fee2e2" stroke="#dc2626" stroke-width="1.8"/>
+  <path d="M550 290 L605 311 L660 290" fill="none" stroke="#dc2626" stroke-width="1.4"/>
+  <text x="605" y="350" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b91c1c">재고 차감 이벤트 (실패)</text>
+  <circle cx="642" cy="298" r="10" fill="#dc2626"/><text x="642" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <rect x="300" y="480" width="760" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
+  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
+  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">재고 차감 실패 결과를 받는다</text>
+  <line x1="660" y1="134" x2="605" y2="248" stroke="#dc2626" stroke-width="2.6" marker-end="url(#r1f)"/>
+  <text x="652" y="196" text-anchor="start" font-size="13" font-weight="700" fill="#b91c1c">1. 상품이 재고 차감 실패를 알림</text>
+  <line x1="605" y1="370" x2="605" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#r1a)"/>
+  <text x="627" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">2. 오케스트레이터가 수신</text>
+  <rect x="1090" y="40" width="460" height="430" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
+  <line x1="1132" y1="40" x2="1132" y2="470" stroke="#f0e6c8" stroke-width="1.3"/>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 · 실패 알림</text>
+  <text x="1146" y="128" font-size="18" font-weight="700" fill="#b91c1c">1. 상품이 재고 차감 실패를 알림</text>
+  <text x="1146" y="158" font-size="17" fill="#475569">재고 차감에 실패한 상품 서비스가</text>
+  <text x="1146" y="181" font-size="17" fill="#475569">그 결과를 이벤트로 발행합니다.</text>
+  <text x="1146" y="225" font-size="18" font-weight="700" fill="#0f172a">2. 오케스트레이터가 수신</text>
+  <text x="1146" y="255" font-size="17" fill="#475569">실패 결과를 받고 롤백을</text>
+  <text x="1146" y="278" font-size="17" fill="#475569">시작합니다.</text>
+  <line x1="1118" y1="312" x2="1530" y2="312" stroke="#f0e6c8" stroke-width="1.3"/>
+  <text x="1146" y="346" font-size="17" font-weight="700" fill="#475569">→ 다음: 주문 취소 (그림 4-13)</text>
+</svg>
+</div>
+<div class="caption">그림 4-12. 롤백 · 실패 알림 - 재고 차감에 실패한 상품이 그 결과를 오케스트레이터에 알립니다</div>
+
+<p>되돌릴 재고가 없으니 남은 일은 주문을 무르는 것뿐입니다.</p>
+
+<div class="svg-figure" style="margin-top:6px">
+<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤백 주문 취소: 오케스트레이터가 주문 취소 명령을 발행하고 주문 서비스가 CANCELLED 처리. 앞 편지들은 비활성으로 남고 주문 취소 명령만 활성이다.">
+  <defs><marker id="r2a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  <marker id="r2b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker></defs>
+  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 · 주문 취소 — 되돌릴 재고가 없으니 주문만 무른다</text>
+  <rect x="345" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="430" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
+  <text x="430" y="114" text-anchor="middle" font-size="11.5" fill="#3730a3">주문 CANCELLED</text>
+  <rect x="575" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="660" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Product</text>
+  <text x="660" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8082 상품</text>
+  <rect x="805" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="890" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Delivery</text>
+  <text x="890" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8084 배달</text>
+  <rect x="280" y="250" width="780" height="120" rx="9" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="280" y="250" width="780" height="22" fill="#ff7849"/>
+  <text x="670" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 주문 취소 명령이 발행된다</text>
+  <rect x="300" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M300 290 L355 311 L410 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
+  <text x="355" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">주문 생성 이벤트</text>
+  <rect x="425" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M425 290 L480 311 L535 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
+  <text x="480" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">재고 차감 명령</text>
+  <rect x="550" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
+  <path d="M550 290 L605 311 L660 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
+  <text x="605" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">재고 차감 이벤트 (실패)</text>
+  <rect x="675" y="290" width="110" height="42" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.8"/>
+  <path d="M675 290 L730 311 L785 290" fill="none" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="730" y="350" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9a3412">주문 취소 명령</text>
+  <circle cx="767" cy="298" r="10" fill="#ff7849"/><text x="767" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <rect x="300" y="480" width="760" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
+  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
+  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">재고 복구 없이 곧장 주문 취소 명령 발행</text>
+  <line x1="730" y1="478" x2="730" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#r2a)"/>
+  <text x="752" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">1. 주문 취소 명령 발행</text>
+  <line x1="730" y1="248" x2="430" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#r2b)"/>
+  <text x="560" y="196" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">2. 주문 서비스가 수신해 CANCELLED 처리</text>
+  <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
+  <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 · 주문 취소</text>
+  <text x="1146" y="124" font-size="20" font-weight="700" fill="#0f172a">1. 주문 취소 명령 발행</text>
+  <text x="1146" y="158" font-size="18" fill="#475569">오케스트레이터가 주문을 무르라는</text>
+  <text x="1146" y="185" font-size="18" fill="#475569">명령을 카프카에 발행합니다.</text>
+  <text x="1146" y="252" font-size="20" font-weight="700" fill="#0f172a">2. 주문 서비스가 CANCELLED</text>
+  <text x="1146" y="286" font-size="18" fill="#475569">주문 서비스가 메시지를 받아</text>
+  <text x="1146" y="313" font-size="18" fill="#475569">주문 상태를 CANCELLED로 바꿉니다.</text>
+  <line x1="1118" y1="346" x2="1530" y2="346" stroke="#f0e6c8" stroke-width="1.3"/>
+  <text x="1146" y="380" font-size="18" font-weight="700" fill="#9a3412">그림 4-20과 일치</text>
+  <text x="1146" y="410" font-size="17" fill="#475569">품절 롤백은 재고 복구 없이 이 한</text>
+  <text x="1146" y="433" font-size="17" fill="#475569">단계로 끝납니다. 로그의</text>
+  <text x="1146" y="456" font-size="17" font-weight="700" fill="#475569">cancel-order-command가 이 단계.</text>
+</svg>
+</div>
+<div class="caption">그림 4-13. 롤백 · 주문 취소 - 되돌릴 재고가 없으니, 주문 취소 한 단계로 롤백이 끝납니다</div>
+
+<p>그래서 그림 4-20 로그에는 재고 복구 없이 <code>cancel-order-command</code>만 찍힙니다. "이미 처리된 것만 롤백"이 바로 이 모습입니다.</p>
+
+<p><strong>선배</strong>: "설계는 끝났어요. 이제 직접 짜 봐요. order-service부터 REST 호출을 걷어내고 Kafka 이벤트로 바꿔요."</p>
+
+<div class="why"><b>이번 반영</b> · Kafka 띠가 정상 흐름(4-6~4-11)과 동일 — 지나온 편지(주문 생성 이벤트·재고 차감 명령 …)는 비활성(흰 배경·연한 회색 글자·얇은 테두리)으로 남고 현재 편지만 활성(채움+뱃지) · 편지 규격 110×42·간격 125 동일 · 그림 4-12 활성=재고 차감 이벤트(실패), 그림 4-13 활성=주문 취소 명령 · 코드(8토픽·OrderOrchestrator 44~53행)·그림 4-20과 정합</div>
+</div>
+
+</div>
+</body>
+</html>

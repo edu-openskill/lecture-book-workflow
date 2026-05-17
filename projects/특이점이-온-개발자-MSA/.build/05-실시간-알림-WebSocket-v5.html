@@ -139,9 +139,21 @@
 <h3>1. 소스 코드 클론</h3>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 레포 클론</div>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-12-msa/ex04.git
 <span class="nb">cd</span><span class="w"> </span>ex04</div>
-<h3>2. 실습 환경</h3>
+<h3>2. 파일 구조</h3>
+<div class="code-block highlight" data-lang="text"><div class="cb-title">ex04 디렉토리</div>ex04/
+├── order/              # 포트 8081 (WebSocket Push 추가)
+├── product/            # 포트 8082
+├── user/               # 포트 8083
+├── delivery/           # 포트 8084 (배달 완료 API 추가)
+├── orchestrator/       # Kafka 워크플로우 조율
+├── frontend/           # Nginx + SockJS 클라이언트 (이번 챕터 신규)
+├── gateway/            # Nginx API Gateway
+├── db/                 # MySQL
+└── k8s/                # Kubernetes 매니페스트 (kafka·frontend 포함)</div>
+<p>서비스마다 패키지 구조가 조금씩 다르므로, 코드를 작성할 파일 경로는 각 실습 코드블록 바로 위에서 안내합니다.</p>
+<h3>3. 실습 환경</h3>
 <p>챕터 4까지 사용한 Docker Desktop, Minikube가 그대로 필요합니다. 별도 추가 도구는 없습니다. 프론트엔드도 Nginx 컨테이너로 Minikube 안에서 함께 띄우므로 따로 서버를 띄울 필요는 없습니다.</p>
-<h3>3. 실습 순서</h3>
+<h3>4. 실습 순서</h3>
 <ol>
 <li>delivery-service에 배달 완료 API + <code>delivery-completed</code> 이벤트 추가</li>
 <li>orchestrator에 <code>delivery-completed</code> 처리 + <code>delivery-created</code> 성공 시 대기로 변경</li>
@@ -163,7 +175,7 @@
 <p>서버에 생긴 변화를 알아내는 방법은 크게 두 가지입니다.</p>
 <p>택배가 왔는지 현관문을 5분마다 직접 열어 확인하는 것처럼, 클라이언트가 서버에 &quot;완료됐나요?&quot;를 일정 간격으로 반복해서 묻는 방법이 <strong>폴링(Polling)</strong> 입니다. 변화가 없어도 요청은 계속 나가므로 대부분이 헛걸음입니다.</p>
 <p>반대로, 택배가 도착할 때 초인종이 울리는 것처럼, 클라이언트가 묻지 않아도 서버가 변화가 생긴 순간 먼저 알리는 방법이 <strong>푸시(Push)</strong> 입니다. 폴링의 헛걸음이 없습니다.</p>
-<!-- image-prompt: Minimal black line drawing on white background, split comparison, 4:3 aspect ratio, 800x600px. Left side labeled "Polling": a person repeatedly opening their front door every few minutes to check if a package has arrived, empty doorstep, a clock showing repeated checks. Right side labeled "Push": the same person sitting comfortably on a sofa, a doorbell rings to notify that the package has arrived. Clean lines, no colors. -->
+<!-- image-prompt: Minimal black line drawing on white background, two side-by-side halves, no divider line, no X mark, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Left half, title "Polling": the same scene repeated three times stacked vertically with NO frame, box, or border around each repetition (no rectangles, no panel outlines), each repetition showing the same tired, weary-looking person (drooping shoulders, exhausted face) opening their front door to an empty doorstep, with a large round analog wall clock whose hands point to a clearly DIFFERENT time in each — top about 9 o'clock, middle about 12 o'clock, bottom about 3 o'clock — the visibly different clock hands making the repeated checking over time obvious. Right half, title "Push": the same person sitting relaxed on a sofa reading while a small bell symbol by the front door rings on its own with short curved motion lines. No speech bubbles, no sound-effect text (no "RING!"), no annotation text, no checklists. Characters drawn in a clean simple cartoon textbook style consistent with the rest of the book — not stick figures, simple but with clear body proportions, hair, and clothing outlines, more detailed than stick figures but less detailed than realistic. Clean lines, no colors. -->
 <div class="chapter-image gemini"><img src="..\chapters\assets\CH05\gemini\01_polling-vs-websocket.png" alt="" /><div class="caption">그림 5-2. 폴링 vs 푸시</div></div>
 <p>동료가 주문 내역을 몇 번이고 다시 열어 봐야 했던 건 화면에 초인종이 없었기 때문입니다. 서버가 먼저 보내는 이 푸시를 구현하는 기술이 <strong>WebSocket</strong>입니다.</p>
 <div class="term-box">
@@ -327,6 +339,7 @@
 </svg>
 </div>
 <div class="caption">그림 5-5. 3단계 - 주문 완료 명령 발행 → 주문 수신 → WebSocket 알림</div>
+<p>앞 챕터에서 쓰던 8개 토픽(정상 흐름 6개 + 롤백 2개)은 그대로 두고, 이번 챕터에서 배달 완료를 알리는 delivery-completed 토픽 하나(delivery → orchestrator)만 더해져 전체 9개가 됩니다.</p>
 <p>세 단계를 코드로 옮기기 위해 이제 세 곳을 수정합니다.</p>
 <ol>
 <li>delivery-service에 배달 완료 API를 추가합니다.</li>
@@ -334,75 +347,52 @@
 <li>order-service에 WebSocket Push를 구현합니다.</li>
 </ol>
 <h2>5.4 delivery-service - 배달 완료 API 추가</h2>
-<h3>5.4.1 패키지 구조</h3>
-<div class="code-block highlight" data-lang="text"><div class="cb-title">delivery-service/ 패키지 구조</div>delivery-service/src/main/java/.../
-├── domain/
-│   └── Delivery.java                        ← [참고] create()는 PENDING 상태. cancel() 메서드는 도입하지 않음
-├── usecase/
-│   ├── CompleteDeliveryUseCase.java         ← [참고] 배달 완료 인터페이스
-│   └── DeliveryService.java                 ← [작성] completeDelivery() 추가
-├── web/
-│   └── DeliveryController.java              ← [작성] PUT /{id}/complete 추가
-└── adapter/
-    ├── message/
-    │   └── DeliveryCompletedEvent.java      ← [참고] 배달 완료 이벤트 DTO (orderId)
-    └── producer/
-        └── DeliveryEventProducer.java       ← [작성] publishDeliveryCompleted() 추가</div>
-<h3>5.4.2 Delivery 엔티티 상태 전이</h3>
-<p>배달 생성 시 상태를 <code>PENDING</code>으로 저장하고, 배달 기사가 완료 처리 시 <code>COMPLETED</code>로 전이합니다. 이전에는 생성과 동시에 <code>complete()</code>를 호출했지만, 이제는 명시적인 API 호출이 있어야 완료됩니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title">domain/Delivery.java. 배달 상태 전이 (PENDING → COMPLETED)</div><span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery_tb&quot;</span><span class="p">)</span>
+<p>첫 번째 곳은 delivery-service입니다. 배달 기사가 완료를 호출하면 배달을 COMPLETED로 바꾸고, 그 사실을 <code>delivery-completed</code> 이벤트로 발행해 orchestrator가 다음을 잇게 합니다. 상태 전이 → 완료 처리 → 이벤트 발행 → 호출 입구 순으로 더합니다.</p>
+<h3>5.4.1 배달 상태 전이 - PENDING에서 COMPLETED로</h3>
+<p>앞에서 만든 Delivery는 생성과 동시에 <code>complete()</code>를 호출했습니다. 이제는 배달 기사의 API 호출이 있어야 완료됩니다. 완료로 바꾸는 <code>complete()</code> 한 메서드만 더합니다.</p>
+<p><code>domain/Delivery.java</code>를 열고 아래 메서드를 추가합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> domain/Delivery.java. 배달 완료 상태 전이</div><span class="nd">@Table</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery_tb&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Delivery</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// 챕터 2 Delivery.java 참조 — 필드 동일</span>
-
-<span class="w">    </span><span class="c1">// 배달 주소 검증</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">validateAddress</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">address</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">address</span><span class="p">.</span><span class="na">isBlank</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;배달 주소는 필수입니다.&quot;</span><span class="p">);</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="c1">// 배달 생성 시 PENDING 상태 (배달 완료 API 대기)</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">Delivery</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Delivery</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">PENDING</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// 필드·create()·validateAddress()는 앞에서 만든 Delivery와 동일 (생략)</span>
 
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">complete</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DeliveryStatus</span><span class="p">.</span><span class="na">COMPLETED</span><span class="p">;</span>
 <span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">updatedAt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="p">.</span><span class="na">now</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<p>이번 챕터에서도 배달 취소 흐름은 다루지 않으므로 <code>cancel()</code> 메서드는 도입하지 않습니다. 주문 롤백이 발생하면 <code>cancel-order-command</code>로 주문만 취소되고, 이미 만들어진 배달은 PENDING 상태로 남습니다. 배달 라이프사이클은 PENDING → COMPLETED 한 방향만 가집니다.</p>
-<p>아래 메서드를 DeliveryService에 추가합니다. 배달 상태를 COMPLETED로 변경하고 Kafka 이벤트를 발행합니다.</p>
+<p><code>create()</code>는 배달을 <code>PENDING</code> 상태로 저장합니다. 완료 처리는 이 <code>complete()</code> 하나뿐이고, 배달 라이프사이클은 PENDING → COMPLETED 한 방향만 가집니다.</p>
+<h3>5.4.2 배달 완료 처리와 이벤트 발행</h3>
+<p>배달 기사가 완료를 호출하면 상태를 COMPLETED로 바꾸고 곧바로 <code>delivery-completed</code>를 발행해야, orchestrator가 그 이벤트를 받아 다음 단계를 잇습니다.</p>
 <p><code>usecase/DeliveryService.java</code>를 열고 아래 메서드를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> usecase/DeliveryService.java. completeDelivery 추가</div><span class="nd">@Override</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/DeliveryService.java. completeDelivery 추가</div><span class="nd">@Override</span>
 <span class="nd">@Transactional</span>
-<span class="kd">public</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="w"> </span><span class="nf">completeDelivery</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">deliveryId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// 추가</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="w"> </span><span class="nf">completeDelivery</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">deliveryId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Delivery</span><span class="w"> </span><span class="n">findDelivery</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deliveryRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">deliveryId</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception404</span><span class="p">(</span><span class="s">&quot;배달 정보를 조회할 수 없습니다.&quot;</span><span class="p">));</span>
 <span class="w">    </span><span class="n">findDelivery</span><span class="p">.</span><span class="na">complete</span><span class="p">();</span>
 <span class="w">    </span><span class="n">deliveryEventProducer</span><span class="p">.</span><span class="na">publishDeliveryCompleted</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DeliveryCompletedEvent</span><span class="p">(</span><span class="n">findDelivery</span><span class="p">.</span><span class="na">getOrderId</span><span class="p">()));</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">findDelivery</span><span class="p">);</span>
 <span class="p">}</span></div>
-<h3>5.4.3 배달 완료 컨트롤러</h3>
-<p>아래 엔드포인트를 DeliveryController에 추가합니다. 배달 기사가 호출하는 배달 완료 API입니다.</p>
-<p><code>web/DeliveryController.java</code>를 열고 아래 엔드포인트를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> web/DeliveryController.java. 배달 완료 엔드포인트</div><span class="nd">@PutMapping</span><span class="p">(</span><span class="s">&quot;/{deliveryId}/complete&quot;</span><span class="p">)</span>
-<span class="kd">public</span><span class="w"> </span><span class="n">ResponseEntity</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="nf">completeDelivery</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="p">(</span><span class="s">&quot;deliveryId&quot;</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">deliveryId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// 추가</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Resp</span><span class="p">.</span><span class="na">ok</span><span class="p">(</span><span class="n">completeDeliveryUseCase</span><span class="p">.</span><span class="na">completeDelivery</span><span class="p">(</span><span class="n">deliveryId</span><span class="p">));</span>
-<span class="p">}</span></div>
-<h3>5.4.4 delivery-completed 이벤트 발행</h3>
-<p>배달이 완료되면 Kafka 배달 완료(<code>delivery-completed</code>) 토픽에 이벤트를 발행합니다. orchestrator가 이 이벤트를 받아 다음 단계를 진행합니다.</p>
-<p>아래 메서드를 기존 파일에 추가합니다.</p>
+<p><code>completeDelivery</code>는 배달을 찾아 <code>complete()</code>로 상태를 바꾸고, <code>DeliveryEventProducer</code>로 완료 이벤트를 발행합니다.</p>
 <p><code>adapter/producer/DeliveryEventProducer.java</code>를 열고 아래 메서드를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> adapter/producer/DeliveryEventProducer.java. delivery-completed 발행</div><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">publishDeliveryCompleted</span><span class="p">(</span><span class="n">DeliveryCompletedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// 추가</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> adapter/producer/DeliveryEventProducer.java. delivery-completed 발행</div><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">publishDeliveryCompleted</span><span class="p">(</span><span class="n">DeliveryCompletedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="s">&quot;delivery-completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">);</span>
 <span class="p">}</span></div>
+<p><code>kafkaTemplate.send</code>에 <code>delivery-completed</code> 토픽과 이벤트를 넘기면 그 토픽으로 메시지가 들어갑니다.</p>
+<h3>5.4.3 배달 완료 엔드포인트</h3>
+<p>남은 것은 배달 기사가 호출할 입구입니다. <code>completeDelivery</code>를 호출하는 엔드포인트를 더합니다.</p>
+<p><code>web/DeliveryController.java</code>를 열고 아래 엔드포인트를 추가합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> web/DeliveryController.java. 배달 완료 엔드포인트</div><span class="nd">@PutMapping</span><span class="p">(</span><span class="s">&quot;/{deliveryId}/complete&quot;</span><span class="p">)</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">ResponseEntity</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="nf">completeDelivery</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="p">(</span><span class="s">&quot;deliveryId&quot;</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">deliveryId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Resp</span><span class="p">.</span><span class="na">ok</span><span class="p">(</span><span class="n">completeDeliveryUseCase</span><span class="p">.</span><span class="na">completeDelivery</span><span class="p">(</span><span class="n">deliveryId</span><span class="p">));</span>
+<span class="p">}</span></div>
+<p>배달 기사가 <code>PUT /api/deliveries/{id}/complete</code>를 호출하면 배달이 완료되고 <code>delivery-completed</code>가 발행됩니다. 이제 orchestrator가 이 이벤트를 받도록 수정합니다.</p>
 <h2>5.5 orchestrator - delivery-completed 처리 추가</h2>
 <p>이제부터는 배달 생성(<code>delivery-created</code>)이 성공해도 바로 완료하지 않고 대기합니다. 이후 배달 완료(<code>delivery-completed</code>) 이벤트를 받았을 때 비로소 주문 완료 명령(<code>complete-order-command</code>)을 발행합니다.</p>
 <h3>5.5.1 deliveryCreated 수정 - 성공 시 대기</h3>
 <p>지금까지는 배달 생성이 성공하면 곧바로 주문 완료 명령(<code>complete-order-command</code>)이 발행됐습니다. 이제는 배달 완료를 기다리며 아무것도 발행하지 않습니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>의 <code>deliveryCreated</code>를 아래처럼 수정합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> handler/OrderOrchestrator.java. deliveryCreated - 성공 시 대기</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 5</span> handler/OrderOrchestrator.java. deliveryCreated - 성공 시 대기</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deliveryCreated</span><span class="p">(</span><span class="n">DeliveryCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">orderId</span><span class="p">();</span>
 <span class="w">    </span><span class="n">WorkflowState</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">states</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">orderId</span><span class="p">);</span>
@@ -416,7 +406,7 @@
 <p>실패 처리는 앞과 동일합니다. 핵심 변경은 성공 시입니다. 전에는 배달이 생성되면 곧바로 주문 완료 명령(<code>complete-order-command</code>)이 발행됐지만, 이제는 아무것도 하지 않고 배달기사의 완료 API 호출을 기다립니다.</p>
 <h3>5.5.2 deliveryCompleted 추가 - 배달 완료 시 주문 완료</h3>
 <p><code>handler/OrderOrchestrator.java</code>에 <code>deliveryCompleted</code> 리스너를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 5</span> handler/OrderOrchestrator.java. deliveryCompleted - 주문 완료 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 6</span> handler/OrderOrchestrator.java. deliveryCompleted - 주문 완료 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deliveryCompleted</span><span class="p">(</span><span class="n">DeliveryCompletedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 배달기사가 완료 API를 호출한 시점 → 주문 완료 명령 발행</span>
 <span class="w">    </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span>
@@ -426,99 +416,17 @@
 <span class="w">    </span><span class="p">);</span>
 <span class="p">}</span></div>
 <p>배달기사가 <code>PUT /api/deliveries/{id}/complete</code>를 호출하면, delivery-service가 배달 완료(<code>delivery-completed</code>) 이벤트를 발행합니다. orchestrator가 이를 받아 주문 완료 명령(<code>complete-order-command</code>)을 발행하고, order-service가 주문을 완료 처리한 뒤 WebSocket으로 사용자에게 알림을 보냅니다.</p>
-<h3>5.5.3 전체 Kafka 토픽 맵 (최종)</h3>
-<p>챕터 5에서 배달 완료(<code>delivery-completed</code>) 토픽이 추가되어, 최종적으로 9개 토픽을 사용합니다.</p>
-<table>
-<thead>
-<tr>
-<th>토픽</th>
-<th>발행</th>
-<th>구독</th>
-<th>목적</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>order-created</code></td>
-<td>order-service</td>
-<td>orchestrator</td>
-<td>새 주문 발생</td>
-</tr>
-<tr>
-<td><code>decrease-product-command</code></td>
-<td>orchestrator</td>
-<td>product-service</td>
-<td>재고 감소 명령</td>
-</tr>
-<tr>
-<td><code>product-decreased</code></td>
-<td>product-service</td>
-<td>orchestrator</td>
-<td>재고 감소 결과</td>
-</tr>
-<tr>
-<td><code>create-delivery-command</code></td>
-<td>orchestrator</td>
-<td>delivery-service</td>
-<td>배달 생성 명령</td>
-</tr>
-<tr>
-<td><code>delivery-created</code></td>
-<td>delivery-service</td>
-<td>orchestrator</td>
-<td>배달 생성 결과</td>
-</tr>
-<tr>
-<td><code>delivery-completed</code></td>
-<td>delivery-service</td>
-<td>orchestrator</td>
-<td>배달 완료 이벤트 (챕터 5 신규)</td>
-</tr>
-<tr>
-<td><code>complete-order-command</code></td>
-<td>orchestrator</td>
-<td>order-service</td>
-<td>주문 완료 명령</td>
-</tr>
-<tr>
-<td><code>cancel-order-command</code></td>
-<td>orchestrator</td>
-<td>order-service</td>
-<td>주문 취소 명령 (롤백)</td>
-</tr>
-<tr>
-<td><code>increase-product-command</code></td>
-<td>orchestrator</td>
-<td>product-service</td>
-<td>재고 복구 명령 (롤백)</td>
-</tr>
-</tbody>
-</table>
 <p class="thought">여기까지 다 이어졌는데, 정작 사용자한테는 어떻게 알리지?</p>
 <h2>5.6 order-service - STOMP로 실시간 Push 구현</h2>
 <p>마지막 퍼즐입니다. order-service가 주문 완료 명령(<code>complete-order-command</code>)을 받아 주문을 완료 처리하고, 동시에 WebSocket으로 사용자에게 알림을 보냅니다.</p>
-<h3>5.6.1 패키지 구조</h3>
-<div class="code-block highlight" data-lang="text"><div class="cb-title">order-service/ 패키지 구조</div>order-service/
-├── build.gradle                           ← [참고] WebSocket 의존성 추가
-└── src/main/java/.../
-    ├── core/
-    │   ├── config/
-    │   │   └── WebSocketConfig.java       ← [작성] STOMP WebSocket 설정
-    │   └── filter/
-    │       └── JwtAuthenticationFilter.java ← [작성] WebSocket 경로 필터 제외
-    └── usecase/
-        └── OrderService.java              ← [작성] completeOrder에 WebSocket Push 추가</div>
-<h3>5.6.2 의존성 추가</h3>
-<p><code>build.gradle</code>에 websocket이 추가됩니다.</p>
-<div class="code-block highlight" data-lang="gradle"><div class="cb-title">order-service/build.gradle. WebSocket 의존성 추가</div>implementation 'org.springframework.boot:spring-boot-starter-websocket'</div>
-<h3>5.6.3 WebSocket 설정</h3>
+<h3>5.6.1 WebSocket 설정</h3>
 <p>WebSocketConfig는 WebSocket 기능을 활성화하고, 클라이언트가 <code>/api/ws/orders</code>로 실시간 연결할 수 있도록 엔드포인트를 등록합니다.
 클라이언트가 이 엔드포인트로 연결한 뒤 <code>/topic/orders/{userId}</code> 채널을 구독하면, 서버가 해당 채널로 보낸 메시지를 실시간으로 수신할 수 있습니다.</p>
 <div class="prep-note">
 <p><strong>WebSocket 위에 STOMP 프로토콜을 사용합니다.</strong> STOMP를 얹으면 &quot;이 채널을 구독한다&quot;, &quot;이 채널에 메시지를 보낸다&quot; 같은 발행-구독 구조를 쓸 수 있습니다. 클라이언트가 <code>/topic/orders/{userId}</code> 채널을 구독하면 해당 사용자에게만 알림이 전달됩니다.</p>
 </div>
 <p><code>core/config/WebSocketConfig.java</code>를 열고 아래 클래스를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 6</span> core/config/WebSocketConfig.java. STOMP WebSocket 설정</div><span class="nd">@Configuration</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 7</span> core/config/WebSocketConfig.java. STOMP WebSocket 설정</div><span class="nd">@Configuration</span>
 <span class="nd">@EnableWebSocketMessageBroker</span><span class="w"> </span><span class="c1">// STOMP WebSocket 브로커 활성화</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WebSocketConfig</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">WebSocketMessageBrokerConfigurer</span><span class="w"> </span><span class="p">{</span>
 
@@ -534,18 +442,7 @@
 <span class="w">        </span><span class="n">registry</span><span class="p">.</span><span class="na">addEndpoint</span><span class="p">(</span><span class="s">&quot;/api/ws/orders&quot;</span><span class="p">).</span><span class="na">setAllowedOriginPatterns</span><span class="p">(</span><span class="s">&quot;*&quot;</span><span class="p">).</span><span class="na">withSockJS</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<h3>5.6.4 JwtAuthenticationFilter 수정</h3>
-<p><code>/api/ws</code> 경로를 JWT 필터에서 제외해야 합니다. 제외하지 않으면 WebSocket 연결이 401로 실패합니다.
-토큰은 WebSocket 연결 시 쿼리 파라미터(<code>?token=</code>)로 별도 전달되므로, 필터에서는 이 경로를 건너뛰어야 합니다.</p>
-<p><code>core/filter/JwtAuthenticationFilter.java</code>의 <code>shouldNotFilter</code>에 <code>/api/ws</code> 경로를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 7</span> core/filter/JwtAuthenticationFilter.java. WebSocket 경로 필터 제외</div><span class="nd">@Override</span>
-<span class="kd">protected</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">shouldNotFilter</span><span class="p">(</span><span class="n">HttpServletRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getRequestURI</span><span class="p">();</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="s">&quot;/login&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span>
-<span class="w">           </span><span class="n">path</span><span class="p">.</span><span class="na">startsWith</span><span class="p">(</span><span class="s">&quot;/h2-console&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span>
-<span class="w">           </span><span class="n">path</span><span class="p">.</span><span class="na">startsWith</span><span class="p">(</span><span class="s">&quot;/api/ws&quot;</span><span class="p">);</span><span class="w">  </span><span class="c1">// 추가: WebSocket 경로 제외</span>
-<span class="p">}</span></div>
-<h3>5.6.5 SimpMessagingTemplate - 주문 완료 시 Push 발송</h3>
+<h3>5.6.2 SimpMessagingTemplate - 주문 완료 시 Push 발송</h3>
 <p><code>completeOrder</code> 메서드에서 <code>/topic/orders/{userId}</code> 채널에 메시지를 보내면 userId에 해당하는 사용자만 알림을 수신합니다.</p>
 <div class="term-box">
 <p><strong>SimpMessagingTemplate이란?</strong> Spring이 제공하는 메시지 전송 도구입니다. <code>convertAndSend(destination, payload)</code> 메서드로 지정한 채널을 구독한 모든 클라이언트에게 메시지를 Push합니다.</p>
@@ -561,18 +458,36 @@
 <span class="w">    </span><span class="n">findOrder</span><span class="p">.</span><span class="na">complete</span><span class="p">();</span>
 <span class="w">    </span><span class="n">messagingTemplate</span><span class="p">.</span><span class="na">convertAndSend</span><span class="p">(</span><span class="s">&quot;/topic/orders/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">findOrder</span><span class="p">.</span><span class="na">getUserId</span><span class="p">(),</span><span class="w"> </span><span class="p">(</span><span class="n">Object</span><span class="p">)</span><span class="w"> </span><span class="n">Map</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;orderId&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">orderId</span><span class="p">));</span><span class="w">  </span><span class="c1">// 추가: WebSocket Push</span>
 <span class="p">}</span></div>
-<p>서버 측 WebSocket 구현이 완료됐습니다. 이제 이 클라이언트를 Kubernetes에서 서빙하기 위한 프론트엔드 인프라를 구성합니다.</p>
-<h3>5.6.6 프론트엔드 - Nginx와 SockJS 클라이언트</h3>
-<p>WebSocket 실시간 알림을 테스트하기 위한 프론트엔드 클라이언트를 구성합니다. Nginx로 정적 HTML을 서빙하면서, API 요청은 gateway-service로 프록시합니다.</p>
-<div class="code-block highlight" data-lang="text"><div class="cb-title">frontend/ + gateway/ 디렉토리</div>frontend/
-├── index.html    # [참고] WebSocket 테스트 HTML
-└── nginx.conf    # [참고] 정적 파일 서빙 + WebSocket 프록시
+<p>서버 측 WebSocket 구현이 끝났습니다. 동작에 필요한 보조 설정과 클라이언트만 남았습니다.</p>
+<h3>5.6.3 WebSocket을 위한 보조 설정</h3>
+<p>핵심 코드 외에 세 가지 설정이 더 필요합니다.</p>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>역할</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>order-service/build.gradle</strong></td>
+<td>WebSocket·STOMP 의존성 추가</td>
+</tr>
+<tr>
+<td><strong>JwtAuthenticationFilter.java</strong></td>
+<td>/api/ws를 JWT 필터에서 제외 (없으면 401)</td>
+</tr>
+<tr>
+<td><strong>frontend·gateway nginx.conf</strong></td>
+<td>/api/ws/에 Upgrade·Connection upgrade 헤더 추가</td>
+</tr>
+</tbody>
+</table>
+<h3>5.6.4 프론트엔드 클라이언트</h3>
+<p>프론트엔드는 Nginx로 정적 HTML을 서빙하는 간단한 페이지입니다. JWT 토큰을 입력받아 WebSocket을 구독하고, 주문 완료 알림을 실시간으로 표시합니다. 핵심인 연결 부분만 보면 다음과 같습니다.</p>
+<div class="code-block highlight" data-lang="javascript"><div class="cb-title">frontend/index.html. WebSocket 연결 부분</div><span class="c1">// ... 토큰 입력·DOM 처리 생략 ...</span>
 
-gateway/
-└── nginx.conf    # [참고] WebSocket 경로 추가</div>
-<h3>5.6.7 index.html - WebSocket 테스트 클라이언트</h3>
-<p>프론트엔드는 간단한 HTML 페이지로, JWT 토큰을 입력받아 WebSocket 구독을 설정하고 주문 완료 알림을 실시간으로 표시합니다. 핵심인 WebSocket 연결 부분만 보면 다음과 같습니다.</p>
-<div class="code-block highlight" data-lang="javascript"><div class="cb-title">frontend/index.html. WebSocket 연결 부분</div><span class="c1">// SockJS로 WebSocket 연결 생성</span>
+<span class="c1">// SockJS로 WebSocket 연결 생성</span>
 <span class="nx">stomp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Stomp</span><span class="p">.</span><span class="nx">over</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">SockJS</span><span class="p">(</span><span class="s1">&#39;/api/ws/orders?token=&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">TOKEN</span><span class="p">));</span>
 
 <span class="c1">// STOMP 연결 후 채널 구독</span>
@@ -582,29 +497,7 @@ gateway/
 <span class="w">        </span><span class="nx">status</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;주문 완료! (주문번호: &#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">orderId</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;)&#39;</span><span class="p">;</span>
 <span class="w">    </span><span class="p">});</span>
 <span class="p">});</span></div>
-<p><code>SockJS</code>로 WebSocket 연결을 만들고, <code>STOMP</code>로 <code>/topic/orders/{userId}</code> 채널을 구독합니다. 서버가 이 채널로 메시지를 보내면 콜백이 실행되어 화면에 주문 완료를 표시합니다.</p>
-<h3>5.6.8 nginx.conf - WebSocket 프록시 설정</h3>
-<p>일반 HTTP는 요청-응답 한 쌍으로 끝나는 일회성 통신입니다. Nginx가 응답 후 연결을 닫아버리기 때문에, Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다.</p>
-<p><code>/api/ws/</code> 경로에 <strong>Upgrade 헤더</strong> 를 설정하여 &quot;이 연결은 WebSocket이니 끊지 말라&quot;고 알려줘야 합니다.</p>
-<div class="term-box">
-<p><strong>Nginx WebSocket 프록시(Upgrade 헤더)란?</strong> Nginx가 WebSocket 연결을 프록시할 때 필요한 설정입니다. nginx 설정에 <code>upgrade 헤더</code>를 설정하여 HTTP 연결을 WebSocket 프로토콜로 전환(upgrade)하도록 백엔드에 전달합니다.</p>
-</div>
-<p>정적 파일을 제공하면서 <code>/login</code>, <code>/api/</code> 요청은 gateway-service로 전달합니다. <code>/api/ws/</code> 블록이 핵심입니다.</p>
-<div class="code-block highlight" data-lang="nginx"><div class="cb-title">frontend/nginx.conf. WebSocket 프록시</div><span class="c1"># /api/ws/ 경로로 들어오는 WebSocket 요청을 gateway로 전달</span>
-<span class="k">location</span><span class="w"> </span><span class="s">/api/ws/</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://gateway</span><span class="p">;</span><span class="w">           </span><span class="c1"># gateway-service로 요청 전달</span>
-<span class="w">    </span><span class="kn">proxy_http_version</span><span class="w"> </span><span class="mi">1</span><span class="s">.1</span><span class="p">;</span><span class="w">              </span><span class="c1"># HTTP/1.1 사용 (WebSocket 필수)</span>
-<span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Upgrade</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span><span class="w">   </span><span class="c1"># 클라이언트의 Upgrade 헤더 전달</span>
-<span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">&quot;upgrade&quot;</span><span class="p">;</span><span class="w">    </span><span class="c1"># 연결을 WebSocket으로 전환</span>
-<span class="p">}</span></div>
-<p>gateway-service의 nginx 설정도 동일하게 <code>upgrade 헤더</code>를 추가합니다.</p>
-<div class="code-block highlight" data-lang="nginx"><div class="cb-title">gateway/nginx.conf. WebSocket 추가분</div><span class="c1"># 기존 location 블록들에 추가</span>
-<span class="k">location</span><span class="w"> </span><span class="s">/api/ws/</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://order-service</span><span class="p">;</span>
-<span class="w">    </span><span class="kn">proxy_http_version</span><span class="w"> </span><span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
-<span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Upgrade</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span>
-<span class="w">    </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">&quot;upgrade&quot;</span><span class="p">;</span>
-<span class="p">}</span></div>
+<p><code>SockJS</code>로 WebSocket 연결을 만들고 <code>STOMP</code>로 <code>/topic/orders/{userId}</code> 채널을 구독합니다. 서버가 이 채널로 메시지를 보내면 콜백이 실행되어 화면에 주문 완료를 표시합니다.</p>
 <h2>5.7 전체 시스템 통합 테스트</h2>
 <p>모든 구현이 완료됐습니다. 이제 전체 시스템을 실행하고 처음부터 끝까지 한 번에 흐름을 확인합니다.</p>
 <h3>5.7.1 K8s 매니페스트</h3>
@@ -618,15 +511,15 @@ gateway/
 </thead>
 <tbody>
 <tr>
-<td><code>frontend-deploy.yml</code></td>
+<td><strong>frontend-deploy.yml</strong></td>
 <td>Nginx 기반 프론트엔드 Pod</td>
 </tr>
 <tr>
-<td><code>frontend-service.yml</code></td>
+<td><strong>frontend-service.yml</strong></td>
 <td>클러스터 내부 접근용 Service</td>
 </tr>
 <tr>
-<td><code>frontend-ingress.yml</code></td>
+<td><strong>frontend-ingress.yml</strong></td>
 <td>외부 요청을 frontend-service로 라우팅</td>
 </tr>
 </tbody>

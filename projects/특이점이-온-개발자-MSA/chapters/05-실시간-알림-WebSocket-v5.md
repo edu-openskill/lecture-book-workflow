@@ -126,11 +126,28 @@ git clone https://github.com/metacoding-12-msa/ex04.git
 cd ex04
 ```
 
-### 2. 실습 환경
+### 2. 파일 구조
+
+```text ex04 디렉토리
+ex04/
+├── order/              # 포트 8081 (WebSocket Push 추가)
+├── product/            # 포트 8082
+├── user/               # 포트 8083
+├── delivery/           # 포트 8084 (배달 완료 API 추가)
+├── orchestrator/       # Kafka 워크플로우 조율
+├── frontend/           # Nginx + SockJS 클라이언트 (이번 챕터 신규)
+├── gateway/            # Nginx API Gateway
+├── db/                 # MySQL
+└── k8s/                # Kubernetes 매니페스트 (kafka·frontend 포함)
+```
+
+서비스마다 패키지 구조가 조금씩 다르므로, 코드를 작성할 파일 경로는 각 실습 코드블록 바로 위에서 안내합니다.
+
+### 3. 실습 환경
 
 챕터 4까지 사용한 Docker Desktop, Minikube가 그대로 필요합니다. 별도 추가 도구는 없습니다. 프론트엔드도 Nginx 컨테이너로 Minikube 안에서 함께 띄우므로 따로 서버를 띄울 필요는 없습니다.
 
-### 3. 실습 순서
+### 4. 실습 순서
 
 1. delivery-service에 배달 완료 API + `delivery-completed` 이벤트 추가
 2. orchestrator에 `delivery-completed` 처리 + `delivery-created` 성공 시 대기로 변경
@@ -166,7 +183,7 @@ cd ex04
 
 반대로, 택배가 도착할 때 초인종이 울리는 것처럼, 클라이언트가 묻지 않아도 서버가 변화가 생긴 순간 먼저 알리는 방법이 **푸시(Push)** 입니다. 폴링의 헛걸음이 없습니다.
 
-<!-- image-prompt: Minimal black line drawing on white background, split comparison, 4:3 aspect ratio, 800x600px. Left side labeled "Polling": a person repeatedly opening their front door every few minutes to check if a package has arrived, empty doorstep, a clock showing repeated checks. Right side labeled "Push": the same person sitting comfortably on a sofa, a doorbell rings to notify that the package has arrived. Clean lines, no colors. -->
+<!-- image-prompt: Minimal black line drawing on white background, two side-by-side halves, no divider line, no X mark, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Left half, title "Polling": the same scene repeated three times stacked vertically with NO frame, box, or border around each repetition (no rectangles, no panel outlines), each repetition showing the same tired, weary-looking person (drooping shoulders, exhausted face) opening their front door to an empty doorstep, with a large round analog wall clock whose hands point to a clearly DIFFERENT time in each — top about 9 o'clock, middle about 12 o'clock, bottom about 3 o'clock — the visibly different clock hands making the repeated checking over time obvious. Right half, title "Push": the same person sitting relaxed on a sofa reading while a small bell symbol by the front door rings on its own with short curved motion lines. No speech bubbles, no sound-effect text (no "RING!"), no annotation text, no checklists. Characters drawn in a clean simple cartoon textbook style consistent with the rest of the book — not stick figures, simple but with clear body proportions, hair, and clothing outlines, more detailed than stick figures but less detailed than realistic. Clean lines, no colors. -->
 ![](assets/CH05/gemini/01_polling-vs-websocket.png)
 *그림 5-2. 폴링 vs 푸시*
 
@@ -347,6 +364,8 @@ cd ex04
 *그림 5-5. 3단계 - 주문 완료 명령 발행 → 주문 수신 → WebSocket 알림*
 
 
+앞 챕터에서 쓰던 8개 토픽(정상 흐름 6개 + 롤백 2개)은 그대로 두고, 이번 챕터에서 배달 완료를 알리는 delivery-completed 토픽 하나(delivery → orchestrator)만 더해져 전체 9개가 됩니다.
+
 세 단계를 코드로 옮기기 위해 이제 세 곳을 수정합니다.
 
 1. delivery-service에 배달 완료 API를 추가합니다.
@@ -356,44 +375,18 @@ cd ex04
 
 ## 5.4 delivery-service - 배달 완료 API 추가
 
-### 5.4.1 패키지 구조
+첫 번째 곳은 delivery-service입니다. 배달 기사가 완료를 호출하면 배달을 COMPLETED로 바꾸고, 그 사실을 `delivery-completed` 이벤트로 발행해 orchestrator가 다음을 잇게 합니다. 상태 전이 → 완료 처리 → 이벤트 발행 → 호출 입구 순으로 더합니다.
 
-```text delivery-service/ 패키지 구조
-delivery-service/src/main/java/.../
-├── domain/
-│   └── Delivery.java                        ← [참고] create()는 PENDING 상태. cancel() 메서드는 도입하지 않음
-├── usecase/
-│   ├── CompleteDeliveryUseCase.java         ← [참고] 배달 완료 인터페이스
-│   └── DeliveryService.java                 ← [작성] completeDelivery() 추가
-├── web/
-│   └── DeliveryController.java              ← [작성] PUT /{id}/complete 추가
-└── adapter/
-    ├── message/
-    │   └── DeliveryCompletedEvent.java      ← [참고] 배달 완료 이벤트 DTO (orderId)
-    └── producer/
-        └── DeliveryEventProducer.java       ← [작성] publishDeliveryCompleted() 추가
-```
+### 5.4.1 배달 상태 전이 - PENDING에서 COMPLETED로
 
-### 5.4.2 Delivery 엔티티 상태 전이
+앞에서 만든 Delivery는 생성과 동시에 `complete()`를 호출했습니다. 이제는 배달 기사의 API 호출이 있어야 완료됩니다. 완료로 바꾸는 `complete()` 한 메서드만 더합니다.
 
-배달 생성 시 상태를 `PENDING`으로 저장하고, 배달 기사가 완료 처리 시 `COMPLETED`로 전이합니다. 이전에는 생성과 동시에 `complete()`를 호출했지만, 이제는 명시적인 API 호출이 있어야 완료됩니다.
+`domain/Delivery.java`를 열고 아래 메서드를 추가합니다.
 
-```java domain/Delivery.java. 배달 상태 전이 (PENDING → COMPLETED)
+```java [실습 1] domain/Delivery.java. 배달 완료 상태 전이
 @Table(name = "delivery_tb")
 public class Delivery {
-    // 챕터 2 Delivery.java 참조 — 필드 동일
-
-    // 배달 주소 검증
-    public static void validateAddress(String address) {
-        if (address == null || address.isBlank()) {
-            throw new Exception400("배달 주소는 필수입니다.");
-        }
-    }
-
-    // 배달 생성 시 PENDING 상태 (배달 완료 API 대기)
-    public static Delivery create(int orderId, String address) {
-        return new Delivery(orderId, address, DeliveryStatus.PENDING);
-    }
+    // 필드·create()·validateAddress()는 앞에서 만든 Delivery와 동일 (생략)
 
     public void complete() {
         this.status = DeliveryStatus.COMPLETED;
@@ -402,16 +395,18 @@ public class Delivery {
 }
 ```
 
-이번 챕터에서도 배달 취소 흐름은 다루지 않으므로 `cancel()` 메서드는 도입하지 않습니다. 주문 롤백이 발생하면 `cancel-order-command`로 주문만 취소되고, 이미 만들어진 배달은 PENDING 상태로 남습니다. 배달 라이프사이클은 PENDING → COMPLETED 한 방향만 가집니다.
+`create()`는 배달을 `PENDING` 상태로 저장합니다. 완료 처리는 이 `complete()` 하나뿐이고, 배달 라이프사이클은 PENDING → COMPLETED 한 방향만 가집니다.
 
-아래 메서드를 DeliveryService에 추가합니다. 배달 상태를 COMPLETED로 변경하고 Kafka 이벤트를 발행합니다.
+### 5.4.2 배달 완료 처리와 이벤트 발행
+
+배달 기사가 완료를 호출하면 상태를 COMPLETED로 바꾸고 곧바로 `delivery-completed`를 발행해야, orchestrator가 그 이벤트를 받아 다음 단계를 잇습니다.
 
 `usecase/DeliveryService.java`를 열고 아래 메서드를 추가합니다.
 
-```java [실습 1] usecase/DeliveryService.java. completeDelivery 추가
+```java [실습 2] usecase/DeliveryService.java. completeDelivery 추가
 @Override
 @Transactional
-public DeliveryResponse completeDelivery(int deliveryId) {  // 추가
+public DeliveryResponse completeDelivery(int deliveryId) {
     Delivery findDelivery = deliveryRepository.findById(deliveryId)
             .orElseThrow(() -> new Exception404("배달 정보를 조회할 수 없습니다."));
     findDelivery.complete();
@@ -420,32 +415,32 @@ public DeliveryResponse completeDelivery(int deliveryId) {  // 추가
 }
 ```
 
-### 5.4.3 배달 완료 컨트롤러
-
-아래 엔드포인트를 DeliveryController에 추가합니다. 배달 기사가 호출하는 배달 완료 API입니다.
-
-`web/DeliveryController.java`를 열고 아래 엔드포인트를 추가합니다.
-
-```java [실습 2] web/DeliveryController.java. 배달 완료 엔드포인트
-@PutMapping("/{deliveryId}/complete")
-public ResponseEntity<?> completeDelivery(@PathVariable("deliveryId") int deliveryId) {  // 추가
-    return Resp.ok(completeDeliveryUseCase.completeDelivery(deliveryId));
-}
-```
-
-### 5.4.4 delivery-completed 이벤트 발행
-
-배달이 완료되면 Kafka 배달 완료(`delivery-completed`) 토픽에 이벤트를 발행합니다. orchestrator가 이 이벤트를 받아 다음 단계를 진행합니다.
-
-아래 메서드를 기존 파일에 추가합니다.
+`completeDelivery`는 배달을 찾아 `complete()`로 상태를 바꾸고, `DeliveryEventProducer`로 완료 이벤트를 발행합니다.
 
 `adapter/producer/DeliveryEventProducer.java`를 열고 아래 메서드를 추가합니다.
 
 ```java [실습 3] adapter/producer/DeliveryEventProducer.java. delivery-completed 발행
-public void publishDeliveryCompleted(DeliveryCompletedEvent event) {  // 추가
+public void publishDeliveryCompleted(DeliveryCompletedEvent event) {
     kafkaTemplate.send("delivery-completed", event);
 }
 ```
+
+`kafkaTemplate.send`에 `delivery-completed` 토픽과 이벤트를 넘기면 그 토픽으로 메시지가 들어갑니다.
+
+### 5.4.3 배달 완료 엔드포인트
+
+남은 것은 배달 기사가 호출할 입구입니다. `completeDelivery`를 호출하는 엔드포인트를 더합니다.
+
+`web/DeliveryController.java`를 열고 아래 엔드포인트를 추가합니다.
+
+```java [실습 4] web/DeliveryController.java. 배달 완료 엔드포인트
+@PutMapping("/{deliveryId}/complete")
+public ResponseEntity<?> completeDelivery(@PathVariable("deliveryId") int deliveryId) {
+    return Resp.ok(completeDeliveryUseCase.completeDelivery(deliveryId));
+}
+```
+
+배달 기사가 `PUT /api/deliveries/{id}/complete`를 호출하면 배달이 완료되고 `delivery-completed`가 발행됩니다. 이제 orchestrator가 이 이벤트를 받도록 수정합니다.
 
 ## 5.5 orchestrator - delivery-completed 처리 추가
 
@@ -457,7 +452,7 @@ public void publishDeliveryCompleted(DeliveryCompletedEvent event) {  // 추가
 
 `handler/OrderOrchestrator.java`의 `deliveryCreated`를 아래처럼 수정합니다.
 
-```java [실습 4] handler/OrderOrchestrator.java. deliveryCreated - 성공 시 대기
+```java [실습 5] handler/OrderOrchestrator.java. deliveryCreated - 성공 시 대기
 @KafkaListener(topics = "delivery-created", groupId = "orchestrator")
 public void deliveryCreated(DeliveryCreatedEvent event) {
     int orderId = event.orderId();
@@ -477,7 +472,7 @@ public void deliveryCreated(DeliveryCreatedEvent event) {
 
 `handler/OrderOrchestrator.java`에 `deliveryCompleted` 리스너를 추가합니다.
 
-```java [실습 5] handler/OrderOrchestrator.java. deliveryCompleted - 주문 완료 명령 발행
+```java [실습 6] handler/OrderOrchestrator.java. deliveryCompleted - 주문 완료 명령 발행
 @KafkaListener(topics = "delivery-completed", groupId = "orchestrator")
 public void deliveryCompleted(DeliveryCompletedEvent event) {
     // 배달기사가 완료 API를 호출한 시점 → 주문 완료 명령 발행
@@ -491,22 +486,6 @@ public void deliveryCompleted(DeliveryCompletedEvent event) {
 
 배달기사가 `PUT /api/deliveries/{id}/complete`를 호출하면, delivery-service가 배달 완료(`delivery-completed`) 이벤트를 발행합니다. orchestrator가 이를 받아 주문 완료 명령(`complete-order-command`)을 발행하고, order-service가 주문을 완료 처리한 뒤 WebSocket으로 사용자에게 알림을 보냅니다.
 
-### 5.5.3 전체 Kafka 토픽 맵 (최종)
-
-챕터 5에서 배달 완료(`delivery-completed`) 토픽이 추가되어, 최종적으로 9개 토픽을 사용합니다.
-
-| 토픽 | 발행 | 구독 | 목적 |
-|---|---|---|---|
-| `order-created` | order-service | orchestrator | 새 주문 발생 |
-| `decrease-product-command` | orchestrator | product-service | 재고 감소 명령 |
-| `product-decreased` | product-service | orchestrator | 재고 감소 결과 |
-| `create-delivery-command` | orchestrator | delivery-service | 배달 생성 명령 |
-| `delivery-created` | delivery-service | orchestrator | 배달 생성 결과 |
-| `delivery-completed` | delivery-service | orchestrator | 배달 완료 이벤트 (챕터 5 신규) |
-| `complete-order-command` | orchestrator | order-service | 주문 완료 명령 |
-| `cancel-order-command` | orchestrator | order-service | 주문 취소 명령 (롤백) |
-| `increase-product-command` | orchestrator | product-service | 재고 복구 명령 (롤백) |
-
 
 *여기까지 다 이어졌는데, 정작 사용자한테는 어떻게 알리지?*
 
@@ -514,30 +493,7 @@ public void deliveryCompleted(DeliveryCompletedEvent event) {
 
 마지막 퍼즐입니다. order-service가 주문 완료 명령(`complete-order-command`)을 받아 주문을 완료 처리하고, 동시에 WebSocket으로 사용자에게 알림을 보냅니다.
 
-### 5.6.1 패키지 구조
-
-```text order-service/ 패키지 구조
-order-service/
-├── build.gradle                           ← [참고] WebSocket 의존성 추가
-└── src/main/java/.../
-    ├── core/
-    │   ├── config/
-    │   │   └── WebSocketConfig.java       ← [작성] STOMP WebSocket 설정
-    │   └── filter/
-    │       └── JwtAuthenticationFilter.java ← [작성] WebSocket 경로 필터 제외
-    └── usecase/
-        └── OrderService.java              ← [작성] completeOrder에 WebSocket Push 추가
-```
-
-### 5.6.2 의존성 추가
-
- `build.gradle`에 websocket이 추가됩니다.
-
-```gradle order-service/build.gradle. WebSocket 의존성 추가
-implementation 'org.springframework.boot:spring-boot-starter-websocket'
-```
-
-### 5.6.3 WebSocket 설정
+### 5.6.1 WebSocket 설정
 
 WebSocketConfig는 WebSocket 기능을 활성화하고, 클라이언트가 `/api/ws/orders`로 실시간 연결할 수 있도록 엔드포인트를 등록합니다.
  클라이언트가 이 엔드포인트로 연결한 뒤 `/topic/orders/{userId}` 채널을 구독하면, 서버가 해당 채널로 보낸 메시지를 실시간으로 수신할 수 있습니다.
@@ -548,7 +504,7 @@ WebSocketConfig는 WebSocket 기능을 활성화하고, 클라이언트가 `/api
 
 `core/config/WebSocketConfig.java`를 열고 아래 클래스를 작성합니다.
 
-```java [실습 6] core/config/WebSocketConfig.java. STOMP WebSocket 설정
+```java [실습 7] core/config/WebSocketConfig.java. STOMP WebSocket 설정
 @Configuration
 @EnableWebSocketMessageBroker // STOMP WebSocket 브로커 활성화
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -567,24 +523,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 }
 ```
 
-### 5.6.4 JwtAuthenticationFilter 수정
-
-`/api/ws` 경로를 JWT 필터에서 제외해야 합니다. 제외하지 않으면 WebSocket 연결이 401로 실패합니다.
-토큰은 WebSocket 연결 시 쿼리 파라미터(`?token=`)로 별도 전달되므로, 필터에서는 이 경로를 건너뛰어야 합니다.
-
-`core/filter/JwtAuthenticationFilter.java`의 `shouldNotFilter`에 `/api/ws` 경로를 추가합니다.
-
-```java [실습 7] core/filter/JwtAuthenticationFilter.java. WebSocket 경로 필터 제외
-@Override
-protected boolean shouldNotFilter(HttpServletRequest request) {
-    String path = request.getRequestURI();
-    return path.equals("/login") ||
-           path.startsWith("/h2-console") ||
-           path.startsWith("/api/ws");  // 추가: WebSocket 경로 제외
-}
-```
-
-### 5.6.5 SimpMessagingTemplate - 주문 완료 시 Push 발송
+### 5.6.2 SimpMessagingTemplate - 주문 완료 시 Push 발송
 
 `completeOrder` 메서드에서 `/topic/orders/{userId}` 채널에 메시지를 보내면 userId에 해당하는 사용자만 알림을 수신합니다.
 
@@ -608,26 +547,25 @@ public void completeOrder(int orderId) {
 }
 ```
 
-서버 측 WebSocket 구현이 완료됐습니다. 이제 이 클라이언트를 Kubernetes에서 서빙하기 위한 프론트엔드 인프라를 구성합니다.
+서버 측 WebSocket 구현이 끝났습니다. 동작에 필요한 보조 설정과 클라이언트만 남았습니다.
 
-### 5.6.6 프론트엔드 - Nginx와 SockJS 클라이언트
+### 5.6.3 WebSocket을 위한 보조 설정
 
-WebSocket 실시간 알림을 테스트하기 위한 프론트엔드 클라이언트를 구성합니다. Nginx로 정적 HTML을 서빙하면서, API 요청은 gateway-service로 프록시합니다.
+핵심 코드 외에 세 가지 설정이 더 필요합니다.
 
-```text frontend/ + gateway/ 디렉토리
-frontend/
-├── index.html    # [참고] WebSocket 테스트 HTML
-└── nginx.conf    # [참고] 정적 파일 서빙 + WebSocket 프록시
+| 파일 | 역할 |
+|------|------|
+| **order-service/build.gradle** | WebSocket·STOMP 의존성 추가 |
+| **JwtAuthenticationFilter.java** | /api/ws를 JWT 필터에서 제외 (없으면 401) |
+| **frontend·gateway nginx.conf** | /api/ws/에 Upgrade·Connection upgrade 헤더 추가 |
 
-gateway/
-└── nginx.conf    # [참고] WebSocket 경로 추가
-```
+### 5.6.4 프론트엔드 클라이언트
 
-### 5.6.7 index.html - WebSocket 테스트 클라이언트
-
-프론트엔드는 간단한 HTML 페이지로, JWT 토큰을 입력받아 WebSocket 구독을 설정하고 주문 완료 알림을 실시간으로 표시합니다. 핵심인 WebSocket 연결 부분만 보면 다음과 같습니다.
+프론트엔드는 Nginx로 정적 HTML을 서빙하는 간단한 페이지입니다. JWT 토큰을 입력받아 WebSocket을 구독하고, 주문 완료 알림을 실시간으로 표시합니다. 핵심인 연결 부분만 보면 다음과 같습니다.
 
 ```javascript frontend/index.html. WebSocket 연결 부분
+// ... 토큰 입력·DOM 처리 생략 ...
+
 // SockJS로 WebSocket 연결 생성
 stomp = Stomp.over(new SockJS('/api/ws/orders?token=' + TOKEN));
 
@@ -640,41 +578,7 @@ stomp.connect({}, function () {
 });
 ```
 
-`SockJS`로 WebSocket 연결을 만들고, `STOMP`로 `/topic/orders/{userId}` 채널을 구독합니다. 서버가 이 채널로 메시지를 보내면 콜백이 실행되어 화면에 주문 완료를 표시합니다.
-
-### 5.6.8 nginx.conf - WebSocket 프록시 설정
-
-일반 HTTP는 요청-응답 한 쌍으로 끝나는 일회성 통신입니다. Nginx가 응답 후 연결을 닫아버리기 때문에, Nginx가 중간에 있으면 WebSocket 연결이 일반 HTTP로 처리되어 끊어집니다.
-
-`/api/ws/` 경로에 **Upgrade 헤더** 를 설정하여 "이 연결은 WebSocket이니 끊지 말라"고 알려줘야 합니다.
-
-:::term-box
-**Nginx WebSocket 프록시(Upgrade 헤더)란?** Nginx가 WebSocket 연결을 프록시할 때 필요한 설정입니다. nginx 설정에 `upgrade 헤더`를 설정하여 HTTP 연결을 WebSocket 프로토콜로 전환(upgrade)하도록 백엔드에 전달합니다.
-:::
-
-정적 파일을 제공하면서 `/login`, `/api/` 요청은 gateway-service로 전달합니다. `/api/ws/` 블록이 핵심입니다.
-
-```nginx frontend/nginx.conf. WebSocket 프록시
-# /api/ws/ 경로로 들어오는 WebSocket 요청을 gateway로 전달
-location /api/ws/ {
-    proxy_pass http://gateway;           # gateway-service로 요청 전달
-    proxy_http_version 1.1;              # HTTP/1.1 사용 (WebSocket 필수)
-    proxy_set_header Upgrade $http_upgrade;   # 클라이언트의 Upgrade 헤더 전달
-    proxy_set_header Connection "upgrade";    # 연결을 WebSocket으로 전환
-}
-```
-
-gateway-service의 nginx 설정도 동일하게 `upgrade 헤더`를 추가합니다.
-
-```nginx gateway/nginx.conf. WebSocket 추가분
-# 기존 location 블록들에 추가
-location /api/ws/ {
-    proxy_pass http://order-service;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-}
-```
+`SockJS`로 WebSocket 연결을 만들고 `STOMP`로 `/topic/orders/{userId}` 채널을 구독합니다. 서버가 이 채널로 메시지를 보내면 콜백이 실행되어 화면에 주문 완료를 표시합니다.
 
 ## 5.7 전체 시스템 통합 테스트
 
@@ -686,9 +590,9 @@ location /api/ws/ {
 
 | 파일 | 역할 |
 |------|------|
-| `frontend-deploy.yml` | Nginx 기반 프론트엔드 Pod |
-| `frontend-service.yml` | 클러스터 내부 접근용 Service |
-| `frontend-ingress.yml` | 외부 요청을 frontend-service로 라우팅 |
+| **frontend-deploy.yml** | Nginx 기반 프론트엔드 Pod |
+| **frontend-service.yml** | 클러스터 내부 접근용 Service |
+| **frontend-ingress.yml** | 외부 요청을 frontend-service로 라우팅 |
 
 이번 챕터부터는 Ingress가 gateway-service가 아닌 **frontend-service**를 가리킵니다. 프론트엔드의 Nginx가 정적 파일을 직접 제공하고, `/api/` 요청만 gateway-service로 전달합니다.
 
