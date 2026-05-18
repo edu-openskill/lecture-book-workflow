@@ -835,7 +835,7 @@ public void decreaseProductCommand(DecreaseProductCommand command) {
 
 | 서비스 | 구독(받음) | 처리 | 발행(보냄) |
 |---|---|---|---|
-| **order** | 주문 요청(REST) | 주문 저장(PENDING) | 주문 생성 이벤트 |
+| **order** | 주문 요청 | 주문 저장(PENDING) | 주문 생성 이벤트 |
 | **order** | 주문 완료·취소 명령 | 주문 상태 변경 | — |
 | **product** | 재고 차감·복구 명령 | 재고 증감 | 재고 차감 이벤트 |
 | **delivery** | 배달 생성 명령 | 배달 생성 | 배달 생성 이벤트 |
