@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>샘플4 - WebSocket 주소 일치 (compact viewBox)</title>
+<style>
+  :root{ --font-mono:'D2Coding','Consolas','Menlo',monospace; --color-border:#cbd5e1; }
+  body{background:#f1f5f9;margin:0;padding:32px;font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;color:#0f172a;}
+  .wrap{max-width:900px;margin:0 auto;}
+  .note{font-size:13px;color:#64748b;margin:0 0 14px;}
+  /* 책 빌드와 동일 조건 재현: max-width 720 캡 */
+  .svg-figure{background:#fff;border:1px solid var(--color-border);border-radius:10px;padding:16px 20px;margin:20px 0;}
+  .svg-figure svg{width:100%;height:auto;max-width:720px;display:block;margin:0 auto;}
+  .caption{text-align:center;color:#64748b;font-size:13px;font-style:italic;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="note">책 빌드와 같은 조건(.svg-figure svg max-width:720px)으로 렌더한 미리보기입니다. viewBox를 760×372로 압축해 글자가 거의 1:1로 보입니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 760 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="서버와 클라이언트가 같은 연결 주소와 같은 채널 주소를 써야 한다. 연결은 addEndpoint와 SockJS가 /api/ws/orders로 일치해야 하고, 발행 convertAndSend와 구독 subscribe가 /topic/orders/userId로 일치해야 하며 /topic은 enableSimpleBroker 접두사다.">
+  <defs><marker id="ln" markerWidth="9" markerHeight="9" refX="4" refY="3" orient="auto"><circle cx="3" cy="3" r="3" fill="#4f46e5"/></marker></defs>
+  <rect x="24" y="12" width="330" height="28" rx="7" fill="#eef2ff"/>
+  <text x="189" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">서버 (주문 서비스)</text>
+  <rect x="406" y="12" width="330" height="28" rx="7" fill="#eef2ff"/>
+  <text x="571" y="31" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">클라이언트 (브라우저 index.html)</text>
+  <text x="24" y="64" font-size="13" font-weight="700" fill="#0f172a">① 연결 — 서버가 등록한 주소로, 클라이언트가 똑같이 연결합니다</text>
+  <rect x="24" y="74" width="330" height="58" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="38" y="96" font-size="11" fill="#64748b">WebSocketConfig — 웹소켓 연결 주소 지정</text>
+  <text x="38" y="119" font-size="13" font-family="var(--font-mono)" fill="#0f172a">addEndpoint(&quot;<tspan fill="#4f46e5" font-weight="700">/api/ws/orders</tspan>&quot;)</text>
+  <rect x="406" y="74" width="330" height="58" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="420" y="96" font-size="11" fill="#64748b">index.html — 연결 시도</text>
+  <text x="420" y="119" font-size="13" font-family="var(--font-mono)" fill="#0f172a">new SockJS(&quot;<tspan fill="#4f46e5" font-weight="700">/api/ws/orders</tspan>&quot;)</text>
+  <line x1="354" y1="103" x2="406" y2="103" stroke="#4f46e5" stroke-width="2" marker-start="url(#ln)" marker-end="url(#ln)"/>
+  <rect x="358" y="89" width="44" height="28" rx="14" fill="#4f46e5"/>
+  <text x="380" y="109" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">=</text>
+  <rect x="24" y="146" width="712" height="32" rx="7" fill="#fff4ed" stroke="#ff7849" stroke-width="1.3"/>
+  <text x="380" y="167" text-anchor="middle" font-size="11.5" fill="#9a3412">아래 발행·구독 주소는 모두 <tspan font-weight="800">&quot;/topic&quot;</tspan> 으로 시작해야 합니다</text>
+  <text x="24" y="210" font-size="13" font-weight="700" fill="#0f172a">② 발행·구독 — 서버가 보낸 채널 주소를, 클라이언트가 똑같이 구독합니다</text>
+  <rect x="24" y="220" width="330" height="60" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="38" y="242" font-size="11" fill="#64748b">OrderService — 주문 완료 시 발행</text>
+  <text x="38" y="265" font-size="13" font-family="var(--font-mono)" fill="#0f172a">convertAndSend(&quot;<tspan fill="#ff7849" font-weight="700">/topic</tspan>/orders/<tspan fill="#7c3aed" font-weight="700">3</tspan>&quot;)</text>
+  <rect x="406" y="220" width="330" height="60" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="420" y="242" font-size="11" fill="#64748b">index.html — 연결 후 구독</text>
+  <text x="420" y="265" font-size="13" font-family="var(--font-mono)" fill="#0f172a">subscribe(&quot;<tspan fill="#ff7849" font-weight="700">/topic</tspan>/orders/<tspan fill="#7c3aed" font-weight="700">3</tspan>&quot;)</text>
+  <line x1="354" y1="250" x2="406" y2="250" stroke="#4f46e5" stroke-width="2" marker-start="url(#ln)" marker-end="url(#ln)"/>
+  <rect x="358" y="236" width="44" height="28" rx="14" fill="#4f46e5"/>
+  <text x="380" y="256" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">=</text>
+  <path d="M170 280 V 304 H 590 V 280" fill="none" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="5,4"/>
+  <rect x="300" y="291" width="160" height="26" rx="13" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.2"/>
+  <text x="380" y="308" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7c3aed">userId 가 같은 사람만 받습니다</text>
+  <text x="380" y="352" text-anchor="middle" font-size="12" fill="#475569">한 글자라도 다르면 연결도, 알림 전달도 되지 않습니다.</text>
+</svg>
+</div>
+  <div class="caption">그림 5-7. WebSocket 주소 일치 - 같은 색은 글자까지 똑같아야 동작합니다</div>
+</div>
+</body>
+</html>
