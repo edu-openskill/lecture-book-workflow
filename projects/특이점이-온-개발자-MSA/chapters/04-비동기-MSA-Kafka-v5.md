@@ -66,9 +66,9 @@
   <rect x="820" y="430" width="170" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="905" y="463" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Delivery</text>
   <text x="905" y="486" text-anchor="middle" font-size="12" fill="#6b7280">:8084 배달</text>
-  <rect x="360" y="588" width="540" height="68" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
-  <rect x="360" y="588" width="540" height="20" fill="#ff7849"/>
-  <text x="630" y="603" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 모든 메시지가 토픽을 거쳐 비동기로 전달</text>
+  <rect x="360" y="588" width="580" height="68" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="360" y="588" width="580" height="20" fill="#ff7849"/>
+  <text x="650" y="603" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 모든 메시지가 토픽을 거쳐 비동기로 전달</text>
   <rect x="410" y="618" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M410 618 L448 631 L486 618" fill="none" stroke="#ff7849" stroke-width="1"/>
   <rect x="530" y="618" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
@@ -924,7 +924,7 @@ minikube image build -t metacoding/orchestrator:2 ./orchestrator
 Kafka가 준비되기 전에 서비스가 시작되면 연결 오류가 발생합니다. Kafka를 먼저 배포하고 ready 상태를 확인한 다음 나머지를 배포합니다.
 
 ```bash [터미널] 배포 순서 (Kafka 우선)
-# 1. 네임스페이스 생성 (최초 1회)
+# 1. 네임스페이스 생성
 kubectl create namespace metacoding
 
 # 2. Kafka 먼저 배포
@@ -1044,7 +1044,7 @@ GET http://127.0.0.1:80/api/orders/4
 
 ### 4.6.5 롤백 확인 - 품절 상품 주문
 
-iPhone 15(productId=2, 재고 0)를 주문하면 product-service에서 재고 감소가 실패하고, orchestrator가 자동으로 롤백을 시작합니다.
+동기 방식에서는 품절 상품이 첫 단계에서 막혀 되돌릴 것이 없었습니다. 반면 비동기 방식에서는 주문이 PENDING으로 먼저 저장됩니다. 그래서 재고 감소가 실패하면 orchestrator가 그 주문을 취소하는 롤백을 시작합니다. iPhone 15(productId=2, 재고 0)로 확인합니다.
 
 ```json
 POST http://127.0.0.1:80/api/orders
@@ -1072,14 +1072,14 @@ GET http://127.0.0.1:80/api/orders/5
 테스트가 끝났으면 이번 챕터에서 실행한 리소스를 정리합니다.
 
 ```bash [터미널] 리소스 정리
-kubectl delete all --all -n metacoding
+kubectl delete namespace metacoding
 ```
 
 상품·배달을 직접 호출하고 실패까지 떠안던 주문 서비스는 이제 주문을 저장하고 이벤트 하나만 발행합니다. 정상 주문은 곧바로 PENDING으로 응답한 뒤 비동기로 COMPLETED가 되고, 품절 주문은 orchestrator가 알아서 CANCELLED로 되돌립니다. 직접 호출이 사라지면서 서비스 사이의 강한 결합이 풀렸고, try/catch 보상 블록도 함께 없어졌습니다.
 
 며칠 뒤, 같은 동료가 책상 앞에 다시 섰습니다. 표정에서 불만이 묻어났습니다.
 
-**동료**: "어제 주문하면서 이상한 게 두 가지 있었는데요."
+**동료**: "어제 직접 주문해 봤는데, 좀 이상한 게 있었어요."
 
 :::remember
 **이것만은 기억하자**
@@ -1089,5 +1089,5 @@ kubectl delete all --all -n metacoding
 - `ConcurrentHashMap`으로 주문별 진행 상태를 추적하고, 실패 시 이미 처리된 단계만 자동 롤백합니다.
 - order-service는 주문 생성 즉시 `PENDING` 상태로 반환하고, 처리 완료 후 `COMPLETED`로 갱신됩니다.
 
-다음 챕터에서는 이 두 가지를 해결합니다. 배달 기사가 완료 API를 호출하여 실제 배달 완료를 처리하고, WebSocket으로 클라이언트에게 주문 완료를 실시간 Push로 알립니다.
+다음 챕터에서는 이를 해결합니다. 배달 기사가 완료 API를 호출하여 실제 배달 완료를 처리하고, WebSocket으로 클라이언트에게 주문 완료를 실시간 Push로 알립니다.
 :::
