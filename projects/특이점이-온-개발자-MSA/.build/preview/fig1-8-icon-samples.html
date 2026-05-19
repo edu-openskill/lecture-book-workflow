@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 1-8 — 아이콘 일러스트 샘플</title>
+<style>
+  :root{
+    --accent:#4f46e5; --accent-deep:#3730a3; --accent-bg:#eef2ff;
+    --warm:#ff7849; --warm-bg:#fff4ed; --warm-deep:#9a3412;
+    --heading:#0f172a; --txt:#1e293b; --txt2:#475569; --muted:#6b7280;
+    --border:#e2e8f0; --border2:#cbd5e1;
+  }
+  body{font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;background:#f8fafc;color:var(--txt);margin:0;padding:40px 24px 80px;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  h1{font-size:22px;color:var(--heading);margin:0 0 6px;}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:34px;}
+  .sample{background:#fff;border:1px solid var(--border);border-radius:14px;padding:26px 28px 30px;margin-bottom:34px;}
+  .sample > h2{font-size:16px;color:var(--accent-deep);margin:0 0 4px;}
+  .sample > .desc{font-size:12.5px;color:var(--txt2);margin:0 0 18px;line-height:1.5;}
+  .cap{text-align:center;font-size:12px;color:var(--muted);margin-top:14px;font-style:italic;}
+  .svg-figure{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;}
+  svg{display:block;width:100%;height:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>그림 1-8 · 학습 흐름 — 아이콘 일러스트 샘플</h1>
+  <p class="sub">아이콘: CH02 연결 · CH03 계층 구조 · CH04 메시지 봉투 · CH05 초인종(5장 푸시 비유와 동일 계열). 단계 사이 라벨 = 앞 챕터의 한계.</p>
+
+  <!-- 공통 아이콘 정의 -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <!-- CH02 연결: 두 노드 + 링크 -->
+      <g id="ic-link">
+        <circle cx="7" cy="24" r="6" fill="none" stroke="#4f46e5" stroke-width="2.2"/>
+        <circle cx="33" cy="24" r="6" fill="none" stroke="#4f46e5" stroke-width="2.2"/>
+        <line x1="13" y1="24" x2="27" y2="24" stroke="#4f46e5" stroke-width="2.2"/>
+      </g>
+      <!-- CH03 계층 구조: 동심 사각(클린 아키텍처) -->
+      <g id="ic-layers">
+        <rect x="4"  y="9"  width="32" height="30" rx="4" fill="none" stroke="#4f46e5" stroke-width="2.2"/>
+        <rect x="11" y="15" width="18" height="18" rx="3" fill="none" stroke="#4f46e5" stroke-width="2"/>
+        <rect x="17" y="20" width="6"  height="8"  rx="1.5" fill="#4f46e5"/>
+      </g>
+      <!-- CH04 메시지 봉투 + 분기 화살표 -->
+      <g id="ic-msg">
+        <rect x="4" y="12" width="30" height="22" rx="3" fill="none" stroke="#4f46e5" stroke-width="2.2"/>
+        <path d="M4 14 L19 26 L34 14" fill="none" stroke="#4f46e5" stroke-width="2.2"/>
+      </g>
+      <!-- CH05 초인종 (5장 푸시 비유) -->
+      <g id="ic-bell">
+        <path d="M20 7 C13 7 11 13 11 19 C11 27 7 29 7 31 L33 31 C33 29 29 27 29 19 C29 13 27 7 20 7 Z" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M16 34 C16 38 24 38 24 34" fill="none" stroke="#4f46e5" stroke-width="2.2"/>
+        <line x1="20" y1="4" x2="20" y2="7" stroke="#4f46e5" stroke-width="2.2"/>
+      </g>
+      <!-- 등반 인물 -->
+      <g id="ic-hiker">
+        <circle cx="9" cy="6" r="5" fill="#ff7849"/>
+        <path d="M9 11 L9 24" stroke="#ff7849" stroke-width="3.4" stroke-linecap="round"/>
+        <path d="M9 15 L19 11 M9 16 L1 21" stroke="#ff7849" stroke-width="3.4" stroke-linecap="round"/>
+        <path d="M9 24 L17 31 M9 24 L3 33" stroke="#ff7849" stroke-width="3.4" stroke-linecap="round"/>
+      </g>
+    </defs>
+  </svg>
+
+  <!-- ===== A+ 계단 일러스트형 ===== -->
+  <div class="sample">
+    <h2>A+ · 계단 일러스트형 (아이콘 + 등반 인물)</h2>
+    <p class="desc">계단 4단 + 카드마다 아이콘 + 위로 올라가는 사람. "한 단계씩 올라간다"가 그림으로 보임. 라이저에 앞 단계의 한계.</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1140 600" role="img" aria-label="아이콘이 든 네 단계 계단을 사람이 올라간다. CH02 연결, CH03 계층구조, CH04 메시지, CH05 초인종.">
+      <defs><marker id="aUp" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker></defs>
+      <rect x="40"  y="430" width="250" height="140" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="310" y="330" width="250" height="240" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <rect x="580" y="230" width="250" height="340" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="850" y="130" width="250" height="440" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <line x1="20" y1="570" x2="1120" y2="570" stroke="#cbd5e1" stroke-width="1.4"/>
+
+      <!-- 카드 1 CH02 -->
+      <rect x="52" y="436" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-link" x="64" y="452"/>
+      <text x="120" y="466" font-size="12" font-weight="700" fill="#6b7280">CH02 · 동기</text>
+      <text x="120" y="488" font-size="14" font-weight="700" fill="#0f172a">REST + 보상 Tx</text>
+      <text x="64" y="524" font-size="11.5" fill="#475569">서비스를 직접 연결한다</text>
+      <!-- 카드 2 CH03 -->
+      <rect x="322" y="336" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-layers" x="334" y="350"/>
+      <text x="390" y="366" font-size="12" font-weight="700" fill="#6b7280">CH03 · 운영</text>
+      <text x="390" y="388" font-size="14" font-weight="700" fill="#0f172a">DDD + K8s</text>
+      <text x="334" y="424" font-size="11.5" fill="#475569">구조를 다듬어 운영에 올린다</text>
+      <!-- 카드 3 CH04 -->
+      <rect x="592" y="236" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-msg" x="604" y="252"/>
+      <text x="660" y="266" font-size="12" font-weight="700" fill="#6b7280">CH04 · 비동기</text>
+      <text x="660" y="288" font-size="14" font-weight="700" fill="#0f172a">Kafka + Saga</text>
+      <text x="604" y="324" font-size="11.5" fill="#475569">메시지로 서비스를 분리한다</text>
+      <!-- 카드 4 CH05 -->
+      <rect x="862" y="136" width="226" height="104" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+      <use href="#ic-bell" x="876" y="148"/>
+      <text x="930" y="164" font-size="12" font-weight="700" fill="#3730a3">CH05 · 실시간</text>
+      <text x="930" y="186" font-size="14" font-weight="700" fill="#0f172a">WebSocket Push</text>
+      <text x="878" y="222" font-size="11.5" fill="#475569">사용자에게 즉시 알린다</text>
+
+      <!-- 상승 화살표 + 한계 라벨 -->
+      <path d="M290 488 H300 V392 H322" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#aUp)"/>
+      <rect x="296" y="540" width="270" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="431" y="557" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ① 코드가 뒤엉켜 운영이 버겁다</text>
+      <path d="M560 388 H572 V292 H592" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#aUp)"/>
+      <rect x="566" y="452" width="300" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="716" y="469" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ② 동기 호출이 서로를 기다리다 멈춘다</text>
+      <path d="M830 288 H842 V192 H862" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#aUp)"/>
+      <rect x="836" y="356" width="252" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="962" y="373" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ③ 완료를 사용자가 모른다</text>
+
+      <!-- 등반 인물 (3단 올라가는 중) -->
+      <use href="#ic-hiker" x="760" y="196" transform="scale(1.6)" transform-origin="760 196"/>
+
+      <text x="40" y="596" font-size="12" fill="#6b7280" font-style="italic">한 계단씩 올라가며, 각 단계는 앞 단계의 한계에서 출발한다</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- ===== B+ 누적 빌드업 (아이콘) ===== -->
+  <div class="sample">
+    <h2>B+ · 누적 빌드업형 (아이콘)</h2>
+    <p class="desc">토대(CH02)에서 꼭대기(CH05)로 한 층씩 쌓이는 탑. 각 층에 아이콘. "이전을 안고 누적 성장".</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1000 560" role="img" aria-label="아이콘이 든 네 층 누적 탑. 바닥 CH02 토대에서 위로 CH05 꼭대기까지 쌓인다.">
+      <defs><marker id="bUp" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker></defs>
+      <rect x="120" y="430" width="760" height="86" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-link" x="150" y="451"/>
+      <text x="210" y="466" font-size="13" font-weight="700" fill="#0f172a">CH02 · 서비스 연결 (REST + 보상 Tx)</text>
+      <text x="210" y="491" font-size="12" fill="#475569">4개 서비스를 직접 연결 — 시스템의 토대</text>
+      <rect x="800" y="447" width="70" height="22" rx="11" fill="#f1f5f9" stroke="#cbd5e1"/><text x="835" y="462" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">토대</text>
+
+      <rect x="150" y="336" width="700" height="86" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-layers" x="180" y="356"/>
+      <text x="240" y="372" font-size="13" font-weight="700" fill="#0f172a">CH03 · 구조·운영 (DDD + Clean + K8s)</text>
+      <text x="240" y="397" font-size="12" fill="#475569">토대를 다듬어 운영 환경에 올림</text>
+
+      <rect x="180" y="242" width="640" height="86" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-msg" x="210" y="264"/>
+      <text x="270" y="278" font-size="13" font-weight="700" fill="#0f172a">CH04 · 비동기 (Kafka + Saga)</text>
+      <text x="270" y="303" font-size="12" fill="#475569">메시지로 서비스를 분리</text>
+
+      <rect x="210" y="148" width="580" height="86" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+      <use href="#ic-bell" x="240" y="160"/>
+      <text x="300" y="184" font-size="13" font-weight="700" fill="#3730a3">CH05 · 실시간 (WebSocket Push)</text>
+      <text x="300" y="209" font-size="12" fill="#475569">완성된 시스템 — 사용자에게 즉시 알림</text>
+      <rect x="700" y="160" width="70" height="22" rx="11" fill="#fff" stroke="#4f46e5"/><text x="735" y="175" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">꼭대기</text>
+
+      <line x1="70" y1="510" x2="70" y2="170" stroke="#4f46e5" stroke-width="2.4" marker-end="url(#bUp)"/>
+      <text x="52" y="345" font-size="13" font-weight="700" fill="#4f46e5" transform="rotate(-90 52 345)">한 층씩 쌓여 성장</text>
+
+      <text x="120" y="546" font-size="12" fill="#6b7280" font-style="italic">같은 시스템에 한 층씩 쌓여 높아진다 — 이전 것을 안고 성장한다</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+</div>
+</body>
+</html>

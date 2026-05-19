@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 1-8 — 전체 방향 비교</title>
+<style>
+  :root{
+    --accent:#4f46e5; --accent-deep:#3730a3; --accent-bg:#eef2ff;
+    --warm:#ff7849; --warm-bg:#fff4ed; --warm-deep:#9a3412;
+    --heading:#0f172a; --txt2:#475569; --muted:#6b7280;
+    --border:#e2e8f0; --border2:#cbd5e1;
+  }
+  body{font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;background:#f8fafc;color:#1e293b;margin:0;padding:40px 24px 80px;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  h1{font-size:22px;color:var(--heading);margin:0 0 6px;}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:34px;}
+  .sample{background:#fff;border:1px solid var(--border);border-radius:14px;padding:24px 26px 28px;margin-bottom:30px;}
+  .sample > h2{font-size:16px;color:var(--accent-deep);margin:0 0 4px;}
+  .sample > .desc{font-size:12.5px;color:var(--txt2);margin:0 0 16px;line-height:1.5;}
+  .cap{text-align:center;font-size:12px;color:var(--muted);margin-top:12px;font-style:italic;}
+  .svg-figure{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;}
+  svg{display:block;width:100%;height:auto;}
+  .evolve-flow{display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr 24px 1fr;align-items:stretch;column-gap:4px;padding:12px 4px;background:#fff;border:1px solid var(--border);border-radius:12px;}
+  .ev-card{border:1px solid var(--border);border-radius:10px;padding:16px 12px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .ev-step{width:28px;height:28px;border-radius:50%;background:var(--warm);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+  .ev-meta{font-size:10.5px;color:var(--muted);font-weight:600;}
+  .ev-name{font-size:13.5px;font-weight:700;color:var(--heading);}
+  .ev-add{font-size:11px;color:var(--txt2);margin-top:3px;border-top:1px dashed var(--border);padding-top:7px;width:100%;}
+  .ev-arrow{align-self:center;color:var(--accent);font-size:18px;font-weight:700;opacity:.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>그림 1-8 · 학습 흐름 — 제안 전체 비교</h1>
+  <p class="sub">CH02 연결 → CH03 구조·운영 → CH04 메시지 분리 → CH05 실시간. 단계 사이 = 앞 챕터의 한계. D·E가 "만들면서 완성" 의도에 맞춘 신규안.</p>
+
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <g id="ic-link"><circle cx="7" cy="24" r="6" fill="none" stroke="#4f46e5" stroke-width="2.2"/><circle cx="33" cy="24" r="6" fill="none" stroke="#4f46e5" stroke-width="2.2"/><line x1="13" y1="24" x2="27" y2="24" stroke="#4f46e5" stroke-width="2.2"/></g>
+    <g id="ic-layers"><rect x="4" y="9" width="32" height="30" rx="4" fill="none" stroke="#4f46e5" stroke-width="2.2"/><rect x="11" y="15" width="18" height="18" rx="3" fill="none" stroke="#4f46e5" stroke-width="2"/><rect x="17" y="20" width="6" height="8" rx="1.5" fill="#4f46e5"/></g>
+    <g id="ic-msg"><rect x="4" y="12" width="30" height="22" rx="3" fill="none" stroke="#4f46e5" stroke-width="2.2"/><path d="M4 14 L19 26 L34 14" fill="none" stroke="#4f46e5" stroke-width="2.2"/></g>
+    <g id="ic-bell"><path d="M20 7 C13 7 11 13 11 19 C11 27 7 29 7 31 L33 31 C33 29 29 27 29 19 C29 13 27 7 20 7 Z" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linejoin="round"/><path d="M16 34 C16 38 24 38 24 34" fill="none" stroke="#4f46e5" stroke-width="2.2"/><line x1="20" y1="4" x2="20" y2="7" stroke="#4f46e5" stroke-width="2.2"/></g>
+    <g id="ic-hiker"><circle cx="9" cy="6" r="5" fill="#ff7849"/><path d="M9 11 L9 24" stroke="#ff7849" stroke-width="3.4" stroke-linecap="round"/><path d="M9 15 L19 11 M9 16 L1 21" stroke="#ff7849" stroke-width="3.4" stroke-linecap="round"/><path d="M9 24 L17 31 M9 24 L3 33" stroke="#ff7849" stroke-width="3.4" stroke-linecap="round"/></g>
+    <marker id="up" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs></svg>
+
+  <!-- 원본 -->
+  <div class="sample">
+    <h2>현재 (원본)</h2>
+    <p class="desc">평평한 가로 카드. 상승·완성 느낌 없음.</p>
+    <div class="evolve-flow">
+      <div class="ev-card"><div class="ev-step">1</div><div class="ev-meta">CH02 · 동기</div><div class="ev-name">REST + 보상 Tx</div><div class="ev-add">서비스를 직접 연결</div></div>
+      <div class="ev-arrow">→</div>
+      <div class="ev-card"><div class="ev-step">2</div><div class="ev-meta">CH03 · 운영</div><div class="ev-name">DDD + K8s</div><div class="ev-add">구조 정리 후 운영</div></div>
+      <div class="ev-arrow">→</div>
+      <div class="ev-card"><div class="ev-step">3</div><div class="ev-meta">CH04 · 비동기</div><div class="ev-name">Kafka + Saga</div><div class="ev-add">메시지로 분리</div></div>
+      <div class="ev-arrow">→</div>
+      <div class="ev-card"><div class="ev-step">4</div><div class="ev-meta">CH05 · 실시간</div><div class="ev-name">WebSocket</div><div class="ev-add">즉시 알림</div></div>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- A 계단 -->
+  <div class="sample">
+    <h2>A · 계단 상승형 (아이콘 + 등반)</h2>
+    <p class="desc">한 칸씩 올라가는 계단. 라이저에 앞 단계 한계. "단계적 상승"이 강점.</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1140 590" role="img" aria-label="네 단계 계단을 사람이 올라간다.">
+      <rect x="40" y="430" width="250" height="140" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="310" y="330" width="250" height="240" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <rect x="580" y="230" width="250" height="340" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="850" y="130" width="250" height="440" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <line x1="20" y1="570" x2="1120" y2="570" stroke="#cbd5e1" stroke-width="1.4"/>
+      <rect x="52" y="436" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-link" x="64" y="452"/><text x="120" y="466" font-size="12" font-weight="700" fill="#6b7280">CH02 · 동기</text><text x="120" y="488" font-size="14" font-weight="700" fill="#0f172a">REST + 보상 Tx</text><text x="64" y="524" font-size="11.5" fill="#475569">서비스를 직접 연결한다</text>
+      <rect x="322" y="336" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-layers" x="334" y="350"/><text x="390" y="366" font-size="12" font-weight="700" fill="#6b7280">CH03 · 운영</text><text x="390" y="388" font-size="14" font-weight="700" fill="#0f172a">DDD + K8s</text><text x="334" y="424" font-size="11.5" fill="#475569">구조를 다듬어 운영에 올린다</text>
+      <rect x="592" y="236" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-msg" x="604" y="252"/><text x="660" y="266" font-size="12" font-weight="700" fill="#6b7280">CH04 · 비동기</text><text x="660" y="288" font-size="14" font-weight="700" fill="#0f172a">Kafka + Saga</text><text x="604" y="324" font-size="11.5" fill="#475569">메시지로 서비스를 분리한다</text>
+      <rect x="862" y="136" width="226" height="104" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+      <use href="#ic-bell" x="876" y="148"/><text x="930" y="164" font-size="12" font-weight="700" fill="#3730a3">CH05 · 실시간</text><text x="930" y="186" font-size="14" font-weight="700" fill="#0f172a">WebSocket Push</text><text x="878" y="222" font-size="11.5" fill="#475569">사용자에게 즉시 알린다</text>
+      <path d="M290 488 H300 V392 H322" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#up)"/>
+      <rect x="296" y="540" width="270" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/><text x="431" y="557" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ① 코드가 뒤엉켜 운영이 버겁다</text>
+      <path d="M560 388 H572 V292 H592" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#up)"/>
+      <rect x="566" y="452" width="300" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/><text x="716" y="469" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ② 동기 호출이 서로를 기다리다 멈춘다</text>
+      <path d="M830 288 H842 V192 H862" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#up)"/>
+      <rect x="836" y="356" width="252" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/><text x="962" y="373" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ③ 완료를 사용자가 모른다</text>
+      <use href="#ic-hiker" x="760" y="196" transform="scale(1.6)" transform-origin="760 196"/>
+      <text x="40" y="590" font-size="12" fill="#6b7280" font-style="italic">한 계단씩 올라가며, 각 단계는 앞 단계의 한계에서 출발한다</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- B 누적 -->
+  <div class="sample">
+    <h2>B · 누적 빌드업형 (아이콘)</h2>
+    <p class="desc">토대→꼭대기로 한 층씩 쌓이는 탑. "이전을 안고 누적".</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1000 540" role="img" aria-label="네 층 누적 탑.">
+      <rect x="120" y="420" width="760" height="84" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-link" x="150" y="440"/><text x="210" y="455" font-size="13" font-weight="700" fill="#0f172a">CH02 · 서비스 연결 (REST + 보상 Tx)</text><text x="210" y="480" font-size="12" fill="#475569">4개 서비스를 직접 연결 — 토대</text>
+      <rect x="800" y="437" width="70" height="22" rx="11" fill="#f1f5f9" stroke="#cbd5e1"/><text x="835" y="452" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">토대</text>
+      <rect x="150" y="328" width="700" height="84" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-layers" x="180" y="346"/><text x="240" y="362" font-size="13" font-weight="700" fill="#0f172a">CH03 · 구조·운영 (DDD + Clean + K8s)</text><text x="240" y="387" font-size="12" fill="#475569">토대를 다듬어 운영 환경에 올림</text>
+      <rect x="180" y="236" width="640" height="84" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-msg" x="210" y="256"/><text x="270" y="270" font-size="13" font-weight="700" fill="#0f172a">CH04 · 비동기 (Kafka + Saga)</text><text x="270" y="295" font-size="12" fill="#475569">메시지로 서비스를 분리</text>
+      <rect x="210" y="144" width="580" height="84" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+      <use href="#ic-bell" x="240" y="156"/><text x="300" y="178" font-size="13" font-weight="700" fill="#3730a3">CH05 · 실시간 (WebSocket Push)</text><text x="300" y="203" font-size="12" fill="#475569">완성 — 사용자에게 즉시 알림</text>
+      <rect x="700" y="156" width="70" height="22" rx="11" fill="#fff" stroke="#4f46e5"/><text x="735" y="171" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">꼭대기</text>
+      <line x1="70" y1="500" x2="70" y2="166" stroke="#4f46e5" stroke-width="2.4" marker-end="url(#up)"/>
+      <text x="52" y="338" font-size="13" font-weight="700" fill="#4f46e5" transform="rotate(-90 52 338)">한 층씩 쌓여 성장</text>
+      <text x="120" y="530" font-size="12" fill="#6b7280" font-style="italic">같은 시스템에 한 층씩 쌓여 높아진다 — 이전 것을 안고 성장</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- D 건물 완공형 -->
+  <div class="sample">
+    <h2>D · 건물 완공형 (신규 · 추천)</h2>
+    <p class="desc">토대 → 골조 → 배관(메시지) → 마감·초인종. 같은 건물이 챕터마다 더 지어져 마지막에 완공. "만들면서 완성"에 가장 직결 (리서치 1번 brick-by-brick + 책 닫기 문장).</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1140 470" role="img" aria-label="건물이 네 단계로 지어진다. 토대, 골조, 배관, 완공.">
+      <line x1="10" y1="362" x2="1130" y2="362" stroke="#cbd5e1" stroke-width="1.6"/>
+      <!-- 패널 1 CH02 토대 -->
+      <g>
+        <rect x="40" y="68" width="216" height="300" rx="8" fill="#fff" stroke="#e2e8f0"/>
+        <rect x="78" y="338" width="140" height="22" rx="2" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="90" y="318" width="22" height="20" fill="none" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="118" y="318" width="22" height="20" fill="none" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="146" y="318" width="22" height="20" fill="none" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="174" y="318" width="22" height="20" fill="none" stroke="#4f46e5" stroke-width="1.6"/>
+        <circle cx="64" cy="92" r="13" fill="#ff7849"/><text x="64" y="97" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">1</text>
+        <text x="86" y="96" font-size="12.5" font-weight="700" fill="#6b7280">CH02 · 동기</text>
+        <text x="148" y="290" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">토대를 놓는다</text>
+        <text x="148" y="312" text-anchor="middle" font-size="11.5" fill="#475569">서비스 4개를 직접 연결</text>
+      </g>
+      <!-- 패널 2 CH03 골조 -->
+      <g>
+        <rect x="320" y="68" width="216" height="300" rx="8" fill="#fff" stroke="#e2e8f0"/>
+        <rect x="358" y="338" width="140" height="22" rx="2" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="372" y="238" width="112" height="100" fill="none" stroke="#4f46e5" stroke-width="2"/>
+        <line x1="372" y1="288" x2="484" y2="288" stroke="#4f46e5" stroke-width="1.4"/>
+        <line x1="428" y1="238" x2="428" y2="338" stroke="#4f46e5" stroke-width="1.4"/>
+        <circle cx="344" cy="92" r="13" fill="#ff7849"/><text x="344" y="97" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">2</text>
+        <text x="366" y="96" font-size="12.5" font-weight="700" fill="#6b7280">CH03 · 운영</text>
+        <text x="428" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">골조를 세운다</text>
+        <text x="428" y="222" text-anchor="middle" font-size="11.5" fill="#475569">DDD·클린 구조 + K8s</text>
+      </g>
+      <!-- 패널 3 CH04 배관(메시지) -->
+      <g>
+        <rect x="600" y="68" width="216" height="300" rx="8" fill="#fff" stroke="#e2e8f0"/>
+        <rect x="638" y="338" width="140" height="22" rx="2" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="652" y="238" width="112" height="100" fill="none" stroke="#4f46e5" stroke-width="2"/>
+        <line x1="652" y1="288" x2="764" y2="288" stroke="#cbd5e1" stroke-width="1.2"/>
+        <line x1="708" y1="238" x2="708" y2="338" stroke="#cbd5e1" stroke-width="1.2"/>
+        <path d="M664 326 V300 H700 V262 H752" fill="none" stroke="#ff7849" stroke-width="2.4"/>
+        <circle cx="664" cy="326" r="3.4" fill="#ff7849"/><circle cx="752" cy="262" r="3.4" fill="#ff7849"/>
+        <circle cx="624" cy="92" r="13" fill="#ff7849"/><text x="624" y="97" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">3</text>
+        <text x="646" y="96" font-size="12.5" font-weight="700" fill="#6b7280">CH04 · 비동기</text>
+        <text x="708" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">배관을 잇는다</text>
+        <text x="708" y="222" text-anchor="middle" font-size="11.5" fill="#475569">메시지(Kafka)로 분리</text>
+      </g>
+      <!-- 패널 4 CH05 완공 -->
+      <g>
+        <rect x="880" y="68" width="216" height="300" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="918" y="338" width="140" height="22" rx="2" fill="#fff" stroke="#4f46e5" stroke-width="1.6"/>
+        <rect x="932" y="238" width="112" height="100" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+        <polygon points="922,238 988,196 1054,238" fill="#fff" stroke="#4f46e5" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="946" y="262" width="26" height="26" fill="#ff7849" opacity="0.85"/>
+        <rect x="1004" y="262" width="26" height="26" fill="#ff7849" opacity="0.85"/>
+        <rect x="975" y="300" width="26" height="38" fill="none" stroke="#4f46e5" stroke-width="1.6"/>
+        <g transform="translate(978,202) scale(0.7)"><use href="#ic-bell"/></g>
+        <circle cx="904" cy="92" r="13" fill="#ff7849"/><text x="904" y="97" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">4</text>
+        <text x="926" y="96" font-size="12.5" font-weight="700" fill="#3730a3">CH05 · 실시간</text>
+        <rect x="952" y="150" width="72" height="24" rx="12" fill="#4f46e5"/><text x="988" y="167" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">완공</text>
+        <text x="988" y="356" text-anchor="middle" font-size="11.5" fill="#3730a3" font-weight="700">WebSocket 알림으로 마감</text>
+      </g>
+      <!-- 한계 칩 -->
+      <rect x="256" y="392" width="64" height="0"/>
+      <text x="288" y="406" text-anchor="middle" font-size="11" fill="#9a3412">→ 운영이</text><text x="288" y="420" text-anchor="middle" font-size="11" fill="#9a3412">버겁다</text>
+      <text x="568" y="406" text-anchor="middle" font-size="11" fill="#9a3412">→ 서로</text><text x="568" y="420" text-anchor="middle" font-size="11" fill="#9a3412">멈춘다</text>
+      <text x="848" y="406" text-anchor="middle" font-size="11" fill="#9a3412">→ 완료를</text><text x="848" y="420" text-anchor="middle" font-size="11" fill="#9a3412">모른다</text>
+      <text x="40" y="452" font-size="12" fill="#6b7280" font-style="italic">같은 건물을 한 단계씩 지어 마지막에 완공한다 — 각 단계는 앞 단계의 한계에서 출발</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- E 퍼즐 완성형 -->
+  <div class="sample">
+    <h2>E · 퍼즐 완성형 (신규)</h2>
+    <p class="desc">완성 시스템 윤곽을 흐리게 깔고, 4조각이 CH02→05 순으로 채워져 마지막에 전체 그림 완성. "완성"의 payoff가 가장 직관적 (리서치 2번 jigsaw).</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1000 470" role="img" aria-label="네 퍼즐 조각이 차례로 맞춰져 완성 시스템 그림이 된다.">
+      <text x="500" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#6b7280">완성 — 주문 시스템 (CH02~05 조각이 맞춰진 전체 그림)</text>
+      <!-- 완성 윤곽 (흐린 배경) -->
+      <rect x="300" y="64" width="400" height="324" rx="12" fill="none" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="6,5"/>
+      <!-- 조각 1 CH02 (좌상) -->
+      <g>
+        <path d="M310 74 H490 V160 a16 16 0 0 1 0 32 V250 H398 a16 16 0 0 1 -32 0 H310 Z" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+        <use href="#ic-link" x="330" y="120"/>
+        <text x="400" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">CH02 · 서비스 연결</text>
+        <text x="400" y="164" text-anchor="middle" font-size="11.5" fill="#475569">REST + 보상 Tx</text>
+        <circle cx="324" cy="90" r="11" fill="#ff7849"/><text x="324" y="94" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">1</text>
+      </g>
+      <!-- 조각 2 CH03 (우상) -->
+      <g>
+        <path d="M490 74 H690 V250 H522 a16 16 0 0 0 -32 0 V192 a16 16 0 0 0 0 -32 Z" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+        <use href="#ic-layers" x="600" y="120"/>
+        <text x="600" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">CH03 · 구조·운영</text>
+        <text x="600" y="174" text-anchor="middle" font-size="11.5" fill="#475569">DDD + K8s</text>
+        <circle cx="676" cy="90" r="11" fill="#ff7849"/><text x="676" y="94" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">2</text>
+      </g>
+      <!-- 조각 3 CH04 (좌하) -->
+      <g>
+        <path d="M310 250 H366 a16 16 0 0 0 32 0 H490 V322 a16 16 0 0 1 0 32 V378 H310 Z" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+        <use href="#ic-msg" x="340" y="290"/>
+        <text x="400" y="318" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">CH04 · 메시지 분리</text>
+        <text x="400" y="342" text-anchor="middle" font-size="11.5" fill="#475569">Kafka + Saga</text>
+        <circle cx="324" cy="366" r="11" fill="#ff7849"/><text x="324" y="370" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">3</text>
+      </g>
+      <!-- 조각 4 CH05 (우하) — 들어오는 중 -->
+      <g transform="translate(40,26)">
+        <path d="M490 322 a16 16 0 0 0 0 -32 V250 H690 V378 H490 Z" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+        <g transform="translate(0,0)"><use href="#ic-bell" x="540" y="288"/></g>
+        <text x="600" y="318" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">CH05 · 실시간 알림</text>
+        <text x="600" y="342" text-anchor="middle" font-size="11.5" fill="#475569">WebSocket Push</text>
+        <circle cx="676" cy="366" r="11" fill="#ff7849"/><text x="676" y="370" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">4</text>
+      </g>
+      <path d="M712 300 C740 300 740 300 760 300" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#up)"/>
+      <text x="785" y="288" font-size="11.5" fill="#3730a3" font-weight="700">마지막</text>
+      <text x="785" y="306" font-size="11.5" fill="#3730a3" font-weight="700">조각이</text>
+      <text x="785" y="324" font-size="11.5" fill="#3730a3" font-weight="700">맞춰진다</text>
+      <text x="40" y="452" font-size="12" fill="#6b7280" font-style="italic">조각을 하나씩 맞춰 완성 시스템 그림을 만든다 — 마지막 CH05가 끼워지면 완성</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+</div>
+</body>
+</html>

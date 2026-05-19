@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 1-8 학습 흐름 — 방향 샘플 비교</title>
+<style>
+  :root{
+    --color-accent:#4f46e5; --color-accent-deep:#3730a3; --color-accent-bg:#eef2ff;
+    --color-accent-warm:#ff7849; --color-accent-warm-bg:#fff4ed;
+    --color-text-heading:#0f172a; --color-text:#1e293b;
+    --color-text-secondary:#475569; --color-text-muted:#6b7280;
+    --color-border:#e2e8f0; --color-border-strong:#cbd5e1;
+  }
+  body{font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;background:#f8fafc;color:var(--color-text);margin:0;padding:40px 24px 80px;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  h1{font-size:22px;color:var(--color-text-heading);margin:0 0 6px;}
+  .sub{color:var(--color-text-muted);font-size:13px;margin-bottom:36px;}
+  .sample{background:#fff;border:1px solid var(--color-border);border-radius:14px;padding:26px 28px 30px;margin-bottom:34px;}
+  .sample > h2{font-size:16px;color:var(--color-accent-deep);margin:0 0 4px;}
+  .sample > .desc{font-size:12.5px;color:var(--color-text-secondary);margin:0 0 18px;line-height:1.5;}
+  .cap{text-align:center;font-size:12px;color:var(--color-text-muted);margin-top:14px;font-style:italic;}
+  .svg-figure{background:#fff;border:1px solid var(--color-border);border-radius:12px;padding:18px;}
+  svg{display:block;width:100%;height:auto;}
+
+  /* 원본 evolve-flow 재현 */
+  .evolve-flow{display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr 24px 1fr;align-items:stretch;column-gap:4px;padding:12px 4px;background:#fff;border:1px solid var(--color-border);border-radius:12px;}
+  .ev-card{border:1px solid var(--color-border);border-radius:10px;padding:18px 12px 16px;text-align:center;background:#fff;display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .ev-step{width:30px;height:30px;border-radius:50%;background:var(--color-accent-warm);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;margin-bottom:4px;}
+  .ev-meta{font-size:10.5px;color:var(--color-text-muted);font-weight:600;}
+  .ev-name{font-size:14px;font-weight:700;color:var(--color-text-heading);line-height:1.2;}
+  .ev-add{font-size:11.5px;color:var(--color-text-secondary);line-height:1.4;margin-top:4px;border-top:1px dashed var(--color-border);padding-top:8px;width:100%;}
+  .ev-arrow{align-self:center;color:var(--color-accent);font-size:18px;font-weight:700;opacity:.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>그림 1-8 · 이 책의 학습 흐름 — 방향 샘플 비교</h1>
+  <p class="sub">CH02 REST/보상Tx → CH03 DDD/K8s → CH04 Kafka/Saga → CH05 WebSocket. 단계 사이 라벨 = 앞 챕터의 한계.</p>
+
+  <!-- ===== 원본 ===== -->
+  <div class="sample">
+    <h2>현재 (원본) — 평평한 가로 카드 + 화살표</h2>
+    <p class="desc">카드 크기·높이가 동일해 "나란히 나열"로 보임. 상승/누적/한계 흐름이 드러나지 않음.</p>
+    <div class="evolve-flow">
+      <div class="ev-card"><div class="ev-step">1</div><div class="ev-meta">CH02 · 동기</div><div class="ev-name">REST + 보상 트랜잭션</div><div class="ev-add">서비스를 직접 연결한다</div></div>
+      <div class="ev-arrow">→</div>
+      <div class="ev-card"><div class="ev-step">2</div><div class="ev-meta">CH03 · 운영</div><div class="ev-name">DDD + Clean Arch + K8s</div><div class="ev-add">도메인을 중심에 두고 운영 환경에 올린다</div></div>
+      <div class="ev-arrow">→</div>
+      <div class="ev-card"><div class="ev-step">3</div><div class="ev-meta">CH04 · 비동기</div><div class="ev-name">Kafka + Saga</div><div class="ev-add">메시지로 서비스를 분리한다</div></div>
+      <div class="ev-arrow">→</div>
+      <div class="ev-card"><div class="ev-step">4</div><div class="ev-meta">CH05 · 실시간</div><div class="ev-name">WebSocket Push</div><div class="ev-add">사용자에게 즉시 알린다</div></div>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- ===== A 계단 상승형 ===== -->
+  <div class="sample">
+    <h2>A · 계단 상승형 (추천)</h2>
+    <p class="desc">한 칸씩 높아지는 계단. 각 계단의 라이저(세로면)에 앞 단계의 한계를 적어, 그 한계가 다음 단으로 밀어 올린다. "단계적으로 올라간다"가 가장 직접적.</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1140 600" role="img" aria-label="네 단계 계단. CH02부터 CH05까지 한 칸씩 높아지며, 각 계단 사이에 앞 챕터의 한계가 적혀 다음 단으로 올라가는 동력이 된다.">
+      <defs>
+        <marker id="aUp" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+      </defs>
+      <!-- 계단 기둥 (연한 배경) -->
+      <rect x="40"  y="430" width="250" height="140" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="310" y="330" width="250" height="240" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <rect x="580" y="230" width="250" height="340" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="850" y="130" width="250" height="440" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <line x1="20" y1="570" x2="1120" y2="570" stroke="#cbd5e1" stroke-width="1.4"/>
+
+      <!-- 카드 4개 (각 계단 위) -->
+      <g>
+        <rect x="52" y="436" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+        <circle cx="78" cy="462" r="14" fill="#ff7849"/><text x="78" y="467" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">1</text>
+        <text x="104" y="460" font-size="12" font-weight="700" fill="#6b7280">CH02 · 동기</text>
+        <text x="68" y="495" font-size="15" font-weight="700" fill="#0f172a">REST + 보상 트랜잭션</text>
+        <text x="68" y="522" font-size="12" fill="#475569">서비스를 직접 연결한다</text>
+      </g>
+      <g>
+        <rect x="322" y="336" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+        <circle cx="348" cy="362" r="14" fill="#ff7849"/><text x="348" y="367" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">2</text>
+        <text x="374" y="360" font-size="12" font-weight="700" fill="#6b7280">CH03 · 운영</text>
+        <text x="338" y="395" font-size="15" font-weight="700" fill="#0f172a">DDD + Clean + K8s</text>
+        <text x="338" y="422" font-size="12" fill="#475569">구조를 다듬어 운영에 올린다</text>
+      </g>
+      <g>
+        <rect x="592" y="236" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+        <circle cx="618" cy="262" r="14" fill="#ff7849"/><text x="618" y="267" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">3</text>
+        <text x="644" y="260" font-size="12" font-weight="700" fill="#6b7280">CH04 · 비동기</text>
+        <text x="608" y="295" font-size="15" font-weight="700" fill="#0f172a">Kafka + Saga</text>
+        <text x="608" y="322" font-size="12" fill="#475569">메시지로 서비스를 분리한다</text>
+      </g>
+      <g>
+        <rect x="862" y="136" width="226" height="104" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+        <circle cx="888" cy="162" r="14" fill="#ff7849"/><text x="888" y="167" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">4</text>
+        <text x="914" y="160" font-size="12" font-weight="700" fill="#3730a3">CH05 · 실시간</text>
+        <text x="878" y="195" font-size="15" font-weight="700" fill="#0f172a">WebSocket Push</text>
+        <text x="878" y="222" font-size="12" fill="#475569">사용자에게 즉시 알린다</text>
+      </g>
+
+      <!-- 상승 화살표 + 한계 라벨 (라이저) -->
+      <path d="M290 488 H300 V392 H322" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#aUp)"/>
+      <rect x="296" y="540" width="270" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="431" y="557" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ① 코드가 뒤엉켜 운영이 버겁다</text>
+
+      <path d="M560 388 H572 V292 H592" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#aUp)"/>
+      <rect x="566" y="452" width="300" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="716" y="469" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ② 동기 호출이 서로를 기다리다 멈춘다</text>
+
+      <path d="M830 288 H842 V192 H862" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#aUp)"/>
+      <rect x="836" y="356" width="252" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="962" y="373" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ③ 완료를 사용자가 모른다</text>
+
+      <text x="40" y="596" font-size="12" fill="#6b7280" font-style="italic">한 계단씩 올라가며, 각 단계는 앞 단계의 한계에서 출발한다</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- ===== B 누적 빌드업형 ===== -->
+  <div class="sample">
+    <h2>B · 누적 빌드업형</h2>
+    <p class="desc">같은 시스템에 챕터마다 한 층씩 쌓여 탑이 높아진다. CH02가 토대, CH05가 꼭대기. "이전을 안고 성장"을 강조 (교체가 아니라 누적).</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1000 560" role="img" aria-label="네 층 누적 탑. 바닥 CH02가 토대, 위로 CH03 CH04 CH05가 한 층씩 쌓여 같은 시스템이 높아진다.">
+      <defs>
+        <marker id="bUp" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+      </defs>
+      <!-- 4개 누적 밴드 (아래가 토대, 위로 갈수록 좁아지는 계단형 탑) -->
+      <rect x="120" y="430" width="760" height="86" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <circle cx="156" cy="473" r="15" fill="#ff7849"/><text x="156" y="478" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">1</text>
+      <text x="184" y="466" font-size="13" font-weight="700" fill="#0f172a">CH02 · 서비스 연결 (REST + 보상 트랜잭션)</text>
+      <text x="184" y="491" font-size="12" fill="#475569">4개 서비스를 직접 연결 — 시스템의 토대</text>
+      <rect x="800" y="447" width="70" height="22" rx="11" fill="#f1f5f9" stroke="#cbd5e1"/><text x="835" y="462" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">토대</text>
+
+      <rect x="150" y="336" width="700" height="86" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <circle cx="186" cy="379" r="15" fill="#ff7849"/><text x="186" y="384" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">2</text>
+      <text x="214" y="372" font-size="13" font-weight="700" fill="#0f172a">CH03 · 구조·운영 (DDD + Clean + K8s)</text>
+      <text x="214" y="397" font-size="12" fill="#475569">토대를 다듬어 운영 환경에 올림</text>
+
+      <rect x="180" y="242" width="640" height="86" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <circle cx="216" cy="285" r="15" fill="#ff7849"/><text x="216" y="290" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">3</text>
+      <text x="244" y="278" font-size="13" font-weight="700" fill="#0f172a">CH04 · 비동기 (Kafka + Saga)</text>
+      <text x="244" y="303" font-size="12" fill="#475569">메시지로 서비스를 분리</text>
+
+      <rect x="210" y="148" width="580" height="86" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+      <circle cx="246" cy="191" r="15" fill="#ff7849"/><text x="246" y="196" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">4</text>
+      <text x="274" y="184" font-size="13" font-weight="700" fill="#3730a3">CH05 · 실시간 (WebSocket Push)</text>
+      <text x="274" y="209" font-size="12" fill="#475569">완성된 시스템 — 사용자에게 즉시 알림</text>
+      <rect x="708" y="160" width="70" height="22" rx="11" fill="#fff" stroke="#4f46e5"/><text x="743" y="175" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">꼭대기</text>
+
+      <!-- 성장 화살표 -->
+      <line x1="70" y1="510" x2="70" y2="170" stroke="#4f46e5" stroke-width="2.4" marker-end="url(#bUp)"/>
+      <text x="52" y="345" font-size="13" font-weight="700" fill="#4f46e5" transform="rotate(-90 52 345)">한 층씩 쌓여 성장</text>
+
+      <text x="120" y="546" font-size="12" fill="#6b7280" font-style="italic">같은 시스템에 한 층씩 쌓여 높아진다 — 이전 것을 안고 성장한다</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+  <!-- ===== C 상승 흐름 보강형 ===== -->
+  <div class="sample">
+    <h2>C · 상승 흐름 보강형 (변경 최소)</h2>
+    <p class="desc">현재 가로 배치를 유지하되 카드를 오른쪽으로 갈수록 살짝 위로, 연결선마다 "앞 단계 한계"를 라벨로 단다. 리스크 최소.</p>
+    <div class="svg-figure">
+    <svg viewBox="0 0 1140 440" role="img" aria-label="네 카드가 오른쪽으로 갈수록 위로 올라가며, 카드 사이 연결선마다 앞 챕터의 한계가 라벨로 붙는다.">
+      <defs>
+        <marker id="cUp" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+      </defs>
+      <g>
+        <rect x="20" y="288" width="234" height="112" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+        <circle cx="48" cy="316" r="14" fill="#ff7849"/><text x="48" y="321" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">1</text>
+        <text x="74" y="314" font-size="12" font-weight="700" fill="#6b7280">CH02 · 동기</text>
+        <text x="38" y="348" font-size="14" font-weight="700" fill="#0f172a">REST + 보상 Tx</text>
+        <text x="38" y="374" font-size="11.5" fill="#475569">서비스를 직접 연결</text>
+      </g>
+      <g>
+        <rect x="316" y="223" width="234" height="112" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+        <circle cx="344" cy="251" r="14" fill="#ff7849"/><text x="344" y="256" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">2</text>
+        <text x="370" y="249" font-size="12" font-weight="700" fill="#6b7280">CH03 · 운영</text>
+        <text x="334" y="283" font-size="14" font-weight="700" fill="#0f172a">DDD + Clean + K8s</text>
+        <text x="334" y="309" font-size="11.5" fill="#475569">구조 정리 후 운영</text>
+      </g>
+      <g>
+        <rect x="612" y="158" width="234" height="112" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+        <circle cx="640" cy="186" r="14" fill="#ff7849"/><text x="640" y="191" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">3</text>
+        <text x="666" y="184" font-size="12" font-weight="700" fill="#6b7280">CH04 · 비동기</text>
+        <text x="630" y="218" font-size="14" font-weight="700" fill="#0f172a">Kafka + Saga</text>
+        <text x="630" y="244" font-size="11.5" fill="#475569">메시지로 분리</text>
+      </g>
+      <g>
+        <rect x="888" y="93" width="234" height="112" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+        <circle cx="916" cy="121" r="14" fill="#ff7849"/><text x="916" y="126" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">4</text>
+        <text x="942" y="119" font-size="12" font-weight="700" fill="#3730a3">CH05 · 실시간</text>
+        <text x="906" y="153" font-size="14" font-weight="700" fill="#0f172a">WebSocket Push</text>
+        <text x="906" y="179" font-size="11.5" fill="#475569">사용자에게 즉시 알림</text>
+      </g>
+
+      <path d="M254 320 C284 320 286 279 316 279" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#cUp)"/>
+      <text x="285" y="372" text-anchor="middle" font-size="11" fill="#9a3412">코드가 뒤엉켜<tspan x="285" dy="14">운영이 버겁다</tspan></text>
+
+      <path d="M550 255 C580 255 582 214 612 214" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#cUp)"/>
+      <text x="581" y="307" text-anchor="middle" font-size="11" fill="#9a3412">동기 호출이<tspan x="581" dy="14">서로를 멈춘다</tspan></text>
+
+      <path d="M846 190 C876 190 878 149 888 149" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#cUp)"/>
+      <text x="867" y="242" text-anchor="middle" font-size="11" fill="#9a3412">완료를<tspan x="867" dy="14">사용자가 모름</tspan></text>
+
+      <text x="20" y="430" font-size="12" fill="#6b7280" font-style="italic">오른쪽으로 갈수록 위로 — 연결선마다 앞 단계의 한계</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+
+</div>
+</body>
+</html>

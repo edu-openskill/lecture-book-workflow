@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 1-8 — A 계단형 (인물 제외) 최종안</title>
+<style>
+  body{font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;background:#f8fafc;color:#1e293b;margin:0;padding:40px 24px 80px;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  h1{font-size:21px;color:#0f172a;margin:0 0 6px;}
+  .sub{color:#6b7280;font-size:13px;margin-bottom:30px;}
+  .sample{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:24px 26px 28px;}
+  .cap{text-align:center;font-size:12px;color:#6b7280;margin-top:12px;font-style:italic;}
+  .svg-figure{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;}
+  svg{display:block;width:100%;height:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>그림 1-8 · A 계단 상승형 — 인물 제외 최종안</h1>
+  <p class="sub">A SVG 그대로, 등반 인물만 제거. 계단 4단 + 아이콘 + 라이저의 "앞 챕터 한계" 유지. 이 형태를 실제 그림 1-8에 넣을 예정.</p>
+
+  <div class="sample">
+    <div class="svg-figure">
+    <svg viewBox="0 0 1140 590" role="img" aria-label="네 단계 계단. CH02 연결, CH03 구조·운영, CH04 메시지 분리, CH05 실시간. 각 단계 사이에 앞 챕터의 한계가 적혀 다음 단으로 올라간다.">
+      <defs>
+        <g id="ic-link"><circle cx="7" cy="24" r="6" fill="none" stroke="#4f46e5" stroke-width="2.2"/><circle cx="33" cy="24" r="6" fill="none" stroke="#4f46e5" stroke-width="2.2"/><line x1="13" y1="24" x2="27" y2="24" stroke="#4f46e5" stroke-width="2.2"/></g>
+        <g id="ic-layers"><rect x="4" y="9" width="32" height="30" rx="4" fill="none" stroke="#4f46e5" stroke-width="2.2"/><rect x="11" y="15" width="18" height="18" rx="3" fill="none" stroke="#4f46e5" stroke-width="2"/><rect x="17" y="20" width="6" height="8" rx="1.5" fill="#4f46e5"/></g>
+        <g id="ic-msg"><rect x="4" y="12" width="30" height="22" rx="3" fill="none" stroke="#4f46e5" stroke-width="2.2"/><path d="M4 14 L19 26 L34 14" fill="none" stroke="#4f46e5" stroke-width="2.2"/></g>
+        <g id="ic-bell"><path d="M20 7 C13 7 11 13 11 19 C11 27 7 29 7 31 L33 31 C33 29 29 27 29 19 C29 13 27 7 20 7 Z" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linejoin="round"/><path d="M16 34 C16 38 24 38 24 34" fill="none" stroke="#4f46e5" stroke-width="2.2"/><line x1="20" y1="4" x2="20" y2="7" stroke="#4f46e5" stroke-width="2.2"/></g>
+        <marker id="up" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+      </defs>
+      <rect x="40" y="430" width="250" height="140" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="310" y="330" width="250" height="240" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <rect x="580" y="230" width="250" height="340" rx="6" fill="#f1f5f9" stroke="#e2e8f0"/>
+      <rect x="850" y="130" width="250" height="440" rx="6" fill="#eef2ff" stroke="#e0e7ff"/>
+      <line x1="20" y1="570" x2="1120" y2="570" stroke="#cbd5e1" stroke-width="1.4"/>
+      <rect x="52" y="436" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-link" x="64" y="452"/><text x="120" y="466" font-size="12" font-weight="700" fill="#6b7280">CH02 · 동기</text><text x="120" y="488" font-size="14" font-weight="700" fill="#0f172a">REST + 보상 Tx</text><text x="64" y="524" font-size="11.5" fill="#475569">서비스를 직접 연결한다</text>
+      <rect x="322" y="336" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-layers" x="334" y="350"/><text x="390" y="366" font-size="12" font-weight="700" fill="#6b7280">CH03 · 운영</text><text x="390" y="388" font-size="14" font-weight="700" fill="#0f172a">DDD + K8s</text><text x="334" y="424" font-size="11.5" fill="#475569">구조를 다듬어 운영에 올린다</text>
+      <rect x="592" y="236" width="226" height="104" rx="9" fill="#fff" stroke="#cbd5e1" stroke-width="1.6"/>
+      <use href="#ic-msg" x="604" y="252"/><text x="660" y="266" font-size="12" font-weight="700" fill="#6b7280">CH04 · 비동기</text><text x="660" y="288" font-size="14" font-weight="700" fill="#0f172a">Kafka + Saga</text><text x="604" y="324" font-size="11.5" fill="#475569">메시지로 서비스를 분리한다</text>
+      <rect x="862" y="136" width="226" height="104" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+      <use href="#ic-bell" x="876" y="148"/><text x="930" y="164" font-size="12" font-weight="700" fill="#3730a3">CH05 · 실시간</text><text x="930" y="186" font-size="14" font-weight="700" fill="#0f172a">WebSocket Push</text><text x="878" y="222" font-size="11.5" fill="#475569">사용자에게 즉시 알린다</text>
+      <path d="M290 488 H300 V392 H322" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#up)"/>
+      <rect x="296" y="540" width="270" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/><text x="431" y="557" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ① 코드가 뒤엉켜 운영이 버겁다</text>
+      <path d="M560 388 H572 V292 H592" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#up)"/>
+      <rect x="566" y="452" width="300" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/><text x="716" y="469" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ② 동기 호출이 서로를 기다리다 멈춘다</text>
+      <path d="M830 288 H842 V192 H862" fill="none" stroke="#4f46e5" stroke-width="2" marker-end="url(#up)"/>
+      <rect x="836" y="356" width="252" height="26" rx="13" fill="#fff4ed" stroke="#ff7849" stroke-width="1.2"/><text x="962" y="373" text-anchor="middle" font-size="11.5" fill="#9a3412">한계 ③ 완료를 사용자가 모른다</text>
+      <text x="40" y="590" font-size="12" fill="#6b7280" font-style="italic">한 계단씩 올라가며, 각 단계는 앞 단계의 한계에서 출발한다</text>
+    </svg>
+    </div>
+    <div class="cap">그림 1-8. 이 책의 학습 흐름</div>
+  </div>
+</div>
+</body>
+</html>
