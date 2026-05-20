@@ -355,7 +355,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pv,pvc<span class="w">
 </div>
 <div class="caption">그림 6-8. PV와 PVC가 Bound 상태로 연결된 결과</div>
 <p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결된 것입니다.</p>
-<p class="thought">'창고와 신청서가 엮였다.'</p>
+<p class="thought">'PV와 PVC가 연결됐다.'</p>
 <p>확인을 위해 Pod 내부에서 파일을 하나 생성한 뒤, Pod를 삭제하고 다시 생성해 봅니다.</p>
 <div class="code-block highlight" data-lang="bash">kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>volume-pod<span class="w"> </span>--<span class="w"> </span>/bin/bash<span class="w">      </span><span class="c1"># Pod 안 bash 접속</span>
 touch<span class="w"> </span>/mnt/data/c.txt<span class="w">                          </span><span class="c1"># 마운트 경로에 빈 파일 생성</span>
@@ -381,7 +381,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <div class="caption">그림 6-9. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</div>
 <p>새로운 Pod가 생성되었음에도 c.txt 파일이 보존되어 있습니다.</p>
 <p>Pod는 교체되었으나 파일의 실체는 PV에 존재하므로 데이터가 유지됩니다. PVC가 새로운 Pod에게도 동일한 창고를 연결해 준 결과입니다.</p>
-<p class="thought">'Pod가 새로 만들어져도 창고는 그대로다. 이제 데이터를 유실할 걱정이 없겠구나.'</p>
+<p class="thought">'Pod가 새로 만들어져도 Volume은 그대로다. 이제 데이터를 유실할 걱정이 없겠구나.'</p>
 <h2>6.3 통합 실습 — 쿠버네티스 위에 웹사이트 올리기</h2>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
