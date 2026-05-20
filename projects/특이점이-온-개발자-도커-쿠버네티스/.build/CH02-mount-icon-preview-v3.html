@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>마운트 - 대안 ④ Docker 영역 안/밖 시안</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: #f5f5f7;
+    padding: 24px;
+    color: #1f2937;
+    line-height: 1.6;
+  }
+  h1 { font-size: 22px; margin-bottom: 6px; }
+  .sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+  .note {
+    background: #eef2ff;
+    border-left: 3px solid #4f46e5;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #3730a3;
+    margin-bottom: 24px;
+  }
+  .option {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .option-head {
+    background: #f0fdf4;
+    border-bottom: 1px solid #bbf7d0;
+    padding: 12px 18px;
+  }
+  .option-head h2 { font-size: 16px; color: #166534; margin-bottom: 4px; }
+  .option-head .desc { font-size: 13px; color: #15803d; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #e5e7eb; }
+  .fig { background: #fff; padding: 18px; }
+  .fig-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .fig svg { width: 100%; height: auto; max-width: 700px; }
+</style>
+</head>
+<body>
+
+<h1>마운트 시각화 — 대안 ④ "Docker 영역 안/밖"</h1>
+<div class="sub">호스트 PC 박스 안에 Docker 관리 영역을 별도로 그려서, 데이터가 어느 쪽에 위치하느냐로 차이를 보여줍니다.</div>
+
+<div class="note">
+  <strong>핵심 아이디어</strong>: 두 그림 모두 호스트 PC 박스 안에 <strong>"Docker 관리 영역"</strong> 점선 박스(파란색)를 그립니다.<br>
+  · 바인드: 사용자 폴더는 Docker 영역 <strong>밖</strong> (호스트 PC 자유 영역) — 노란 폴더 아이콘<br>
+  · 볼륨: 데이터는 Docker 영역 <strong>안</strong> — 실린더(DB·저장소) 아이콘
+</div>
+
+<div class="option">
+  <div class="option-head">
+    <h2>대안 ④ · Docker 영역 박스 + 폴더/실린더 아이콘</h2>
+    <div class="desc">호스트 PC 안 "어디에 위치하느냐"로 차이를 시각화 (외부 자료의 표준 패턴)</div>
+  </div>
+  <div class="pair">
+
+    <!-- ===== 바인드 ===== -->
+    <div class="fig">
+      <div class="fig-label">대안 ④ · 바인드</div>
+      <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="d4-bm" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+        </defs>
+        <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">바인드 마운트 - 호스트의 일반 폴더와 직접 연결</text>
+
+        <!-- 호스트 PC 외곽 박스 -->
+        <rect x="20" y="50" width="340" height="220" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6" stroke-dasharray="6,4"/>
+        <text x="34" y="72" font-size="11" font-weight="700" fill="#475569">호스트 PC</text>
+
+        <!-- 사용자 자유 영역 라벨 (좌상) -->
+        <text x="40" y="92" font-size="10" font-weight="700" fill="#94a3b8">사용자 자유 영역</text>
+
+        <!-- 노란 폴더 아이콘 + 경로 -->
+        <g transform="translate(50, 110)">
+          <path d="M 0 8 L 20 8 L 26 0 L 70 0 L 70 50 L 0 50 Z" fill="#fbbf24" stroke="#7b341e" stroke-width="1.8"/>
+          <rect x="6" y="16" width="58" height="3" fill="#fde68a"/>
+          <text x="35" y="36" text-anchor="middle" font-size="10" font-weight="800" fill="#7b341e">사용자</text>
+          <text x="35" y="46" text-anchor="middle" font-size="10" font-weight="800" fill="#7b341e">폴더</text>
+        </g>
+        <rect x="135" y="120" width="200" height="22" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+        <text x="235" y="135" text-anchor="middle" font-size="11" font-family="monospace" fill="#0f172a">/c/app/bind</text>
+        <rect x="160" y="148" width="150" height="22" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+        <text x="235" y="163" text-anchor="middle" font-size="11" font-family="monospace" fill="#0f172a">a.txt</text>
+
+        <!-- Docker 관리 영역 (비어있음, 흐릿) -->
+        <rect x="40" y="195" width="300" height="60" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.4" stroke-dasharray="5,3" opacity="0.6"/>
+        <text x="50" y="213" font-size="10" font-weight="700" fill="#4f46e5">Docker 관리 영역</text>
+        <text x="190" y="235" text-anchor="middle" font-size="11" font-style="italic" fill="#6366f1">(이 영역은 사용하지 않습니다)</text>
+
+        <!-- 컨테이너 박스 -->
+        <rect x="450" y="50" width="290" height="220" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="6,4"/>
+        <text x="464" y="72" font-size="11" font-weight="700" fill="#7b341e">컨테이너 (Ubuntu)</text>
+        <rect x="475" y="110" width="250" height="120" rx="6" fill="#fff" stroke="#fdba74" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <text x="600" y="132" text-anchor="middle" font-size="11" font-weight="600" fill="#7b341e">컨테이너 내부 경로</text>
+        <rect x="510" y="150" width="180" height="22" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+        <text x="600" y="165" text-anchor="middle" font-size="11" font-family="monospace" fill="#0f172a">/app/bind</text>
+        <rect x="535" y="180" width="130" height="22" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+        <text x="600" y="195" text-anchor="middle" font-size="11" font-family="monospace" fill="#0f172a">a.txt</text>
+
+        <!-- 화살표 (노란 폴더 → 컨테이너, Docker 영역 우회) -->
+        <line x1="360" y1="135" x2="450" y2="155" stroke="#dc2626" stroke-width="2.2" marker-end="url(#d4-bm)"/>
+        <line x1="450" y1="175" x2="360" y2="155" stroke="#dc2626" stroke-width="2.2" marker-end="url(#d4-bm)"/>
+        <text x="405" y="130" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c">직접 연결</text>
+      </svg>
+    </div>
+
+    <!-- ===== 볼륨 ===== -->
+    <div class="fig">
+      <div class="fig-label">대안 ④ · 볼륨</div>
+      <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="d4-vm" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker>
+        </defs>
+        <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">볼륨 마운트 - Docker 영역 안의 저장소와 연결</text>
+
+        <!-- 호스트 PC 외곽 박스 -->
+        <rect x="20" y="50" width="340" height="220" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6" stroke-dasharray="6,4"/>
+        <text x="34" y="72" font-size="11" font-weight="700" fill="#475569">호스트 PC</text>
+
+        <!-- 사용자 자유 영역 (비어있음) -->
+        <text x="40" y="92" font-size="10" font-weight="700" fill="#94a3b8">사용자 자유 영역</text>
+        <text x="170" y="115" text-anchor="middle" font-size="11" font-style="italic" fill="#94a3b8">(이 영역은 사용하지 않습니다)</text>
+
+        <!-- Docker 관리 영역 (강조) -->
+        <rect x="40" y="135" width="300" height="120" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="2.2" stroke-dasharray="5,3"/>
+        <text x="50" y="153" font-size="11" font-weight="800" fill="#3730a3">Docker 관리 영역</text>
+        <text x="50" y="167" font-size="9" font-family="monospace" fill="#4f46e5">/var/lib/docker/volumes/</text>
+
+        <!-- 실린더 (DB·저장소 모양) -->
+        <g transform="translate(110, 200)">
+          <ellipse cx="0" cy="0" rx="24" ry="6" fill="#fff" stroke="#1d63ed" stroke-width="1.8"/>
+          <path d="M -24 0 L -24 26 Q -24 32 0 32 Q 24 32 24 26 L 24 0" fill="#fff" stroke="#1d63ed" stroke-width="1.8"/>
+          <ellipse cx="0" cy="10" rx="24" ry="5" fill="none" stroke="#1d63ed" stroke-width="0.8" opacity="0.5"/>
+          <ellipse cx="0" cy="20" rx="24" ry="5" fill="none" stroke="#1d63ed" stroke-width="0.8" opacity="0.5"/>
+          <text x="0" y="20" text-anchor="middle" font-size="11" font-weight="800" fill="#1d63ed">볼륨</text>
+        </g>
+        <rect x="160" y="210" width="170" height="22" rx="3" fill="#fff" stroke="#1d63ed" stroke-width="1.2"/>
+        <text x="245" y="225" text-anchor="middle" font-size="11" font-family="monospace" fill="#1d63ed">metacoding-volume</text>
+
+        <!-- 컨테이너 박스 -->
+        <rect x="450" y="50" width="290" height="220" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="6,4"/>
+        <text x="464" y="72" font-size="11" font-weight="700" fill="#7b341e">컨테이너 (Ubuntu)</text>
+        <rect x="475" y="110" width="250" height="120" rx="6" fill="#fff" stroke="#fdba74" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <text x="600" y="132" text-anchor="middle" font-size="11" font-weight="600" fill="#7b341e">컨테이너 내부 경로</text>
+        <rect x="510" y="150" width="180" height="22" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+        <text x="600" y="165" text-anchor="middle" font-size="11" font-family="monospace" fill="#0f172a">/app/volume</text>
+        <rect x="535" y="180" width="130" height="22" rx="3" fill="#fff" stroke="#475569" stroke-width="1.2"/>
+        <text x="600" y="195" text-anchor="middle" font-size="11" font-family="monospace" fill="#0f172a">b.txt</text>
+
+        <!-- 화살표 (실린더 → 컨테이너) -->
+        <line x1="360" y1="195" x2="450" y2="170" stroke="#dc2626" stroke-width="2.2" marker-end="url(#d4-vm)"/>
+        <line x1="450" y1="190" x2="360" y2="215" stroke="#dc2626" stroke-width="2.2" marker-end="url(#d4-vm)"/>
+        <text x="405" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c">Docker 경유</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

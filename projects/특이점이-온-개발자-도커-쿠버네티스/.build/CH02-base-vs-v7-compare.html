@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CH02 베이스 ↔ v7 본문 비교</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: #f5f5f7;
+    margin: 0;
+    padding: 24px;
+    color: #1f2937;
+    line-height: 1.7;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px 0; }
+  .sub { font-size: 13px; color: #64748b; margin-bottom: 18px; }
+  .card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .card-head {
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge.shrink { background: #fee2e2; color: #991b1b; }
+  .badge.image  { background: #d1fae5; color: #065f46; }
+  .badge.mono   { background: #ddd6fe; color: #5b21b6; }
+  .badge.format { background: #f3e8ff; color: #6b21a8; }
+  .badge.tone   { background: #e0e7ff; color: #3730a3; }
+  .badge.user   { background: #fef3c7; color: #92400e; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .col { padding: 16px 18px; font-size: 14px; }
+  .col.base { border-right: 1px solid #e5e7eb; }
+  .col-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .col.v7 .col-label { color: #4f46e5; }
+  .text { white-space: pre-wrap; word-break: keep-all; }
+  .text em { color: #b45309; font-style: italic; }
+  .text strong { color: #0f172a; }
+  .empty { color: #cbd5e1; font-style: italic; font-size: 13px; }
+  .note {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #78350f;
+    margin: 0 0 18px 0;
+  }
+  .nav {
+    position: sticky;
+    top: 0;
+    background: #f5f5f7;
+    padding: 8px 0;
+    margin-bottom: 16px;
+    z-index: 10;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .nav a {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 4px 10px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #475569;
+    font-size: 12px;
+  }
+  .nav a:hover { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  hr.section { border: 0; border-top: 1px dashed #cbd5e1; margin: 28px 0 14px 0; }
+  .section-title { font-size: 16px; font-weight: 700; color: #475569; margin-bottom: 12px; }
+  .summary {
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+  }
+  .summary h3 { font-size: 14px; margin: 0 0 8px 0; color: #3730a3; }
+  .summary li { font-size: 13px; margin-bottom: 4px; }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>CH02 베이스 ↔ v7 본문 비교</h1>
+<div class="sub"><code>chapters/02-Docker-이해하기.md</code> (1795줄) vs <code>chapters/02-Docker-이해하기-v7.md</code> (1894줄) — 차이 자리 14개</div>
+
+<div class="nav">
+  <a href="#s1">머리·2.1</a>
+  <a href="#s2">2.2·2.3</a>
+  <a href="#s3">2.4</a>
+  <a href="#s4">2.5</a>
+  <a href="#s5">2.6</a>
+  <a href="#s6">2.7</a>
+  <a href="#s7">2.8·2.9·기억하자</a>
+</div>
+
+<div class="summary">
+  <h3>한눈에 보는 차이 (3축)</h3>
+  <ul>
+    <li><strong>독백</strong>: v7이 베이스보다 <strong>+6개</strong>. v7만 있는 자리 → 2.1.1 끝(도커 정리) · 2.4.3 끝(글자 하나) · 2.4.5 끝(왜 접속이 안 되지) · 2.5.2 끝(케이블 한 가닥) · 2.5.4 끝(naver.com처럼) · 2.7.4 끝(표현 차이)</li>
+    <li><strong>이미지·SVG</strong>: 베이스만 — <strong>그림 2-12 컨테이너 통신 한눈에 보기</strong> (큰 도입 SVG 신설). v7만 — 그림 2-25 find 결과(베이스 삭제), 격리구조 SVG 재설계(베이스가 호스트 박스 확장)</li>
+    <li><strong>박스 형식</strong>: 베이스가 <code>:::tip</code>·HTML <code>&lt;table&gt;</code> 사용 / v7은 마크다운 표·<code>:::note</code>·<code>:::term-box</code> 더 빈번</li>
+    <li><strong>분량 감소</strong>: 2.5 도입 절 통째 삭제(베이스), 2.4.5 끝 단락 압축, attach vs exec 비교표 삭제(베이스), 그림 2-25 find 실습 삭제(베이스)</li>
+  </ul>
+</div>
+
+<hr class="section" id="s1">
+<div class="section-title">머리 + 2.1 가상화</div>
+
+<div class="card">
+  <div class="card-head">자리 1 · 책 머리 도입 <span class="badge format">형식</span> <span class="badge shrink">분량</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">(<code>:::goal</code> 박스 없음)
+
+토요일 아침이었습니다. 어제 빨간 글씨로 지나갔던 석 줄이 그대로 머릿속에 남아 있었습니다.
+오픈이는 노트북 앞에 앉아 Docker가 환경을 어떻게 다루는지부터 짚어야겠다고 마음먹었습니다.
+
+<em>'명령어를 치기 전에 원리부터 보자.'</em></div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text"><strong>:::goal 박스 (4줄 학습 목표)</strong>
+
+토요일 아침이었습니다. 어제 빨간 글씨로 지나갔던 석 줄(런타임 버전, 시스템 패키지, 설정 경로)이
+그대로 머릿속에 남아 있었습니다. 책상 위에는 지하철에서 적어 둔 노트가 펼쳐진 채였고,
+'컨테이너', 'Docker', 'Kubernetes' 세 단어 옆에는 화살표 하나가 그어져 있었습니다.
+
+오픈이는 커피 한 잔을 들고 노트북 앞에 앉았습니다. 오늘의 목표는 한 줄이었습니다.
+
+<strong>Docker가 무엇이고 어떻게 돌아가는지, 개념과 기본 사용법을 손에 익힌다.</strong>
+
+오늘 안에 다 마칠 수 있을지는 자신이 없었습니다. 그래도 어디까지 갈 수 있는지는
+보고 싶었습니다. 마우스를 설치 버튼 위로 가져갔다가 손을 멈췄습니다.
+
+<em>'명령어부터 치면 그냥 외우게 될 텐데. 원리부터 보자.'</em>
+
+뒤에 나올 명령어를 기계적으로 입력하지 않으려면 이 도구가 환경을 어떤 방식으로
+다루는지부터 짚어 둬야 했습니다.</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">자리 2 · 2.1.1 소제목 + 도입 단락 <span class="badge tone">톤</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text"><strong>### 2.1.1 주방 네 개 대신 주방 하나</strong>
+
+(베이스는 도입 단락이 짧음. 곧장 "한 주방에 요리사 네 명이 있습니다…"로 진입)</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text"><strong>### 2.1.1 한 주방, 네 명의 요리사</strong>
+
+먼저 컨테이너의 원리부터 정리하기로 했습니다. 자료를 한참 읽다 떠오른 장면은
+한 주방에 요리사 여러 명이 들어가는 모습이었습니다.
+
+한 주방에 요리사 네 명이 있습니다. 네 명이 동시에 요리를 하려면 주방을 어떻게 꾸며야 할까요.</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">자리 3 · 2.1.1 끝 독백 <span class="badge mono">독백</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text empty">(독백 없음. 곧장 2.1.2로 넘어감)</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text"><em>'아, 도커는 내 컴퓨터 OS 하나를 여러 컨테이너가 나눠 쓰면서, 각자 격리된 공간에서 따로 돌게 하는 거구나.'</em></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">자리 4 · 2.1.2 박스 형식 <span class="badge format">형식</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text"><code>:::term-box</code> (가상화) → <code>:::tip</code> (하이퍼바이저 vs 컨테이너)
+
+그림 2-4 SVG (컨테이너 가상화 3계층 + Kernel 박스 통합)
+
+<code>:::term-box</code> (커널) → <code>:::note</code> (컨테이너의 격리)</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text"><code>:::term-box</code> (가상화) → <code>:::note</code> (하이퍼바이저 vs 컨테이너)
+
+그림 2-4 SVG (컨테이너 가상화 3계층, Kernel 박스 별도)
+그림 2-5 SVG (커널 도식 — v7 단독)
+
+<code>:::term-box</code> (커널) → <code>:::note</code> (컨테이너의 격리)</div>
+    </div>
+  </div>
+</div>
+
+<hr class="section" id="s2">
+<div class="section-title">2.2 이미지 + 2.3 Docker 설치</div>
+
+<div class="card">
+  <div class="card-head">자리 5 · 2.2 끝 박스 <span class="badge format">형식</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">그림 2-7 (Docker 전체 흐름)
+
+<code>:::tip</code> 이미지 레이어 — "도커 이미지는 OS 전체를 담는 VM 이미지에 비해 훨씬 가볍습니다." 한 줄 추가</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text">그림 2-8 (Docker 전체 흐름) — 같은 그림이지만 번호 +1 (앞에 그림 2-5 커널 도식 신설로 시프트)
+
+<code>:::note</code> 이미지 레이어 — 끝 두 문장 "여기에 커널은 호스트와 공유하므로 이미지에 담지 않습니다. 이런 구조 덕에 도커 이미지는 OS 전체를 담는 VM 이미지에 비해 훨씬 가볍습니다." 포함</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">자리 6 · 2.3 설치 박스 <span class="badge format">형식</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">Docker Desktop 설치는 공식 사이트(...)에서 OS에 맞는 설치 파일을 받아 설치합니다.
+
+<code>:::note</code> <strong>설치 전 확인 사항</strong>
+- Windows: BIOS/UEFI에서 하드웨어 가상화(Intel VT-x 또는 AMD-V) 켜져 있어야…
+- macOS Apple Silicon: Rosetta 2 설치 권장…</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text">Docker Desktop 설치는 공식 사이트(...)에서 OS에 맞는 설치 파일을 받아 기본 옵션대로 설치하면 끝입니다.
+
+(설치 전 확인 사항 박스 <strong>없음</strong>)
+
+<code>:::note</code> Windows와 macOS의 내부 리눅스 — WSL2·경량 Linux VM 설명</div>
+    </div>
+  </div>
+</div>
+
+<hr class="section" id="s3">
+<div class="section-title">2.4 Docker CLI</div>
+
+<div class="card">
+  <div class="card-head">자리 7 · 2.4.3 끝 독백 <span class="badge mono">독백</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text empty">(독백 없음. 곧장 2.4.4로)</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text"><em>'글자 하나로 포그라운드가 백그라운드가 되네.'</em></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">자리 8 · 2.4.5 자주 쓰는 명령어 표 끝 + 2.5 연결 <span class="badge format">형식</span> <span class="badge mono">독백</span> <span class="badge shrink">분량</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">HTML <strong>&lt;table&gt;</strong> 7행 (자주 쓰는 명령어)
+
+(끝 마무리 단락 없음. 곧장 2.5 헤더)
+
+<strong>## 2.5 컨테이너 통신</strong>
+컨테이너 안에서 앱이 돌아도 외부에서 접속할 수 없으면 쓸모가 없습니다. …</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text">마크다운 <strong>표</strong> 7행 + 끝 단락:
+"조회는 ps, 로그는 logs, 내리기는 stop, 지우기는 rm을 씁니다. 이 정도로 묶어두면 필요할 때 찾아 쓸 수 있습니다."
+
+오픈이는 컨테이너 동작 확인을 위해 브라우저에 localhost를 입력했습니다. 화면은 뜨지 않았습니다.
+
+<em>'왜 접속이 안 되지.'</em>
+
+<strong>## 2.5 컨테이너 통신</strong>
+왜 접속이 안 되는지 알려면 컨테이너가 외부와 어떻게 닿는지부터 짚어야 했습니다.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="section" id="s4">
+<div class="section-title">2.5 컨테이너 통신 — 가장 큰 차이 자리</div>
+
+<div class="card">
+  <div class="card-head">자리 9 · 2.5 도입 구조 <span class="badge image">이미지</span> <span class="badge shrink">분량</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text"><strong>[그림 2-12. 컨테이너 통신 한눈에 보기 — 큰 SVG 신설]</strong>
+외부 브라우저 → 호스트 포트 → iptables(DNAT) → docker0 → web/db 컨테이너 통신 종합도
+
+컨테이너 네트워크는 세 가지로 정리됩니다. 컨테이너끼리 연결, 외부 요청 들어오기, 이름으로 찾기.
+
+<strong>### 2.5.1 컨테이너 간 통신</strong> (절 헤더 변경)
+A, B, C 식당이 푸드코트에 입점해 있습니다. …</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text"><strong>### 2.5.1 네트워크 한눈에 보기</strong>
+
+오픈이가 자료를 펼치니 컨테이너 네트워크가 크게 세 가지로 나뉘어 있었습니다.
+
+주방 비유로 가상화를 잡았던 것처럼, 이번에는 식당 여러 개가 모인 <strong>푸드코트</strong>로 그려 봤습니다.
+
+<strong>### 2.5.2 컨테이너끼리 - 주방 모니터와 주문 전광판</strong>
+A, B, C 식당이 …</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">자리 10 · 2.5 격리 구조 SVG <span class="badge image">이미지</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">그림 2-14 격리 구조 SVG — <strong>호스트 박스가 전체로 확장</strong>, Namespace A·B가 호스트 박스 <strong>안</strong> 좌우에 배치, veth pair는 양방향 직선
+
+긴 한 단락이 두 단락으로 분리:
+"컨테이너가 실행되는 순간 컨테이너의 격리된 네트워크 공간(Namespace)이 케이블(veth pair)을 통해 docker0에 연결됩니다.
+
+이제 A 컨테이너가 B의 IP로 호출하면 데이터는 A → docker0 → B 순서로 흐릅니다."</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text">그림 2-14 격리 구조 SVG — <strong>호스트 박스가 중앙에만</strong>, Namespace A·B가 호스트 박스 <strong>바깥</strong> 좌·우, veth pair는 작은 박스 거쳐 곡선 연결
+
+한 단락에 메커니즘 자세히:
+"컨테이너가 뜨는 순간 자기만의 Namespace가 새로 생기고 veth pair 한 쌍이 만들어집니다. 한 끝은 컨테이너 안에, 다른 끝은 호스트의 docker0에 자동으로 꽂히면서 docker0가 빈 IP(172.17.0.x)를 컨테이너에 할당합니다. 이때 A 컨테이너가 B의 IP로 호출하면 데이터는 A → docker0 → B의 경로로 흐릅니다. docker0는 어떤 케이블이 어느 IP에 묶여 있는지 표를 들고 있어서 들어온 데이터를 정확히 그 IP의 케이블로만 흘려보냅니다."</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">자리 11 · 2.5.2~2.5.3 끝 독백 <span class="badge mono">독백</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">그림 2-14 격리 구조 SVG 아래:
+<em>'각 컨테이너는 격리되어 있지만 docker0를 통해 서로 통신하는구나.'</em>
+
+(2.5.4 끝 독백 없음 — naver.com 독백 v7만)</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text">그림 2-14 격리 구조 SVG 아래:
+<em>'각자 격리되어 있는데 케이블 한 가닥으로 다 통하네. 그럼 푸드코트 바깥의 손님은 어떻게 주문하지.'</em>
+
+2.5.4 끝:
+<em>'naver.com처럼 컨테이너도 이름으로 부르면 되는구나. IP는 일일이 외울 필요 없겠네.'</em></div>
+    </div>
+  </div>
+</div>
+
+<hr class="section" id="s5">
+<div class="section-title">2.6 컨테이너 내부</div>
+
+<div class="card">
+  <div class="card-head">자리 12 · 2.6.2 find 실습 <span class="badge image">이미지</span> <span class="badge shrink">분량</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">cat 출력(그림 2-24) 다음 곧장:
+"컨테이너에서 빠져나올 때는 exit입니다…"
+
+(find 실습 + 그림 2-25 <strong>없음</strong>)</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text">cat 출력 다음:
+"그러고 보니 아까 깔았던 nginx의 기본 페이지는 어디에 놓여 있을까 궁금해졌습니다. 오픈이는 find로 index.html 파일의 위치를 찾아봤습니다."
+
+<code>find / -name index.html</code>
+
+그림 2-25 파일 검색 결과 (터미널 로그)
+
+"컨테이너에서 빠져나올 때는…"</div>
+    </div>
+  </div>
+</div>
+
+<hr class="section" id="s6">
+<div class="section-title">2.7 포그라운드와 백그라운드</div>
+
+<div class="card">
+  <div class="card-head">자리 13 · 2.7.4 attach vs exec — 비교표 + 끝 독백 <span class="badge shrink">분량</span> <span class="badge mono">독백</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text">소제목: <strong>### 2.7.4 백그라운드 접속 - attach vs exec</strong>
+
+도입·실습·그림 모두 압축형:
+"백그라운드로 실행한 컨테이너에 다시 들어가는 방법은 두 가지입니다. 메인 프로세스에 직접 연결하는 attach와 새 프로세스를 하나 더 만드는 exec, 결과는 비슷해 보이지만 내부 동작이 다릅니다."
+
+(<strong>attach vs exec 4행 비교표 없음</strong>)
+
+끝 독백:
+<em>'attach는 메인 프로세스에 연결되고, exec는 새 프로세스를 띄우는구나. 앞으로는 exec만 쓰자.'</em></div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text">소제목: <strong>### 2.7.4 attach vs exec</strong> (베이스보다 짧음)
+
+도입 길게:
+"오픈이는 백그라운드로 띄운 컨테이너에 다시 들어가는 방법이 궁금해졌습니다. 알아보니 메인 프로세스에 직접 연결하는 attach, 새 프로세스를 하나 더 띄우는 exec 두 가지 방법을 확인했습니다. 결과는 비슷해 보이지만 내부에서 일어나는 일이 다르다고 해서, 두 가지를 직접 비교해봤습니다."
+
+<strong>attach vs exec 비교 markdown 표 4행</strong> (방식·동작·위험성)
+
+끝 독백:
+<em>'attach는 메인 프로세스에 직접 붙는 방식이고, exec는 새 프로세스를 만들어 접근하는 방식이구나. 앞으로는 exec만 써야겠다.'</em></div>
+    </div>
+  </div>
+</div>
+
+<hr class="section" id="s7">
+<div class="section-title">2.8 commit + 2.9 마운트 + 이것만은 기억하자</div>
+
+<div class="card">
+  <div class="card-head">자리 14 · 2.8 도입 + 이것만은 기억하자 <span class="badge format">형식</span></div>
+  <div class="grid">
+    <div class="col base">
+      <div class="col-label">베이스</div>
+      <div class="text"><strong>## 2.8 commit</strong> 도입 짧게:
+"Ubuntu 컨테이너에 패키지를 설치하고 파일을 추가했는데, 컨테이너를 내리는 순간 그 작업이 모두 사라집니다.
+
+<em>'내가 수정한 이 상태를 기록해두려면 어떻게 해야 하지?'</em>
+
+컨테이너의 현재 상태를 그대로 이미지로 저장하는 명령이 docker commit입니다."
+
+마지막: <strong>## 이것만은 기억하자</strong> (평문 H2)</div>
+    </div>
+    <div class="col v7">
+      <div class="col-label">v7</div>
+      <div class="text"><strong>## 2.8 commit</strong> 도입 길게 (2.7.4 끝에서 다리 단락):
+"여기까지 공부하니 컨테이너의 생명 주기는 더 이상 헷갈리지 않았습니다. 그런데 한 가지 생각이 오픈이를 붙잡았습니다…"
+
+<em>'내가 수정한 이 상태를 기록해 두려면 어떻게 해야 하지.'</em>
+
+"필요한 건 지금 컨테이너 상태를 그대로 기록해 두는 방법입니다. … 그 일을 하는 명령이 docker commit입니다."
+
+"지금까지 오픈이는 남이 올려둔 이미지(ubuntu, nginx, tomcat)를 Docker Hub에서 받아 쓰기만 했습니다. 반대로, 직접 수정한 컨테이너를 이미지로 만들어 Docker Hub에 올릴 수도 있습니다. 그러면 다른 컴퓨터에서도 이 이미지를 받으면 같은 상태로 쓸 수 있습니다."
+
+마지막: <code>:::remember</code> 박스</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

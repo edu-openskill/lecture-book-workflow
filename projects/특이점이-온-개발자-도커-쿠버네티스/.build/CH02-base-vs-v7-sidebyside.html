@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CH02 베이스 ↔ v7 사이드 바이 사이드 비교</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: #f5f5f7;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 10px 16px;
+    flex-shrink: 0;
+  }
+  h1 { font-size: 16px; margin-bottom: 6px; }
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .nav button {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #475569;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .nav button:hover {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
+  }
+  .container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #cbd5e1;
+    overflow: hidden;
+  }
+  .pane { background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+  .pane-head {
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    flex-shrink: 0;
+  }
+  .pane.base .pane-head { color: #64748b; }
+  .pane.v7 .pane-head { color: #4f46e5; }
+  iframe {
+    flex: 1;
+    width: 100%;
+    border: 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CH02 베이스 ↔ v7 사이드 바이 사이드</h1>
+  <div class="nav">
+    <strong style="font-size:12px;color:#94a3b8;align-self:center;margin-right:6px;">절 점프:</strong>
+    <button onclick="jumpBoth('2.1 가상화')">2.1</button>
+    <button onclick="jumpBoth('2.1.1')">2.1.1</button>
+    <button onclick="jumpBoth('2.1.2')">2.1.2</button>
+    <button onclick="jumpBoth('2.1.3')">2.1.3</button>
+    <button onclick="jumpBoth('2.2 이미지')">2.2</button>
+    <button onclick="jumpBoth('2.3 Docker 설치')">2.3</button>
+    <button onclick="jumpBoth('2.4 Docker CLI')">2.4</button>
+    <button onclick="jumpBoth('2.4.1')">2.4.1</button>
+    <button onclick="jumpBoth('2.4.2')">2.4.2</button>
+    <button onclick="jumpBoth('2.4.3')">2.4.3</button>
+    <button onclick="jumpBoth('2.4.4')">2.4.4</button>
+    <button onclick="jumpBoth('2.4.5')">2.4.5</button>
+    <button onclick="jumpBoth('2.5 컨테이너 통신')">2.5</button>
+    <button onclick="jumpBoth('컨테이너 간 통신')">2.5 (간 통신)</button>
+    <button onclick="jumpBoth('외부에서 들어오기')">2.5 외부</button>
+    <button onclick="jumpBoth('이름으로 찾기')">2.5 DNS</button>
+    <button onclick="jumpBoth('2.6 컨테이너 내부')">2.6</button>
+    <button onclick="jumpBoth('2.6.1')">2.6.1</button>
+    <button onclick="jumpBoth('2.6.2')">2.6.2</button>
+    <button onclick="jumpBoth('2.6.3')">2.6.3</button>
+    <button onclick="jumpBoth('2.7 포그라운드')">2.7</button>
+    <button onclick="jumpBoth('2.7.1')">2.7.1</button>
+    <button onclick="jumpBoth('2.7.2')">2.7.2</button>
+    <button onclick="jumpBoth('2.7.3')">2.7.3</button>
+    <button onclick="jumpBoth('2.7.4')">2.7.4</button>
+    <button onclick="jumpBoth('2.8 commit')">2.8</button>
+    <button onclick="jumpBoth('2.9 마운트')">2.9</button>
+    <button onclick="jumpBoth('이것만은 기억하자')">기억하자</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="pane base">
+    <div class="pane-head">베이스 (v1) — 02-Docker-이해하기.html</div>
+    <iframe id="leftFrame" src="02-Docker-이해하기.html"></iframe>
+  </div>
+  <div class="pane v7">
+    <div class="pane-head">v7 (현재) — 02-Docker-이해하기-v7.html</div>
+    <iframe id="rightFrame" src="02-Docker-이해하기-v7.html"></iframe>
+  </div>
+</div>
+
+<script>
+function jumpBoth(headerText) {
+  ['leftFrame', 'rightFrame'].forEach(id => {
+    const iframe = document.getElementById(id);
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const headers = doc.querySelectorAll('h1, h2, h3');
+      let found = null;
+      for (const h of headers) {
+        if (h.textContent.includes(headerText)) {
+          found = h;
+          break;
+        }
+      }
+      if (found) {
+        found.scrollIntoView({behavior: 'instant', block: 'start'});
+      } else {
+        console.warn('Header not found:', headerText, 'in', id);
+      }
+    } catch (e) {
+      console.error('Cross-frame access blocked. Try opening from local server.', e);
+      alert('iframe 접근이 차단됐습니다. 두 페이지를 별도 탭으로 열어 비교해 주세요.');
+    }
+  });
+}
+</script>
+
+</body>
+</html>
