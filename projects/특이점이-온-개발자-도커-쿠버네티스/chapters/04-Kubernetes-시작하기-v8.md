@@ -1033,7 +1033,8 @@ kubectl get pod                          # 생성된 Pod 목록 확인
 명령어 한 줄로 이미지 버전을 올려 봤습니다.
 
 ```bash [터미널] 이미지 버전 교체 (롤링 업데이트 트리거)
-kubectl set image deployment/nginx-replica nginx-container=nginx:1.21   # 이미지 1.21로 교체
+# 이미지를 nginx:1.21로 교체
+kubectl set image deployment/nginx-replica nginx-container=nginx:1.21
 ```
 
 <div class="terminal-log">
