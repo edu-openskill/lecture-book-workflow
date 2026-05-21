@@ -247,8 +247,8 @@
 <div class="caption">그림 4-4. Kubernetes 클러스터의 구조</div>
 <ul>
 <li><strong>클러스터</strong>: 컨트롤 플레인과 모든 워커 노드를 하나로 묶은 전체 시스템입니다.</li>
-<li><strong>컨트롤 플레인</strong>: 클러스터 전체를 관리하는 시스템입니다. 개발자의 명령을 받아 Pod를 어느 워커 노드에 띄울지 결정하고, 장애가 생긴 Pod를 새 Pod로 자동 교체하며, 클러스터 상태를 항상 원하는 모습으로 유지합니다.</li>
-<li><strong>워커 노드</strong>: Pod가 실제로 띄워져서 일을 처리하는 노드입니다. 컨트롤 플레인의 결정에 따라 Pod를 띄우고 운영합니다.</li>
+<li><strong>컨트롤 플레인</strong>: 클러스터 전체를 관리하는 시스템입니다. 개발자의 명령을 받아 Pod를 어느 워커 노드에 배치할지 결정하고, 장애가 생긴 Pod를 새 Pod로 자동 교체하며, 클러스터 상태를 항상 원하는 모습으로 유지합니다.</li>
+<li><strong>워커 노드</strong>: Pod가 실제로 실행되어 일을 처리하는 노드입니다. 컨트롤 플레인의 결정에 따라 Pod를 실행하고 운영합니다.</li>
 </ul>
 <div class="term-box">
 <p><strong>노드(Node)</strong>: 컨테이너가 실제로 돌아가는 컴퓨터 한 대를 말합니다. 실제 서비스 환경에서는 수십~수백 대의 노드(서버)가 모여 하나의 클러스터를 이룹니다.</p>
@@ -492,7 +492,7 @@ brew<span class="w"> </span>install<span class="w"> </span>minikube</div>
 </tbody>
 </table>
 <h2>4.3 첫 Pod - Kubernetes의 최소 단위</h2>
-<p>노트북에 Minikube 환경을 구성했으니 이제 실제 쿠버네티스의 리소스를 하나씩 띄워 볼 차례입니다. 도커만 쓸 때와 무엇이 다른지, 쿠버네티스라는 시스템이 컨테이너를 다루는 최소 단위부터 확인해 보겠습니다.</p>
+<p>노트북에 Minikube 환경을 구성했으니 이제 실제 쿠버네티스의 리소스를 하나씩 생성해 볼 차례입니다. 도커만 쓸 때와 무엇이 다른지, 쿠버네티스라는 시스템이 컨테이너를 다루는 최소 단위부터 확인해 보겠습니다.</p>
 <h3>4.3.1 kubectl과 Pod</h3>
 <p>클러스터에 명령을 내릴 때 사용하는 도구는 kubectl입니다. &quot;이런 상태를 만들어 달라&quot;고 쿠버네티스에 요청하는 명령줄 도구입니다.</p>
 <p>본격적인 실습 전에 오픈이는 <strong>Pod(파드)</strong> 라는 생소한 단위를 먼저 짚고 넘어갔습니다. 도커에서는 컨테이너가 실행의 최소 단위지만, 쿠버네티스는 컨테이너를 직접 제어하지 않습니다. 대신 하나 이상의 컨테이너를 Pod라는 상자로 한 번 감싸서 관리합니다.</p>
@@ -832,14 +832,14 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 <div class="caption">그림 4-18. Pod를 다 지워도 Deployment가 자동으로 새 Pod를 띄웁니다</div>
 <p><code>hello-pod2</code>는 그대로 사라졌지만 Deployment가 만든 Pod는 잠깐 사라졌다가 <strong>새 이름으로 다시 올라와</strong> 있었습니다.</p>
 <p class="thought">'오, 이거다. 내가 수동으로 살릴 필요가 없네.'</p>
-<p>Deployment에 replicas: 1이라고 선언해 두었기 때문에, Pod가 사라지면 시스템이 이를 감지하고 즉시 설계도(template)대로 새 Pod를 만들어 냅니다. 도커를 쓸 때 오픈이가 일일이 확인하며 다시 띄워야 했던 일을 이제 쿠버네티스가 대신 합니다.</p>
+<p>Deployment에 replicas: 1이라고 선언해 두었기 때문에, Pod가 사라지면 시스템이 이를 감지하고 즉시 설계도(template)대로 새 Pod를 만들어 냅니다. 도커를 쓸 때 오픈이가 일일이 확인하며 다시 실행해야 했던 일을 이제 쿠버네티스가 대신 합니다.</p>
 <h3>4.4.3 ReplicaSet - Pod 개수 자동 관리</h3>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex10</p>
 </div>
 <p class="thought">'하나가 살아나는 건 알겠는데, 사용자가 동시에 몰리면 어떨까. 아무리 성능이 좋아도 한 대로는 한계가 있을 텐데.'</p>
-<p>운영 환경에서는 부하를 분산하기 위해 여러 대의 Pod를 띄워야 합니다. 쿠버네티스에서는 replicas 값만 수정하면 되는데, 이 개수 관리를 실질적으로 담당하는 리소스가 바로 <strong>ReplicaSet(레플리카셋)</strong> 입니다.</p>
+<p>운영 환경에서는 부하를 분산하기 위해 여러 대의 Pod를 실행해야 합니다. 쿠버네티스에서는 replicas 값만 수정하면 되는데, 이 개수 관리를 실질적으로 담당하는 리소스가 바로 <strong>ReplicaSet(레플리카셋)</strong> 입니다.</p>
 <p>에어컨이 설정 온도를 유지하기 위해 실시간으로 온도를 체크하듯, ReplicaSet은 <strong>사용자가 선언한 개수(Desired State)</strong> 와 <strong>실제 돌아가는 개수</strong>를 계속 비교합니다. 누군가 Pod를 지우거나 장애가 생겨 숫자가 모자라면, 즉시 새 Pod를 생성해 선언한 개수를 맞춥니다.</p>
 <div class="term-box">
 <p><strong>ReplicaSet</strong>: Deployment가 내부적으로 생성·관리하는 리소스로, 실제 Pod 개수 유지의 실행 주체입니다. 사용자는 보통 ReplicaSet을 직접 만들지 않고 Deployment를 통해 관리합니다.</p>
@@ -927,9 +927,9 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 <h3>4.4.4 롤링 업데이트 - 끊김 없는 버전 교체</h3>
 <p class="thought">'그런데 4개나 되는 Pod를 새 버전으로 바꾸려면 어떻게 하지. 전부 내리고 새로 올리면 그 찰나에 서비스가 죽을 텐데. 팀장님한테 혼나겠지.'</p>
 <p>스케일링으로 동시 접속 문제는 해결했지만, 다음 고민은 <strong>배포</strong>였습니다. 서버를 내리고 새 버전으로 한꺼번에 바꾸면, 서버가 내려가 있는 동안 오류가 발생합니다.</p>
-<p>이 지점에서 등장하는 것이 <strong>롤링 업데이트(Rolling Update)</strong> 입니다. 새 버전을 먼저 띄우고, 제대로 작동하는 게 확인되면 기존 버전을 내리는 식으로 <strong>순차 교체</strong>하는 방식입니다. YAML 파일의 strategy 설정이 바로 이 교체 속도를 조절하는 리모컨입니다.</p>
+<p>이 지점에서 등장하는 것이 <strong>롤링 업데이트(Rolling Update)</strong> 입니다. 새 버전을 먼저 실행하고, 제대로 작동하는 게 확인되면 기존 버전을 내리는 식으로 <strong>순차 교체</strong>하는 방식입니다. YAML 파일의 strategy 설정이 바로 이 교체 속도를 조절하는 리모컨입니다.</p>
 <div class="term-box">
-<p><strong>RollingUpdate 전략</strong>: K8s Deployment의 기본 배포 전략입니다. <code>maxSurge</code>와 <code>maxUnavailable</code> 두 값으로 &quot;몇 개를 더 띄울 수 있는지&quot;, &quot;몇 개까지 사용 불가능해도 되는지&quot;를 조정합니다.</p>
+<p><strong>RollingUpdate 전략</strong>: K8s Deployment의 기본 배포 전략입니다. <code>maxSurge</code>와 <code>maxUnavailable</code> 두 값으로 &quot;몇 개를 더 실행할 수 있는지&quot;, &quot;몇 개까지 사용 불가능해도 되는지&quot;를 조정합니다.</p>
 </div>
 <p>위 YAML의 <code>strategy</code> 블록의 속성은 다음과 같습니다.</p>
 <ul>

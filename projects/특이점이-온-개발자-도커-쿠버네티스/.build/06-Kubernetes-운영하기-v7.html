@@ -37,7 +37,7 @@
 <p>챕터 3에서 MySQL 컨테이너를 띄우던 날, 빌드 도중 <em>민감한 정보는 ENV에 넣지 말라</em>는 경고가 한 줄로 지나간 적이 있었습니다. 그때는 학습용이라 그대로 뒀습니다. 학습 레포에 둔 그 한 줄이 지금은 운영 레포로 올라가기 직전이었습니다.</p>
 <div class="chapter-image gemini"><img src="..\assets\CH06\gemini\01_prologue-secret-leaks-to-git.png" alt="운영 YAML에 적은 비밀번호가 Git에 그대로 올라간다" /><div class="caption">그림 6-1. 운영 YAML에 적은 비밀번호가 Git 저장소에 그대로 올라간다</div></div>
 <p>이미지에 비밀번호를 박아 두면 환경이 바뀔 때마다 이미지를 다시 빌드해야 합니다. YAML로 옮겨 적자니 지금처럼 Git에 그대로 올라갑니다. DB 주소나 접속 URL처럼 환경마다 달라지는 값도 같은 처지였습니다.</p>
-<p>문제는 비밀번호만이 아니었습니다. 통합 사이트의 DB Pod 한 대를 떠올리자 또 한 가지가 보였습니다. Deployment가 죽은 Pod를 곧장 새로 띄워 주는 모습을 며칠 전에 봤기 때문에, 같은 일이 DB Pod에서 벌어지면 어떻게 될지가 분명해졌습니다. 코드는 다시 띄우면 그만입니다. 그 안에 쌓아 둔 회원 정보와 게시글은 새 Pod로 따라오지 않습니다.</p>
+<p>문제는 비밀번호만이 아니었습니다. 통합 사이트의 DB Pod 한 대를 떠올리자 또 한 가지가 보였습니다. Deployment가 죽은 Pod를 곧장 새로 실행해 주는 모습을 며칠 전에 봤기 때문에, 같은 일이 DB Pod에서 벌어지면 어떻게 될지가 분명해졌습니다. 코드는 다시 실행하면 그만입니다. 그 안에 쌓아 둔 회원 정보와 게시글은 새 Pod로 따라오지 않습니다.</p>
 <p>오픈이는 푸시 명령어를 잠시 내려놓고 노트에 두 단어를 적었습니다. <strong>설정·비밀번호</strong>, 그리고 <strong>데이터</strong>. 이 두 가지를 해결하지 못한 채 레포를 올리면 운영에 뜨자마자 문제가 터집니다.</p>
 <p class="thought">'두 가지부터 해결해야겠다.'</p>
 <p>다음 날 아침, 옆자리 선배에게 이 두 가지를 꺼내 봤습니다. 선배가 의자를 굴려 다가왔습니다.</p>
@@ -222,7 +222,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 변경된 ConfigMap 적용</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/configmap-conn.yml<span class="w">   </span><span class="c1"># 변경된 ConfigMap 적용</span></div>
 <p>apply를 걸자 <code>configured</code> 메시지가 떴습니다. ConfigMap 자체는 갱신된 듯했는데, 막상 Pod 안의 환경 변수를 들여다보니 포트는 여전히 <code>80</code>이었습니다.</p>
 <p class="thought">'어? 분명히 바꿨는데 왜 그대로지?'</p>
-<p>리눅스에서 환경 변수는 <strong>프로세스가 시작될 때 한 번 꽂히는 값</strong>입니다. 그래서 ConfigMap 쪽이 갱신되어도, 이미 떠 있는 Pod의 프로세스 안에는 처음 들어온 옛 값이 그대로 남아 있습니다. 새 값을 반영하려면 Pod를 한 번 새로 띄워 줘야 합니다.</p>
+<p>리눅스에서 환경 변수는 <strong>프로세스가 시작될 때 한 번 꽂히는 값</strong>입니다. 그래서 ConfigMap 쪽이 갱신되어도, 이미 떠 있는 Pod의 프로세스 안에는 처음 들어온 옛 값이 그대로 남아 있습니다. 새 값을 반영하려면 Pod를 한 번 새로 실행해 줘야 합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="apply만 한 경우 ConfigMap 변경이 Pod에 반영되지 않음">
   <defs>
@@ -251,7 +251,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 </div>
 <div class="caption">그림 6-6. apply 만 한 경우 - ConfigMap 변경이 기존 Pod에는 반영되지 않음</div>
 <div class="svg-figure">
-<svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="rollout restart로 새 Pod를 띄우면 ConfigMap 새 값이 반영됨">
+<svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="rollout restart로 새 Pod를 실행하면 ConfigMap 새 값이 반영됨">
   <defs>
     <marker id="g65b-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
     <marker id="g65b-g" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1565c0"/></marker>
@@ -277,7 +277,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
   <text x="400" y="172" text-anchor="middle" font-size="11" fill="#6b7280" font-style="italic">새 Pod는 시작 시점에 갱신된 ConfigMap을 읽어 환경 변수에 새 값(localhost:90)을 박습니다.</text>
 </svg>
 </div>
-<div class="caption">그림 6-7. rollout restart 로 Pod를 새로 띄우면 ConfigMap 새 값이 환경 변수로 반영됨</div>
+<div class="caption">그림 6-7. rollout restart 로 Pod를 새로 실행하면 ConfigMap 새 값이 환경 변수로 반영됨</div>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 재시작으로 새 ConfigMap 반영</div>kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">   </span><span class="c1"># Pod 재시작</span></div>
 <p><code>kubectl rollout restart</code>는 여러 Pod를 순차로 교체해 새 값을 반영하는 명령입니다. 재시작이 끝나고 다시 환경 변수를 찍어 보니 포트가 <code>90</code>으로 바뀌어 있었습니다. apply는 ConfigMap을 갱신할 뿐, 실제 Pod까지 반영되려면 재시작이 한 번 더 필요합니다.</p>
 <p>설정과 비밀번호를 이미지 바깥으로 빼는 일은 끝났습니다. 노트에 적어 둔 두 단어 중 첫 번째 문제가 풀렸지만, 한 가지가 더 남아 있습니다. 비밀번호로 잠가 두는 DB의 데이터가 아직 그대로였습니다.</p>
@@ -432,7 +432,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pv,pvc<span class="w">
 <div class="caption">그림 6-9. PV와 PVC가 Bound 상태로 연결된 결과</div>
 <p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결된 것입니다.</p>
 <p class="thought">'창고와 신청서가 엮였구나.'</p>
-<p>확인을 위해 Pod 내부에서 파일을 하나 만든 뒤, Pod를 삭제하고 다시 띄워 보겠습니다.</p>
+<p>확인을 위해 Pod 내부에서 파일을 하나 만든 뒤, Pod를 삭제하고 다시 실행해 보겠습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 파일 생성 후 Pod 재생성으로 데이터 보존 확인</div>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>volume-pod<span class="w"> </span>--<span class="w"> </span>/bin/bash<span class="w">      </span><span class="c1"># Pod 안 bash 접속</span>
 touch<span class="w"> </span>/mnt/data/c.txt<span class="w">                          </span><span class="c1"># 마운트 경로에 빈 파일 생성</span>
 <span class="nb">exit</span><span class="w">                                           </span><span class="c1"># Pod 셸 종료</span>
@@ -642,7 +642,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <tbody>
 <tr>
 <td style="text-align:center"><code>frontend-deploy.yml</code></td>
-<td style="text-align:left"><code>metacoding/frontend:1</code> 이미지를 띄우는 Deployment. 정적 HTML과 <code>/api</code>를 backend-service로 프록시하는 Nginx 설정을 담은 컨테이너 한 개를 80번 포트로 올립니다</td>
+<td style="text-align:left"><code>metacoding/frontend:1</code> 이미지를 실행하는 Deployment. 정적 HTML과 <code>/api</code>를 backend-service로 프록시하는 Nginx 설정을 담은 컨테이너 한 개를 80번 포트로 올립니다</td>
 </tr>
 <tr>
 <td style="text-align:center"><code>frontend-service.yml</code></td>
@@ -733,7 +733,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">          </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">db-pvc</span></div>
-<p><code>volumeMounts</code>로 컨테이너의 <code>/var/lib/mysql</code>(MySQL이 데이터를 쓰는 표준 경로)에 PVC가 가리키는 PV를 끌어다 붙입니다. Pod가 사라져도 데이터는 PV에 남아, Deployment가 새 Pod를 띄워도 회원 정보와 게시글이 같은 자리에서 다시 보입니다.</p>
+<p><code>volumeMounts</code>로 컨테이너의 <code>/var/lib/mysql</code>(MySQL이 데이터를 쓰는 표준 경로)에 PVC가 가리키는 PV를 끌어다 붙입니다. Pod가 사라져도 데이터는 PV에 남아, Deployment가 새 Pod를 실행해도 회원 정보와 게시글이 그대로 다시 보입니다.</p>
 <p>같은 폴더의 나머지 네 파일은 다음과 같습니다.</p>
 <table>
 <thead>
@@ -773,7 +773,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <tbody>
 <tr>
 <td style="text-align:center"><code>redis-deploy.yml</code></td>
-<td style="text-align:left"><code>metacoding/redis:1</code> 이미지를 띄우는 Deployment. Redis 컨테이너 한 개를 6379 포트로 올립니다</td>
+<td style="text-align:left"><code>metacoding/redis:1</code> 이미지를 실행하는 Deployment. Redis 컨테이너 한 개를 6379 포트로 올립니다</td>
 </tr>
 <tr>
 <td style="text-align:center"><code>redis-service.yml</code></td>
@@ -782,7 +782,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 </tbody>
 </table>
 <h3>6.3.4 공통 준비</h3>
-<p>코드를 살펴봤으니 띄울 차례였습니다. 오픈이는 본격적으로 배포하기 전에 두 가지부터 챙겼습니다. Minikube와 Ingress Controller를 켜는 일, 그리고 네 가지 이미지를 빌드해 두는 일이었습니다.</p>
+<p>코드를 살펴봤으니 배포할 차례였습니다. 오픈이는 본격적으로 배포하기 전에 두 가지부터 챙겼습니다. Minikube와 Ingress Controller를 켜는 일, 그리고 네 가지 이미지를 빌드해 두는 일이었습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube와 Ingress Controller 시작</div>minikube<span class="w"> </span>start
 minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress
 kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>ingress-nginx<span class="w">   </span><span class="c1"># Controller Pod Running 확인</span></div>
@@ -828,7 +828,7 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> backend Pod 로그로 분산 확인</div>kubectl<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>backend<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>--prefix<span class="w">   </span><span class="c1"># backend Pod 최근 100줄 (Pod명 표시)</span></div>
 <p>서로 다른 Pod 이름이 앞에 붙은 로그 줄이 번갈아 나타난다면 요청이 두 서버에 분산되어 들어간 것입니다.</p>
 <p>옆자리 동료가 의자를 굴려 화면을 들여다봤습니다.</p>
-<div class="dialogue"><span class="speaker">동료</span>: "어, 이거 챕터 3에서 docker-compose로 띄웠던 그 사이트 아니에요? 이번엔 K8s 위에 있네요."</div>
+<div class="dialogue"><span class="speaker">동료</span>: "어, 이거 며칠 전에 docker-compose로 띄웠던 그 사이트 아니에요? 이번엔 K8s 위에 있네요."</div>
 <p>오픈이는 고개를 끄덕였습니다. 같은 사이트지만 자리가 달라졌습니다. docker-compose 한 파일 안에 묶여 있던 세 덩어리가, 이제는 클러스터 위에서 각자 Pod로 떠 있고 Service 이름으로 서로를 호출하고 있었습니다.</p>
 <p class="thought">'드디어 다 엮였다. 이름만으로 서로를 찾아가는 통합 시스템이라니.'</p>
 <div class="remember">

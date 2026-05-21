@@ -27,7 +27,7 @@
 <li>브라우저에서 Pod까지 패킷이 가는 3단계 흐름을 그려 봅니다</li>
 </ul>
 </div>
-<p>다음 날 아침이었습니다. 자리에 앉아 가방을 내려놓고 어제 띄워둔 Pod 네 대를 다시 떠올렸습니다. 자동 복구와 무중단 교체가 두 눈앞에서 돌아갔던 장면이 아직 또렷했습니다.</p>
+<p>다음 날 아침이었습니다. 자리에 앉아 가방을 내려놓고 어제 실행해둔 Pod 네 대를 다시 떠올렸습니다. 자동 복구와 무중단 교체가 두 눈앞에서 돌아갔던 장면이 아직 또렷했습니다.</p>
 <p>그때 옆자리 동료가 의자를 밀고 와 모니터를 들여다봤습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "오픈 씨, 어제 띄운 거 어떻게 들어가요? 주소 좀 알려 주세요."</div>
 <p>오픈이는 입을 떼려다 말았습니다. 정작 그 한마디가 막혔습니다.</p>
@@ -81,8 +81,8 @@
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex11</p>
 </div>
-<p>오픈이는 직접 띄워 보기로 했습니다. 먼저 Pod를 세우고 그 앞에 대표 번호를 답니다.</p>
-<p>오픈이는 <code>ex11</code> 폴더를 열었습니다. 어제 사용했던 <code>deploy-ex02.yml</code>이 그대로 남아 있습니다. 이 파일은 Pod 네 개를 띄우는 Deployment 설정입니다.</p>
+<p>오픈이는 직접 실행해 보기로 했습니다. 먼저 Pod를 세우고 그 앞에 대표 번호를 답니다.</p>
+<p>오픈이는 <code>ex11</code> 폴더를 열었습니다. 어제 사용했던 <code>deploy-ex02.yml</code>이 그대로 남아 있습니다. 이 파일은 Pod 네 개를 실행하는 Deployment 설정입니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 4개 생성</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/deploy-ex02.yml<span class="w">   </span><span class="c1"># Pod 4개 생성</span></div>
 <p>오픈이는 다음으로 Service YAML을 살펴봤습니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 1</span> ex11/service-ex01.yml. NodePort Service 정의</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -446,7 +446,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <p>그때 옆자리 의자가 다시 굴러왔습니다. 동료가 화면을 살피며 &quot;이 주소로 사람들이 쉽게 들어올 수 있겠어요?&quot;라고 물었습니다.</p>
 <p>오픈이는 발급된 <code>127.0.0.1:10345</code>를 다시 봤습니다. 터미널을 닫는 순간 사라지는 주소였습니다. 다시 띄울 때마다 포트도 바뀌었습니다.</p>
 <p class="thought">'안에서는 Service로 묶었는데, 밖에서 들어올 진입점은 아직 임시구나.'</p>
-<p>Service를 하나 더 띄우면 진입점도 또 하나 늘어납니다. 외부에서 보면 진입점이 두 개, 세 개로 늘어난다는 뜻입니다. 그렇다고 임시 포트를 사람마다 알려 줄 수도 없습니다.</p>
+<p>Service를 하나 더 만들면 진입점도 또 하나 늘어납니다. 외부에서 보면 진입점이 두 개, 세 개로 늘어난다는 뜻입니다. 그렇다고 임시 포트를 사람마다 알려 줄 수도 없습니다.</p>
 <p class="thought">'도커 때 NGINX가 그 자리에 있었지.'</p>
 <p>도커에서는 NGINX가 외부 요청을 받아 같은 도메인 아래 경로별로 뒤쪽 서버로 분기해 줬습니다. 쿠버네티스에서도 그 자리가 필요합니다.</p>
 <p>Service YAML을 처음부터 끝까지 다시 훑어봐도 경로별 라우팅 항목은 보이지 않았습니다. Service는 라벨로 Pod를 묶을 뿐, URL 경로를 보고 분기하는 기능은 없습니다.</p>
@@ -531,7 +531,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <div class="caption">그림 5-13. Ingress 리소스(YAML)와 Ingress Controller(Pod) — 둘 다 있어야 라우팅이 작동합니다</div>
 <p class="thought">'아, 규칙만 적어 둔다고 알아서 굴러가는 게 아니구나. 그 규칙을 읽고 실제로 실행해 주는 역할이 따로 필요한 거네.'</p>
-<p>실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다. 미니큐브는 Ingress Controller를 애드온 형태로 한 번에 띄울 수 있는 명령어를 제공합니다.</p>
+<p>실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다. 미니큐브는 Ingress Controller를 애드온 형태로 한 번에 배포할 수 있는 명령어를 제공합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 인그레스 애드온 활성화</div>minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress<span class="w">           </span><span class="c1"># 인그레스 애드온 활성화</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -571,8 +571,8 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <div class="caption">그림 5-15. Ingress Controller Pod가 Running 상태임을 확인</div>
 <p><code>ingress-nginx-controller</code>가 <code>1/1 Running</code> 상태입니다. 물류 센터가 가동되어 우편을 받을 준비를 마쳤다는 뜻입니다.</p>
 <h4>① 두 서비스 준비</h4>
-<p>이제 들어온 요청을 받아 처리할 Service를 띄울 차례입니다. 주문 쪽과 매장 쪽을 각각 ClusterIP Service로 만들겠습니다. 두 Service는 같은 이미지(<code>hashicorp/http-echo</code>)를 쓰는데, <code>-text</code> 옵션으로 응답 문구만 달리 줍니다. 주문 쪽은 <code>&quot;주문 접수 완료&quot;</code>, 매장 쪽은 <code>&quot;매장 선택&quot;</code>이 돌아옵니다.</p>
-<p><code>ex12/</code> 안에는 주문과 매장 각각 <strong>Pod를 띄우는 Deployment</strong> 와 그 Pod를 묶는 <strong>ClusterIP Service</strong> 가 한 쌍씩 들어 있습니다.</p>
+<p>이제 들어온 요청을 받아 처리할 Service를 만들 차례입니다. 주문 쪽과 매장 쪽을 각각 ClusterIP Service로 만들겠습니다. 두 Service는 같은 이미지(<code>hashicorp/http-echo</code>)를 쓰는데, <code>-text</code> 옵션으로 응답 문구만 달리 줍니다. 주문 쪽은 <code>&quot;주문 접수 완료&quot;</code>, 매장 쪽은 <code>&quot;매장 선택&quot;</code>이 돌아옵니다.</p>
+<p><code>ex12/</code> 안에는 주문과 매장 각각 <strong>Pod를 실행하는 Deployment</strong> 와 그 Pod를 묶는 <strong>ClusterIP Service</strong> 가 한 쌍씩 들어 있습니다.</p>
 <table>
 <thead>
 <tr>
