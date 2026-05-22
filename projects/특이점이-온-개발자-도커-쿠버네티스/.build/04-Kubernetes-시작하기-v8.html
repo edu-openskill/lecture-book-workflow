@@ -21,38 +21,29 @@
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
-<li>&quot;지금 띄워라&quot;(Docker)와 &quot;이 상태를 유지해라&quot;(Kubernetes)의 차이를 이해합니다</li>
+<li><strong>명령형</strong>(Docker)과 <strong>선언형</strong>(Kubernetes)의 차이를 이해합니다</li>
 <li><strong>컨트롤 플레인·워커 노드</strong> 구조와 <strong>Minikube</strong>로 로컬 클러스터를 띄웁니다</li>
 <li><strong>Pod</strong>를 직접 만들면 생기는 문제를 <strong>Deployment</strong>로 자동 복구·스케일링까지 해결합니다</li>
 <li><strong>롤링 업데이트</strong>와 <strong>롤백</strong>으로 무중단 배포를 손에 익힙니다</li>
 </ul>
 </div>
-<p>빔 프로젝터 화면에 통합 사이트가 명령 하나로 올라갔습니다. 프론트, 백엔드, DB 컨테이너가 줄줄이 올라오는 로그를 팀장이 팔짱을 낀 채 바라봤습니다. 마지막 빌드 줄이 떨어지고 브라우저에 회원 목록이 떴을 때, 팀장이 의자 등받이에서 몸을 떼며 한마디를 던졌습니다.</p>
-<div class="dialogue"><span class="speaker">팀장</span>: "오픈 씨, 구성은 깔끔하네요. 그런데 이거 운영 서버에 올릴 거잖아요. 만약 새벽 두 시에 컨테이너 하나가 죽으면 누가 살리죠?"</div>
-<p>질문이 끝나기도 전에 입이 막혔습니다. 자리에서 모니터를 들여다보고 있을 때라면 다시 띄우면 그만입니다. 자리를 비웠거나 잠들어 있을 때는 누가 알람을 받아도 한참 뒤에야 손을 댈 수 있습니다. 도커는 컨테이너를 띄워 주는 도구이지, 죽은 컨테이너를 감시하며 자동으로 복구하는 도구는 아닙니다.</p>
-<p>팀장의 질문은 거기서 끝나지 않았습니다.</p>
-<ul>
-<li>새벽에 컨테이너 한 대가 죽으면 누가 자동으로 살릴 수 있는지</li>
-<li>사용자가 갑자기 몰리면 서버 대수를 어떻게 늘릴 건지</li>
-<li>새 버전을 배포할 때 서비스 중단 없이 교체할 수 있는지</li>
-</ul>
-<div class="dialogue"><span class="speaker">팀장</span>: "이제 운영까지 생각해야죠. 쿠버네티스(Kubernetes) 한번 제대로 파 봐요."</div>
-<div class="chapter-image gemini"><img src="..\assets\CH04\gemini\01_prologue-the-question-asked.png" alt="팀장의 운영 질문에 답이 막힌 순간" /><div class="caption">그림 4-1. 사이트는 떴지만, 팀장의 운영 질문에 답이 막힌 순간</div></div>
-<p>회의가 끝나고 자리로 돌아왔지만 모니터 글자는 잘 들어오지 않았습니다. 그동안 도커로 한 일이 결국 <strong>컨테이너 실행</strong>까지였다는 게 그제야 보였습니다. 퇴근하고 집에서 노트북을 열었습니다. 도커에 겨우 익숙해졌는데 또 산을 넘어야 한다니 막막했지만, 팀장이 깔아 놓은 운영의 숙제를 풀려면 쿠버네티스가 왜 필요한지부터 짚어야 했습니다.</p>
+<p>지난주 회의실에서 들은 팀장의 마지막 물음이 며칠이 지나도 머리에서 떠나지 않았습니다. 도커를 공부했지만, 실제 운영에서 발생하는 문제는 일일이 대응해야 하기 때문입니다.</p>
+<div class="chapter-image gemini"><img src="..\assets\CH04\gemini\01_prologue-the-question-asked.png" alt="팀장의 운영 질문에 답이 막힌 순간" /><div class="caption">그림 4-1. 팀장의 운영 질문에 답이 막힌 순간</div></div>
+<p>점심을 먹고 돌아오는 길에 선배에게 고민을 털어놨습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "도커를 공부하면 끝일 줄 알았는데, 운영에서 컨테이너가 죽거나 트래픽이 몰릴 때 어떻게 해야 할지 모르겠어요."</div>
+<div class="dialogue"><span class="speaker">선배</span>: "도커만으로는 운영까지 챙기기 어려워요. 그래서 쿠버네티스를 같이 알아야 해요. 컨테이너에 대한 관리는 쿠버네티스 담당이거든요."</div>
+<p>선배의 말을 들은 오픈이는 퇴근 후 집에서 노트북을 열었습니다. 그리고 쿠버네티스가 무엇이고, 어떤 역할을 하는지 살펴보기로 했습니다.</p>
 <h2>4.1 Kubernetes - Docker만으로 부족한 순간</h2>
-<h3>4.1.1 도커는 실행 명령, K8s는 약속 유지</h3>
-<p>팀장의 질문은 사실 오픈이가 이미 다 겪어 본 일들이었습니다. 새벽 알람도, 이벤트 시작과 동시에 몰린 트래픽도, 배포 중 멈춘 결제 화면도 모두 운영 단계에서 발생한 문제입니다.</p>
-<p>쿠버네티스를 알아보니 도커와 컨테이너를 다루는 방식 자체가 달랐습니다.</p>
+<h3>4.1.1 도커는 실행 명령, Kubernetes는 약속 유지</h3>
+<p>오픈이가 살펴본 도커와 쿠버네티스는 컨테이너를 다루는 방식이 다음과 같이 달랐습니다.</p>
 <ul>
-<li><strong>Docker</strong>: <em>&quot;이 컨테이너를 지금 띄워라.&quot;</em> 한 번의 실행 지시입니다.</li>
-<li><strong>Kubernetes</strong>: <em>&quot;이 서비스 3개가 항상 떠 있게 유지해라.&quot;</em> 지속되는 <strong>약속</strong>입니다.</li>
+<li><strong>Docker(명령형)</strong>: <em>&quot;이 컨테이너를 실행해라.&quot;</em></li>
+<li><strong>Kubernetes(선언형)</strong>: <em>&quot;이 서비스를 원하는 상태로 유지해라.&quot;</em></li>
 </ul>
-<p>쿠버네티스는 약속한 상태를 24시간 감시하다가 어긋나면 즉시 새 컨테이너를 실행시켜 다시 맞춥니다. 오픈이가 매번 직접 명령어를 쳐서 상태를 만들던 방식과는 다른 <strong>관리</strong> 방식이었습니다.</p>
-<p class="thought">'내가 일일이 감시하고 살리지 않아도 시스템이 알아서 관리해 준다는 거네.'</p>
-<h3>4.1.2 본사가 원하는 상태를 선언한다</h3>
-<p><strong>선언형</strong>이라는 단어는 책에서 자주 봤습니다. 그런데 시스템이 &quot;계속 비교하며 상태를 맞춘다&quot;는 게 막상 어떤 모습인지 그림이 그려지지 않았습니다. 다음 날 사무실에서 옆자리 선배에게 슬쩍 물어봤습니다.</p>
-<div class="dialogue"><span class="speaker">선배</span>: "프랜차이즈 본사가 가맹점을 어떻게 관리하는지 생각하면 편해요. 본사가 매장에 들어가서 직접 요리하지는 않잖아요."</div>
-<p>본사는 가맹점 하나하나를 직접 운영하지 않습니다. 대신 &quot;서울 지역에 가맹점 50개 유지&quot; 같은 지침을 내려보냅니다. 한 가맹점이 갑자기 폐업하면 관리팀이 새 가맹점을 여는 방향으로 움직이고, 손님이 몰려 대기 줄이 길어지면 직원을 더 뽑으라고 지시합니다. 본사는 <strong>'원하는 상태(Desired State)'</strong> 만 선언하고, 현장은 그 상태에 맞춰 끊임없이 움직입니다.</p>
+<p>명령형은 매 동작을 직접 지시하는 방식이고, 선언형은 유지할 상태만 정의해 두는 방식입니다.</p>
+<h3>4.1.2 본사와 가맹점</h3>
+<p>쿠버네티스가 컨테이너를 관리하는 방식은 프랜차이즈 본사가 가맹점을 관리하는 방식과 비슷합니다.</p>
+<p>본사는 가맹점을 직접 운영하지 않습니다. 대신 가맹점 수나 모습 같은 <strong>규칙</strong>을 정하고 그 규칙이 지켜지는지를 관리합니다. 만약 매장이 문을 닫으면 <strong>새로운 매장을 열기 위해 노력</strong>하고, 수요가 많아지면 <strong>새로운 매장을 추가</strong>합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 800 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="본사 빌딩이 가맹점 매장 4개를 유지하도록 선언하면 시스템이 자동으로 개수를 맞추는 구조">
   <defs>
@@ -63,7 +54,7 @@
       <path d="M0,0 L0,6 L7,3 z" fill="#cbd5e1"/>
     </marker>
   </defs>
-  <text x="400" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#1f2937">본사가 "가맹점 4개"를 선언하면 시스템이 알아서 맞춥니다</text>
+  <text x="400" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#1f2937">본사가 "가맹점 3개"를 선언하면 시스템이 알아서 맞춥니다</text>
   <g>
     <rect x="350" y="42" width="100" height="22" fill="#1565c0" rx="2"/>
     <text x="400" y="58" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">본사 HQ</text>
@@ -77,7 +68,7 @@
     <rect x="423" y="160" width="32" height="26" fill="#dbeafe" stroke="#1565c0" stroke-width="1"/>
     <rect x="385" y="200" width="30" height="34" fill="#1565c0"/>
     <rect x="160" y="100" width="148" height="50" rx="6" fill="#fff" stroke="#1565c0" stroke-width="1.2"/>
-    <text x="234" y="120" text-anchor="middle" font-size="11" fill="#1565c0" font-weight="700">"가맹점 4개 유지"</text>
+    <text x="234" y="120" text-anchor="middle" font-size="11" fill="#1565c0" font-weight="700">"가맹점 3개 유지"</text>
     <text x="234" y="138" text-anchor="middle" font-size="9" fill="#6b7280" font-style="italic">(원하는 상태 선언)</text>
     <polygon points="308,124 322,128 308,134" fill="#fff" stroke="#1565c0" stroke-width="1.2"/>
   </g>
@@ -133,7 +124,7 @@
     <rect x="708" y="338" width="32" height="70" fill="none" stroke="#ff7849" stroke-width="1" stroke-dasharray="3,2"/>
     <rect x="635" y="356" width="60" height="20" fill="#fff7ed" stroke="#ff7849" stroke-width="1.2"/>
     <text x="665" y="370" text-anchor="middle" font-size="10" fill="#ff7849" font-weight="700">NEW</text>
-    <text x="680" y="436" text-anchor="middle" font-size="10" fill="#ff7849">자동 개점 (4개 맞춤)</text>
+    <text x="680" y="436" text-anchor="middle" font-size="10" fill="#ff7849">자동 개점 (3개 회복)</text>
   </g>
   <path d="M 380 234 Q 250 260, 100 286" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#hq-arr)"/>
   <path d="M 390 234 Q 330 260, 280 286" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#hq-arr)"/>
@@ -141,9 +132,9 @@
   <path d="M 420 234 Q 560 260, 680 286" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#hq-arr)"/>
 </svg>
 </div>
-<div class="caption">그림 4-2. 본사가 &quot;가맹점 4개 유지&quot;를 선언하면 시스템이 가맹점 개수를 자동으로 맞추는 구조</div>
-<p>쿠버네티스도 마찬가지입니다. 오픈이가 &quot;Pod 4개 유지&quot;를 선언만 해 두면, 시스템이 그 상태를 자동으로 맞춥니다.</p>
-<h3>4.1.3 K8s 핵심 리소스 한눈에</h3>
+<div class="caption">그림 4-2. 본사가 &quot;가맹점 3개 유지&quot;를 선언하면 시스템이 가맹점 개수를 자동으로 맞추는 구조</div>
+<p>쿠버네티스도 마찬가지입니다. 컨테이너 수나 상태 규칙 등 <strong>원하는 상태</strong>를 선언해 두면, 시스템이 자동으로 그 상태를 <strong>유지</strong>합니다.</p>
+<h3>4.1.3 Kubernetes 핵심 리소스 한눈에</h3>
 <p>쿠버네티스 세상에서는 모든 작업 단위를 <strong>리소스(Resource)</strong> 라고 부릅니다. 사용자의 요청은 여러 리소스를 거쳐 실제 컨테이너에 도달합니다. 전체적인 흐름은 다음과 같습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes 핵심 리소스의 전체 구조 — 사용자 요청은 Service에서 Pod로 직접 흐르고, Pod 오른쪽의 Deployment가 Pod 생성·관리를 담당한다">
@@ -191,8 +182,8 @@
 </svg>
 </div>
 <div class="caption">그림 4-3. Kubernetes 핵심 리소스의 전체 구조</div>
-<p>이번 챕터에서는 가장 기본이 되는 Pod와 Deployment를 먼저 다뤄 보겠습니다. 자동 복구와 스케일링 같은 핵심 기능을 이 둘만으로도 충분히 구현할 수 있기 때문입니다.</p>
-<h3>4.1.4 K8s 동작 원리 - 컨트롤 플레인과 워커 노드의 조직도</h3>
+<p>이번 챕터에서는 가장 기본이 되는 Pod와 Deployment를 먼저 다뤄 보겠습니다.</p>
+<h3>4.1.4 Kubernetes - 컨트롤 플레인과 워커 노드</h3>
 <p>쿠버네티스는 크게 <strong>컨트롤 플레인(Control Plane)</strong> 과 <strong>워커 노드(Worker Node)</strong> 라는 두 조직으로 나뉩니다. 이 둘이 합쳐져 유기적으로 돌아가는 전체 시스템을 <strong>클러스터(Cluster)</strong> 라고 부릅니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes 클러스터: 컨트롤 플레인(API Server·etcd·Scheduler·Controller Manager)과 워커 노드들이 오케스트레이션 계층을 이루고, 컨테이너 엔진은 워커 노드 안에 들어 있다. 그 아래 호스트 OS와 하드웨어가 인프라 계층을 이룬다.">
@@ -253,6 +244,7 @@
 <div class="term-box">
 <p><strong>노드(Node)</strong>: 컨테이너가 실제로 돌아가는 컴퓨터 한 대를 말합니다. 실제 서비스 환경에서는 수십~수백 대의 노드(서버)가 모여 하나의 클러스터를 이룹니다.</p>
 </div>
+<h3>4.1.5 Kubernetes의 동작 원리</h3>
 <p>개발자가 명령을 내리면 <strong>본사 관리팀(컨트롤 플레인)</strong> 에서는 접수, 판단, 지시가 순차적으로 일어납니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="명령이 컨트롤 플레인에서 워커 노드로 전달되는 가로 흐름">
@@ -929,7 +921,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 <p>스케일링으로 동시 접속 문제는 해결했지만, 다음 고민은 <strong>배포</strong>였습니다. 서버를 내리고 새 버전으로 한꺼번에 바꾸면, 서버가 내려가 있는 동안 오류가 발생합니다.</p>
 <p>이 지점에서 등장하는 것이 <strong>롤링 업데이트(Rolling Update)</strong> 입니다. 새 버전을 먼저 실행하고, 제대로 작동하는 게 확인되면 기존 버전을 내리는 식으로 <strong>순차 교체</strong>하는 방식입니다. YAML 파일의 strategy 설정이 바로 이 교체 속도를 조절하는 리모컨입니다.</p>
 <div class="term-box">
-<p><strong>RollingUpdate 전략</strong>: K8s Deployment의 기본 배포 전략입니다. <code>maxSurge</code>와 <code>maxUnavailable</code> 두 값으로 &quot;몇 개를 더 실행할 수 있는지&quot;, &quot;몇 개까지 사용 불가능해도 되는지&quot;를 조정합니다.</p>
+<p><strong>RollingUpdate 전략</strong>: Kubernetes Deployment의 기본 배포 전략입니다. <code>maxSurge</code>와 <code>maxUnavailable</code> 두 값으로 &quot;몇 개를 더 실행할 수 있는지&quot;, &quot;몇 개까지 사용 불가능해도 되는지&quot;를 조정합니다.</p>
 </div>
 <p>위 YAML의 <code>strategy</code> 블록의 속성은 다음과 같습니다.</p>
 <ul>
@@ -1011,8 +1003,8 @@ kubectl<span class="w"> </span>rollout<span class="w"> </span>undo<span class="w
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
 <li><strong>Docker는 &quot;지금 띄워라&quot;, Kubernetes는 &quot;이 상태를 유지해라&quot;.</strong> 선언형 관리의 핵심입니다. 내가 원하는 상태를 YAML에 정의해 두면, 쿠버네티스가 실시간 상태를 확인하며 그 상태에 계속 맞춥니다.</li>
-<li><strong>K8s는 프랜차이즈 본사 구조입니다.</strong> 본사가 전국의 가맹점을 관리하는 모습과 같습니다. 컨트롤 플레인이 워커 노드 위의 Pod를 관리합니다.</li>
-<li><strong>Pod는 가맹점, 실행의 최소 단위입니다.</strong> K8s에서 컨테이너는 Pod라는 상자에 담겨 움직입니다.</li>
+<li><strong>쿠버네티스는 프랜차이즈 본사 구조입니다.</strong> 본사가 전국의 가맹점을 관리하는 모습과 같습니다. 컨트롤 플레인이 워커 노드 위의 Pod를 관리합니다.</li>
+<li><strong>Pod는 가맹점, 실행의 최소 단위입니다.</strong> 쿠버네티스에서 컨테이너는 Pod라는 상자에 담겨 움직입니다.</li>
 <li><strong>Pod를 직접 만들지 마세요.</strong> 직접 만든 Pod는 장애가 나도 복구되지 않습니다. 반드시 Deployment로 감싸서 관리 목록에 올려야 자동 복구와 스케일링이 가능해집니다.</li>
 <li><strong>롤링 업데이트로 무중단 배포를 합니다.</strong> 새 Pod를 먼저 띄운 뒤 기존 Pod를 순차적으로 교체하여, 서비스 중단 없이 버전을 올리는 방식입니다.</li>
 </ul>
