@@ -525,8 +525,11 @@ src/main/resources/
 <h2>3.6 Minikube - 실행 및 결과 확인</h2>
 <h3>3.6.1 Minikube 시작</h3>
 <p>Minikube는 로컬 PC에 가벼운 Kubernetes 클러스터를 만들어주는 도구입니다. 설치되어 있지 않다면 OS에 맞게 먼저 설치합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube 설치 - macOS</div>brew<span class="w"> </span>install<span class="w"> </span>minikube</div>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube 설치 - Windows</div>winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube</div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube 설치</div><span class="c1"># macOS</span>
+brew<span class="w"> </span>install<span class="w"> </span>minikube
+
+<span class="c1"># Windows</span>
+winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube</div>
 <p>설치한 뒤 새 터미널을 열고, Docker Desktop이 실행 중인 상태에서 아래 명령을 입력하면 클러스터가 생성됩니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube 시작</div>minikube<span class="w"> </span>start</div>
 <div class="terminal-log">

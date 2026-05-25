@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 v10 — 와이드 비율 + 박스 글자 압축 + 화살표 z-order + 박스 라벨 정정</title>
+
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+
+<style>
+  .preview-banner { background: #fff4ed; border: 1px solid #ff7849; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px; font-size: 13px; color: #7b341e; }
+  .lens-panel { margin-top: 36px; padding: 16px 18px; border: 1px dashed #94a3b8; border-radius: 6px; background: #fafbfc; font-size: 13px; }
+  .lens-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: #0f172a; }
+  .lens-panel table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .lens-panel th, .lens-panel td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+  .lens-panel th { background: #f1f5f9; }
+  .ok { color: #047857; font-weight: 700; }
+  .diff-old { color: #94a3b8; text-decoration: line-through; }
+  .diff-new { color: #7b341e; font-weight: 700; }
+  .term-table { width: 100%; border-collapse: collapse; margin: 12px 0 4px 0; font-size: 13px; }
+  .term-table th, .term-table td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; vertical-align: top; }
+  .term-table th { background: #f1f5f9; font-weight: 700; }
+  .term-table td:first-child, .term-table td:nth-child(2) { text-align: center; }
+  .step-caption { text-align: center; font-style: italic; color: #475569; font-size: 13px; margin: 4px 0 24px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="preview-banner">
+    <strong>샘플 미리보기 v10</strong> — viewBox 1200×320 와이드, 박스 글자 최소화, 화살표 z-order 재배치(가려짐 해결), 본사 박스 라벨 <b>"프랜차이즈 본사" → "컨트롤 플레인"</b> 정정. 챕터 파일은 아직 수정되지 않았습니다.
+  </div>
+
+  <h3>4.1.4 Kubernetes의 동작 원리 (샘플)</h3>
+
+  <p>신규 가맹점 하나가 문을 여는 과정은 크게 <b>신청 → 판단 → 오픈</b> 세 단계로 흘러갑니다. 쿠버네티스도 똑같은 세 단계로 Pod 하나를 띄웁니다. 하나씩 들여다보겠습니다.</p>
+
+  <p><b>1. 신청 — 개발자가 본사 안내데스크에 명령을 낸다</b><br>
+  개발자가 <code>kubectl</code>로 명령을 입력하면 그 요청은 가맹 희망자가 신청서를 들고 본사 안내데스크에 들르는 것과 같습니다. 외부에서 들어오는 모든 요청은 가장 먼저 <b>Kube API Server(안내데스크)</b>를 통과합니다.</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 1200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="신청 단계 — 개발자가 kubectl 명령을 보내 Kube API Server에 도달하는 길. 컨트롤 플레인 내부 부서들과 워커 노드는 회색 외곽선으로 위치만 표시.">
+    <defs>
+      <marker id="s1-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+      <marker id="s1-dim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
+    </defs>
+
+    <!-- 단계 띠 -->
+    <rect x="20" y="20" width="150" height="22" rx="3" fill="#475569"/>
+    <text x="95" y="36" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1. 신청</text>
+    <rect x="190" y="20" width="580" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="480" y="36" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">2. 판단 — 컨트롤 플레인 (본사)</text>
+    <rect x="790" y="20" width="390" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="985" y="36" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">3. 오픈 — 워커 노드 (현장)</text>
+
+    <!-- 1. 컨트롤 플레인 박스 (외곽 진, 내부 흐림) -->
+    <rect x="190" y="60" width="580" height="250" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="202" y="78" font-size="11" font-weight="700" fill="#7b341e">컨트롤 플레인</text>
+
+    <rect x="210" y="170" width="160" height="110" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="290" y="220" text-anchor="middle" font-size="12" fill="#cbd5e1">etcd</text>
+    <text x="290" y="238" text-anchor="middle" font-size="10" fill="#cbd5e1">기록실</text>
+
+    <rect x="385" y="170" width="170" height="110" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="470" y="220" text-anchor="middle" font-size="12" fill="#cbd5e1">Scheduler</text>
+    <text x="470" y="238" text-anchor="middle" font-size="10" fill="#cbd5e1">출점 담당팀</text>
+
+    <rect x="570" y="170" width="190" height="110" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="665" y="220" text-anchor="middle" font-size="12" fill="#cbd5e1">Controller Manager</text>
+    <text x="665" y="238" text-anchor="middle" font-size="10" fill="#cbd5e1">운영점검팀</text>
+
+    <!-- 2. 워커 노드 박스 (흐림) -->
+    <rect x="790" y="60" width="390" height="250" rx="8" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="802" y="78" font-size="11" font-weight="600" fill="#cbd5e1">워커 노드</text>
+    <rect x="805" y="95" width="360" height="70" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="985" y="135" text-anchor="middle" font-size="12" fill="#cbd5e1">kubelet</text>
+    <rect x="805" y="180" width="360" height="115" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="985" y="240" text-anchor="middle" font-size="11" fill="#cbd5e1">Pod</text>
+
+    <!-- 3. 컨트롤 플레인 → 워커 화살표 (흐림) -->
+    <line x1="770" y1="125" x2="790" y2="125" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#s1-dim)"/>
+
+    <!-- 4. API Server (진 — 이번 단계 주인공) — 박스 위에 그려서 화살표 받기 -->
+    <rect x="290" y="95" width="380" height="50" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2.2"/>
+    <text x="480" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube API Server</text>
+    <text x="480" y="134" text-anchor="middle" font-size="10" fill="#7b341e">안내데스크</text>
+
+    <!-- 5. 개발자 (진) -->
+    <circle cx="80" cy="115" r="11" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+    <path d="M 57 162 V 148 Q 57 128 80 128 Q 103 128 103 148 V 162 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+    <text x="80" y="183" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">개발자</text>
+    <text x="80" y="197" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">(가맹 희망자)</text>
+
+    <!-- 6. 개발자 → API Server 화살표 (마지막에 그려서 박스 위에 표시) -->
+    <line x1="115" y1="120" x2="285" y2="120" stroke="#475569" stroke-width="2.2" marker-end="url(#s1-p)"/>
+    <text x="200" y="110" text-anchor="middle" font-size="11" fill="#0f172a" font-weight="700">kubectl 명령</text>
+    <text x="200" y="138" text-anchor="middle" font-size="9" fill="#7b341e" font-style="italic">(가맹 신청서 제출)</text>
+  </svg>
+  </div>
+  <p class="step-caption">그림 4-4. 신청 단계 — 개발자의 명령이 안내데스크에 도착하는 길</p>
+
+  <p><b>2. 판단 — 본사 부서들이 어디에 낼지 정하고 현황을 기록한다</b><br>
+  안내데스크가 신청을 접수하면 그 내용을 <b>etcd(기록실)</b>에 보관합니다. 기록된 정보를 보고 <b>Scheduler(출점 담당팀)</b>는 새 가맹점을 어느 워커 노드에 낼지 정하고, <b>Controller Manager(운영점검팀)</b>는 클러스터가 원하는 상태대로 굴러가는지 끊임없이 비교합니다. 세 부서는 안내데스크를 통해 서로 상태를 주고받으며 결론을 좁힙니다.</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 1200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="판단 단계 — 컨트롤 플레인 안내데스크와 세 부서가 양방향으로 협의해 결론을 좁히는 모습. 좌측 개발자와 우측 워커 노드는 회색 외곽선.">
+    <defs>
+      <marker id="s2-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+      <marker id="s2-o-rev" markerWidth="10" markerHeight="10" refX="2" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+      <marker id="s2-dim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
+    </defs>
+
+    <rect x="20" y="20" width="150" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="95" y="36" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">1. 신청</text>
+    <rect x="190" y="20" width="580" height="22" rx="3" fill="#ff7849"/>
+    <text x="480" y="36" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2. 판단 — 컨트롤 플레인 (본사)</text>
+    <rect x="790" y="20" width="390" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="985" y="36" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">3. 오픈 — 워커 노드 (현장)</text>
+
+    <!-- 컨트롤 플레인 박스 (진) -->
+    <rect x="190" y="60" width="580" height="250" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+    <text x="202" y="78" font-size="11" font-weight="700" fill="#7b341e">컨트롤 플레인</text>
+
+    <!-- 3부서 (진) -->
+    <rect x="210" y="170" width="160" height="110" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="290" y="220" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">etcd</text>
+    <text x="290" y="240" text-anchor="middle" font-size="10" fill="#7b341e">기록실</text>
+
+    <rect x="385" y="170" width="170" height="110" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="470" y="220" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Scheduler</text>
+    <text x="470" y="240" text-anchor="middle" font-size="10" fill="#7b341e">출점 담당팀</text>
+
+    <rect x="570" y="170" width="190" height="110" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="665" y="220" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Controller Manager</text>
+    <text x="665" y="240" text-anchor="middle" font-size="10" fill="#7b341e">운영점검팀</text>
+
+    <!-- 워커 노드 (흐림) -->
+    <rect x="790" y="60" width="390" height="250" rx="8" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="802" y="78" font-size="11" font-weight="600" fill="#cbd5e1">워커 노드</text>
+    <rect x="805" y="95" width="360" height="70" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="985" y="135" text-anchor="middle" font-size="12" fill="#cbd5e1">kubelet</text>
+    <rect x="805" y="180" width="360" height="115" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="985" y="240" text-anchor="middle" font-size="11" fill="#cbd5e1">Pod</text>
+
+    <!-- 컨트롤 플레인 → 워커 화살표 (흐림) -->
+    <line x1="770" y1="125" x2="790" y2="125" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#s2-dim)"/>
+
+    <!-- API Server (진) -->
+    <rect x="290" y="95" width="380" height="50" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
+    <text x="480" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube API Server</text>
+    <text x="480" y="134" text-anchor="middle" font-size="10" fill="#7b341e">안내데스크</text>
+
+    <!-- 안내데스크 ↔ 부서 양방향 (진) -->
+    <line x1="380" y1="148" x2="300" y2="167" stroke="#ff7849" stroke-width="1.6" marker-start="url(#s2-o-rev)" marker-end="url(#s2-o)"/>
+    <line x1="480" y1="148" x2="480" y2="167" stroke="#ff7849" stroke-width="1.6" marker-start="url(#s2-o-rev)" marker-end="url(#s2-o)"/>
+    <line x1="580" y1="148" x2="660" y2="167" stroke="#ff7849" stroke-width="1.6" marker-start="url(#s2-o-rev)" marker-end="url(#s2-o)"/>
+
+    <!-- 개발자 (흐림) -->
+    <circle cx="80" cy="115" r="11" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <path d="M 57 162 V 148 Q 57 128 80 128 Q 103 128 103 148 V 162 Z" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <text x="80" y="183" text-anchor="middle" font-size="11" fill="#cbd5e1">개발자</text>
+    <line x1="115" y1="120" x2="285" y2="120" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#s2-dim)"/>
+  </svg>
+  </div>
+  <p class="step-caption">그림 4-5. 판단 단계 — 안내데스크와 세 부서가 양방향으로 결론을 좁히는 모습</p>
+
+  <p><b>3. 오픈 — 현장 매니저가 받아 매장을 연다</b><br>
+  결론이 정해지면 그 지시는 다시 Kube API Server를 거쳐 워커 노드의 <b>kubelet</b>에 도착합니다. kubelet은 현장 매니저처럼 본사의 지시를 받아 노드 안에서 Pod를 직접 만들고, 컨테이너의 생사·상태가 흐트러지지 않게 계속 챙깁니다. 가맹점이 실제로 문을 여는 단계입니다.</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 1200 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="오픈 단계 — 컨트롤 플레인의 지시가 워커 노드의 kubelet에 도착해 Pod가 실제로 생성되는 모습. 좌측 개발자와 컨트롤 플레인 내부 부서는 회색 외곽선.">
+    <defs>
+      <marker id="s3-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+      <marker id="s3-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+      <marker id="s3-dim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
+    </defs>
+
+    <rect x="20" y="20" width="150" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="95" y="36" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">1. 신청</text>
+    <rect x="190" y="20" width="580" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="480" y="36" text-anchor="middle" font-size="11" font-weight="600" fill="#cbd5e1">2. 판단 — 컨트롤 플레인 (본사)</text>
+    <rect x="790" y="20" width="390" height="22" rx="3" fill="#4f46e5"/>
+    <text x="985" y="36" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3. 오픈 — 워커 노드 (현장)</text>
+
+    <!-- 컨트롤 플레인 (흐림) -->
+    <rect x="190" y="60" width="580" height="250" rx="10" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="202" y="78" font-size="11" font-weight="600" fill="#cbd5e1">컨트롤 플레인</text>
+    <rect x="290" y="95" width="380" height="50" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="480" y="125" text-anchor="middle" font-size="12" fill="#cbd5e1">Kube API Server</text>
+    <rect x="210" y="170" width="160" height="110" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="290" y="230" text-anchor="middle" font-size="11" fill="#cbd5e1">etcd</text>
+    <rect x="385" y="170" width="170" height="110" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="470" y="230" text-anchor="middle" font-size="11" fill="#cbd5e1">Scheduler</text>
+    <rect x="570" y="170" width="190" height="110" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="665" y="230" text-anchor="middle" font-size="11" fill="#cbd5e1">Controller Manager</text>
+
+    <!-- 워커 노드 (진) -->
+    <rect x="790" y="60" width="390" height="250" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <text x="802" y="78" font-size="11" font-weight="700" fill="#3730a3">워커 노드</text>
+
+    <!-- kubelet (압축 2줄) -->
+    <rect x="805" y="95" width="360" height="70" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <text x="985" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">kubelet · 현장 매니저</text>
+    <text x="985" y="145" text-anchor="middle" font-size="10" fill="#3730a3">· 본사 지시 받아 Pod 생성 · 컨테이너 생사·상태 점검</text>
+
+    <line x1="985" y1="167" x2="985" y2="190" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#s3-i)"/>
+    <text x="1030" y="183" text-anchor="middle" font-size="9" fill="#3730a3" font-style="italic">생성</text>
+
+    <!-- Pod (신규 가맹점) -->
+    <g transform="translate(805, 192)">
+      <path d="M 0 22 L 28 0 L 332 0 L 360 22 L 360 100 L 0 100 Z" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
+      <path d="M 0 22 L 28 0 L 332 0 L 360 22 Z" fill="#ff7849" opacity="0.22" stroke="#ff7849" stroke-width="1.2"/>
+      <text x="180" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod (신규 가맹점)</text>
+      <rect x="151" y="58" width="58" height="32" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
+      <text x="180" y="79" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">OPEN</text>
+    </g>
+
+    <!-- 컨트롤 플레인 → 워커 화살표 (진 — 이번 단계 주역) -->
+    <line x1="770" y1="125" x2="790" y2="125" stroke="#475569" stroke-width="2.2" marker-end="url(#s3-p)"/>
+    <text x="780" y="113" text-anchor="middle" font-size="10" fill="#0f172a" font-style="italic">개점 지시</text>
+
+    <!-- 개발자 (흐림) -->
+    <circle cx="80" cy="115" r="11" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <path d="M 57 162 V 148 Q 57 128 80 128 Q 103 128 103 148 V 162 Z" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <text x="80" y="183" text-anchor="middle" font-size="11" fill="#cbd5e1">개발자</text>
+    <line x1="115" y1="120" x2="285" y2="120" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#s3-dim)"/>
+  </svg>
+  </div>
+  <p class="step-caption">그림 4-6. 오픈 단계 — kubelet이 본사의 지시를 받아 Pod를 실제로 띄우는 모습</p>
+
+  <table class="term-table">
+    <thead>
+      <tr><th>구성 요소</th><th>비유</th><th>역할</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>Kube API Server</b></td><td>본사 안내데스크</td><td>모든 요청이 가장 먼저 도달하는 입구입니다. 외부 명령과 내부 부서 간의 소통이 모두 이 통로를 거칩니다.</td></tr>
+      <tr><td><b>etcd</b></td><td>본사 기록실</td><td>클러스터의 원하는 상태와 현재 상태를 모두 기록·조회하는 데이터베이스입니다.</td></tr>
+      <tr><td><b>Scheduler</b></td><td>출점 담당팀</td><td>새 Pod를 어느 워커 노드에 배치할지 결정합니다.</td></tr>
+      <tr><td><b>Controller Manager</b></td><td>운영점검팀</td><td>원하는 상태와 실제 상태를 끊임없이 비교하다가 차이가 생기면 복구 작업을 지시합니다.</td></tr>
+      <tr><td><b>kubelet</b></td><td>현장 매니저</td><td>본사의 지시를 받아 노드 안에서 Pod를 만들고, 컨테이너가 살아 있는지·정의된 상태와 같은지 계속 점검해 유지합니다.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="lens-panel" style="background:#fef9f4; border-color:#ff7849;">
+    <h3>v9 → v10 변경 요약</h3>
+    <ul style="margin:0; padding-left:20px;">
+      <li>viewBox <span class="diff-old">1000 × 440 (세로 길쭉)</span> → <span class="diff-new">1200 × 320 (와이드·납작)</span></li>
+      <li>본사 박스 라벨 <span class="diff-old">"프랜차이즈 본사"</span> → <span class="diff-new">"컨트롤 플레인"</span> (비유는 단계 띠에서 회수)</li>
+      <li>박스 내부 글자 축소 — 부서 박스 3줄 → <span class="diff-new">2줄(기술명 + 비유 한 줄)</span>, 안내데스크 부연 제거, "세 부서는 안내데스크를 통해…" 그림 내 캡션 제거(본문에 동일 문장 있음)</li>
+      <li>화살표 z-order 재배치 — 개발자→API Server 화살표를 본사 박스·API Server 박스 <b>뒤</b>가 아니라 <b>위</b>에 그려서 가려짐 해결</li>
+      <li>kubelet 박스 <span class="diff-old">3줄</span> → <span class="diff-new">2줄 압축</span>: "kubelet · 현장 매니저" / "· 본사 지시 받아 Pod 생성 · 컨테이너 생사·상태 점검"</li>
+    </ul>
+  </div>
+
+  <div class="lens-panel">
+    <h3>5렌즈 자가 점검 (v10)</h3>
+    <table>
+      <tr><th style="width:14%">렌즈</th><th style="width:8%">결과</th><th>근거</th></tr>
+      <tr><td>① 연결</td><td><span class="ok">PASS</span></td><td>본문 변화 없음. 그림은 위치·관계만 보여주고 설명은 본문이 담당하는 분담 강화. 단락 cold start 동일.</td></tr>
+      <tr><td>② 코드 정합</td><td><span class="ok">PASS</span></td><td>박스 라벨이 실제 컴포넌트 이름과 일치되어 사실 정확도 향상.</td></tr>
+      <tr><td>③ 라벨/AI투</td><td><span class="ok">PASS</span></td><td>박스 라벨 = 기술명, 비유 회수는 단계 띠로 분리 — 메모 "비유 단독 사용 금지, 영어 기술명(비유) 형식" 원칙 회복.</td></tr>
+      <tr><td>④ 과거형</td><td><span class="ok">PASS</span></td><td>영향 없음.</td></tr>
+      <tr><td>⑤ 의인화</td><td><span class="ok">PASS</span></td><td>영향 없음.</td></tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

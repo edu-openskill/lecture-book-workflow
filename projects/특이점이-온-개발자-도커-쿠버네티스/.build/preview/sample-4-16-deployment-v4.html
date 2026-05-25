@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 4-16 v4 — 첫 그림 추상화 (YAML 키 제거)</title>
+
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+
+<style>
+  .preview-banner { background: #fff4ed; border: 1px solid #ff7849; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px; font-size: 13px; color: #7b341e; }
+  .compare-banner { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin: 28px 0 12px 0; font-size: 12.5px; color: #475569; }
+  .step-caption { text-align: center; font-style: italic; color: #475569; font-size: 13px; margin: 4px 0 24px 0; }
+  .original-note { text-align: center; font-size: 11.5px; color: #94a3b8; margin: 0 0 8px 0; }
+  .svg-figure svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="preview-banner">
+    <strong>샘플 4-16 v4</strong> — Deployment <b>첫 그림</b>이므로 <b>YAML 키(replicas·selector·template) 완전 제거</b>.
+    개념만으로 표현: Deployment(원하는 상태 선언 · 비교·유지) → 점선 화살표(관리) → Pod(컨테이너 실행).
+    세부 YAML 키는 직후 실습 1 코드블록과 그림 4-17부터 등장.
+  </div>
+
+  <div class="compare-banner">아래: v4 (첫 그림 추상화)</div>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment 구조: Deployment가 원하는 상태를 선언해 두고 Pod를 띄워 관리한다">
+    <defs>
+      <marker id="mng-arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+    </defs>
+
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Deployment의 구조 — Pod를 띄우고 원하는 상태를 계속 유지</text>
+
+    <!-- Deployment 박스 (왼쪽) -->
+    <rect x="40" y="60" width="260" height="120" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <path d="M 48 60 L 292 60 Q 300 60 300 68 L 300 86 L 40 86 L 40 68 Q 40 60 48 60 Z" fill="#4f46e5"/>
+    <text x="170" y="79" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Deployment</text>
+
+    <text x="170" y="115" text-anchor="middle" font-size="12" fill="#3730a3">원하는 상태를 선언</text>
+    <text x="170" y="140" text-anchor="middle" font-size="12" fill="#3730a3">↻ 비교·유지</text>
+    <text x="170" y="166" text-anchor="middle" font-size="11" font-style="italic" fill="#64748b">(매뉴얼 역할)</text>
+
+    <!-- 점선 화살표: Deployment → Pod -->
+    <path d="M 300 120 Q 410 120, 510 120" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#mng-arr)"/>
+    <text x="405" y="110" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">관리</text>
+
+    <!-- Pod 박스 (오른쪽) -->
+    <rect x="510" y="80" width="220" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 516 80 L 724 80 Q 730 80 730 86 L 730 100 L 510 100 L 510 86 Q 510 80 516 80 Z" fill="#ff7849"/>
+    <text x="620" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod</text>
+    <text x="620" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">nginx</text>
+    <text x="620" y="148" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">실행 중</text>
+
+    <!-- 하단 보충 -->
+    <text x="380" y="210" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod가 사라지면 Deployment가 같은 모양의 Pod를 다시 띄워 원래대로 맞춥니다.</text>
+  </svg>
+  </div>
+
+  <p class="step-caption">그림 4-16. Deployment의 구조 — Pod를 띄우고 원하는 상태를 계속 유지</p>
+
+  <div class="compare-banner">참고: 그림 4-17 (selector 매칭 — YAML 키 처음 등장 자리)</div>
+  <p class="original-note">▼ 4-17 (selector 매칭)</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 285" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="그림 4-17">
+    <defs>
+      <marker id="sl-pick" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+    </defs>
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Deployment selector — 같은 라벨을 가진 Pod만 관리</text>
+    <rect x="40" y="100" width="220" height="100" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <path d="M 48 100 L 252 100 Q 260 100 260 108 L 260 126 L 40 126 L 40 108 Q 40 100 48 100 Z" fill="#4f46e5"/>
+    <text x="150" y="119" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Deployment</text>
+    <text x="150" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#3730a3">selector</text>
+    <text x="150" y="183" text-anchor="middle" font-size="14" font-family="monospace" font-weight="700" fill="#3730a3">app: nginx</text>
+    <path d="M 260 135 Q 380 75, 510 70" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#sl-pick)"/>
+    <path d="M 260 155 Q 380 155, 510 155" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#sl-pick)"/>
+    <rect x="510" y="45" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="525" y="68" font-size="12" font-weight="700" fill="#7b341e">Pod 1</text>
+    <text x="525" y="91" font-size="11" font-family="monospace" fill="#7b341e">labels:</text>
+    <text x="585" y="91" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
+    <text x="722" y="68" text-anchor="end" font-size="11" font-weight="700" fill="#4f46e5">선택</text>
+    <rect x="510" y="130" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="525" y="153" font-size="12" font-weight="700" fill="#7b341e">Pod 2</text>
+    <text x="525" y="176" font-size="11" font-family="monospace" fill="#7b341e">labels:</text>
+    <text x="585" y="176" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
+    <text x="722" y="153" text-anchor="end" font-size="11" font-weight="700" fill="#4f46e5">선택</text>
+    <rect x="510" y="215" width="220" height="60" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
+    <text x="525" y="238" font-size="12" font-weight="700" fill="#94a3b8">Pod 3</text>
+    <text x="525" y="261" font-size="11" font-family="monospace" fill="#94a3b8">labels:</text>
+    <text x="585" y="261" font-size="11" font-family="monospace" font-weight="700" fill="#94a3b8">app: db</text>
+    <text x="722" y="238" text-anchor="end" font-size="11" font-weight="700" fill="#94a3b8">제외</text>
+  </svg>
+  </div>
+
+</div>
+</body>
+</html>

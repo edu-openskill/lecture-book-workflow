@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 4-16 v2 — Reconciliation Loop</title>
+
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+
+<style>
+  .preview-banner { background: #fff4ed; border: 1px solid #ff7849; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px; font-size: 13px; color: #7b341e; }
+  .compare-banner { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin: 28px 0 12px 0; font-size: 12.5px; color: #475569; }
+  .step-caption { text-align: center; font-style: italic; color: #475569; font-size: 13px; margin: 4px 0 24px 0; }
+  .original-note { text-align: center; font-size: 11.5px; color: #94a3b8; margin: 0 0 8px 0; }
+  .svg-figure svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="preview-banner">
+    <strong>샘플 4-16 v2</strong> — 외부 자료 표준 패턴 <b>Reconciliation Loop</b>(쿠버네티스 공식 + Red Hat 등) 차용.
+    위쪽 <b>Desired State</b>(원하는 상태 spec) ↔ 가운데 <b>Deployment Controller</b>(Observe → Compare → Act) ↔ 아래쪽 <b>Actual State</b>(현재 상태 status).
+    캡션 "Controller가 비교·유지"와 시각·텍스트 일치. ReplicaSet 미등장(4.4.3에서 등장 예정).
+  </div>
+
+  <div class="compare-banner">아래: 새 안 v2 (Reconciliation Loop)</div>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment의 Reconciliation Loop — Desired State와 Actual State 사이에서 Controller가 Observe·Compare·Act를 반복하여 두 상태를 일치시킨다">
+    <defs>
+      <marker id="apply-arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+      </marker>
+      <marker id="loop-arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+    </defs>
+
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Deployment의 구조 — Controller가 원하는 상태와 현재 상태를 계속 비교·유지</text>
+
+    <!-- 사용자 + kubectl apply -->
+    <text x="210" y="60" text-anchor="end" font-size="11" font-style="italic" fill="#475569">사용자 →</text>
+    <rect x="220" y="40" width="320" height="34" rx="4" fill="#0f172a"/>
+    <text x="232" y="62" font-family="monospace" font-size="12" fill="#fff">$ kubectl apply -f deploy.yml</text>
+    <line x1="380" y1="76" x2="380" y2="100" stroke="#475569" stroke-width="1.8" marker-end="url(#apply-arr)"/>
+    <text x="395" y="92" font-size="10" font-style="italic" fill="#475569">선언</text>
+
+    <!-- Desired State 박스 (상단) -->
+    <rect x="140" y="108" width="480" height="76" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M 150 108 L 610 108 Q 620 108 620 118 L 620 134 L 140 134 L 140 118 Q 140 108 150 108 Z" fill="#4f46e5"/>
+    <text x="160" y="126" font-size="13" font-weight="700" fill="#fff">Desired State — 원하는 상태 (spec)</text>
+    <text x="160" y="156" font-size="12" font-family="monospace" fill="#475569">replicas: 1</text>
+    <text x="320" y="156" font-size="12" font-family="monospace" fill="#475569">image: nginx</text>
+    <text x="160" y="174" font-size="12" font-family="monospace" fill="#475569">selector: app=nginx</text>
+
+    <!-- Controller 박스 (가운데) -->
+    <rect x="220" y="220" width="320" height="80" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="2.4"/>
+    <text x="380" y="244" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">Deployment Controller</text>
+    <text x="380" y="266" text-anchor="middle" font-size="11" font-style="italic" fill="#3730a3">↻ Observe · Compare · Act</text>
+    <text x="380" y="287" text-anchor="middle" font-size="10.5" fill="#475569">두 상태가 어긋나면 좁히도록 동작</text>
+
+    <!-- 양방향 화살표: Desired ↔ Controller -->
+    <line x1="320" y1="186" x2="320" y2="217" stroke="#4f46e5" stroke-width="1.8" marker-end="url(#loop-arr)"/>
+    <line x1="440" y1="217" x2="440" y2="186" stroke="#4f46e5" stroke-width="1.8" marker-end="url(#loop-arr)"/>
+    <text x="380" y="206" text-anchor="middle" font-size="10" font-style="italic" fill="#4f46e5">읽기 / 반영</text>
+
+    <!-- 양방향 화살표: Controller ↔ Actual -->
+    <line x1="320" y1="303" x2="320" y2="334" stroke="#4f46e5" stroke-width="1.8" marker-end="url(#loop-arr)"/>
+    <line x1="440" y1="334" x2="440" y2="303" stroke="#4f46e5" stroke-width="1.8" marker-end="url(#loop-arr)"/>
+    <text x="380" y="323" text-anchor="middle" font-size="10" font-style="italic" fill="#4f46e5">관찰 / 조정</text>
+
+    <!-- Actual State 박스 (하단) -->
+    <rect x="140" y="336" width="480" height="92" rx="8" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+    <path d="M 150 336 L 610 336 Q 620 336 620 346 L 620 362 L 140 362 L 140 346 Q 140 336 150 336 Z" fill="#ff7849"/>
+    <text x="160" y="354" font-size="13" font-weight="700" fill="#fff">Actual State — 현재 상태 (status)</text>
+    <rect x="320" y="376" width="120" height="40" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="380" y="394" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod</text>
+    <text x="380" y="410" text-anchor="middle" font-size="10" font-family="monospace" fill="#7b341e">app: nginx</text>
+
+    <!-- 하단 보충 -->
+    <text x="380" y="458" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod가 사라져 두 상태가 어긋나면 Controller가 새 Pod를 띄워 원래대로 맞춥니다.</text>
+  </svg>
+  </div>
+
+  <p class="step-caption">그림 4-16. Deployment의 구조 — Controller가 원하는 상태와 현재 상태를 계속 비교·유지</p>
+
+  <div class="compare-banner">참고 1: v1 (selector 매칭 패턴)</div>
+  <p class="original-note">▼ v1 (4-17 패턴 차용)</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="v1: Deployment selector 매칭">
+    <defs>
+      <marker id="v1-flow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+      </marker>
+      <marker id="v1-match" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+    </defs>
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Deployment의 구조 — 선언한 상태를 Controller가 라벨로 매칭해 유지</text>
+    <text x="210" y="60" text-anchor="end" font-size="11" font-style="italic" fill="#475569">사용자 →</text>
+    <rect x="220" y="40" width="320" height="34" rx="4" fill="#0f172a"/>
+    <text x="232" y="62" font-family="monospace" font-size="12" fill="#fff">$ kubectl apply -f deploy.yml</text>
+    <line x1="380" y1="76" x2="380" y2="102" stroke="#475569" stroke-width="1.8" marker-end="url(#v1-flow)"/>
+    <text x="395" y="93" font-size="10" font-style="italic" fill="#475569">선언</text>
+    <rect x="40" y="108" width="340" height="215" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M 50 108 L 370 108 Q 380 108 380 118 L 380 138 L 40 138 L 40 118 Q 40 108 50 108 Z" fill="#4f46e5"/>
+    <text x="60" y="128" font-size="14" font-weight="700" fill="#fff">Deployment</text>
+    <text x="370" y="128" text-anchor="end" font-size="10.5" font-weight="600" fill="#fff">↻ Controller — 비교·유지</text>
+    <text x="60" y="160" font-size="11" font-weight="600" fill="#3730a3">원하는 상태</text>
+    <text x="60" y="182" font-size="12" font-family="monospace" fill="#475569">replicas: 1</text>
+    <text x="60" y="202" font-size="12" font-family="monospace" fill="#475569">selector: app=nginx</text>
+    <text x="60" y="222" font-size="12" font-family="monospace" fill="#475569">template: { image: nginx }</text>
+    <line x1="55" y1="240" x2="365" y2="240" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="60" y="262" font-size="11" font-weight="600" fill="#3730a3">현재 상태</text>
+    <text x="60" y="284" font-size="12" font-family="monospace" fill="#475569">Pod 1개 실행 중 (app=nginx)</text>
+    <line x1="382" y1="215" x2="498" y2="215" stroke="#4f46e5" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#v1-match)"/>
+    <text x="440" y="207" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5" font-style="italic">라벨 매칭</text>
+    <text x="440" y="232" text-anchor="middle" font-size="10" font-family="monospace" fill="#4f46e5">app=nginx</text>
+    <rect x="500" y="175" width="220" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 506 175 L 714 175 Q 720 175 720 181 L 720 197 L 500 197 L 500 181 Q 500 175 506 175 Z" fill="#ff7849"/>
+    <text x="610" y="190" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod</text>
+    <text x="610" y="218" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">nginx</text>
+    <text x="610" y="238" text-anchor="middle" font-size="10.5" font-family="monospace" fill="#7b341e">labels: { app: nginx }</text>
+  </svg>
+  </div>
+
+  <div class="compare-banner">참고 2: 기존 안 (Deployment 박스 안에 Pod 3개)</div>
+  <p class="original-note">▼ 기존 안</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="기존 안">
+    <defs>
+      <marker id="orig-flow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+      </marker>
+    </defs>
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Deployment의 구조 — 선언한 상태를 Controller가 계속 비교·유지</text>
+    <text x="210" y="60" text-anchor="end" font-size="11" font-style="italic" fill="#475569">사용자 →</text>
+    <rect x="220" y="40" width="320" height="34" rx="4" fill="#0f172a"/>
+    <text x="232" y="62" font-family="monospace" font-size="12" fill="#fff">$ kubectl apply -f deploy.yml</text>
+    <line x1="380" y1="76" x2="380" y2="102" stroke="#475569" stroke-width="1.8" marker-end="url(#orig-flow)"/>
+    <text x="395" y="93" font-size="10" font-style="italic" fill="#475569">선언</text>
+    <rect x="40" y="108" width="680" height="195" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M 50 108 L 710 108 Q 720 108 720 118 L 720 138 L 40 138 L 40 118 Q 40 108 50 108 Z" fill="#4f46e5"/>
+    <text x="60" y="128" font-size="14" font-weight="700" fill="#fff">Deployment</text>
+    <text x="700" y="128" text-anchor="end" font-size="11" font-weight="600" fill="#fff">↻ Controller — 계속 비교·유지</text>
+    <text x="60" y="160" font-size="11" font-weight="600" fill="#3730a3">원하는 상태:</text>
+    <text x="138" y="160" font-size="11" font-family="monospace" fill="#475569">replicas: 3  ·  selector: app: nginx  ·  template</text>
+    <rect x="100" y="180" width="170" height="70" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 106 180 L 264 180 Q 270 180 270 186 L 270 202 L 100 202 L 100 186 Q 100 180 106 180 Z" fill="#ff7849"/>
+    <text x="185" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Pod 1</text>
+    <text x="185" y="223" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">nginx</text>
+    <text x="185" y="241" text-anchor="middle" font-size="10" font-family="monospace" fill="#7b341e">app: nginx</text>
+    <rect x="295" y="180" width="170" height="70" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 301 180 L 459 180 Q 465 180 465 186 L 465 202 L 295 202 L 295 186 Q 295 180 301 180 Z" fill="#ff7849"/>
+    <text x="380" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Pod 2</text>
+    <text x="380" y="223" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">nginx</text>
+    <text x="380" y="241" text-anchor="middle" font-size="10" font-family="monospace" fill="#7b341e">app: nginx</text>
+    <rect x="490" y="180" width="170" height="70" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 496 180 L 654 180 Q 660 180 660 186 L 660 202 L 490 202 L 490 186 Q 490 180 496 180 Z" fill="#ff7849"/>
+    <text x="575" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Pod 3</text>
+    <text x="575" y="223" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">nginx</text>
+    <text x="575" y="241" text-anchor="middle" font-size="10" font-family="monospace" fill="#7b341e">app: nginx</text>
+    <text x="60" y="285" font-size="11" font-weight="600" fill="#3730a3">현재 상태:</text>
+    <text x="138" y="285" font-size="11" font-family="monospace" fill="#475569">Pod 3개 실행 중</text>
+  </svg>
+  </div>
+
+</div>
+</body>
+</html>

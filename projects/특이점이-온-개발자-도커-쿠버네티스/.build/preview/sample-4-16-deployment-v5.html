@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 4-16 v5 — 추상 + Pod 2개</title>
+
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+
+<style>
+  .preview-banner { background: #fff4ed; border: 1px solid #ff7849; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px; font-size: 13px; color: #7b341e; }
+  .compare-banner { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin: 28px 0 12px 0; font-size: 12.5px; color: #475569; }
+  .step-caption { text-align: center; font-style: italic; color: #475569; font-size: 13px; margin: 4px 0 24px 0; }
+  .original-note { text-align: center; font-size: 11.5px; color: #94a3b8; margin: 0 0 8px 0; }
+  .svg-figure svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="preview-banner">
+    <strong>샘플 4-16 v5</strong> — v4 대비: <b>nginx 이미지 이름 제거</b> + <b>Pod 2개로</b>.
+    완전 추상화 (구체 키워드·이미지 이름 없음). Deployment(원하는 상태 선언 · 비교·유지) → 점선 화살표(관리) → Pod 2개 (실행 중).
+  </div>
+
+  <div class="compare-banner">아래: v5</div>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment 구조: Deployment가 원하는 상태를 선언해 두고 여러 Pod를 띄워 관리한다">
+    <defs>
+      <marker id="mng-arr5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+    </defs>
+
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Deployment의 구조 — Pod를 띄우고 원하는 상태를 계속 유지</text>
+
+    <!-- Deployment 박스 (왼쪽) -->
+    <rect x="40" y="80" width="260" height="120" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <path d="M 48 80 L 292 80 Q 300 80 300 88 L 300 106 L 40 106 L 40 88 Q 40 80 48 80 Z" fill="#4f46e5"/>
+    <text x="170" y="99" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Deployment</text>
+
+    <text x="170" y="135" text-anchor="middle" font-size="12" fill="#3730a3">원하는 상태를 선언</text>
+    <text x="170" y="160" text-anchor="middle" font-size="12" fill="#3730a3">↻ 비교·유지</text>
+    <text x="170" y="186" text-anchor="middle" font-size="11" font-style="italic" fill="#64748b">(매뉴얼 역할)</text>
+
+    <!-- 점선 화살표: Deployment → Pod 1 -->
+    <path d="M 300 130 Q 410 110, 510 90" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#mng-arr5)"/>
+    <!-- 점선 화살표: Deployment → Pod 2 -->
+    <path d="M 300 150 Q 410 170, 510 190" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#mng-arr5)"/>
+
+    <text x="405" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">관리</text>
+
+    <!-- Pod 1 박스 (오른쪽 위) -->
+    <rect x="510" y="60" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 516 60 L 724 60 Q 730 60 730 66 L 730 80 L 510 80 L 510 66 Q 510 60 516 60 Z" fill="#ff7849"/>
+    <text x="620" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod 1</text>
+    <text x="620" y="106" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">실행 중</text>
+
+    <!-- Pod 2 박스 (오른쪽 아래) -->
+    <rect x="510" y="160" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 516 160 L 724 160 Q 730 160 730 166 L 730 180 L 510 180 L 510 166 Q 510 160 516 160 Z" fill="#ff7849"/>
+    <text x="620" y="174" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod 2</text>
+    <text x="620" y="206" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">실행 중</text>
+
+    <!-- 하단 보충 -->
+    <text x="380" y="250" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod가 사라지면 Deployment가 같은 모양의 Pod를 다시 띄워 원래대로 맞춥니다.</text>
+  </svg>
+  </div>
+
+  <p class="step-caption">그림 4-16. Deployment의 구조 — Pod를 띄우고 원하는 상태를 계속 유지</p>
+
+  <div class="compare-banner">참고: v4 (Pod 1개)</div>
+  <p class="original-note">▼ v4</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="v4">
+    <defs>
+      <marker id="v4-arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+    </defs>
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Deployment의 구조 — Pod를 띄우고 원하는 상태를 계속 유지</text>
+    <rect x="40" y="60" width="260" height="120" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <path d="M 48 60 L 292 60 Q 300 60 300 68 L 300 86 L 40 86 L 40 68 Q 40 60 48 60 Z" fill="#4f46e5"/>
+    <text x="170" y="79" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Deployment</text>
+    <text x="170" y="115" text-anchor="middle" font-size="12" fill="#3730a3">원하는 상태를 선언</text>
+    <text x="170" y="140" text-anchor="middle" font-size="12" fill="#3730a3">↻ 비교·유지</text>
+    <text x="170" y="166" text-anchor="middle" font-size="11" font-style="italic" fill="#64748b">(매뉴얼 역할)</text>
+    <path d="M 300 120 Q 410 120, 510 120" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#v4-arr)"/>
+    <text x="405" y="110" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">관리</text>
+    <rect x="510" y="80" width="220" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 516 80 L 724 80 Q 730 80 730 86 L 730 100 L 510 100 L 510 86 Q 510 80 516 80 Z" fill="#ff7849"/>
+    <text x="620" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod</text>
+    <text x="620" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">nginx</text>
+    <text x="620" y="148" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">실행 중</text>
+    <text x="380" y="210" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod가 사라지면 Deployment가 같은 모양의 Pod를 다시 띄워 원래대로 맞춥니다.</text>
+  </svg>
+  </div>
+
+</div>
+</body>
+</html>

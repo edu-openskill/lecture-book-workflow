@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 4-20 v2 — 브랜드 토큰 준수</title>
+
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+
+<style>
+  .preview-banner { background: #fff4ed; border: 1px solid #ff7849; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px; font-size: 13px; color: #7b341e; }
+  .compare-banner { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin: 28px 0 12px 0; font-size: 12.5px; color: #475569; }
+  .step-caption { text-align: center; font-style: italic; color: #475569; font-size: 13px; margin: 4px 0 24px 0; }
+  .original-note { text-align: center; font-size: 11.5px; color: #94a3b8; margin: 0 0 8px 0; }
+  .svg-figure svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="preview-banner">
+    <strong>샘플 4-20 v2</strong> — v1의 success(초록)·danger(빨강)를 <b>제거</b> (Utility 토큰 — 새 컴포넌트 사용 금지).
+    <b>Primary 인디고 + Secondary 오렌지 + 무채색</b>만 사용. Pod 2 종료는 무채색 점선·회색 X로, Pod 3 자동 생성은 인디고 배경·굵은 인디고 테두리 + 오렌지 헤더로 강조.
+  </div>
+
+  <div class="compare-banner">아래: v2 (브랜드 토큰 준수)</div>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ReplicaSet 자가 복구: Deployment가 Pod 2개를 유지하는 상태에서 Pod 하나가 종료되면 새 Pod를 자동으로 띄워 개수를 맞춘다">
+    <defs>
+      <marker id="mng-arr-v2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+      <marker id="dim-arr-v2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/>
+      </marker>
+    </defs>
+
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Pod 하나가 종료되면 새 Pod를 자동으로 띄워 개수를 맞춤</text>
+
+    <!-- Deployment 박스 (왼쪽) -->
+    <rect x="40" y="105" width="260" height="120" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <path d="M 48 105 L 292 105 Q 300 105 300 113 L 300 131 L 40 131 L 40 113 Q 40 105 48 105 Z" fill="#4f46e5"/>
+    <text x="170" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Deployment</text>
+    <text x="170" y="160" text-anchor="middle" font-size="12" fill="#3730a3">Pod 2개 유지</text>
+    <text x="170" y="185" text-anchor="middle" font-size="12" fill="#3730a3">↻ 비교·유지</text>
+    <text x="170" y="211" text-anchor="middle" font-size="11" font-style="italic" fill="#64748b">(매뉴얼 역할)</text>
+
+    <!-- 점선 화살표: Deployment → Pod 1 (정상) -->
+    <path d="M 300 145 Q 410 110, 510 80" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#mng-arr-v2)"/>
+    <!-- 점선 화살표: Deployment → Pod 2 (종료, 무채색 흐림) -->
+    <path d="M 300 165 Q 410 165, 510 165" fill="none" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#dim-arr-v2)"/>
+    <!-- 점선 화살표: Deployment → Pod 3 (자동 생성, 인디고 굵게) -->
+    <path d="M 300 185 Q 410 220, 510 250" fill="none" stroke="#4f46e5" stroke-width="2.4" stroke-dasharray="6,4" marker-end="url(#mng-arr-v2)"/>
+
+    <text x="405" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">관리</text>
+    <text x="405" y="245" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5" font-style="italic">새로 띄움</text>
+
+    <!-- Pod 1 (오른쪽 위) — 정상 (Secondary 오렌지) -->
+    <rect x="510" y="50" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 516 50 L 724 50 Q 730 50 730 56 L 730 70 L 510 70 L 510 56 Q 510 50 516 50 Z" fill="#ff7849"/>
+    <text x="620" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod 1</text>
+    <text x="620" y="96" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">실행 중</text>
+
+    <!-- Pod 2 (오른쪽 중간) — 종료 (무채색 점선) -->
+    <rect x="510" y="135" width="220" height="60" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
+    <path d="M 516 135 L 724 135 Q 730 135 730 141 L 730 155 L 510 155 L 510 141 Q 510 135 516 135 Z" fill="#cbd5e1"/>
+    <text x="620" y="149" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" text-decoration="line-through">Pod 2</text>
+    <text x="620" y="181" text-anchor="middle" font-size="11" font-style="italic" fill="#94a3b8">종료</text>
+    <!-- X 표시 (무채색) -->
+    <line x1="690" y1="142" x2="715" y2="167" stroke="#475569" stroke-width="2.5"/>
+    <line x1="715" y1="142" x2="690" y2="167" stroke="#475569" stroke-width="2.5"/>
+
+    <!-- Pod 3 (오른쪽 아래) — 자동 생성 (오렌지 헤더 + 인디고 배경·굵은 인디고 테두리로 강조) -->
+    <rect x="510" y="220" width="220" height="60" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M 516 220 L 724 220 Q 730 220 730 226 L 730 240 L 510 240 L 510 226 Q 510 220 516 220 Z" fill="#ff7849"/>
+    <text x="620" y="234" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod 3</text>
+    <text x="620" y="266" text-anchor="middle" font-size="11" font-style="italic" fill="#3730a3">자동 생성</text>
+
+    <!-- 하단 보충 -->
+    <text x="380" y="305" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod 2가 종료되면 Deployment가 즉시 Pod 3을 띄워 다시 2개를 유지합니다.</text>
+  </svg>
+  </div>
+
+  <p class="step-caption">그림 4-20. Pod 하나가 종료되면 새 Pod를 자동으로 띄워 개수를 맞춤</p>
+
+  <div class="compare-banner">참고: v1 (success·danger 사용)</div>
+  <p class="original-note">▼ v1 (toxin 토큰 사용 — 책 스타일에는 안 맞음)</p>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="v1">
+    <defs>
+      <marker id="v1-mng" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/>
+      </marker>
+      <marker id="v1-create" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#059669"/>
+      </marker>
+    </defs>
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Pod 하나가 종료되면 새 Pod를 자동으로 띄워 개수를 맞춤</text>
+    <rect x="40" y="105" width="260" height="120" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <path d="M 48 105 L 292 105 Q 300 105 300 113 L 300 131 L 40 131 L 40 113 Q 40 105 48 105 Z" fill="#4f46e5"/>
+    <text x="170" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Deployment</text>
+    <text x="170" y="160" text-anchor="middle" font-size="12" fill="#3730a3">Pod 2개 유지</text>
+    <text x="170" y="185" text-anchor="middle" font-size="12" fill="#3730a3">↻ 비교·유지</text>
+    <text x="170" y="211" text-anchor="middle" font-size="11" font-style="italic" fill="#64748b">(매뉴얼 역할)</text>
+    <path d="M 300 145 Q 410 110, 510 80" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#v1-mng)"/>
+    <path d="M 300 165 Q 410 165, 510 165" fill="none" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#v1-mng)"/>
+    <path d="M 300 185 Q 410 220, 510 250" fill="none" stroke="#059669" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#v1-create)"/>
+    <text x="405" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">관리</text>
+    <text x="405" y="245" text-anchor="middle" font-size="11" font-weight="700" fill="#059669" font-style="italic">새로 띄움</text>
+    <rect x="510" y="50" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <path d="M 516 50 L 724 50 Q 730 50 730 56 L 730 70 L 510 70 L 510 56 Q 510 50 516 50 Z" fill="#ff7849"/>
+    <text x="620" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod 1</text>
+    <text x="620" y="96" text-anchor="middle" font-size="11" font-style="italic" fill="#7b341e">실행 중</text>
+    <rect x="510" y="135" width="220" height="60" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
+    <path d="M 516 135 L 724 135 Q 730 135 730 141 L 730 155 L 510 155 L 510 141 Q 510 135 516 135 Z" fill="#cbd5e1"/>
+    <text x="620" y="149" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" text-decoration="line-through">Pod 2</text>
+    <text x="620" y="181" text-anchor="middle" font-size="11" font-style="italic" fill="#94a3b8">종료</text>
+    <line x1="690" y1="142" x2="715" y2="167" stroke="#dc2626" stroke-width="2.5"/>
+    <line x1="715" y1="142" x2="690" y2="167" stroke="#dc2626" stroke-width="2.5"/>
+    <rect x="510" y="220" width="220" height="60" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <path d="M 516 220 L 724 220 Q 730 220 730 226 L 730 240 L 510 240 L 510 226 Q 510 220 516 220 Z" fill="#059669"/>
+    <text x="620" y="234" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pod 3</text>
+    <text x="620" y="266" text-anchor="middle" font-size="11" font-style="italic" fill="#047857">자동 생성</text>
+    <text x="380" y="305" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod 2가 종료되면 Deployment가 즉시 Pod 3을 띄워 다시 2개를 유지합니다.</text>
+  </svg>
+  </div>
+
+</div>
+</body>
+</html>

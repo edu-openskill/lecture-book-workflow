@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 4-3 v5 — 워커 묶기·화살표 중앙</title>
+
+<link rel="stylesheet" href="../styles/fonts.css">
+<link rel="stylesheet" href="../styles/tokens.css">
+<link rel="stylesheet" href="../styles/base.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/diagrams.css">
+
+<style>
+  .preview-banner { background: #fff4ed; border: 1px solid #ff7849; border-radius: 6px; padding: 10px 14px; margin-bottom: 24px; font-size: 13px; color: #7b341e; }
+  .compare-banner { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; margin: 28px 0 12px 0; font-size: 12.5px; color: #475569; }
+  .lens-panel { margin-top: 36px; padding: 16px 18px; border: 1px dashed #94a3b8; border-radius: 6px; background: #fafbfc; font-size: 13px; }
+  .lens-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: #0f172a; }
+  .lens-panel table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .lens-panel th, .lens-panel td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+  .lens-panel th { background: #f1f5f9; }
+  .ok { color: #047857; font-weight: 700; }
+  .step-caption { text-align: center; font-style: italic; color: #475569; font-size: 13px; margin: 4px 0 24px 0; }
+  .original-note { text-align: center; font-size: 11.5px; color: #94a3b8; margin: 0 0 8px 0; }
+  .svg-figure svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="preview-banner">
+    <strong>샘플 4-3 v5</strong> — v4 대비: <b>워커끼리 간격 80→25</b>로 좁혀 한 묶음으로 보이게, <b>명령 화살표를 박스 위(y=160)에서 박스 세로 중앙(y=235)으로 이동</b>.
+  </div>
+
+  <h3>그림 4-3 (A안 샘플 v5) — Kubernetes 클러스터: 노드 한 대 = 컴퓨터 한 대</h3>
+
+  <div class="svg-figure">
+  <svg viewBox="0 0 940 410" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes 클러스터 — 컨트롤 플레인 노드 1대와 워커 노드 2대가 각각 독립된 호스트 OS·하드웨어 위에서 동작">
+    <defs>
+      <marker id="cmd-ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+      </marker>
+    </defs>
+    <text x="470" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Kubernetes 클러스터 — 노드 한 대 = 컴퓨터 한 대</text>
+
+    <text x="22" y="183" font-size="10" font-weight="600" fill="#64748b" transform="rotate(-90 22 183)">오케스트레이션 계층</text>
+    <text x="22" y="323" font-size="10" font-weight="600" fill="#64748b" transform="rotate(-90 22 323)">인프라 계층</text>
+
+    <!-- 컨트롤 플레인 노드 (x=55, w=250) -->
+    <rect x="55" y="70" width="250" height="330" rx="8" fill="none" stroke="#ff7849" stroke-width="2"/>
+    <path d="M 63 70 L 297 70 Q 305 70 305 78 L 305 98 L 55 98 L 55 78 Q 55 70 63 70 Z" fill="#ff7849"/>
+    <text x="180" y="89" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">컨트롤 플레인 노드</text>
+    <text x="180" y="115" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">(물리 서버 또는 VM 1대)</text>
+
+    <rect x="72" y="128" width="216" height="110" rx="6" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5,3"/>
+    <rect x="80" y="140" width="200" height="40" rx="4" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
+    <text x="180" y="164" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube API Server</text>
+    <rect x="80" y="196" width="58" height="30" rx="3" fill="#fff" stroke="#fcd4bf"/>
+    <text x="109" y="215" text-anchor="middle" font-size="11" font-weight="600" fill="#7b341e">etcd</text>
+    <rect x="146" y="196" width="72" height="30" rx="3" fill="#fff" stroke="#fcd4bf"/>
+    <text x="182" y="215" text-anchor="middle" font-size="11" font-weight="600" fill="#7b341e">Scheduler</text>
+    <rect x="226" y="196" width="54" height="30" rx="3" fill="#fff" stroke="#fcd4bf"/>
+    <text x="253" y="209" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">Controller</text>
+    <text x="253" y="220" text-anchor="middle" font-size="9" font-weight="600" fill="#7b341e">Manager</text>
+
+    <line x1="55" y1="250" x2="305" y2="250" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="6,4"/>
+
+    <rect x="72" y="260" width="216" height="58" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="180" y="294" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">호스트 OS</text>
+    <rect x="72" y="328" width="216" height="58" rx="4" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.2"/>
+    <text x="180" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">하드웨어 (물리 서버 / VM)</text>
+
+    <!-- 명령 화살표 (박스 세로 중앙, y=235) -->
+    <line x1="307" y1="235" x2="383" y2="235" stroke="#475569" stroke-width="2" marker-end="url(#cmd-ah)"/>
+    <text x="345" y="226" text-anchor="middle" font-size="11" fill="#475569" font-weight="600" font-style="italic">명령</text>
+
+    <!-- 워커 노드 1 (x=385, w=250) -->
+    <rect x="385" y="70" width="250" height="330" rx="8" fill="none" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M 393 70 L 627 70 Q 635 70 635 78 L 635 98 L 385 98 L 385 78 Q 385 70 393 70 Z" fill="#4f46e5"/>
+    <text x="510" y="89" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">워커 노드 1</text>
+    <text x="510" y="115" text-anchor="middle" font-size="10" font-style="italic" fill="#3730a3">(물리 서버 또는 VM 1대)</text>
+
+    <rect x="402" y="128" width="216" height="110" rx="6" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5,3"/>
+    <rect x="410" y="140" width="100" height="40" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+    <text x="460" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">kubelet</text>
+    <rect x="518" y="140" width="100" height="40" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+    <text x="568" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">kube-proxy</text>
+    <rect x="410" y="196" width="208" height="36" rx="4" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.4"/>
+    <text x="514" y="219" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">컨테이너 엔진</text>
+
+    <line x1="385" y1="250" x2="635" y2="250" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="6,4"/>
+
+    <rect x="402" y="260" width="216" height="58" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="510" y="294" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">호스트 OS</text>
+    <rect x="402" y="328" width="216" height="58" rx="4" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.2"/>
+    <text x="510" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">하드웨어 (물리 서버 / VM)</text>
+
+    <!-- 워커 노드 2 (x=660, w=250) — 워커 1과 25px 간격 -->
+    <rect x="660" y="70" width="250" height="330" rx="8" fill="none" stroke="#4f46e5" stroke-width="2"/>
+    <path d="M 668 70 L 902 70 Q 910 70 910 78 L 910 98 L 660 98 L 660 78 Q 660 70 668 70 Z" fill="#4f46e5"/>
+    <text x="785" y="89" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">워커 노드 2</text>
+    <text x="785" y="115" text-anchor="middle" font-size="10" font-style="italic" fill="#3730a3">(물리 서버 또는 VM 1대)</text>
+
+    <rect x="677" y="128" width="216" height="110" rx="6" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="5,3"/>
+    <rect x="685" y="140" width="100" height="40" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+    <text x="735" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">kubelet</text>
+    <rect x="793" y="140" width="100" height="40" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+    <text x="843" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">kube-proxy</text>
+    <rect x="685" y="196" width="208" height="36" rx="4" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.4"/>
+    <text x="789" y="219" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">컨테이너 엔진</text>
+
+    <line x1="660" y1="250" x2="910" y2="250" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="6,4"/>
+
+    <rect x="677" y="260" width="216" height="58" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="785" y="294" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">호스트 OS</text>
+    <rect x="677" y="328" width="216" height="58" rx="4" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.2"/>
+    <text x="785" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">하드웨어 (물리 서버 / VM)</text>
+  </svg>
+  </div>
+
+  <p class="step-caption">그림 4-3 (A안 샘플 v5). 컨트롤 플레인 1대 + 워커 2대 — 박스 하나가 곧 컴퓨터 한 대입니다</p>
+
+  <div class="compare-banner">
+    <b>참고 — 원본 그림 4-3</b>: 호스트 OS·하드웨어가 세 노드를 통째로 떠받치는 단일 박스. 본문 "노드 = 컴퓨터 한 대" 정의와 충돌하던 자리.
+  </div>
+
+  <div class="svg-figure" style="opacity: 0.85;">
+  <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="원본 그림 4-3">
+    <defs>
+      <marker id="k8s-cmd-ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+      </marker>
+    </defs>
+    <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Kubernetes 클러스터의 계층 구조 (원본)</text>
+    <text x="20" y="125" font-size="10" font-weight="600" fill="#64748b" transform="rotate(-90 20 125)">오케스트레이션 계층</text>
+    <text x="20" y="275" font-size="10" font-weight="600" fill="#64748b" transform="rotate(-90 20 275)">인프라 계층</text>
+    <rect x="50" y="40" width="690" height="170" rx="8" fill="none" stroke="#475569" stroke-width="1.4"/>
+    <rect x="70" y="60" width="200" height="130" rx="6" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5,3"/>
+    <rect x="80" y="70" width="180" height="22" rx="4" fill="#ff7849"/>
+    <text x="170" y="86" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">컨트롤 플레인</text>
+    <rect x="80" y="100" width="180" height="36" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
+    <text x="170" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Kube API Server</text>
+    <rect x="80" y="148" width="56" height="22" rx="3" fill="#fff" stroke="#fcd4bf" stroke-width="1"/>
+    <text x="108" y="163" text-anchor="middle" font-size="10" font-weight="600" fill="#7b341e">etcd</text>
+    <rect x="142" y="148" width="56" height="22" rx="3" fill="#fff" stroke="#fcd4bf" stroke-width="1"/>
+    <text x="170" y="163" text-anchor="middle" font-size="10" font-weight="600" fill="#7b341e">Scheduler</text>
+    <rect x="204" y="148" width="56" height="22" rx="3" fill="#fff" stroke="#fcd4bf" stroke-width="1"/>
+    <text x="232" y="159" text-anchor="middle" font-size="8" font-weight="600" fill="#7b341e">Controller</text>
+    <text x="232" y="168" text-anchor="middle" font-size="8" font-weight="600" fill="#7b341e">Manager</text>
+    <line x1="282" y1="128" x2="328" y2="128" stroke="#475569" stroke-width="1.6" marker-end="url(#k8s-cmd-ah)"/>
+    <rect x="340" y="60" width="180" height="130" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+    <rect x="350" y="70" width="160" height="22" rx="4" fill="#4f46e5"/>
+    <text x="430" y="86" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">워커 노드 1</text>
+    <rect x="356" y="100" width="74" height="28" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="393" y="119" text-anchor="middle" font-size="11" font-weight="600" fill="#3730a3">kubelet</text>
+    <rect x="436" y="100" width="74" height="28" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="473" y="119" text-anchor="middle" font-size="11" font-weight="600" fill="#3730a3">kube-proxy</text>
+    <rect x="356" y="148" width="154" height="28" rx="4" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.4"/>
+    <text x="433" y="167" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">컨테이너 엔진</text>
+    <rect x="540" y="60" width="180" height="130" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+    <rect x="550" y="70" width="160" height="22" rx="4" fill="#4f46e5"/>
+    <text x="630" y="86" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">워커 노드 2</text>
+    <rect x="556" y="100" width="74" height="28" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="593" y="119" text-anchor="middle" font-size="11" font-weight="600" fill="#3730a3">kubelet</text>
+    <rect x="636" y="100" width="74" height="28" rx="4" fill="#fff" stroke="#4f46e5" stroke-width="1.2"/>
+    <text x="673" y="119" text-anchor="middle" font-size="11" font-weight="600" fill="#3730a3">kube-proxy</text>
+    <rect x="556" y="148" width="154" height="28" rx="4" fill="#eef2ff" stroke="#c7d2fe" stroke-width="1.4"/>
+    <text x="633" y="167" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">컨테이너 엔진</text>
+    <line x1="40" y1="222" x2="720" y2="222" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="6,4"/>
+    <rect x="50" y="232" width="690" height="32" rx="4" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="395" y="253" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">호스트 OS</text>
+    <rect x="50" y="272" width="690" height="32" rx="4" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.2"/>
+    <text x="395" y="293" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">하드웨어 (물리 서버 또는 가상 머신)</text>
+  </svg>
+  </div>
+
+  <p class="original-note">원본 — 호스트 OS·하드웨어가 통합된 단일 박스.</p>
+
+  <div class="lens-panel">
+    <h3>5개 렌즈 점검 (v5)</h3>
+    <table>
+      <thead><tr><th>렌즈</th><th>판정</th><th>근거</th></tr></thead>
+      <tbody>
+        <tr><td>① 연결</td><td><span class="ok">통과</span></td><td>본문 정의 ↔ 박스 3개 일치. 워커끼리 좁은 간격이 "같은 역할 그룹"이라는 시각 신호를 덧붙임.</td></tr>
+        <tr><td>② 코드 정합</td><td><span class="ok">통과</span></td><td>코드 무관.</td></tr>
+        <tr><td>③ 라벨/AI투</td><td><span class="ok">통과</span></td><td>군더더기 없음.</td></tr>
+        <tr><td>④ 과거형</td><td><span class="ok">통과</span></td><td>해당 없음.</td></tr>
+        <tr><td>⑤ 의인화</td><td><span class="ok">통과</span></td><td>해당 없음.</td></tr>
+      </tbody>
+    </table>
+    <p style="margin: 12px 0 0 0; color: #475569;">간격 — 컨트롤 플레인 ↔ 워커 1: <b>80px</b> (화살표 공간). 워커 1 ↔ 워커 2: <b>25px</b> (같은 역할 묶음). 화살표 y=235로 박스 세로 중앙에 위치.</p>
+  </div>
+
+</div>
+</body>
+</html>
