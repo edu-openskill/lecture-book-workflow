@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 5-13 한 단계 샘플 v2</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    background: #f8fafc;
+    margin: 0;
+    padding: 40px 24px;
+    color: #1f2937;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 18px; margin: 0 0 24px; color: #0f172a; }
+  .stage {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 22px 22px;
+  }
+  .caption {
+    text-align: center;
+    font-style: italic;
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 18px;
+  }
+  .svg-figure svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>그림 5-13 — 한 단계 샘플 v2 (크기·비례 조정)</h1>
+
+<div class="stage">
+  <div class="svg-figure">
+    <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ingress Controller가 시작·변경 시점에 Ingress 리소스를 미리 읽어 내부 라우팅 설정으로 갖고 있다가, 외부 요청이 오면 그 내부 설정으로 Service에 즉시 분기">
+      <defs>
+        <marker id="one2-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1f2937"/></marker>
+        <marker id="one2-dash" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+      </defs>
+
+      <text x="400" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Ingress Controller는 Ingress 리소스를 미리 읽어 두고 외부 요청을 Service로 분기합니다</text>
+
+      <!-- Ingress 리소스 (상단) -->
+      <rect x="320" y="40" width="180" height="70" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <path d="M 328 40 H 492 Q 500 40 500 48 V 58 H 320 V 48 Q 320 40 328 40 Z" fill="#475569"/>
+      <text x="410" y="53" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Ingress 리소스</text>
+      <text x="410" y="72" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">YAML</text>
+      <text x="330" y="90" font-size="10" font-family="monospace" fill="#0f172a">/order   → order-service</text>
+      <text x="330" y="104" font-size="10" font-family="monospace" fill="#0f172a">/stores  → stores-service</text>
+
+      <!-- watch 점선 화살표 -->
+      <line x1="410" y1="112" x2="410" y2="155" stroke="#475569" stroke-width="1.6" stroke-dasharray="6,4" marker-end="url(#one2-dash)"/>
+      <text x="420" y="130" font-size="11" font-weight="700" fill="#475569">watch</text>
+      <text x="420" y="145" font-size="9" font-style="italic" fill="#94a3b8">변경 시 한 번 미리 읽음</text>
+
+      <!-- 외부 요청 (좌측) -->
+      <g transform="translate(70, 220)">
+        <circle cx="0" cy="0" r="13" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+        <path d="M -20 32 Q -20 11 0 11 Q 20 11 20 32 L 20 50 L -20 50 Z" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      </g>
+      <text x="70" y="290" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">외부 요청</text>
+
+      <line x1="100" y1="225" x2="218" y2="225" stroke="#1f2937" stroke-width="1.6" marker-end="url(#one2-arrow)"/>
+      <text x="159" y="217" text-anchor="middle" font-size="10" font-style="italic" fill="#6b7280">/order, /stores</text>
+
+      <!-- Ingress Controller (가운데, 크기 축소) -->
+      <rect x="220" y="160" width="360" height="130" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+      <path d="M 228 160 H 572 Q 580 160 580 168 V 178 H 220 V 168 Q 220 160 228 160 Z" fill="#ff7849"/>
+      <text x="400" y="173" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Ingress Controller</text>
+
+      <rect x="240" y="190" width="320" height="88" rx="4" fill="#fffaf0" stroke="#fed7aa" stroke-width="1.4" stroke-dasharray="3,2"/>
+      <text x="400" y="208" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">내부 라우팅 설정</text>
+      <text x="400" y="230" text-anchor="middle" font-size="10" font-family="monospace" fill="#0f172a">/order   → order-service</text>
+      <text x="400" y="248" text-anchor="middle" font-size="10" font-family="monospace" fill="#0f172a">/stores  → stores-service</text>
+      <text x="400" y="270" text-anchor="middle" font-size="9" font-style="italic" fill="#94a3b8">(Ingress 리소스를 미리 읽어 갱신)</text>
+
+      <!-- Controller → Service 화살표 -->
+      <line x1="580" y1="225" x2="628" y2="225" stroke="#1f2937" stroke-width="1.6" marker-end="url(#one2-arrow)"/>
+      <text x="604" y="217" text-anchor="middle" font-size="10" font-style="italic" fill="#6b7280">즉시 분기</text>
+
+      <!-- Service 묶음 (우측 점선) -->
+      <rect x="630" y="160" width="140" height="130" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4,3"/>
+      <text x="700" y="175" text-anchor="middle" font-size="10" font-style="italic" fill="#64748b">Service</text>
+
+      <rect x="640" y="188" width="120" height="42" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <text x="700" y="213" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">order-service</text>
+
+      <rect x="640" y="240" width="120" height="42" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <text x="700" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">stores-service</text>
+    </svg>
+  </div>
+
+  <div class="caption">그림 5-13. Ingress Controller는 Ingress 리소스를 미리 읽어 내부 라우팅 설정으로 갖고 있다가, 외부 요청이 오면 그 설정으로 Service에 즉시 분기합니다</div>
+</div>
+
+</div>
+</body>
+</html>

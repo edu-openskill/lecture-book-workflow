@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 5-13 단계별 샘플 v7</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    background: #f8fafc;
+    margin: 0;
+    padding: 40px 24px;
+    color: #1f2937;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 18px; margin: 0 0 24px; color: #0f172a; }
+  .stage {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px 20px 18px;
+    margin-bottom: 14px;
+  }
+  .stage-label {
+    font-size: 13px;
+    color: #7b341e;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .stage-sub {
+    font-size: 11px;
+    color: #64748b;
+    margin: 0 0 12px;
+  }
+  .caption {
+    text-align: center;
+    font-style: italic;
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  .svg-figure svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>그림 5-13 — 단계별 샘플 v7 (K8s 실제 동작)</h1>
+
+<!-- 단계 1 -->
+<div class="stage">
+  <div class="stage-label">단계 1 · 사용자가 Ingress 리소스 적용</div>
+  <div class="stage-sub">kubectl apply 한 YAML이 API Server를 거쳐 etcd에 저장됩니다</div>
+  <div class="svg-figure">
+    <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="사용자가 kubectl apply 명령으로 보낸 Ingress 리소스 YAML이 API Server를 거쳐 etcd에 저장되는 단계">
+      <defs>
+        <marker id="s1-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1f2937"/></marker>
+      </defs>
+
+      <!-- 사용자/터미널 -->
+      <g transform="translate(50, 90)">
+        <circle cx="0" cy="0" r="12" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+        <path d="M -18 28 Q -18 10 0 10 Q 18 10 18 28 L 18 44 L -18 44 Z" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      </g>
+      <text x="50" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">사용자</text>
+
+      <line x1="70" y1="100" x2="178" y2="100" stroke="#1f2937" stroke-width="1.6" marker-end="url(#s1-arrow)"/>
+      <text x="124" y="92" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">kubectl apply</text>
+
+      <!-- API Server -->
+      <rect x="180" y="75" width="160" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <path d="M 188 75 H 332 Q 340 75 340 83 V 92 H 180 V 83 Q 180 75 188 75 Z" fill="#475569"/>
+      <text x="260" y="87" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">API Server</text>
+      <text x="260" y="115" text-anchor="middle" font-size="10" fill="#475569">검증·중계</text>
+
+      <line x1="340" y1="105" x2="448" y2="105" stroke="#1f2937" stroke-width="1.6" marker-end="url(#s1-arrow)"/>
+      <text x="394" y="97" text-anchor="middle" font-size="10" font-style="italic" fill="#6b7280">저장</text>
+
+      <!-- etcd -->
+      <rect x="450" y="40" width="280" height="130" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4,3"/>
+      <text x="590" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#64748b">etcd · 클러스터 저장소</text>
+
+      <rect x="470" y="72" width="240" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <path d="M 478 72 H 702 Q 710 72 710 80 V 90 H 470 V 80 Q 470 72 478 72 Z" fill="#475569"/>
+      <text x="590" y="85" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Ingress 리소스</text>
+      <text x="480" y="110" font-size="10" font-family="monospace" fill="#0f172a">/order   → order-service</text>
+      <text x="480" y="130" font-size="10" font-family="monospace" fill="#0f172a">/stores  → stores-service</text>
+    </svg>
+  </div>
+</div>
+
+<!-- 단계 2 -->
+<div class="stage">
+  <div class="stage-label">단계 2 · Ingress 컨트롤러가 변경을 감지하고 내부 설정 갱신</div>
+  <div class="stage-sub">컨트롤러는 API Server에 watch를 걸어 두고 있어 변경이 즉시 전달됩니다</div>
+  <div class="svg-figure">
+    <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ingress 컨트롤러가 API Server에 걸어 둔 watch를 통해 etcd의 Ingress 리소스 변경을 전달받고 내부 라우팅 설정을 갱신하는 단계">
+      <defs>
+        <marker id="s2-dash" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+      </defs>
+
+      <!-- etcd (좌) -->
+      <rect x="20" y="40" width="200" height="130" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4,3"/>
+      <text x="120" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#64748b">etcd</text>
+
+      <rect x="35" y="72" width="170" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <path d="M 43 72 H 197 Q 205 72 205 80 V 90 H 35 V 80 Q 35 72 43 72 Z" fill="#475569"/>
+      <text x="120" y="85" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Ingress 리소스</text>
+      <text x="45" y="110" font-size="9" font-family="monospace" fill="#0f172a">/order  → order-service</text>
+      <text x="45" y="128" font-size="9" font-family="monospace" fill="#0f172a">/stores → stores-service</text>
+
+      <line x1="220" y1="105" x2="278" y2="105" stroke="#475569" stroke-width="1.6" stroke-dasharray="6,4" marker-end="url(#s2-dash)"/>
+      <text x="249" y="97" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">변경 통지</text>
+
+      <!-- API Server (가운데) -->
+      <rect x="280" y="75" width="160" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <path d="M 288 75 H 432 Q 440 75 440 83 V 92 H 280 V 83 Q 280 75 288 75 Z" fill="#475569"/>
+      <text x="360" y="87" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">API Server</text>
+      <text x="360" y="115" text-anchor="middle" font-size="10" fill="#475569">watch 중계</text>
+
+      <line x1="440" y1="105" x2="498" y2="105" stroke="#475569" stroke-width="1.6" stroke-dasharray="6,4" marker-end="url(#s2-dash)"/>
+      <text x="469" y="97" text-anchor="middle" font-size="9" font-style="italic" fill="#475569">watch 알림</text>
+
+      <!-- Ingress 컨트롤러 (우) -->
+      <rect x="500" y="50" width="240" height="110" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+      <path d="M 508 50 H 732 Q 740 50 740 58 V 70 H 500 V 58 Q 500 50 508 50 Z" fill="#ff7849"/>
+      <text x="620" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Ingress 컨트롤러</text>
+
+      <rect x="515" y="82" width="210" height="68" rx="4" fill="#fffaf0" stroke="#fed7aa" stroke-width="1.4" stroke-dasharray="3,2"/>
+      <text x="620" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">내부 라우팅 설정</text>
+      <text x="525" y="122" font-size="9" font-family="monospace" fill="#0f172a">/order  → order-service</text>
+      <text x="525" y="140" font-size="9" font-family="monospace" fill="#0f172a">/stores → stores-service</text>
+    </svg>
+  </div>
+</div>
+
+<!-- 단계 3 -->
+<div class="stage">
+  <div class="stage-label">단계 3 · 외부 요청 처리</div>
+  <div class="stage-sub">외부 요청이 오면 컨트롤러는 내부 설정으로 Service에 분기합니다 (etcd·API Server를 다시 거치지 않음)</div>
+  <div class="svg-figure">
+    <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="외부 요청이 Ingress 컨트롤러로 들어오면 컨트롤러는 단계 2에서 갱신된 내부 라우팅 설정으로 Service에 즉시 분기">
+      <defs>
+        <marker id="s3-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1f2937"/></marker>
+      </defs>
+
+      <!-- 외부 요청 (좌) -->
+      <g transform="translate(50, 85)">
+        <circle cx="0" cy="0" r="13" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+        <path d="M -20 32 Q -20 11 0 11 Q 20 11 20 32 L 20 50 L -20 50 Z" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      </g>
+      <text x="50" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">외부 요청</text>
+
+      <line x1="72" y1="100" x2="238" y2="100" stroke="#1f2937" stroke-width="1.6" marker-end="url(#s3-arrow)"/>
+      <text x="155" y="92" text-anchor="middle" font-size="10" font-style="italic" fill="#6b7280">/order, /stores</text>
+
+      <!-- Ingress 컨트롤러 (가운데) -->
+      <rect x="240" y="50" width="280" height="110" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+      <path d="M 248 50 H 512 Q 520 50 520 58 V 70 H 240 V 58 Q 240 50 248 50 Z" fill="#ff7849"/>
+      <text x="380" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Ingress 컨트롤러</text>
+
+      <rect x="255" y="82" width="250" height="68" rx="4" fill="#fffaf0" stroke="#fed7aa" stroke-width="1.4" stroke-dasharray="3,2"/>
+      <text x="380" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">내부 라우팅 설정</text>
+      <text x="380" y="122" text-anchor="middle" font-size="9" font-family="monospace" fill="#0f172a">/order  → order-service</text>
+      <text x="380" y="140" text-anchor="middle" font-size="9" font-family="monospace" fill="#0f172a">/stores → stores-service</text>
+
+      <line x1="520" y1="100" x2="588" y2="100" stroke="#1f2937" stroke-width="1.6" marker-end="url(#s3-arrow)"/>
+
+      <!-- Service (우) -->
+      <rect x="590" y="70" width="150" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+      <path d="M 598 70 H 732 Q 740 70 740 78 V 88 H 590 V 78 Q 590 70 598 70 Z" fill="#475569"/>
+      <text x="665" y="82" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Service</text>
+    </svg>
+  </div>
+</div>
+
+<div class="caption">그림 5-13. Ingress 리소스는 etcd에 저장되고, Ingress 컨트롤러가 API Server를 통해 미리 읽어 내부 설정을 갱신해 둡니다. 외부 요청은 그 내부 설정으로 즉시 분기됩니다</div>
+
+</div>
+</body>
+</html>
