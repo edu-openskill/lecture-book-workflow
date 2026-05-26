@@ -468,42 +468,59 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <div class="caption">그림 5-12. Ingress가 도메인과 경로를 읽어 요청을 적절한 Service로 연결하는 구조</div>
 <p><strong>Service</strong>는 Pod 묶음마다 <strong>고정 진입점</strong>을 만듭니다. <strong>Ingress</strong>는 그렇게 만들어진 Service 여러 개를 <strong>외부 도메인 하나</strong>로 묶어 줍니다. 외부 요청이 들어오면 <strong>URL 경로</strong>를 보고 알맞은 Service로 갈라집니다. Service가 <strong>IP와 포트</strong>만 보고 요청을 전달한다면, Ingress는 <strong>도메인과 URL 경로</strong>까지 함께 봅니다.</p>
-<h3>5.2.3 Ingress 적용하기</h3>
+<h3>5.2.3 Ingress 컨트롤러</h3>
+<p>Ingress는 <strong>Ingress 리소스(YAML)</strong> 와 <strong>Ingress 컨트롤러</strong> 두 가지로 구성됩니다.</p>
+<p>Ingress 리소스에는 어떤 경로를 어느 Service로 보낼지 <strong>라우팅 규칙을 적어 둡니다</strong>. Ingress 컨트롤러는 <strong>라우팅 규칙을 미리 읽어 두었다가</strong>, 외부 요청이 들어오면 <strong>규칙에 맞는 Service로 보냅니다</strong>.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ingress Controller가 Ingress 리소스(YAML)의 규칙을 참조해 외부 요청을 두 Service로 분기하는 구조">
+  <defs>
+    <marker id="ic13-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="ic13-ref" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Ingress Controller가 리소스의 규칙을 참조해 요청을 Service로 분기</text>
+  <rect x="135" y="40" width="605" height="310" rx="10" fill="#fff" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="6,4"/>
+  <text x="150" y="61" font-size="11" font-weight="700" fill="#7b341e">Kubernetes 클러스터</text>
+  <rect x="180" y="75" width="200" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <path d="M 188 75 H 372 Q 380 75 380 83 V 95 H 180 V 83 Q 180 75 188 75 Z" fill="#475569"/>
+  <text x="280" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Ingress 리소스 (YAML)</text>
+  <text x="200" y="120" font-size="11" font-family="monospace" fill="#0f172a">/order   → order-service</text>
+  <text x="200" y="140" font-size="11" font-family="monospace" fill="#0f172a">/stores → stores-service</text>
+  <line x1="280" y1="200" x2="280" y2="158" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#ic13-ref)"/>
+  <text x="318" y="182" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">규칙 참조</text>
+  <g transform="translate(60, 240)">
+    <circle cx="0" cy="0" r="14" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <path d="M -22 35 Q -22 12 0 12 Q 22 12 22 35 L 22 55 L -22 55 Z" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  </g>
+  <text x="60" y="325" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">고객</text>
+  <line x1="90" y1="250" x2="198" y2="250" stroke="#475569" stroke-width="1.6" marker-end="url(#ic13-p)"/>
+  <text x="145" y="242" text-anchor="middle" font-size="10" font-style="italic" fill="#6b7280">/order, /stores</text>
+  <rect x="200" y="200" width="160" height="100" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <path d="M 208 200 H 352 Q 360 200 360 208 V 220 H 200 V 208 Q 200 200 208 200 Z" fill="#ff7849"/>
+  <text x="280" y="215" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Ingress Controller</text>
+  <text x="280" y="248" text-anchor="middle" font-size="10" fill="#7b341e">외부 트래픽 처리</text>
+  <circle cx="248" cy="275" r="8" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
+  <circle cx="280" cy="275" r="8" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
+  <circle cx="312" cy="275" r="8" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
+  <line x1="360" y1="225" x2="438" y2="200" stroke="#475569" stroke-width="1.6" marker-end="url(#ic13-p)"/>
+  <text x="400" y="198" text-anchor="middle" font-size="11" font-family="monospace" font-weight="700" fill="#0f172a">/order</text>
+  <line x1="360" y1="275" x2="438" y2="295" stroke="#475569" stroke-width="1.6" marker-end="url(#ic13-p)"/>
+  <text x="400" y="312" text-anchor="middle" font-size="11" font-family="monospace" font-weight="700" fill="#0f172a">/stores</text>
+  <rect x="440" y="180" width="160" height="40" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="520" y="205" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">order-service</text>
+  <rect x="440" y="275" width="160" height="40" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="520" y="300" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">stores-service</text>
+</svg>
+</div>
+<div class="caption">그림 5-13. Ingress 리소스(YAML)와 Ingress Controller — 둘 다 있어야 라우팅이 작동합니다</div>
+<div class="prep-note">
+<p><strong>Ingress 컨트롤러는 라우팅 규칙을 어떻게 받을까</strong></p>
+<p>YAML로 작성한 Ingress 리소스를 등록하면 API Server를 거쳐 상태 저장소인 <strong>etcd</strong>에 보관됩니다. Ingress 컨트롤러는 API Server로부터 라우팅 규칙을 받아 적용합니다.</p>
+</div>
+<h3>5.2.4 Ingress 적용하기</h3>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex12</p>
 </div>
-<p>Ingress는 라우팅 규칙을 적은 <strong>Ingress 리소스(YAML)</strong> 와 그 규칙을 읽고 외부 트래픽을 처리하는 <strong>Ingress 컨트롤러</strong> 두 가지로 분리됩니다. Ingress 리소스만 만들고 Ingress 컨트롤러가 떠 있지 않으면 라우팅이 동작하지 않으므로, 두 가지가 함께 떠 있어야 합니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ingress Controller(Pod)가 Ingress 리소스(YAML)의 규칙을 참조해 외부 요청을 Service로 분기">
-  <defs>
-    <marker id="ic12-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1f2937"/></marker>
-    <marker id="ic12-ref" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-  </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Ingress Controller가 리소스의 규칙을 참조해 외부 요청을 Service로 분기합니다</text>
-  <text x="180" y="48" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">외부 요청</text>
-  <line x1="180" y1="55" x2="180" y2="92" stroke="#1f2937" stroke-width="1.6" marker-end="url(#ic12-arrow)"/>
-  <rect x="80" y="100" width="200" height="120" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
-  <path d="M 88 100 H 272 Q 280 100 280 108 V 120 H 80 V 108 Q 80 100 88 100 Z" fill="#ff7849"/>
-  <text x="180" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Ingress Controller</text>
-  <text x="180" y="160" text-anchor="middle" font-size="10" fill="#475569">외부 트래픽 처리</text>
-  <circle cx="148" cy="190" r="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
-  <circle cx="180" cy="190" r="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
-  <circle cx="212" cy="190" r="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
-  <line x1="280" y1="150" x2="450" y2="150" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#ic12-ref)"/>
-  <text x="365" y="140" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">규칙 참조</text>
-  <rect x="450" y="100" width="240" height="120" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <path d="M 458 100 H 682 Q 690 100 690 108 V 120 H 450 V 108 Q 450 100 458 100 Z" fill="#475569"/>
-  <text x="570" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Ingress 리소스</text>
-  <text x="570" y="138" text-anchor="middle" font-size="10" font-style="italic" fill="#475569">YAML</text>
-  <line x1="465" y1="148" x2="675" y2="148" stroke="#cbd5e1" stroke-width="0.6"/>
-  <text x="465" y="170" font-size="10" font-family="monospace" fill="#0f172a">/order   → order-service</text>
-  <text x="465" y="190" font-size="10" font-family="monospace" fill="#0f172a">/stores → stores-service</text>
-  <line x1="180" y1="220" x2="180" y2="252" stroke="#1f2937" stroke-width="1.6" marker-end="url(#ic12-arrow)"/>
-  <text x="180" y="268" text-anchor="middle" font-size="10" fill="#475569">Service 분기</text>
-</svg>
-</div>
-<div class="caption">그림 5-13. Ingress 리소스(YAML)와 Ingress Controller — 둘 다 있어야 라우팅이 작동합니다</div>
 <p>실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다. 미니큐브는 Ingress Controller를 애드온 형태로 한 번에 배포할 수 있는 명령어를 제공합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 인그레스 애드온 활성화</div>minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress<span class="w">           </span><span class="c1"># 인그레스 애드온 활성화</span></div>
 <div class="terminal-log">
@@ -656,7 +673,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>ingress<span class="w"
 <p>동료가 등 뒤로 와서 화면을 들여다봤습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "이번엔 주소 하나만 알려 주면 되는 거예요?"</div>
 <p>오픈이는 <code>localhost/order</code>와 <code>localhost/stores</code>를 차례로 적어 줬습니다. 이번에는 포트 번호도 없고, 따로 외울 IP도 없었습니다.</p>
-<h3>5.2.4 Service와 Ingress가 보는 정보가 다른 이유</h3>
+<h3>5.2.5 Service와 Ingress가 보는 정보가 다른 이유</h3>
 <p>오픈이는 두 리소스가 같은 트래픽을 다루는데 보는 정보가 다르다는 점이 궁금했습니다. 우편 한 통이 떠올랐습니다.</p>
 <p>우편 봉투에 붙은 <strong>송장</strong>에는 두 가지 정보가 함께 적혀 있습니다. 위쪽의 <strong>받는 곳 주소</strong>는 사람이 눈으로 읽는 위치 정보이고, 아래쪽의 <strong>송장 바코드</strong>는 우체국이 시스템에 등록한 뒤 출력해 붙인 시스템적 분류 코드입니다. 분류 라인·도착 우체국 코드 같은 정보가 구조화되어 있어 스캐너로만 읽힙니다. 두 정보는 같은 송장 위에 있지만 누가 읽는지와 들이는 손이 다릅니다.</p>
 <div class="svg-figure">
