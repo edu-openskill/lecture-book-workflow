@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>그림 5-20 배치 옵션 비교</title>
+<style>
+  body { font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; color:#1f2937; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color:#6b7280; margin-bottom: 32px; }
+  section { margin-bottom: 56px; padding: 20px; border: 1px solid #e5e7eb; border-radius: 10px; background:#fff; }
+  h2 { font-size: 17px; margin: 0 0 6px; color: #b45309; }
+  .desc { color:#475569; font-size: 13px; margin-bottom: 14px; line-height: 1.6; }
+  svg { display:block; margin: 0 auto; max-width: 100%; height: auto; }
+  .cap { text-align:center; font-style: italic; font-size: 13px; color:#374151; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>그림 5-20 배치 옵션 비교</h1>
+<p class="sub">현재 그림은 좌측에 Service, 우측에 Ingress가 있어 좌→우 읽기가 "Service 먼저"로 보입니다. 세 옵션 모두 Ingress가 먼저 읽히도록 조정한 안입니다.</p>
+
+<!-- ===== 현재(원본) 비교용 ===== -->
+<section>
+<h2>(현재) 원본 — Service 좌상, Ingress 우하</h2>
+<p class="desc">좌→우 읽기 시 Service가 먼저 보임. 네트워크 흐름(Ingress → Service)과 반대 인상.</p>
+<svg viewBox="0 0 800 305" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="o-or" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="o-sl" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">한 우편 송장에 두 가지 정보가 함께 붙어 있습니다</text>
+  <g transform="translate(180, 56)">
+    <rect x="0" y="0" width="440" height="240" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="220" y="-12" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">우편</text>
+    <g transform="translate(20, 90)">
+      <rect x="0" y="0" width="400" height="135" rx="3" fill="#fff" stroke="#dc2626" stroke-width="1.6"/>
+      <text x="200" y="-4" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">송장</text>
+      <rect x="8" y="8" width="384" height="56" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="24" font-size="10" font-weight="700" fill="#475569">받는 곳 주소</text>
+      <text x="386" y="24" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">사람이 눈으로 읽음</text>
+      <text x="16" y="48" font-size="11" font-family="monospace" font-weight="700" fill="#0f172a">서울시 강남구 ○○로 123</text>
+      <rect x="8" y="70" width="384" height="58" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="86" font-size="10" font-weight="700" fill="#dc2626">송장 바코드</text>
+      <text x="386" y="86" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">스캐너로 읽음</text>
+      <rect x="16" y="92" width="135" height="24" fill="repeating-linear-gradient(90deg,#0f172a 0 1.5px,transparent 1.5px 3px)"/>
+      <g transform="translate(16,92)"><line x1="0" y1="0" x2="135" y2="0" stroke="#0f172a" stroke-width="0"/></g>
+      <g transform="translate(16,92)">
+        <line x1="0" y1="0" x2="0" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="4" y1="0" x2="4" y2="24" stroke="#0f172a" stroke-width="1.4"/><line x1="9" y1="0" x2="9" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="14" y1="0" x2="14" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="19" y1="0" x2="19" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="24" y1="0" x2="24" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="29" y1="0" x2="29" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="34" y1="0" x2="34" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="39" y1="0" x2="39" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="44" y1="0" x2="44" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="49" y1="0" x2="49" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="54" y1="0" x2="54" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="59" y1="0" x2="59" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="64" y1="0" x2="64" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="69" y1="0" x2="69" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="74" y1="0" x2="74" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="79" y1="0" x2="79" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="84" y1="0" x2="84" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="89" y1="0" x2="89" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="94" y1="0" x2="94" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="99" y1="0" x2="99" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="104" y1="0" x2="104" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="109" y1="0" x2="109" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="114" y1="0" x2="114" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="119" y1="0" x2="119" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="124" y1="0" x2="124" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="129" y1="0" x2="129" y2="24" stroke="#0f172a" stroke-width="1.2"/>
+      </g>
+      <text x="200" y="124" text-anchor="middle" font-size="9" font-family="monospace" fill="#dc2626">1234-5678-90</text>
+    </g>
+  </g>
+  <g transform="translate(20, 110)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Service</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#475569">받는 곳 주소만</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#94a3b8">눈으로 읽고 분류</text>
+  </g>
+  <line x1="170" y1="130" x2="216" y2="158" stroke="#475569" stroke-width="2" marker-end="url(#o-sl)"/>
+  <g transform="translate(630, 158)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Ingress</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#7b341e">송장 바코드까지</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#7b341e">스캐너로 정밀 분기</text>
+  </g>
+  <line x1="630" y1="188" x2="572" y2="220" stroke="#ff7849" stroke-width="2.2" marker-end="url(#o-or)"/>
+</svg>
+<p class="cap">그림 5-20 (현재). Service 좌상 / Ingress 우하</p>
+</section>
+
+<!-- ===== 옵션 A ===== -->
+<section>
+<h2>옵션 A — 박스만 좌우 swap (송장 내부 유지)</h2>
+<p class="desc">Ingress를 좌상, Service를 우하로 옮김. 송장 내부 구조(위 주소 / 아래 바코드)는 유지. 화살표가 좌상→우하 대각선으로 교차하지만 우편 송장 실제 형태와 일치.</p>
+<svg viewBox="0 0 800 305" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="a-or" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="a-sl" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">한 우편 송장에 두 가지 정보가 함께 붙어 있습니다</text>
+  <g transform="translate(180, 56)">
+    <rect x="0" y="0" width="440" height="240" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="220" y="-12" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">우편</text>
+    <g transform="translate(20, 90)">
+      <rect x="0" y="0" width="400" height="135" rx="3" fill="#fff" stroke="#dc2626" stroke-width="1.6"/>
+      <text x="200" y="-4" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">송장</text>
+      <rect x="8" y="8" width="384" height="56" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="24" font-size="10" font-weight="700" fill="#475569">받는 곳 주소</text>
+      <text x="386" y="24" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">사람이 눈으로 읽음</text>
+      <text x="16" y="48" font-size="11" font-family="monospace" font-weight="700" fill="#0f172a">서울시 강남구 ○○로 123</text>
+      <rect x="8" y="70" width="384" height="58" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="86" font-size="10" font-weight="700" fill="#dc2626">송장 바코드</text>
+      <text x="386" y="86" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">스캐너로 읽음</text>
+      <g transform="translate(16,92)">
+        <line x1="0" y1="0" x2="0" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="4" y1="0" x2="4" y2="24" stroke="#0f172a" stroke-width="1.4"/><line x1="9" y1="0" x2="9" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="14" y1="0" x2="14" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="19" y1="0" x2="19" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="24" y1="0" x2="24" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="29" y1="0" x2="29" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="34" y1="0" x2="34" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="39" y1="0" x2="39" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="44" y1="0" x2="44" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="49" y1="0" x2="49" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="54" y1="0" x2="54" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="59" y1="0" x2="59" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="64" y1="0" x2="64" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="69" y1="0" x2="69" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="74" y1="0" x2="74" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="79" y1="0" x2="79" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="84" y1="0" x2="84" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="89" y1="0" x2="89" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="94" y1="0" x2="94" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="99" y1="0" x2="99" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="104" y1="0" x2="104" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="109" y1="0" x2="109" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="114" y1="0" x2="114" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="119" y1="0" x2="119" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="124" y1="0" x2="124" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="129" y1="0" x2="129" y2="24" stroke="#0f172a" stroke-width="1.2"/>
+      </g>
+      <text x="200" y="124" text-anchor="middle" font-size="9" font-family="monospace" fill="#dc2626">1234-5678-90</text>
+    </g>
+  </g>
+  <!-- Ingress 좌상 -->
+  <g transform="translate(20, 110)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Ingress</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#7b341e">송장 바코드까지</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#7b341e">스캐너로 정밀 분기</text>
+  </g>
+  <!-- Ingress → 바코드(중앙 송장 아래쪽) -->
+  <line x1="170" y1="170" x2="216" y2="230" stroke="#ff7849" stroke-width="2.2" marker-end="url(#a-or)"/>
+  <!-- Service 우하 -->
+  <g transform="translate(630, 158)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Service</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#475569">받는 곳 주소만</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#94a3b8">눈으로 읽고 분류</text>
+  </g>
+  <!-- Service → 받는 곳 주소(중앙 송장 위쪽) -->
+  <line x1="630" y1="170" x2="582" y2="180" stroke="#475569" stroke-width="2" marker-end="url(#a-sl)"/>
+</svg>
+<p class="cap">옵션 A. Ingress 좌상 → 바코드(아래), Service 우하 → 받는 곳 주소(위). 화살표가 대각선 교차.</p>
+</section>
+
+<!-- ===== 옵션 B ===== -->
+<section>
+<h2>옵션 B — 박스 swap + 송장 내부도 swap (시선 흐름 가장 매끄러움)</h2>
+<p class="desc">송장 내부 위쪽에 바코드, 아래쪽에 받는 곳 주소. Ingress 좌상 → 바코드(위) → 받는 곳 주소(아래) → Service 우하. 시선이 좌→우, 위→아래로 매끄러움. 단점: 실제 우편 송장은 보통 주소가 위라 비유의 직관성이 살짝 손상.</p>
+<svg viewBox="0 0 800 305" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="b-or" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="b-sl" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">한 우편 송장에 두 가지 정보가 함께 붙어 있습니다</text>
+  <g transform="translate(180, 56)">
+    <rect x="0" y="0" width="440" height="240" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="220" y="-12" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">우편</text>
+    <g transform="translate(20, 90)">
+      <rect x="0" y="0" width="400" height="135" rx="3" fill="#fff" stroke="#dc2626" stroke-width="1.6"/>
+      <text x="200" y="-4" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">송장</text>
+      <!-- 위: 바코드 -->
+      <rect x="8" y="8" width="384" height="58" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="24" font-size="10" font-weight="700" fill="#dc2626">송장 바코드</text>
+      <text x="386" y="24" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">스캐너로 읽음</text>
+      <g transform="translate(16,30)">
+        <line x1="0" y1="0" x2="0" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="4" y1="0" x2="4" y2="24" stroke="#0f172a" stroke-width="1.4"/><line x1="9" y1="0" x2="9" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="14" y1="0" x2="14" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="19" y1="0" x2="19" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="24" y1="0" x2="24" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="29" y1="0" x2="29" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="34" y1="0" x2="34" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="39" y1="0" x2="39" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="44" y1="0" x2="44" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="49" y1="0" x2="49" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="54" y1="0" x2="54" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="59" y1="0" x2="59" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="64" y1="0" x2="64" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="69" y1="0" x2="69" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="74" y1="0" x2="74" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="79" y1="0" x2="79" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="84" y1="0" x2="84" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="89" y1="0" x2="89" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="94" y1="0" x2="94" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="99" y1="0" x2="99" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="104" y1="0" x2="104" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="109" y1="0" x2="109" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="114" y1="0" x2="114" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="119" y1="0" x2="119" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="124" y1="0" x2="124" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="129" y1="0" x2="129" y2="24" stroke="#0f172a" stroke-width="1.2"/>
+      </g>
+      <text x="200" y="62" text-anchor="middle" font-size="9" font-family="monospace" fill="#dc2626">1234-5678-90</text>
+      <!-- 아래: 받는 곳 주소 -->
+      <rect x="8" y="72" width="384" height="56" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="88" font-size="10" font-weight="700" fill="#475569">받는 곳 주소</text>
+      <text x="386" y="88" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">사람이 눈으로 읽음</text>
+      <text x="16" y="112" font-size="11" font-family="monospace" font-weight="700" fill="#0f172a">서울시 강남구 ○○로 123</text>
+    </g>
+  </g>
+  <!-- Ingress 좌상 → 바코드(위) -->
+  <g transform="translate(20, 110)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Ingress</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#7b341e">송장 바코드까지</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#7b341e">스캐너로 정밀 분기</text>
+  </g>
+  <line x1="170" y1="140" x2="218" y2="160" stroke="#ff7849" stroke-width="2.2" marker-end="url(#b-or)"/>
+  <!-- Service 우하 → 받는 곳 주소(아래) -->
+  <g transform="translate(630, 158)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Service</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#475569">받는 곳 주소만</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#94a3b8">눈으로 읽고 분류</text>
+  </g>
+  <line x1="630" y1="200" x2="582" y2="230" stroke="#475569" stroke-width="2" marker-end="url(#b-sl)"/>
+</svg>
+<p class="cap">옵션 B. 송장 내부 위쪽=바코드, 아래쪽=받는 곳 주소. 좌→우, 위→아래 자연 흐름.</p>
+</section>
+
+<!-- ===== 옵션 C ===== -->
+<section>
+<h2>옵션 C — 좌우 평행 배치 (둘 다 같은 높이)</h2>
+<p class="desc">Ingress 좌측, Service 우측. 송장 가운데. 둘이 같은 높이로 좌→우 시선이 가장 명확하게 Ingress → 송장 → Service 흐름.</p>
+<svg viewBox="0 0 800 305" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="c-or" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="c-sl" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">한 우편 송장에 두 가지 정보가 함께 붙어 있습니다</text>
+  <g transform="translate(180, 56)">
+    <rect x="0" y="0" width="440" height="240" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="220" y="-12" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">우편</text>
+    <g transform="translate(20, 90)">
+      <rect x="0" y="0" width="400" height="135" rx="3" fill="#fff" stroke="#dc2626" stroke-width="1.6"/>
+      <text x="200" y="-4" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">송장</text>
+      <rect x="8" y="8" width="384" height="56" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="24" font-size="10" font-weight="700" fill="#475569">받는 곳 주소</text>
+      <text x="386" y="24" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">사람이 눈으로 읽음</text>
+      <text x="16" y="48" font-size="11" font-family="monospace" font-weight="700" fill="#0f172a">서울시 강남구 ○○로 123</text>
+      <rect x="8" y="70" width="384" height="58" rx="2" fill="#fffaf0" stroke="#cbd5e1" stroke-width="0.8"/>
+      <text x="16" y="86" font-size="10" font-weight="700" fill="#dc2626">송장 바코드</text>
+      <text x="386" y="86" text-anchor="end" font-size="8" font-style="italic" fill="#94a3b8">스캐너로 읽음</text>
+      <g transform="translate(16,92)">
+        <line x1="0" y1="0" x2="0" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="4" y1="0" x2="4" y2="24" stroke="#0f172a" stroke-width="1.4"/><line x1="9" y1="0" x2="9" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="14" y1="0" x2="14" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="19" y1="0" x2="19" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="24" y1="0" x2="24" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="29" y1="0" x2="29" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="34" y1="0" x2="34" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="39" y1="0" x2="39" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="44" y1="0" x2="44" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="49" y1="0" x2="49" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="54" y1="0" x2="54" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="59" y1="0" x2="59" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="64" y1="0" x2="64" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="69" y1="0" x2="69" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="74" y1="0" x2="74" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="79" y1="0" x2="79" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="84" y1="0" x2="84" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="89" y1="0" x2="89" y2="24" stroke="#0f172a" stroke-width="1.2"/><line x1="94" y1="0" x2="94" y2="24" stroke="#0f172a" stroke-width="0.5"/><line x1="99" y1="0" x2="99" y2="24" stroke="#0f172a" stroke-width="1.1"/><line x1="104" y1="0" x2="104" y2="24" stroke="#0f172a" stroke-width="0.7"/><line x1="109" y1="0" x2="109" y2="24" stroke="#0f172a" stroke-width="1.3"/><line x1="114" y1="0" x2="114" y2="24" stroke="#0f172a" stroke-width="0.6"/><line x1="119" y1="0" x2="119" y2="24" stroke="#0f172a" stroke-width="1"/><line x1="124" y1="0" x2="124" y2="24" stroke="#0f172a" stroke-width="0.8"/><line x1="129" y1="0" x2="129" y2="24" stroke="#0f172a" stroke-width="1.2"/>
+      </g>
+      <text x="200" y="124" text-anchor="middle" font-size="9" font-family="monospace" fill="#dc2626">1234-5678-90</text>
+    </g>
+  </g>
+  <!-- Ingress 좌측 (가운데 높이) -->
+  <g transform="translate(20, 165)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Ingress</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#7b341e">송장 바코드까지</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#7b341e">스캐너로 정밀 분기</text>
+  </g>
+  <line x1="170" y1="220" x2="218" y2="235" stroke="#ff7849" stroke-width="2.2" marker-end="url(#c-or)"/>
+  <!-- Service 우측 (가운데 높이) -->
+  <g transform="translate(630, 165)">
+    <rect x="0" y="0" width="150" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+    <text x="75" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Service</text>
+    <text x="75" y="40" text-anchor="middle" font-size="9" fill="#475569">받는 곳 주소만</text>
+    <text x="75" y="54" text-anchor="middle" font-size="8" fill="#94a3b8">눈으로 읽고 분류</text>
+  </g>
+  <line x1="630" y1="180" x2="582" y2="175" stroke="#475569" stroke-width="2" marker-end="url(#c-sl)"/>
+</svg>
+<p class="cap">옵션 C. 둘 다 같은 높이. 좌→우 시선이 Ingress → 송장 → Service로 자연.</p>
+</section>
+
+</body>
+</html>

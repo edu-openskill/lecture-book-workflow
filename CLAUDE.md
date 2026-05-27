@@ -166,6 +166,7 @@ projects/[책이름]/
 | `.claude/rules/chapter-format.md`   | `chapters/**`         | 실습 챕터 12단계 포맷 템플릿 (paths 스코핑)              |
 | `.claude/rules/writing-preface.md`  | `book/front/preface*` | 머릿말 패턴 (paths 스코핑)                               |
 | `.claude/rules/writing-epilogue.md` | `book/back/epilogue*` | 맺음말 패턴 (paths 스코핑)                               |
+| `.claude/rules/chapter-analysis.md` | 전역                  | 챕터 본문 분석 요청 시 H3 전체 흐름 매핑 + 수정 영향 시뮬 강제 |
 
 ### Hooks (강제 차단)
 
