@@ -8,7 +8,7 @@
   margin: 22mm 18mm 22mm 18mm;
 
   @top-center {
-    content: "AI도 모르는 우리 회사 이야기";
+    content: "";
     font-family: 'Pretendard', sans-serif;
     font-size: 9pt;
     color: #a0aec0;
@@ -192,6 +192,7 @@ h2 { page-break-before: auto; }
   margin-top: -12px;   /* 컴포넌트 margin-bottom과 collapse되어 위로 끌어올림 */
   font-size: 9pt;
   color: #718096;
+  text-align: center;
 }
 
 /* 표지·그림자 제거 (인쇄 선명도) */

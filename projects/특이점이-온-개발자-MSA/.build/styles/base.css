@@ -102,7 +102,7 @@
   /* 테이블 */
   table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 14px 0; font-size: 14px; background: transparent; }
   th { background: transparent; color: var(--color-text-heading); font-weight: 700; text-align: left; padding: 9px 12px; border-bottom: 2px solid #2d3748; font-size: 13px; word-break: keep-all; line-height: 1.5; }
-  td { padding: 9px 12px; border-bottom: 1px solid var(--color-border-dashed); color: var(--color-text-muted); word-break: keep-all; line-height: 1.55; vertical-align: top; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--color-border-dashed); color: var(--color-text-muted); word-break: keep-all; overflow-wrap: anywhere; line-height: 1.55; vertical-align: top; }
   tr:last-child td { border-bottom: none; }
   /* 테이블 셀 안 인라인 코드: 긴 명령어가 셀 폭을 넘어가면 자연스러운 위치에서 줄바꿈 */
   td code, th code { word-break: break-word; overflow-wrap: anywhere; }
@@ -117,6 +117,31 @@
     font-family: 'JetBrains Mono', monospace;
     font-weight: 500;
     border: 1px solid var(--color-border);
+  }
+
+  /* 언어 태그 없는 ``` 코드블록 (plain pre><code). 인라인 code 스타일을 reset하고 pre 컨테이너에만 박스를 부여 */
+  pre {
+    background: var(--color-surface-alt);
+    padding: 12px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    margin: 14px 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    line-height: 1.6;
+    white-space: pre;
+  }
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    display: block;
   }
 
   /* 본문 일반 리스트 (ol, ul) — 기본 여백·들여쓰기 통일 */

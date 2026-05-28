@@ -102,7 +102,7 @@
   /* 테이블 */
   table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 14px 0; font-size: 14px; background: transparent; }
   th { background: transparent; color: var(--color-text-heading); font-weight: 700; text-align: left; padding: 9px 12px; border-bottom: 2px solid #2d3748; font-size: 13px; word-break: keep-all; line-height: 1.5; }
-  td { padding: 9px 12px; border-bottom: 1px solid var(--color-border-dashed); color: var(--color-text-muted); word-break: keep-all; line-height: 1.55; vertical-align: top; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--color-border-dashed); color: var(--color-text-muted); word-break: keep-all; overflow-wrap: anywhere; line-height: 1.55; vertical-align: top; }
   tr:last-child td { border-bottom: none; }
   /* 테이블 셀 안 인라인 코드: 긴 명령어가 셀 폭을 넘어가면 자연스러운 위치에서 줄바꿈 */
   td code, th code { word-break: break-word; overflow-wrap: anywhere; }

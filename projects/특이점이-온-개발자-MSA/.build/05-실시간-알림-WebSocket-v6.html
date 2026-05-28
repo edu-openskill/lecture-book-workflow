@@ -20,6 +20,12 @@
 <body>
 <div class="container">
 <h1>챕터 5. 실시간 알림 - 주문 완료를 즉시 전달하다</h1>
+<p>베타 테스터로 등록한 동료가 자리로 왔습니다. 표정이 떨떠름했습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "어제 책 한 권 주문했는데, 화면이 계속 '처리 중'이더라고요. 끝났는지 알 수가 없어서 한참 뒤에 주문 내역을 다시 열어 봤어요. 그랬더니 '배달 완료'래요. 근데 책은 오늘까지 안 왔어요."</div>
+<p>오픈이는 배달 코드를 따라가 봤습니다. 배달은 만들어지자마자 곧바로 완료로 바뀌었습니다. 정작 물건이 진짜 전달되는 순간은 코드 어디에도 없었습니다. 그렇게 찍힌 완료조차 화면에 바로 뜨지 않아, 동료는 끝났는지 직접 확인할 수밖에 없었습니다.</p>
+<p>이 문제를 들고 선배에게 갔습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "배달이 만들어지자마자 완료로 찍혀요. 지금 이대로 사용자한테 '완료'라고 알리면 거짓말입니다. 어디부터 손대야 하죠?"</div>
+<div class="dialogue"><span class="speaker">선배</span>: "알림은 진짜 끝났을 때 보내야 의미가 있어요. 진짜 끝나는 순간은 곧 만들 거예요. 그 전에, 사용자가 끝났는지 왜 직접 확인해야 했는지부터 봐요."</div>
 <div class="svg-figure">
 <svg viewBox="0 0 1200 880" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 5 한눈에 보기: 챕터 4와 동일하게 1단계 로그인, 2단계 주문은 Client가 Ingress·Gateway를 거쳐 Order에 주문하고 즉시 PENDING을 응답받는다. Order·Product·Delivery는 가운데 Orchestrator와 event·command를 주고받고 Orchestrator가 Kafka 토픽으로 비동기 전달한다. 챕터 4와의 차이는, 비동기 처리가 끝나 주문이 완료되면 Order가 WebSocket으로 Client에게 완료를 즉시 Push(13)한다는 점이다.">
   <defs>
@@ -165,22 +171,15 @@
 <li>K8s에 frontend 추가 배포 → 통합 시나리오 검증</li>
 </ol>
 </div>
-<h2>5.1 처리 중에서 멈춘 화면</h2>
-<p>베타 테스터로 등록한 동료가 자리로 왔습니다. 표정이 떨떠름했습니다.</p>
-<div class="dialogue"><span class="speaker">동료</span>: "어제 책 한 권 주문했는데, 화면이 계속 '처리 중'이더라고요. 끝났는지 알 수가 없어서 한참 뒤에 주문 내역을 다시 열어 봤어요. 그랬더니 '배달 완료'래요. 근데 책은 오늘까지 안 왔어요."</div>
-<p>오픈이는 배달 코드를 따라가 봤습니다. 배달은 만들어지자마자 곧바로 완료로 바뀌었습니다. 정작 물건이 진짜 전달되는 순간은 코드 어디에도 없었습니다. 그렇게 찍힌 완료조차 화면에 바로 뜨지 않아, 동료는 끝났는지 직접 확인할 수밖에 없었습니다.</p>
-<p>이 문제를 들고 선배에게 갔습니다.</p>
-<div class="dialogue"><span class="speaker">오픈이</span>: "배달이 만들어지자마자 완료로 찍혀요. 지금 이대로 사용자한테 '완료'라고 알리면 거짓말입니다. 어디부터 손대야 하죠?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "알림은 진짜 끝났을 때 보내야 의미가 있어요. 진짜 끝나는 순간은 곧 만들 거예요. 그 전에, 사용자가 끝났는지 왜 직접 확인해야 했는지부터 봐요."</div>
-<h2>5.2 WebSocket - 폴링의 한계를 넘다</h2>
-<h3>5.2.1 폴링 vs 푸시</h3>
+<h2>5.1 WebSocket - 폴링의 한계를 넘다</h2>
+<h3>5.1.1 폴링 vs 푸시</h3>
 <p>서버에 생긴 변화를 알아내는 방법은 크게 두 가지입니다.</p>
 <p>택배가 왔는지 현관문을 5분마다 열어 확인합니다. 도착했는지 아닌지는 직접 열어 봐야만 알 수 있습니다. 이렇게 클라이언트가 서버에 &quot;완료됐나요?&quot;라고 일정한 간격으로 반복해서 묻는 방식이 <strong>폴링(Polling)</strong> 입니다. 서버는 물어볼 때마다 그 시점의 상태를 응답할 뿐이라, 아직 변화가 없으면 클라이언트는 같은 질문을 다음 간격에 다시 보냅니다.</p>
 <p>반대로 택배가 도착하면 초인종이 한 번 울립니다. 안에 있는 사람은 문을 여닫으며 확인할 필요 없이, 울리는 순간 도착을 압니다. 이렇게 클라이언트가 묻지 않아도 서버가 변화가 생긴 순간 먼저 알리는 방식이 <strong>푸시(Push)</strong> 입니다. 클라이언트는 반복해서 묻지 않고, 변화가 생기면 그 즉시 화면까지 전달됩니다.</p>
 <!-- image-prompt: Minimal black line drawing on white background, two side-by-side halves, no divider line, no X mark, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Left half, title "Polling": the same scene repeated three times stacked vertically with NO frame, box, or border around each repetition (no rectangles, no panel outlines), each repetition showing the same tired, weary-looking person (drooping shoulders, exhausted face) opening their front door to an empty doorstep, with a large round analog wall clock whose hands point to a clearly DIFFERENT time in each — top about 9 o'clock, middle about 12 o'clock, bottom about 3 o'clock — the visibly different clock hands making the repeated checking over time obvious. Right half, title "Push": the same person sitting relaxed on a sofa reading while a small bell symbol by the front door rings on its own with short curved motion lines. No speech bubbles, no sound-effect text (no "RING!"), no annotation text, no checklists. Characters drawn in a clean simple cartoon textbook style consistent with the rest of the book — not stick figures, simple but with clear body proportions, hair, and clothing outlines, more detailed than stick figures but less detailed than realistic. Clean lines, no colors. -->
 <div class="chapter-image gemini"><img src="..\chapters\assets\CH05\gemini\01_polling-vs-websocket.png" alt="" /><div class="caption">그림 5-2. 폴링 vs 푸시</div></div>
 <p>동료가 주문 내역을 몇 번이고 다시 열어 봐야 했던 건 화면에 초인종이 없었기 때문입니다. 사용자에게 끝난 사실을 곧바로 알리려면, 서버가 먼저 보내는 푸시가 필요합니다.</p>
-<h3>5.2.2 WebSocket</h3>
+<h3>5.1.2 WebSocket</h3>
 <p>푸시를 구현하는 기술이 <strong>WebSocket</strong>입니다.</p>
 <p>HTTP 요청-응답은 편지와 같습니다. 한 통 보내고 답장이 오면 한 번의 왕복이 끝나고, 또 궁금하면 다시 한 통을 보내야 합니다. 그래서 보내는 쪽이 묻지 않으면 상대는 아무것도 전할 수 없습니다.</p>
 <p>반대로 WebSocket은 전화 통화에 가깝습니다. 한 번 연결되면 끊지 않고 그대로 이어 두어, 묻지 않아도 어느 쪽이든 먼저 말할 수 있습니다. 서버는 변화가 생긴 순간 &quot;주문 완료&quot;라고 먼저 전합니다.</p>
@@ -227,7 +226,7 @@
 <p><strong>WebSocket이란?</strong> 클라이언트와 서버가 한 번 연결을 맺으면 끊지 않고 유지하는 통신 방식입니다. 연결이 살아 있는 동안에는 서버가 요청을 기다릴 필요 없이 클라이언트에 데이터를 보낼 수 있습니다. 상태가 바뀌면 그 즉시 알림이 전달됩니다.</p>
 </div>
 <p>WebSocket을 붙이면 서버는 주문이 완료되는 순간 사용자 화면으로 곧바로 알림을 보낼 수 있습니다. 이제 주문 완료를 위해 배달 완료 기능을 추가해 보겠습니다.</p>
-<h2>5.3 배달 완료 - 생성과 완료를 분리한다</h2>
+<h2>5.2 배달 완료 - 생성과 완료를 분리한다</h2>
 <p>이제부터는 접수하면 배달이 <strong>PENDING</strong>으로 남고, 배달 기사가 전달한 뒤에야 <strong>COMPLETED</strong>가 됩니다. 배달이 만들어진 뒤 완료되기까지를 순서대로 보겠습니다.</p>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
@@ -381,9 +380,9 @@
 </div>
 <div class="caption">그림 5-6. 3단계 - 주문 완료 명령 발행 → 주문 수신 → WebSocket 알림</div>
 <p>이 세 단계가 차례로 이어지면 배달이 진짜 끝나는 순간 사용자에게 완료 알림이 전달됩니다. 첫 단계가 일어나는 배달 서비스부터 구현합니다.</p>
-<h2>5.4 배달 서비스 - 배달 완료 API</h2>
+<h2>5.3 배달 서비스 - 배달 완료 API</h2>
 <p>배달 서비스에서 손볼 곳은 두 군데입니다. 생성에서 완료를 분리하고, 배달 기사가 호출할 완료 처리를 더합니다. 두 작업에 앞서 컨트롤러·포트·이벤트부터 보겠습니다.</p>
-<h3>5.4.1 컨트롤러·포트·이벤트 발행</h3>
+<h3>5.3.1 컨트롤러·포트·이벤트 발행</h3>
 <p>요청을 받는 컨트롤러, 컨트롤러가 부르는 포트, 완료 이벤트를 발행하는 코드는 패턴이 단순해 표로 정리합니다. 전체 코드는 깃헙 레포에서 확인합니다.</p>
 <table>
 <thead>
@@ -407,7 +406,7 @@
 </tr>
 </tbody>
 </table>
-<h3>5.4.2 생성과 완료 분리</h3>
+<h3>5.3.2 생성과 완료 분리</h3>
 <p>완료 요청을 받을 컨트롤러와 포트는 갖췄습니다. 그런데 배달은 아직 만들어지자마자 곧바로 완료로 바뀝니다. 앞에서 본 1단계가 여기입니다. 이 완료 호출을 지워 생성과 완료를 분리하면 배달은 PENDING으로 남고, 완료는 배달 기사가 직접 호출할 때로 미뤄집니다.</p>
 <p><code>usecase/DeliveryService.java</code>의 <code>createDelivery</code>를 아래처럼 고칩니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> usecase/DeliveryService.java. 생성 시 완료 호출 제거</div><span class="nd">@Transactional</span>
@@ -417,7 +416,7 @@
 <span class="w">    </span><span class="c1">// 삭제: createdDelivery.complete();  ← 생성 시 완료 호출 제거</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">createdDelivery</span><span class="p">);</span>
 <span class="p">}</span></div>
-<h3>5.4.3 서비스 - 완료 처리</h3>
+<h3>5.3.3 서비스 - 완료 처리</h3>
 <p>실습 1에서 완료 호출을 지운 <code>DeliveryService</code>에 이번엔 배달 기사가 호출할 완료 메서드를 더합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/DeliveryService.java. completeDelivery 추가</div><span class="nd">@Override</span>
 <span class="nd">@Transactional</span>
@@ -429,9 +428,9 @@
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">findDelivery</span><span class="p">);</span>
 <span class="p">}</span></div>
 <p>배달 기사가 완료를 호출하면 배달이 완료되고, 완료 이벤트가 발행됩니다. 이제 오케스트레이터가 완료 이벤트를 받도록 수정합니다.</p>
-<h2>5.5 오케스트레이터 - 배달 완료 이벤트 처리 추가</h2>
+<h2>5.4 오케스트레이터 - 배달 완료 이벤트 처리 추가</h2>
 <p>오케스트레이터는 배달 생성 결과를 받아도 더 진행하지 않고, 배달 완료를 받아 주문을 끝냅니다.</p>
-<h3>5.5.1 deliveryCreated 수정 - 성공 시 발행 중단</h3>
+<h3>5.4.1 deliveryCreated 수정 - 성공 시 발행 중단</h3>
 <p>배달 생성이 성공하면 더 이상 주문 완료 명령을 보내지 않습니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>의 <code>deliveryCreated</code>를 아래처럼 수정합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> handler/OrderOrchestrator.java. deliveryCreated - 성공 시 발행 중단</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
@@ -457,7 +456,7 @@
 <span class="w">    </span><span class="n">states</span><span class="p">.</span><span class="na">remove</span><span class="p">(</span><span class="n">orderId</span><span class="p">);</span>
 <span class="p">}</span></div>
 <p>실패 처리는 앞과 같습니다. 성공 분기만 달라집니다.</p>
-<h3>5.5.2 deliveryCompleted 추가 - 배달 완료 시 주문 완료</h3>
+<h3>5.4.2 deliveryCompleted 추가 - 배달 완료 시 주문 완료</h3>
 <p><code>handler/OrderOrchestrator.java</code>에 <code>deliveryCompleted</code> 리스너를 추가합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> handler/OrderOrchestrator.java. deliveryCompleted - 주문 완료 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deliveryCompleted</span><span class="p">(</span><span class="n">DeliveryCompletedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -470,9 +469,9 @@
 <span class="p">}</span></div>
 <p>배달 기사가 완료를 호출하면, 주문 완료와 화면 알림까지 이어집니다.</p>
 <p class="thought">여기까지 다 이어졌는데, 정작 사용자한테는 어떻게 알리지?</p>
-<h2>5.6 주문 서비스 - STOMP로 실시간 Push 구현</h2>
+<h2>5.5 주문 서비스 - STOMP로 실시간 Push 구현</h2>
 <p>남은 곳은 주문 서비스입니다. 주문 완료 명령을 받으면 주문을 끝내고, 사용자 화면으로 곧바로 알립니다.</p>
-<h3>5.6.1 WebSocket 설정</h3>
+<h3>5.5.1 WebSocket 설정</h3>
 <p>WebSocketConfig는 WebSocket을 켜고, 클라이언트가 <code>/api/ws/orders</code>로 실시간 연결할 엔드포인트를 등록합니다.</p>
 <div class="prep-note">
 <p><strong>WebSocket 위에 STOMP 프로토콜을 사용합니다.</strong> STOMP를 얹으면 &quot;이 채널을 구독한다&quot;, &quot;이 채널에 메시지를 보낸다&quot; 같은 발행-구독 구조를 쓸 수 있습니다. 클라이언트가 <code>/topic/orders/{userId}</code> 채널을 구독하면 해당 사용자에게만 알림이 전달됩니다.</p>
@@ -494,7 +493,7 @@
 <span class="w">        </span><span class="n">registry</span><span class="p">.</span><span class="na">addEndpoint</span><span class="p">(</span><span class="s">&quot;/api/ws/orders&quot;</span><span class="p">).</span><span class="na">setAllowedOriginPatterns</span><span class="p">(</span><span class="s">&quot;*&quot;</span><span class="p">).</span><span class="na">withSockJS</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<h3>5.6.2 SimpMessagingTemplate - 주문 완료 시 Push 발송</h3>
+<h3>5.5.2 SimpMessagingTemplate - 주문 완료 시 Push 발송</h3>
 <p><code>completeOrder</code> 메서드에서 <code>/topic/orders/{userId}</code> 채널에 메시지를 보내면 userId에 해당하는 사용자만 알림을 수신합니다.</p>
 <div class="term-box">
 <p><strong>SimpMessagingTemplate이란?</strong> Spring이 제공하는 메시지 전송 도구입니다. <code>convertAndSend(destination, payload)</code> 메서드로 지정한 채널을 구독한 모든 클라이언트에게 메시지를 Push합니다.</p>
@@ -547,7 +546,7 @@
 </svg>
 </div>
 <div class="caption">그림 5-7. WebSocket 주소 일치 - 같은 색은 글자까지 똑같아야 동작합니다</div>
-<h3>5.6.3 보조 설정과 클라이언트</h3>
+<h3>5.5.3 보조 설정과 클라이언트</h3>
 <p>핵심 코드 외에 필요한 설정과 클라이언트는 표로 정리합니다. 전체 코드는 깃헙 레포에서 확인합니다.</p>
 <table>
 <thead>
@@ -580,9 +579,9 @@
 <p>보통 HTTP 요청은 한 번 주고받으면 연결이 끝납니다. WebSocket은 연결을 끊지 않고 계속 열어 두는 방식이라, 처음 연결할 때 &quot;일반 HTTP가 아니라 계속 유지하는 WebSocket으로 바꾸자&quot;고 알리는 신호, 곧 업그레이드 헤더가 필요합니다.</p>
 <p>문제는 브라우저와 서버 사이에 프록시(frontend·gateway)가 있다는 점입니다. 프록시가 업그레이드 헤더를 전달하지 않으면 일반 요청처럼 처리돼 연결이 끊깁니다. 그래서 두 프록시의 <code>/api/ws/</code> 설정 모두에 업그레이드 헤더를 전달하도록 적어 둡니다.</p>
 </div>
-<h2>5.7 전체 시스템 통합 테스트</h2>
+<h2>5.6 전체 시스템 통합 테스트</h2>
 <p>모든 구현이 완료됐습니다. 이제 전체 시스템을 실행하고 처음부터 끝까지 한 번에 흐름을 확인합니다.</p>
-<h3>5.7.1 K8s 매니페스트</h3>
+<h3>5.6.1 K8s 매니페스트</h3>
 <p>앞 챕터까지의 구성에서 frontend 서비스가 새로 추가됩니다. <code>k8s/frontend/</code> 폴더에 Deployment, Service, Ingress가 정의되어 있습니다.</p>
 <table>
 <thead>
@@ -607,7 +606,7 @@
 </tbody>
 </table>
 <p>이번 챕터부터는 Ingress가 gateway-service가 아닌 <strong>frontend-service</strong>를 가리킵니다. 프론트엔드의 Nginx가 정적 파일을 직접 제공하고, <code>/api/</code> 요청만 gateway-service로 전달합니다.</p>
-<h3>5.7.2 이미지 빌드</h3>
+<h3>5.6.2 이미지 빌드</h3>
 <p>Minikube 내부에 이미지를 빌드합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 이미지 빌드</div>minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/db:3<span class="w"> </span>./db
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/gateway:3<span class="w"> </span>./gateway
@@ -617,7 +616,7 @@ minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/delivery:3<span class="w"> </span>./delivery
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/orchestrator:3<span class="w"> </span>./orchestrator
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/frontend:3<span class="w"> </span>./frontend</div>
-<h3>5.7.3 배포</h3>
+<h3>5.6.3 배포</h3>
 <p>Kafka를 먼저 배포하고 ready 상태를 확인한 다음 나머지를 배포합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 배포 순서 (Kafka 우선)</div><span class="c1"># 1. 네임스페이스 생성</span>
 kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>metacoding
@@ -664,11 +663,11 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
   </div>
 </div>
 <div class="caption">그림 5-8. Pod 상태 확인</div>
-<h3>5.7.4 서비스 접근</h3>
+<h3>5.6.4 서비스 접근</h3>
 <p>Ingress를 통해 외부에서 접속하려면 <code>minikube tunnel</code>을 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 외부 접근 터널</div>minikube<span class="w"> </span>tunnel</div>
 <p>터널이 실행되면 <code>http://127.0.0.1:80</code>로 프론트엔드에 접속할 수 있습니다.</p>
-<h3>5.7.5 통합 테스트 시나리오</h3>
+<h3>5.6.5 통합 테스트 시나리오</h3>
 <p><strong>Step 1: WebSocket 연결 및 주문 생성 (클라이언트 역할)</strong></p>
 <p>브라우저를 통해 index.html에 접속합니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">브라우저</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/index.html</span></div>

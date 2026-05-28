@@ -20,9 +20,6 @@
 <body>
 <div class="container">
 <h1>챕터 4. 비동기 MSA - Kafka로 서비스를 분리하다</h1>
-<blockquote>
-<p>이 챕터의 전체 소스코드는 <strong>https://github.com/metacoding-12-msa/ex03</strong> 에서 확인할 수 있습니다.</p>
-</blockquote>
 <div class="svg-figure">
 <svg viewBox="0 0 1200 880" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 4 한눈에 보기: 챕터 3과 동일하게 Client는 클러스터 밖에 있고, 1단계 로그인은 Client가 Ingress·Gateway를 거쳐 User에 로그인하고 JWT를 응답받는다. 2단계 주문은 Client가 Ingress·Gateway를 거쳐 Order에 동기 REST로 주문하고 즉시 PENDING을 응답받는다. 그 뒤 Order·Product·Delivery 세 서비스는 가운데 Orchestrator와 event·command를 주고받고, Orchestrator가 그 모든 메시지를 아래 Kafka 토픽으로 비동기 전달한다. 서비스끼리는 직접 호출하지 않는다.">
   <defs>
@@ -1009,6 +1006,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <p>상품·배달을 직접 호출하고 실패까지 떠안던 주문 서비스는 이제 주문을 저장하고 이벤트 하나만 발행합니다. 정상 주문은 곧바로 PENDING으로 응답한 뒤 비동기로 COMPLETED가 되고, 품절 주문은 orchestrator가 알아서 CANCELLED로 되돌립니다. 직접 호출이 사라지면서 서비스 사이의 강한 결합이 풀렸고, try/catch 보상 블록도 함께 없어졌습니다.</p>
 <p>며칠 뒤, 같은 동료가 책상 앞에 다시 섰습니다. 표정에서 불만이 묻어났습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "어제 직접 주문해 봤는데, 좀 이상한 게 있었어요."</div>
+<p>시스템을 점검하던 동료가 새로운 문제를 알려 왔습니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>

@@ -3091,3 +3091,701 @@
   .sp-callout.warm { border-left-color: var(--color-accent-warm); background: var(--color-accent-warm-bg); color: var(--color-accent-warm-text); }
   .sp-callout.info { border-left-color: var(--color-info); background: var(--color-info-bg); color: var(--color-info-text); }
   .sp-callout strong { font-weight: 700; }
+
+  /* ===== MSA 책 다이어그램 컴포넌트 ===== */
+
+  /* .k8s-resources — Kubernetes 리소스 관계도 (CH03 §3.6.1)
+     Ingress → Service → Pod (← Deployment, ← ConfigMap/Secret) 관계를 한 장에. */
+  .k8s-resources {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .k8s-resources .kr-title {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .k8s-resources .kr-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .k8s-resources .kr-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .k8s-resources .kr-node {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    min-width: 180px;
+    text-align: center;
+  }
+  .k8s-resources .kr-tag {
+    display: inline-block;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-feature-settings: 'liga' off;
+  }
+  .k8s-resources .kr-desc {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .k8s-resources .kr-arrow {
+    color: var(--color-accent);
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .k8s-resources .kr-arrow.kr-h { font-size: 22px; }
+  .k8s-resources .kr-arrow .kr-arrow-lbl {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  /* .state-lifecycle — 상태 전이 다이어그램 (CH05 §5.3)
+     생성 → PENDING → COMPLETED 같은 좌→우 상태 흐름. 화살표 위에 트리거 라벨. */
+  .state-lifecycle {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .state-lifecycle .sl-title {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .state-lifecycle .sl-flow {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .state-lifecycle .sl-state {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    min-width: 160px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .state-lifecycle .sl-state.sl-final {
+    border-color: var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  .state-lifecycle .sl-tag {
+    display: inline-block;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    align-self: center;
+    font-feature-settings: 'liga' off;
+  }
+  .state-lifecycle .sl-state.sl-final .sl-tag {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .state-lifecycle .sl-desc {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .state-lifecycle .sl-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    gap: 4px;
+    padding: 0 4px;
+  }
+  .state-lifecycle .sl-arrow-line {
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .state-lifecycle .sl-arrow-lbl {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* .svc-arch — 서비스 아키텍처 다이어그램 (CH01 §1.3)
+     4~5개 서비스 박스 + 화살표 + 옵션 라벨(REST 메서드 또는 Kafka 토픽). */
+  .svc-arch {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .svc-arch .sa-title {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .svc-arch .sa-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .svc-arch .sa-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .svc-arch .sa-node {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    min-width: 150px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .svc-arch .sa-node.sa-primary {
+    border-color: var(--color-accent);
+    background: var(--color-accent-bg);
+  }
+  .svc-arch .sa-node.sa-hub {
+    border-color: var(--color-accent-warm);
+    background: var(--color-accent-warm-bg);
+  }
+  .svc-arch .sa-tag {
+    display: inline-block;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    align-self: center;
+    font-feature-settings: 'liga' off;
+  }
+  .svc-arch .sa-node.sa-primary .sa-tag {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .svc-arch .sa-node.sa-hub .sa-tag {
+    background: var(--color-accent-warm);
+    color: #fff;
+  }
+  .svc-arch .sa-desc {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .svc-arch .sa-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--color-accent);
+    gap: 4px;
+    padding: 0 4px;
+  }
+  .svc-arch .sa-arrow-line {
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .svc-arch .sa-arrow-lbl {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .svc-arch .sa-note {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-border);
+  }
+
+  /* .saga-flow — Saga 패턴 (Choreography / Orchestration) (CH01 §1.4.3, CH04 §4.3) */
+  .saga-flow {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .saga-flow .sf-title {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .saga-flow .sf-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .saga-flow .sf-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .saga-flow .sf-node {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    min-width: 130px;
+    text-align: center;
+  }
+  .saga-flow .sf-node.sf-hub {
+    border-color: var(--color-accent-warm);
+    background: var(--color-accent-warm-bg);
+  }
+  .saga-flow .sf-tag {
+    display: inline-block;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-feature-settings: 'liga' off;
+  }
+  .saga-flow .sf-hub .sf-tag {
+    background: var(--color-accent-warm);
+    color: #fff;
+  }
+  .saga-flow .sf-desc {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+    word-break: keep-all;
+  }
+  .saga-flow .sf-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 0 4px;
+    min-width: 110px;
+  }
+  .saga-flow .sf-fwd {
+    color: var(--color-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+  .saga-flow .sf-bwd {
+    color: var(--color-accent-warm-text);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+  .saga-flow .sf-arrow-line {
+    color: var(--color-accent);
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .saga-flow .sf-arrow-lbl {
+    color: var(--color-text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .saga-flow .sf-note {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-border);
+  }
+
+  /* .seq-diagram — 시퀀스 다이어그램 (CH02 §2.6, CH04 §4.6 단계별) */
+  .seq-diagram {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .seq-diagram .sd-title {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .seq-diagram .sd-lifelines {
+    display: flex;
+    justify-content: space-around;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+  .seq-diagram .sd-actor {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+  .seq-diagram .sd-actor .sd-tag {
+    display: inline-block;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 4px;
+    font-feature-settings: 'liga' off;
+  }
+  .seq-diagram .sd-actor.sd-hub .sd-tag {
+    background: var(--color-accent-warm);
+    color: #fff;
+  }
+  .seq-diagram .sd-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .seq-diagram .sd-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: var(--color-surface, #f8fafc);
+  }
+  .seq-diagram .sd-step.sd-fail {
+    background: var(--color-accent-warm-bg);
+  }
+  .seq-diagram .sd-num {
+    display: inline-block;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 50%;
+    text-align: center;
+    flex-shrink: 0;
+    font-feature-settings: 'liga' off;
+  }
+  .seq-diagram .sd-step.sd-fail .sd-num {
+    background: var(--color-accent-warm);
+  }
+  .seq-diagram .sd-from-to {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--color-accent-text);
+    font-weight: 700;
+    white-space: nowrap;
+    min-width: 140px;
+  }
+  .seq-diagram .sd-step.sd-fail .sd-from-to {
+    color: var(--color-accent-warm-text);
+  }
+  .seq-diagram .sd-msg {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    flex: 1;
+  }
+
+  /* .kafka-topic-flow — Producer → Topic → Consumer (CH04 §4.2.1) */
+  .kafka-topic-flow {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .kafka-topic-flow .ktf-title {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .kafka-topic-flow .ktf-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .kafka-topic-flow .ktf-node {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    min-width: 140px;
+    text-align: center;
+  }
+  .kafka-topic-flow .ktf-topic {
+    background: var(--color-accent-warm-bg);
+    border: 1px solid var(--color-accent-warm);
+    border-radius: 10px;
+    padding: 12px 16px;
+    min-width: 220px;
+    text-align: center;
+  }
+  .kafka-topic-flow .ktf-tag {
+    display: inline-block;
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-feature-settings: 'liga' off;
+  }
+  .kafka-topic-flow .ktf-topic .ktf-tag {
+    background: var(--color-accent-warm);
+    color: #fff;
+  }
+  .kafka-topic-flow .ktf-name {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-accent-warm-text);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .kafka-topic-flow .ktf-desc {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .kafka-topic-flow .ktf-msgs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .kafka-topic-flow .ktf-msg {
+    display: inline-block;
+    background: #fff;
+    border: 1px solid var(--color-accent-warm);
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--color-accent-warm-text);
+    padding: 2px 6px;
+  }
+  .kafka-topic-flow .ktf-arrow {
+    color: var(--color-accent);
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1;
+  }
+  .kafka-topic-flow .ktf-group {
+    border: 1px dashed var(--color-accent-border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .kafka-topic-flow .ktf-group-lbl {
+    color: var(--color-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .kafka-topic-flow .ktf-group-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+  .kafka-topic-flow .ktf-instance {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+  .kafka-topic-flow .ktf-instance.ktf-active {
+    background: var(--color-accent-bg);
+    color: var(--color-accent-text);
+    font-weight: 700;
+  }
+  .kafka-topic-flow .ktf-instance.ktf-skip {
+    color: var(--color-text-subtle);
+    text-decoration: line-through;
+  }
+
+  /* .kafka-cluster — 브로커 클러스터·Listener (CH04 §4.7.1) */
+  .kafka-cluster {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .kafka-cluster .kc-title {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+  .kafka-cluster .kc-cluster {
+    border: 2px dashed var(--color-accent-warm);
+    border-radius: 12px;
+    padding: 18px;
+    background: var(--color-accent-warm-bg);
+  }
+  .kafka-cluster .kc-cluster-id {
+    color: var(--color-accent-warm-text);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .kafka-cluster .kc-brokers {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .kafka-cluster .kc-broker {
+    background: #fff;
+    border: 1px solid var(--color-accent-warm);
+    border-radius: 10px;
+    padding: 12px 18px;
+    min-width: 130px;
+    text-align: center;
+  }
+  .kafka-cluster .kc-tag {
+    display: inline-block;
+    background: var(--color-accent-warm);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-feature-settings: 'liga' off;
+  }
+  .kafka-cluster .kc-desc {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .kafka-cluster .kc-listeners {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .kafka-cluster .kc-listener {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    background: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .kafka-cluster .kc-listener-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-accent-text);
+    font-weight: 700;
+    min-width: 200px;
+  }
+  .kafka-cluster .kc-listener-val {
+    color: var(--color-text-secondary);
+  }
+  .kafka-cluster .kc-clients {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .kafka-cluster .kc-client {
+    background: #fff;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .kafka-cluster .kc-arrow {
+    color: var(--color-accent);
+    font-size: 22px;
+    text-align: center;
+    line-height: 1;
+    font-weight: 300;
+    margin: 4px 0;
+  }
+  .kafka-cluster .kc-note {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-border);
+  }

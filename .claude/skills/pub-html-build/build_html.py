@@ -21,6 +21,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import sys
 import webbrowser
 from dataclasses import dataclass
@@ -526,9 +527,10 @@ def _ensure_repo_root_symlink() -> None:
 # ========== Jinja2 템플릿 병합 =============================================
 def ensure_build_symlinks() -> None:
     """
-    .build/에 styles(스킬 CSS) 상대 심링크를 생성한다.
-    에셋은 `resolve_image_paths`에서 ../assets/ 상대경로로 재작성되므로 심링크 불필요.
-    tokens.css는 .build/에 직접 저장(저작물)되므로 심링크 불필요.
+    .build/에 styles(스킬 CSS)를 노출한다.
+    1순위: 상대 심링크 (스킬 원본 수정이 자동 반영됨)
+    fallback: Windows 권한 부재 등으로 심링크가 실패하면 디렉토리 복사로 대체한다.
+             매 빌드마다 스킬 원본으로 덮어써서 stale 사본을 방지한다.
     """
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
     targets = {
@@ -538,6 +540,7 @@ def ensure_build_symlinks() -> None:
     for name, src in targets.items():
         link = BUILD_DIR / name
         rel = os.path.relpath(src, start=link.parent)
+
         if link.is_symlink():
             try:
                 if os.readlink(link) == rel:
@@ -546,11 +549,21 @@ def ensure_build_symlinks() -> None:
                 pass
             link.unlink()
         elif link.exists():
-            continue
+            if link.is_dir():
+                shutil.rmtree(link)
+            else:
+                link.unlink()
+
         try:
             link.symlink_to(rel)
         except OSError as exc:
-            print(f"  ⚠️  심링크 생성 실패 {name}: {exc}", file=sys.stderr)
+            try:
+                shutil.copytree(src, link)
+            except OSError as copy_exc:
+                print(
+                    f"  ⚠️  styles 동기화 실패 {name}: 심링크 {exc} / 복사 {copy_exc}",
+                    file=sys.stderr,
+                )
 
     # 레포 루트에 책 alias 심링크는 만들지 않는다.
     # 챕터 md의 이미지 경로는 resolve_image_paths()가 .build/ 기준 상대경로로 재작성하므로

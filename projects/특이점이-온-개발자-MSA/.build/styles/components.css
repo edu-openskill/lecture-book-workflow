@@ -38,7 +38,7 @@
   .prep-item-title .num-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-info); color: white; font-size: 12px; font-weight: 700; }
 
   /* 대사 — 본문 기본색, speaker 이름만 파란색 */
-  .dialogue { margin: 14px 0; color: var(--color-text-heading); }
+  .dialogue { margin: 14px 0; color: var(--color-text-heading); font-size: 16px; }
   .speaker { color: #3182ce; font-weight: 700; margin-right: 4px; }
   /* 내면독백 — 차분한 슬레이트 이탤릭 */
   .thought { color: var(--color-text-muted); font-style: italic; margin: 16px 0; }
