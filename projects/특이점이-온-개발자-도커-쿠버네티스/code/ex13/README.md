@@ -9,7 +9,8 @@ CH06 §6.1에서 사용. 일반 설정값(ConfigMap)과 민감 정보(Secret)를
 ```bash
 kubectl apply -f ex13/configmap-conn.yml
 kubectl apply -f ex13/deploy-ex03.yml
-kubectl exec -it deploy/nginx-config-secret -- env | grep -i conn
+kubectl get pod                          # Pod 이름 확인
+kubectl exec -it <Pod명> -- env          # Pod 환경 변수 조회
 ```
 
 ## 2단계 — Secret 추가 연결
@@ -19,7 +20,8 @@ kubectl exec -it deploy/nginx-config-secret -- env | grep -i conn
 ```bash
 kubectl apply -f ex13/secret-password.yml
 kubectl apply -f ex13/deploy-ex03.yml       # Secret까지 연결한 변경판 적용
-kubectl exec -it deploy/nginx-config-secret -- env | grep -iE "conn|password"
+kubectl get pod                             # 새 Pod 이름 확인
+kubectl exec -it <Pod명> -- env             # Pod 환경 변수 조회
 ```
 
 ## 3단계 — ConfigMap 값 변경 후 rollout 확인

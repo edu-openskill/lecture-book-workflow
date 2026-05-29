@@ -2,6 +2,7 @@
 #### 미니큐브 실행
 
 - minikube start
+- minikube addons enable ingress
 
 #### 이미지 빌드
 
@@ -24,10 +25,12 @@
 
 ### 로그 확인
 
- - kubectl logs deploy/db-deploy -n metacoding --tail=100
- - kubectl logs deploy/frontend-deploy -n metacoding --tail=100
  - kubectl logs -l app=backend -n metacoding --tail=100 --prefix
 
-### 연결
+### 외부 진입 터널 (별도 터미널)
 
-- minikube service frontend-service -n metacoding --url
+- minikube tunnel
+
+### 접속
+
+- http://127.0.0.1

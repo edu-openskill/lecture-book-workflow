@@ -2,7 +2,8 @@
 
 ### 컨테이너 빌드 및 실행
 
-- docker-compose -f ex07/docker-compose.yml up
+- cd ex07
+- docker compose up
 
 ### 실행
 - http://localhost:80/

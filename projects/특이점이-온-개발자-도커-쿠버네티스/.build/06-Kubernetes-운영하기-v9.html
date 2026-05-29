@@ -18,16 +18,7 @@
 <body>
 <div class="container">
 <h1>Ch.6 Kubernetes 운영하기</h1>
-<div class="goal-box">
-<p><strong>이번 챕터가 끝나면</strong></p>
-<ul>
-<li><strong>ConfigMap·Secret</strong>으로 설정값과 비밀번호를 이미지 바깥으로 분리합니다</li>
-<li><strong>PV·PVC</strong>로 Pod가 죽어도 데이터가 사라지지 않게 영속화합니다</li>
-<li><strong>Namespace</strong>로 리소스를 논리적으로 구분합니다</li>
-<li>챕터 3의 통합 사이트를 K8s 위에 한 번에 올려 운영 환경에 가까운 시스템을 만듭니다</li>
-</ul>
-</div>
-<p>며칠 뒤였습니다. 이미지를 배포하기 전, 마지막으로 한 번 더 코드 리뷰를 하고 있었습니다. 리뷰 중 Dockerfile의 환경 변수 코드가 눈에 띄었습니다.</p>
+<p>며칠 뒤였습니다. 진행 중인 프로젝트를 배포하기 전, 마지막으로 한 번 더 코드 리뷰를 하고 있었습니다. 리뷰 중 Dockerfile의 환경 변수 코드가 눈에 띄었습니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><span class="k">ENV</span><span class="w"> </span><span class="nv">MYSQL_PASSWORD</span><span class="o">=</span>metacoding1234</div>
 <p class="thought">'잠깐. 이대로 빌드하면 비밀번호가 이미지에 그대로 박히는데.'</p>
 <!-- [GEMINI PROMPT: Dockerfile에 적힌 평문 비밀번호가 빌드된 컨테이너 이미지에 그대로 담겨 사내 레지스트리 서버로 올라가는 모습. 좌측: Dockerfile 텍스트 박스(ENV MYSQL_PASSWORD=... 줄에 자물쇠 아이콘 부착). 중앙: 컨테이너 이미지 박스(이미지 내부에 비밀번호 라벨이 그대로 들어가 있는 모습). 우측: 사내 컨테이너 레지스트리 서버 일러스트. 좌→우 흐름 화살표.
@@ -38,6 +29,15 @@
 <p>옆자리 선배에게 질문하자, 선배가 모니터에서 눈을 떼고 돌아봤습니다.</p>
 <div class="dialogue"><span class="speaker">선배</span>: "Dockerfile에 비밀번호를 직접 적지 마세요. 설정은 이미지 바깥에 두고, 이미지에는 순수한 코드만 담아야 해요. 쿠버네티스에는 이런 리소스를 관리하는 <strong>ConfigMap</strong>과 <strong>Secret</strong>이 따로 마련되어 있어요."</div>
 <p class="thought">'설정을 바깥으로 빼는 방법이 있구나. 이 두 가지부터 당장 알아봐야겠다.'</p>
+<div class="goal-box">
+<p><strong>이번 챕터가 끝나면</strong></p>
+<ul>
+<li><strong>ConfigMap·Secret</strong>으로 설정값과 비밀번호를 이미지 바깥으로 분리합니다</li>
+<li><strong>PV·PVC</strong>로 Pod가 죽어도 데이터가 사라지지 않게 영속화합니다</li>
+<li><strong>Namespace</strong>로 리소스를 논리적으로 구분합니다</li>
+<li>챕터 3의 통합 사이트를 쿠버네티스 위에 한 번에 올려 운영 환경에 가까운 시스템을 만듭니다</li>
+</ul>
+</div>
 <h2>6.1 ConfigMap·Secret - 설정과 비밀번호를 이미지 바깥으로</h2>
 <p>컨테이너 이미지는 한 번 빌드하면 내용물을 수정할 수 없습니다. 만약 데이터베이스 주소나 비밀번호를 이미지 안에 직접 적어 두면, 개발 서버용 이미지와 운영 서버용 이미지를 매번 따로 빌드해야 하는 문제가 생깁니다.</p>
 <p>그래서 쿠버네티스는 '변하지 않는 코드(컨테이너 이미지)'와 '환경마다 변하는 설정값'을 분리합니다. 일반 설정값은 <strong>ConfigMap</strong>에, 민감한 정보는 <strong>Secret</strong>에 담아 이미지 바깥에 따로 보관하는 방식입니다.</p>
@@ -440,7 +440,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pv,pvc<span class="w">
   </div>
 </div>
 <div class="caption">그림 6-10. PV와 PVC가 Bound 상태로 연결된 결과</div>
-<p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결된 것입니다.</p>
+<p>STATUS가 Bound 상태라면 PV와 PVC가 정상적으로 연결됐다는 뜻입니다.</p>
 <p>확인을 위해 Pod 내부에서 파일을 하나 만든 뒤, Pod를 삭제하고 다시 실행해 보겠습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 파일 생성 후 Pod 재생성으로 데이터 보존 확인</div>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>volume-pod<span class="w"> </span>--<span class="w"> </span>/bin/bash<span class="w">      </span><span class="c1"># Pod 안 bash 접속</span>
 touch<span class="w"> </span>/mnt/data/c.txt<span class="w">                          </span><span class="c1"># 마운트 경로에 빈 파일 생성</span>
@@ -821,11 +821,11 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <p>백엔드 두 Pod에 요청이 실제로 분산되는지는 로그로도 확인할 수 있습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> backend Pod 로그로 분산 확인</div><span class="c1"># backend Pod 최근 100줄 (Pod명 앞에 붙임)</span>
 kubectl<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>backend<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>--prefix</div>
-<p>오픈이는 화면을 잠시 바라봤습니다. 처음 서버에 코드를 올리던 날, 모니터를 가득 채웠던 건 시뻘건 에러 줄이었습니다. 그때는 이 문제를 어떻게 해결해야 할지 알지 못했습니다. 또 docker-compose 시연을 마치고 나오던 회의실에서 팀장이 던진 &quot;새벽에 컨테이너 하나가 죽으면 누가 살리죠?&quot;라는 물음도, 그때는 답을 가지고 있지 않았습니다.</p>
+<p>오픈이는 화면을 잠시 바라봤습니다. 처음 서버에 코드를 올리던 날, 모니터를 가득 채웠던 건 시뻘건 에러 줄이었습니다. 그때는 이 문제를 어떻게 해결해야 할지 알지 못했습니다. 또 docker-compose 시연을 마치고 나오던 회의실에서 팀장이 던진 &quot;새벽에 컨테이너 하나가 죽으면 누가 살리죠?&quot;라는 물음에도, 그때는 답을 찾지 못했습니다.</p>
 <p>지금 화면 위에는 네 서비스의 여러 리소스가 한 시스템으로 묶여 동작합니다. 설령 한쪽 Pod가 멈추더라도 사이트는 그대로 응답합니다.</p>
 <p>옆자리에서 선배가 화면 쪽을 한 번 보고 모니터로 돌아갔습니다.</p>
 <div class="dialogue"><span class="speaker">선배</span>: "처음엔 로컬이랑 서버 환경 다르다고 헤매더니, 이제는 클러스터까지 직접 올리고 많이 성장했네요."</div>
-<div class="dialogue"><span class="speaker">오픈이</span>: "그러게요. 전에는 에러 한 줄 뜨면 앞이 캄캄했는데, 이제는 전체적인 흐름이 잡히네요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "그러게요. 전에는 에러 한 줄 뜨면 앞이 캄캄했는데, 이제는 전체 흐름이 잡히네요."</div>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>

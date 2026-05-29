@@ -2,7 +2,8 @@
 
 ### 컨테이너 빌드 및 실행
 
-- docker-compose -f ex06/docker-compose.yml up
+- cd ex06
+- docker compose up
 
 ### 실행
 - http://localhost/app1
