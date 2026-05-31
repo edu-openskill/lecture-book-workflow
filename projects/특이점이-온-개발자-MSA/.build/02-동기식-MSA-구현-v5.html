@@ -525,6 +525,11 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <span class="w">        </span><span class="c1">// 1. 주문 생성</span>
 <span class="w">        </span><span class="n">createdOrder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">Order</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">));</span>
 
+<span class="w">        </span><span class="c1">// 최소 주문 금액 검증</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">quantity</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">price</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1000</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception400</span><span class="p">(</span><span class="s">&quot;최소 주문 금액은 1,000원입니다.&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
 <span class="w">        </span><span class="c1">// 2. 상품 재고 차감</span>
 <span class="w">        </span><span class="n">productClient</span><span class="p">.</span><span class="na">decreaseQuantity</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ProductRequest</span><span class="p">(</span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">));</span>
 <span class="w">        </span><span class="n">productDecreased</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
@@ -700,6 +705,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <p>주문이 성공하면 상품 서비스에서 재고가 10 → 9로 줄어들고, 배달 서비스에 배달이 생성됩니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8082/api/products/1</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\09_stock-decreased.png" alt="" /><div class="caption">그림 2-9. 재고 감소 확인</div></div>
+<p>배달 서비스에도 배달이 생성됐는지 확인합니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8084/api/deliveries/4   # 더미 배달 3건 다음이라 새 배달은 4번</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\10_delivery-created.png" alt="" /><div class="caption">그림 2-10. 배달 생성 확인</div></div>
 <h3>2.6.4 시나리오 2: 재고 부족</h3>
@@ -743,7 +749,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <li>단 주문 데이터 자체는 트랜잭션 롤백으로 사라지므로 실패 이력은 남지 않습니다.</li>
 <li>이 구조의 한계는 다음 챕터 운영 환경에서, 그다음 챕터 비동기 전환에서 차례로 해소됩니다.</li>
 </ul>
-<p>다음 챕터에서는 비즈니스 로직이 서비스 코드에 흩어져 있는 문제를 마주칩니다. 도메인이 자기 일을 모르고 Service가 다 답하고 있다는 통증을 인식하고, <strong>DDD + 클린 아키텍처</strong>로 코드 구조를 정리한 뒤 운영 환경(K8s)에 올립니다.</p>
+<p>다음 챕터에서는 비즈니스 로직이 서비스 코드에 흩어져 있는 문제를 마주칩니다. 도메인이 자기 일을 모르고 Service가 다 답하고 있다는 통증을 인식하고, <strong>DDD + 클린 아키텍처</strong>로 코드 구조를 정리한 뒤 운영 환경(Kubernetes)에 올립니다.</p>
 </div>
 
 </div>

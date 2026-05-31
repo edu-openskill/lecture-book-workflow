@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>3.3 본문 풀이 — 4개 옵션 비교</title>
+<style>
+  :root {
+    --c-domain: #16a34a;
+    --c-domain-bg: #dcfce7;
+    --c-domain-border: #86efac;
+    --c-usecase: #7c3aed;
+    --c-usecase-bg: #ede9fe;
+    --c-usecase-border: #c4b5fd;
+    --c-web: #2563eb;
+    --c-web-bg: #dbeafe;
+    --c-web-border: #93c5fd;
+    --c-repo: #ea580c;
+    --c-repo-bg: #ffedd5;
+    --c-repo-border: #fdba74;
+    --c-gray: #64748b;
+    --c-gray-bg: #f1f5f9;
+    --c-gray-border: #cbd5e1;
+    --accent: #4f46e5;
+    --accent-dark: #3730a3;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background: #f5f5f5;
+    padding: 40px 24px;
+    margin: 0;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .frame { max-width: 1100px; margin: 0 auto; }
+  .frame > h1 { font-size: 20px; margin: 0 0 8px; }
+  .frame > .lead { color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+
+  .option-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 44px;
+    margin-bottom: 36px;
+  }
+  .option-card h2.opt-title { font-size: 17px; color: var(--accent-dark); margin: 0 0 8px; }
+  .option-card .opt-desc { color: var(--muted); font-size: 13px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
+
+  .body-section h3.sec-title {
+    font-size: 18px;
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+  .body-section p { font-size: 14px; margin: 0 0 14px; color: #1e293b; }
+  .body-section p strong { color: var(--accent-dark); }
+  code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.9em; background: #f1f5f9; padding: 1px 5px; border-radius: 3px; }
+
+  .body-section ul.role-list { margin: 0 0 14px; padding: 0; list-style: none; }
+  .body-section ul.role-list li { font-size: 14px; padding: 6px 0; }
+  .body-section ul.role-list li code { font-weight: 700; }
+
+  .body-section table.role-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 0 0 14px; }
+  .body-section table.role-table th, .body-section table.role-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  .body-section table.role-table th { background: #f8fafc; color: var(--muted); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .body-section table.role-table td.code { font-family: 'SFMono-Regular', Consolas, monospace; }
+
+  /* === 다이어그램 (시안 B) === */
+  .figure { margin: 24px 0 8px; }
+  .figure-body { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .caption { text-align: center; font-style: italic; color: var(--muted); margin-top: 10px; font-size: 12.5px; }
+
+  .pkg-flow { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 0; align-items: start; }
+  .pkg-side.left { border: 2px dashed var(--c-gray); border-radius: 10px; padding: 12px; }
+  .pkg-side.right { border: 2px solid var(--border); border-radius: 10px; padding: 0; }
+  .pkg-side .pkg-label { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12.5px; font-weight: 700; text-align: center; padding: 4px 0 8px; border-bottom: 1px solid var(--border); color: var(--c-gray); }
+  .pkg-side.right .pkg-group { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .pkg-side.right .pkg-group:last-child { border-bottom: none; }
+  .pkg-side.right .pkg-name { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: baseline; gap: 6px; }
+  .pkg-side.right .pkg-name .role-hint { font-family: -apple-system, sans-serif; font-size: 10.5px; font-weight: 500; color: var(--muted); font-style: italic; }
+  .pkg-side.right .pkg-domain .pkg-name { color: var(--c-domain); }
+  .pkg-side.right .pkg-usecase .pkg-name { color: var(--c-usecase); }
+  .pkg-side.right .pkg-web .pkg-name { color: var(--c-web); }
+  .pkg-side.right .pkg-repo .pkg-name { color: var(--c-repo); }
+
+  .chip {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    border: 1.5px solid;
+    margin: 0 4px 5px 0;
+  }
+  .chip.c-flat { background: var(--c-gray-bg); color: var(--c-gray); border-color: var(--c-gray-border); }
+  .chip.c-domain { background: var(--c-domain-bg); color: var(--c-domain); border-color: var(--c-domain-border); }
+  .chip.c-usecase { background: var(--c-usecase-bg); color: var(--c-usecase); border-color: var(--c-usecase-border); }
+  .chip.c-web { background: var(--c-web-bg); color: var(--c-web); border-color: var(--c-web-border); }
+  .chip.c-repo { background: var(--c-repo-bg); color: var(--c-repo); border-color: var(--c-repo-border); }
+
+  .pkg-left-chips { display: flex; flex-direction: column; gap: 5px; padding: 8px 0 0; }
+  .pkg-left-chips .chip { margin: 0; }
+
+  .pkg-center { display: flex; flex-direction: column; gap: 4px; padding: 12px 8px; }
+  .pkg-row { display: grid; grid-template-columns: 1fr 14px 1fr; gap: 4px; align-items: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11px; }
+  .pkg-row .lhs { text-align: right; color: var(--c-gray); }
+  .pkg-row .arr { text-align: center; color: var(--muted); }
+  .pkg-row .rhs { font-weight: 700; }
+  .pkg-row.r-domain .rhs { color: var(--c-domain); }
+  .pkg-row.r-usecase .rhs { color: var(--c-usecase); }
+  .pkg-row.r-web .rhs { color: var(--c-web); }
+  .pkg-row.r-repo .rhs { color: var(--c-repo); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <h1>3.3 본문 풀이 — 4개 옵션 비교</h1>
+  <p class="lead">"영속성", "UseCase 인터페이스와 구현" 같은 사전적 표현을 풀어쓰는 4가지 방식. 각 옵션마다 본문 + 그림 시안 B.</p>
+
+  <!-- ============ 옵션 1 ============ -->
+  <div class="option-card">
+    <h2 class="opt-title">옵션 1 — 한 단락에 풀어쓰기 (가장 보수적)</h2>
+    <p class="opt-desc">본문 두 단락 구조 유지. 사전 용어만 일상어로 풀이.</p>
+    <div class="body-section">
+      <h3 class="sec-title">3.3 패키지 구조 비교 - 단일 패키지에서 책임별 패키지로</h3>
+      <p>챕터 2는 <strong>단일 패키지 구조</strong>입니다. 주문과 관련된 모든 클래스가 <code>orders/</code> 한 폴더에 모여 있습니다.</p>
+      <p>챕터 3은 <strong>책임별 패키지 구조</strong>입니다. 비즈니스 규칙은 <code>domain/</code>, 데이터베이스 읽고 쓰기는 <code>repository/</code>, 어떤 일을 할지 약속한 인터페이스와 실제 구현은 <code>usecase/</code>, 외부 요청을 받는 진입점은 <code>web/</code>. 역할이 같은 코드끼리 묶입니다. 앞에서 다룬 도메인 응집과 인터페이스 분리가 폴더 구조에 그대로 반영됩니다.</p>
+      <div class="figure">
+        <div class="figure-body">
+          <div class="pkg-flow">
+            <div class="pkg-side left">
+              <div class="pkg-label">챕터 2 — orders/</div>
+              <div class="pkg-left-chips">
+                <span class="chip c-flat">Order</span><span class="chip c-flat">OrderStatus</span><span class="chip c-flat">OrderController</span><span class="chip c-flat">OrderService</span><span class="chip c-flat">OrderRepository</span><span class="chip c-flat">OrderRequest</span><span class="chip c-flat">OrderResponse</span>
+              </div>
+            </div>
+            <div class="pkg-center">
+              <div class="pkg-row r-domain"><span class="lhs">Order</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-domain"><span class="lhs">OrderStatus</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderController</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-usecase"><span class="lhs">OrderService</span><span class="arr">→</span><span class="rhs">usecase/</span></div>
+              <div class="pkg-row r-repo"><span class="lhs">OrderRepository</span><span class="arr">→</span><span class="rhs">repository/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderRequest</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderResponse</span><span class="arr">→</span><span class="rhs">web/</span></div>
+            </div>
+            <div class="pkg-side right">
+              <div class="pkg-group pkg-domain"><div class="pkg-name">domain/</div><span class="chip c-domain">Order</span><span class="chip c-domain">OrderStatus</span></div>
+              <div class="pkg-group pkg-usecase"><div class="pkg-name">usecase/</div><span class="chip c-usecase">OrderService</span><span class="chip c-usecase">CreateOrderUseCase</span></div>
+              <div class="pkg-group pkg-web"><div class="pkg-name">web/</div><span class="chip c-web">OrderController</span><span class="chip c-web">OrderRequest</span><span class="chip c-web">OrderResponse</span></div>
+              <div class="pkg-group pkg-repo"><div class="pkg-name">repository/</div><span class="chip c-repo">OrderRepository</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">그림 3-5. 패키지 구조 비교</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 옵션 2 ============ -->
+  <div class="option-card">
+    <h2 class="opt-title">옵션 2 — 본문 + 표</h2>
+    <p class="opt-desc">폴더별 역할을 표로 명확하게 한 줄씩.</p>
+    <div class="body-section">
+      <h3 class="sec-title">3.3 패키지 구조 비교 - 단일 패키지에서 책임별 패키지로</h3>
+      <p>챕터 2는 <strong>단일 패키지 구조</strong>입니다. 주문과 관련된 모든 클래스가 <code>orders/</code> 한 폴더에 모여 있습니다.</p>
+      <p>챕터 3은 <strong>책임별 패키지 구조</strong>입니다. 같은 주문 코드가 역할에 따라 네 폴더로 나뉩니다.</p>
+      <table class="role-table">
+        <thead>
+          <tr><th>폴더</th><th>역할</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="code">domain/</td><td>주문의 비즈니스 규칙 (엔티티 + 상태)</td></tr>
+          <tr><td class="code">repository/</td><td>주문을 데이터베이스에서 읽고 쓰기</td></tr>
+          <tr><td class="code">usecase/</td><td>주문을 어떻게 처리할지 약속한 인터페이스와 실제 구현</td></tr>
+          <tr><td class="code">web/</td><td>외부 요청을 받는 진입점 (Controller + DTO)</td></tr>
+        </tbody>
+      </table>
+      <p>앞에서 다룬 도메인 응집과 인터페이스 분리가 폴더 구조에 그대로 반영됩니다.</p>
+      <div class="figure">
+        <div class="figure-body">
+          <div class="pkg-flow">
+            <div class="pkg-side left">
+              <div class="pkg-label">챕터 2 — orders/</div>
+              <div class="pkg-left-chips">
+                <span class="chip c-flat">Order</span><span class="chip c-flat">OrderStatus</span><span class="chip c-flat">OrderController</span><span class="chip c-flat">OrderService</span><span class="chip c-flat">OrderRepository</span><span class="chip c-flat">OrderRequest</span><span class="chip c-flat">OrderResponse</span>
+              </div>
+            </div>
+            <div class="pkg-center">
+              <div class="pkg-row r-domain"><span class="lhs">Order</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-domain"><span class="lhs">OrderStatus</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderController</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-usecase"><span class="lhs">OrderService</span><span class="arr">→</span><span class="rhs">usecase/</span></div>
+              <div class="pkg-row r-repo"><span class="lhs">OrderRepository</span><span class="arr">→</span><span class="rhs">repository/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderRequest</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderResponse</span><span class="arr">→</span><span class="rhs">web/</span></div>
+            </div>
+            <div class="pkg-side right">
+              <div class="pkg-group pkg-domain"><div class="pkg-name">domain/</div><span class="chip c-domain">Order</span><span class="chip c-domain">OrderStatus</span></div>
+              <div class="pkg-group pkg-usecase"><div class="pkg-name">usecase/</div><span class="chip c-usecase">OrderService</span><span class="chip c-usecase">CreateOrderUseCase</span></div>
+              <div class="pkg-group pkg-web"><div class="pkg-name">web/</div><span class="chip c-web">OrderController</span><span class="chip c-web">OrderRequest</span><span class="chip c-web">OrderResponse</span></div>
+              <div class="pkg-group pkg-repo"><div class="pkg-name">repository/</div><span class="chip c-repo">OrderRepository</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">그림 3-5. 패키지 구조 비교</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 옵션 3 ============ -->
+  <div class="option-card">
+    <h2 class="opt-title">옵션 3 — 본문 + 불릿 리스트</h2>
+    <p class="opt-desc">표 대신 불릿으로 가볍게.</p>
+    <div class="body-section">
+      <h3 class="sec-title">3.3 패키지 구조 비교 - 단일 패키지에서 책임별 패키지로</h3>
+      <p>챕터 2는 <strong>단일 패키지 구조</strong>입니다. 주문과 관련된 모든 클래스가 <code>orders/</code> 한 폴더에 모여 있습니다.</p>
+      <p>챕터 3은 <strong>책임별 패키지 구조</strong>입니다. 같은 주문 코드가 역할에 따라 네 폴더로 나뉩니다.</p>
+      <ul class="role-list">
+        <li>• <code>domain/</code> — 주문의 비즈니스 규칙 (엔티티 + 상태)</li>
+        <li>• <code>repository/</code> — 주문을 데이터베이스에서 읽고 쓰기</li>
+        <li>• <code>usecase/</code> — 주문을 어떻게 처리할지 약속한 인터페이스와 실제 구현</li>
+        <li>• <code>web/</code> — 외부 요청을 받는 진입점 (Controller + DTO)</li>
+      </ul>
+      <p>앞에서 다룬 도메인 응집과 인터페이스 분리가 폴더 구조에 그대로 반영됩니다.</p>
+      <div class="figure">
+        <div class="figure-body">
+          <div class="pkg-flow">
+            <div class="pkg-side left">
+              <div class="pkg-label">챕터 2 — orders/</div>
+              <div class="pkg-left-chips">
+                <span class="chip c-flat">Order</span><span class="chip c-flat">OrderStatus</span><span class="chip c-flat">OrderController</span><span class="chip c-flat">OrderService</span><span class="chip c-flat">OrderRepository</span><span class="chip c-flat">OrderRequest</span><span class="chip c-flat">OrderResponse</span>
+              </div>
+            </div>
+            <div class="pkg-center">
+              <div class="pkg-row r-domain"><span class="lhs">Order</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-domain"><span class="lhs">OrderStatus</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderController</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-usecase"><span class="lhs">OrderService</span><span class="arr">→</span><span class="rhs">usecase/</span></div>
+              <div class="pkg-row r-repo"><span class="lhs">OrderRepository</span><span class="arr">→</span><span class="rhs">repository/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderRequest</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderResponse</span><span class="arr">→</span><span class="rhs">web/</span></div>
+            </div>
+            <div class="pkg-side right">
+              <div class="pkg-group pkg-domain"><div class="pkg-name">domain/</div><span class="chip c-domain">Order</span><span class="chip c-domain">OrderStatus</span></div>
+              <div class="pkg-group pkg-usecase"><div class="pkg-name">usecase/</div><span class="chip c-usecase">OrderService</span><span class="chip c-usecase">CreateOrderUseCase</span></div>
+              <div class="pkg-group pkg-web"><div class="pkg-name">web/</div><span class="chip c-web">OrderController</span><span class="chip c-web">OrderRequest</span><span class="chip c-web">OrderResponse</span></div>
+              <div class="pkg-group pkg-repo"><div class="pkg-name">repository/</div><span class="chip c-repo">OrderRepository</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">그림 3-5. 패키지 구조 비교</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 옵션 4 ============ -->
+  <div class="option-card">
+    <h2 class="opt-title">옵션 4 — 본문 짧게 + 다이어그램 안에 역할 라벨</h2>
+    <p class="opt-desc">본문은 원칙만, 폴더별 역할은 그림이 책임짐.</p>
+    <div class="body-section">
+      <h3 class="sec-title">3.3 패키지 구조 비교 - 단일 패키지에서 책임별 패키지로</h3>
+      <p>챕터 2는 <strong>단일 패키지 구조</strong>입니다. 주문과 관련된 모든 클래스가 <code>orders/</code> 한 폴더에 모여 있습니다.</p>
+      <p>챕터 3은 <strong>책임별 패키지 구조</strong>입니다. 같은 주문 코드가 역할에 따라 네 폴더로 나뉩니다. 앞에서 다룬 도메인 응집과 인터페이스 분리가 폴더 구조에 그대로 반영됩니다.</p>
+      <div class="figure">
+        <div class="figure-body">
+          <div class="pkg-flow">
+            <div class="pkg-side left">
+              <div class="pkg-label">챕터 2 — orders/</div>
+              <div class="pkg-left-chips">
+                <span class="chip c-flat">Order</span><span class="chip c-flat">OrderStatus</span><span class="chip c-flat">OrderController</span><span class="chip c-flat">OrderService</span><span class="chip c-flat">OrderRepository</span><span class="chip c-flat">OrderRequest</span><span class="chip c-flat">OrderResponse</span>
+              </div>
+            </div>
+            <div class="pkg-center">
+              <div class="pkg-row r-domain"><span class="lhs">Order</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-domain"><span class="lhs">OrderStatus</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderController</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-usecase"><span class="lhs">OrderService</span><span class="arr">→</span><span class="rhs">usecase/</span></div>
+              <div class="pkg-row r-repo"><span class="lhs">OrderRepository</span><span class="arr">→</span><span class="rhs">repository/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderRequest</span><span class="arr">→</span><span class="rhs">web/</span></div>
+              <div class="pkg-row r-web"><span class="lhs">OrderResponse</span><span class="arr">→</span><span class="rhs">web/</span></div>
+            </div>
+            <div class="pkg-side right">
+              <div class="pkg-group pkg-domain">
+                <div class="pkg-name">domain/ <span class="role-hint">비즈니스 규칙</span></div>
+                <span class="chip c-domain">Order</span><span class="chip c-domain">OrderStatus</span>
+              </div>
+              <div class="pkg-group pkg-usecase">
+                <div class="pkg-name">usecase/ <span class="role-hint">인터페이스 + 구현</span></div>
+                <span class="chip c-usecase">OrderService</span><span class="chip c-usecase">CreateOrderUseCase</span>
+              </div>
+              <div class="pkg-group pkg-web">
+                <div class="pkg-name">web/ <span class="role-hint">외부 요청 진입점</span></div>
+                <span class="chip c-web">OrderController</span><span class="chip c-web">OrderRequest</span><span class="chip c-web">OrderResponse</span>
+              </div>
+              <div class="pkg-group pkg-repo">
+                <div class="pkg-name">repository/ <span class="role-hint">DB 접근</span></div>
+                <span class="chip c-repo">OrderRepository</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">그림 3-5. 패키지 구조 비교 — 폴더 옆에 짧은 역할 라벨</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

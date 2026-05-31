@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>패키지 구조 비교 — 시안</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Roboto, sans-serif;
+    background: #fafafa;
+    padding: 40px 24px;
+    color: #0f172a;
+    margin: 0;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 18px; margin: 0 0 8px; color: #0f172a; }
+  .note { color: #64748b; font-size: 13px; margin-bottom: 32px; }
+
+  .section { margin-bottom: 56px; }
+  .section h2 { font-size: 15px; color: #334155; margin: 0 0 12px; }
+
+  /* --- 시안 A. 좌우 2단 (CSS Grid) --- */
+  .pkg-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .pkg-col { display: flex; flex-direction: column; }
+  .pkg-header {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .pkg-header .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .before .tag { background: #f1f5f9; color: #475569; }
+  .after .tag { background: #eef2ff; color: #3730a3; }
+  .pkg-header .title { color: #0f172a; }
+
+  .pkg-tree {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    white-space: pre;
+    margin: 0;
+    color: #334155;
+  }
+  .pkg-tree .changed {
+    background: #eef2ff;
+    color: #3730a3;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .pkg-tree .same { color: #94a3b8; }
+  .pkg-tree .comment { color: #94a3b8; font-style: italic; }
+
+  .caption {
+    text-align: center;
+    font-style: italic;
+    color: #64748b;
+    margin-top: 14px;
+    font-size: 13px;
+  }
+
+  /* --- 시안 B. 좌우 + 가운데 화살표 --- */
+  .pkg-compare-arrow {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 16px;
+    align-items: stretch;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .pkg-compare-arrow .pkg-col {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .pkg-compare-arrow .pkg-col.after { border-color: #c7d2fe; background: #fafbff; }
+  .arrow-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4f46e5;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  /* --- 시안 C. 위·아래 스택 (좁은 화면 호환) --- */
+  .pkg-compare-stack { display: flex; flex-direction: column; gap: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; }
+  .pkg-compare-stack .pkg-col { border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+  .pkg-compare-stack .pkg-col.after { border-color: #c7d2fe; background: #fafbff; }
+
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>패키지 구조 비교 — 그림 3-5 시안</h1>
+  <p class="note">변경된 디렉토리만 인디고 악센트, 변하지 않은 것(<code>core/</code>·<code>adapter/</code>)은 회색 처리해서 변화가 즉시 보이게.</p>
+
+  <!-- 시안 A -->
+  <div class="section">
+    <h2>시안 A. 좌우 2단 (가장 단순)</h2>
+    <div class="pkg-compare">
+      <div class="pkg-col">
+        <div class="pkg-header before"><span class="tag">챕터 2 (ex01)</span><span class="title">평면 구조</span></div>
+<pre class="pkg-tree">com/metacoding/order/
+├── <span class="same">core/</span>                <span class="comment"># JWT·필터·예외</span>
+├── <span class="changed">orders/</span>             <span class="comment"># 모든 게 한 패키지에</span>
+│   ├── Order.java
+│   ├── OrderStatus.java
+│   ├── OrderController.java
+│   ├── OrderService.java
+│   ├── OrderRepository.java
+│   └── OrderRequest/Response.java
+└── <span class="same">adapter/</span>             <span class="comment"># 외부 서비스 클라이언트</span></pre>
+      </div>
+      <div class="pkg-col">
+        <div class="pkg-header after"><span class="tag">챕터 3 (ex02)</span><span class="title">책임별 분리</span></div>
+<pre class="pkg-tree">com/metacoding/order/
+├── <span class="same">core/</span>                <span class="comment"># 그대로</span>
+├── <span class="changed">domain/</span>             <span class="comment"># 엔티티 + 비즈니스 규칙</span>
+├── <span class="changed">repository/</span>         <span class="comment"># Spring Data JPA</span>
+├── <span class="changed">usecase/</span>            <span class="comment"># UseCase 인터페이스 + 구현</span>
+├── <span class="changed">web/</span>                <span class="comment"># 컨트롤러 + DTO</span>
+└── <span class="same">adapter/</span>             <span class="comment"># 그대로</span></pre>
+      </div>
+    </div>
+    <div class="caption">그림 3-5. 패키지 구조 비교 — 평면에서 책임별 분리로</div>
+  </div>
+
+  <!-- 시안 B -->
+  <div class="section">
+    <h2>시안 B. 좌우 + 화살표 (변화 방향 강조)</h2>
+    <div class="pkg-compare-arrow">
+      <div class="pkg-col before">
+        <div class="pkg-header before"><span class="tag">챕터 2</span><span class="title">평면 구조</span></div>
+<pre class="pkg-tree">com/metacoding/order/
+├── <span class="same">core/</span>
+├── <span class="changed">orders/</span>
+│   ├── Order.java
+│   ├── OrderStatus.java
+│   ├── OrderController.java
+│   ├── OrderService.java
+│   ├── OrderRepository.java
+│   └── OrderRequest/Response.java
+└── <span class="same">adapter/</span></pre>
+      </div>
+      <div class="arrow-cell">→</div>
+      <div class="pkg-col after">
+        <div class="pkg-header after"><span class="tag">챕터 3</span><span class="title">책임별 분리</span></div>
+<pre class="pkg-tree">com/metacoding/order/
+├── <span class="same">core/</span>
+├── <span class="changed">domain/</span>
+├── <span class="changed">repository/</span>
+├── <span class="changed">usecase/</span>
+├── <span class="changed">web/</span>
+└── <span class="same">adapter/</span></pre>
+      </div>
+    </div>
+    <div class="caption">그림 3-5. 패키지 구조 — 평면에서 책임별 분리로</div>
+  </div>
+
+  <!-- 시안 C -->
+  <div class="section">
+    <h2>시안 C. 위·아래 스택 (좁은 페이지에 안전)</h2>
+    <div class="pkg-compare-stack">
+      <div class="pkg-col before">
+        <div class="pkg-header before"><span class="tag">챕터 2</span><span class="title">평면 구조 — 모든 게 한 패키지에</span></div>
+<pre class="pkg-tree">com/metacoding/order/
+├── <span class="same">core/</span>
+├── <span class="changed">orders/</span>
+│   ├── Order.java, OrderStatus.java
+│   ├── OrderController.java, OrderService.java, OrderRepository.java
+│   └── OrderRequest.java, OrderResponse.java
+└── <span class="same">adapter/</span></pre>
+      </div>
+      <div class="pkg-col after">
+        <div class="pkg-header after"><span class="tag">챕터 3</span><span class="title">책임별 분리 — 4개 패키지로 나뉨</span></div>
+<pre class="pkg-tree">com/metacoding/order/
+├── <span class="same">core/</span>
+├── <span class="changed">domain/</span>             <span class="comment"># 엔티티 + 비즈니스 규칙</span>
+├── <span class="changed">repository/</span>         <span class="comment"># Spring Data JPA</span>
+├── <span class="changed">usecase/</span>            <span class="comment"># UseCase 인터페이스 + 구현</span>
+├── <span class="changed">web/</span>                <span class="comment"># 컨트롤러 + DTO</span>
+└── <span class="same">adapter/</span></pre>
+      </div>
+    </div>
+    <div class="caption">그림 3-5. 패키지 구조 비교</div>
+  </div>
+
+</div>
+</body>
+</html>

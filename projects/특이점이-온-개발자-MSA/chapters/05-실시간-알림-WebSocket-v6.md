@@ -154,7 +154,7 @@ ex04/
 ├── frontend/           # Nginx + SockJS 클라이언트 (이번 챕터 신규)
 ├── gateway/            # Nginx API Gateway
 ├── db/                 # MySQL
-└── k8s/                # Kubernetes 매니페스트 (kafka·frontend 포함)
+└── k8s/                # Kubernetes YAML 파일 (kafka·frontend 포함)
 ```
 
 서비스마다 패키지 구조가 조금씩 다르므로, 코드를 작성할 파일 경로는 각 실습 코드블록 바로 위에서 안내합니다.
@@ -169,7 +169,7 @@ ex04/
 2. 오케스트레이터에 `delivery-completed` 처리 + `delivery-created` 성공 시 대기로 변경
 3. 주문 서비스에 STOMP WebSocket 설정 + 주문 완료 시 Push
 4. SockJS 기반 index.html 프론트엔드와 Nginx 프록시 구성
-5. K8s에 frontend 추가 배포 → 통합 시나리오 검증
+5. Kubernetes에 frontend 추가 배포 → 통합 시나리오 검증
 ::::
 
 ## 5.1 WebSocket - 폴링의 한계를 넘다
@@ -474,7 +474,7 @@ public void deliveryCreated(DeliveryCreatedEvent event) {
     WorkflowState state = states.get(orderId);
     if (state == null) return;
 
-    if (!event.success()) {
+    if (!event.isSuccess()) {
         // 실패: 재고 복구 + 주문 취소 (앞 챕터와 동일)
         ...
         return;
@@ -635,7 +635,7 @@ public void completeOrder(int orderId) {
 
 모든 구현이 완료됐습니다. 이제 전체 시스템을 실행하고 처음부터 끝까지 한 번에 흐름을 확인합니다.
 
-### 5.6.1 K8s 매니페스트
+### 5.6.1 Kubernetes 리소스 정의
 
 앞 챕터까지의 구성에서 frontend 서비스가 새로 추가됩니다. `k8s/frontend/` 폴더에 Deployment, Service, Ingress가 정의되어 있습니다.
 

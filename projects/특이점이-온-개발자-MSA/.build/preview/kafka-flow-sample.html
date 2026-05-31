@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>그림 4-4 샘플 — offset 없는 버전</title>
+<style>
+  body { font-family: "Pretendard","Malgun Gothic","Segoe UI",sans-serif; background:#f8fafc; margin:0; padding:40px 24px; }
+  .svg-figure { max-width:1180px; margin:0 auto 8px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px 20px 4px; }
+  .cap { text-align:center; color:#475569; font-style:italic; font-size:14px; margin:8px auto 30px; }
+  h2 { text-align:center; color:#0f172a; font-size:15px; margin:0 auto 18px; }
+</style>
+</head>
+<body>
+<h2>그림 4-4 샘플 (offset 제거 · 토픽 3개 + 메시지)</h2>
+
+<div class="svg-figure">
+<svg viewBox="0 0 1180 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="실제 Kafka: 각 서비스가 토픽에 메시지를 발행하면 orchestrator가 구독해 가져간다">
+  <defs>
+    <marker id="ka" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="kb" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker>
+  </defs>
+  <text x="590" y="36" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">실제 Kafka — 서비스가 토픽에 발행하고 orchestrator가 가져간다</text>
+
+  <g transform="translate(48 200)">
+    <rect x="0" y="0" width="134" height="96" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <line x1="0" y1="32" x2="134" y2="32" stroke="#4f46e5" stroke-width="1.2"/>
+    <line x1="0" y1="64" x2="134" y2="64" stroke="#4f46e5" stroke-width="1.2"/>
+    <circle cx="18" cy="16" r="3.2" fill="#4f46e5"/><circle cx="18" cy="48" r="3.2" fill="#4f46e5"/><circle cx="18" cy="80" r="3.2" fill="#4f46e5"/>
+  </g>
+  <text x="115" y="324" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">프로듀서</text>
+  <text x="115" y="346" text-anchor="middle" font-size="11.5" fill="#64748b">order · product · delivery</text>
+
+  <line x1="192" y1="248" x2="298" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#ka)"/>
+  <text x="244" y="232" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4f46e5">발행</text>
+
+  <rect x="300" y="118" width="580" height="262" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <rect x="300" y="118" width="580" height="34" fill="#ff7849"/>
+  <text x="590" y="141" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">KAFKA</text>
+
+  <rect x="318" y="182" width="172" height="150" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="404" y="212" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412">order-created</text>
+  <text x="404" y="231" text-anchor="middle" font-size="11" fill="#c2773f">토픽</text>
+  <rect x="379" y="262" width="50" height="34" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.2"/>
+  <path d="M379 262 L404 281 L429 262" fill="none" stroke="#ff7849" stroke-width="1.2"/>
+
+  <rect x="504" y="182" width="172" height="150" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="590" y="212" text-anchor="middle" font-size="12" font-weight="700" fill="#9a3412">product-decreased</text>
+  <text x="590" y="231" text-anchor="middle" font-size="11" fill="#c2773f">토픽</text>
+  <rect x="565" y="262" width="50" height="34" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.2"/>
+  <path d="M565 262 L590 281 L615 262" fill="none" stroke="#ff7849" stroke-width="1.2"/>
+
+  <rect x="690" y="182" width="172" height="150" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="776" y="212" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412">delivery-created</text>
+  <text x="776" y="231" text-anchor="middle" font-size="11" fill="#c2773f">토픽</text>
+  <rect x="751" y="262" width="50" height="34" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.2"/>
+  <path d="M751 262 L776 281 L801 262" fill="none" stroke="#ff7849" stroke-width="1.2"/>
+
+  <text x="590" y="358" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412">목적별로 나뉜 토픽</text>
+
+  <line x1="882" y1="248" x2="988" y2="248" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#kb)"/>
+  <text x="935" y="232" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3730a3">구독</text>
+
+  <g transform="translate(998 200)">
+    <rect x="0" y="0" width="134" height="96" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <line x1="0" y1="32" x2="134" y2="32" stroke="#4f46e5" stroke-width="1.2"/>
+    <line x1="0" y1="64" x2="134" y2="64" stroke="#4f46e5" stroke-width="1.2"/>
+    <circle cx="18" cy="16" r="3.2" fill="#4f46e5"/><circle cx="18" cy="48" r="3.2" fill="#4f46e5"/><circle cx="18" cy="80" r="3.2" fill="#4f46e5"/>
+  </g>
+  <text x="1065" y="324" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">컨슈머</text>
+  <text x="1065" y="346" text-anchor="middle" font-size="11.5" fill="#64748b">orchestrator</text>
+
+  <text x="590" y="430" text-anchor="middle" font-size="12.5" fill="#475569" font-style="italic">프로듀서가 토픽에 메시지를 발행하면, orchestrator가 구독해 가져갑니다</text>
+</svg>
+<div class="cap">그림 4-4. 실제 Kafka - 각 서비스가 토픽에 메시지를 발행하면 orchestrator가 구독해 가져갑니다</div>
+</div>
+</body>
+</html>

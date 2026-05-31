@@ -20,14 +20,13 @@
 <body>
 <div class="container">
 <h1>챕터 4. 비동기 MSA - Kafka로 서비스를 분리하다</h1>
-<p>배포 다음 날 아침, 모니터에 알림이 울렸습니다. 에러 그래프가 한 칸 솟았다가 곧 가라앉았습니다. 상품 서버가 잠깐 죽었고, 쿠버네티스가 다시 띄웠습니다.</p>
-<p>그런데 그 잠깐 사이에 들어온 주문이 전부 실패해 있었습니다. 주문 서버는 재고를 줄이려고 상품 서버를 직접 호출했는데, 상품 서버가 죽어 있어 호출이 실패했습니다. 주문 처리는 그 응답을 기다리던 중이라, 호출이 실패하면서 주문 처리도 함께 실패했습니다.</p>
-<p class="thought">서로 직접 부르니까, 하나가 멈추면 기다리던 쪽도 같이 멈추는구나.</p>
-<p>선배가 모니터를 들여다봤습니다.</p>
-<div class="dialogue"><span class="speaker">선배</span>: "동기로 직접 호출하니까 그래요. 호출한 쪽은 상대가 응답할 때까지 기다리는데, 상대가 잠깐 죽으면 호출한 쪽도 같이 멈춰요. 이럴 땐 호출을 붙잡고 기다리지 말고 비동기로 메시지를 주고받아야 해요. 그 비동기 통신을 해 주는 게 <strong>Kafka</strong>예요."</div>
-<div class="dialogue"><span class="speaker">오픈이</span>: "메시지요? 상대가 없으면 어떻게 되는데요?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "주문하는 쪽은 메시지를 남기고 진동벨을 받고 돌아가요. 재고 담당자는 자기 차례가 되면 쌓인 메시지를 꺼내 처리해요. 담당자가 잠깐 자리를 비워도 메시지는 그 자리에 남아 있어요. 돌아와서 그때 처리하면 되죠."</div>
-<div class="dialogue"><span class="speaker">선배</span>: "결국 이게 MSA가 노린 거예요. 서비스를 따로 배포하고, 하나가 죽어도 나머지는 멀쩡해야죠. 그런데 서로 직접 호출하면서 응답을 기다리는 한, 하나가 멈추면 다 같이 멈춰요. 카페로 치면 카운터 앞에서 기다리는 것과 진동벨을 받고 자리에 앉는 것의 차이예요. 그게 바로 동기와 비동기의 차이예요."</div>
+<p>배포 다음 날 아침, 모니터에 알림이 울렸습니다. 상품 서버가 잠깐 죽은 탓이었습니다. 에러 로그가 쌓이다가, 쿠버네티스가 상품 서버를 복구하자 멈췄습니다.</p>
+<p>문제는 그 사이에 들어온 주문이 전부 실패한 것입니다. 주문 서버가 상품 서버를 호출했지만, 상품 서버가 죽어 있어 주문 실패가 발생했습니다.</p>
+<p class="thought">서로 직접 호출하니까, 하나가 죽으면 호출한 쪽도 같이 실패하는구나.</p>
+<p>상황을 확인한 선배가 다가왔습니다.</p>
+<div class="dialogue"><span class="speaker">선배</span>: "이거 앞에 얘기했던 상황이네요. 동기적으로 직접 호출하니까 그래요. 호출한 쪽은 상대가 응답할 때까지 기다리는데, 상대가 잠깐 죽으면 호출한 쪽도 같이 멈춰요. 이럴 땐 호출을 붙잡고 기다리지 말고 비동기적으로 메시지를 주고받아야 해요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "메시지요? 받는 서비스가 죽어 있으면 그 메시지는 어떻게 돼요?"</div>
+<div class="dialogue"><span class="speaker">선배</span>: "메시지는 중간에 쌓여 있다가, 받는 서비스가 살아나면 그때 가져가 처리해요. 보내는 쪽은 응답을 기다리지 않으니 그대로 자기 일을 이어 가죠. 그게 동기 호출과 비동기 메시지의 차이예요."</div>
 <div class="svg-figure">
 <svg viewBox="0 0 1200 880" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 4 한눈에 보기: 챕터 3과 동일하게 Client는 클러스터 밖에 있고, 1단계 로그인은 Client가 Ingress·Gateway를 거쳐 User에 로그인하고 JWT를 응답받는다. 2단계 주문은 Client가 Ingress·Gateway를 거쳐 Order에 동기 REST로 주문하고 즉시 PENDING을 응답받는다. 그 뒤 Order·Product·Delivery 세 서비스는 가운데 Orchestrator와 event·command를 주고받고, Orchestrator가 그 모든 메시지를 아래 Kafka 토픽으로 비동기 전달한다. 서비스끼리는 직접 호출하지 않는다.">
   <defs>
@@ -94,7 +93,7 @@
   <text x="905" y="486" text-anchor="middle" font-size="12" fill="#6b7280">:8084 배달</text>
   <rect x="360" y="588" width="580" height="68" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
   <rect x="360" y="588" width="580" height="20" fill="#ff7849"/>
-  <text x="650" y="603" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 모든 메시지가 토픽을 거쳐 비동기로 전달</text>
+  <text x="650" y="603" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 모든 메시지가 토픽을 거쳐 비동기적으로 전달</text>
   <rect x="410" y="618" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M410 618 L448 631 L486 618" fill="none" stroke="#ff7849" stroke-width="1"/>
   <rect x="530" y="618" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
@@ -151,23 +150,21 @@
 ├── orchestrator/       # Kafka 워크플로우 조율 (이번 챕터 신규)
 ├── gateway/            # Nginx API Gateway
 ├── db/                 # MySQL
-└── k8s/                # Kubernetes 매니페스트 (kafka 포함)</div>
+└── k8s/                # Kubernetes YAML 파일 (kafka 포함)</div>
 <p>서비스마다 패키지 구조가 조금씩 다르므로, 코드를 작성할 파일 경로는 각 실습 코드블록 바로 위에서 안내합니다.</p>
 <h3>3. Kafka</h3>
-<p>이 챕터는 Kafka를 별도로 설치하지 않습니다. Kubernetes 매니페스트(<code>k8s/kafka/</code>)로 Minikube 안에 띄우므로, 챕터 3에서 준비한 Docker Desktop과 Minikube만 있으면 됩니다.</p>
+<p>이 챕터는 Kafka를 별도로 설치하지 않습니다. Kubernetes YAML(<code>k8s/kafka/</code>)로 Minikube 안에 띄우므로, 챕터 3에서 준비한 Docker Desktop과 Minikube만 있으면 됩니다.</p>
 <h3>4. 실습 순서</h3>
 <ol>
 <li>order-service의 REST 호출을 Kafka 이벤트 발행으로 교체</li>
 <li>product-service · delivery-service에 Kafka Consumer/Producer 추가</li>
 <li>새 서비스 <strong>orchestrator</strong>에서 워크플로우 조율 로직 작성</li>
-<li>K8s에 Kafka + orchestrator 배포</li>
+<li>Kubernetes에 Kafka + orchestrator 배포</li>
 <li>정상 주문 / 품절 롤백 시나리오 검증</li>
 </ol>
-<div class="prep-note">
-<p><strong>이번 챕터는 책에서 가장 복잡한 내용을 다룹니다.</strong> 여러 서비스가 동시에 Kafka 메시지를 주고받으며 상태가 바뀝니다. 전체 토픽맵(4.2.2)과 흐름 표(4.3.1~4.3.2)를 먼저 훑어보고 시작하면 길을 잃지 않습니다.</p>
-</div>
 </div>
 <h2>4.1 동기 호출의 한계 - 한 서비스가 멈추면 전체가 멈춘다</h2>
+<p>동기적 방식과 비동기적 방식을 비유를 통해 알아보겠습니다.</p>
 <h3>4.1.1 카운터 대기 vs 진동벨</h3>
 <p><strong>카운터 대기 방식 (동기적)</strong></p>
 <p>카운터 앞에 서서 &quot;아메리카노 하나요&quot;라고 주문합니다. 바리스타가 커피를 만드는 동안 카운터 앞에서 기다립니다. 내 커피가 나와야 다음 손님이 주문할 수 있습니다. 바리스타가 원두를 갈다가 커피 머신이 고장 나면 뒤에 줄 선 손님 전부가 멈춥니다.</p>
@@ -175,13 +172,14 @@
 <p>&quot;아메리카노 하나요&quot;라고 주문하면 진동벨을 받고 자리에 앉습니다. 바리스타는 주문을 순서대로 처리하고, 커피가 완성되면 벨이 울립니다. 손님은 기다리는 동안 다른 일을 할 수 있고, 뒤에 줄 선 손님도 바로 주문할 수 있습니다. 커피 머신이 잠깐 멈춰도 주문 목록은 사라지지 않습니다.</p>
 <!-- image-prompt: Minimal black line drawing on white background, split comparison, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Separated by a simple vertical line in the middle, no X mark. Left side, title "동기 (카운터 대기)": barista behind counter making coffee, one customer standing at counter waiting, four or five more customers queued behind in a long line looking bored. All frozen/blocked. Right side, title "비동기 (진동벨)": same cafe counter with barista, but the customer has walked away to a table, sitting with a laptop and a small vibration buzzer on the table. A wavy line from the buzzer indicating it will ring. No speech bubbles, no annotation text, no checklists. Clean lines, no colors. -->
 <div class="chapter-image gemini"><img src="..\chapters\assets\CH04\gemini\01_sync-vs-async.png" alt="" /><div class="caption">그림 4-2. 동기 vs 비동기 통신</div></div>
-<p>아침에 겪은 그 잠깐의 멈춤이 바로 카운터 대기의 풍경이었습니다. 커피 머신이 멈추자 카운터 앞에 선 손님까지 함께 멈췄고, 그 사이 들어온 주문이 전부 실패했습니다. 진동벨 방식이라면 손님은 주문만 남기고 자리로 돌아가 있으니, 커피 머신이 잠깐 멈춰도 주문은 그대로 남아 있다가 커피 머신이 복구된 후에 처리됩니다. 동기로 서로를 직접 호출하며 응답을 기다리면 한 서비스의 멈춤이 곧 전체의 멈춤이 되지만, 비동기로 메시지를 주고받으면 그렇지 않습니다.</p>
+<p>그렇다면 이 비동기 메시지는 무엇으로 주고받을까요?</p>
 <h2>4.2 Kafka - 메시지를 전달하는 우체국</h2>
-<p>비동기 통신을 실제로 담당하는 것이 <strong>Kafka</strong>입니다.</p>
+<h3>4.2.1 프로듀서·토픽·컨슈머</h3>
+<p>메시지는 <strong>Kafka</strong>로 주고받습니다. Kafka는 시스템 사이에서 비동기 통신을 담당하며, 메시지를 안전하게 전달해 주는 역할을 합니다.</p>
 <div class="term-box">
-<p><strong>Apache Kafka</strong>는 서비스끼리 직접 호출하지 않고, 가운데에서 메시지를 받아 보관했다가 전달해 주는 메시지 시스템입니다. 받는 쪽이 잠시 멈춰도 메시지가 그대로 남아 있어 비동기 통신이 가능합니다.</p>
+<p><strong>Apache Kafka</strong>는 대량의 메시지를 빠르고 안정적으로 주고받기 위해 만들어진 <strong>분산 메시지 시스템</strong>입니다. 받은 메시지를 바로 지우지 않고 일정 기간 보관하기 때문에, 필요하면 <strong>지난 메시지를 다시 꺼내 볼 수도</strong> 있습니다. <strong>높은 처리량과 확장성</strong> 덕분에 대규모 서비스에서 널리 사용합니다.</p>
 </div>
-<p>Kafka는 우체국입니다. 발신자가 우편을 부치면, 우체국은 <strong>일반 편지, 등기, 특송, 택배처럼 종류별로 나눠</strong> 따로 보관합니다. 그리고 집배원은 자기가 처리할 종류의 칸에서만 우편을 꺼내 갑니다. 우체국을 사이에 두고 우편을 주고받기 때문에, 비동기적으로 각자의 시간에 일을 처리할 수 있습니다.</p>
+<p>Kafka는 우체국과 같은 역할을 합니다. 발신자가 우편을 부치면, 우체국은 <strong>일반 편지, 등기, 특송, 택배처럼 종류별로 나눠</strong> 따로 보관합니다. 그리고 집배원은 자기가 처리할 종류의 칸에서만 우편을 꺼내 갑니다. 우체국을 사이에 두고 우편을 주고받기 때문에, 비동기적으로 각자의 시간에 일을 처리할 수 있습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1180 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kafka 우체국: 프로듀서가 우편을 부치면 우체국이 종류별 우편함에 보관하고 집배원(컨슈머)이 자기 우편함에서 가져간다">
   <defs>
@@ -275,10 +273,48 @@
 </tr>
 </tbody>
 </table>
-<p><strong>프로듀서</strong>가 토픽에 메시지를 보내는 일을 <strong>발행</strong>, <strong>컨슈머</strong>가 자기가 다룰 토픽을 정해 두고 거기에 들어온 메시지를 받아 처리하는 일을 <strong>구독</strong>이라고 합니다.</p>
+<p>프로듀서가 토픽에 메시지를 보내는 것을 <strong>발행</strong>(Publish), 컨슈머가 특정 토픽을 지정해 두고 메시지를 가져와 처리하는 것을 <strong>구독</strong>(Subscribe)이라고 합니다.</p>
+<p>우체국이 우편을 일반·등기·특송으로 나눠 담듯, Kafka도 메시지를 <strong>토픽이라는 우편함에 종류별로 나눠 담습니다</strong>. <strong>토픽마다 이름이 있어서</strong>, 프로듀서는 보낼 메시지에 맞는 <strong>토픽 이름으로 발행</strong>하고 컨슈머는 자기가 맡은 <strong>토픽 이름으로 구독</strong>합니다.</p>
+<p>재고를 차감하라는 메시지는 재고 차감 토픽에 쌓이고, 이 토픽을 구독한 컨슈머가 꺼내 처리합니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 1180 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kafka 구조: 프로듀서가 재고 차감 토픽에 메시지를 발행하면 컨슈머가 구독해 가져간다">
+  <defs>
+    <marker id="k4a" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="k4b" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker>
+  </defs>
+  <text x="590" y="36" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">실제 Kafka — 프로듀서가 토픽에 발행하면 컨슈머가 구독한다</text>
+  <g transform="translate(70 164)">
+    <rect x="0" y="0" width="134" height="96" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <line x1="0" y1="32" x2="134" y2="32" stroke="#4f46e5" stroke-width="1.2"/>
+    <line x1="0" y1="64" x2="134" y2="64" stroke="#4f46e5" stroke-width="1.2"/>
+    <circle cx="18" cy="16" r="3.2" fill="#4f46e5"/><circle cx="18" cy="48" r="3.2" fill="#4f46e5"/><circle cx="18" cy="80" r="3.2" fill="#4f46e5"/>
+  </g>
+  <text x="137" y="290" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">프로듀서</text>
+  <line x1="208" y1="212" x2="366" y2="212" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#k4a)"/>
+  <text x="287" y="198" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4f46e5">발행</text>
+  <rect x="384" y="112" width="400" height="200" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <rect x="384" y="112" width="400" height="34" fill="#ff7849"/>
+  <text x="584" y="135" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">KAFKA</text>
+  <rect x="410" y="170" width="348" height="122" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="584" y="204" text-anchor="middle" font-size="14" font-weight="700" fill="#9a3412">재고 차감</text>
+  <text x="584" y="227" text-anchor="middle" font-size="11" fill="#c2773f">decrease-product-command</text>
+  <rect x="559" y="250" width="50" height="34" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.2"/>
+  <path d="M559 250 L584 269 L609 250" fill="none" stroke="#ff7849" stroke-width="1.2"/>
+  <line x1="786" y1="212" x2="944" y2="212" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#k4b)"/>
+  <text x="865" y="198" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3730a3">구독</text>
+  <g transform="translate(960 164)">
+    <rect x="0" y="0" width="134" height="96" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <line x1="0" y1="32" x2="134" y2="32" stroke="#4f46e5" stroke-width="1.2"/>
+    <line x1="0" y1="64" x2="134" y2="64" stroke="#4f46e5" stroke-width="1.2"/>
+    <circle cx="18" cy="16" r="3.2" fill="#4f46e5"/><circle cx="18" cy="48" r="3.2" fill="#4f46e5"/><circle cx="18" cy="80" r="3.2" fill="#4f46e5"/>
+  </g>
+  <text x="1027" y="290" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">컨슈머</text>
+</svg>
+</div>
+<div class="caption">그림 4-4. Kafka의 프로듀서·토픽·컨슈머 구조</div>
 <p>그런데 같은 일을 하는 컨슈머가 여러 대 떠 있을 때는 메시지를 어떻게 나눠 받아야 할까요?</p>
-<h3>4.2.1 컨슈머 그룹</h3>
-<p>상품 서비스를 2대로 늘려 운영한다고 가정해 보겠습니다. 두 서버가 같은 토픽을 구독하면 &quot;재고 1개 차감&quot; 메시지를 둘 다 받아 처리해, 재고가 2개 줄어듭니다. 이 중복 처리를 막아 주는 것이 <strong>컨슈머 그룹</strong>입니다. 같은 일을 하는 서버를 한 그룹으로 묶으면, 그 메시지는 그룹 안의 한 서버에만 전달됩니다.</p>
+<h3>4.2.2 컨슈머 그룹</h3>
+<p>상품 서비스를 2대로 늘려 운영한다고 가정해 보겠습니다. 두 서버가 같은 토픽을 구독하면 &quot;재고 1개 차감&quot; 메시지를 둘 다 받아 처리해, 재고가 2개 줄어듭니다. 이 중복 처리를 막아 주는 것이 <strong>컨슈머 그룹</strong>입니다. <strong>같은 일을 하는 서버를 한 그룹으로 묶으면, 그 메시지는 그룹 안의 한 서버에만 전달됩니다</strong>.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 980 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨슈머 그룹 비교: 그룹으로 안 묶으면 두 컨슈머가 같은 메시지를 각각 처리해 재고가 두 번 깎이고, 같은 컨슈머 그룹으로 묶으면 한 컨슈머만 처리해 재고가 한 번만 깎인다">
   <defs>
@@ -359,10 +395,27 @@
   <text x="640" y="414" font-size="17" font-weight="700" fill="#3730a3">상품 재고 10 → 9 (한 번만)</text>
 </svg>
 </div>
-<div class="caption">그림 4-4. 컨슈머 그룹 - 안 묶으면 재고가 두 번 깎이고, 같은 그룹으로 묶으면 한 번만 깎인다</div>
-<h3>4.2.2 이번 챕터에서 사용하는 토픽 맵</h3>
-<p>이 챕터에서는 핵심 흐름만 직접 다루므로, 각 토픽의 발행·구독 코드 전체는 깃헙 레포에서 확인합니다.</p>
-<p>총 8개의 토픽을 사용합니다. <code>command</code>가 붙은 토픽은 orchestrator가 각 서비스에 내리는 명령입니다. <code>command</code>가 없는 토픽은 각 서비스가 처리 결과를 orchestrator에 보고하는 이벤트입니다.</p>
+<div class="caption">그림 4-5. 컨슈머 그룹 - 묶으면 한 번만 처리</div>
+<div class="tip">
+<p><strong>Kafka 더 알아두기</strong></p>
+<ul>
+<li><strong>컨슈머가 읽어도 메시지는 남는다</strong>: 우체국에서 우편을 꺼내 읽어도 그 우편은 함에 그대로 보관됩니다(기본 7일). 그래서 서로 다른 컨슈머가 같은 메시지를 각자 자기 속도로 찾아 읽을 수 있고, 장애가 나도 다시 읽어 처리할 수 있습니다.</li>
+<li><strong>RabbitMQ 같은 큐와의 차이</strong>: 전통적인 메시지 큐는 컨슈머가 메시지를 읽으면 큐에서 바로 사라집니다. Kafka는 읽어도 남아 있다는 점이 가장 큰 차이입니다.</li>
+</ul>
+</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "각 서비스가 서로 메시지를 발행하고 구독하면서 알아서 이어지는 건가요?"</div>
+<div class="dialogue"><span class="speaker">선배</span>: "방식이 두 가지예요. 방금 말한 것처럼 각 서비스가 서로 발행하고 구독하면서 다음 단계를 스스로 이어 갈 수도 있고, 전체 흐름을 관리하는 <strong>지휘자</strong>를 둘 수도 있어요. 그러면 중간에 한 단계가 실패해도, 지휘자가 어디까지 진행됐는지 알고 있으니까 이미 끝난 단계만 복구할 수 있어요."</div>
+<h2>4.3 Orchestration Saga - 지휘자가 흐름을 조율하다</h2>
+<p>하나의 주문을 여러 서비스가 단계별로 나눠 처리하다 보면, 중간 한 단계가 실패해도 앞 단계는 이미 끝나 있습니다. 이때 끝난 단계를 취소하는 <strong>보상</strong>으로 데이터를 맞추는 방식을 <strong>Saga 패턴</strong>이라고 합니다.</p>
+<p>Saga 패턴에서 전체 흐름을 지휘자가 중앙에서 관리하는 방식을 <strong>Orchestration Saga</strong>라고 합니다. 흐름을 한 곳에 모으면 상태가 한 곳에 있어 추적과 롤백이 단순해지고, 각 서비스는 자기 일에만 집중할 수 있습니다.</p>
+<!-- image-prompt: Clean black line drawing on white background, simplified orchestra illustration, 4:3 aspect ratio, 800x600px. No stage, no curtains, no background. Center: a conductor on a small podium holding a baton and a score labeled "SAGA", drawn in a clean cartoon style (not stick figures — simple but with body proportions, hair, clothing outlines). Three musicians sitting around the conductor with recognizable instruments and music stands labeled "ORDER", "PRODUCT", "DELIVERY". Blue curved arrows from conductor to each musician labeled "command". Green curved arrows from each musician back labeled "result". Simple cartoon style like a textbook illustration — more detailed than stick figures but less detailed than realistic. No shading, no colors except blue and green arrows. -->
+<div class="chapter-image gemini"><img src="..\chapters\assets\CH04\gemini\04_orchestra.png" alt="" /><div class="caption">그림 4-6. Orchestration Saga 구조</div></div>
+<p>이번 챕터 예제에서는 주문 요청이 들어오면, 지휘자 역할을 하는 <strong>orchestrator</strong>가 재고 차감, 배달 생성, 주문 완료 단계를 순서대로 지휘합니다.</p>
+<div class="prep-note">
+<p><strong>Saga를 구현하는 방식에는 Orchestration 외에 Choreography도 있습니다.</strong> 중앙 지휘자 없이 <strong>각 서비스가 서로 발행하고 구독하며 다음 단계를 이어 가는 방식</strong>으로, 단계가 적을 때는 가볍지만 단계가 늘거나 보상이 복잡해질수록 전체 흐름이 여러 서비스에 흩어져 추적이 어렵습니다. 이 책은 상태를 한 곳에서 추적할 수 있는 Orchestration을 선택합니다.</p>
+</div>
+<h3>4.3.1 이번 챕터에서 사용하는 토픽 맵</h3>
+<p>이 챕터에서는 주문 흐름에 총 8개의 토픽을 사용합니다. 토픽은 orchestrator가 서비스에 일을 시키는 <strong>명령</strong>과, 서비스가 결과를 돌려주는 <strong>이벤트</strong> 두 종류입니다.</p>
 <p><strong>정상 흐름 (6단계)</strong></p>
 <table>
   <colgroup>
@@ -398,26 +451,10 @@
     <tr><td><code>increase-product-command</code></td><td>orchestrator → product</td><td>재고 복구</td></tr>
   </tbody>
 </table>
-<div class="dialogue"><span class="speaker">오픈이</span>: "메시지 방식으로 바꾸니까, 전체 흐름을 누가 관리해야 할지 모르겠어요."</div>
-<div class="dialogue"><span class="speaker">선배</span>: "전체 흐름을 관리하는 <strong>지휘자</strong>를 만들면 편해요. 전체 악보를 보고 순서를 정하는 것처럼, 각 서비스는 자기 일만 하고 결과만 보고하게 해요."</div>
-<div class="tip">
-<p><strong>Kafka 더 알아두기</strong></p>
-<ul>
-<li><strong>컨슈머가 읽어도 메시지는 남는다</strong>: 우체국에서 우편을 꺼내 읽어도 그 우편은 함에 그대로 보관됩니다(기본 7일). 그래서 서로 다른 컨슈머가 같은 메시지를 각자 자기 속도로 찾아 읽을 수 있고, 장애가 나도 다시 읽어 처리할 수 있습니다.</li>
-<li><strong>RabbitMQ 같은 큐와의 차이</strong>: 전통적인 메시지 큐는 컨슈머가 메시지를 읽으면 큐에서 바로 사라집니다. Kafka는 읽어도 남아 있다는 점이 가장 큰 차이입니다.</li>
-</ul>
-</div>
-<h2>4.3 Orchestration Saga - 지휘자가 흐름을 조율하다</h2>
-<p>각 서비스가 자기 단계만 처리해 결과를 메시지로 발행하고, 별도의 관리자가 다음 단계와 보상을 책임지는 분산 트랜잭션 패턴을 <strong>Saga 패턴</strong>이라고 합니다.</p>
-<p>Saga 패턴의 흐름 관리를 한 서비스가 중앙에서 지휘하는 방식이 <strong>Orchestration Saga</strong>, 그 지휘자 서비스가 <strong>orchestrator</strong>입니다. 흐름을 한 곳에 모으면 상태가 한 곳에 있어 추적과 롤백이 단순해지고, 각 서비스는 자기 일에만 집중할 수 있습니다.</p>
-<!-- image-prompt: Clean black line drawing on white background, simplified orchestra illustration, 4:3 aspect ratio, 800x600px. No stage, no curtains, no background. Center: a conductor on a small podium holding a baton and a score labeled "SAGA", drawn in a clean cartoon style (not stick figures — simple but with body proportions, hair, clothing outlines). Three musicians sitting around the conductor with recognizable instruments and music stands labeled "ORDER", "PRODUCT", "DELIVERY". Blue curved arrows from conductor to each musician labeled "command". Green curved arrows from each musician back labeled "result". Simple cartoon style like a textbook illustration — more detailed than stick figures but less detailed than realistic. No shading, no colors except blue and green arrows. -->
-<div class="chapter-image gemini"><img src="..\chapters\assets\CH04\gemini\04_orchestra.png" alt="" /><div class="caption">그림 4-5. Orchestration Saga 구조</div></div>
-<p>이번 챕터의 예제에서는 주문 요청이 들어오면 orchestrator가 재고 차감, 배달 생성, 주문 완료 단계를 순서대로 지휘합니다.</p>
-<div class="prep-note">
-<p><strong>Saga 패턴을 구현하는 방식에는 Choreography도 있습니다.</strong> 중앙 지휘자 없이 각 서비스가 이벤트를 발행하고 구독하며 다음 단계를 스스로 이어 갑니다. 단계가 적을 때는 가볍지만, 단계가 늘거나 보상이 복잡해질수록 전체 흐름이 여러 서비스에 흩어져 추적이 어렵습니다. 이 책은 상태를 한 곳에서 추적할 수 있는 Orchestration을 선택합니다.</p>
-</div>
-<h3>4.3.1 주문 요청 성공 흐름</h3>
-<p>orchestrator를 사이에 두고 비동기로 동작하면, 주문 요청이 들어왔을 때 주문 서비스는 우선 <strong>PENDING</strong> 상태를 응답합니다. 이후 orchestrator가 아래 단계를 차례로 진행해 모두 성공하면 주문 상태가 <strong>COMPLETED</strong>로 바뀝니다.</p>
+<p>핵심 흐름만 직접 다루므로, 각 토픽의 발행·구독 코드 전체는 깃헙 레포에서 확인합니다.</p>
+<h3>4.3.2 주문 요청 성공 흐름</h3>
+<p>이제 비동기 통신으로 주문 요청이 처리되는 전체 흐름을 따라가 보겠습니다.</p>
+<p>서비스들이 orchestrator를 사이에 두고 메시지를 주고받기 때문에, 주문 요청이 들어오면 주문 서비스는 우선 <strong>PENDING</strong> 상태로 응답합니다. 이후 orchestrator가 아래 단계를 차례로 진행해 모두 성공하면 주문 상태가 <strong>COMPLETED</strong>로 바뀝니다.</p>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -439,10 +476,10 @@
  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text><line x1="430" y1="134" x2="355" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#mk)"/><text x="414.5" y="192" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">1. 주문 생성 이벤트 발행</text><line x1="355" y1="370" x2="355" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#mk2)"/><text x="377" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">2. 오케스트레이터가 수신</text><rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">1단계</text><text x="1146" y="124" font-size="20" font-weight="700" fill="#0f172a">1. 주문 생성 이벤트 발행</text><text x="1146" y="158" font-size="18" font-weight="400" fill="#475569">주문을 저장한 뒤</text><text x="1146" y="185" font-size="18" font-weight="400" fill="#475569">PENDING을 응답합니다.</text><text x="1146" y="212" font-size="18" font-weight="400" fill="#475569">그 후 주문 이벤트를</text><text x="1146" y="239" font-size="18" font-weight="400" fill="#475569">카프카에 발행합니다.</text><text x="1146" y="279" font-size="20" font-weight="700" fill="#0f172a">2. 오케스트레이터가 수신</text><text x="1146" y="313" font-size="18" font-weight="400" fill="#475569">오케스트레이터가 그 토픽을</text><text x="1146" y="340" font-size="18" font-weight="400" fill="#475569">구독하고 있다가 메시지를</text><text x="1146" y="367" font-size="18" font-weight="400" fill="#475569">받아 진행 상태를 기록합니다.</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">1단계</text><text x="1146" y="124" font-size="21" font-weight="700" fill="#0f172a">1. 주문 생성 이벤트 발행</text><text x="1146" y="158" font-size="19" font-weight="400" fill="#475569">주문을 저장한 뒤</text><text x="1146" y="185" font-size="19" font-weight="400" fill="#475569">PENDING을 응답합니다.</text><text x="1146" y="212" font-size="19" font-weight="400" fill="#475569">그 후 <tspan font-weight="700">주문 생성 이벤트</tspan>를</text><text x="1146" y="239" font-size="19" font-weight="400" fill="#475569">카프카에 발행합니다.</text><text x="1146" y="279" font-size="21" font-weight="700" fill="#0f172a">2. 오케스트레이터가 수신</text><text x="1146" y="313" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">주문 생성 이벤트</tspan></text><text x="1146" y="340" font-size="19" font-weight="400" fill="#475569">토픽을 구독하고 있다가 메시지를</text><text x="1146" y="367" font-size="19" font-weight="400" fill="#475569">받아 진행 상태를 기록합니다.</text>
  </svg>
 </div>
-<div class="caption">그림 4-6. 1단계 — 주문 생성 이벤트 발행 → 오케스트레이터 수신</div>
+<div class="caption">그림 4-7. 1단계 — 주문 생성 이벤트 발행 → 오케스트레이터 수신</div>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -466,10 +503,10 @@
  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text><line x1="480" y1="478" x2="480" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#mk)"/><text x="502" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">3. 재고 차감 명령 발행</text><line x1="480" y1="248" x2="660" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#mk2)"/><text x="592" y="192" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">4. 상품 서비스가 수신</text><rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">2단계</text><text x="1146" y="132" font-size="20" font-weight="700" fill="#0f172a">3. 재고 차감 명령 발행</text><text x="1146" y="174" font-size="18" font-weight="400" fill="#475569">오케스트레이터가 '재고 차감</text><text x="1146" y="207" font-size="18" font-weight="400" fill="#475569">명령'을 카프카에 발행합니다.</text><text x="1146" y="240" font-size="20" font-weight="700" fill="#0f172a">4. 상품 서비스가 수신</text><text x="1146" y="282" font-size="18" font-weight="400" fill="#475569">상품 서비스가 그 토픽을</text><text x="1146" y="315" font-size="18" font-weight="400" fill="#475569">구독하고 있다가 메시지를</text><text x="1146" y="348" font-size="18" font-weight="400" fill="#475569">받아 재고를 차감합니다.</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">2단계</text><text x="1146" y="132" font-size="21" font-weight="700" fill="#0f172a">3. 재고 차감 명령 발행</text><text x="1146" y="174" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">재고 차감</tspan></text><text x="1146" y="207" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">명령</tspan>을 카프카에 발행합니다.</text><text x="1146" y="240" font-size="21" font-weight="700" fill="#0f172a">4. 상품 서비스가 수신</text><text x="1146" y="282" font-size="19" font-weight="400" fill="#475569">상품 서비스가 <tspan font-weight="700">재고 차감 명령</tspan></text><text x="1146" y="315" font-size="19" font-weight="400" fill="#475569">토픽을 구독하고 있다가 메시지를</text><text x="1146" y="348" font-size="19" font-weight="400" fill="#475569">받아 재고를 차감합니다.</text>
  </svg>
 </div>
-<div class="caption">그림 4-7. 2단계 — 재고 차감 명령 발행 → 상품 수신</div>
+<div class="caption">그림 4-8. 2단계 — 재고 차감 명령 발행 → 상품 수신</div>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -495,10 +532,10 @@
  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text><line x1="660" y1="134" x2="605" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#mk)"/><text x="654.5" y="192" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">5. 재고 차감 이벤트 발행</text><line x1="605" y1="370" x2="605" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#mk2)"/><text x="627" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">6. 오케스트레이터가 수신</text><rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">3단계</text><text x="1146" y="132" font-size="20" font-weight="700" fill="#0f172a">5. 재고 차감 이벤트 발행</text><text x="1146" y="174" font-size="18" font-weight="400" fill="#475569">상품 서비스가 재고를 줄인 뒤</text><text x="1146" y="207" font-size="18" font-weight="400" fill="#475569">성공 여부를 '재고 차감</text><text x="1146" y="240" font-size="18" font-weight="400" fill="#475569">이벤트'로 카프카에 발행합니다.</text><text x="1146" y="273" font-size="20" font-weight="700" fill="#0f172a">6. 오케스트레이터가 수신</text><text x="1146" y="315" font-size="18" font-weight="400" fill="#475569">오케스트레이터가 그 토픽을</text><text x="1146" y="348" font-size="18" font-weight="400" fill="#475569">구독하고 있다가 메시지를</text><text x="1146" y="381" font-size="18" font-weight="400" fill="#475569">받아 성공을 확인합니다.</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">3단계</text><text x="1146" y="132" font-size="21" font-weight="700" fill="#0f172a">5. 재고 차감 이벤트 발행</text><text x="1146" y="174" font-size="19" font-weight="400" fill="#475569">상품 서비스가 재고를 줄인 뒤</text><text x="1146" y="207" font-size="19" font-weight="400" fill="#475569">성공 여부를 <tspan font-weight="700">재고 차감</tspan></text><text x="1146" y="240" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">이벤트</tspan>로 카프카에 발행합니다.</text><text x="1146" y="273" font-size="21" font-weight="700" fill="#0f172a">6. 오케스트레이터가 수신</text><text x="1146" y="315" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">재고 차감 이벤트</tspan></text><text x="1146" y="348" font-size="19" font-weight="400" fill="#475569">토픽을 구독하고 있다가 메시지를</text><text x="1146" y="381" font-size="19" font-weight="400" fill="#475569">받아 성공을 확인합니다.</text>
  </svg>
 </div>
-<div class="caption">그림 4-8. 3단계 — 재고 차감 이벤트 발행(상품) → 오케스트레이터 수신</div>
+<div class="caption">그림 4-9. 3단계 — 재고 차감 이벤트 발행(상품) → 오케스트레이터 수신</div>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -526,10 +563,10 @@
  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text><line x1="730" y1="478" x2="730" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#mk)"/><text x="752" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">7. 배달 생성 명령 발행</text><line x1="730" y1="248" x2="890" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#mk2)"/><text x="832" y="192" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">8. 배달 서비스가 수신</text><rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">4단계</text><text x="1146" y="132" font-size="20" font-weight="700" fill="#0f172a">7. 배달 생성 명령 발행</text><text x="1146" y="174" font-size="18" font-weight="400" fill="#475569">오케스트레이터가 '배달 생성</text><text x="1146" y="207" font-size="18" font-weight="400" fill="#475569">명령'을 카프카에 발행합니다.</text><text x="1146" y="240" font-size="20" font-weight="700" fill="#0f172a">8. 배달 서비스가 수신</text><text x="1146" y="282" font-size="18" font-weight="400" fill="#475569">배달 서비스가 그 토픽을</text><text x="1146" y="315" font-size="18" font-weight="400" fill="#475569">구독하고 있다가 메시지를</text><text x="1146" y="348" font-size="18" font-weight="400" fill="#475569">받아 배달을 생성합니다.</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">4단계</text><text x="1146" y="132" font-size="21" font-weight="700" fill="#0f172a">7. 배달 생성 명령 발행</text><text x="1146" y="174" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">배달 생성</tspan></text><text x="1146" y="207" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">명령</tspan>을 카프카에 발행합니다.</text><text x="1146" y="240" font-size="21" font-weight="700" fill="#0f172a">8. 배달 서비스가 수신</text><text x="1146" y="282" font-size="19" font-weight="400" fill="#475569">배달 서비스가 <tspan font-weight="700">배달 생성 명령</tspan></text><text x="1146" y="315" font-size="19" font-weight="400" fill="#475569">토픽을 구독하고 있다가 메시지를</text><text x="1146" y="348" font-size="19" font-weight="400" fill="#475569">받아 배달을 생성합니다.</text>
  </svg>
 </div>
-<div class="caption">그림 4-9. 4단계 — 배달 생성 명령 발행 → 배달 수신</div>
+<div class="caption">그림 4-10. 4단계 — 배달 생성 명령 발행 → 배달 수신</div>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -559,10 +596,10 @@
  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text><line x1="890" y1="134" x2="855" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#mk)"/><text x="894.5" y="192" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">9. 배달 생성 이벤트 발행</text><line x1="855" y1="370" x2="855" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#mk2)"/><text x="877" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">10. 오케스트레이터가 수신</text><rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">5단계</text><text x="1146" y="132" font-size="20" font-weight="700" fill="#0f172a">9. 배달 생성 이벤트 발행</text><text x="1146" y="174" font-size="18" font-weight="400" fill="#475569">배달 서비스가 배달을 만든 뒤</text><text x="1146" y="207" font-size="18" font-weight="400" fill="#475569">성공 여부를 '배달 생성</text><text x="1146" y="240" font-size="18" font-weight="400" fill="#475569">이벤트'로 카프카에 발행합니다.</text><text x="1146" y="273" font-size="20" font-weight="700" fill="#0f172a">10. 오케스트레이터가 수신</text><text x="1146" y="315" font-size="18" font-weight="400" fill="#475569">오케스트레이터가 그 토픽을</text><text x="1146" y="348" font-size="18" font-weight="400" fill="#475569">구독하고 있다가 메시지를</text><text x="1146" y="381" font-size="18" font-weight="400" fill="#475569">받아 성공을 확인합니다.</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">5단계</text><text x="1146" y="132" font-size="21" font-weight="700" fill="#0f172a">9. 배달 생성 이벤트 발행</text><text x="1146" y="174" font-size="19" font-weight="400" fill="#475569">배달 서비스가 배달을 만든 뒤</text><text x="1146" y="207" font-size="19" font-weight="400" fill="#475569">성공 여부를 <tspan font-weight="700">배달 생성</tspan></text><text x="1146" y="240" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">이벤트</tspan>로 카프카에 발행합니다.</text><text x="1146" y="273" font-size="21" font-weight="700" fill="#0f172a">10. 오케스트레이터가 수신</text><text x="1146" y="315" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">배달 생성 이벤트</tspan></text><text x="1146" y="348" font-size="19" font-weight="400" fill="#475569">토픽을 구독하고 있다가 메시지를</text><text x="1146" y="381" font-size="19" font-weight="400" fill="#475569">받아 성공을 확인합니다.</text>
  </svg>
 </div>
-<div class="caption">그림 4-10. 5단계 — 배달 생성 이벤트 발행(배달) → 오케스트레이터 수신</div>
+<div class="caption">그림 4-11. 5단계 — 배달 생성 이벤트 발행(배달) → 오케스트레이터 수신</div>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -594,12 +631,12 @@
  <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text><line x1="980" y1="478" x2="980" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#mk)"/><text x="1002" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">11. 주문 완료 명령 발행</text><line x1="980" y1="248" x2="430" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#mk2)"/><text x="727" y="192" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">12. 주문 서비스가 수신</text><rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">6단계</text><text x="1146" y="132" font-size="20" font-weight="700" fill="#0f172a">11. 주문 완료 명령 발행</text><text x="1146" y="174" font-size="18" font-weight="400" fill="#475569">오케스트레이터가 '주문 완료</text><text x="1146" y="207" font-size="18" font-weight="400" fill="#475569">명령'을 카프카에 발행합니다.</text><text x="1146" y="240" font-size="20" font-weight="700" fill="#0f172a">12. 주문 서비스가 수신</text><text x="1146" y="282" font-size="18" font-weight="400" fill="#475569">주문 서비스가 그 토픽을</text><text x="1146" y="315" font-size="18" font-weight="400" fill="#475569">구독하고 있다가 메시지를</text><text x="1146" y="348" font-size="18" font-weight="400" fill="#475569">받아 주문을 COMPLETED로</text><text x="1146" y="381" font-size="18" font-weight="400" fill="#475569">바꿉니다.</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">6단계</text><text x="1146" y="132" font-size="21" font-weight="700" fill="#0f172a">11. 주문 완료 명령 발행</text><text x="1146" y="174" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">주문 완료</tspan></text><text x="1146" y="207" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">명령</tspan>을 카프카에 발행합니다.</text><text x="1146" y="240" font-size="21" font-weight="700" fill="#0f172a">12. 주문 서비스가 수신</text><text x="1146" y="282" font-size="19" font-weight="400" fill="#475569">주문 서비스가 <tspan font-weight="700">주문 완료 명령</tspan></text><text x="1146" y="315" font-size="19" font-weight="400" fill="#475569">토픽을 구독하고 있다가 메시지를</text><text x="1146" y="348" font-size="19" font-weight="400" fill="#475569">받아 주문을 COMPLETED로</text><text x="1146" y="381" font-size="19" font-weight="400" fill="#475569">바꿉니다.</text>
  </svg>
 </div>
-<div class="caption">그림 4-11. 6단계 — 주문 완료 명령 발행 → 주문 수신</div>
-<h3>4.3.2 주문 요청 실패 흐름 (롤백)</h3>
-<p>상품 서비스가 재고 차감에 실패하면 재고 차감 실패 이벤트를 발행합니다. 오케스트레이터는 <strong>이미 처리된 단계만</strong> 역순으로 되돌립니다.</p>
+<div class="caption">그림 4-12. 6단계 — 주문 완료 명령 발행 → 주문 수신</div>
+<h3>4.3.3 주문 요청 실패 흐름 (롤백)</h3>
+<p>만약 상품 서비스가 재고 차감에 실패하면 재고 차감 실패 이벤트를 발행합니다. 오케스트레이터는 <strong>이미 처리된 단계만</strong> 역순으로 되돌립니다.</p>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤백 실패 알림: 상품이 재고 차감 실패 결과를 이벤트로 알리고 오케스트레이터가 받는다. Kafka 띠에는 지나온 편지가 비활성으로 남고 재고 차감 이벤트만 활성이다.">
   <defs><marker id="rb1a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker>
@@ -637,23 +674,20 @@
   <rect x="1090" y="40" width="460" height="430" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="470" stroke="#f0e6c8" stroke-width="1.3"/>
   <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 · 실패 알림</text>
-  <text x="1146" y="128" font-size="18" font-weight="700" fill="#b91c1c">1. 상품이 재고 차감 실패를 알림</text>
-  <text x="1146" y="158" font-size="17" font-weight="400" fill="#475569">재고 차감에 실패한 상품 서비스가</text>
-  <text x="1146" y="181" font-size="17" font-weight="400" fill="#475569">그 결과를 이벤트로 발행합니다.</text>
-  <text x="1146" y="225" font-size="18" font-weight="700" fill="#0f172a">2. 오케스트레이터가 수신</text>
-  <text x="1146" y="255" font-size="17" font-weight="400" fill="#475569">실패 결과를 받고 롤백을</text>
-  <text x="1146" y="278" font-size="17" font-weight="400" fill="#475569">시작합니다.</text>
-  <line x1="1118" y1="312" x2="1530" y2="312" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="346" font-size="17" font-weight="700" fill="#475569">→ 다음: 주문 취소 (그림 4-13)</text>
+  <text x="1146" y="128" font-size="21" font-weight="700" fill="#b91c1c">1. 상품이 재고 차감 실패를 알림</text>
+  <text x="1146" y="158" font-size="19" font-weight="400" fill="#475569">재고 차감에 실패한 상품 서비스가</text>
+  <text x="1146" y="181" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">재고 차감 이벤트</tspan>를 발행합니다.</text>
+  <text x="1146" y="225" font-size="21" font-weight="700" fill="#0f172a">2. 오케스트레이터가 수신</text>
+  <text x="1146" y="255" font-size="19" font-weight="400" fill="#475569">실패 결과를 받고 롤백을</text>
+  <text x="1146" y="278" font-size="19" font-weight="400" fill="#475569">시작합니다.</text>
 </svg>
 </div>
-<div class="caption">그림 4-12. 롤백 · 실패 알림 — 재고 차감에 실패한 상품이 그 결과를 오케스트레이터에 알립니다</div>
-<p>되돌릴 재고가 없으니 남은 일은 주문을 무르는 것뿐입니다. 오케스트레이터는 주문 취소 명령을 발행하고, 주문 상태가 CANCELLED로 변경됩니다.</p>
+<div class="caption">그림 4-13. 롤백 · 실패 알림 — 상품이 실패를 알림</div>
 <div class="svg-figure">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤백 주문 취소: 오케스트레이터가 주문 취소 명령을 발행하고 주문 서비스가 CANCELLED 처리. 앞 편지들은 비활성으로 남고 주문 취소 명령만 활성이다.">
   <defs><marker id="rb2a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   <marker id="rb2b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker></defs>
-  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 · 주문 취소 — 되돌릴 재고가 없으니 주문만 무른다</text>
+  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 · 주문 취소 — 주문 취소 명령을 발행</text>
   <rect x="345" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
   <text x="430" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
   <text x="430" y="114" text-anchor="middle" font-size="11.5" fill="#3730a3">주문 CANCELLED</text>
@@ -683,26 +717,24 @@
   <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
   <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">재고 복구 없이 곧장 주문 취소 명령 발행</text>
   <line x1="730" y1="478" x2="730" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#rb2a)"/>
-  <text x="752" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">1. 주문 취소 명령 발행</text>
+  <text x="752" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">3. 주문 취소 명령 발행</text>
   <line x1="730" y1="248" x2="430" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#rb2b)"/>
-  <text x="560" y="196" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">2. 주문 서비스가 수신해 CANCELLED 처리</text>
+  <text x="605" y="196" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">4. 주문 서비스가 수신해 CANCELLED 처리</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
   <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 · 주문 취소</text>
-  <text x="1146" y="124" font-size="20" font-weight="700" fill="#0f172a">1. 주문 취소 명령 발행</text>
-  <text x="1146" y="158" font-size="18" font-weight="400" fill="#475569">오케스트레이터가 주문을 무르라는</text>
-  <text x="1146" y="185" font-size="18" font-weight="400" fill="#475569">명령을 카프카에 발행합니다.</text>
-  <text x="1146" y="252" font-size="20" font-weight="700" fill="#0f172a">2. 주문 서비스가 CANCELLED</text>
-  <text x="1146" y="286" font-size="18" font-weight="400" fill="#475569">주문 서비스가 메시지를 받아</text>
-  <text x="1146" y="313" font-size="18" font-weight="400" fill="#475569">주문 상태를 CANCELLED로 바꿉니다.</text>
+  <text x="1146" y="124" font-size="21" font-weight="700" fill="#0f172a">3. 주문 취소 명령 발행</text>
+  <text x="1146" y="158" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">주문 취소</tspan></text>
+  <text x="1146" y="185" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">명령</tspan>을 카프카에 발행합니다.</text>
+  <text x="1146" y="252" font-size="21" font-weight="700" fill="#0f172a">4. 주문 서비스가 CANCELLED</text>
+  <text x="1146" y="286" font-size="19" font-weight="400" fill="#475569">주문 서비스가 메시지를 받아</text>
+  <text x="1146" y="313" font-size="19" font-weight="400" fill="#475569">주문 상태를 CANCELLED로 바꿉니다.</text>
 </svg>
 </div>
-<div class="caption">그림 4-13. 롤백 · 주문 취소 — 되돌릴 재고가 없으니, 주문 취소 한 단계로 롤백이 끝납니다</div>
-<div class="dialogue"><span class="speaker">선배</span>: "흐름은 잡혔으니, 이제 직접 만들어 봐요."</div>
+<div class="caption">그림 4-14. 롤백 · 주문 취소 — 주문 취소 명령 발행</div>
 <h2>4.4 Kafka로 주고받기 - 발행과 구독</h2>
-<p>4.4부터는 이 흐름을 코드로 옮깁니다. Kafka 코드는 메시지를 토픽에 넣는 발행과, 토픽을 듣고 있다가 받는 구독으로 이뤄집니다.</p>
 <h3>4.4.1 발행 - 토픽에 메시지를 넣는다</h3>
-<p>앞에서 본 발신자가 우편을 부치듯, 프로듀서도 메시지를 토픽에 부칠 도구가 필요합니다. Spring에서 그 도구로 제공하는 것이 <strong><code>KafkaTemplate</code></strong> 입니다. <code>&quot;order-created&quot;</code>처럼 이름을 토픽 자리에 넘기면 그 토픽으로 메시지가 들어갑니다. 주문 서비스가 주문을 저장한 뒤 '주문 생성 이벤트'를 발행하는 코드는 다음과 같습니다.</p>
+<p>프로듀서가 메시지를 발행할 때는 Spring이 제공하는 <strong><code>KafkaTemplate</code></strong> 을 사용합니다. 주문 서비스가 주문을 저장한 뒤 <strong>주문 생성 이벤트</strong>를 발행하는 코드는 다음과 같습니다.</p>
 <p><code>adapter/producer/OrderEventProducer.java</code>를 열고 아래 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> adapter/producer/OrderEventProducer.java. 주문 생성 이벤트 발행</div><span class="nd">@Component</span>
 <span class="nd">@RequiredArgsConstructor</span>
@@ -714,15 +746,28 @@
 <span class="w">        </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<p><code>kafkaTemplate.send</code>에 토픽 이름과 보낼 객체를 넘기면 해당 토픽으로 메시지가 들어갑니다.</p>
-<p>주문 서비스는 주문을 저장하고 '주문 생성 이벤트'를 발행하면 됩니다. 그다음 재고 차감·배달 생성·실패 복구는 orchestrator가 맡습니다.</p>
+<p><code>kafkaTemplate.send</code>에 <code>order-created</code> 같은 토픽 이름과 보낼 객체를 넘기면 해당 토픽으로 메시지가 들어갑니다.</p>
+<p>주문 서비스는 주문을 <strong>PENDING</strong> 상태로 저장하고 <strong>주문 생성 이벤트</strong>를 발행하면 됩니다.</p>
+<p><code>usecase/OrderService.java</code>를 열고 <code>createOrder</code> 메서드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행</div><span class="nd">@Override</span>
+<span class="nd">@Transactional</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. 주문 생성</span>
+<span class="w">    </span><span class="n">Order</span><span class="w"> </span><span class="n">createdOrder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">Order</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">));</span>
+<span class="w">    </span><span class="n">createdOrder</span><span class="p">.</span><span class="na">validateMinAmount</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 2. Kafka로 주문 생성 이벤트 발행</span>
+<span class="w">    </span><span class="n">orderEventProducer</span><span class="p">.</span><span class="na">publishOrderCreated</span><span class="p">(</span>
+<span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">OrderCreatedEvent</span><span class="p">(</span><span class="n">createdOrder</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">)</span>
+<span class="w">    </span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">OrderResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">createdOrder</span><span class="p">);</span>
+<span class="p">}</span></div>
+<p>저장된 주문을 <code>OrderCreatedEvent</code>에 담아 [실습 1]에서 만든 <code>publishOrderCreated</code>로 넘깁니다. 실제 토픽 발행은 그 안의 <code>kafkaTemplate.send</code>가 맡습니다.</p>
 <h3>4.4.2 orchestrator - 흐름을 조율하는 코드</h3>
-<p>이벤트를 받아 다음 명령을 정하는 일은 orchestrator만 합니다. 1단계(주문 생성 이벤트 수신)를 코드로 보면 다음과 같습니다.</p>
-<div class="prep-note">
-<p><code>@KafkaListener</code>의 <code>topics</code>는 구독할 토픽 이름입니다. 토픽은 메시지가 종류별로 쌓이는 우편함이고, <code>&quot;order-created&quot;</code>처럼 그 우편함 이름을 적습니다. <strong><code>groupId</code>는 앞에서 본 컨슈머 그룹의 이름입니다.</strong> 같은 <code>groupId</code>를 적은 컨슈머끼리 한 그룹이 됩니다.</p>
-</div>
+<p>이벤트를 받아 다음 명령을 정하는 일은 orchestrator만 합니다. 주문 생성 이벤트를 받아 재고 차감 명령을 발행하는 코드는 다음과 같습니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>를 열고 아래 메서드를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> handler/OrderOrchestrator.java. 주문 생성 이벤트를 받아 재고 차감 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> handler/OrderOrchestrator.java. 주문 생성 이벤트를 받아 재고 차감 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">orderCreated</span><span class="p">(</span><span class="n">OrderCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 1. 주문 진행 상태를 메모리에 기록</span>
 <span class="w">    </span><span class="n">states</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WorkflowState</span><span class="p">(</span>
@@ -734,27 +779,27 @@
 <span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">DecreaseProductCommand</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span>
 <span class="w">                    </span><span class="n">event</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">price</span><span class="p">()));</span>
 <span class="p">}</span></div>
-<p>이 메서드는 주문 생성 이벤트를 받아 진행 상태를 기록하고, 다음 명령을 발행합니다. 그림 4-6·4-7의 흐름이 이 한 메서드에 그대로 담겨 있습니다.</p>
+<p>메서드에 붙인 <code>@KafkaListener</code>의 <code>topics</code>에 구독할 토픽 이름, <code>groupId</code>에 컨슈머 그룹의 이름을 넣습니다.</p>
 <p><code>WorkflowState</code>는 주문 한 건의 진행 정보를 메모리에 들고 있는 객체입니다. 결과 이벤트가 돌아올 때 orchestrator는 이 기록을 보고 다음 명령을 정합니다.</p>
 <h3>4.4.3 구독 - 토픽의 메시지를 받는다</h3>
-<p>앞에서 orchestrator가 발행한 '재고 차감 명령'을 이번에는 상품 서비스가 받습니다. 받는 쪽은 메서드에 <code>@KafkaListener</code>를 붙이고 토픽 이름과 그룹 이름을 적습니다. 그 토픽에 메시지가 들어오면 이 메서드가 자동으로 실행됩니다. 상품 서비스는 이 명령을 받아 재고를 줄이고, 그 결과를 '재고 차감 이벤트'로 발행합니다.</p>
+<p>앞에서 orchestrator가 발행한 <strong>재고 차감 명령</strong>을 이번에는 상품 서비스가 받습니다. 받은 명령으로 재고를 줄이고, 그 결과를 <strong>재고 차감 이벤트</strong>로 발행합니다.</p>
 <p><code>adapter/consumer/ProductCommandConsumer.java</code>를 열고 아래 메서드를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> adapter/consumer/ProductCommandConsumer.java. 재고 차감 명령 구독</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;decrease-product-command&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;product-service&quot;</span><span class="p">)</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> adapter/consumer/ProductCommandConsumer.java. 재고 차감 명령 구독</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;decrease-product-command&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;product-service&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">decreaseProductCommand</span><span class="p">(</span><span class="n">DecreaseProductCommand</span><span class="w"> </span><span class="n">command</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kt">boolean</span><span class="w"> </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
-<span class="w">    </span><span class="c1">// 1. 재고 차감 (성공하면 success = true)</span>
+<span class="w">    </span><span class="kt">boolean</span><span class="w"> </span><span class="n">isSuccess</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// 1. 재고 차감 (성공하면 isSuccess = true)</span>
 <span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">productService</span><span class="p">.</span><span class="na">decreaseQuantity</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">price</span><span class="p">());</span>
-<span class="w">        </span><span class="n">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">        </span><span class="n">isSuccess</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="c1">// 재고 부족 등 실패는 success = false로 그대로 보고</span>
+<span class="w">        </span><span class="c1">// 재고 부족 등 실패는 isSuccess = false로 그대로 보고</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="c1">// 2. 처리 결과를 &#39;재고 차감 이벤트&#39;로 발행</span>
 <span class="w">    </span><span class="n">productEventProducer</span><span class="p">.</span><span class="na">publishProductDecreased</span><span class="p">(</span>
-<span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">ProductDecreasedEvent</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">success</span><span class="p">));</span>
+<span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">ProductDecreasedEvent</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">isSuccess</span><span class="p">));</span>
 <span class="p">}</span></div>
-<p>상품 서비스는 명령을 받아 재고를 줄이고, 성공·실패를 <code>success</code> 값에 담아 결과 이벤트로 돌려줍니다.</p>
+<p>상품 서비스는 명령을 받아 재고를 줄이고, 성공·실패 여부를 결과 이벤트에 담아 돌려줍니다.</p>
 <p>각 서비스 코드는 모두 같은 발행·구독 패턴이고, 토픽 이름만 다릅니다. 그래서 코드를 일일이 보지 않아도, 어떤 서비스가 무슨 토픽을 구독해 무엇을 하고 무엇을 발행하는지만 알면 전체가 보입니다.</p>
 <table>
 <thead>
@@ -805,7 +850,7 @@
 <table>
 <thead>
 <tr>
-<th>K8s 리소스</th>
+<th>Kubernetes 리소스</th>
 <th>역할</th>
 </tr>
 </thead>
@@ -861,7 +906,7 @@
   <text x="500" y="425" text-anchor="middle" font-size="12" fill="#475569">클라이언트의 SPRING_KAFKA_BOOTSTRAP_SERVERS 값은 Kafka 서버의 ADVERTISED_LISTENERS 값과 일치해야 합니다.</text>
 </svg>
 </div>
-<div class="caption">그림 4-14. 클라이언트는 kafka-service:9092로 Kafka에 접근합니다</div>
+<div class="caption">그림 4-15. 클라이언트가 kafka-service:9092로 접근</div>
 <p><code>kafka-deploy.yml</code>의 핵심 환경변수는 다음과 같습니다. 전체 YAML은 GitHub에서 확인하세요.</p>
 <table>
 <thead>
@@ -939,7 +984,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
     <div class="tl-divider"><span class="tl-val">8개 Deployment + 7개 Service 배포 완료</span><span class="tl-cursor"></span></div>
   </div>
 </div>
-<div class="caption">그림 4-15. Kafka 및 서비스 배포 실행</div>
+<div class="caption">그림 4-16. Kafka 및 서비스 배포 실행</div>
 <p>모든 Pod가 Running 상태인지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 상태 확인</div>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>metacoding</div>
 <!-- terminal-prompt: Terminal output of "kubectl get pods -n metacoding" command. All pods (db, gateway, order, product, user, delivery, kafka, orchestrator) showing Running status with 1/1 Ready. -->
@@ -962,7 +1007,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
     <div class="tl-divider"><span class="tl-val">8개 Pod Running (Kafka + orchestrator 추가)</span><span class="tl-cursor"></span></div>
   </div>
 </div>
-<div class="caption">그림 4-16. Pod 상태 확인 (kubectl get pods)</div>
+<div class="caption">그림 4-17. Pod 상태 확인 (kubectl get pods)</div>
 <h3>4.6.3 서비스 접근</h3>
 <p>Ingress를 통해 외부에서 접속하려면 <code>minikube tunnel</code>을 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 외부 접근 터널</div>minikube<span class="w"> </span>tunnel</div>
@@ -978,11 +1023,11 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <span class="w">  </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Addr 4&quot;</span>
 <span class="p">}</span></div>
 <!-- terminal-prompt: HTTP client (IntelliJ or Postman) showing POST /api/orders response. JSON body with order status "PENDING". -->
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\14_order-pending.png" alt="" /><div class="caption">그림 4-17. 주문 생성 응답 (PENDING 상태)</div></div>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\14_order-pending.png" alt="" /><div class="caption">그림 4-18. 주문 생성 응답 (PENDING 상태)</div></div>
 <p>챕터 3과 다르게 즉시 <code>PENDING</code> 상태로 반환됩니다. Kafka 이벤트가 처리되면 상태가 <code>COMPLETED</code>로 변경됩니다. 잠시 후 주문 상태를 다시 조회합니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/api/orders/4</span></div>
 <!-- terminal-prompt: HTTP client showing GET /api/orders/4 response. JSON body with order status changed to "COMPLETED". -->
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\15_order-completed.png" alt="" /><div class="caption">그림 4-18. 주문 완료 확인 (COMPLETED 상태)</div></div>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\15_order-completed.png" alt="" /><div class="caption">그림 4-19. 주문 완료 확인 (COMPLETED 상태)</div></div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "PENDING이었다가 COMPLETED로 바뀌었어요! 그런데 롤백도 자동으로 되나요?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "품절 상품으로 주문해 봐요. orchestrator 로그를 보면 보일 거예요."</div>
 <h3>4.6.5 롤백 확인 - 품절 상품 주문</h3>
@@ -996,14 +1041,14 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <span class="w">  </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Addr 5&quot;</span>
 <span class="p">}</span></div>
 <!-- terminal-prompt: HTTP client showing POST /api/orders response for out-of-stock product (productId=2). JSON body with order status "PENDING". -->
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\16_stockout-order.png" alt="" /><div class="caption">그림 4-19. 품절 상품 주문 요청</div></div>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\16_stockout-order.png" alt="" /><div class="caption">그림 4-20. 품절 상품 주문 요청</div></div>
 <p>잠시 후 상태를 확인하면 <code>CANCELLED</code>가 됩니다.</p>
 <div class="code-block highlight" data-lang="JSON"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/api/orders/5</span></div>
 <!-- [CAPTURE NEEDED: GET /api/orders/5 응답 — 주문 상태가 CANCELLED] -->
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\17_order-cancelled.png" alt="" /><div class="caption">그림 4-20. 주문 취소 확인 (CANCELLED 상태)</div></div>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\17_order-cancelled.png" alt="" /><div class="caption">그림 4-21. 주문 취소 확인 (CANCELLED 상태)</div></div>
 <p>테스트가 끝났으면 이번 챕터에서 실행한 리소스를 정리합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 리소스 정리</div>kubectl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>metacoding</div>
-<p>상품·배달을 직접 호출하고 실패까지 떠안던 주문 서비스는 이제 주문을 저장하고 이벤트 하나만 발행합니다. 정상 주문은 곧바로 PENDING으로 응답한 뒤 비동기로 COMPLETED가 되고, 품절 주문은 orchestrator가 알아서 CANCELLED로 되돌립니다. 직접 호출이 사라지면서 서비스 사이의 강한 결합이 풀렸고, try/catch 보상 블록도 함께 없어졌습니다.</p>
+<p>상품·배달을 직접 호출하고 실패까지 떠안던 주문 서비스는 이제 주문을 저장하고 이벤트 하나만 발행합니다. 정상 주문은 곧바로 PENDING으로 응답한 뒤 비동기적으로 COMPLETED가 되고, 품절 주문은 orchestrator가 알아서 CANCELLED로 되돌립니다. 직접 호출이 사라지면서 서비스 사이의 강한 결합이 풀렸고, try/catch 보상 블록도 함께 없어졌습니다.</p>
 <p>며칠 뒤, 같은 동료가 책상 앞에 다시 섰습니다. 표정에서 불만이 묻어났습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "어제 직접 주문해 봤는데, 좀 이상한 게 있었어요."</div>
 <p>시스템을 점검하던 동료가 새로운 문제를 알려 왔습니다.</p>

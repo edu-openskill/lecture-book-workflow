@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>패키지 구조 비교 — 클래스 기준</title>
+<style>
+  :root {
+    --c-domain: #16a34a;
+    --c-domain-bg: #dcfce7;
+    --c-domain-border: #86efac;
+    --c-usecase: #7c3aed;
+    --c-usecase-bg: #ede9fe;
+    --c-usecase-border: #c4b5fd;
+    --c-web: #2563eb;
+    --c-web-bg: #dbeafe;
+    --c-web-border: #93c5fd;
+    --c-repo: #ea580c;
+    --c-repo-bg: #ffedd5;
+    --c-repo-border: #fdba74;
+    --c-gray: #64748b;
+    --c-gray-bg: #f1f5f9;
+    --c-gray-border: #cbd5e1;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background: #fafafa;
+    padding: 40px 24px;
+    margin: 0;
+    color: var(--text);
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  .lead { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+  .section { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 36px; }
+  .section h2 { font-size: 16px; color: var(--text); margin: 0 0 6px; }
+  .section .desc { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .caption { text-align: center; font-style: italic; color: var(--muted); margin-top: 14px; font-size: 13px; }
+
+  /* ===== 공통: 클래스 칩 ===== */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    border: 1.5px solid;
+  }
+  .chip.c-domain { background: var(--c-domain-bg); color: var(--c-domain); border-color: var(--c-domain-border); }
+  .chip.c-usecase { background: var(--c-usecase-bg); color: var(--c-usecase); border-color: var(--c-usecase-border); }
+  .chip.c-web { background: var(--c-web-bg); color: var(--c-web); border-color: var(--c-web-border); }
+  .chip.c-repo { background: var(--c-repo-bg); color: var(--c-repo); border-color: var(--c-repo-border); }
+  .chip.c-flat { background: var(--c-gray-bg); color: var(--c-gray); border-color: var(--c-gray-border); }
+
+  /* ===== 시안 A. 같은 7개 클래스, 좌우 색 비교 ===== */
+  .optA { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .optA .col-title { font-size: 12px; font-weight: 700; color: var(--muted); text-align: center; margin-bottom: 12px; }
+  .optA .container-box {
+    border: 2px solid;
+    border-radius: 10px;
+    padding: 20px;
+    min-height: 280px;
+  }
+  .optA .container-box.flat { border-color: var(--c-gray); border-style: dashed; }
+  .optA .container-box.split { border-color: var(--border); }
+  .optA .pkg-label {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .optA .container-box.flat .pkg-label { color: var(--c-gray); }
+  .optA .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .optA .split-area .pkg-group {
+    margin-bottom: 14px;
+  }
+  .optA .split-area .pkg-group:last-child { margin-bottom: 0; }
+  .optA .split-area .pkg-name {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .optA .split-area .pkg-domain .pkg-name { color: var(--c-domain); }
+  .optA .split-area .pkg-usecase .pkg-name { color: var(--c-usecase); }
+  .optA .split-area .pkg-web .pkg-name { color: var(--c-web); }
+  .optA .split-area .pkg-repo .pkg-name { color: var(--c-repo); }
+
+  /* ===== 시안 B. 가운데 클래스 목록 + 좌우 화살표 (이동) ===== */
+  .optB { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 0; align-items: start; }
+  .optB .side {
+    background: #fff;
+    border: 2px dashed var(--c-gray);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .optB .side .pkg-label { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; font-weight: 700; color: var(--c-gray); text-align: center; padding: 4px 0 10px; border-bottom: 1px solid var(--border); }
+  .optB .side.right { border-style: solid; border-color: var(--border); padding: 0; }
+  .optB .side.right .pkg-group { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .optB .side.right .pkg-group:last-child { border-bottom: none; }
+  .optB .side.right .pkg-name { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .optB .pkg-domain .pkg-name { color: var(--c-domain); }
+  .optB .pkg-usecase .pkg-name { color: var(--c-usecase); }
+  .optB .pkg-web .pkg-name { color: var(--c-web); }
+  .optB .pkg-repo .pkg-name { color: var(--c-repo); }
+  .optB .center {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 16px 12px;
+  }
+  .optB .row {
+    display: grid;
+    grid-template-columns: 1fr 16px 1fr;
+    gap: 6px;
+    align-items: center;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px;
+  }
+  .optB .row .lhs { text-align: right; color: var(--c-gray); }
+  .optB .row .arr { text-align: center; color: var(--muted); }
+  .optB .row .rhs { font-weight: 700; }
+  .optB .row.r-domain .rhs { color: var(--c-domain); }
+  .optB .row.r-usecase .rhs { color: var(--c-usecase); }
+  .optB .row.r-web .rhs { color: var(--c-web); }
+  .optB .row.r-repo .rhs { color: var(--c-repo); }
+
+  /* ===== 시안 C. 표 — 클래스를 행으로, 색 표시 ===== */
+  .optC table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .optC th, .optC td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  .optC th { background: #f8fafc; color: var(--muted); font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .optC td.code { font-family: 'SFMono-Regular', Consolas, monospace; }
+  .optC .tag { display: inline-block; padding: 3px 9px; border-radius: 4px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11.5px; font-weight: 700; }
+  .optC .tag-flat { background: var(--c-gray-bg); color: var(--c-gray); }
+  .optC .tag-domain { background: var(--c-domain-bg); color: var(--c-domain); }
+  .optC .tag-usecase { background: var(--c-usecase-bg); color: var(--c-usecase); }
+  .optC .tag-web { background: var(--c-web-bg); color: var(--c-web); }
+  .optC .tag-repo { background: var(--c-repo-bg); color: var(--c-repo); }
+  .optC .arrow-col { width: 30px; text-align: center; color: var(--muted); font-weight: 700; }
+
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>패키지 구조 비교 — 클래스 기준 (3가지 시안)</h1>
+  <p class="lead">같은 7개 클래스가 챕터 2에선 평면(한 폴더), 챕터 3에선 책임별 4색 폴더로 나뉘는 모습.</p>
+
+  <!-- 시안 A -->
+  <div class="section">
+    <h2>시안 A. 좌우 색 비교 — 평면(회색) vs 책임별(4색)</h2>
+    <div class="desc">같은 클래스 라벨을 두 번 보여주되, 왼쪽은 한 색(평면), 오른쪽은 책임별 4색으로 묶어 그룹.</div>
+    <div class="optA">
+      <div>
+        <div class="col-title">챕터 2 (ex01)</div>
+        <div class="container-box flat">
+          <div class="pkg-label">orders/</div>
+          <div class="chips">
+            <span class="chip c-flat">Order</span>
+            <span class="chip c-flat">OrderStatus</span>
+            <span class="chip c-flat">OrderController</span>
+            <span class="chip c-flat">OrderService</span>
+            <span class="chip c-flat">OrderRepository</span>
+            <span class="chip c-flat">OrderRequest</span>
+            <span class="chip c-flat">OrderResponse</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="col-title">챕터 3 (ex02)</div>
+        <div class="container-box split split-area">
+          <div class="pkg-group pkg-domain">
+            <div class="pkg-name">domain/</div>
+            <div class="chips">
+              <span class="chip c-domain">Order</span>
+              <span class="chip c-domain">OrderStatus</span>
+            </div>
+          </div>
+          <div class="pkg-group pkg-usecase">
+            <div class="pkg-name">usecase/</div>
+            <div class="chips">
+              <span class="chip c-usecase">CreateOrderUseCase</span>
+              <span class="chip c-usecase">OrderService</span>
+            </div>
+          </div>
+          <div class="pkg-group pkg-web">
+            <div class="pkg-name">web/</div>
+            <div class="chips">
+              <span class="chip c-web">OrderController</span>
+              <span class="chip c-web">OrderRequest</span>
+              <span class="chip c-web">OrderResponse</span>
+            </div>
+          </div>
+          <div class="pkg-group pkg-repo">
+            <div class="pkg-name">repository/</div>
+            <div class="chips">
+              <span class="chip c-repo">OrderRepository</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">시안 A. 같은 클래스가 평면(왼쪽)에서 책임별 4색(오른쪽)으로 나뉨</div>
+  </div>
+
+  <!-- 시안 B -->
+  <div class="section">
+    <h2>시안 B. 가운데 매핑 라인 — 어느 클래스가 어디로 이동했는지</h2>
+    <div class="desc">왼쪽은 챕터 2 클래스, 오른쪽은 챕터 3 패키지. 가운데에 1:1 매핑 라인.</div>
+    <div class="optB">
+      <div class="side left">
+        <div class="pkg-label">챕터 2 — orders/</div>
+        <div style="display:flex; flex-direction:column; gap:6px; padding:10px 0 0;">
+          <span class="chip c-flat">Order</span>
+          <span class="chip c-flat">OrderStatus</span>
+          <span class="chip c-flat">OrderController</span>
+          <span class="chip c-flat">OrderService</span>
+          <span class="chip c-flat">OrderRepository</span>
+          <span class="chip c-flat">OrderRequest</span>
+          <span class="chip c-flat">OrderResponse</span>
+        </div>
+      </div>
+      <div class="center">
+        <div class="row r-domain"><span class="lhs">Order</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+        <div class="row r-domain"><span class="lhs">OrderStatus</span><span class="arr">→</span><span class="rhs">domain/</span></div>
+        <div class="row r-web"><span class="lhs">OrderController</span><span class="arr">→</span><span class="rhs">web/</span></div>
+        <div class="row r-usecase"><span class="lhs">OrderService</span><span class="arr">→</span><span class="rhs">usecase/</span></div>
+        <div class="row r-repo"><span class="lhs">OrderRepository</span><span class="arr">→</span><span class="rhs">repository/</span></div>
+        <div class="row r-web"><span class="lhs">OrderRequest</span><span class="arr">→</span><span class="rhs">web/</span></div>
+        <div class="row r-web"><span class="lhs">OrderResponse</span><span class="arr">→</span><span class="rhs">web/</span></div>
+      </div>
+      <div class="side right">
+        <div class="pkg-group pkg-domain">
+          <div class="pkg-name">domain/</div>
+          <div class="chips" style="display:flex; flex-wrap:wrap; gap:6px;">
+            <span class="chip c-domain">Order</span>
+            <span class="chip c-domain">OrderStatus</span>
+          </div>
+        </div>
+        <div class="pkg-group pkg-usecase">
+          <div class="pkg-name">usecase/</div>
+          <div class="chips" style="display:flex; flex-wrap:wrap; gap:6px;">
+            <span class="chip c-usecase">OrderService</span>
+            <span class="chip c-usecase">CreateOrderUseCase</span>
+          </div>
+        </div>
+        <div class="pkg-group pkg-web">
+          <div class="pkg-name">web/</div>
+          <div class="chips" style="display:flex; flex-wrap:wrap; gap:6px;">
+            <span class="chip c-web">OrderController</span>
+            <span class="chip c-web">OrderRequest</span>
+            <span class="chip c-web">OrderResponse</span>
+          </div>
+        </div>
+        <div class="pkg-group pkg-repo">
+          <div class="pkg-name">repository/</div>
+          <div class="chips" style="display:flex; flex-wrap:wrap; gap:6px;">
+            <span class="chip c-repo">OrderRepository</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">시안 B. 평면에서 책임별로 이동하는 1:1 매핑 라인</div>
+  </div>
+
+  <!-- 시안 C -->
+  <div class="section optC">
+    <h2>시안 C. 표 — 클래스 행 + 챕터 2/3 패키지 컬럼</h2>
+    <div class="desc">행: 클래스, 열: 챕터별 위치. 색 태그로 즉시 인지.</div>
+    <table>
+      <thead>
+        <tr><th>클래스</th><th>챕터 2 위치</th><th class="arrow-col">→</th><th>챕터 3 위치</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="code">Order</td><td><span class="tag tag-flat">orders/</span></td><td class="arrow-col">→</td><td><span class="tag tag-domain">domain/</span></td></tr>
+        <tr><td class="code">OrderStatus</td><td><span class="tag tag-flat">orders/</span></td><td class="arrow-col">→</td><td><span class="tag tag-domain">domain/</span></td></tr>
+        <tr><td class="code">OrderController</td><td><span class="tag tag-flat">orders/</span></td><td class="arrow-col">→</td><td><span class="tag tag-web">web/</span></td></tr>
+        <tr><td class="code">OrderService</td><td><span class="tag tag-flat">orders/</span></td><td class="arrow-col">→</td><td><span class="tag tag-usecase">usecase/</span></td></tr>
+        <tr><td class="code">OrderRepository</td><td><span class="tag tag-flat">orders/</span></td><td class="arrow-col">→</td><td><span class="tag tag-repo">repository/</span></td></tr>
+        <tr><td class="code">OrderRequest</td><td><span class="tag tag-flat">orders/</span></td><td class="arrow-col">→</td><td><span class="tag tag-web">web/</span></td></tr>
+        <tr><td class="code">OrderResponse</td><td><span class="tag tag-flat">orders/</span></td><td class="arrow-col">→</td><td><span class="tag tag-web">web/</span></td></tr>
+      </tbody>
+    </table>
+    <div class="caption">시안 C. 클래스별 이주 매핑</div>
+  </div>
+
+</div>
+</body>
+</html>

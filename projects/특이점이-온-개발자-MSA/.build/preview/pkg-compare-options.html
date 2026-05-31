@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>패키지 구조 비교 — 6가지 표현 시안</title>
+<style>
+  :root {
+    --accent: #4f46e5;
+    --accent-dark: #3730a3;
+    --accent-bg: #eef2ff;
+    --accent-border: #c7d2fe;
+    --warm: #f97316;
+    --warm-bg: #fff7ed;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-faint: #94a3b8;
+    --border: #e2e8f0;
+    --bg: #fafafa;
+    --surface: #fff;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', Roboto, sans-serif;
+    background: var(--bg);
+    padding: 40px 24px;
+    color: var(--text);
+    margin: 0;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  .lead { color: var(--text-muted); font-size: 14px; margin-bottom: 40px; }
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 36px; }
+  .section h2 { font-size: 16px; color: var(--accent-dark); margin: 0 0 6px; }
+  .section .desc { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  .caption { text-align: center; font-style: italic; color: var(--text-muted); margin-top: 14px; font-size: 13px; }
+  code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.92em; background: #f1f5f9; padding: 1px 5px; border-radius: 3px; }
+
+  /* ===== 시안 1: 블록 박스 ===== */
+  .opt1 { display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center; }
+  .opt1 .arrow { color: var(--accent); font-size: 32px; font-weight: 700; }
+  .opt1-before {
+    border: 2px solid var(--text-faint);
+    border-radius: 10px;
+    padding: 16px;
+    background: #fff;
+  }
+  .opt1-before .label { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
+  .opt1-before .pkg-name { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 12px; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .opt1-before .items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .opt1-before .items span { background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-family: 'SFMono-Regular', Consolas, monospace; color: #334155; }
+  .opt1-after { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .opt1-after .box {
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--accent-bg);
+  }
+  .opt1-after .box .pkg-name { font-weight: 700; color: var(--accent-dark); font-family: 'SFMono-Regular', Consolas, monospace; font-size: 14px; margin-bottom: 6px; }
+  .opt1-after .box .item { font-size: 11px; color: var(--accent-dark); font-family: 'SFMono-Regular', Consolas, monospace; }
+
+  /* ===== 시안 2: 클린 아키텍처 4층 띠 ===== */
+  .opt2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .opt2-col { }
+  .opt2-col .col-title { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; text-align: center; }
+  .layers { display: flex; flex-direction: column; gap: 6px; }
+  .layer { padding: 12px 14px; border-radius: 6px; font-size: 12px; }
+  .layer .layer-name { font-weight: 700; font-size: 11px; margin-bottom: 4px; }
+  .layer .layer-pkg { font-family: 'SFMono-Regular', Consolas, monospace; color: var(--text-muted); }
+  /* Chapter 2: 모든 게 한 띠에 섞임 */
+  .opt2-before .merged {
+    background: linear-gradient(135deg, #fee2e2 0%, #fef3c7 33%, #dbeafe 66%, #d1fae5 100%);
+    padding: 24px 14px;
+    border-radius: 6px;
+    text-align: center;
+    border: 1px dashed #ef4444;
+  }
+  .opt2-before .merged .merged-title { font-weight: 700; color: #991b1b; margin-bottom: 8px; }
+  .opt2-before .merged .merged-desc { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11px; color: #7f1d1d; }
+  /* Chapter 3: 깔끔히 분리 */
+  .opt2-after .layer-entities { background: #dcfce7; color: #14532d; }
+  .opt2-after .layer-usecase { background: #ddd6fe; color: #4c1d95; }
+  .opt2-after .layer-adapter { background: #dbeafe; color: #1e3a8a; }
+  .opt2-after .layer-frame { background: #fef3c7; color: #78350f; }
+
+  /* ===== 시안 3: 요청 흐름도 ===== */
+  .opt3-svg-wrap { display: flex; flex-direction: column; gap: 24px; }
+  .opt3-row { background: #fff; }
+  .opt3-row .row-label { font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; }
+  .opt3-row svg { width: 100%; height: auto; display: block; }
+
+  /* ===== 시안 4: 이주 매핑 표 ===== */
+  .opt4 table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .opt4 th, .opt4 td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  .opt4 th { background: #f8fafc; color: var(--text-muted); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .opt4 td.code { font-family: 'SFMono-Regular', Consolas, monospace; color: #334155; }
+  .opt4 .from { color: var(--text-muted); }
+  .opt4 .to { color: var(--accent-dark); font-weight: 600; }
+  .opt4 .arrow-col { width: 30px; text-align: center; color: var(--accent); font-weight: 700; }
+
+  /* ===== 시안 5: 벤 다이어그램 ===== */
+  .opt5-svg-wrap { display: flex; justify-content: center; }
+  .opt5-svg-wrap svg { max-width: 100%; height: auto; }
+
+  /* ===== 시안 6: 일러스트 자리 ===== */
+  .opt6 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .opt6-card { border: 2px dashed var(--text-faint); border-radius: 12px; padding: 30px; text-align: center; }
+  .opt6-card .placeholder { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; font-weight: 700; }
+  .opt6-card .emoji { font-size: 64px; margin-bottom: 12px; }
+  .opt6-card .prompt-note { font-size: 11px; color: var(--text-muted); font-style: italic; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>패키지 구조 비교 — 6가지 표현 시안</h1>
+  <p class="lead">평면(챕터 2) → 책임별 분리(챕터 3) 변화를 표현하는 6가지 방법.</p>
+
+  <!-- 시안 1 -->
+  <div class="section">
+    <h2>시안 1. 블록 박스 — "한 박스 → 네 박스"</h2>
+    <div class="desc">패키지를 사각형으로. 한 덩어리가 네 조각으로 나뉘는 변환이 직설.</div>
+    <div class="opt1">
+      <div class="opt1-before">
+        <div class="label">챕터 2 (ex01)</div>
+        <div class="pkg-name">orders/</div>
+        <div class="items">
+          <span>Order</span>
+          <span>OrderStatus</span>
+          <span>OrderController</span>
+          <span>OrderService</span>
+          <span>OrderRepository</span>
+          <span>OrderRequest</span>
+          <span>OrderResponse</span>
+        </div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="opt1-after">
+        <div class="box">
+          <div class="pkg-name">domain/</div>
+          <div class="item">Order, OrderStatus</div>
+        </div>
+        <div class="box">
+          <div class="pkg-name">repository/</div>
+          <div class="item">OrderRepository</div>
+        </div>
+        <div class="box">
+          <div class="pkg-name">usecase/</div>
+          <div class="item">CreateOrderUseCase + 구현</div>
+        </div>
+        <div class="box">
+          <div class="pkg-name">web/</div>
+          <div class="item">OrderController, DTO</div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">시안 1. 블록 박스 — 평면 한 덩어리에서 네 책임별 조각으로</div>
+  </div>
+
+  <!-- 시안 2 -->
+  <div class="section">
+    <h2>시안 2. 클린 아키텍처 4층 띠</h2>
+    <div class="desc">엔티티 / UseCase / 어댑터 / 프레임워크 4층. 챕터 2는 다 섞여 있고, 챕터 3은 띠로 깔끔 분리.</div>
+    <div class="opt2">
+      <div class="opt2-col opt2-before">
+        <div class="col-title">챕터 2</div>
+        <div class="merged">
+          <div class="merged-title">모두 한 패키지에 섞임</div>
+          <div class="merged-desc">orders/ — Entity·Service·Repository·Controller·DTO 다 한 곳에</div>
+        </div>
+      </div>
+      <div class="opt2-col opt2-after">
+        <div class="col-title">챕터 3</div>
+        <div class="layers">
+          <div class="layer layer-entities">
+            <div class="layer-name">Entities</div>
+            <div class="layer-pkg">domain/ — Order, OrderStatus</div>
+          </div>
+          <div class="layer layer-usecase">
+            <div class="layer-name">Use Cases</div>
+            <div class="layer-pkg">usecase/ — CreateOrderUseCase + 구현</div>
+          </div>
+          <div class="layer layer-adapter">
+            <div class="layer-name">Interface Adapters</div>
+            <div class="layer-pkg">web/ — Controller, DTO &nbsp;|&nbsp; repository/</div>
+          </div>
+          <div class="layer layer-frame">
+            <div class="layer-name">Frameworks &amp; Drivers</div>
+            <div class="layer-pkg">core/ — JWT, 예외 &nbsp;|&nbsp; adapter/ — 외부 HTTP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption">시안 2. 클린 아키텍처 4층 — 섞임에서 띠 분리로</div>
+  </div>
+
+  <!-- 시안 3 -->
+  <div class="section">
+    <h2>시안 3. 요청 흐름도 — 책임이 흐름 위에 분포</h2>
+    <div class="desc">Request부터 DB까지 흐름. 챕터 2는 모든 단계가 한 박스, 챕터 3은 각 단계가 분리.</div>
+    <div class="opt3-svg-wrap">
+      <div class="opt3-row">
+        <div class="row-label">챕터 2 (ex01)</div>
+        <svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="o3a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#475569"/></marker>
+          </defs>
+          <text x="60" y="85" font-size="13" fill="#0f172a" font-weight="700">Request</text>
+          <line x1="120" y1="80" x2="160" y2="80" stroke="#475569" stroke-width="1.5" marker-end="url(#o3a)"/>
+          <rect x="170" y="30" width="600" height="110" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,4"/>
+          <text x="470" y="50" text-anchor="middle" font-size="12" fill="#991b1b" font-weight="700">orders/ (한 패키지)</text>
+          <rect x="190" y="65" width="120" height="55" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+          <text x="250" y="92" text-anchor="middle" font-size="11" fill="#0f172a">Controller</text>
+          <text x="250" y="108" text-anchor="middle" font-size="9" fill="#64748b">+ DTO</text>
+          <rect x="330" y="65" width="120" height="55" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+          <text x="390" y="98" text-anchor="middle" font-size="11" fill="#0f172a">Service</text>
+          <rect x="470" y="65" width="120" height="55" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+          <text x="530" y="92" text-anchor="middle" font-size="11" fill="#0f172a">Repository</text>
+          <text x="530" y="108" text-anchor="middle" font-size="9" fill="#64748b">+ Entity</text>
+          <line x1="310" y1="92" x2="328" y2="92" stroke="#475569" stroke-width="1.3" marker-end="url(#o3a)"/>
+          <line x1="450" y1="92" x2="468" y2="92" stroke="#475569" stroke-width="1.3" marker-end="url(#o3a)"/>
+          <line x1="770" y1="80" x2="820" y2="80" stroke="#475569" stroke-width="1.5" marker-end="url(#o3a)"/>
+          <text x="850" y="85" text-anchor="middle" font-size="13" fill="#0f172a" font-weight="700">DB</text>
+        </svg>
+      </div>
+      <div class="opt3-row">
+        <div class="row-label">챕터 3 (ex02)</div>
+        <svg viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="o3b" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4f46e5"/></marker>
+          </defs>
+          <text x="60" y="85" font-size="13" fill="#0f172a" font-weight="700">Request</text>
+          <line x1="120" y1="80" x2="155" y2="80" stroke="#4f46e5" stroke-width="1.5" marker-end="url(#o3b)"/>
+          <rect x="160" y="55" width="130" height="60" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+          <text x="225" y="82" text-anchor="middle" font-size="12" fill="#3730a3" font-weight="700">web/</text>
+          <text x="225" y="100" text-anchor="middle" font-size="10" fill="#3730a3">Controller + DTO</text>
+          <line x1="290" y1="85" x2="320" y2="85" stroke="#4f46e5" stroke-width="1.5" marker-end="url(#o3b)"/>
+          <rect x="325" y="55" width="130" height="60" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+          <text x="390" y="82" text-anchor="middle" font-size="12" fill="#3730a3" font-weight="700">usecase/</text>
+          <text x="390" y="100" text-anchor="middle" font-size="10" fill="#3730a3">UseCase + 구현</text>
+          <line x1="455" y1="85" x2="485" y2="85" stroke="#4f46e5" stroke-width="1.5" marker-end="url(#o3b)"/>
+          <rect x="490" y="55" width="130" height="60" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+          <text x="555" y="82" text-anchor="middle" font-size="12" fill="#3730a3" font-weight="700">repository/</text>
+          <text x="555" y="100" text-anchor="middle" font-size="10" fill="#3730a3">Spring Data JPA</text>
+          <line x1="620" y1="85" x2="820" y2="85" stroke="#4f46e5" stroke-width="1.5" marker-end="url(#o3b)"/>
+          <text x="850" y="85" text-anchor="middle" font-size="13" fill="#0f172a" font-weight="700">DB</text>
+          <rect x="370" y="130" width="200" height="22" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="1.4" stroke-dasharray="4,3"/>
+          <text x="470" y="146" text-anchor="middle" font-size="10" fill="#3730a3" font-weight="700">domain/ — 비즈니스 규칙 (꺼내 씀)</text>
+          <line x1="390" y1="115" x2="430" y2="128" stroke="#4f46e5" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="555" y1="115" x2="510" y2="128" stroke="#4f46e5" stroke-width="1" stroke-dasharray="3,3"/>
+        </svg>
+      </div>
+    </div>
+    <div class="caption">시안 3. 요청 흐름도 — 한 박스에서 단계별 분리로</div>
+  </div>
+
+  <!-- 시안 4 -->
+  <div class="section opt4">
+    <h2>시안 4. 클래스 이주 매핑 표</h2>
+    <div class="desc">각 클래스가 어디서 어디로 옮겨갔는지 정확한 매핑. 그림 없음.</div>
+    <table>
+      <thead>
+        <tr><th>클래스</th><th>챕터 2 위치</th><th class="arrow-col">→</th><th>챕터 3 위치</th><th>이유</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="code">Order, OrderStatus</td><td class="code from">orders/</td><td class="arrow-col">→</td><td class="code to">domain/</td><td>비즈니스 규칙 응집 (DDD)</td></tr>
+        <tr><td class="code">OrderRepository</td><td class="code from">orders/</td><td class="arrow-col">→</td><td class="code to">repository/</td><td>영속성 책임 분리</td></tr>
+        <tr><td class="code">OrderService</td><td class="code from">orders/</td><td class="arrow-col">→</td><td class="code to">usecase/</td><td>인터페이스 + 구현 분리 (의존성 역전)</td></tr>
+        <tr><td class="code">OrderController, DTO</td><td class="code from">orders/</td><td class="arrow-col">→</td><td class="code to">web/</td><td>진입점 책임 분리</td></tr>
+        <tr><td class="code">JWT, 예외 처리</td><td class="code from">core/</td><td class="arrow-col">=</td><td class="code from">core/</td><td>변화 없음</td></tr>
+        <tr><td class="code">외부 서비스 클라이언트</td><td class="code from">adapter/</td><td class="arrow-col">=</td><td class="code from">adapter/</td><td>변화 없음</td></tr>
+      </tbody>
+    </table>
+    <div class="caption">시안 4. 클래스 이주 매핑</div>
+  </div>
+
+  <!-- 시안 5 -->
+  <div class="section">
+    <h2>시안 5. 벤 다이어그램 — 변하지 않은 것 vs 변한 것</h2>
+    <div class="desc">두 챕터의 패키지 집합. 공통(core·adapter) vs 변경(orders → domain·repository·usecase·web).</div>
+    <div class="opt5-svg-wrap">
+      <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+        <text x="350" y="24" text-anchor="middle" font-size="13" fill="#0f172a" font-weight="700">두 챕터 패키지 집합</text>
+        <circle cx="240" cy="200" r="140" fill="#fef2f2" stroke="#ef4444" stroke-width="2" opacity="0.55"/>
+        <circle cx="460" cy="200" r="140" fill="#eef2ff" stroke="#4f46e5" stroke-width="2" opacity="0.55"/>
+        <text x="170" y="80" text-anchor="middle" font-size="12" fill="#991b1b" font-weight="700">챕터 2 전용</text>
+        <text x="170" y="180" text-anchor="middle" font-size="13" fill="#7f1d1d" font-family="monospace" font-weight="700">orders/</text>
+        <text x="170" y="205" text-anchor="middle" font-size="10" fill="#7f1d1d">(모든 게 한 곳)</text>
+        <text x="530" y="80" text-anchor="middle" font-size="12" fill="#3730a3" font-weight="700">챕터 3 전용</text>
+        <text x="555" y="170" text-anchor="middle" font-size="12" fill="#3730a3" font-family="monospace" font-weight="700">domain/</text>
+        <text x="555" y="195" text-anchor="middle" font-size="12" fill="#3730a3" font-family="monospace" font-weight="700">repository/</text>
+        <text x="555" y="220" text-anchor="middle" font-size="12" fill="#3730a3" font-family="monospace" font-weight="700">usecase/</text>
+        <text x="555" y="245" text-anchor="middle" font-size="12" fill="#3730a3" font-family="monospace" font-weight="700">web/</text>
+        <text x="350" y="170" text-anchor="middle" font-size="11" fill="#475569" font-weight="700">공통</text>
+        <text x="350" y="200" text-anchor="middle" font-size="12" fill="#334155" font-family="monospace" font-weight="700">core/</text>
+        <text x="350" y="225" text-anchor="middle" font-size="12" fill="#334155" font-family="monospace" font-weight="700">adapter/</text>
+      </svg>
+    </div>
+    <div class="caption">시안 5. 두 챕터 패키지 집합 — 공통과 차이</div>
+  </div>
+
+  <!-- 시안 6 -->
+  <div class="section">
+    <h2>시안 6. 일러스트 비유 (Gemini 생성)</h2>
+    <div class="desc">"한 덩어리 → 칸이 나뉜 구조" 비유 일러스트. 실제 그림은 Gemini로 생성.</div>
+    <div class="opt6">
+      <div class="opt6-card">
+        <div class="emoji">🍞</div>
+        <div class="placeholder">챕터 2 — 한 덩어리 빵</div>
+        <div class="prompt-note">모든 재료가 섞여 들어간 한 덩어리</div>
+      </div>
+      <div class="opt6-card">
+        <div class="emoji">🍱</div>
+        <div class="placeholder">챕터 3 — 칸이 나뉜 도시락</div>
+        <div class="prompt-note">반찬별 칸이 분리된 도시락</div>
+      </div>
+    </div>
+    <div class="caption">시안 6. 일러스트 비유 (Gemini 생성 자리)</div>
+  </div>
+
+</div>
+</body>
+</html>

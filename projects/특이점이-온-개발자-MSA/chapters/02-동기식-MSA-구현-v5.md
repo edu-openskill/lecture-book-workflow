@@ -325,6 +325,11 @@ public OrderResponse createOrder(int userId, int productId, int quantity, Long p
         // 1. 주문 생성
         createdOrder = orderRepository.save(Order.create(userId, productId, quantity, price));
 
+        // 최소 주문 금액 검증
+        if (quantity * price < 1000) {
+            throw new Exception400("최소 주문 금액은 1,000원입니다.");
+        }
+
         // 2. 상품 재고 차감
         productClient.decreaseQuantity(new ProductRequest(productId, quantity, price));
         productDecreased = true;
@@ -481,6 +486,8 @@ GET http://localhost:8082/api/products/1
 
 *그림 2-9. 재고 감소 확인*
 
+배달 서비스에도 배달이 생성됐는지 확인합니다.
+
 ```json
 GET http://localhost:8084/api/deliveries/4   # 더미 배달 3건 다음이라 새 배달은 4번
 ```
@@ -562,5 +569,5 @@ docker compose down
 - 단 주문 데이터 자체는 트랜잭션 롤백으로 사라지므로 실패 이력은 남지 않습니다.
 - 이 구조의 한계는 다음 챕터 운영 환경에서, 그다음 챕터 비동기 전환에서 차례로 해소됩니다.
 
-다음 챕터에서는 비즈니스 로직이 서비스 코드에 흩어져 있는 문제를 마주칩니다. 도메인이 자기 일을 모르고 Service가 다 답하고 있다는 통증을 인식하고, **DDD + 클린 아키텍처**로 코드 구조를 정리한 뒤 운영 환경(K8s)에 올립니다.
+다음 챕터에서는 비즈니스 로직이 서비스 코드에 흩어져 있는 문제를 마주칩니다. 도메인이 자기 일을 모르고 Service가 다 답하고 있다는 통증을 인식하고, **DDD + 클린 아키텍처**로 코드 구조를 정리한 뒤 운영 환경(Kubernetes)에 올립니다.
 :::
