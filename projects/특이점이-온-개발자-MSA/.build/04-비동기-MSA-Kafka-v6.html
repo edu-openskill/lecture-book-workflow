@@ -734,7 +734,7 @@
 <div class="caption">그림 4-14. 롤백 · 주문 취소 — 주문 취소 명령 발행</div>
 <h2>4.4 Kafka로 주고받기 - 발행과 구독</h2>
 <h3>4.4.1 발행 - 토픽에 메시지를 넣는다</h3>
-<p>프로듀서가 메시지를 발행할 때는 Spring이 제공하는 <strong><code>KafkaTemplate</code></strong> 을 사용합니다. 주문 서비스가 주문을 저장한 뒤 <strong>주문 생성 이벤트</strong>를 발행하는 코드는 다음과 같습니다.</p>
+<p>프로듀서가 메시지를 발행할 때는 Spring이 제공하는 <strong><code>KafkaTemplate</code></strong> 을 사용합니다. <strong>주문 생성 이벤트</strong>를 발행하는 코드는 다음과 같습니다.</p>
 <p><code>adapter/producer/OrderEventProducer.java</code>를 열고 아래 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> adapter/producer/OrderEventProducer.java. 주문 생성 이벤트 발행</div><span class="nd">@Component</span>
 <span class="nd">@RequiredArgsConstructor</span>
@@ -747,7 +747,7 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <p><code>kafkaTemplate.send</code>에 <code>order-created</code> 같은 토픽 이름과 보낼 객체를 넘기면 해당 토픽으로 메시지가 들어갑니다.</p>
-<p>주문 서비스는 주문을 <strong>PENDING</strong> 상태로 저장하고 <strong>주문 생성 이벤트</strong>를 발행하면 됩니다.</p>
+<p>주문 서비스는 주문을 <strong>PENDING</strong> 상태로 저장하고, <strong>주문 생성 이벤트 프로듀서</strong>를 호출합니다.</p>
 <p><code>usecase/OrderService.java</code>를 열고 <code>createOrder</code> 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행</div><span class="nd">@Override</span>
 <span class="nd">@Transactional</span>
@@ -763,9 +763,9 @@
 
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">OrderResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">createdOrder</span><span class="p">);</span>
 <span class="p">}</span></div>
-<p>저장된 주문을 <code>OrderCreatedEvent</code>에 담아 [실습 1]에서 만든 <code>publishOrderCreated</code>로 넘깁니다. 실제 토픽 발행은 그 안의 <code>kafkaTemplate.send</code>가 맡습니다.</p>
+<p>저장된 주문을 <code>OrderCreatedEvent</code>에 담아 [실습 1]에서 만든 <code>publishOrderCreated</code>로 넘깁니다.</p>
 <h3>4.4.2 orchestrator - 흐름을 조율하는 코드</h3>
-<p>이벤트를 받아 다음 명령을 정하는 일은 orchestrator만 합니다. 주문 생성 이벤트를 받아 재고 차감 명령을 발행하는 코드는 다음과 같습니다.</p>
+<p>이벤트를 받아 <strong>다음 명령을 정하는 일</strong>은 orchestrator가 수행합니다. <strong>주문 생성 이벤트</strong>를 받아 <strong>재고 차감 명령</strong>을 발행하는 코드는 다음과 같습니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>를 열고 아래 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> handler/OrderOrchestrator.java. 주문 생성 이벤트를 받아 재고 차감 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">orderCreated</span><span class="p">(</span><span class="n">OrderCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -779,8 +779,7 @@
 <span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">DecreaseProductCommand</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span>
 <span class="w">                    </span><span class="n">event</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">price</span><span class="p">()));</span>
 <span class="p">}</span></div>
-<p>메서드에 붙인 <code>@KafkaListener</code>의 <code>topics</code>에 구독할 토픽 이름, <code>groupId</code>에 컨슈머 그룹의 이름을 넣습니다.</p>
-<p><code>WorkflowState</code>는 주문 한 건의 진행 정보를 메모리에 들고 있는 객체입니다. 결과 이벤트가 돌아올 때 orchestrator는 이 기록을 보고 다음 명령을 정합니다.</p>
+<p><code>@KafkaListener</code>의 <code>topics</code>는 구독할 토픽 이름, <code>groupId</code>는 컨슈머 그룹 이름입니다. 그리고 <code>WorkflowState</code>는 주문 하나의 진행 정보를 메모리에 들고 있는 객체로, 결과 이벤트가 돌아오면 orchestrator는 이 기록을 보고 다음 명령을 정합니다.</p>
 <h3>4.4.3 구독 - 토픽의 메시지를 받는다</h3>
 <p>앞에서 orchestrator가 발행한 <strong>재고 차감 명령</strong>을 이번에는 상품 서비스가 받습니다. 받은 명령으로 재고를 줄이고, 그 결과를 <strong>재고 차감 이벤트</strong>로 발행합니다.</p>
 <p><code>adapter/consumer/ProductCommandConsumer.java</code>를 열고 아래 메서드를 작성합니다.</p>
@@ -799,8 +798,8 @@
 <span class="w">    </span><span class="n">productEventProducer</span><span class="p">.</span><span class="na">publishProductDecreased</span><span class="p">(</span>
 <span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">ProductDecreasedEvent</span><span class="p">(</span><span class="n">command</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">command</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">isSuccess</span><span class="p">));</span>
 <span class="p">}</span></div>
-<p>상품 서비스는 명령을 받아 재고를 줄이고, 성공·실패 여부를 결과 이벤트에 담아 돌려줍니다.</p>
-<p>각 서비스 코드는 모두 같은 발행·구독 패턴이고, 토픽 이름만 다릅니다. 그래서 코드를 일일이 보지 않아도, 어떤 서비스가 무슨 토픽을 구독해 무엇을 하고 무엇을 발행하는지만 알면 전체가 보입니다.</p>
+<p>상품 서비스는 명령을 받아 재고를 줄인 뒤, 성공이든 실패든 그 결과를 이벤트에 담아 돌려줍니다.</p>
+<p>각 서비스 코드는 모두 같은 발행·구독 패턴이고, 토픽 이름만 다릅니다. 그래서 코드를 일일이 보지 않아도, 각 서비스가 무슨 토픽을 구독해 어떻게 처리하고 무엇을 발행하는지만 알면 전체 흐름이 보입니다.</p>
 <table>
 <thead>
 <tr>
@@ -846,7 +845,7 @@
 <p>각 서비스의 전체 코드는 GitHub에서 확인하세요.</p>
 <p>이제 Kubernetes에 Kafka와 orchestrator를 추가하고 전체 시스템을 배포합니다.</p>
 <h2>4.5 Kubernetes - Kafka와 orchestrator 배포</h2>
-<p>챕터 3에서 6개 서비스를 Kubernetes에 올렸습니다. Kafka를 도입하면서 더해지는 건 둘입니다. Kafka 서버 한 대와 orchestrator 한 개. 그리고 기존 order·product·delivery는 Kafka가 어디 있는지 알아야 하므로 ConfigMap에 주소 한 줄을 더합니다. 챕터 3 배포에서 바뀌는 부분은 이 세 가지가 전부입니다.</p>
+<p>챕터 3에서 6개 서비스를 Kubernetes에 올렸습니다. Kafka를 도입하면서 더해지는 건 Kafka 서버와 orchestrator입니다.</p>
 <table>
 <thead>
 <tr>
@@ -857,7 +856,7 @@
 <tbody>
 <tr>
 <td><code>kafka-deploy.yml</code></td>
-<td>KRaft 모드로 Kafka 서버 한 대를 띄웁니다.</td>
+<td>Kafka 서버를 띄웁니다.</td>
 </tr>
 <tr>
 <td><code>kafka-service.yml</code></td>
@@ -873,8 +872,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>KRaft 모드</strong>는 Kafka가 클러스터 관리 정보를 스스로 처리하는 실행 방식입니다. 덕분에 별도 컴포넌트 없이 Kafka 컨테이너 하나로 동작합니다.</p>
-<p>각 서비스는 Kafka 서버에 <code>kafka-service:9092</code> 주소로 접근합니다. 클라이언트 쪽은 각 서비스의 ConfigMap에 <code>SPRING_KAFKA_BOOTSTRAP_SERVERS</code>로 접속 주소를 적고, Kafka 서버 쪽은 <code>kafka-deploy.yml</code>에 <code>KAFKA_ADVERTISED_LISTENERS</code>로 자기 주소를 알립니다. 둘 다 <code>kafka-service:9092</code>로 맞춥니다.</p>
+<p>모든 서비스는 Kafka 서버의 주소 <code>kafka-service:9092</code>로 접근합니다. 클라이언트는 ConfigMap에 접속할 주소를, Kafka 서버는 자기 주소를 지정하는데, 두 값이 같아야 연결됩니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1000 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KAFKA_ADVERTISED_LISTENERS: 4개의 클라이언트 서비스가 kafka-service:9092 주소로 Kafka 서버에 접근">
   <defs>
@@ -907,33 +905,11 @@
 </svg>
 </div>
 <div class="caption">그림 4-15. 클라이언트가 kafka-service:9092로 접근</div>
-<p><code>kafka-deploy.yml</code>의 핵심 환경변수는 다음과 같습니다. 전체 YAML은 GitHub에서 확인하세요.</p>
-<table>
-<thead>
-<tr>
-<th>환경변수</th>
-<th>역할</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>CLUSTER_ID</code></td>
-<td>Kafka 서버들을 하나의 클러스터로 묶는 식별자입니다.</td>
-</tr>
-<tr>
-<td><code>KAFKA_PROCESS_ROLES</code></td>
-<td>한 컨테이너가 브로커와 컨트롤러 역할을 겸하도록 지정합니다.</td>
-</tr>
-<tr>
-<td><code>KAFKA_ADVERTISED_LISTENERS</code></td>
-<td>클라이언트가 접근할 주소를 알립니다. ConfigMap의 <code>SPRING_KAFKA_BOOTSTRAP_SERVERS</code>와 같아야 합니다.</td>
-</tr>
-<tr>
-<td><code>KAFKA_CONTROLLER_QUORUM_VOTERS</code></td>
-<td>컨트롤러 역할을 맡는 Kafka 서버 목록을 지정합니다.</td>
-</tr>
-</tbody>
-</table>
+<p><code>kafka-deploy.yml</code>의 전체 환경변수는 GitHub에서 확인하세요. 각 변수의 역할은 주석으로 달려 있습니다.</p>
+<div class="tip">
+<p><strong>KRaft 모드 - Kafka가 컨테이너 하나로 동작하는 이유</strong></p>
+<p>Kafka 서버는 두 가지 일을 합니다. 하나는 메시지를 받아 두고 전달하는 역할(<strong>브로커</strong>), 다른 하나는 브로커 목록이나 토픽 설정 같은 클러스터 정보를 관리하는 역할(<strong>컨트롤러</strong>)입니다. 예전에는 이 관리 역할을 <strong>ZooKeeper</strong>라는 별도 서비스에 맡겨야 했지만, <strong>KRaft(Kafka Raft)</strong> 모드는 Kafka가 직접 맡습니다. 그래서 ZooKeeper 없이 Kafka 컨테이너 하나로 동작합니다. 운영 환경에서는 브로커와 컨트롤러를 여러 노드로 나눠 안정성을 높입니다.</p>
+</div>
 <h2>4.6 실행 및 결과 확인</h2>
 <h3>4.6.1 이미지 빌드</h3>
 <p>Minikube 내부에 이미지를 빌드합니다. 챕터 3 대비 orchestrator 서비스가 새로 추가됩니다.</p>

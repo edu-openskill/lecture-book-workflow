@@ -785,7 +785,7 @@ Saga 패턴에서 전체 흐름을 지휘자가 중앙에서 관리하는 방식
 
 ### 4.4.1 발행 - 토픽에 메시지를 넣는다
 
-프로듀서가 메시지를 발행할 때는 Spring이 제공하는 **`KafkaTemplate`** 을 사용합니다. 주문 서비스가 주문을 저장한 뒤 **주문 생성 이벤트**를 발행하는 코드는 다음과 같습니다.
+프로듀서가 메시지를 발행할 때는 Spring이 제공하는 **`KafkaTemplate`** 을 사용합니다. **주문 생성 이벤트**를 발행하는 코드는 다음과 같습니다.
 
 `adapter/producer/OrderEventProducer.java`를 열고 아래 메서드를 작성합니다.
 
@@ -804,7 +804,7 @@ public class OrderEventProducer {
 
 `kafkaTemplate.send`에 `order-created` 같은 토픽 이름과 보낼 객체를 넘기면 해당 토픽으로 메시지가 들어갑니다.
 
-주문 서비스는 주문을 **PENDING** 상태로 저장하고 **주문 생성 이벤트**를 발행하면 됩니다.
+주문 서비스는 주문을 **PENDING** 상태로 저장하고, **주문 생성 이벤트 프로듀서**를 호출합니다.
 
 `usecase/OrderService.java`를 열고 `createOrder` 메서드를 작성합니다.
 
@@ -825,11 +825,11 @@ public OrderResponse createOrder(int userId, int productId, int quantity, Long p
 }
 ```
 
-저장된 주문을 `OrderCreatedEvent`에 담아 [실습 1]에서 만든 `publishOrderCreated`로 넘깁니다. 실제 토픽 발행은 그 안의 `kafkaTemplate.send`가 맡습니다.
+저장된 주문을 `OrderCreatedEvent`에 담아 [실습 1]에서 만든 `publishOrderCreated`로 넘깁니다.
 
 ### 4.4.2 orchestrator - 흐름을 조율하는 코드
 
-이벤트를 받아 다음 명령을 정하는 일은 orchestrator만 합니다. 주문 생성 이벤트를 받아 재고 차감 명령을 발행하는 코드는 다음과 같습니다.
+이벤트를 받아 **다음 명령을 정하는 일**은 orchestrator가 수행합니다. **주문 생성 이벤트**를 받아 **재고 차감 명령**을 발행하는 코드는 다음과 같습니다.
 
 `handler/OrderOrchestrator.java`를 열고 아래 메서드를 작성합니다.
 
@@ -848,9 +848,7 @@ public void orderCreated(OrderCreatedEvent event) {
 }
 ```
 
-메서드에 붙인 `@KafkaListener`의 `topics`에 구독할 토픽 이름, `groupId`에 컨슈머 그룹의 이름을 넣습니다.
-
-`WorkflowState`는 주문 한 건의 진행 정보를 메모리에 들고 있는 객체입니다. 결과 이벤트가 돌아올 때 orchestrator는 이 기록을 보고 다음 명령을 정합니다.
+`@KafkaListener`의 `topics`는 구독할 토픽 이름, `groupId`는 컨슈머 그룹 이름입니다. 그리고 `WorkflowState`는 주문 하나의 진행 정보를 메모리에 들고 있는 객체로, 결과 이벤트가 돌아오면 orchestrator는 이 기록을 보고 다음 명령을 정합니다.
 
 ### 4.4.3 구독 - 토픽의 메시지를 받는다
 
@@ -876,9 +874,9 @@ public void decreaseProductCommand(DecreaseProductCommand command) {
 }
 ```
 
-상품 서비스는 명령을 받아 재고를 줄이고, 성공·실패 여부를 결과 이벤트에 담아 돌려줍니다.
+상품 서비스는 명령을 받아 재고를 줄인 뒤, 성공이든 실패든 그 결과를 이벤트에 담아 돌려줍니다.
 
-각 서비스 코드는 모두 같은 발행·구독 패턴이고, 토픽 이름만 다릅니다. 그래서 코드를 일일이 보지 않아도, 어떤 서비스가 무슨 토픽을 구독해 무엇을 하고 무엇을 발행하는지만 알면 전체가 보입니다.
+각 서비스 코드는 모두 같은 발행·구독 패턴이고, 토픽 이름만 다릅니다. 그래서 코드를 일일이 보지 않아도, 각 서비스가 무슨 토픽을 구독해 어떻게 처리하고 무엇을 발행하는지만 알면 전체 흐름이 보입니다.
 
 | 서비스 | 구독(받음) | 처리 | 발행(보냄) |
 |---|---|---|---|
@@ -894,18 +892,16 @@ public void decreaseProductCommand(DecreaseProductCommand command) {
 
 ## 4.5 Kubernetes - Kafka와 orchestrator 배포
 
-챕터 3에서 6개 서비스를 Kubernetes에 올렸습니다. Kafka를 도입하면서 더해지는 건 둘입니다. Kafka 서버 한 대와 orchestrator 한 개. 그리고 기존 order·product·delivery는 Kafka가 어디 있는지 알아야 하므로 ConfigMap에 주소 한 줄을 더합니다. 챕터 3 배포에서 바뀌는 부분은 이 세 가지가 전부입니다.
+챕터 3에서 6개 서비스를 Kubernetes에 올렸습니다. Kafka를 도입하면서 더해지는 건 Kafka 서버와 orchestrator입니다.
 
 | Kubernetes 리소스 | 역할 |
 |---|---|
-| `kafka-deploy.yml` | KRaft 모드로 Kafka 서버 한 대를 띄웁니다. |
+| `kafka-deploy.yml` | Kafka 서버를 띄웁니다. |
 | `kafka-service.yml` | Kafka 서버를 `kafka-service:9092`로 노출합니다. |
 | `orchestrator-deploy.yml` | 워크플로우를 조율하는 orchestrator Pod를 띄웁니다. REST가 없어 Service는 두지 않습니다. |
 | `orchestrator-configmap.yml` | orchestrator에 환경변수를 주입합니다. |
 
-**KRaft 모드**는 Kafka가 클러스터 관리 정보를 스스로 처리하는 실행 방식입니다. 덕분에 별도 컴포넌트 없이 Kafka 컨테이너 하나로 동작합니다.
-
-각 서비스는 Kafka 서버에 `kafka-service:9092` 주소로 접근합니다. 클라이언트 쪽은 각 서비스의 ConfigMap에 `SPRING_KAFKA_BOOTSTRAP_SERVERS`로 접속 주소를 적고, Kafka 서버 쪽은 `kafka-deploy.yml`에 `KAFKA_ADVERTISED_LISTENERS`로 자기 주소를 알립니다. 둘 다 `kafka-service:9092`로 맞춥니다.
+모든 서비스는 Kafka 서버의 주소 `kafka-service:9092`로 접근합니다. 클라이언트는 ConfigMap에 접속할 주소를, Kafka 서버는 자기 주소를 지정하는데, 두 값이 같아야 연결됩니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 1000 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KAFKA_ADVERTISED_LISTENERS: 4개의 클라이언트 서비스가 kafka-service:9092 주소로 Kafka 서버에 접근">
@@ -941,14 +937,13 @@ public void decreaseProductCommand(DecreaseProductCommand command) {
 
 *그림 4-15. 클라이언트가 kafka-service:9092로 접근*
 
-`kafka-deploy.yml`의 핵심 환경변수는 다음과 같습니다. 전체 YAML은 GitHub에서 확인하세요.
+`kafka-deploy.yml`의 전체 환경변수는 GitHub에서 확인하세요. 각 변수의 역할은 주석으로 달려 있습니다.
 
-| 환경변수 | 역할 |
-|---|---|
-| `CLUSTER_ID` | Kafka 서버들을 하나의 클러스터로 묶는 식별자입니다. |
-| `KAFKA_PROCESS_ROLES` | 한 컨테이너가 브로커와 컨트롤러 역할을 겸하도록 지정합니다. |
-| `KAFKA_ADVERTISED_LISTENERS` | 클라이언트가 접근할 주소를 알립니다. ConfigMap의 `SPRING_KAFKA_BOOTSTRAP_SERVERS`와 같아야 합니다. |
-| `KAFKA_CONTROLLER_QUORUM_VOTERS` | 컨트롤러 역할을 맡는 Kafka 서버 목록을 지정합니다. |
+:::tip
+**KRaft 모드 - Kafka가 컨테이너 하나로 동작하는 이유**
+
+Kafka 서버는 두 가지 일을 합니다. 하나는 메시지를 받아 두고 전달하는 역할(**브로커**), 다른 하나는 브로커 목록이나 토픽 설정 같은 클러스터 정보를 관리하는 역할(**컨트롤러**)입니다. 예전에는 이 관리 역할을 **ZooKeeper**라는 별도 서비스에 맡겨야 했지만, **KRaft(Kafka Raft)** 모드는 Kafka가 직접 맡습니다. 그래서 ZooKeeper 없이 Kafka 컨테이너 하나로 동작합니다. 운영 환경에서는 브로커와 컨트롤러를 여러 노드로 나눠 안정성을 높입니다.
+:::
 
 ## 4.6 실행 및 결과 확인
 
