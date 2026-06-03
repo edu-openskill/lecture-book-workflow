@@ -24,9 +24,9 @@
 <p>문제는 그 사이에 들어온 주문이 전부 실패한 것입니다. 주문 서버가 상품 서버를 호출했지만, 상품 서버가 죽어 있어 주문 실패가 발생했습니다.</p>
 <p class="thought">서로 직접 호출하니까, 하나가 죽으면 호출한 쪽도 같이 실패하는구나.</p>
 <p>상황을 확인한 선배가 다가왔습니다.</p>
-<div class="dialogue"><span class="speaker">선배</span>: "이거 앞에 얘기했던 상황이네요. 동기적으로 직접 호출하니까 그래요. 호출한 쪽은 상대가 응답할 때까지 기다리는데, 상대가 잠깐 죽으면 호출한 쪽도 같이 멈춰요. 이럴 땐 호출을 붙잡고 기다리지 말고 비동기적으로 메시지를 주고받아야 해요."</div>
+<div class="dialogue"><span class="speaker">선배</span>: "이거 어제 얘기했던 상황이네요. 동기적으로 직접 호출하니까 그래요. 호출한 쪽은 상대가 응답할 때까지 기다리는데, 상대가 잠깐 죽으면 호출한 쪽도 같이 멈춰요. 이럴 땐 호출을 기다리지 말고 비동기적으로 메시지를 주고받아야 해요."</div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "메시지요? 받는 서비스가 죽어 있으면 그 메시지는 어떻게 돼요?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "메시지는 중간에 쌓여 있다가, 받는 서비스가 살아나면 그때 가져가 처리해요. 보내는 쪽은 응답을 기다리지 않으니 그대로 자기 일을 이어 가죠. 그게 동기 호출과 비동기 메시지의 차이예요."</div>
+<div class="dialogue"><span class="speaker">선배</span>: "메시지는 중간에 쌓여 있다가, 받는 서비스가 살아나면 그때 가져가서 처리해요. 보내는 쪽은 응답을 기다리지 않으니 그대로 자기 일을 이어 가죠. 그게 동기 호출과 비동기 메시지의 차이예요."</div>
 <div class="svg-figure">
 <svg viewBox="0 0 1200 880" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 4 한눈에 보기: 챕터 3과 동일하게 Client는 클러스터 밖에 있고, 1단계 로그인은 Client가 Ingress·Gateway를 거쳐 User에 로그인하고 JWT를 응답받는다. 2단계 주문은 Client가 Ingress·Gateway를 거쳐 Order에 동기 REST로 주문하고 즉시 PENDING을 응답받는다. 그 뒤 Order·Product·Delivery 세 서비스는 가운데 Orchestrator와 event·command를 주고받고, Orchestrator가 그 모든 메시지를 아래 Kafka 토픽으로 비동기 전달한다. 서비스끼리는 직접 호출하지 않는다.">
   <defs>
@@ -129,11 +129,8 @@
 <div class="goal-box">
 <p>이번 챕터가 끝나면</p>
 <ul>
-<li>동기 REST 호출의 한계를 이해하고 비동기 메시지 방식의 장점을 설명할 수 있습니다.</li>
-<li>Kafka의 토픽, 프로듀서, 컨슈머, 컨슈머 그룹 개념을 이해할 수 있습니다.</li>
-<li>Orchestration Saga 패턴을 Kafka로 구현할 수 있습니다.</li>
-<li>order-service의 동기 호출을 Kafka 이벤트 발행으로 교체할 수 있습니다.</li>
-<li>orchestrator가 워크플로우 상태를 추적하고 실패 시 자동 롤백하는 방법을 이해할 수 있습니다.</li>
+<li>Kafka 이벤트로 연결해 서비스 간 결합을 끊는 이유를 이해할 수 있습니다.</li>
+<li>오케스트레이터가 흐름을 조율하고 실패를 자동 보상하는 Saga를 이해할 수 있습니다.</li>
 </ul>
 </div>
 <div class="prep-section-md">
@@ -160,26 +157,24 @@
 <li>product-service · delivery-service에 Kafka Consumer/Producer 추가</li>
 <li>새 서비스 <strong>orchestrator</strong>에서 워크플로우 조율 로직 작성</li>
 <li>Kubernetes에 Kafka + orchestrator 배포</li>
-<li>정상 주문 / 품절 롤백 시나리오 검증</li>
+<li>정상 주문 / 품절 보상 시나리오 검증</li>
 </ol>
 </div>
 <h2>4.1 동기 호출의 한계 - 한 서비스가 멈추면 전체가 멈춘다</h2>
 <p>동기적 방식과 비동기적 방식을 비유를 통해 알아보겠습니다.</p>
 <h3>4.1.1 카운터 대기 vs 진동벨</h3>
-<p><strong>카운터 대기 방식 (동기적)</strong></p>
-<p>카운터 앞에 서서 &quot;아메리카노 하나요&quot;라고 주문합니다. 바리스타가 커피를 만드는 동안 카운터 앞에서 기다립니다. 내 커피가 나와야 다음 손님이 주문할 수 있습니다. 바리스타가 원두를 갈다가 커피 머신이 고장 나면 뒤에 줄 선 손님 전부가 멈춥니다.</p>
-<p><strong>진동벨 방식 (비동기적)</strong></p>
-<p>&quot;아메리카노 하나요&quot;라고 주문하면 진동벨을 받고 자리에 앉습니다. 바리스타는 주문을 순서대로 처리하고, 커피가 완성되면 벨이 울립니다. 손님은 기다리는 동안 다른 일을 할 수 있고, 뒤에 줄 선 손님도 바로 주문할 수 있습니다. 커피 머신이 잠깐 멈춰도 주문 목록은 사라지지 않습니다.</p>
+<p>카운터 앞에 서서 커피를 주문하면, 나올 때까지 그 앞에서 기다립니다. 내 커피가 나와야 다음 손님이 주문할 수 있습니다. 만약 커피 머신이 고장 나면 뒤에 줄 선 손님 전부가 기다려야 합니다. 이렇게 요청을 보낸 쪽이 응답이 올 때까지 기다리는 방식이 <strong>동기(synchronous)</strong> 호출입니다.</p>
+<p>반대로 커피 주문 후 진동벨을 받으면 자리에 앉아 다른 일을 할 수 있습니다. 커피가 완성되면 벨이 울립니다. 뒤에 줄 선 손님도 곧바로 주문할 수 있습니다. 커피 머신이 잠깐 멈춰도 주문은 그대로 쌓여 있다가, 머신이 다시 돌아가면 밀린 주문부터 이어서 만듭니다. 이렇게 요청을 보낸 쪽이 기다리지 않고 결과가 준비되면 따로 받는 방식이 <strong>비동기(asynchronous)</strong> 호출입니다.</p>
 <!-- image-prompt: Minimal black line drawing on white background, split comparison, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Separated by a simple vertical line in the middle, no X mark. Left side, title "동기 (카운터 대기)": barista behind counter making coffee, one customer standing at counter waiting, four or five more customers queued behind in a long line looking bored. All frozen/blocked. Right side, title "비동기 (진동벨)": same cafe counter with barista, but the customer has walked away to a table, sitting with a laptop and a small vibration buzzer on the table. A wavy line from the buzzer indicating it will ring. No speech bubbles, no annotation text, no checklists. Clean lines, no colors. -->
 <div class="chapter-image gemini"><img src="..\chapters\assets\CH04\gemini\01_sync-vs-async.png" alt="" /><div class="caption">그림 4-2. 동기 vs 비동기 통신</div></div>
-<p>그렇다면 이 비동기 메시지는 무엇으로 주고받을까요?</p>
+<p>그렇다면 MSA 구조에서 비동기 메시지는 어떤 방식으로 주고받을까요?</p>
 <h2>4.2 Kafka - 메시지를 전달하는 우체국</h2>
 <h3>4.2.1 프로듀서·토픽·컨슈머</h3>
-<p>메시지는 <strong>Kafka</strong>로 주고받습니다. Kafka는 시스템 사이에서 비동기 통신을 담당하며, 메시지를 안전하게 전달해 주는 역할을 합니다.</p>
+<p>MSA 구조에서 비동기 메시지는 <strong>Kafka</strong>를 통해 주고받습니다. Kafka는 시스템 사이에서 비동기 통신을 담당하며, 메시지를 안전하게 전달해 주는 역할을 합니다.</p>
 <div class="term-box">
 <p><strong>Apache Kafka</strong>는 대량의 메시지를 빠르고 안정적으로 주고받기 위해 만들어진 <strong>분산 메시지 시스템</strong>입니다. 받은 메시지를 바로 지우지 않고 일정 기간 보관하기 때문에, 필요하면 <strong>지난 메시지를 다시 꺼내 볼 수도</strong> 있습니다. <strong>높은 처리량과 확장성</strong> 덕분에 대규모 서비스에서 널리 사용합니다.</p>
 </div>
-<p>Kafka는 우체국과 같은 역할을 합니다. 발신자가 우편을 부치면, 우체국은 <strong>일반 편지, 등기, 특송, 택배처럼 종류별로 나눠</strong> 따로 보관합니다. 그리고 집배원은 자기가 처리할 종류의 칸에서만 우편을 꺼내 갑니다. 우체국을 사이에 두고 우편을 주고받기 때문에, 비동기적으로 각자의 시간에 일을 처리할 수 있습니다.</p>
+<p>Kafka는 우체국과 같은 역할을 합니다. 발신자가 우편을 부치면, 우체국은 <strong>일반 편지, 등기, 특송, 택배처럼 종류별로 나눠</strong> 따로 보관합니다. 그리고 집배원은 자기 담당의 칸에서만 우편을 꺼내 갑니다. 우체국을 사이에 두고 우편을 주고받기 때문에, 비동기적으로 각자의 시간에 일을 처리할 수 있습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1180 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kafka 우체국: 프로듀서가 우편을 부치면 우체국이 종류별 우편함에 보관하고 집배원(컨슈머)이 자기 우편함에서 가져간다">
   <defs>
@@ -240,7 +235,7 @@
   <text x="937" y="226" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3730a3">가져가기</text>
 </svg>
 </div>
-<div class="caption">그림 4-3. Kafka 우체국 - 부치고, 보관·분류되고, 집배원이 가져간다</div>
+<div class="caption">그림 4-3. Kafka 우체국 - 메시지를 종류별로 보관하고 전달하는 구조</div>
 <p>그림 4-3의 Kafka 요소의 역할을 정리하면 다음과 같습니다.</p>
 <table>
 <thead>
@@ -252,22 +247,22 @@
 </thead>
 <tbody>
 <tr>
-<td>Kafka</td>
+<td><strong>Kafka</strong></td>
 <td>우체국</td>
 <td>메시지를 받아 보관하고 전달</td>
 </tr>
 <tr>
-<td>토픽(Topic)</td>
+<td><strong>토픽(Topic)</strong></td>
 <td>종류별 우편함 (일반/등기/특송 등)</td>
 <td>메시지를 목적별로 나눠 담음</td>
 </tr>
 <tr>
-<td>프로듀서(Producer)</td>
+<td><strong>프로듀서(Producer)</strong></td>
 <td>발신자</td>
 <td>토픽에 메시지를 발행</td>
 </tr>
 <tr>
-<td>컨슈머(Consumer)</td>
+<td><strong>컨슈머(Consumer)</strong></td>
 <td>집배원</td>
 <td>토픽을 구독해 메시지를 처리</td>
 </tr>
@@ -275,7 +270,6 @@
 </table>
 <p>프로듀서가 토픽에 메시지를 보내는 것을 <strong>발행</strong>(Publish), 컨슈머가 특정 토픽을 지정해 두고 메시지를 가져와 처리하는 것을 <strong>구독</strong>(Subscribe)이라고 합니다.</p>
 <p>우체국이 우편을 일반·등기·특송으로 나눠 담듯, Kafka도 메시지를 <strong>토픽이라는 우편함에 종류별로 나눠 담습니다</strong>. <strong>토픽마다 이름이 있어서</strong>, 프로듀서는 보낼 메시지에 맞는 <strong>토픽 이름으로 발행</strong>하고 컨슈머는 자기가 맡은 <strong>토픽 이름으로 구독</strong>합니다.</p>
-<p>재고를 차감하라는 메시지는 재고 차감 토픽에 쌓이고, 이 토픽을 구독한 컨슈머가 꺼내 처리합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1180 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kafka 구조: 프로듀서가 재고 차감 토픽에 메시지를 발행하면 컨슈머가 구독해 가져간다">
   <defs>
@@ -400,17 +394,18 @@
 <p><strong>Kafka 더 알아두기</strong></p>
 <ul>
 <li><strong>컨슈머가 읽어도 메시지는 남는다</strong>: 우체국에서 우편을 꺼내 읽어도 그 우편은 함에 그대로 보관됩니다(기본 7일). 그래서 서로 다른 컨슈머가 같은 메시지를 각자 자기 속도로 찾아 읽을 수 있고, 장애가 나도 다시 읽어 처리할 수 있습니다.</li>
-<li><strong>RabbitMQ 같은 큐와의 차이</strong>: 전통적인 메시지 큐는 컨슈머가 메시지를 읽으면 큐에서 바로 사라집니다. Kafka는 읽어도 남아 있다는 점이 가장 큰 차이입니다.</li>
+<li><strong>RabbitMQ 같은 큐와의 차이</strong>: 전통적인 메시지 큐는 컨슈머가 메시지를 가져가 처리하면 큐에서 사라집니다. Kafka는 읽어도 남아 있다는 점이 가장 큰 차이입니다.</li>
 </ul>
 </div>
-<div class="dialogue"><span class="speaker">오픈이</span>: "각 서비스가 서로 메시지를 발행하고 구독하면서 알아서 이어지는 건가요?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "방식이 두 가지예요. 방금 말한 것처럼 각 서비스가 서로 발행하고 구독하면서 다음 단계를 스스로 이어 갈 수도 있고, 전체 흐름을 관리하는 <strong>지휘자</strong>를 둘 수도 있어요. 그러면 중간에 한 단계가 실패해도, 지휘자가 어디까지 진행됐는지 알고 있으니까 이미 끝난 단계만 복구할 수 있어요."</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "각 서비스가 서로 메시지를 발행하고 구독하면서 알아서 자기 할 일을 처리하는 건가요?"</div>
+<div class="dialogue"><span class="speaker">선배</span>: "두 가지 방식이 있어요. 방금 말한 것처럼 각 서비스가 서로 발행하고 구독하면서 다음 단계를 스스로 이어 갈 수도 있고, 전체 흐름을 관리하는 <strong>지휘자</strong>를 둘 수도 있어요. <strong>서비스끼리 주고받으면</strong> 중간에 문제가 생겼을 때 어디까지 됐는지 알기 어려워요. 그래서 <strong>지휘자를 두면</strong>, 한 단계가 실패해도 어디까지 진행됐는지 알고 있으니까 <strong>이미 끝난 단계만 복구</strong>할 수 있어요."</div>
 <h2>4.3 Orchestration Saga - 지휘자가 흐름을 조율하다</h2>
 <p>하나의 주문을 여러 서비스가 단계별로 나눠 처리하다 보면, 중간 한 단계가 실패해도 앞 단계는 이미 끝나 있습니다. 이때 끝난 단계를 취소하는 <strong>보상</strong>으로 데이터를 맞추는 방식을 <strong>Saga 패턴</strong>이라고 합니다.</p>
-<p>Saga 패턴에서 전체 흐름을 지휘자가 중앙에서 관리하는 방식을 <strong>Orchestration Saga</strong>라고 합니다. 흐름을 한 곳에 모으면 상태가 한 곳에 있어 추적과 롤백이 단순해지고, 각 서비스는 자기 일에만 집중할 수 있습니다.</p>
+<p>Saga 패턴에서 전체 흐름을 지휘자가 중앙에서 관리하는 방식을 <strong>Orchestration Saga</strong>라고 합니다. 흐름을 한 곳에 모으면 상태가 한 곳에 있어 추적과 보상이 단순해지고, 각 서비스는 자기 일에만 집중할 수 있습니다.</p>
 <!-- image-prompt: Clean black line drawing on white background, simplified orchestra illustration, 4:3 aspect ratio, 800x600px. No stage, no curtains, no background. Center: a conductor on a small podium holding a baton and a score labeled "SAGA", drawn in a clean cartoon style (not stick figures — simple but with body proportions, hair, clothing outlines). Three musicians sitting around the conductor with recognizable instruments and music stands labeled "ORDER", "PRODUCT", "DELIVERY". Blue curved arrows from conductor to each musician labeled "command". Green curved arrows from each musician back labeled "result". Simple cartoon style like a textbook illustration — more detailed than stick figures but less detailed than realistic. No shading, no colors except blue and green arrows. -->
 <div class="chapter-image gemini"><img src="..\chapters\assets\CH04\gemini\04_orchestra.png" alt="" /><div class="caption">그림 4-6. Orchestration Saga 구조</div></div>
-<p>이번 챕터 예제에서는 주문 요청이 들어오면, 지휘자 역할을 하는 <strong>orchestrator</strong>가 재고 차감, 배달 생성, 주문 완료 단계를 순서대로 지휘합니다.</p>
+<p>챕터 2~3에서 구현한 주문 서비스 중심의 보상 트랜잭션 관리도 일종의 Orchestration Saga입니다.</p>
+<p>이번 챕터에서는 조율 역할만 전담하는 <strong>별도 orchestrator 서비스</strong>를 두는 구조를 살펴보겠습니다. 주문 요청이 들어오면 orchestrator가 재고 차감, 배달 생성, 주문 완료 단계를 순차적으로 지휘합니다.</p>
 <div class="prep-note">
 <p><strong>Saga를 구현하는 방식에는 Orchestration 외에 Choreography도 있습니다.</strong> 중앙 지휘자 없이 <strong>각 서비스가 서로 발행하고 구독하며 다음 단계를 이어 가는 방식</strong>으로, 단계가 적을 때는 가볍지만 단계가 늘거나 보상이 복잡해질수록 전체 흐름이 여러 서비스에 흩어져 추적이 어렵습니다. 이 책은 상태를 한 곳에서 추적할 수 있는 Orchestration을 선택합니다.</p>
 </div>
@@ -436,7 +431,7 @@
     <tr><td style="text-align:center">6</td><td><code>complete-order-command</code></td><td>orchestrator → order</td><td>주문 완료 명령</td></tr>
   </tbody>
 </table>
-<p><strong>롤백 흐름 (2개)</strong></p>
+<p><strong>보상 흐름 (2개)</strong></p>
 <table>
   <colgroup>
     <col style="width:44%">
@@ -635,13 +630,13 @@
  </svg>
 </div>
 <div class="caption">그림 4-12. 6단계 — 주문 완료 명령 발행 → 주문 수신</div>
-<h3>4.3.3 주문 요청 실패 흐름 (롤백)</h3>
+<h3>4.3.3 주문 요청 실패 흐름 (보상 트랜잭션)</h3>
 <p>만약 상품 서비스가 재고 차감에 실패하면 재고 차감 실패 이벤트를 발행합니다. 오케스트레이터는 <strong>이미 처리된 단계만</strong> 역순으로 되돌립니다.</p>
 <div class="svg-figure">
-<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤백 실패 알림: 상품이 재고 차감 실패 결과를 이벤트로 알리고 오케스트레이터가 받는다. Kafka 띠에는 지나온 편지가 비활성으로 남고 재고 차감 이벤트만 활성이다.">
+<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="보상 실패 알림: 상품이 재고 차감 실패 결과를 이벤트로 알리고 오케스트레이터가 받는다. Kafka 띠에는 지나온 편지가 비활성으로 남고 재고 차감 이벤트만 활성이다.">
   <defs><marker id="rb1a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker>
   <marker id="rb1f" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#dc2626"/></marker></defs>
-  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 · 실패 알림 — 상품이 재고 차감 실패를 오케스트레이터에 알린다</text>
+  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">보상 · 실패 알림 — 상품이 재고 차감 실패를 오케스트레이터에 알린다</text>
   <rect x="345" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <text x="430" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Order</text>
   <text x="430" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8081 주문</text>
@@ -673,21 +668,21 @@
   <text x="627" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">2. 오케스트레이터가 수신</text>
   <rect x="1090" y="40" width="460" height="430" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="470" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 · 실패 알림</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">보상 · 실패 알림</text>
   <text x="1146" y="128" font-size="21" font-weight="700" fill="#b91c1c">1. 상품이 재고 차감 실패를 알림</text>
   <text x="1146" y="158" font-size="19" font-weight="400" fill="#475569">재고 차감에 실패한 상품 서비스가</text>
   <text x="1146" y="181" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">재고 차감 이벤트</tspan>를 발행합니다.</text>
   <text x="1146" y="225" font-size="21" font-weight="700" fill="#0f172a">2. 오케스트레이터가 수신</text>
-  <text x="1146" y="255" font-size="19" font-weight="400" fill="#475569">실패 결과를 받고 롤백을</text>
+  <text x="1146" y="255" font-size="19" font-weight="400" fill="#475569">실패 결과를 받고 보상을</text>
   <text x="1146" y="278" font-size="19" font-weight="400" fill="#475569">시작합니다.</text>
 </svg>
 </div>
-<div class="caption">그림 4-13. 롤백 · 실패 알림 — 상품이 실패를 알림</div>
+<div class="caption">그림 4-13. 보상 · 실패 알림 — 상품이 실패를 알림</div>
 <div class="svg-figure">
-<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤백 주문 취소: 오케스트레이터가 주문 취소 명령을 발행하고 주문 서비스가 CANCELLED 처리. 앞 편지들은 비활성으로 남고 주문 취소 명령만 활성이다.">
+<svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="보상 주문 취소: 오케스트레이터가 주문 취소 명령을 발행하고 주문 서비스가 CANCELLED 처리. 앞 편지들은 비활성으로 남고 주문 취소 명령만 활성이다.">
   <defs><marker id="rb2a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   <marker id="rb2b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3730a3"/></marker></defs>
-  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">롤백 · 주문 취소 — 주문 취소 명령을 발행</text>
+  <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">보상 · 주문 취소 — 주문 취소 명령을 발행</text>
   <rect x="345" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
   <text x="430" y="92" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
   <text x="430" y="114" text-anchor="middle" font-size="11.5" fill="#3730a3">주문 CANCELLED</text>
@@ -722,7 +717,7 @@
   <text x="605" y="196" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">4. 주문 서비스가 수신해 CANCELLED 처리</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
-  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">롤백 · 주문 취소</text>
+  <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">보상 · 주문 취소</text>
   <text x="1146" y="124" font-size="21" font-weight="700" fill="#0f172a">3. 주문 취소 명령 발행</text>
   <text x="1146" y="158" font-size="19" font-weight="400" fill="#475569">오케스트레이터가 <tspan font-weight="700">주문 취소</tspan></text>
   <text x="1146" y="185" font-size="19" font-weight="400" fill="#475569"><tspan font-weight="700">명령</tspan>을 카프카에 발행합니다.</text>
@@ -731,7 +726,7 @@
   <text x="1146" y="313" font-size="19" font-weight="400" fill="#475569">주문 상태를 CANCELLED로 바꿉니다.</text>
 </svg>
 </div>
-<div class="caption">그림 4-14. 롤백 · 주문 취소 — 주문 취소 명령 발행</div>
+<div class="caption">그림 4-14. 보상 · 주문 취소 — 주문 취소 명령 발행</div>
 <h2>4.4 Kafka로 주고받기 - 발행과 구독</h2>
 <h3>4.4.1 발행 - 토픽에 메시지를 넣는다</h3>
 <p>프로듀서가 메시지를 발행할 때는 Spring이 제공하는 <strong><code>KafkaTemplate</code></strong> 을 사용합니다. <strong>주문 생성 이벤트</strong>를 발행하는 코드는 다음과 같습니다.</p>
@@ -746,7 +741,7 @@
 <span class="w">        </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<p><code>kafkaTemplate.send</code>에 <code>order-created</code> 같은 토픽 이름과 보낼 객체를 넘기면 해당 토픽으로 메시지가 들어갑니다.</p>
+<p><code>kafkaTemplate.send</code>에 <code>order-created</code> 같은 토픽 이름과 보낼 이벤트를 넘기면 해당 토픽으로 메시지가 들어갑니다.</p>
 <p>주문 서비스는 주문을 <strong>PENDING</strong> 상태로 저장하고, <strong>주문 생성 이벤트 프로듀서</strong>를 호출합니다.</p>
 <p><code>usecase/OrderService.java</code>를 열고 <code>createOrder</code> 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행</div><span class="nd">@Override</span>
@@ -763,7 +758,6 @@
 
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">OrderResponse</span><span class="p">.</span><span class="na">from</span><span class="p">(</span><span class="n">createdOrder</span><span class="p">);</span>
 <span class="p">}</span></div>
-<p>저장된 주문을 <code>OrderCreatedEvent</code>에 담아 [실습 1]에서 만든 <code>publishOrderCreated</code>로 넘깁니다.</p>
 <h3>4.4.2 orchestrator - 흐름을 조율하는 코드</h3>
 <p>이벤트를 받아 <strong>다음 명령을 정하는 일</strong>은 orchestrator가 수행합니다. <strong>주문 생성 이벤트</strong>를 받아 <strong>재고 차감 명령</strong>을 발행하는 코드는 다음과 같습니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>를 열고 아래 메서드를 작성합니다.</p>
@@ -800,52 +794,10 @@
 <span class="p">}</span></div>
 <p>상품 서비스는 명령을 받아 재고를 줄인 뒤, 성공이든 실패든 그 결과를 이벤트에 담아 돌려줍니다.</p>
 <p>각 서비스 코드는 모두 같은 발행·구독 패턴이고, 토픽 이름만 다릅니다. 그래서 코드를 일일이 보지 않아도, 각 서비스가 무슨 토픽을 구독해 어떻게 처리하고 무엇을 발행하는지만 알면 전체 흐름이 보입니다.</p>
-<table>
-<thead>
-<tr>
-<th>서비스</th>
-<th>구독(받음)</th>
-<th>처리</th>
-<th>발행(보냄)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>order</strong></td>
-<td>주문 요청</td>
-<td>주문 저장(PENDING)</td>
-<td>주문 생성 이벤트</td>
-</tr>
-<tr>
-<td><strong>order</strong></td>
-<td>주문 완료·취소 명령</td>
-<td>주문 상태 변경</td>
-<td>—</td>
-</tr>
-<tr>
-<td><strong>product</strong></td>
-<td>재고 차감·복구 명령</td>
-<td>재고 증감</td>
-<td>재고 차감 이벤트</td>
-</tr>
-<tr>
-<td><strong>delivery</strong></td>
-<td>배달 생성 명령</td>
-<td>배달 생성</td>
-<td>배달 생성 이벤트</td>
-</tr>
-<tr>
-<td><strong>orchestrator</strong></td>
-<td>주문 생성·재고 차감·배달 생성 이벤트</td>
-<td>다음 단계 결정</td>
-<td>재고 차감·배달 생성·주문 완료 명령 (실패 시 복구·취소 명령)</td>
-</tr>
-</tbody>
-</table>
 <p>각 서비스의 전체 코드는 GitHub에서 확인하세요.</p>
 <p>이제 Kubernetes에 Kafka와 orchestrator를 추가하고 전체 시스템을 배포합니다.</p>
 <h2>4.5 Kubernetes - Kafka와 orchestrator 배포</h2>
-<p>챕터 3에서 6개 서비스를 Kubernetes에 올렸습니다. Kafka를 도입하면서 더해지는 건 Kafka 서버와 orchestrator입니다.</p>
+<p>챕터 3에서 6개 서비스를 Kubernetes에 올렸습니다. Kafka를 도입하면서 추가되는 건 <strong>Kafka 서버</strong>와 <strong>orchestrator 서버</strong>입니다.</p>
 <table>
 <thead>
 <tr>
@@ -872,7 +824,7 @@
 </tr>
 </tbody>
 </table>
-<p>모든 서비스는 Kafka 서버의 주소 <code>kafka-service:9092</code>로 접근합니다. 클라이언트는 ConfigMap에 접속할 주소를, Kafka 서버는 자기 주소를 지정하는데, 두 값이 같아야 연결됩니다.</p>
+<p>모든 서비스는 Kafka 서버의 주소 <code>kafka-service:9092</code>로 접근합니다. 각 서비스는 ConfigMap에 접속할 주소를, Kafka 서버는 자기 주소를 지정하는데, 두 값이 같아야 연결됩니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1000 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KAFKA_ADVERTISED_LISTENERS: 4개의 클라이언트 서비스가 kafka-service:9092 주소로 Kafka 서버에 접근">
   <defs>
@@ -907,8 +859,8 @@
 <div class="caption">그림 4-15. 클라이언트가 kafka-service:9092로 접근</div>
 <p><code>kafka-deploy.yml</code>의 전체 환경변수는 GitHub에서 확인하세요. 각 변수의 역할은 주석으로 달려 있습니다.</p>
 <div class="tip">
-<p><strong>KRaft 모드 - Kafka가 컨테이너 하나로 동작하는 이유</strong></p>
-<p>Kafka 서버는 두 가지 일을 합니다. 하나는 메시지를 받아 두고 전달하는 역할(<strong>브로커</strong>), 다른 하나는 브로커 목록이나 토픽 설정 같은 클러스터 정보를 관리하는 역할(<strong>컨트롤러</strong>)입니다. 예전에는 이 관리 역할을 <strong>ZooKeeper</strong>라는 별도 서비스에 맡겨야 했지만, <strong>KRaft(Kafka Raft)</strong> 모드는 Kafka가 직접 맡습니다. 그래서 ZooKeeper 없이 Kafka 컨테이너 하나로 동작합니다. 운영 환경에서는 브로커와 컨트롤러를 여러 노드로 나눠 안정성을 높입니다.</p>
+<p><strong>KRaft 모드 알아두기</strong></p>
+<p>Kafka 서버는 두 가지 일을 합니다. 하나는 메시지를 받아 두고 전달하는 역할(<strong>브로커</strong>), 다른 하나는 브로커 목록이나 토픽 설정 같은 클러스터 정보를 관리하는 역할(<strong>컨트롤러</strong>)입니다. 예전에는 이 관리 역할을 <strong>ZooKeeper</strong>라는 별도 서비스에 맡겨야 했지만, <strong>KRaft(Kafka Raft)</strong> 모드는 Kafka가 직접 맡습니다. 그래서 ZooKeeper 없이 Kafka 컨테이너 하나가 브로커와 컨트롤러 역할을 모두 처리합니다. 운영 환경에서는 브로커와 컨트롤러를 여러 노드로 나눠 안정성을 높입니다.</p>
 </div>
 <h2>4.6 실행 및 결과 확인</h2>
 <h3>4.6.1 이미지 빌드</h3>
@@ -921,7 +873,7 @@ minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/delivery:2<span class="w"> </span>./delivery
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/orchestrator:2<span class="w"> </span>./orchestrator</div>
 <h3>4.6.2 배포 순서</h3>
-<p>Kafka가 준비되기 전에 서비스가 시작되면 연결 오류가 발생합니다. Kafka를 먼저 배포하고 ready 상태를 확인한 다음 나머지를 배포합니다.</p>
+<p>Kafka가 준비되기 전에 서비스가 시작되면 연결 오류가 발생합니다. Kafka를 먼저 배포하고 준비된 것을 확인한 다음 나머지를 배포합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 배포 순서 (Kafka 우선)</div><span class="c1"># 1. 네임스페이스 생성</span>
 kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>metacoding
 
@@ -985,11 +937,11 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 </div>
 <div class="caption">그림 4-17. Pod 상태 확인 (kubectl get pods)</div>
 <h3>4.6.3 서비스 접근</h3>
-<p>Ingress를 통해 외부에서 접속하려면 <code>minikube tunnel</code>을 실행합니다.</p>
+<p>Ingress를 통해 외부에서 접속하기 위해 <code>minikube tunnel</code>을 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 외부 접근 터널</div>minikube<span class="w"> </span>tunnel</div>
 <p>터널이 실행되면 <code>http://127.0.0.1:80</code>로 gateway-service에 접속할 수 있습니다.</p>
 <h3>4.6.4 비동기 흐름 테스트</h3>
-<p>AirPods (productId=3)를 주문합니다.</p>
+<p>이제 AirPods (productId=3) 2개를 주문하는 API 요청을 보내 보겠습니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/api/orders</span>
 
 <span class="p">{</span>
@@ -1000,14 +952,14 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <span class="p">}</span></div>
 <!-- terminal-prompt: HTTP client (IntelliJ or Postman) showing POST /api/orders response. JSON body with order status "PENDING". -->
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\14_order-pending.png" alt="" /><div class="caption">그림 4-18. 주문 생성 응답 (PENDING 상태)</div></div>
-<p>챕터 3과 다르게 즉시 <code>PENDING</code> 상태로 반환됩니다. Kafka 이벤트가 처리되면 상태가 <code>COMPLETED</code>로 변경됩니다. 잠시 후 주문 상태를 다시 조회합니다.</p>
+<p>챕터 3과 다르게 즉시 <code>PENDING</code> 상태로 반환됩니다. 잠시 후 주문 상태를 다시 조회하면, Kafka 이벤트가 처리되어 상태가 <code>COMPLETED</code>로 바뀐 것을 확인할 수 있습니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/api/orders/4</span></div>
 <!-- terminal-prompt: HTTP client showing GET /api/orders/4 response. JSON body with order status changed to "COMPLETED". -->
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\15_order-completed.png" alt="" /><div class="caption">그림 4-19. 주문 완료 확인 (COMPLETED 상태)</div></div>
-<div class="dialogue"><span class="speaker">오픈이</span>: "PENDING이었다가 COMPLETED로 바뀌었어요! 그런데 롤백도 자동으로 되나요?"</div>
+<div class="dialogue"><span class="speaker">오픈이</span>: "PENDING이었다가 COMPLETED로 바뀌었어요! 그런데 중간에 실패하면 어떻게 되나요?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "품절 상품으로 주문해 봐요. orchestrator 로그를 보면 보일 거예요."</div>
-<h3>4.6.5 롤백 확인 - 품절 상품 주문</h3>
-<p>동기 방식에서는 품절 상품이 첫 단계에서 막혀 되돌릴 것이 없었습니다. 반면 비동기 방식에서는 주문이 PENDING으로 먼저 저장됩니다. 그래서 재고 감소가 실패하면 orchestrator가 그 주문을 취소하는 롤백을 시작합니다. iPhone 15(productId=2, 재고 0)로 확인합니다.</p>
+<h3>4.6.5 보상 트랜잭션 확인 - 품절 상품 주문</h3>
+<p>동기 방식에서는 품절 상품을 주문하면 <strong>주문 자체가 생성되지 않아</strong> 되돌릴 것도 없었습니다. 반면 비동기 방식에서는 주문이 <strong>PENDING으로 먼저 저장</strong>됩니다. 그래서 재고 감소가 실패하면 orchestrator가 주문을 취소하는 <strong>보상 트랜잭션</strong>을 시작합니다. iPhone 15(productId=2, 재고 0)로 확인해 보겠습니다.</p>
 <div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//127.0.0.1:80/api/orders</span>
 
 <span class="p">{</span>
@@ -1024,17 +976,17 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH04\terminal\17_order-cancelled.png" alt="" /><div class="caption">그림 4-21. 주문 취소 확인 (CANCELLED 상태)</div></div>
 <p>테스트가 끝났으면 이번 챕터에서 실행한 리소스를 정리합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 리소스 정리</div>kubectl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>metacoding</div>
-<p>상품·배달을 직접 호출하고 실패까지 떠안던 주문 서비스는 이제 주문을 저장하고 이벤트 하나만 발행합니다. 정상 주문은 곧바로 PENDING으로 응답한 뒤 비동기적으로 COMPLETED가 되고, 품절 주문은 orchestrator가 알아서 CANCELLED로 되돌립니다. 직접 호출이 사라지면서 서비스 사이의 강한 결합이 풀렸고, try/catch 보상 블록도 함께 없어졌습니다.</p>
-<p>며칠 뒤, 같은 동료가 책상 앞에 다시 섰습니다. 표정에서 불만이 묻어났습니다.</p>
+<p>상품·배달을 직접 호출하고 실패까지 떠안던 주문 서비스는 이제 주문을 저장하고 <strong>이벤트 하나만 발행</strong>합니다. 직접 호출이 사라지면서 서비스 사이의 <strong>강한 결합이 풀렸고</strong>, <strong>try/catch 보상 블록도 함께 없어졌습니다</strong>.</p>
+<p>서비스를 비동기로 전환하고 며칠 뒤, 베타 테스터로 등록한 동료가 자리로 왔습니다. 표정이 떨떠름했습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "어제 직접 주문해 봤는데, 좀 이상한 게 있었어요."</div>
 <p>시스템을 점검하던 동료가 새로운 문제를 알려 왔습니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
 <li>동기 REST 호출을 <strong>Kafka 비동기 이벤트</strong>로 교체하여 서비스 간 결합을 끊었습니다.</li>
-<li><strong>orchestrator</strong> 서비스가 Kafka 토픽을 통해 전체 워크플로우를 조율합니다.</li>
-<li><code>ConcurrentHashMap</code>으로 주문별 진행 상태를 추적하고, 실패 시 이미 처리된 단계만 자동 롤백합니다.</li>
-<li>order-service는 주문 생성 즉시 <code>PENDING</code> 상태로 반환하고, 처리 완료 후 <code>COMPLETED</code>로 갱신됩니다.</li>
+<li><strong>orchestrator</strong>가 <strong>명령</strong>으로 각 서비스를 조율하고, 각 서비스는 <strong>이벤트</strong>로 결과를 알립니다.</li>
+<li><strong>Saga 패턴</strong>으로 분산 트랜잭션을 단계별로 처리하고, 실패한 단계는 <strong>보상 트랜잭션</strong>으로 되돌립니다.</li>
+<li>주문 요청에는 즉시 <code>PENDING</code>으로 응답하고, 처리가 끝나면 최종 상태로 갱신됩니다.</li>
 </ul>
 <p>다음 챕터에서는 이를 해결합니다. 배달 기사가 완료 API를 호출하여 실제 배달 완료를 처리하고, WebSocket으로 클라이언트에게 주문 완료를 실시간 Push로 알립니다.</p>
 </div>
