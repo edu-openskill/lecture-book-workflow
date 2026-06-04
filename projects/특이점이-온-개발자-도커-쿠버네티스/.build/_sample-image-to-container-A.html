@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>샘플 — 이미지 → 컨테이너 (안 A)</title>
+<style>
+  body { background:#fff; color:#1f2937; font-family:"Pretendard","맑은 고딕",system-ui,sans-serif; margin:0; padding:40px; }
+  .wrap { max-width:900px; margin:0 auto; }
+  h1 { font-size:18px; color:#475569; font-weight:700; }
+  .svg-figure { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:20px; margin:24px 0 8px; }
+  .svg-figure svg { width:100%; height:auto; display:block; }
+  .caption { text-align:center; font-style:italic; color:#6b7280; font-size:14px; margin-top:6px; }
+  .note { color:#475569; font-size:14px; line-height:1.7; background:#f8fafc; border:1px solid #e5e7eb; border-radius:8px; padding:14px 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>샘플 미리보기 — 안 A (실행 관점)</h1>
+
+<div class="svg-figure">
+<svg viewBox="0 0 820 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이미지를 실행하면 이미지 레이어 묶음 위에서 프로그램이 도는 컨테이너가 되는 모습">
+  <defs>
+    <marker id="arrowA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="410" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2937">이미지를 실행하면 컨테이너가 됩니다</text>
+  <text x="195" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">이미지</text>
+  <rect x="70" y="76" width="250" height="184" rx="8" fill="#fff" stroke="#475569" stroke-width="2"/>
+  <rect x="88" y="90" width="214" height="38" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.7"/>
+  <text x="195" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">애플리케이션 코드</text>
+  <rect x="88" y="132" width="214" height="38" rx="4" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+  <text x="195" y="156" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">런타임</text>
+  <rect x="88" y="174" width="214" height="38" rx="4" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+  <text x="195" y="198" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">시스템 라이브러리</text>
+  <rect x="88" y="216" width="214" height="38" rx="4" fill="#e2e8f0" stroke="#475569" stroke-width="1.7"/>
+  <text x="195" y="240" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">베이스 OS</text>
+  <line x1="332" y1="168" x2="452" y2="168" stroke="#475569" stroke-width="2" marker-end="url(#arrowA)"/>
+  <text x="392" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">실행</text>
+  <text x="585" y="50" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">컨테이너</text>
+  <rect x="460" y="60" width="250" height="234" rx="8" fill="#fff" stroke="#ff7849" stroke-width="2.2"/>
+  <rect x="478" y="74" width="214" height="42" rx="4" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="585" y="92" text-anchor="middle" font-size="12" font-weight="800" fill="#3730a3">▶ 실행 중인 프로그램</text>
+  <text x="585" y="107" text-anchor="middle" font-size="9.5" font-style="italic" fill="#4f46e5">프로세스</text>
+  <rect x="478" y="124" width="214" height="34" rx="4" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="585" y="145" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7b341e">애플리케이션 코드</text>
+  <rect x="478" y="162" width="214" height="34" rx="4" fill="#f1f5f9" stroke="#475569" stroke-width="1.4"/>
+  <text x="585" y="183" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">런타임</text>
+  <rect x="478" y="200" width="214" height="34" rx="4" fill="#f1f5f9" stroke="#475569" stroke-width="1.4"/>
+  <text x="585" y="221" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">시스템 라이브러리</text>
+  <rect x="478" y="238" width="214" height="34" rx="4" fill="#e2e8f0" stroke="#475569" stroke-width="1.6"/>
+  <text x="585" y="259" text-anchor="middle" font-size="11.5" font-weight="700" fill="#334155">베이스 OS</text>
+  <path d="M 700 124 L 706 124 L 706 272 L 700 272" fill="none" stroke="#94a3b8" stroke-width="1.4"/>
+  <line x1="706" y1="198" x2="712" y2="198" stroke="#94a3b8" stroke-width="1.4"/>
+  <text x="744" y="194" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">이미지</text>
+  <text x="744" y="208" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">레이어</text>
+</svg>
+</div>
+<div class="caption">그림 2-8. 이미지를 실행하면 레이어 묶음 위에서 프로그램이 도는 컨테이너가 됩니다</div>
+
+<p class="note">실행 관점입니다. 이미지의 레이어(애플리케이션 코드·런타임·시스템 라이브러리·베이스 OS)는 그대로 합쳐지고, 맨 위에서 프로그램(프로세스)이 돌면 컨테이너가 됩니다. 본문 L391 문장과 그대로 맞물립니다. (쓰기 가능 레이어 같은 파일 관점은 넣지 않았습니다.)</p>
+</div>
+</body>
+</html>
