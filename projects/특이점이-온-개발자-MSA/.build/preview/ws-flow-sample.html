@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>웹소켓 연결 흐름 — 핸드셰이크/명부 샘플</title>
+<style>
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 960px; margin: 48px auto; padding: 0 24px; color: #0f172a; background: #fff; }
+  h3 { font-size: 21px; margin-top: 40px; }
+  p { line-height: 1.85; color: #1f2937; font-size: 16px; }
+  .svg-figure { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin: 22px 0 6px; background: #fff; }
+  .svg-figure svg { width: 100%; height: auto; display: block; }
+  .caption { text-align: center; color: #64748b; font-style: italic; font-size: 14px; margin: 0 0 32px; }
+  .note { color:#9a3412; font-size:13px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:10px 14px; }
+</style>
+</head>
+<body>
+
+<p class="note">샘플 — 핸드셰이크(요청↔응답) + 브로커의 "구독 명부" + 명부 기반 전달을 장면으로 그렸습니다.</p>
+
+<h3>웹소켓 알림이 가능해지기까지</h3>
+<p>브라우저가 연결을 청하면 서버가 받아들여 연결이 열립니다. 브라우저가 자기 채널을 구독하면 서버의 브로커가 명부에 적어 두고, 서버가 그 채널로 보내면 명부를 보고 그 브라우저에 알림을 보냅니다.</p>
+
+<!-- 1단계: 핸드셰이크 -->
+<div class="svg-figure">
+<svg viewBox="280 120 1300 330" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="rq" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="rs" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0d9488"/></marker>
+  </defs>
+  <text x="700" y="158" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">1단계 — 연결 핸드셰이크</text>
+
+  <rect x="300" y="250" width="160" height="84" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.8"/>
+  <text x="380" y="298" text-anchor="middle" font-size="15" font-weight="700" fill="#6d28d9">브라우저</text>
+  <rect x="540" y="250" width="140" height="84" rx="8" fill="#fff" stroke="#475569" stroke-width="1.5"/>
+  <text x="610" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">frontend</text>
+  <rect x="740" y="250" width="140" height="84" rx="8" fill="#fff" stroke="#475569" stroke-width="1.5"/>
+  <text x="810" y="298" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">gateway</text>
+  <rect x="940" y="250" width="160" height="84" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="1020" y="298" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">주문 서비스</text>
+
+  <text x="700" y="218" text-anchor="middle" font-size="13" font-weight="700" fill="#4f46e5">① "웹소켓으로 바꿔 주세요" (업그레이드 요청)</text>
+  <line x1="462" y1="278" x2="538" y2="278" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#rq)"/>
+  <line x1="682" y1="278" x2="738" y2="278" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#rq)"/>
+  <line x1="882" y1="278" x2="938" y2="278" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#rq)"/>
+
+  <line x1="938" y1="308" x2="882" y2="308" stroke="#0d9488" stroke-width="2.2" stroke-dasharray="5,3" marker-end="url(#rs)"/>
+  <line x1="738" y1="308" x2="682" y2="308" stroke="#0d9488" stroke-width="2.2" stroke-dasharray="5,3" marker-end="url(#rs)"/>
+  <line x1="538" y1="308" x2="462" y2="308" stroke="#0d9488" stroke-width="2.2" stroke-dasharray="5,3" marker-end="url(#rs)"/>
+  <text x="700" y="372" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">② "좋아요" — 연결을 엽니다 (이후 끊기지 않음)</text>
+
+  <rect x="1130" y="180" width="430" height="230" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
+  <text x="1156" y="222" font-size="19" font-weight="700" fill="#9a3412">연결 핸드셰이크</text>
+  <text x="1156" y="262" font-size="17" fill="#475569">브라우저가 "웹소켓으로 바꾸자"고</text>
+  <text x="1156" y="286" font-size="17" fill="#475569">청하면, 서버가 받아들여 연결이</text>
+  <text x="1156" y="310" font-size="17" fill="#475569">열립니다.</text>
+  <text x="1156" y="348" font-size="17" fill="#475569">frontend·gateway는 이 요청·응답을</text>
+  <text x="1156" y="372" font-size="17" fill="#475569">그대로 넘겨야 연결이 유지됩니다.</text>
+</svg>
+</div>
+<div class="caption">그림 5-4. 1단계 - 브라우저가 청하고 서버가 받아들여 연결이 열린다</div>
+
+<!-- 2단계: 구독 등록 -->
+<div class="svg-figure">
+<svg viewBox="280 120 1300 360" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="sb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7c3aed"/></marker></defs>
+  <text x="700" y="158" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">2단계 — 구독 등록</text>
+
+  <rect x="300" y="270" width="170" height="84" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.8"/>
+  <text x="385" y="318" text-anchor="middle" font-size="15" font-weight="700" fill="#6d28d9">브라우저</text>
+
+  <rect x="760" y="190" width="340" height="250" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="930" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">주문 서비스</text>
+  <rect x="790" y="240" width="280" height="170" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="930" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">STOMP 브로커 — 구독 명부</text>
+  <rect x="812" y="284" width="236" height="40" rx="5" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="930" y="309" text-anchor="middle" font-size="13.5" font-weight="700" fill="#9a3412">내 연결  →  내 채널</text>
+  <rect x="812" y="332" width="236" height="30" rx="5" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="930" y="352" text-anchor="middle" font-size="12.5" fill="#cbd5e1">(다른 사용자 → 다른 채널)</text>
+
+  <line x1="472" y1="300" x2="758" y2="300" stroke="#7c3aed" stroke-width="2.4" marker-end="url(#sb)"/>
+  <text x="615" y="288" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6d28d9">① 내 채널을 듣겠습니다 (구독)</text>
+  <text x="615" y="322" text-anchor="middle" font-size="12" fill="#94a3b8">→ 명부에 한 줄 등록</text>
+
+  <rect x="1130" y="190" width="430" height="240" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
+  <text x="1156" y="232" font-size="19" font-weight="700" fill="#9a3412">구독 등록</text>
+  <text x="1156" y="272" font-size="17" fill="#475569">브라우저가 자기 채널을 구독하면,</text>
+  <text x="1156" y="296" font-size="17" fill="#475569">브로커가 "이 연결은 이 채널을</text>
+  <text x="1156" y="320" font-size="17" fill="#475569">듣는다"를 명부에 적어 둡니다.</text>
+  <text x="1156" y="360" font-size="17" fill="#475569">명부의 이 한 줄이 곧 "채널을</text>
+  <text x="1156" y="384" font-size="17" fill="#475569">구독한다"의 실체입니다.</text>
+</svg>
+</div>
+<div class="caption">그림 5-5. 2단계 - 구독하면 브로커 명부에 "내 연결 → 내 채널"이 적힌다</div>
+
+<!-- 3단계: 알림 도달 -->
+<div class="svg-figure">
+<svg viewBox="280 120 1300 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="pb" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="700" y="158" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">3단계 — 알림 도달</text>
+
+  <rect x="300" y="190" width="340" height="250" rx="10" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="470" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">주문 서비스</text>
+  <rect x="330" y="240" width="280" height="170" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
+  <text x="470" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">STOMP 브로커 — 구독 명부</text>
+  <rect x="352" y="288" width="236" height="40" rx="5" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <text x="470" y="313" text-anchor="middle" font-size="13.5" font-weight="700" fill="#9a3412">내 연결  →  내 채널</text>
+  <text x="470" y="358" text-anchor="middle" font-size="12" fill="#6d28d9">② 명부에서 같은 채널 찾기</text>
+
+  <rect x="940" y="270" width="170" height="84" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.8"/>
+  <text x="1025" y="312" text-anchor="middle" font-size="15" font-weight="700" fill="#6d28d9">브라우저</text>
+  <text x="1025" y="334" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7c3aed">"주문 완료!"</text>
+
+  <text x="470" y="180" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4f46e5">① 내 채널로 알림 보냄</text>
+  <line x1="640" y1="308" x2="938" y2="308" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#pb)"/>
+  <text x="790" y="296" text-anchor="middle" font-size="13.5" font-weight="700" fill="#4f46e5">③ 그 연결로 전달</text>
+
+  <rect x="1140" y="190" width="420" height="240" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
+  <text x="1166" y="232" font-size="19" font-weight="700" fill="#9a3412">알림 도달</text>
+  <text x="1166" y="272" font-size="17" fill="#475569">서버가 채널로 알림을 보내면,</text>
+  <text x="1166" y="296" font-size="17" fill="#475569">브로커가 명부에서 그 채널을</text>
+  <text x="1166" y="320" font-size="17" fill="#475569">구독한 연결을 찾아 보냅니다.</text>
+  <text x="1166" y="360" font-size="17" fill="#475569">보낸 채널과 명부의 채널이 같아야</text>
+  <text x="1166" y="384" font-size="17" fill="#475569">그 브라우저에 닿습니다.</text>
+</svg>
+</div>
+<div class="caption">그림 5-6. 3단계 - 브로커가 명부를 보고 같은 채널의 연결로 알림을 보낸다</div>
+
+</body>
+</html>

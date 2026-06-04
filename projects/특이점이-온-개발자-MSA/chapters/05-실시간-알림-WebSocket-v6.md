@@ -234,8 +234,6 @@ ex04/
 
 :::term-box
 **웹소켓(WebSocket)이란?** 클라이언트와 서버가 한 번 연결을 맺으면 이를 끊지 않고 유지하는 통신 방식입니다. 연결이 유효한 동안에는 서버가 클라이언트의 요청을 기다리지 않고도 데이터를 보낼 수 있어, 상태 변화를 실시간으로 전달할 수 있습니다.
-
-웹소켓은 HTTP를 완전히 대체하는 독립적인 기술이 아닙니다. 처음에는 일반 HTTP 요청으로 연결을 시작한 뒤, 프로토콜을 웹소켓으로 전환하겠다는 신호(Upgrade)를 주고받아 기존 연결을 웹소켓 방식으로 전환합니다.
 :::
 
 지금은 주문이 생성됨과 동시에 완료 처리가 됩니다. 실시간 알림이 올바르게 작동하려면 실제 배달이 끝난 뒤에 주문이 완료되어야 하므로, 먼저 배달 완료 기능부터 구현해 보겠습니다.
@@ -437,7 +435,8 @@ public DeliveryResponse completeDelivery(int deliveryId) {
     Delivery findDelivery = deliveryRepository.findById(deliveryId)
             .orElseThrow(() -> new Exception404("배달 정보를 조회할 수 없습니다."));
     findDelivery.complete();
-    deliveryEventProducer.publishDeliveryCompleted(new DeliveryCompletedEvent(findDelivery.getOrderId()));
+    deliveryEventProducer.publishDeliveryCompleted(
+            new DeliveryCompletedEvent(findDelivery.getOrderId()));
     return DeliveryResponse.from(findDelivery);
 }
 ```
@@ -468,58 +467,103 @@ public void deliveryCompleted(DeliveryCompletedEvent event) {
 
 ### 5.5.1 웹소켓 설정
 
-WebSocketConfig는 웹소켓을 활성화하고, 클라이언트가 접속할 주소(`/api/ws/orders`)를 지정합니다. 클라이언트가 이 주소로 요청하면 서버와 웹소켓 연결이 맺어집니다.
+WebSocketConfig는 두 가지 주소를 등록합니다. 하나는 **클라이언트가 웹소켓으로 연결할 주소(`/api/ws/orders`)** 이고, 다른 하나는 **서버가 주문 완료 알림을 보낼 채널의 접두사(`/topic`)** 입니다. 클라이언트가 연결 주소로 접속하면 서버와 웹소켓으로 연결됩니다.
 
 `core/config/WebSocketConfig.java`를 열고 아래 클래스를 작성합니다.
 
 ```java [실습 4] core/config/WebSocketConfig.java. STOMP 웹소켓 설정
 @Configuration
-@EnableWebSocketMessageBroker // STOMP WebSocket 브로커 활성화
+@EnableWebSocketMessageBroker // 이 애너테이션을 붙이면 STOMP 메시징 기능이 켜집니다
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // /topic 접두사로 메시지 라우팅 (Kafka 토픽과는 다른 개념)
+        // /topic으로 시작하는 주소로 메시지가 오면,
+        // 서버가 같은 주소를 구독한 클라이언트에게 전달합니다
         config.enableSimpleBroker("/topic");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 웹소켓 연결 엔드포인트 — withSockJS()는 미지원 브라우저용 폴백
+        // 클라이언트가 웹소켓 연결을 시작할 주소입니다. 어떤 출처에서든 연결을 허용합니다
         registry.addEndpoint("/api/ws/orders").setAllowedOriginPatterns("*").withSockJS();
     }
 }
 ```
 
 :::note
-**웹소켓 위에 STOMP 프로토콜을 사용합니다.** STOMP를 얹으면 "이 채널을 구독한다", "이 채널에 메시지를 보낸다" 같은 발행-구독 구조를 쓸 수 있습니다. 클라이언트가 `/topic/orders/{userId}` 채널을 구독하면 해당 사용자에게만 알림이 전달됩니다.
+**웹소켓 위에 STOMP 프로토콜을 사용합니다.** 웹소켓은 서버와 클라이언트를 계속 연결해 주지만, 연결만으로는 메시지를 누구에게 보낼지 가려내지 못합니다. STOMP(Simple Text Oriented Messaging Protocol)를 얹으면 메시지를 채널로 나눠, **채널을 구독한 사람에게만 보내는 발행-구독 구조**를 쓸 수 있습니다. 이 예제에서 서버는 `/topic/orders/{userId}` 채널로 보내고, 같은 채널을 구독한 사용자만 자기 주문 완료 알림을 받습니다.
 :::
 
 ### 5.5.2 SimpMessagingTemplate - 주문 완료 시 Push 발송
 
-`completeOrder` 메서드에서 `/topic/orders/{userId}` 채널에 메시지를 보내면 userId에 해당하는 사용자만 알림을 수신합니다.
-
-:::term-box
-**SimpMessagingTemplate이란?** Spring이 제공하는 메시지 전송 도구입니다. `convertAndSend(destination, payload)` 메서드로 지정한 채널을 구독한 모든 클라이언트에게 메시지를 Push합니다.
-:::
+이제 주문이 완료되는 순간, 앞에서 본 `/topic/orders/{userId}` 채널로 알림을 보낼 차례입니다. 주문을 완료 처리하는 `completeOrder` 메서드에서, `SimpMessagingTemplate`이라는 도구로 이 채널에 메시지를 보냅니다.
 
 `usecase/OrderService.java`의 `completeOrder` 메서드를 아래처럼 수정합니다.
 
 ```java [실습 5] usecase/OrderService.java. completeOrder + WebSocket Push
-private final SimpMessagingTemplate messagingTemplate;  // 추가: 생성자 주입
-
 @Transactional
 public void completeOrder(int orderId) {
     Order findOrder = orderRepository.findById(orderId)
             .orElseThrow(() -> new Exception404("주문을 찾을 수 없습니다."));
     findOrder.complete();
-    messagingTemplate.convertAndSend("/topic/orders/" + findOrder.getUserId(), Map.of("orderId", orderId));  // 추가: WebSocket Push
+    // 추가: 이 채널을 구독한 클라이언트에게 메시지를 보냄
+    messagingTemplate.convertAndSend(
+            "/topic/orders/" + findOrder.getUserId(),
+            Map.of("orderId", orderId));
 }
 ```
 
-서버 측 웹소켓 구현이 끝났습니다. 동작에 필요한 보조 설정과 클라이언트만 남았습니다.
+### 5.5.3 주문 서비스 보조 설정
 
-클라이언트가 알림을 받으려면, 서버가 정한 주소를 클라이언트도 똑같이 써야 합니다.
+핵심 코드 외에 주문 서비스에 필요한 설정은 표로 정리합니다. 전체 코드는 깃헙 레포에서 확인합니다.
+
+| 파일 | 역할 |
+|------|------|
+| **order-service/build.gradle** | 웹소켓·STOMP 의존성 추가 |
+| **JwtAuthenticationFilter.java** | 웹소켓 연결 경로를 로그인 검사에서 제외 |
+
+## 5.6 프론트엔드 연결
+
+서버는 주문이 완료되면 채널로 알림을 보냅니다. 이제 **같은 채널을 구독해 알림을 받는 클라이언트**를 만들 차례입니다. 먼저 프록시가 웹소켓 연결을 끊지 않게 하고, 브라우저가 STOMP로 자기 채널을 구독하게 합니다.
+
+### 5.6.1 업그레이드 헤더 전달
+
+보통 HTTP 요청은 한 번 주고받으면 연결이 끝납니다. 웹소켓은 연결을 끊지 않고 계속 열어 둡니다. 그래서 처음 연결할 때 "일반 HTTP가 아니라 웹소켓으로 바꾸자"는 신호를 주고받습니다. 이 신호를 **업그레이드 헤더**라고 합니다.
+
+문제는 브라우저와 서버 사이에 frontend와 gateway가 있다는 점입니다. 이 둘이 업그레이드 헤더를 넘기지 않으면 일반 요청처럼 처리돼 **연결이 끊깁니다**. 그래서 frontend와 gateway 두 곳의 nginx에 업그레이드 헤더를 전달하도록 설정합니다.
+
+`frontend/nginx.conf`의 `/api/ws/` 위치에 아래처럼 업그레이드 헤더를 더합니다.
+
+```nginx [frontend/nginx.conf] 웹소켓 업그레이드 헤더
+location /api/ws/ {
+    proxy_pass http://gateway;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+```
+
+`gateway/nginx.conf`의 `/api/ws/` 블록에도 같은 코드를 넣습니다. 그래야 브라우저에서 gateway까지 업그레이드 헤더가 끊기지 않고 전달됩니다.
+
+### 5.6.2 클라이언트 - STOMP 구독
+
+`frontend/index.html`은 서버 알림을 받아 화면에 주문 완료를 표시하는 STOMP 클라이언트입니다. 주문하기 버튼을 누르면, 먼저 웹소켓을 연결하고 자기 주문 완료 알림이 올 `/topic/orders/{userId}` 채널을 구독합니다. 알림 받을 준비를 마친 다음 주문 API를 호출합니다.
+
+```javascript [frontend/index.html] STOMP 연결과 구독
+// 1. /api/ws/orders로 웹소켓 연결
+stomp = Stomp.over(new SockJS('/api/ws/orders?token=' + TOKEN));
+stomp.connect({}, function () {
+    // 2. 내 주문 알림 채널 구독
+    stomp.subscribe('/topic/orders/' + userId, function (msg) {
+        // 3. 서버가 보낸 메시지를 화면에 표시
+        const data = JSON.parse(msg.body);
+        status.textContent = '주문 완료! (주문번호: ' + data.orderId + ')';
+    });
+});
+```
+
+주문이 완료되면 서버는 `/topic/orders/{userId}` 채널로 완료 알림을 보내고, 미리 구독해 둔 클라이언트가 받아 화면에 주문 완료를 표시합니다. 단, 보낸 채널과 구독한 채널이 **글자까지 같아야** 알림이 도착합니다. 전체 index.html은 깃헙 레포에서 확인합니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 760 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="서버와 클라이언트가 같은 연결 주소와 같은 채널 주소를 써야 한다. 연결은 addEndpoint와 SockJS가 /api/ws/orders로 일치해야 하고, 발행 convertAndSend와 구독 subscribe가 /topic/orders/userId로 일치해야 하며 /topic은 enableSimpleBroker 접두사다.">
@@ -558,57 +602,6 @@ public void completeOrder(int orderId) {
 </div>
 
 *그림 5-7. 웹소켓 주소 일치 - 같은 색은 글자까지 똑같아야 동작합니다*
-
-### 5.5.3 주문 서비스 보조 설정
-
-핵심 코드 외에 주문 서비스에 필요한 설정은 표로 정리합니다. 전체 코드는 깃헙 레포에서 확인합니다.
-
-| 파일 | 역할 |
-|------|------|
-| **order-service/build.gradle** | 웹소켓·STOMP 의존성 추가 |
-| **JwtAuthenticationFilter.java** | 웹소켓 연결 경로를 로그인 검사에서 제외 |
-
-## 5.6 프론트엔드 연결
-
-이제 브라우저가 알림을 받을 차례입니다. 프록시가 웹소켓 연결을 끊지 않게 하고, 브라우저가 STOMP로 자기 채널을 구독하도록 만듭니다.
-
-### 5.6.1 프록시 업그레이드 헤더
-
-보통 HTTP 요청은 한 번 주고받으면 연결이 끝납니다. 웹소켓은 연결을 끊지 않고 계속 열어 두는 방식이라, 처음 연결할 때 "일반 HTTP가 아니라 계속 유지하는 웹소켓으로 바꾸자"고 알리는 신호, 곧 업그레이드 헤더가 필요합니다.
-
-문제는 브라우저와 서버 사이에 프록시(frontend·gateway)가 있다는 점입니다. 프록시가 업그레이드 헤더를 전달하지 않으면 일반 요청처럼 처리돼 연결이 끊깁니다. 그래서 두 프록시의 `/api/ws/` 설정 모두에 업그레이드 헤더를 전달하도록 적어 둡니다.
-
-`frontend/nginx.conf`의 `/api/ws/` 위치에 아래처럼 업그레이드 헤더를 더합니다.
-
-```nginx [frontend/nginx.conf] 웹소켓 업그레이드 헤더
-location /api/ws/ {
-    proxy_pass http://gateway;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-}
-```
-
-`gateway/nginx.conf`의 `/api/ws/` 블록도 같은 네 줄을 둬, 브라우저에서 gateway까지 업그레이드 헤더가 끊기지 않고 전달됩니다.
-
-### 5.6.2 클라이언트 - STOMP 구독
-
-`frontend/index.html`은 서버 알림을 받아 화면에 주문 완료를 표시하는 STOMP 클라이언트입니다. 주문하기 버튼을 누르면, 먼저 `/api/ws/orders`로 웹소켓을 연결하고 자기 채널 `/topic/orders/{userId}`를 구독한 뒤 주문 API를 호출합니다.
-
-```javascript [frontend/index.html] STOMP 연결과 구독
-// 1. /api/ws/orders로 웹소켓 연결
-stomp = Stomp.over(new SockJS('/api/ws/orders?token=' + TOKEN));
-stomp.connect({}, function () {
-    // 2. 내 주문 알림 채널 구독
-    stomp.subscribe('/topic/orders/' + userId, function (msg) {
-        // 3. 서버가 보낸 메시지를 화면에 표시
-        const data = JSON.parse(msg.body);
-        status.textContent = '주문 완료! (주문번호: ' + data.orderId + ')';
-    });
-});
-```
-
-서버가 `/topic/orders/{userId}`로 발행한 메시지를, 같은 채널을 구독한 클라이언트가 받아 화면을 바꿉니다. 보낸 채널과 구독한 채널이 글자까지 같아야 그 사용자에게 도착합니다. 전체 index.html은 깃헙 레포에서 확인합니다.
 
 ## 5.7 전체 시스템 통합 테스트
 

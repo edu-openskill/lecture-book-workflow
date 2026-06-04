@@ -803,14 +803,16 @@ public class OrderEventProducer {
 ```java [실습 2] usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행
 @Override
 @Transactional
-public OrderResponse createOrder(int userId, int productId, int quantity, Long price, String address) {
+public OrderResponse createOrder(int userId, int productId,
+        int quantity, Long price, String address) {
     // 1. 주문 생성
     Order createdOrder = orderRepository.save(Order.create(userId, productId, quantity, price));
     createdOrder.validateMinAmount();
 
     // 2. Kafka로 주문 생성 이벤트 발행
     orderEventProducer.publishOrderCreated(
-            new OrderCreatedEvent(createdOrder.getId(), userId, productId, quantity, price, address)
+            new OrderCreatedEvent(
+                    createdOrder.getId(), userId, productId, quantity, price, address)
     );
 
     return OrderResponse.from(createdOrder);
@@ -860,13 +862,16 @@ public void decreaseProductCommand(DecreaseProductCommand command) {
 
     // 2. 처리 결과를 '재고 차감 이벤트'로 발행
     productEventProducer.publishProductDecreased(
-            new ProductDecreasedEvent(command.orderId(), command.productId(), command.quantity(), isSuccess));
+            new ProductDecreasedEvent(
+                    command.orderId(), command.productId(), command.quantity(), isSuccess));
 }
 ```
 
 상품 서비스는 명령을 받아 재고를 줄인 뒤, 성공이든 실패든 그 결과를 이벤트에 담아 돌려줍니다.
 
 각 서비스 코드는 모두 같은 발행·구독 패턴이고, 토픽 이름만 다릅니다. 그래서 코드를 일일이 보지 않아도, 각 서비스가 무슨 토픽을 구독해 어떻게 처리하고 무엇을 발행하는지만 알면 전체 흐름이 보입니다.
+
+이 흐름의 끝에서 주문 서비스는 주문 완료 명령을 받아 `completeOrder`로 주문을 COMPLETED로 바꿉니다.
 
 각 서비스의 전체 코드는 GitHub에서 확인하세요.
 

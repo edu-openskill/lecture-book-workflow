@@ -382,9 +382,11 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase, Cancel
 
     @Override
     @Transactional
-    public OrderResponse createOrder(int userId, int productId, int quantity, Long price, String address) {
+    public OrderResponse createOrder(int userId, int productId,
+            int quantity, Long price, String address) {
         // 3. 주문을 생성하고, 생성된 주문이 스스로 최소 금액을 검증
-        Order createdOrder = orderRepository.save(Order.create(userId, productId, quantity, price));
+        Order createdOrder = orderRepository.save(
+                Order.create(userId, productId, quantity, price));
         createdOrder.validateMinAmount();
         // ... 재고 차감 → 배달 생성 → 완료 (보상 트랜잭션)
     }
