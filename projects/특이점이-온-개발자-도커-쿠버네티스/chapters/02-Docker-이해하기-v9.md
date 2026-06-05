@@ -1804,58 +1804,29 @@ docker push coderyu5523/tomcat   # 로컬 이미지를 Hub로 업로드
 
 *그림 2-44. 호스트 폴더와 컨테이너 경로가 같은 데이터를 바라보도록 묶인 상태*
 
-호스트의 `/c/app/bind` 경로에 폴더를 하나 만들고, 컨테이너 안의 경로와 직접 연결합니다.
+이제 터미널을 열고 직접 해보겠습니다. 호스트의 `/c/app/bind` 경로에 폴더를 하나 만들고, 컨테이너 안의 경로와 연결합니다.
 
 ```bash [터미널] bind mount 폴더 준비와 마운트 실행
 # 호스트 PC에 공유할 폴더 생성
 mkdir -p /c/app/bind
+# 문법: docker run -it --mount type=bind,src=<호스트 경로>,dst=<컨테이너 경로> <이미지>
 # 호스트 폴더(src)와 컨테이너 경로(dst)를 연결
 docker run -it --mount type=bind,src=/c/app/bind,dst=/app/bind ubuntu
 ```
 
-macOS·Linux 사용자는 호스트 경로를 `~/app/bind`로 바꿔 사용합니다.
-
-<table>
-<colgroup>
-<col style="width:140px">
-<col>
-</colgroup>
-<thead><tr><th>단계</th><th>명령</th></tr></thead>
-<tbody>
-<tr><td>폴더 생성</td><td><strong>mkdir -p ~/app/bind</strong></td></tr>
-<tr><td>마운트 실행</td><td><strong>docker run -it --mount type=bind,src=$HOME/app/bind,dst=/app/bind ubuntu</strong></td></tr>
-<tr><td>확인</td><td><strong>ls ~/app/bind</strong></td></tr>
-</tbody>
-</table>
-
-컨테이너 안에서 `a.txt`를 만들고, 호스트 쪽 폴더를 확인해 봅니다.
+컨테이너 안 `/app/bind`에 `a.txt`를 만들고, 호스트 쪽 `/c/app/bind`에서 같은 파일이 보이는지 확인합니다.
 
 ```bash [터미널] bind mount 양방향 동기화 확인
 touch /app/bind/a.txt   # 컨테이너 안에서 파일 생성
-ls /c/app/bind          # 호스트 터미널에서 확인
 ```
 
-<div class="terminal-log">
-  <div class="tl-chrome">
-    <div class="tl-traffic"><span></span><span></span><span></span></div>
-    <div class="tl-title">실행결과</div>
-    <div class="tl-spacer"></div>
-  </div>
-  <div class="tl-body">
-    <div><span class="tl-key">$</span> <span class="tl-str">ls /c/app/bind</span></div>
-    <div>a.txt</div>
-  </div>
-</div>
+![](../assets/CH02/bind-mount-result.png)
 
 *그림 2-45. 호스트 PC에서 같은 파일이 보이는 것을 확인*
 
-같은 파일이 **양쪽에** 있습니다. 호스트에서 소스 코드를 고치면 컨테이너에 바로 반영되니, **개발할 때 쓰기 딱 맞는 방식**입니다.
-
 ### 2.8.2 볼륨 마운트: Docker가 관리하는 저장소
 
-바인드 마운트는 **사용자가 폴더를 직접 관리**해야 합니다.
-
-반대로 **볼륨 마운트(Volume Mount)** 는 **Docker가 자동으로 관리**합니다. **사용자는 볼륨에 이름만 정하면**, **실제 저장 위치는 Docker가 알아서** 처리합니다.
+바인드 마운트는 **사용자가 폴더를 직접 관리**해야 합니다. 반대로 **볼륨 마운트(Volume Mount)** 는 **Docker가 자동으로 관리**합니다. **사용자는 볼륨에 이름만 정하면**, **호스트의 실제 저장 위치는 Docker가 알아서** 처리합니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="볼륨 마운트 — Docker가 관리하는 호스트 PC 안 저장 공간을 컨테이너에 연결한 구조">
@@ -1894,9 +1865,10 @@ ls /c/app/bind          # 호스트 터미널에서 확인
 
 *그림 2-46. Docker 엔진이 관리하는 내부 저장 공간에 데이터가 저장되는 구조*
 
-`metacoding-volume`이라는 이름으로 볼륨을 만들면서 ubuntu 컨테이너를 실행합니다. **존재하지 않는 볼륨 이름을 주면 Docker가 자동으로 만들어 줍니다**.
+이제 직접 해보겠습니다. 다음 명령은 `metacoding-volume`이라는 볼륨을 만들어 ubuntu 컨테이너를 실행합니다.
 
 ```bash [터미널] named volume 마운트로 ubuntu 실행
+# 문법: docker run -it --mount type=volume,src=<볼륨 이름>,dst=<컨테이너 경로> <이미지>
 # 볼륨 마운트로 ubuntu 실행
 docker run -it --mount type=volume,src=metacoding-volume,dst=/app/volume ubuntu
 ```
@@ -1915,7 +1887,9 @@ docker run -it --mount type=volume,src=metacoding-volume,dst=/app/volume ubuntu
 
 *그림 2-47. 볼륨 마운트로 ubuntu 실행*
 
-컨테이너 안에 들어가면 `/app/volume` 폴더가 자동으로 만들어져 있습니다. 이 폴더에 빈 파일을 하나 만들고, 컨테이너를 빠져나와 볼륨이 그대로 남아 있는지 확인합니다.
+데이터는 Docker가 관리하는 저장소에 보관되며, 컨테이너는 `/app/volume` 경로를 통해 이 데이터를 읽고 씁니다. 따라서 해당 경로에 저장한 데이터만 유지되고, 그 외의 경로에 저장된 파일은 컨테이너 삭제 시 함께 지워집니다.
+
+이 폴더에 `b.txt`를 만들고, 컨테이너를 빠져나와 볼륨이 그대로 남아 있는지 확인합니다.
 
 ```bash [터미널] 볼륨에 파일 생성
 touch /app/volume/b.txt   # 볼륨 안에 빈 파일 생성
@@ -1966,26 +1940,13 @@ ls /app/volume
 
 방금 만든 `b.txt`가 새 컨테이너 안에서도 그대로 보입니다. **컨테이너를 내려도 데이터는 사라지지 않습니다**.
 
-두 마운트 방식의 명령어 문법은 다음과 같습니다.
-
-<table style="width:100%; border-collapse:collapse;">
-  <thead>
-    <tr>
-      <th style="width:18%; text-align:left;">방식</th>
-      <th style="text-align:left;">명령어</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td style="white-space:nowrap;"><strong>바인드 마운트</strong></td><td style="white-space:nowrap;"><strong>docker run -it --mount type=bind,src=&lt;호스트 경로&gt;,dst=&lt;컨테이너 경로&gt; &lt;이미지&gt;</strong></td></tr>
-    <tr><td style="white-space:nowrap;"><strong>볼륨 마운트</strong></td><td style="white-space:nowrap;"><strong>docker run -it --mount type=volume,src=&lt;볼륨 이름&gt;,dst=&lt;컨테이너 경로&gt; &lt;이미지&gt;</strong></td></tr>
-  </tbody>
-</table>
-
 오픈이는 하루 사이에 익힌 키워드를 정리했습니다. 격리, 이미지, 포트포워딩, CMD, 볼륨이 머릿속에 정리됐습니다. 어제 헤맸던 그 에러도 이제는 어디에서 막혔던 건지 짚을 수 있을 것 같았습니다.
 
-다만 한 가지가 남았습니다. 오늘 띄운 건 컨테이너 한 대였습니다. 실제 회사에서 다루는 사내 도구는 화면 하나에도 프론트엔드, 백엔드, 데이터베이스가 같이 굴러갑니다. `docker run` 명령을 컨테이너마다 따로 친다고 생각하니 명령줄이 길어지는 그림이 먼저 떠올랐습니다.
+다만 지금까지 익힌 건 도커와 컨테이너의 기본입니다. 실제 현장에서 그대로 쓰기에는 한계가 있습니다.
 
-*'한 대는 됐다. 그런데 세 대를 함께 띄우려면 이 명령줄을 매번 칠 수는 없을 텐데.'*
+*'기본은 익혔다. 그런데 실제 현장은 이것만으로는 부족하겠지.'*
+
+다음 챕터에서는 컨테이너를 활용해 실제 서비스를 구성하는 방법을 익혀 보겠습니다.
 
 :::remember
 **이것만은 기억하자**
@@ -1995,6 +1956,4 @@ ls /app/volume
 - **컨테이너 통신은 docker0가 중심입니다.** 컨테이너끼리는 docker0로 묶이고, 외부 요청은 포트포워딩으로 들어옵니다.
 - **메인 프로세스가 살아 있어야 컨테이너가 살아 있습니다.** 이미지의 CMD에 앱 실행 명령을 지정해 두는 이유가 여기에 있습니다.
 - **마운트는 컨테이너와 외부 저장소를 잇습니다.** 바인드는 호스트의 특정 폴더를, 볼륨은 Docker 엔진이 관리하는 저장소를 컨테이너에 연결합니다.
-
-다음 챕터에서는 단일 컨테이너가 아니라, 프론트엔드·백엔드·DB가 함께 뜨는 실제 서비스 구성을 다룹니다. **Dockerfile**로 환경을 자동으로 만들고 **Docker Compose**로 컨테이너 묶음을 한 번에 올려 보겠습니다.
 :::
