@@ -1043,7 +1043,7 @@ minikube tunnel
 
 이제 AirPods (productId=3) 2개를 주문하는 API 요청을 보내 보겠습니다.
 
-```json
+```json [Hoppscotch] 주문 생성
 POST http://127.0.0.1:80/api/orders
 
 {
@@ -1060,7 +1060,7 @@ POST http://127.0.0.1:80/api/orders
 
 챕터 3과 다르게 즉시 `PENDING` 상태로 반환됩니다. 잠시 후 주문 상태를 다시 조회하면, Kafka 이벤트가 처리되어 상태가 `COMPLETED`로 바뀐 것을 확인할 수 있습니다.
 
-```json
+```json [Hoppscotch] 주문 조회
 GET http://127.0.0.1:80/api/orders/4
 ```
 <!-- terminal-prompt: HTTP client showing GET /api/orders/4 response. JSON body with order status changed to "COMPLETED". -->
@@ -1075,7 +1075,7 @@ GET http://127.0.0.1:80/api/orders/4
 
 동기 방식에서는 품절 상품을 주문하면 **주문 자체가 생성되지 않아** 되돌릴 것도 없었습니다. 반면 비동기 방식에서는 주문이 **PENDING으로 먼저 저장**됩니다. 그래서 재고 감소가 실패하면 orchestrator가 주문을 취소하는 **보상 트랜잭션**을 시작합니다. iPhone 15(productId=2, 재고 0)로 확인해 보겠습니다.
 
-```json
+```json [Hoppscotch] 주문 생성 (품절 상품)
 POST http://127.0.0.1:80/api/orders
 
 {
@@ -1091,7 +1091,7 @@ POST http://127.0.0.1:80/api/orders
 
 잠시 후 상태를 확인하면 `CANCELLED`가 됩니다.
 
-```JSON
+```JSON [Hoppscotch] 주문 조회
 GET http://127.0.0.1:80/api/orders/5
 ```
 <!-- [CAPTURE NEEDED: GET /api/orders/5 응답 — 주문 상태가 CANCELLED] -->
@@ -1104,13 +1104,9 @@ GET http://127.0.0.1:80/api/orders/5
 kubectl delete namespace metacoding
 ```
 
-상품·배달을 직접 호출하고 실패까지 떠안던 주문 서비스는 이제 주문을 저장하고 **이벤트 하나만 발행**합니다. 직접 호출이 사라지면서 서비스 사이의 **강한 결합이 풀렸고**, **try/catch 보상 블록도 함께 없어졌습니다**.
+상품·배달을 직접 호출하며 실패 시 보상까지 책임지던 주문 서비스는 이제 주문을 저장하고 **이벤트 하나만 발행**합니다. 직접 호출이 사라지면서 서비스 사이의 **강한 결합이 풀렸고**, **try/catch 보상 블록도 함께 없어졌습니다**.
 
-서비스를 비동기로 전환하고 며칠 뒤, 베타 테스터로 등록한 동료가 자리로 왔습니다. 표정이 떨떠름했습니다.
-
-**동료**: "어제 직접 주문해 봤는데, 좀 이상한 게 있었어요."
-
-시스템을 점검하던 동료가 새로운 문제를 알려 왔습니다.
+서비스를 비동기로 전환하고 며칠 뒤, 베타 테스터로 등록한 동료가 새로운 문제를 들고 찾아왔습니다.
 
 :::remember
 **이것만은 기억하자**

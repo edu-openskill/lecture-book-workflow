@@ -417,6 +417,15 @@ def find_front_files() -> list[Path]:
     return sorted(f for f in front_dir.glob("*.md") if not f.name.endswith(".bak"))
 
 
+def find_back_files() -> list[Path]:
+    """book/back/ 의 epilogue·afterword 등 back matter 파일 목록.
+    챕터와 같은 템플릿·CSS로 렌더된다."""
+    back_dir = PROJECT_ROOT / "book" / "back"
+    if not back_dir.exists():
+        return []
+    return sorted(f for f in back_dir.glob("*.md") if not f.name.endswith(".bak"))
+
+
 def render_chapter(md_path: Path, md_renderer) -> Chapter:
     raw = md_path.read_text(encoding="utf-8")
 
@@ -672,6 +681,11 @@ def main() -> int:
         action="store_true",
         help="book/front/*.md (preface·prologue·github-source 등)만 빌드",
     )
+    parser.add_argument(
+        "--back",
+        action="store_true",
+        help="book/back/*.md (epilogue·afterword 등)만 빌드",
+    )
     args = parser.parse_args()
 
     configure_paths(args.project_root)
@@ -688,6 +702,11 @@ def main() -> int:
         files = find_front_files()
         if not files:
             print("❌ book/front/*.md 가 없습니다.", file=sys.stderr)
+            return 1
+    elif args.back:
+        files = find_back_files()
+        if not files:
+            print("❌ book/back/*.md 가 없습니다.", file=sys.stderr)
             return 1
     else:
         files = find_chapter_files(args.chapter)

@@ -1,10 +1,10 @@
 # 챕터 5. 실시간 알림 - 주문 완료를 즉시 전달하다
 
-베타 테스터로 등록한 동료가 자리로 왔습니다. 표정이 떨떠름했습니다.
+베타 테스터로 새 시스템을 써 본 동료였습니다. 표정이 떨떠름했습니다.
 
 **동료**: "어제 물건을 주문했는데, 화면이 계속 **처리 중**이더라고요. 끝났는지 알 수가 없어서 한참 뒤에 주문 내역을 다시 열어 보고서야 **주문 완료**된 걸 알았어요."
 
-오픈이는 코드 흐름을 따라가 봤습니다. 주문이 생성되면 그대로 처리 중(PENDING) 상태로 응답 후, 사용자에게 완료(COMPLETED) 응답은 하지 않았습니다. 게다가 주문은 배달이 끝나는 순간과 상관없이 만들어지자마자 완료 처리가 되었습니다.
+오픈이는 코드 흐름을 따라가 봤습니다. 주문이 생성되면 그대로 처리 중(**PENDING**) 상태로 응답 후, 사용자에게 완료(**COMPLETED**) 응답은 하지 않았습니다. 게다가 주문 완료는 실제 배달이 끝났는지와 무관하게, 배달이 생성되는 순간 곧바로 처리되었습니다.
 
 이 문제를 들고 선배에게 갔습니다.
 
@@ -406,9 +406,11 @@ ex04/
 
 ## 5.3 웹소켓 연결 흐름
 
-앞 절의 마지막 단계에서 주문 서비스는 완료된 주문을 웹소켓으로 사용자에게 알립니다. 그 알림이 브라우저 화면까지 닿는 길은 연결을 맺고(연결), 받을 채널을 등록하고(구독), 그 채널로 메시지를 보내는(발송) 세 단계로 이뤄집니다. 코드로 옮기기 전에, 세 단계가 어떻게 이어지는지 먼저 따라가 보겠습니다.
+이번에는 웹소켓 연결 흐름을 살펴보겠습니다. 주문 서비스가 보낸 알림이 사용자 화면에 뜨기까지, 크게 세 단계를 거칩니다.
 
-첫 단계는 연결입니다. 앞에서 웹소켓을 전화 통화에 빗댔습니다. 통화가 이어지려면 한쪽이 걸고 상대가 받아야 하듯, 브라우저가 서버가 정한 주소로 연결을 청하면 서버가 이를 받아들여 양방향 연결이 열립니다. 브라우저와 주문 서비스 사이에 놓인 frontend와 gateway는 이 요청을 그대로 통과시켜, 한 번 열린 연결이 끝까지 유지되도록 합니다.
+### 5.3.1 브라우저와 주문 서비스의 연결 - HTTP에서 웹소켓으로
+
+전화는 한쪽이 걸고 상대가 받아야 통화가 이어집니다. 마찬가지로 브라우저가 연결을 청하고 주문 서비스가 받아들이면 **양방향 연결**이 열립니다. 이 연결은 **업그레이드 헤더**를 통해 일반 HTTP에서 **웹소켓**으로 바뀝니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 900 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 연결 핸드셰이크. 브라우저가 frontend와 gateway를 거쳐 주문 서비스로 웹소켓 업그레이드를 요청하면 응답으로 양방향 연결이 열린다.">
@@ -425,42 +427,46 @@ ex04/
   <text x="480" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">gateway</text>
   <rect x="630" y="78" width="120" height="52" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
   <text x="690" y="110" text-anchor="middle" font-size="15" font-weight="700" fill="#3730a3">주문 서비스</text>
-  <text x="450" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#4f46e5">① /api/ws/orders 연결 요청 (HTTP → WebSocket 업그레이드)</text>
+  <text x="450" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#4f46e5">① 웹소켓 연결 요청 (HTTP → WebSocket 업그레이드)</text>
   <line x1="180" y1="94" x2="272" y2="94" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq1)"/>
   <line x1="380" y1="94" x2="422" y2="94" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq1)"/>
   <line x1="530" y1="94" x2="622" y2="94" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq1)"/>
   <line x1="622" y1="114" x2="538" y2="114" stroke="#0d9488" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#rs1)"/>
   <line x1="422" y1="114" x2="388" y2="114" stroke="#0d9488" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#rs1)"/>
   <line x1="272" y1="114" x2="188" y2="114" stroke="#0d9488" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#rs1)"/>
-  <text x="450" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">② 101 Switching Protocols (양방향 연결 수립)</text>
+  <text x="450" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">② 양방향 연결 수립</text>
 </svg>
 </div>
 
 *그림 5-7. 1단계 - 브라우저가 청하고 서버가 받아들여 양방향 연결이 열립니다*
 
-연결이 열렸어도 서버는 알림을 어디로 보내야 할지 아직 모릅니다. 그래서 브라우저가 자기가 받을 채널을 서버에 알립니다. 그러면 주문 서비스 안의 브로커가 "이 연결은 이 채널을 받는다"를 구독 명부에 한 줄 적어 둡니다. 명부의 이 한 줄이 곧 채널을 구독한다는 말의 실체입니다.
+:::term-box
+**업그레이드 헤더란?** HTTP Upgrade 헤더는 클라이언트와 서버가 현재 사용 중인 HTTP 연결을 다른 프로토콜로 전환하기 위해 사용하는 헤더입니다. 주로 웹소켓 연결을 설정할 때 사용되며, 이를 통해 동일한 연결에서 새로운 통신 방식을 사용할 수 있습니다.
+:::
+
+### 5.3.2 브라우저의 채널 구독 - 명부에 한 줄 추가
+
+웹소켓이 연결되더라도 서버는 누구에게 어떤 알림을 보낼지 스스로 알 수 없습니다. 따라서 브라우저가 먼저 서버에 자신이 받을 채널을 알려주며 **구독(Subscribe)** 해야 합니다.
+
+브라우저가 특정 채널을 구독하면, 주문 서비스 안의 브로커는 **구독 명부**에 그 사실을 기록해 둡니다. 즉, 브라우저가 구독하고 서버가 명부를 작성해 관리하는 구조입니다. 이제 서버는 이 명부를 보고 정확한 대상에게 알림을 발송합니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 900 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 구독 등록. 브라우저가 채널을 SUBSCRIBE로 알리고, 이 프레임은 1단계 연결을 타고 frontend와 gateway를 그대로 통과해 주문 서비스에 닿는다. 주문 서비스 안의 내장 STOMP 브로커가 구독 명부에 세션 A는 topic/orders/3이라고 한 줄 적어 둔다.">
+<svg viewBox="0 0 900 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 구독 등록. 브라우저가 채널을 SUBSCRIBE로 알리고, 이 프레임은 1단계 연결을 타고 frontend와 gateway를 그대로 통과해 주문 서비스에 닿는다. 주문 서비스 안의 내장 브로커가 구독 명부에 세션 A는 topic/orders/3이라고 한 줄 적어 둔다.">
   <defs>
     <marker id="rq2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
   <text x="450" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">2단계 - 구독 등록 (받을 채널을 명부에 적기)</text>
-
   <rect x="70" y="84" width="118" height="56" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.8"/>
   <text x="129" y="118" text-anchor="middle" font-size="14.5" font-weight="700" fill="#6d28d9">브라우저</text>
-
   <text x="223" y="100" text-anchor="middle" font-size="11.5" font-weight="700" fill="#4f46e5">구독</text>
   <line x1="188" y1="112" x2="258" y2="112" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq2)"/>
   <rect x="262" y="88" width="64" height="48" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
   <text x="294" y="107" text-anchor="middle" font-size="10" fill="#94a3b8">frontend</text>
   <text x="294" y="123" text-anchor="middle" font-size="10" fill="#94a3b8">gateway</text>
-  <text x="294" y="154" text-anchor="middle" font-size="9" fill="#94a3b8">1단계 연결 그대로 통과</text>
   <line x1="326" y1="112" x2="404" y2="112" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq2)"/>
-
   <rect x="408" y="74" width="372" height="92" rx="12" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
   <text x="428" y="96" font-size="13" font-weight="700" fill="#3730a3">주문 서비스</text>
-  <text x="428" y="116" font-size="10.5" fill="#64748b">구독 명부 (내장 STOMP 브로커)<tspan fill="#4f46e5" font-weight="700">&#160;&#160;· 방금 추가</tspan></text>
+  <text x="428" y="116" font-size="10.5" fill="#64748b">구독 명부 (내장 브로커)<tspan fill="#4f46e5" font-weight="700">&#160;&#160;· 방금 추가</tspan></text>
   <rect x="428" y="124" width="332" height="32" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
   <text x="446" y="145" font-size="12.5" fill="#3730a3">세션 A&#160;&#160;→&#160;&#160;<tspan class="mono" fill="#ff7849" font-weight="700">/topic</tspan><tspan class="mono" fill="#0f172a">/orders/</tspan><tspan class="mono" fill="#7c3aed" font-weight="700">3</tspan></text>
 </svg>
@@ -468,7 +474,13 @@ ex04/
 
 *그림 5-8. 2단계 - 브라우저가 구독하면 브로커가 구독 명부에 한 줄 적어 둡니다*
 
-이제 주문이 완료되면, 주문 서비스는 구독 명부에서 보낼 주소와 같은 채널을 찾습니다. 같은 채널을 구독해 둔 연결을 따라 알림이 브라우저까지 전달되고, 화면에 주문 완료가 표시됩니다. 보내는 채널과 구독한 채널이 글자까지 같아야 알림이 닿습니다.
+:::term-box
+**브로커란?** 메시지를 보내는 쪽과 받는 쪽 사이에서 전달을 중개하는 역할입니다. 어떤 클라이언트가 어떤 채널을 구독했는지 명부로 관리하다가, 메시지가 들어오면 같은 채널을 구독한 클라이언트에게 전달합니다.
+:::
+
+### 5.3.3 주문 서비스의 알림 발송 - 같은 채널 찾아 전달
+
+채널 주소에는 **알림을 받을 사용자**에 대한 정보가 들어 있습니다. 그래서 주문이 완료되면, 주문 서비스는 완료된 주문이 누구의 것인지부터 확인합니다. 그리고 주문한 사용자의 채널 주소를 구독 명부에서 찾아 알림을 보냅니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 900 184" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3단계 발송과 전달. 주문 서비스 안의 completeOrder가 발송 주소 topic/orders/3으로 같은 서비스 안의 구독 명부를 찾는다. 명부의 세션 A가 topic/orders/3을 구독하고 있으므로 주문 완료 알림으로 orderId 4를 보내고, 이 메시지는 1단계 연결을 타고 gateway와 frontend를 그대로 통과해 브라우저에 닿는다.">
@@ -477,30 +489,23 @@ ex04/
     <marker id="rs3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0d9488"/></marker>
   </defs>
   <text x="450" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">3단계 - 발송과 전달 (명부에서 같은 채널 찾기)</text>
-
   <rect x="40" y="72" width="450" height="100" rx="12" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
   <text x="60" y="94" font-size="13" font-weight="700" fill="#3730a3">주문 서비스</text>
-
   <rect x="60" y="104" width="144" height="54" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <text x="132" y="128" text-anchor="middle" font-size="12.5" class="mono" fill="#0f172a">completeOrder()</text>
   <text x="132" y="146" text-anchor="middle" font-size="10" fill="#64748b">주문 완료 처리</text>
-
   <text x="230" y="120" text-anchor="middle" font-size="10.5" font-weight="700" fill="#4f46e5">발송</text>
   <line x1="204" y1="131" x2="252" y2="131" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq3)"/>
-
-  <text x="256" y="94" font-size="10.5" fill="#64748b">구독 명부 (내장 STOMP 브로커)</text>
+  <text x="256" y="94" font-size="10.5" fill="#64748b">구독 명부 (내장 브로커)</text>
   <rect x="256" y="104" width="216" height="46" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
   <text x="272" y="132" font-size="12.5" fill="#3730a3">세션 A&#160;&#160;→&#160;&#160;<tspan class="mono" fill="#ff7849" font-weight="700">/topic</tspan><tspan class="mono" fill="#0f172a">/orders/</tspan><tspan class="mono" fill="#7c3aed" font-weight="700">3</tspan></text>
-
   <text x="658" y="114" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">주문 완료 알림</text>
   <line x1="490" y1="127" x2="536" y2="127" stroke="#0d9488" stroke-width="3" marker-end="url(#rs3)"/>
   <rect x="540" y="103" width="64" height="48" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
   <text x="572" y="122" text-anchor="middle" font-size="10" fill="#94a3b8">gateway</text>
   <text x="572" y="138" text-anchor="middle" font-size="10" fill="#94a3b8">frontend</text>
-  <text x="572" y="169" text-anchor="middle" font-size="9" fill="#94a3b8">1단계 연결 그대로 통과</text>
   <line x1="604" y1="127" x2="712" y2="127" stroke="#0d9488" stroke-width="3" marker-end="url(#rs3)"/>
   <text x="658" y="146" text-anchor="middle" font-size="10.5" class="mono" fill="#475569">{ orderId: 4 }</text>
-
   <rect x="716" y="99" width="158" height="56" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.8"/>
   <text x="795" y="123" text-anchor="middle" font-size="14.5" font-weight="700" fill="#6d28d9">브라우저</text>
   <text x="795" y="142" text-anchor="middle" font-size="10" fill="#64748b">화면에 '주문 완료!' 표시</text>
@@ -509,7 +514,7 @@ ex04/
 
 *그림 5-9. 3단계 - 발송 주소와 같은 채널을 명부에서 찾아 구독한 브라우저에 보냅니다*
 
-연결을 맺고, 채널을 구독하고, 그 채널로 보내는 세 단계가 웹소켓 알림의 흐름입니다. 배달이 끝나는 순간을 주문 완료로 잇고, 그 완료를 이 세 단계로 사용자에게 보내는 것이 이번 챕터에서 만들 전체 흐름입니다. 이제 코드로 옮길 차례입니다. 그 출발점인 배달 서비스에서, 배달의 생성과 완료를 나누는 일부터 시작합니다.
+세 단계가 모두 갖춰지면, 배달이 끝나는 순간 사용자 화면에 주문 완료가 표시됩니다. 이제 코드로 구현해 보겠습니다. 먼저 배달 서비스에서 배달의 생성과 완료 과정을 분리하는 작업부터 시작합니다.
 
 ## 5.4 배달 서비스 - 배달 완료 API
 
@@ -517,7 +522,7 @@ ex04/
 
 ### 5.4.1 createDelivery 수정 - 배달 생성·완료 분리
 
-배달 생성 시 배달 완료 호출을 지우면 배달은 PENDING으로 남습니다. 배달 완료는 배달 기사가 직접 호출할 때까지 미뤄집니다.
+배달 생성 시 배달 완료 호출을 지우면 배달은 **PENDING**으로 남습니다. 배달 완료는 배달 기사가 직접 호출할 때까지 미뤄집니다.
 
 `usecase/DeliveryService.java`의 `createDelivery`를 아래처럼 고칩니다.
 
@@ -574,7 +579,7 @@ public void deliveryCompleted(DeliveryCompletedEvent event) {
 
 ### 5.6.1 웹소켓 설정
 
-WebSocketConfig는 두 가지 주소를 등록합니다. 하나는 **클라이언트가 웹소켓으로 연결할 주소(`/api/ws/orders`)** 이고, 다른 하나는 **서버가 주문 완료 알림을 보낼 채널의 접두사(`/topic`)** 입니다. 클라이언트가 연결 주소로 접속하면 서버와 웹소켓으로 연결됩니다.
+WebSocketConfig는 두 가지 주소를 등록합니다. 하나는 **클라이언트가 웹소켓으로 연결할 주소(`/api/ws/orders`)** 이고, 다른 하나는 **서버와 클라이언트가 알림을 주고받을 주소의 접두사(`/topic`)** 입니다.
 
 `core/config/WebSocketConfig.java`를 열고 아래 클래스를 작성합니다.
 
@@ -602,9 +607,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 **웹소켓 위에 STOMP 프로토콜을 사용합니다.** 웹소켓은 서버와 클라이언트를 계속 연결해 주지만, 연결만으로는 메시지를 누구에게 보낼지 가려내지 못합니다. STOMP(Simple Text Oriented Messaging Protocol)를 얹으면 메시지를 채널로 나눠, **채널을 구독한 사람에게만 보내는 발행-구독 구조**를 쓸 수 있습니다. 이 예제에서 서버는 `/topic/orders/{userId}` 채널로 보내고, 같은 채널을 구독한 사용자만 자기 주문 완료 알림을 받습니다.
 :::
 
-### 5.6.2 SimpMessagingTemplate - 주문 완료 시 Push 발송
+클라이언트는 연결 주소로 웹소켓을 연 뒤, `/topic` 주소를 구독해 알림을 받습니다. 이때 브로커는 구독한 주소를 명부에 등록해 둡니다.
 
-이제 주문이 완료되는 순간, 앞에서 본 `/topic/orders/{userId}` 채널로 알림을 보낼 차례입니다. 주문을 완료 처리하는 `completeOrder` 메서드에서, `SimpMessagingTemplate`이라는 도구로 이 채널에 메시지를 보냅니다.
+### 5.6.2 주문 완료 시 알림 발송
+
+완료 알림은 `/topic/orders/{userId}` 채널로 보냅니다. 주문 완료 후 채널을 구독한 클라이언트에게 메시지를 전달합니다.
 
 `usecase/OrderService.java`의 `completeOrder` 메서드를 아래처럼 수정합니다.
 
@@ -636,11 +643,9 @@ public void completeOrder(int orderId) {
 
 ### 5.7.1 업그레이드 헤더 전달
 
-보통 HTTP 요청은 한 번 주고받으면 연결이 끝납니다. 웹소켓은 연결을 끊지 않고 계속 열어 둡니다. 그래서 처음 연결할 때 "일반 HTTP가 아니라 웹소켓으로 바꾸자"는 신호를 주고받습니다. 이 신호를 **업그레이드 헤더**라고 합니다.
+앞에서 본 업그레이드 헤더는 브라우저와 주문 서비스 사이의 frontend와 gateway를 거쳐야 합니다. 그런데 이 둘이 업그레이드 헤더를 넘기지 않으면 일반 요청처럼 처리돼 **연결이 끊깁니다**. 그래서 frontend와 gateway 두 곳의 nginx에 **업그레이드 헤더를 전달**하도록 설정합니다.
 
-문제는 브라우저와 서버 사이에 frontend와 gateway가 있다는 점입니다. 이 둘이 업그레이드 헤더를 넘기지 않으면 일반 요청처럼 처리돼 **연결이 끊깁니다**. 그래서 frontend와 gateway 두 곳의 nginx에 업그레이드 헤더를 전달하도록 설정합니다.
-
-`frontend/nginx.conf`의 `/api/ws/` 위치에 아래처럼 업그레이드 헤더를 더합니다.
+`frontend/nginx.conf`의 `/api/ws/` 위치에 아래처럼 업그레이드 헤더를 추가합니다.
 
 ```nginx [frontend/nginx.conf] 웹소켓 업그레이드 헤더
 location /api/ws/ {
@@ -670,7 +675,7 @@ stomp.connect({}, function () {
 });
 ```
 
-주문이 완료되면 서버는 `/topic/orders/{userId}` 채널로 완료 알림을 보내고, 미리 구독해 둔 클라이언트가 받아 화면에 주문 완료를 표시합니다. 단, 보낸 채널과 구독한 채널이 **글자까지 같아야** 알림이 도착합니다. 전체 index.html은 깃헙 레포에서 확인합니다.
+클라이언트와 서버 양쪽 코드에서 웹소켓 연결 주소(`/api/ws/orders`)와 구독 채널 주소(`/topic/orders/{userId}`)를 동일하게 맞춰주어야 정상적으로 알림이 전달됩니다. 전체 index.html은 깃헙 레포에서 확인합니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 760 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="서버와 클라이언트가 같은 연결 주소와 같은 채널 주소를 써야 한다. 연결은 addEndpoint와 SockJS가 /api/ws/orders로 일치해야 하고, 발행 convertAndSend와 구독 subscribe가 /topic/orders/userId로 일치해야 하며 /topic은 enableSimpleBroker 접두사다.">
@@ -710,9 +715,11 @@ stomp.connect({}, function () {
 
 *그림 5-10. 웹소켓 주소 일치 - 같은 색은 글자까지 똑같아야 동작합니다*
 
+*프록시마다 헤더를 넘기고, 서버랑 브라우저가 같은 채널을 보게 맞췄다. 이제 주문이 끝나는 순간 화면이 바로 바뀌겠지.*
+
 ## 5.8 전체 시스템 통합 테스트
 
-모든 구현이 완료됐습니다. 이제 전체 시스템을 실행하고 처음부터 끝까지 한 번에 흐름을 확인합니다.
+이제 전체 시스템을 실행해, 주문 생성부터 완료 알림까지 전체 흐름을 확인합니다.
 
 ### 5.8.1 Kubernetes 리소스 정의
 
@@ -724,7 +731,7 @@ stomp.connect({}, function () {
 | **frontend-service.yml** | 클러스터 내부 접근용 Service |
 | **frontend-ingress.yml** | 외부 요청을 frontend-service로 라우팅 |
 
-이번 챕터부터는 Ingress가 gateway-service가 아닌 **frontend-service**를 가리킵니다. 프론트엔드의 Nginx가 정적 파일을 직접 제공하고, `/api/` 요청만 gateway-service로 전달합니다.
+이번 챕터부터 Ingress는 gateway-service 대신 **frontend-service**로 요청을 보냅니다. 프론트엔드 Nginx가 정적 파일을 직접 응답하고, `/api/` 요청만 gateway-service로 전달합니다.
 
 ### 5.8.2 이미지 빌드
 
@@ -743,7 +750,7 @@ minikube image build -t metacoding/frontend:3 ./frontend
 
 ### 5.8.3 배포
 
-Kafka를 먼저 배포하고 ready 상태를 확인한 다음 나머지를 배포합니다.
+Kafka를 먼저 배포하고, 준비될 때까지 기다린 다음 나머지를 배포합니다.
 
 ```bash [터미널] 배포 순서 (Kafka 우선)
 # 1. 네임스페이스 생성
@@ -803,7 +810,7 @@ kubectl get pods -n metacoding
 
 ### 5.8.4 서비스 접근
 
-Ingress를 통해 외부에서 접속하려면 `minikube tunnel`을 실행합니다.
+외부에서 Ingress로 접속하기 위해 `minikube tunnel`을 실행합니다.
 
 ```bash [터미널] 외부 접근 터널
 minikube tunnel
@@ -814,24 +821,18 @@ minikube tunnel
 
 ### 5.8.5 통합 테스트 시나리오
 
-**Step 1: 웹소켓 연결 및 주문 생성 (클라이언트 역할)**
+**Step 1: 웹소켓 연결 및 주문 생성**
 
-브라우저를 통해 index.html에 접속합니다.
-```json
-브라우저 http://127.0.0.1:80/index.html
-```
+브라우저로 index.html에 접속합니다. 그다음 로그인 API(`POST /login`)에서 발급받은 JWT 토큰을 입력하여 웹소켓을 연결합니다.
+
 <!-- terminal-prompt: Browser showing index.html initial page. WebSocket test client with JWT token input field and "주문하기" (Place Order) button. -->
 ![](assets/CH05/terminal/05_index-html-initial.png)
 *그림 5-12. 브라우저에서 index.html 접속 화면*
 
 
-웹소켓 연결을 위해 토큰을 입력합니다. 로그인 API(`POST /login`)로 발급받은 JWT 토큰을 입력합니다. `Bearer ` 접두사는 붙어 있어도 그대로 인식됩니다.
+주문하기 버튼을 클릭합니다. 그러면 index.html이 웹소켓에 연결하고 `/topic/orders/{userId}` 채널을 구독합니다.
 
-
-
-토큰을 입력하고 주문하기 버튼을 클릭합니다. index.html이 내부적으로 웹소켓에 연결하고 `/topic/orders/{userId}` 채널을 구독한 뒤 다음과 같은 주문 요청을 보냅니다.
-
-```json
+```json [자동 전송] index.html이 보내는 주문 요청
 POST /api/orders
 
 {
@@ -842,7 +843,7 @@ POST /api/orders
 }
 ```
 
-이 요청은 주문하기 버튼을 누르면 index.html이 자동으로 보냅니다. 따로 직접 호출하지 않습니다.
+이 요청은 주문하기 버튼을 누르면 index.html이 자동으로 보내므로, 직접 호출하지 않아도 됩니다.
 
 <!-- terminal-prompt: Browser showing the page after entering JWT token and clicking "주문하기" button. Order accepted and showing PENDING status. -->
 ![](assets/CH05/terminal/06_token-order.png)
@@ -857,8 +858,8 @@ POST /api/orders
 
 
 
-Hoppscotch로 생성된 주문을 확인하면 `PENDING` 상태로 머물러 있습니다.
-```json
+Hoppscotch로 생성된 주문을 확인하면 **`PENDING`** 상태로 머물러 있습니다.
+```json [Hoppscotch] 주문 조회
 GET http://127.0.0.1:80/api/orders/4
 ```
 
@@ -869,11 +870,11 @@ GET http://127.0.0.1:80/api/orders/4
 
 
 
-**Step 2: 배달 완료 (배달 기사 역할)**
+**Step 2: 배달 완료**
 
 먼저 생성된 배달을 확인해보겠습니다.
 
-```json
+```json [Hoppscotch] 배달 조회
 GET http://127.0.0.1:80/api/deliveries/4
 ```
 
@@ -881,11 +882,11 @@ GET http://127.0.0.1:80/api/deliveries/4
 ![](assets/CH05/terminal/09_delivery-pending.png)
 *그림 5-16. 배달 조회 결과 - PENDING 상태*
 
-배달 ID가 4인 배달이 `PENDING` 상태로 생성되었습니다.
+배달 ID가 4인 배달이 **`PENDING`** 상태로 생성되었습니다.
 
-배달 기사가 물건을 전달한 뒤 배달 완료 처리를 합니다.
+배달 완료 API를 호출해 완료 처리를 합니다.
 
-```json
+```json [Hoppscotch] 배달 완료 호출
 PUT http://127.0.0.1:80/api/deliveries/4/complete
 ```
 <!-- terminal-prompt: Hoppscotch showing PUT /api/deliveries/4/complete response. JSON body with delivery status changed to "COMPLETED". -->
@@ -897,8 +898,8 @@ PUT http://127.0.0.1:80/api/deliveries/4/complete
 
 **Step 3: 주문 완료 및 웹소켓 응답 확인**
 
-배달 완료 처리 후, 주문 완료 명령으로 주문이 `COMPLETED` 상태가 됩니다.
-```json
+배달 완료 처리 후, 주문 완료 명령으로 주문이 **`COMPLETED`** 상태가 됩니다.
+```json [Hoppscotch] 주문 조회
 GET http://127.0.0.1:80/api/orders/4
 ```
 
@@ -915,12 +916,11 @@ GET http://127.0.0.1:80/api/orders/4
 ![](assets/CH05/terminal/12_websocket-notification.png)
 *그림 5-19. 웹소켓 알림 수신 - 클라이언트 화면에 주문 완료 표시*
 
+완성한 화면을 동료에게 보여 줬습니다. 주문하기를 누르자 잠시 뒤 '처리 중'이 '주문 완료'로 바뀌었습니다. 동료가 주문 내역을 다시 열어 보려다 멈췄습니다.
 
-완성된 시스템을 동료에게 보여줬습니다. 같은 화면, 같은 주문, 같은 배달이었지만 이번에는 다음 날 책이 도착할 때까지 동료가 주문 내역을 다시 열어 보지 않았습니다.
+**동료**: "이제 사용자도 새로고침 없이 주문이 끝난 걸 바로 알 수 있겠네요."
 
-**동료**: "전엔 '완료'라고 떠도 못 믿어서 주문 내역을 자꾸 다시 열어 봤는데, 이번엔 뜨자마자 진짜 끝난 거였어요."
-
-*진짜 끝났을 때만 알린다. 그 한 줄 차이였다.*
+처리 중에 멈춰 있던 화면이, 이제 주문이 끝나는 순간 곧바로 결과를 보여 줍니다. 사용자가 끝났는지 확인하러 화면을 다시 열지 않아도 됩니다.
 
 :::remember
 **이것만은 기억하자**
@@ -929,15 +929,3 @@ GET http://127.0.0.1:80/api/orders/4
 - 배달 생성과 배달 완료를 분리해, 주문 완료를 **실제 배달이 끝난 시점**에 맞춥니다.
 - 주문이 완료되면 주문 서비스가 **웹소켓**으로 사용자에게 실시간으로 알립니다.
 :::
-
-오픈이는 문득 그날 새벽을 떠올렸습니다. 휴대폰 두 대가 동시에 울리고, 대시보드가 빨갛게 차 있고, 주문 API 옆에서 로그인 API가 같이 죽어 있던 새벽 세 시.
-
-*주문이랑 로그인이 무슨 상관이야?*
-
-그때는 답을 몰랐습니다. 지금은 압니다. 회원도, 상품도, 주문도, 배달도 각자의 서비스로 분리됐고, 하나가 흔들려도 나머지는 멈추지 않습니다. Kafka에 쌓인 메시지는 사라지지 않고, orchestrator가 실패한 주문을 되돌리며, 완료된 주문은 사용자 화면에 바로 표시됩니다.
-
-선배가 지나가다 모니터를 봤습니다.
-
-**선배**: "이제 새벽에 안 깨워도 되겠네요."
-
-오픈이는 대답 대신 웃었습니다. 모놀리식 한 덩어리에서 시작해, 코드를 한 줄씩 바꿔 여기까지 왔습니다.

@@ -22,7 +22,7 @@
 <h1>챕터 2. 동기식 MSA 구현 - 서비스를 연결하다</h1>
 <div class="dialogue"><span class="speaker">오픈이</span>: "선배님, 서비스 네 개로 나누는 건 알겠는데, 어떤 방식이 가장 단순한 방식인가요?"</div>
 <div class="dialogue"><span class="speaker">선배</span>: "일단 각자 따로 만든 다음 동기적으로 연결해 봐요. 서로 전화를 거는 것처럼 직접 호출하는 거예요. 제일 단순한 방법이죠."</div>
-<p>방향이 보였습니다. 이제 만들어 봅니다.</p>
+<p>방향이 보였습니다. 이제 만들어 보겠습니다.</p>
 <p>이번 챕터의 핵심은 주문 서비스입니다. 주문 서비스에서 주문 요청이 들어오면, 주문 서비스가 상품 서비스와 배달 서비스를 직접 호출하고 응답하는 흐름을 따라가 보겠습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1020 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 2 한눈에 보기: 1단계는 클라이언트가 User에 로그인하여 JWT를 받고, 2단계는 클라이언트가 Order에 주문을 요청하면 Order가 Product와 Delivery를 동기 호출하고 응답을 받은 뒤 클라이언트에 주문 완료를 응답하는 흐름. 모든 서비스는 Docker Compose로 묶여 있음">
@@ -508,7 +508,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tbody>
 </table>
 <h3>2.5.4 OrderService - 보상 트랜잭션의 핵심</h3>
-<p>이제 이번 챕터의 하이라이트입니다. <strong>보상 트랜잭션 패턴</strong>을 직접 구현합니다. 코드를 읽을 때 <code>productDecreased</code>와 <code>deliveryCreated</code> <strong>두 플래그를 추적</strong>하면서 읽어보세요. 단계가 성공할 때마다 플래그를 <code>true</code>로 올려두고, catch 블록에서는 <strong>켜져 있는 플래그만 골라 역순으로 되돌립니다</strong>.</p>
+<p>이제 이번 챕터의 핵심입니다. <strong>보상 트랜잭션 패턴</strong>을 직접 구현합니다. 코드를 읽을 때 <code>productDecreased</code>와 <code>deliveryCreated</code> <strong>두 플래그를 추적</strong>하면서 읽어보세요. 단계가 성공할 때마다 플래그를 <code>true</code>로 올려두고, catch 블록에서는 <strong>켜져 있는 플래그만 골라 역순으로 되돌립니다</strong>.</p>
 <p><code>orders/OrderService.java</code>를 열고 아래 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> orders/OrderService.java. createOrder - 보상 트랜잭션 핵심</div><span class="nd">@Transactional</span>
 <span class="kd">public</span><span class="w"> </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span>
@@ -557,7 +557,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <p>참고로 catch 마지막의 <code>throw</code>로 <code>@Transactional</code>이 주문 트랜잭션까지 함께 롤백합니다. <strong>외부 서비스는 보상 호출, 주문 데이터는 트랜잭션 롤백</strong>으로 정리됩니다.</p>
 <p class="thought">재고를 줄였으면 다시 늘리고, 배달을 만들었으면 취소하고... 그 말이 이거였구나.</p>
 <h2>2.6 Docker Compose - 네 개의 서비스를 한 번에 실행하다</h2>
-<p>코드가 완성되었습니다. 이제 직접 실행하여 <strong>보상 트랜잭션이 작동하는 것</strong>을 눈으로 확인해 봅니다.</p>
+<p>코드가 완성되었습니다. 이제 직접 실행하여 <strong>보상 트랜잭션이 작동하는 것</strong>을 눈으로 확인해 보겠습니다.</p>
 <p>시나리오를 따라가기 전에, 각 서비스에 어떤 데이터가 미리 등록되어 있는지 살펴봅니다. 이번 챕터는 <strong>H2 in-memory DB</strong>를 사용합니다. 데이터 정의는 각 서비스의 <code>db/data.sql</code>에 있습니다.</p>
 <table>
 <thead>
@@ -630,25 +630,25 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </thead>
 <tbody>
 <tr>
-<td>order</td>
+<td>order-service</td>
 <td><code>./order</code></td>
 <td><code>8081:8081</code></td>
 <td>msa-network</td>
 </tr>
 <tr>
-<td>user</td>
+<td>user-service</td>
 <td><code>./user</code></td>
 <td><code>8083:8083</code></td>
 <td>msa-network</td>
 </tr>
 <tr>
-<td>product</td>
+<td>product-service</td>
 <td><code>./product</code></td>
 <td><code>8082:8082</code></td>
 <td>msa-network</td>
 </tr>
 <tr>
-<td>delivery</td>
+<td>delivery-service</td>
 <td><code>./delivery</code></td>
 <td><code>8084:8084</code></td>
 <td>msa-network</td>
@@ -681,7 +681,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\05_hoppscotch-extension.png" alt="" /><div class="caption">그림 2-5. Browser Extension 인터셉터 설정</div></div>
 <h3>2.6.3 시나리오 1: 정상 주문</h3>
 <p>먼저 로그인하여 JWT 토큰을 받습니다. 이때 콘텐츠 종류(Content-Type)를 <code>application/json</code>으로 설정해야 합니다. 이 헤더는 서버에게 &quot;내가 보내는 데이터는 JSON 형식이다&quot;라고 알리는 역할을 합니다.</p>
-<div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8083/login</span>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 로그인</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8083/login</span>
 
 <span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ssar&quot;</span><span class="p">,</span>
@@ -692,7 +692,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <p>받은 토큰을 Hoppscotch의 인증 &gt; 인증 유형(Bearer) 항목의 토큰 필드에 넣습니다.</p>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\07_bearer-token.png" alt="" /><div class="caption">그림 2-7. Bearer 토큰 설정</div></div>
 <p>MacBook Pro(상품 ID 1, 재고 10개)를 1개 주문합니다. 요청 바디는 상품 정보(<code>productId</code>, <code>quantity</code>, <code>price</code>)와 배달 주소(<code>address</code>)를 한 번에 담습니다.</p>
-<div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 주문 생성</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
 
 <span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;productId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
@@ -702,14 +702,14 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <span class="p">}</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\08_order-create.png" alt="" /><div class="caption">그림 2-8. 주문 생성 API 호출 결과</div></div>
 <p>주문이 성공하면 상품 서비스에서 재고가 10 → 9로 줄어들고, 배달 서비스에 배달이 생성됩니다.</p>
-<div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8082/api/products/1</span></div>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 재고 조회</div><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8082/api/products/1</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\09_stock-decreased.png" alt="" /><div class="caption">그림 2-9. 재고 감소 확인</div></div>
 <p>배달 서비스에도 배달이 생성됐는지 확인합니다.</p>
-<div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8084/api/deliveries/4   # 더미 배달 3건 다음이라 새 배달은 4번</span></div>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 배달 조회</div><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8084/api/deliveries/4   # 더미 배달 3건 다음이라 새 배달은 4번</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\10_delivery-created.png" alt="" /><div class="caption">그림 2-10. 배달 생성 확인</div></div>
 <h3>2.6.4 시나리오 2: 재고 부족</h3>
 <p>품절 상품인 iPhone 15(상품 ID 2, 재고 0)를 주문해 보겠습니다. 첫 번째 단계(재고 차감)에서 바로 실패하므로 보상할 작업이 없어 즉시 에러가 반환됩니다.</p>
-<div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 주문 생성 (재고 부족)</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
 
 <span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;productId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
@@ -722,7 +722,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <div class="dialogue"><span class="speaker">선배</span>: "주소를 비워서 보내 봐요. 재고는 줄어든 다음 배달에서 실패할 거예요."</div>
 <h3>2.6.5 시나리오 3: 주소 누락</h3>
 <p>이번에는 주소를 빈 문자열로 보내 보겠습니다. 주문 자체는 재고 차감까지 진행되지만, 배달 서비스에서 주소가 없으므로 실패합니다. 이때 보상 트랜잭션이 작동하여 차감된 재고가 복구되고, 주문 데이터는 트랜잭션 롤백으로 처음부터 없던 일처럼 DB에서 사라집니다.</p>
-<div class="code-block highlight" data-lang="json"><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 주문 생성 (주소 누락)</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
 
 <span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;productId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
@@ -732,13 +732,13 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <span class="p">}</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\12_empty-address-error.png" alt="" /><div class="caption">그림 2-12. 주소 누락 시 에러 응답</div></div>
 <p>그리고 재고가 원복되었는지 확인합니다.</p>
-<div class="code-block highlight" data-lang="json"><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8082/api/products/1</span></div>
+<div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 재고 조회</div><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8082/api/products/1</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\13_stock-restored.png" alt="" /><div class="caption">그림 2-13. 재고 원복 확인</div></div>
 <p>테스트가 끝났으면 실행 중인 컨테이너를 정리합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 컨테이너 정리</div>docker<span class="w"> </span>compose<span class="w"> </span>down</div>
 <p>이 명령어를 실행하면 docker compose up으로 띄운 모든 컨테이너가 종료되고 제거됩니다.</p>
 <p>보상 트랜잭션 덕분에 데이터 일관성을 유지할 수 있었습니다. 하지만 이 구조에는 눈에 잘 보이지 않는 문제가 몇 가지 있습니다. 모든 서비스 호출이 동기적이라 상품 서비스가 1초 걸리면 주문 서비스도 1초를 기다립니다. 보상 트랜잭션 코드도 비즈니스 로직과 섞이면서 try-catch 중첩이 깊어집니다.</p>
-<p>실패한 주문은 트랜잭션 롤백으로 데이터 자체가 사라지므로 &quot;어떤 주문이 왜 실패했는지&quot; 이력도 남지 않습니다. 게다가 비즈니스 로직이 서비스 코드에 섞여 있어, 손볼 때마다 어디를 고쳐야 할지 막막한 코드 구조도 같이 따라옵니다.</p>
+<p>실패한 주문은 트랜잭션 롤백으로 데이터 자체가 사라지므로 &quot;어떤 주문이 왜 실패했는지&quot; 이력도 남지 않습니다. 게다가 비즈니스 로직이 서비스 코드에 섞여 있어, 손볼 때마다 어디를 고쳐야 할지 막막해집니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>

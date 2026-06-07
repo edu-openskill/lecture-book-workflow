@@ -755,7 +755,7 @@ minikube tunnel
 
 MacBook Pro(상품 ID 1) 1개를 배달 주소와 함께 주문합니다.
 
-```json
+```json [Hoppscotch] 주문 생성
 POST http://127.0.0.1:80/api/orders
 
 {
