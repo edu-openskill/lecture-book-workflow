@@ -426,9 +426,7 @@ ex01/
 
 핵심은 `lb` 폴더의 `nginx.conf` 파일입니다. 경로별로 어느 서버 그룹으로 보낼지 적는 파일입니다.
 
-**ex01/lb/nginx.conf**
-
-```nginx
+```nginx [참고] ex01/lb/nginx.conf. 경로 라우팅 설정
 upstream app1 {                           # app1 그룹 지정
     server host.docker.internal:8000;     # 호스트의 8000번 포트 = app1 컨테이너
 }
@@ -450,17 +448,13 @@ server {
 }
 ```
 
-설정 파일을 담은 컨테이너도 만들어야 합니다. `lb` 폴더의 Dockerfile이 그 역할을 합니다.
-
-**ex01/lb/Dockerfile**
+이제 이 설정 파일을 포함한 이미지가 필요합니다. `lb` 폴더의 Dockerfile로 만듭니다.
 
 ```dockerfile [실습 4] ex01/lb/Dockerfile. NGINX 라우터 이미지
 FROM nginx                                          # NGINX 공식 이미지 사용
 COPY nginx.conf /etc/nginx/conf.d/default.conf      # 작성한 설정 파일을 기본 경로에 복사
 ENTRYPOINT ["nginx", "-g", "daemon off;"]           # NGINX를 포그라운드로 실행
 ```
-
-공식 NGINX 이미지를 베이스로 쓰고, 그 위에 방금 작성한 `nginx.conf`를 덮어 씌우면 라우터가 완성됩니다.
 
 세 폴더가 준비되면 차례로 빌드하고 실행합니다.
 
@@ -487,11 +481,13 @@ docker build -t lb ex01/lb && docker run -dit -p 80:80 lb
 
 #### host.docker.internal이 왜 필요한가
 
-오픈이는 `nginx.conf`의 `host.docker.internal:8000` 한 줄이 눈에 들어왔습니다. lb 컨테이너에서 app1 컨테이너를 부르려는데 호스트 PC를 한 번 거쳐 가야 했습니다.
+`nginx.conf`에는 서버 주소가 `host.docker.internal:8000`으로 설정되어 있습니다.
 
 :::term-box
 **host.docker.internal**: 컨테이너 내부에서 **호스트 PC**를 가리키는 특수 주소입니다. 컨테이너 안에서 localhost라고 입력하면 호스트 PC가 아닌 **컨테이너 자기 자신을** 가리키게 됩니다. 따라서 호스트 PC에 열려 있는 포트에 접근하려면 이 **별칭을** 사용해야 합니다.
 :::
+
+*'같은 도커 위에서 도는 컨테이너끼리인데, 왜 호스트를 한 번 거쳐서 가야 하지.'*
 
 <div class="svg-figure">
 <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="lb 컨테이너에서 호스트 PC를 거쳐 app1 컨테이너로 가는 우회 경로">
@@ -524,18 +520,16 @@ docker build -t lb ex01/lb && docker run -dit -p 80:80 lb
 
 *그림 3-14. lb 컨테이너 → 호스트 PC → app1 컨테이너로 가는 우회 경로*
 
-*'같은 도커 위에서 도는 컨테이너끼리인데, 왜 호스트를 한 번 거쳐서 가야 하지.'*
-
-`docker run`으로 컨테이너를 하나씩 실행하면 도커는 그 컨테이너를 **기본 네트워크**에 자동으로 할당합니다. 두 가지 한계 때문에 호스트 네트워크를 통해야 합니다.
+`docker run`으로 컨테이너를 하나씩 실행하면 도커는 그 컨테이너를 **기본 네트워크**에 자동으로 할당합니다. 그래서 두 가지 한계가 생깁니다.
 
 :::note
-**호스트 네트워크를 통해야 하는 이유**
+**기본 네트워크의 두 가지 한계**
 
-- **변동되는 IP** : 컨테이너를 재시작할 때마다 IP가 새로 부여되어 **nginx.conf**에 고정값으로 적어둘 수 없습니다.
-- **이름으로 통신 불가** : 기본 네트워크에서는 **app1** 같은 컨테이너 이름으로 컨테이너 간 통신을 할 수 없습니다.
+- **변동되는 IP**: 컨테이너는 재시작할 때마다 IP가 새로 부여됩니다. 고정되지 않는 내부 IP는 `nginx.conf`에 하드코딩할 수 없습니다.
+- **이름으로 통신 불가**: 기본 네트워크에서는 컨테이너 이름(예: `app1`)을 IP로 변환해 주는 내장 DNS가 없어, 이름으로 컨테이너끼리 직접 통신할 수 없습니다.
   :::
 
-이런 이유로 기본 네트워크에서는 nginx 설정에 `host.docker.internal`을 사용해야 합니다.
+이처럼 `nginx.conf`에 컨테이너의 주소를 명시할 수 없기 때문에, 다른 컨테이너에 접근하려면 호스트 PC를 거치는 `host.docker.internal`을 설정에 써야 합니다.
 
 오픈이는 이런 궁금증이 생겼습니다.
 
@@ -543,7 +537,7 @@ docker build -t lb ex01/lb && docker run -dit -p 80:80 lb
 
 #### 사용자 정의 네트워크 — 이름으로 부르기
 
-이 문제를 해결해 주는 것이 챕터 2에서 봤던 **사용자 정의 네트워크(User-defined Network)** 입니다. 사용자 정의 네트워크에서는 도커 내부 DNS가 컨테이너 이름을 IP로 대신 변환해 줍니다. 그래서 `host.docker.internal` 같은 우회 없이 컨테이너 이름을 그대로 적어 둘 수 있습니다.
+챕터 2에서 본 **사용자 정의 네트워크(User-defined Network)** 가 이 문제를 해결합니다. 이 네트워크에서는 내장 DNS가 컨테이너 이름을 IP로 변환합니다. 그래서 `host.docker.internal` 같은 우회 없이 컨테이너 이름을 그대로 적을 수 있습니다.
 
 실습에 필요한 명령어는 다음과 같습니다.
 
@@ -608,9 +602,7 @@ docker build -t lb ex01/lb && docker run -dit -p 80:80 lb
 
 이번 실습은 `ex02` 폴더에 있습니다. 앞 실습과의 차이는 `nginx.conf`의 `upstream` 안에 서버 주소 두 개가 컨테이너 이름으로 적혀 있다는 점입니다.
 
-**ex02/lb/nginx.conf**
-
-```nginx
+```nginx [참고] ex02/lb/nginx.conf. 로드밸런싱 설정
 upstream app1 {
     server app1-1:80;     # 첫 번째 서버. 컨테이너 이름으로 호출
     server app1-2:80;     # 같은 그룹에 두 번째 서버 추가
@@ -812,9 +804,7 @@ ex03/
 
 설정 파일에 새로 등장한 지시어는 두 가지입니다. `proxy_cache_path`는 캐시를 저장할 경로와 메모리 공간을 선언하고, `proxy_cache`는 그 공간을 어느 location에서 사용할지 지정합니다.
 
-**ex03/nginx/nginx.conf**
-
-```nginx
+```nginx [참고] ex03/nginx/nginx.conf. 캐싱 설정
 # 캐시를 저장할 경로와 메모리 공간 이름을 선언합니다. (http{} 블록 내부에 위치)
 proxy_cache_path /var/cache/nginx keys_zone=my_cache:10m;
 
@@ -1016,8 +1006,6 @@ ex04/
 
 이 서버를 실행할 컨테이너의 Dockerfile은 다음과 같습니다. 파이썬 이미지 위에 flask와 redis 라이브러리만 얹어 실행하는 구성입니다.
 
-**ex04/api/Dockerfile**
-
 ```dockerfile [실습 5] ex04/api/Dockerfile. Python API 이미지
 FROM python:3.10-alpine                       # 파이썬 이미지 사용
 WORKDIR /app                                  # 작업 디렉토리 설정
@@ -1090,8 +1078,6 @@ ex05/
 │   └── init.sql         # 컨테이너 첫 기동 시 자동 실행될 SQL
 └── README.md            # 실습 안내
 ```
-
-**ex05/db/Dockerfile**
 
 ```dockerfile [실습 6] ex05/db/Dockerfile. MySQL + 초기 스크립트 이미지
 FROM mysql                                    # MySQL 공식 이미지 사용
@@ -1381,8 +1367,6 @@ ex06/
 
 Compose는 네트워크를 자동으로 만들어 줍니다. 덕분에 `lb/nginx.conf`에서 백엔드 주소를 `host.docker.internal:포트` 대신 `app1:80`, `app2:80`처럼 서비스 이름으로 그대로 적을 수 있습니다.
 
-**ex06/docker-compose.yml**
-
 ```yaml [실습 9] ex06/docker-compose.yml. ex01을 Compose로 다시 짜기
 services:             # 컨테이너 단위로 실행할 서비스 묶음
   app1:               # 첫 번째 서비스. 다른 서비스가 호스트명으로 호출
@@ -1522,8 +1506,6 @@ backend 폴더에는 자바 소스 파일이 보이지 않습니다. 대신 Dock
 
 `entrypoint.sh`는 컨테이너가 실행되는 순간 깃허브에서 소스를 받아 빌드하고 실행합니다.
 
-**ex07/backend/entrypoint.sh**
-
 ```bash [실습 10] ex07/backend/entrypoint.sh. Git clone + 빌드 스크립트
 #!/bin/bash
 # 백엔드 소스 내려받기
@@ -1536,8 +1518,6 @@ java -jar -Dspring.profiles.active=prod build/libs/*.jar
 ```
 
 이 스크립트가 컨테이너 시작 시 자동으로 실행되도록 Dockerfile의 ENTRYPOINT로 지정합니다.
-
-**ex07/backend/Dockerfile**
 
 ```dockerfile [실습 11] ex07/backend/Dockerfile. Spring Boot 이미지
 FROM eclipse-temurin:21-jdk                       # JDK 21 공식 이미지 사용
@@ -1570,8 +1550,6 @@ frontend 폴더에는 `index.html`과 `nginx.conf`가 들어 있습니다.
 ### 3.6.5 docker-compose.yml
 
 마지막으로 frontend·backend·db를 묶어 띄우는 `docker-compose.yml`을 작성합니다.
-
-**ex07/docker-compose.yml**
 
 ```yaml [실습 12] ex07/docker-compose.yml. ex07 전체 구성
 services:
