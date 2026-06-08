@@ -349,6 +349,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   <text x="90" y="160" text-anchor="middle" font-size="11" fill="#6b7280">요청 발송</text>
   <line x1="160" y1="145" x2="280" y2="145" stroke="#475569" stroke-width="1.6" marker-end="url(#rr39)"/>
   <text x="220" y="136" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">요청</text>
+  <rect x="262" y="28" width="448" height="237" rx="10" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="6,4"/>
   <rect x="280" y="115" width="140" height="60" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
   <text x="350" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">NGINX</text>
   <text x="350" y="160" text-anchor="middle" font-size="11" fill="#7b341e">URL 경로 분류</text>
@@ -487,12 +488,13 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
   <defs>
     <marker id="rr313" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
-  <text x="360" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">라운드 로빈 — 요청을 차례대로 한 명씩</text>
+  <text x="360" y="14" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">라운드 로빈 — 요청을 차례대로 한 명씩</text>
   <rect x="20" y="115" width="140" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
   <text x="90" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">클라이언트</text>
   <text x="90" y="160" text-anchor="middle" font-size="11" fill="#6b7280">요청 3개 발송</text>
   <line x1="160" y1="145" x2="280" y2="145" stroke="#475569" stroke-width="1.6" marker-end="url(#rr313)"/>
   <text x="220" y="136" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">요청 ×3</text>
+  <rect x="262" y="20" width="448" height="255" rx="10" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="6,4"/>
   <rect x="280" y="115" width="140" height="60" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
   <text x="350" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">NGINX</text>
   <text x="350" y="160" text-anchor="middle" font-size="11" fill="#7b341e">차례대로 분배</text>
@@ -542,7 +544,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>lb<span class="w"> </span>--network<span class="w"> </span>ex02-network<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
 <p>컨테이너 실행 후 <code>localhost:80/app1</code>에 여러 번 접속합니다. 화면은 매번 같습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-21.png" alt="" /><div class="caption">그림 3-16. /app1 경로로 접속한 결과 (라운드 로빈)</div></div>
-<p>화면만으로는 어느 서버가 응답한 건지 알 길이 없었습니다. 두 컨테이너가 같은 이미지이기 때문입니다. 두 서버 양쪽으로 진짜 요청이 갈라져 들어갔는지 확인하려면 각자의 로그를 직접 들여다봐야 했습니다. <code>docker logs</code> 명령을 두 번 쳤습니다.</p>
+<p>두 컨테이너가 같은 이미지라, 화면만으로는 어느 서버가 응답했는지 알 수 없습니다. 요청이 두 서버로 제대로 나뉘는지 확인하려면 각 서버의 로그를 직접 봐야 합니다. <code>docker logs</code> 명령을 두 번 실행합니다.</p>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -585,9 +587,9 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex03</p>
 </div>
-<p>로드밸런싱 로그를 보니 양쪽 컨테이너 모두 똑같은 HTML을 매번 새로 만들어 응답하고 있었습니다. 같은 한 줄짜리 페이지를 두 대가 번갈아 가며 다시 그리고 있었습니다.</p>
-<p class="thought">'단순한 HTML을 매번 백엔드까지 가서 만들어 주고 있다니. 사람이 늘면 이건 또 다른 부담이 되겠는데.'</p>
-<p>이 비효율을 풀어 주는 방법이 있었습니다. 자주 입는 옷을 옷장 깊숙이 넣지 않고 옷걸이에 따로 걸어 두면 다음 날 그 옷걸이에서 바로 꺼낼 수 있습니다. 자주 나가는 응답을 NGINX 앞단에 저장해 두고 같은 요청이 다시 들어오면 백엔드까지 가지 않고 NGINX가 바로 돌려주는 방식을 <strong>캐싱(Caching)</strong> 이라고 부릅니다.</p>
+<p>앞에서 본 두 로그를 다시 보면, 두 컨테이너가 요청을 번갈아 나눠 받고 있습니다. 그런데 어느 쪽이든 정적 페이지를 매번 다시 응답하고 있습니다.</p>
+<p class="thought">'단순한 HTML을 매번 백엔드까지 가서 가져와야 하다니. 사용자가 늘면 서버에 부담이 되겠는데.'</p>
+<p>이 비효율을 풀어 주는 방법이 있었습니다. 자주 나가는 응답을 NGINX 앞단에 저장해 두면, 같은 요청이 다시 들어왔을 때 백엔드까지 가지 않고 바로 돌려줄 수 있습니다. 이런 방식을 <strong>캐싱(Caching)</strong> 이라고 부릅니다.</p>
 <p>캐싱이 켜진 응답에는 상태 정보가 함께 담깁니다. 이번 실습에서 다룰 상태는 두 가지입니다.</p>
 <table>
 <thead>
@@ -716,10 +718,12 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>nginx-cache<span class="w"> </span>--network<span class="w"> </span>ex03-network<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>nginx-cache</div>
 <p>브라우저에서 <code>localhost:80/image.png</code>를 열었습니다. 화면에 이미지가 떴습니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-32.png" alt="" /><div class="caption">그림 3-21. 캐싱 실습 — 이미지 응답</div></div>
-<p>이제 캐싱이 됐는지 확인해 보겠습니다. <strong>개발자 도구(F12, 브라우저 디버그 창)</strong> 의 Network 탭을 열고 <strong>Disable cache</strong>를 체크합니다. 브라우저 자체 캐시가 끼어들지 못하게 막은 뒤 <strong>응답 헤더</strong>를 확인합니다. 첫 요청의 <code>X-Cache-Status</code>는 예상대로 <strong>MISS</strong>로 찍혀 있습니다.</p>
+<p>이제 캐싱이 됐는지 확인해 보겠습니다. <strong>개발자 도구(F12, 브라우저 디버그 창)</strong> 의 Network 탭을 열고, 브라우저 자체 캐시가 끼어들지 못하도록 <strong>Disable cache</strong>를 체크합니다. 그런 다음 <strong>응답 헤더</strong>를 확인합니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-33.png" alt="" /><div class="caption">그림 3-22. X-Cache-Status: MISS 확인</div></div>
-<p>새로고침을 한 번 더 눌렀습니다. 같은 자리에 찍히는 값이 이번에는 <strong>HIT</strong>로 바뀌어 있었습니다. 두 번째 요청은 백엔드까지 가지 않고, NGINX가 캐시에 저장해 둔 응답을 돌려준 결과입니다.</p>
+<p>첫 요청의 <code>X-Cache-Status</code>는 예상대로 <strong>MISS</strong>로 찍혀 있습니다.</p>
+<p>브라우저를 한 번 더 새로고침합니다.</p>
 <div class="chapter-image"><img src="..\assets\CH03\chap02-34.png" alt="" /><div class="caption">그림 3-23. X-Cache-Status: HIT 확인</div></div>
+<p>같은 자리에 찍히는 값이 이번에는 <strong>HIT</strong>로 바뀌어 있었습니다. 두 번째 요청은 백엔드까지 가지 않고, NGINX가 캐시에 저장해 둔 응답을 돌려준 결과입니다.</p>
 <h2>3.3 Redis - 서버 여러 대가 함께 쓰는 공용 저장소</h2>
 <h3>3.3.1 서버 여러 대면 생기는 세션 문제</h3>
 <p>다음 날 점심을 먹고 자리에 돌아왔을 때 옆자리 동료가 의자를 돌려 말을 걸어 왔습니다.</p>
