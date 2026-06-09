@@ -1,6 +1,6 @@
 # Ch.4 Kubernetes 시작하기
 
-지난주 회의실에서 들은 팀장의 마지막 물음이 며칠이 지나도 머리에서 떠나지 않았습니다. 도커를 공부했지만, 실제 운영에서 발생하는 문제는 일일이 대응해야 하기 때문입니다.
+회의실을 나선 오픈이의 머릿속은 복잡했습니다. 시연은 문제없이 끝났지만, 팀장이 마지막에 던진 질문이 마음에 걸렸습니다. 운영 중에 컨테이너가 멈추면 어떻게 되살릴 것인가. 도커만으로는 그 답이 보이지 않았습니다.
 
 ![팀장의 운영 질문에 답이 막힌 순간](../assets/CH04/gemini/01_prologue-the-question-asked.png)
 
@@ -41,20 +41,16 @@ winget install Kubernetes.minikube
 예제 코드는 챕터 2에서 클론한 레포의 `ex08`~`ex10`을 사용합니다.
 ::::
 
-## 4.1 Kubernetes - Docker만으로 부족한 순간
+## 4.1 Kubernetes - 원하는 상태를 유지하기
 
 ### 4.1.1 도커는 실행 명령, Kubernetes는 약속 유지
 
-오픈이가 살펴본 도커와 쿠버네티스는 컨테이너를 다루는 방식이 다음과 같이 달랐습니다.
+도커와 쿠버네티스는 컨테이너를 다루는 방식이 다음과 같이 다릅니다.
 
 - **Docker(명령형)**: *"이 컨테이너를 실행해라."*
 - **Kubernetes(선언형)**: *"이 서비스를 원하는 상태로 유지해라."*
 
-명령형은 매 동작을 직접 지시하는 방식이고, 선언형은 유지할 상태만 정의해 두는 방식입니다.
-
-### 4.1.2 본사와 가맹점
-
-쿠버네티스가 컨테이너를 관리하는 방식은 프랜차이즈 본사가 가맹점을 관리하는 방식과 비슷합니다.
+이 선언형 방식은 프랜차이즈 본사가 가맹점을 관리하는 방식과 비슷합니다.
 
 본사는 가맹점을 직접 운영하지 않습니다. 대신 가맹점 수나 모습 같은 **규칙**을 정하고 그 규칙이 지켜지는지를 관리합니다. 만약 매장이 문을 닫으면 **새로운 매장을 열기 위해 노력**하고, 수요가 많아지면 **새로운 매장을 추가**합니다.
 
@@ -151,11 +147,15 @@ winget install Kubernetes.minikube
 
 쿠버네티스도 마찬가지입니다. 컨테이너 수나 상태 규칙 등 **원하는 상태**를 선언해 두면, 시스템이 자동으로 그 상태를 **유지**합니다.
 
-### 4.1.3 Kubernetes - 컨트롤 플레인과 워커 노드
+### 4.1.2 Kubernetes - 컨트롤 플레인과 워커 노드
 
 쿠버네티스는 크게 **컨트롤 플레인(Control Plane)** 과 **워커 노드(Worker Node)** 로 이루어집니다.
 
-컨트롤 플레인은 **프랜차이즈 본사 관리팀**처럼 컨테이너를 관리할 **규칙을 정하고 지시를 내립니다**. 지시를 받은 워커 노드가 실제로 컨테이너를 **실행하고 관리합니다**. 이때 쿠버네티스는 컨테이너를 **Pod**라는 단위로 묶어 관리합니다.
+:::term-box
+**노드(Node)**: 컨테이너가 실제로 돌아가는 컴퓨터 한 대를 말합니다. 실제 서비스 환경에서는 수십~수백 대의 노드(서버)가 모여 하나의 클러스터를 이룹니다. 컨트롤 플레인과 워커 노드 모두 이런 노드 위에서 동작합니다.
+:::
+
+컨트롤 플레인은 **프랜차이즈 본사 관리팀**처럼 컨테이너를 관리할 **규칙을 정하고 지시를 내립니다**. 지시를 받은 워커 노드가 실제로 컨테이너를 **실행하고 관리합니다**. 이때 쿠버네티스는 **컨테이너를 Pod라는 단위로 묶어 관리합니다**.
 
 <div class="svg-figure">
 <svg viewBox="0 0 940 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes 클러스터 구조 — 컨트롤 플레인 노드 1대와 워커 노드 2대가 각각 독립된 호스트 OS·하드웨어 위에서 동작">
@@ -222,16 +222,9 @@ winget install Kubernetes.minikube
 
 *그림 4-3. Kubernetes 클러스터의 구조*
 
-이 둘이 합쳐져 유기적으로 돌아가는 전체 시스템을 **클러스터(Cluster)** 라고 부릅니다.
+컨트롤 플레인과 워커 노드가 합쳐져 유기적으로 돌아가는 전체 시스템을 **클러스터(Cluster)** 라고 부릅니다.
 
-- **컨트롤 플레인**: 클러스터 전체를 관리하는 시스템입니다. 개발자의 명령을 받아 Pod를 어느 워커 노드에 배치할지 결정하고, 장애가 생긴 Pod를 새 Pod로 자동 교체하며, 클러스터 상태를 항상 원하는 모습으로 유지합니다.
-- **워커 노드**: Pod가 실제로 실행되어 일을 처리하는 노드입니다. 컨트롤 플레인의 결정에 따라 Pod를 실행하고 운영합니다.
-
-:::term-box
-**노드(Node)**: 컨테이너가 실제로 돌아가는 컴퓨터 한 대를 말합니다. 실제 서비스 환경에서는 수십~수백 대의 노드(서버)가 모여 하나의 클러스터를 이룹니다.
-:::
-
-### 4.1.4 Kubernetes의 동작 원리
+### 4.1.3 Kubernetes의 동작 원리
 
 개발자가 명령을 내려 Pod 하나가 만들어지는 일은 **프랜차이즈 본사가 새 가맹점을 여는 흐름**과 비슷합니다. 크게 **명령 → 판단 → 지시** 세 단계로 일어납니다. 하나씩 들여다보겠습니다.
 
@@ -240,17 +233,12 @@ winget install Kubernetes.minikube
 개발자가 클러스터에 명령을 보내는 일은 **프랜차이즈 본사에 가맹점을 신청하는 것**과 같습니다. 외부에서 들어오는 모든 요청은 **가장 먼저** 컨트롤 플레인 내부의 **Kube API Server**를 통과합니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 1200 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="명령 단계 — 개발자가 클러스터에 명령을 보내 Kube API Server에 도달하는 길.">
-  <defs>
-    <marker id="s1-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-    <marker id="s1-dim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
-  </defs>
+<svg viewBox="0 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="명령 단계 — 개발자가 클러스터에 명령을 보내 Kube API Server에 도달하는 길.">
+  <defs><marker id="a-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker></defs>
   <rect x="20" y="20" width="150" height="22" rx="3" fill="#475569"/>
   <text x="95" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">1. 명령</text>
   <rect x="190" y="20" width="580" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
   <text x="480" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">2. 판단 — 컨트롤 플레인 (본사)</text>
-  <rect x="790" y="20" width="390" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
-  <text x="985" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">3. 지시 — 워커 노드 (현장)</text>
   <rect x="190" y="60" width="580" height="210" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <text x="202" y="78" font-size="12" font-weight="700" fill="#7b341e">컨트롤 플레인</text>
   <rect x="210" y="170" width="165" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
@@ -262,17 +250,6 @@ winget install Kubernetes.minikube
   <rect x="575" y="170" width="185" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
   <text x="668" y="204" text-anchor="middle" font-size="15" font-weight="700" fill="#cbd5e1">Controller Manager</text>
   <text x="668" y="228" text-anchor="middle" font-size="11" fill="#cbd5e1">운영점검팀 — 상태 비교</text>
-  <rect x="790" y="60" width="390" height="100" rx="8" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="800" y="78" font-size="11" font-weight="600" fill="#cbd5e1">워커 노드 1</text>
-  <rect x="905" y="88" width="160" height="64" rx="5" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="985" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#cbd5e1">kubelet</text>
-  <text x="985" y="135" text-anchor="middle" font-size="10" fill="#cbd5e1">현장 매니저</text>
-  <rect x="790" y="170" width="390" height="100" rx="8" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="800" y="188" font-size="11" font-weight="600" fill="#cbd5e1">워커 노드 2</text>
-  <rect x="905" y="198" width="160" height="64" rx="5" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="985" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#cbd5e1">kubelet</text>
-  <text x="985" y="245" text-anchor="middle" font-size="10" fill="#cbd5e1">현장 매니저</text>
-  <line x1="670" y1="110" x2="810" y2="110" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#s1-dim)"/>
   <rect x="290" y="85" width="380" height="50" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2.2"/>
   <text x="480" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Kube API Server</text>
   <text x="480" y="126" text-anchor="middle" font-size="11" fill="#7b341e">안내데스크 — 신청 접수·라우팅</text>
@@ -280,7 +257,7 @@ winget install Kubernetes.minikube
   <path d="M 55 152 V 138 Q 55 116 80 116 Q 105 116 105 138 V 152 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
   <text x="80" y="174" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">개발자</text>
   <text x="80" y="190" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">(가맹 희망자)</text>
-  <line x1="117" y1="110" x2="285" y2="110" stroke="#475569" stroke-width="2.4" marker-end="url(#s1-p)"/>
+  <line x1="117" y1="110" x2="285" y2="110" stroke="#475569" stroke-width="2.4" marker-end="url(#a-p)"/>
   <text x="201" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">kubectl 명령</text>
   <text x="201" y="128" text-anchor="middle" font-size="10" fill="#7b341e" font-style="italic">(가맹 신청서 제출)</text>
 </svg>
@@ -293,18 +270,13 @@ winget install Kubernetes.minikube
 컨트롤 플레인이 신청을 판단하는 일은 **본사 각 부서가 모여 새 매장의 자리와 기존 매장의 상태를 함께 논의하는 것**과 같습니다. **Kube API Server**로 들어온 요청은 **etcd**에 보관됩니다. 보관된 정보를 보고 **Scheduler**가 새 Pod를 **어느 노드에 배치할지** 정합니다. 그 사이 **Controller Manager**는 클러스터 상태가 **정의된 모습과 어긋나지 않는지** 살핍니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 1200 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="판단 단계 — 컨트롤 플레인 안내데스크와 세 부서가 양방향으로 협의해 결론을 좁히는 모습.">
+<svg viewBox="85 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="판단 단계 — 컨트롤 플레인 안내데스크와 세 부서가 양방향으로 협의해 결론을 좁히는 모습.">
   <defs>
-    <marker id="s2-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="s2-o-rev" markerWidth="10" markerHeight="10" refX="2" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
-    <marker id="s2-dim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
+    <marker id="b-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    <marker id="b-o-rev" markerWidth="10" markerHeight="10" refX="2" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
-  <rect x="20" y="20" width="150" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
-  <text x="95" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">1. 명령</text>
   <rect x="190" y="20" width="580" height="22" rx="3" fill="#ff7849"/>
   <text x="480" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">2. 판단 — 컨트롤 플레인 (본사)</text>
-  <rect x="790" y="20" width="390" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
-  <text x="985" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">3. 지시 — 워커 노드 (현장)</text>
   <rect x="190" y="60" width="580" height="210" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
   <text x="202" y="78" font-size="12" font-weight="700" fill="#7b341e">컨트롤 플레인</text>
   <rect x="210" y="170" width="165" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
@@ -316,27 +288,12 @@ winget install Kubernetes.minikube
   <rect x="575" y="170" width="185" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
   <text x="668" y="204" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Controller Manager</text>
   <text x="668" y="228" text-anchor="middle" font-size="11" fill="#7b341e">운영점검팀 — 상태 비교</text>
-  <rect x="790" y="60" width="390" height="100" rx="8" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="800" y="78" font-size="11" font-weight="600" fill="#cbd5e1">워커 노드 1</text>
-  <rect x="905" y="88" width="160" height="64" rx="5" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="985" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#cbd5e1">kubelet</text>
-  <text x="985" y="135" text-anchor="middle" font-size="10" fill="#cbd5e1">현장 매니저</text>
-  <rect x="790" y="170" width="390" height="100" rx="8" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="800" y="188" font-size="11" font-weight="600" fill="#cbd5e1">워커 노드 2</text>
-  <rect x="905" y="198" width="160" height="64" rx="5" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="985" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#cbd5e1">kubelet</text>
-  <text x="985" y="245" text-anchor="middle" font-size="10" fill="#cbd5e1">현장 매니저</text>
   <rect x="290" y="85" width="380" height="50" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="480" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Kube API Server</text>
   <text x="480" y="126" text-anchor="middle" font-size="11" fill="#7b341e">안내데스크 — 신청 접수·라우팅</text>
-  <line x1="380" y1="138" x2="305" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#s2-o-rev)" marker-end="url(#s2-o)"/>
-  <line x1="480" y1="138" x2="480" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#s2-o-rev)" marker-end="url(#s2-o)"/>
-  <line x1="580" y1="138" x2="660" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#s2-o-rev)" marker-end="url(#s2-o)"/>
-  <circle cx="80" cy="100" r="12" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
-  <path d="M 55 152 V 138 Q 55 116 80 116 Q 105 116 105 138 V 152 Z" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
-  <text x="80" y="174" text-anchor="middle" font-size="13" fill="#cbd5e1">개발자</text>
-  <line x1="117" y1="110" x2="285" y2="110" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#s2-dim)"/>
-  <line x1="670" y1="110" x2="810" y2="110" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#s2-dim)"/>
+  <line x1="380" y1="138" x2="305" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#b-o-rev)" marker-end="url(#b-o)"/>
+  <line x1="480" y1="138" x2="480" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#b-o-rev)" marker-end="url(#b-o)"/>
+  <line x1="580" y1="138" x2="660" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#b-o-rev)" marker-end="url(#b-o)"/>
 </svg>
 </div>
 
@@ -349,61 +306,47 @@ winget install Kubernetes.minikube
 결론이 정해지면 워커 노드의 **kubelet**이 Kube API Server에서 그 지시를 받아 처리합니다. kubelet은 노드 안에서 **Pod를 직접 만들고**, 컨테이너의 상태가 정의된 모습에서 벗어나지 않게 **계속 점검합니다**. 여기까지 오면 **Pod가 실제로 생성됩니다**.
 
 <div class="svg-figure">
-<svg viewBox="0 0 1200 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지시 단계 — 컨트롤 플레인의 Pod 생성 지시가 워커 노드의 kubelet에 도착해 Pod가 실제로 생성되는 모습.">
+<svg viewBox="0 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지시 단계 — 컨트롤 플레인의 Pod 생성 지시가 워커 노드의 kubelet에 도착해 Pod가 실제로 생성되는 모습.">
   <defs>
-    <marker id="s3-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
-    <marker id="s3-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
-    <marker id="s3-dim" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#cbd5e1"/></marker>
+    <marker id="c-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="c-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
-  <rect x="20" y="20" width="150" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
-  <text x="95" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">1. 명령</text>
-  <rect x="190" y="20" width="580" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
-  <text x="480" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">2. 판단 — 컨트롤 플레인 (본사)</text>
-  <rect x="790" y="20" width="390" height="22" rx="3" fill="#4f46e5"/>
-  <text x="985" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3. 지시 — 워커 노드 (현장)</text>
-  <rect x="190" y="60" width="580" height="210" rx="10" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
-  <text x="202" y="78" font-size="12" font-weight="600" fill="#cbd5e1">컨트롤 플레인</text>
-  <rect x="290" y="85" width="380" height="50" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="480" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Kube API Server</text>
-  <text x="480" y="126" text-anchor="middle" font-size="11" fill="#7b341e">안내데스크 — 지시 전달</text>
-  <rect x="210" y="170" width="165" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="292" y="216" text-anchor="middle" font-size="14" fill="#cbd5e1">etcd</text>
-  <rect x="385" y="170" width="180" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="475" y="216" text-anchor="middle" font-size="14" fill="#cbd5e1">Scheduler</text>
-  <rect x="575" y="170" width="185" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="668" y="216" text-anchor="middle" font-size="13" fill="#cbd5e1">Controller Manager</text>
-  <rect x="790" y="60" width="390" height="100" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
-  <text x="800" y="78" font-size="11" font-weight="700" fill="#3730a3">워커 노드 1</text>
-  <rect x="800" y="88" width="160" height="64" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="880" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">kubelet</text>
-  <text x="880" y="135" text-anchor="middle" font-size="10" fill="#3730a3">현장 매니저</text>
-  <rect x="1015" y="88" width="160" height="64" rx="5" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="1095" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Pod (OPEN)</text>
-  <text x="1095" y="135" text-anchor="middle" font-size="10" fill="#7b341e">신규 가맹점</text>
-  <line x1="965" y1="120" x2="1012" y2="120" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#s3-i)"/>
-  <text x="988" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#3730a3" font-style="italic">생성</text>
-  <rect x="790" y="170" width="390" height="100" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
-  <text x="800" y="188" font-size="11" font-weight="700" fill="#3730a3">워커 노드 2</text>
-  <rect x="800" y="198" width="160" height="64" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="880" y="225" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">kubelet</text>
-  <text x="880" y="245" text-anchor="middle" font-size="10" fill="#3730a3">현장 매니저</text>
-  <rect x="1015" y="198" width="160" height="64" rx="5" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
-  <text x="1095" y="225" text-anchor="middle" font-size="12" fill="#cbd5e1">Pod</text>
-  <text x="1095" y="245" text-anchor="middle" font-size="10" font-style="italic" fill="#cbd5e1">(없음)</text>
-  <circle cx="80" cy="100" r="12" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
-  <path d="M 55 152 V 138 Q 55 116 80 116 Q 105 116 105 138 V 152 Z" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="3,2"/>
-  <text x="80" y="174" text-anchor="middle" font-size="13" fill="#cbd5e1">개발자</text>
-  <line x1="117" y1="110" x2="285" y2="110" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#s3-dim)"/>
-  <line x1="670" y1="110" x2="810" y2="110" stroke="#475569" stroke-width="2.4" marker-end="url(#s3-p)"/>
-  <text x="740" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Pod 생성 지시</text>
-  <text x="740" y="128" text-anchor="middle" font-size="10" fill="#7b341e" font-style="italic">(개점 지시)</text>
+  <rect x="20" y="20" width="330" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+  <text x="185" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">2. 판단 — 컨트롤 플레인</text>
+  <rect x="360" y="20" width="410" height="22" rx="3" fill="#4f46e5"/>
+  <text x="565" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3. 지시 — 워커 노드 (현장)</text>
+  <rect x="20" y="70" width="330" height="150" rx="10" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="34" y="90" font-size="12" font-weight="600" fill="#cbd5e1">컨트롤 플레인</text>
+  <rect x="45" y="108" width="280" height="62" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2.2"/>
+  <text x="185" y="134" text-anchor="middle" font-size="16" font-weight="700" fill="#7b341e">Kube API Server</text>
+  <text x="185" y="154" text-anchor="middle" font-size="11" fill="#7b341e">안내데스크 — 지시 전달</text>
+  <line x1="325" y1="139" x2="398" y2="139" stroke="#475569" stroke-width="2.4" marker-end="url(#c-p)"/>
+  <text x="362" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Pod 생성 지시</text>
+  <text x="362" y="156" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">(개점 지시)</text>
+  <rect x="405" y="55" width="365" height="100" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="416" y="74" font-size="11" font-weight="700" fill="#3730a3">워커 노드 1</text>
+  <rect x="416" y="84" width="160" height="62" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="496" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">kubelet</text>
+  <text x="496" y="130" text-anchor="middle" font-size="10" fill="#3730a3">현장 매니저</text>
+  <rect x="598" y="84" width="160" height="62" rx="5" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="678" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Pod (OPEN)</text>
+  <text x="678" y="130" text-anchor="middle" font-size="10" fill="#7b341e">신규 가맹점</text>
+  <line x1="578" y1="115" x2="595" y2="115" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#c-i)"/>
+  <rect x="405" y="168" width="365" height="100" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="416" y="187" font-size="11" font-weight="700" fill="#3730a3">워커 노드 2</text>
+  <rect x="416" y="197" width="160" height="62" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="496" y="223" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">kubelet</text>
+  <text x="496" y="243" text-anchor="middle" font-size="10" fill="#3730a3">현장 매니저</text>
+  <rect x="598" y="197" width="160" height="62" rx="5" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="678" y="222" text-anchor="middle" font-size="12" fill="#cbd5e1">Pod</text>
+  <text x="678" y="242" text-anchor="middle" font-size="10" font-style="italic" fill="#cbd5e1">(없음)</text>
 </svg>
 </div>
 
 *그림 4-6. 지시 단계 — kubelet이 컨트롤 플레인의 지시를 받아 Pod를 띄우는 모습*
 
 
-### 4.1.5 Kubernetes 핵심 리소스 한눈에
+### 4.1.4 Kubernetes 핵심 리소스 한눈에
 
 쿠버네티스 세상에서는 모든 작업 단위를 **리소스(Resource)** 라고 부릅니다. 사용자의 요청은 여러 리소스를 거쳐 실제 컨테이너에 도달합니다. 전체적인 흐름은 다음과 같습니다.
 

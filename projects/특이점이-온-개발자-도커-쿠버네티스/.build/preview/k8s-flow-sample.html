@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>K8s 동작원리 — 폭 통일(790) 단계별 (4-4/4-5/4-6)</title>
+<style>
+  body { background:#f8fafc; margin:0; padding:40px 0; font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+  .page { max-width:720px; margin:0 auto; }
+  .note { font-size:13px; color:#475569; margin:0 0 20px; }
+  .svg-figure { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:6px; }
+  .svg-figure svg { width:100%; height:auto; display:block; }
+  .cap { text-align:center; font-style:italic; font-size:13px; color:#475569; margin:0 0 28px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <p class="note">세 그림 viewBox 폭 = 790 통일 → 글자 크기 동일. 4-6은 워커 노드를 API 옆으로 당기고 흐린 부서 제거(컴팩트).</p>
+
+  <!-- ===== 4-4 (명령) viewBox 0 0 790 290 ===== -->
+  <div class="svg-figure">
+  <svg viewBox="0 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="명령 단계 — 개발자가 클러스터에 명령을 보내 Kube API Server에 도달.">
+    <defs><marker id="a-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker></defs>
+    <rect x="20" y="20" width="150" height="22" rx="3" fill="#475569"/>
+    <text x="95" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">1. 명령</text>
+    <rect x="190" y="20" width="580" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="480" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">2. 판단 — 컨트롤 플레인 (본사)</text>
+    <rect x="190" y="60" width="580" height="210" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="202" y="78" font-size="12" font-weight="700" fill="#7b341e">컨트롤 플레인</text>
+    <rect x="210" y="170" width="165" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="292" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#cbd5e1">etcd</text>
+    <text x="292" y="228" text-anchor="middle" font-size="11" fill="#cbd5e1">기록실 — 상태 저장</text>
+    <rect x="385" y="170" width="180" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="475" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#cbd5e1">Scheduler</text>
+    <text x="475" y="228" text-anchor="middle" font-size="11" fill="#cbd5e1">출점 담당팀 — 노드 선정</text>
+    <rect x="575" y="170" width="185" height="80" rx="6" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="668" y="204" text-anchor="middle" font-size="15" font-weight="700" fill="#cbd5e1">Controller Manager</text>
+    <text x="668" y="228" text-anchor="middle" font-size="11" fill="#cbd5e1">운영점검팀 — 상태 비교</text>
+    <rect x="290" y="85" width="380" height="50" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2.2"/>
+    <text x="480" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Kube API Server</text>
+    <text x="480" y="126" text-anchor="middle" font-size="11" fill="#7b341e">안내데스크 — 신청 접수·라우팅</text>
+    <circle cx="80" cy="100" r="12" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+    <path d="M 55 152 V 138 Q 55 116 80 116 Q 105 116 105 138 V 152 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+    <text x="80" y="174" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">개발자</text>
+    <text x="80" y="190" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">(가맹 희망자)</text>
+    <line x1="117" y1="110" x2="285" y2="110" stroke="#475569" stroke-width="2.4" marker-end="url(#a-p)"/>
+    <text x="201" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">kubectl 명령</text>
+    <text x="201" y="128" text-anchor="middle" font-size="10" fill="#7b341e" font-style="italic">(가맹 신청서 제출)</text>
+  </svg>
+  </div>
+  <p class="cap">그림 4-4. 명령 단계</p>
+
+  <!-- ===== 4-5 (판단) viewBox 85 0 790 290 (content centered) ===== -->
+  <div class="svg-figure">
+  <svg viewBox="85 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="판단 단계 — 컨트롤 플레인 안내데스크와 세 부서가 협의.">
+    <defs>
+      <marker id="b-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+      <marker id="b-o-rev" markerWidth="10" markerHeight="10" refX="2" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+    </defs>
+    <rect x="190" y="20" width="580" height="22" rx="3" fill="#ff7849"/>
+    <text x="480" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">2. 판단 — 컨트롤 플레인 (본사)</text>
+    <rect x="190" y="60" width="580" height="210" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+    <text x="202" y="78" font-size="12" font-weight="700" fill="#7b341e">컨트롤 플레인</text>
+    <rect x="210" y="170" width="165" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="292" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#7b341e">etcd</text>
+    <text x="292" y="228" text-anchor="middle" font-size="11" fill="#7b341e">기록실 — 상태 저장</text>
+    <rect x="385" y="170" width="180" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="475" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="#7b341e">Scheduler</text>
+    <text x="475" y="228" text-anchor="middle" font-size="11" fill="#7b341e">출점 담당팀 — 노드 선정</text>
+    <rect x="575" y="170" width="185" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+    <text x="668" y="204" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Controller Manager</text>
+    <text x="668" y="228" text-anchor="middle" font-size="11" fill="#7b341e">운영점검팀 — 상태 비교</text>
+    <rect x="290" y="85" width="380" height="50" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
+    <text x="480" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Kube API Server</text>
+    <text x="480" y="126" text-anchor="middle" font-size="11" fill="#7b341e">안내데스크 — 신청 접수·라우팅</text>
+    <line x1="380" y1="138" x2="305" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#b-o-rev)" marker-end="url(#b-o)"/>
+    <line x1="480" y1="138" x2="480" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#b-o-rev)" marker-end="url(#b-o)"/>
+    <line x1="580" y1="138" x2="660" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#b-o-rev)" marker-end="url(#b-o)"/>
+  </svg>
+  </div>
+  <p class="cap">그림 4-5. 판단 단계</p>
+
+  <!-- ===== 4-6 (지시) 컴팩트, viewBox 0 0 790 290 ===== -->
+  <div class="svg-figure">
+  <svg viewBox="0 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지시 단계 — 컨트롤 플레인의 Pod 생성 지시가 워커 노드 kubelet에 도착해 Pod 생성.">
+    <defs>
+      <marker id="c-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+      <marker id="c-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    </defs>
+    <rect x="20" y="20" width="330" height="22" rx="3" fill="#f1f5f9" stroke="#e5e7eb"/>
+    <text x="185" y="36" text-anchor="middle" font-size="12" font-weight="600" fill="#cbd5e1">2. 판단 — 컨트롤 플레인</text>
+    <rect x="360" y="20" width="410" height="22" rx="3" fill="#4f46e5"/>
+    <text x="565" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3. 지시 — 워커 노드 (현장)</text>
+
+    <!-- 컨트롤 플레인 (간략) -->
+    <rect x="20" y="70" width="330" height="150" rx="10" fill="none" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <text x="34" y="90" font-size="12" font-weight="600" fill="#cbd5e1">컨트롤 플레인</text>
+    <rect x="45" y="108" width="280" height="62" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2.2"/>
+    <text x="185" y="134" text-anchor="middle" font-size="16" font-weight="700" fill="#7b341e">Kube API Server</text>
+    <text x="185" y="154" text-anchor="middle" font-size="11" fill="#7b341e">안내데스크 — 지시 전달</text>
+
+    <!-- API → 워커 화살표 -->
+    <line x1="325" y1="139" x2="398" y2="139" stroke="#475569" stroke-width="2.4" marker-end="url(#c-p)"/>
+    <text x="362" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Pod 생성 지시</text>
+    <text x="362" y="156" text-anchor="middle" font-size="10" font-style="italic" fill="#7b341e">(개점 지시)</text>
+
+    <!-- 워커 노드 1 (active) -->
+    <rect x="405" y="55" width="365" height="100" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <text x="416" y="74" font-size="11" font-weight="700" fill="#3730a3">워커 노드 1</text>
+    <rect x="416" y="84" width="160" height="62" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <text x="496" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">kubelet</text>
+    <text x="496" y="130" text-anchor="middle" font-size="10" fill="#3730a3">현장 매니저</text>
+    <rect x="598" y="84" width="160" height="62" rx="5" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+    <text x="678" y="108" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Pod (OPEN)</text>
+    <text x="678" y="130" text-anchor="middle" font-size="10" fill="#7b341e">신규 가맹점</text>
+    <line x1="578" y1="115" x2="595" y2="115" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#c-i)"/>
+
+    <!-- 워커 노드 2 (active) -->
+    <rect x="405" y="168" width="365" height="100" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
+    <text x="416" y="187" font-size="11" font-weight="700" fill="#3730a3">워커 노드 2</text>
+    <rect x="416" y="197" width="160" height="62" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+    <text x="496" y="223" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">kubelet</text>
+    <text x="496" y="243" text-anchor="middle" font-size="10" fill="#3730a3">현장 매니저</text>
+    <rect x="598" y="197" width="160" height="62" rx="5" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="678" y="222" text-anchor="middle" font-size="12" fill="#cbd5e1">Pod</text>
+    <text x="678" y="242" text-anchor="middle" font-size="10" font-style="italic" fill="#cbd5e1">(없음)</text>
+  </svg>
+  </div>
+  <p class="cap">그림 4-6. 지시 단계</p>
+</div>
+</body>
+</html>
