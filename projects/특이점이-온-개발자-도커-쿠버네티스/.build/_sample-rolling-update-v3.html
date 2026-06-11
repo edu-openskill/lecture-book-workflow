@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>롤링 업데이트 다이어그램 샘플 v3 — 단순형</title>
+<style>
+  body { background:#f1f5f9; font-family:'Pretendard','Apple SD Gothic Neo',sans-serif; margin:0; padding:40px; }
+  .wrap { max-width:880px; margin:0 auto; }
+  .svg-figure { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:18px 10px 8px; }
+  .svg-figure svg { width:100%; height:auto; display:block; }
+  .caption { text-align:center; font-style:italic; color:#475569; font-size:14px; margin:10px 0 8px; }
+  .lead { color:#0f172a; font-size:16px; margin:0 0 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="lead">롤링 업데이트 — 단순형 (새 Pod 뜨고 / 기존 Pod 사라짐)</p>
+<div class="svg-figure">
+<svg viewBox="0 0 820 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤링 업데이트 4단계: 새 Pod 4개가 뜨고 기존 Pod 4개가 사라지는 과정">
+  <defs><marker id="v3-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+  <text x="410" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">롤링 업데이트 진행 — replicas 4 · maxSurge 4 · maxUnavailable 0</text>
+
+  <rect x="30" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+  <rect x="225" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.6"/>
+  <rect x="430" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+  <rect x="630" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+
+  <text x="110" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">① 시작</text>
+  <text x="305" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f46e5">② 새 버전 추가</text>
+  <text x="510" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">③ 기존 종료</text>
+  <text x="710" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">④ 완료</text>
+
+  <text x="110" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <circle cx="83" cy="116" r="8" fill="#ff7849"/><circle cx="103" cy="116" r="8" fill="#ff7849"/><circle cx="123" cy="116" r="8" fill="#ff7849"/><circle cx="143" cy="116" r="8" fill="#ff7849"/>
+  <text x="110" y="150" text-anchor="middle" font-size="13" fill="#cbd5e1">—</text>
+  <text x="110" y="184" text-anchor="middle" font-size="11" fill="#475569">v1.20 · 4개</text>
+
+  <text x="305" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <circle cx="278" cy="116" r="8" fill="#ff7849"/><circle cx="298" cy="116" r="8" fill="#ff7849"/><circle cx="318" cy="116" r="8" fill="#ff7849"/><circle cx="338" cy="116" r="8" fill="#ff7849"/>
+  <text x="305" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <circle cx="278" cy="160" r="8" fill="#4f46e5"/><circle cx="298" cy="160" r="8" fill="#4f46e5"/><circle cx="318" cy="160" r="8" fill="#4f46e5"/><circle cx="338" cy="160" r="8" fill="#4f46e5"/>
+  <text x="305" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">총 8개 (일시 증가)</text>
+
+  <text x="510" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#cbd5e1">v1.20</text>
+  <circle cx="483" cy="116" r="8" fill="#eef1f5"/><circle cx="503" cy="116" r="8" fill="#eef1f5"/><circle cx="523" cy="116" r="8" fill="#eef1f5"/><circle cx="543" cy="116" r="8" fill="#eef1f5"/>
+  <line x1="478" y1="111" x2="548" y2="121" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="510" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <circle cx="483" cy="160" r="8" fill="#4f46e5"/><circle cx="503" cy="160" r="8" fill="#4f46e5"/><circle cx="523" cy="160" r="8" fill="#4f46e5"/><circle cx="543" cy="160" r="8" fill="#4f46e5"/>
+  <text x="510" y="190" text-anchor="middle" font-size="11" fill="#475569">기존 4개 내려감</text>
+
+  <text x="710" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#cbd5e1">v1.20</text>
+  <text x="710" y="120" text-anchor="middle" font-size="13" fill="#cbd5e1">—</text>
+  <text x="710" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <circle cx="683" cy="160" r="8" fill="#4f46e5"/><circle cx="703" cy="160" r="8" fill="#4f46e5"/><circle cx="723" cy="160" r="8" fill="#4f46e5"/><circle cx="743" cy="160" r="8" fill="#4f46e5"/>
+  <text x="710" y="184" text-anchor="middle" font-size="11" fill="#475569">v1.21 · 4개</text>
+
+  <path d="M 192 128 L 222 128" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#v3-arr)"/>
+  <path d="M 387 128 L 427 128" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#v3-arr)"/>
+  <path d="M 592 128 L 627 128" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#v3-arr)"/>
+
+  <text x="410" y="232" text-anchor="middle" font-size="11" fill="#475569"><tspan font-weight="700" fill="#4f46e5">maxSurge 4</tspan> → 새 Pod 4개를 먼저 띄우고, <tspan font-weight="700" fill="#7b341e">maxUnavailable 0</tspan> → 기존 4개를 그 뒤에 내려 서비스가 끊기지 않습니다</text>
+</svg>
+</div>
+<div class="caption">그림 4-22. 롤링 업데이트 진행 - 새 Pod 4개를 띄운 뒤 기존 Pod 4개를 차례로 내립니다</div>
+</div>
+</body>
+</html>

@@ -18,7 +18,7 @@
 <body>
 <div class="container">
 <h1>Ch.4 Kubernetes 시작하기</h1>
-<p>회의실을 나선 오픈이의 머릿속은 복잡했습니다. 시연은 문제없이 끝났지만, 팀장이 마지막에 던진 질문이 마음에 걸렸습니다. 운영 중에 컨테이너가 멈추면 어떻게 되살릴 것인가. 도커만으로는 그 답이 보이지 않았습니다.</p>
+<p>회의실을 나선 오픈이의 머릿속은 복잡했습니다. 시연은 문제없이 끝났지만, 팀장이 마지막에 던진 질문이 마음에 걸렸습니다. 운영 중에 컨테이너가 죽으면 어떻게 되살릴 것인가. 도커만으로는 그 답이 보이지 않았습니다.</p>
 <div class="chapter-image gemini"><img src="..\assets\CH04\gemini\01_prologue-the-question-asked.png" alt="팀장의 운영 질문에 답이 막힌 순간" /><div class="caption">그림 4-1. 팀장의 운영 질문에 답이 막힌 순간</div></div>
 <p>점심을 먹고 돌아오는 길에 선배에게 고민을 털어놨습니다.</p>
 <div class="dialogue"><span class="speaker">오픈이</span>: "도커를 공부하면 끝일 줄 알았는데, 운영에서 컨테이너가 죽거나 트래픽이 몰릴 때 어떻게 해야 할지 모르겠어요."</div>
@@ -675,7 +675,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex09</p>
 </div>
-<p>Deployment는 &quot;<strong>Pod를 몇 개 유지할지, 문제가 생기면 어떻게 교체할지</strong>&quot;를 적어 두는 <strong>매뉴얼</strong>과 같습니다. 선언한 상태와 실제 상태를 비교해, 차이가 생기면 Pod를 다시 만들어 원래대로 되돌립니다.</p>
+<p>Deployment는 &quot;<strong>Pod를 몇 개 유지할지, 문제가 생기면 어떻게 교체할지</strong>&quot;를 적어 두는 <strong>매뉴얼</strong>과 같습니다. 선언한 상태와 실제 상태를 비교해, 차이가 생기면 Pod를 다시 만들어 원하는 상태로 되돌립니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment 구조: Deployment가 원하는 상태를 선언해 두고 여러 Pod를 띄워 관리한다">
   <defs>
@@ -724,7 +724,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-container</span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:1.20</span></div>
 <p>여기서 중요한 개념은 <strong>selector</strong> 와 <strong>labels</strong> 의 연결입니다.</p>
-<p>Deployment가 관리할 Pod를 생성할 때, Pod의 <strong>labels</strong> 영역에 <strong>app: nginx</strong> 라는 이름표를 붙입니다. 그리고 Deployment의 <strong>selector</strong> 에 똑같이 <strong>app: nginx</strong> 라고 지정해 두면, 쿠버네티스는 이 이름표를 가진 Pod들만 식별하여 관리합니다.</p>
+<p>Deployment가 관리할 Pod를 생성할 때, Pod의 <strong>labels</strong> 영역에 이름표를 붙입니다. 그리고 Deployment의 <strong>selector</strong> 에 똑같은 이름표를 지정해 두면, 쿠버네티스는 그 이름표를 가진 Pod들만 식별하여 관리합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 285" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment의 selector(app: nginx)와 같은 라벨을 가진 Pod만 골라 관리하고, 라벨이 다른 Pod는 제외하는 구조">
   <defs>
@@ -742,18 +742,18 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
   <path d="M 260 155 Q 380 155, 510 155" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#sl-pick)"/>
   <rect x="510" y="45" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
   <text x="525" y="68" font-size="12" font-weight="700" fill="#7b341e">Pod 1</text>
-  <text x="525" y="91" font-size="11" font-family="monospace" fill="#7b341e">labels:</text>
-  <text x="585" y="91" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
+  <text x="525" y="91" font-size="13" font-family="monospace" fill="#7b341e">labels:</text>
+  <text x="585" y="91" font-size="13" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
   <text x="722" y="68" text-anchor="end" font-size="11" font-weight="700" fill="#4f46e5">선택</text>
   <rect x="510" y="130" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
   <text x="525" y="153" font-size="12" font-weight="700" fill="#7b341e">Pod 2</text>
-  <text x="525" y="176" font-size="11" font-family="monospace" fill="#7b341e">labels:</text>
-  <text x="585" y="176" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
+  <text x="525" y="176" font-size="13" font-family="monospace" fill="#7b341e">labels:</text>
+  <text x="585" y="176" font-size="13" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
   <text x="722" y="153" text-anchor="end" font-size="11" font-weight="700" fill="#4f46e5">선택</text>
   <rect x="510" y="215" width="220" height="60" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
   <text x="525" y="238" font-size="12" font-weight="700" fill="#94a3b8">Pod 3</text>
-  <text x="525" y="261" font-size="11" font-family="monospace" fill="#94a3b8">labels:</text>
-  <text x="585" y="261" font-size="11" font-family="monospace" font-weight="700" fill="#94a3b8">app: db</text>
+  <text x="525" y="261" font-size="13" font-family="monospace" fill="#94a3b8">labels:</text>
+  <text x="585" y="261" font-size="13" font-family="monospace" font-weight="700" fill="#94a3b8">app: db</text>
   <text x="722" y="238" text-anchor="end" font-size="11" font-weight="700" fill="#94a3b8">제외</text>
 </svg>
 </div>
@@ -775,7 +775,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
   </div>
 </div>
 <div class="caption">그림 4-18. Deployment가 만든 Pod가 뜬 모습</div>
-<p>이제 Deployment가 정말로 지침을 지키는지 확인하기 위해, 현재 실행 중인 Pod를 전부 지웁니다.</p>
+<p>이제 Deployment가 정말로 원하는 상태를 유지하는지 확인하기 위해, 현재 실행 중인 Pod를 전부 지웁니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 전체 삭제 후 자동 복구 확인</div>kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>--all<span class="w">           </span><span class="c1"># 모든 Pod 삭제 </span>
 kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                    </span><span class="c1"># 목록 재확인</span></div>
 <div class="terminal-log">
@@ -794,7 +794,8 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
   </div>
 </div>
 <div class="caption">그림 4-19. Pod를 다 지워도 Deployment가 자동으로 새 Pod를 띄웁니다</div>
-<p>hello-pod1은 그대로 사라졌지만 Deployment가 만든 Pod는 잠깐 사라졌다가 <strong>새 이름으로 다시 실행되었습니다</strong>.</p>
+<p>hello-pod1은 그대로 사라졌지만 Deployment가 만든 Pod는 삭제된 후 <strong>새 이름으로 다시 실행되었습니다</strong>.</p>
+<p class="thought">'팀장님이 물어봤던 게 이거였구나. 원하는 상태만 정해 두면, 그다음은 Deployment가 자동으로 관리해 주네.'</p>
 <h3>4.4.3 ReplicaSet - Pod 개수 자동 관리</h3>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
@@ -889,16 +890,53 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 </div>
 <div class="caption">그림 4-21. replicas 설정대로 Pod 4개가 생성</div>
 <h3>4.4.4 롤링 업데이트 - 끊김 없는 버전 교체</h3>
-<p>운영에서는 서비스를 유지하면서 새 버전으로 교체하는 일이 자주 일어납니다. 4개 Pod를 한 대씩 손으로 끄고 새 버전으로 띄우는 작업을 매번 사람이 처리하긴 번거롭습니다. 쿠버네티스는 이 과정을 자동화하는 방식, <strong>롤링 업데이트(Rolling Update)</strong> 를 기본 제공합니다.</p>
-<div class="term-box">
-<p><strong>RollingUpdate 전략</strong>: Kubernetes Deployment의 기본 배포 전략입니다. <code>maxSurge</code>와 <code>maxUnavailable</code> 두 값으로 &quot;몇 개를 더 실행할 수 있는지&quot;, &quot;몇 개까지 사용 불가능해도 되는지&quot;를 조정합니다.</p>
-</div>
-<p><code>deploy-ex02.yml</code>의 <code>strategy</code> 블록의 속성은 다음과 같습니다.</p>
+<p>운영 중인 서비스는 사용자가 중단 없이 이용하도록, 서비스를 유지하며 새 버전으로 교체하는 작업이 빈번하게 일어납니다. 하지만 여러 Pod를 사람이 일일이 수동으로 내리고 올리는 방식은 비효율적일 뿐만 아니라 실수의 위험도 따릅니다. 쿠버네티스는 이 과정을 자동화하는 <strong>롤링 업데이트(Rolling Update)</strong> 를 제공합니다.</p>
+<p>앞서 만든 <code>deploy-ex02.yml</code>에는 이 롤링 업데이트 동작을 정하는 <code>strategy</code> 블록이 들어 있습니다. 각 속성은 다음과 같습니다.</p>
 <ul>
-<li><strong>maxSurge</strong>: 업데이트 중 정원(replicas)보다 잠시 증가되는 Pod의 수 (추가 투입 인원)</li>
-<li><strong>maxUnavailable</strong>: 업데이트 중 <strong>작동 불능</strong> 상태가 되어도 허용되는 Pod의 수 (잠시 문 닫아도 되는 가게 수)</li>
+<li><strong>maxSurge</strong>: 업데이트 중 replicas로 지정한 수보다 잠시 더 늘어나는 Pod의 수</li>
+<li><strong>maxUnavailable</strong>: 업데이트 중 <strong>작동 불능</strong> 상태가 되어도 허용되는 Pod의 수</li>
 </ul>
-<p>예를 들어 replicas: 4, maxSurge: 4, maxUnavailable: 0이라면, 기존 4개는 그대로 둔 상태에서 새 버전 4개를 한꺼번에 더 만듭니다. 새 Pod가 Ready 상태가 되는 대로 기존 Pod를 차례로 종료시킵니다. <strong>maxSurge를 줄이면</strong> 한 번에 띄울 새 Pod 수를 제한해 천천히 교체하고, <strong>maxUnavailable을 늘리면</strong> 기존 Pod를 줄이며 빠르게 교체하는 등 두 값을 조정해 원하는 배포 방식을 설정할 수 있습니다.</p>
+<p>예를 들어 replicas: 4, maxSurge: 4, maxUnavailable: 0이라면, 기존 4개는 그대로 둔 상태에서 새 버전 4개를 한꺼번에 더 만듭니다. 새 Pod가 Ready 상태가 되는 대로 기존 Pod를 차례로 종료시킵니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 820 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤링 업데이트 4단계: 새 Pod 4개가 뜨고 기존 Pod 4개가 사라지는 과정">
+  <defs><marker id="ru-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
+  <text x="410" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">롤링 업데이트 진행 — replicas 4 · maxSurge 4 · maxUnavailable 0</text>
+  <rect x="30" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+  <rect x="225" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.6"/>
+  <rect x="430" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+  <rect x="630" y="44" width="160" height="158" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+  <text x="110" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">① 시작</text>
+  <text x="305" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f46e5">② 새 버전 추가</text>
+  <text x="510" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">③ 기존 종료</text>
+  <text x="710" y="66" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">④ 완료</text>
+  <text x="110" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <circle cx="83" cy="116" r="8" fill="#ff7849"/><circle cx="103" cy="116" r="8" fill="#ff7849"/><circle cx="123" cy="116" r="8" fill="#ff7849"/><circle cx="143" cy="116" r="8" fill="#ff7849"/>
+  <text x="110" y="150" text-anchor="middle" font-size="13" fill="#cbd5e1">—</text>
+  <text x="110" y="184" text-anchor="middle" font-size="11" fill="#475569">v1.20 · 4개</text>
+  <text x="305" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <circle cx="278" cy="116" r="8" fill="#ff7849"/><circle cx="298" cy="116" r="8" fill="#ff7849"/><circle cx="318" cy="116" r="8" fill="#ff7849"/><circle cx="338" cy="116" r="8" fill="#ff7849"/>
+  <text x="305" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <circle cx="278" cy="160" r="8" fill="#4f46e5"/><circle cx="298" cy="160" r="8" fill="#4f46e5"/><circle cx="318" cy="160" r="8" fill="#4f46e5"/><circle cx="338" cy="160" r="8" fill="#4f46e5"/>
+  <text x="305" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">총 8개 (일시 증가)</text>
+  <text x="510" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#cbd5e1">v1.20</text>
+  <circle cx="483" cy="116" r="8" fill="#eef1f5"/><circle cx="503" cy="116" r="8" fill="#eef1f5"/><circle cx="523" cy="116" r="8" fill="#eef1f5"/><circle cx="543" cy="116" r="8" fill="#eef1f5"/>
+  <line x1="478" y1="111" x2="548" y2="121" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="510" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <circle cx="483" cy="160" r="8" fill="#4f46e5"/><circle cx="503" cy="160" r="8" fill="#4f46e5"/><circle cx="523" cy="160" r="8" fill="#4f46e5"/><circle cx="543" cy="160" r="8" fill="#4f46e5"/>
+  <text x="510" y="190" text-anchor="middle" font-size="11" fill="#475569">기존 4개 내려감</text>
+  <text x="710" y="98" text-anchor="middle" font-size="10.5" font-weight="700" fill="#cbd5e1">v1.20</text>
+  <text x="710" y="120" text-anchor="middle" font-size="13" fill="#cbd5e1">—</text>
+  <text x="710" y="142" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <circle cx="683" cy="160" r="8" fill="#4f46e5"/><circle cx="703" cy="160" r="8" fill="#4f46e5"/><circle cx="723" cy="160" r="8" fill="#4f46e5"/><circle cx="743" cy="160" r="8" fill="#4f46e5"/>
+  <text x="710" y="184" text-anchor="middle" font-size="11" fill="#475569">v1.21 · 4개</text>
+  <path d="M 192 128 L 222 128" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ru-arr)"/>
+  <path d="M 387 128 L 427 128" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ru-arr)"/>
+  <path d="M 592 128 L 627 128" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ru-arr)"/>
+  <text x="410" y="232" text-anchor="middle" font-size="11" fill="#475569"><tspan font-weight="700" fill="#4f46e5">maxSurge 4</tspan> → 새 Pod 4개를 먼저 띄우고, <tspan font-weight="700" fill="#7b341e">maxUnavailable 0</tspan> → 기존 4개를 그 뒤에 내려 서비스가 끊기지 않습니다</text>
+</svg>
+</div>
+<div class="caption">그림 4-22. 롤링 업데이트 진행 - 새 Pod 4개를 띄운 뒤 기존 Pod 4개를 차례로 내립니다</div>
+<p><strong>maxSurge를 줄이면</strong> 한 번에 띄울 새 Pod 수를 제한해 천천히 교체하고, <strong>maxUnavailable을 늘리면</strong> 기존 Pod를 줄이며 빠르게 교체하는 등 두 값을 조정해 원하는 배포 방식을 설정할 수 있습니다.</p>
 <p>다음 명령어로 이미지 버전을 교체해 보겠습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 이미지 버전 교체 (롤링 업데이트 트리거)</div><span class="c1"># 이미지를 nginx:1.21로 교체</span>
 kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </span>image<span class="w"> </span>deployment/nginx-replica<span class="w"> </span>nginx-container<span class="o">=</span>nginx:1.21</div>
@@ -913,7 +951,7 @@ kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </spa
     <div>deployment.apps/nginx-replica image updated</div>
   </div>
 </div>
-<div class="caption">그림 4-22. 이미지 버전 업데이트 실행</div>
+<div class="caption">그림 4-23. 이미지 버전 업데이트 실행</div>
 <p><code>kubectl get</code> 명령어에 <code>-w</code> 옵션을 추가하면 Pod 상태 변화를 실시간으로 볼 수 있습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 상태 실시간 감시</div>kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-w<span class="w">   </span><span class="c1"># Pod 상태 실시간 감시</span></div>
 <div class="terminal-log">
@@ -947,12 +985,12 @@ kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </spa
     <div>nginx-replica-756b46b54c-l5l7f   0/1     Completed           0          9m24s</div>
   </div>
 </div>
-<div class="caption">그림 4-23. 롤링 업데이트 진행 화면</div>
+<div class="caption">그림 4-24. 롤링 업데이트 진행 화면</div>
 <p>출력에서 새 Pod는 <strong>Pending → ContainerCreating → Running</strong> 순서로 실행되고, 기존 Pod는 <strong>Running → Terminating → Completed</strong> 순서로 종료됩니다.</p>
 <p>업데이트가 끝난 뒤 Deployment의 상세 정보를 확인하면 이미지가 <code>nginx:1.21</code> 버전으로 변경된 것을 볼 수 있습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Deployment 상세 정보 조회</div>kubectl<span class="w"> </span>describe<span class="w"> </span>deployment<span class="w"> </span>nginx-replica<span class="w">  </span><span class="c1"># Deployment 상세 정보 조회</span></div>
 <h3>4.4.5 Rollback - 되돌리기</h3>
-<p>세상에 완벽한 배포는 없습니다. 만약 새 버전에 문제가 보인다면, <code>kubectl rollout</code> 명령어로 이전 버전으로 되돌릴 수 있습니다.</p>
+<p>배포한 새 버전에서 뒤늦게 문제가 발견될 때가 있습니다. 그럴 때는 <code>kubectl rollout</code> 명령어로 이전 버전으로 되돌립니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 롤백</div>kubectl<span class="w"> </span>rollout<span class="w"> </span>undo<span class="w"> </span>deployment/nginx-replica<span class="w">      </span><span class="c1"># 이전 버전으로 롤백</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -965,7 +1003,10 @@ kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </spa
     <div>deployment.apps/nginx-replica rolled back</div>
   </div>
 </div>
-<div class="caption">그림 4-24. Rollback 실행 결과</div>
+<div class="caption">그림 4-25. Rollback 실행 결과</div>
+<p>이렇게 쿠버네티스로 컨테이너를 운영하는 법을 익히고 나니, 문득 회의실에서의 그 질문이 떠올랐습니다.</p>
+<p class="thought">'컨테이너가 죽거나 트래픽이 몰리면 어쩌나 막막했는데. 이제 쿠버네티스한테 맡기면 되겠다.'</p>
+<p>다음 챕터에서는 Service와 Ingress로 외부와 연결되는 진입점을 만들어 보겠습니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
@@ -975,7 +1016,6 @@ kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </spa
 <li><strong>Pod를 직접 만들지 마세요.</strong> 직접 만든 Pod는 장애가 나도 복구되지 않습니다. 반드시 Deployment로 감싸서 관리 목록에 올려야 자동 복구와 스케일링이 가능해집니다.</li>
 <li><strong>롤링 업데이트로 무중단 배포를 합니다.</strong> 새 Pod를 먼저 띄운 뒤 기존 Pod를 순차적으로 교체하여, 서비스 중단 없이 버전을 올리는 방식입니다.</li>
 </ul>
-<p>다만 외부에서 이 Pod에 들어올 방법은 아직 없습니다. 다음 챕터에서는 Service와 Ingress로 외부와 연결되는 진입점을 만들어 보겠습니다.</p>
 </div>
 
 </div>

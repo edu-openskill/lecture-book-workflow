@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>롤링 업데이트 다이어그램 샘플</title>
+<style>
+  body { background:#f1f5f9; font-family:'Pretendard','Apple SD Gothic Neo',sans-serif; margin:0; padding:40px; }
+  .wrap { max-width:860px; margin:0 auto; }
+  .svg-figure { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:18px 10px 8px; }
+  .svg-figure svg { width:100%; height:auto; display:block; }
+  .caption { text-align:center; font-style:italic; color:#475569; font-size:14px; margin:10px 0 36px; }
+  h2 { color:#0f172a; font-size:16px; margin:0 0 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h2>샘플 — 롤링 업데이트 진행 다이어그램 (그림 4-22 후보)</h2>
+
+<div class="svg-figure">
+<svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤링 업데이트가 4단계로 진행되는 과정: 시작, maxSurge로 새 Pod 추가, 교체, 완료">
+  <defs>
+    <marker id="ru-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <text x="410" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">롤링 업데이트 진행 — replicas 4 · maxSurge 4 · maxUnavailable 0</text>
+
+  <rect x="30" y="44" width="160" height="182" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+  <rect x="225" y="44" width="160" height="182" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.6"/>
+  <rect x="430" y="44" width="160" height="182" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+  <rect x="630" y="44" width="160" height="182" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1.4"/>
+
+  <text x="110" y="68" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">① 시작</text>
+  <text x="305" y="68" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f46e5">② maxSurge 추가</text>
+  <text x="510" y="68" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">③ 교체</text>
+  <text x="710" y="68" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">④ 완료</text>
+
+  <text x="110" y="86" text-anchor="middle" font-size="10" fill="#94a3b8">v1.20 운영 중</text>
+  <text x="305" y="86" text-anchor="middle" font-size="10" fill="#94a3b8">새 버전 추가 생성</text>
+  <text x="510" y="86" text-anchor="middle" font-size="10" fill="#94a3b8">기존 Pod 종료</text>
+  <text x="710" y="86" text-anchor="middle" font-size="10" fill="#94a3b8">v1.21 운영 중</text>
+
+  <text x="46" y="116" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <text x="46" y="162" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <text x="241" y="116" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <text x="241" y="162" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <text x="446" y="116" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <text x="446" y="162" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+  <text x="646" y="116" font-size="10.5" font-weight="700" fill="#7b341e">v1.20</text>
+  <text x="646" y="162" font-size="10.5" font-weight="700" fill="#3730a3">v1.21</text>
+
+  <circle cx="95" cy="128" r="7" fill="#ff7849"/>
+  <circle cx="113" cy="128" r="7" fill="#ff7849"/>
+  <circle cx="131" cy="128" r="7" fill="#ff7849"/>
+  <circle cx="149" cy="128" r="7" fill="#ff7849"/>
+  <text x="122" y="160" text-anchor="middle" font-size="13" fill="#cbd5e1">—</text>
+
+  <circle cx="290" cy="128" r="7" fill="#ff7849"/>
+  <circle cx="308" cy="128" r="7" fill="#ff7849"/>
+  <circle cx="326" cy="128" r="7" fill="#ff7849"/>
+  <circle cx="344" cy="128" r="7" fill="#ff7849"/>
+  <circle cx="290" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="308" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="326" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="344" cy="174" r="7" fill="#4f46e5"/>
+
+  <circle cx="495" cy="128" r="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="3,2"/>
+  <circle cx="513" cy="128" r="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="3,2"/>
+  <circle cx="531" cy="128" r="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="3,2"/>
+  <circle cx="549" cy="128" r="7" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="3,2"/>
+  <circle cx="495" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="513" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="531" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="549" cy="174" r="7" fill="#4f46e5"/>
+
+  <text x="710" y="132" text-anchor="middle" font-size="13" fill="#cbd5e1">—</text>
+  <circle cx="691" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="709" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="727" cy="174" r="7" fill="#4f46e5"/>
+  <circle cx="745" cy="174" r="7" fill="#4f46e5"/>
+
+  <text x="110" y="208" text-anchor="middle" font-size="11" fill="#475569">총 4개</text>
+  <text x="305" y="208" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">총 8개 (일시 증가)</text>
+  <text x="510" y="208" text-anchor="middle" font-size="11" fill="#475569">교체 진행 중</text>
+  <text x="710" y="208" text-anchor="middle" font-size="11" fill="#475569">총 4개</text>
+
+  <path d="M 192 135 L 222 135" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ru-arr)"/>
+  <path d="M 387 135 L 427 135" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ru-arr)"/>
+  <path d="M 592 135 L 627 135" fill="none" stroke="#94a3b8" stroke-width="1.4" marker-end="url(#ru-arr)"/>
+
+  <text x="410" y="256" text-anchor="middle" font-size="11" fill="#475569"><tspan font-weight="700" fill="#4f46e5">maxSurge 4</tspan> → 새 Pod 4개를 한꺼번에 더 띄웁니다 (단계 ②의 일시 8개)</text>
+  <text x="410" y="276" text-anchor="middle" font-size="11" fill="#475569"><tspan font-weight="700" fill="#7b341e">maxUnavailable 0</tspan> → 기존 Pod를 먼저 끄지 않아 서비스가 끊기지 않습니다</text>
+</svg>
+</div>
+<div class="caption">그림 4-22. 롤링 업데이트 진행 - 새 Pod를 먼저 띄우고 기존 Pod를 차례로 교체합니다</div>
+
+</div>
+</body>
+</html>

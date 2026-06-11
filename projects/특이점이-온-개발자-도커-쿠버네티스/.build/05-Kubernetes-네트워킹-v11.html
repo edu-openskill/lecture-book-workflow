@@ -18,22 +18,19 @@
 <body>
 <div class="container">
 <h1>Ch.5 Kubernetes 네트워킹</h1>
-<p>다음 날 아침이었습니다. 가방을 내려놓고 자리에 앉았습니다.</p>
-<p>옆자리 선배가 자리에 앉으며 물었습니다.</p>
-<div class="dialogue"><span class="speaker">선배</span>: "어제 쿠버네티스는 어디까지 봤어요?"</div>
-<div class="dialogue"><span class="speaker">오픈이</span>: "Pod 띄우는 거랑 자동 복구까지 봤어요."</div>
-<div class="dialogue"><span class="speaker">선배</span>: "잘했네요. 그럼 외부에서 그 Pod에는 어떻게 접근하면 될까요?"</div>
-<p>오픈이는 답이 떠오르지 않았습니다.</p>
-<p class="thought">'어... 어디로 들어가지...'</p>
-<p>오픈이는 어제처럼 Pod 네 대를 다시 실행했습니다. Pod마다 다른 IP가 보였고, 그중 하나를 브라우저에 쳐 봤지만 화면은 열리지 않습니다.</p>
+<p>오픈이는 어제 배운 내용을 바탕으로 테스트 서버에 애플리케이션을 배포했습니다. Pod가 종료되더라도 Deployment가 즉시 새 Pod를 실행해 주니 마음이 든든했습니다.</p>
+<p>다음 날 아침, 동료가 찾아왔습니다.</p>
+<div class="dialogue"><span class="speaker">동료</span>: "오픈 씨, 어제 테스트 서버에 올렸다는 서비스에 접속이 안 되는데, 어떻게 들어가요?"</div>
+<p>오픈이는 당황했습니다. 로그상으로는 분명 정상 실행 중이었지만, 정작 브라우저로 접속해 본 적은 없었기 때문입니다. 서둘러 Pod 목록에서 IP를 확인해 브라우저에 입력해 보았지만, 페이지는 열리지 않았습니다.</p>
 <div class="chapter-image gemini"><img src="..\assets\CH05\gemini\01_prologue-no-fixed-address.png" alt="Pod는 떠 있는데 접근할 주소가 없던 아침" /><div class="caption">그림 5-1. Pod는 떠 있는데 접근할 주소가 없던 아침</div></div>
-<p>게다가 화면에 뜬 IP는 어제 본 것과 모두 달랐습니다.</p>
-<div class="dialogue"><span class="speaker">오픈이</span>: "선배님, IP가 보여도 안 들어가지고, 다시 실행할 때마다 바뀌어요. 어떻게 접근해야 하죠?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "Service라는 리소스가 그 역할을 맡아요. Pod 앞에 고정된 주소를 세워 두는 일을 하죠. 한 번 공부해봐요."</div>
+<p>게다가 Pod가 재생성될 때마다 IP가 바뀌니, IP로는 접근할 수도 없었습니다.</p>
+<p class="thought">'쿠버네티스 환경에서는 외부에서 Pod로 어떻게 접속해야 하지?'</p>
+<p>막막해진 오픈이가 선배에게 묻자, 선배가 화면을 보며 설명했습니다.</p>
+<div class="dialogue"><span class="speaker">선배</span>: "외부 요청이 실제 Pod까지 도달하려면 두 가지 역할이 필요해요. 들어온 요청을 도메인이나 경로에 따라 알맞은 곳으로 보내 주는 <strong>Ingress</strong>, 그리고 수시로 바뀌는 Pod를 묶어 고정된 진입점을 제공하는 <strong>Service</strong>죠. 이 두 가지를 한번 알아봐요."</div>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
-<li><strong>Service</strong>가 어떻게 Pod IP 변동을 추상화해 고정 진입점을 만드는지 이해합니다</li>
+<li>Pod IP가 바뀌어도 변하지 않는 <strong>Service</strong> 주소를 만들어 접속합니다</li>
 <li>서비스를 외부에 노출하는 여러 방식의 차이를 익힙니다</li>
 <li><strong>Ingress</strong>로 외부 도메인 한 곳에서 URL 경로별로 요청을 분기합니다</li>
 <li>브라우저에서 Pod까지 패킷이 가는 흐름을 그려 보겠습니다</li>
@@ -41,7 +38,8 @@
 </div>
 <h2>5.1 Service - Pod의 고정 주소</h2>
 <h3>5.1.1 Service가 필요한 이유</h3>
-<p>오픈이가 <strong>Service</strong>를 검색해 보니, 첫 줄에 정의가 적혀 있었습니다. Pod IP가 바뀌어도 변하지 않는 <strong>고정 진입점</strong>을 만들고, 뒤에 연결된 여러 Pod에 <strong>요청을 분배</strong>하는 리소스가 Service였습니다.</p>
+<p>Pod의 IP는 고정된 값이 아닙니다. Pod는 종료되거나 새 버전으로 교체될 때마다 새로 만들어지고, 그때마다 IP가 바뀝니다. 게다가 같은 역할을 하는 Pod를 여러 개 띄워 두면, 요청을 그중 어디로 보낼지도 정해야 합니다.</p>
+<p><strong>Service</strong>는 이 문제를 해결합니다. Pod IP가 바뀌어도 변하지 않는 <strong>고정 진입점</strong>을 만들고, 들어온 요청을 <strong>연결된 여러 Pod</strong>에 <strong>분배</strong>하는 리소스입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="외부 요청이 Service를 거쳐 클러스터 안 여러 Pod로 분배되는 구조">
   <defs>
@@ -78,10 +76,10 @@
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex11</p>
 </div>
-<p>오픈이는 직접 만들어 보기로 했습니다. 먼저 Pod를 실행한 다음, 앞에 Service를 붙이는 순서로 진행합니다.</p>
+<p>이제 직접 만들어 보겠습니다. 먼저 Pod를 실행한 다음, 앞에 Service를 붙이는 순서로 진행합니다.</p>
 <p><code>ex11</code> 폴더를 열고 어제 적용했던 <code>deploy-ex02.yml</code>을 다시 적용합니다. Pod 네 개를 실행하는 Deployment 설정입니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 4개 생성</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/deploy-ex02.yml<span class="w">   </span><span class="c1"># Pod 4개 생성</span></div>
-<p>다음으로 Service YAML을 살펴봤습니다.</p>
+<p>다음은 Service를 정의한 YAML입니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 1</span> ex11/service-ex01.yml. NodePort Service 정의</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -94,7 +92,7 @@
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w">          </span><span class="c1"># 클러스터 내부에서 Service로 진입하는 포트</span>
 <span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w">    </span><span class="c1"># Service가 Pod로 요청을 전달하는 포트</span>
 <span class="w">      </span><span class="nt">nodePort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30080</span><span class="w">   </span><span class="c1"># 외부에서 노드로 진입할 때 사용하는 포트 (기본 허용 범위 30000~32767)</span></div>
-<p>Service는 <strong>Deployment</strong>와 동일하게 <strong>selector</strong> 방식으로 Pod를 관리합니다.</p>
+<p>Service는 <strong>Deployment</strong>와 마찬가지로 <strong>selector</strong>에 지정한 라벨과 일치하는 Pod를 골라 연결합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Service의 selector(app: nginx)와 같은 라벨을 가진 Pod만 골라 매칭하고, 라벨이 다른 Pod는 제외하는 구조">
   <defs>
@@ -110,28 +108,28 @@
   <path d="M 260 135 Q 380 135, 510 135" fill="none" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#sl-svc)"/>
   <rect x="510" y="25" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
   <text x="525" y="48" font-size="12" font-weight="700" fill="#7b341e">Pod 1</text>
-  <text x="525" y="71" font-size="11" font-family="monospace" fill="#7b341e">labels: </text>
-  <text x="585" y="71" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
+  <text x="525" y="71" font-size="13" font-family="monospace" fill="#7b341e">labels: </text>
+  <text x="585" y="71" font-size="13" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
   <text x="722" y="48" text-anchor="end" font-size="11" font-weight="700" fill="#ff7849">선택</text>
   <rect x="510" y="105" width="220" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
   <text x="525" y="128" font-size="12" font-weight="700" fill="#7b341e">Pod 2</text>
-  <text x="525" y="151" font-size="11" font-family="monospace" fill="#7b341e">labels: </text>
-  <text x="585" y="151" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
+  <text x="525" y="151" font-size="13" font-family="monospace" fill="#7b341e">labels: </text>
+  <text x="585" y="151" font-size="13" font-family="monospace" font-weight="700" fill="#7b341e">app: nginx</text>
   <text x="722" y="128" text-anchor="end" font-size="11" font-weight="700" fill="#ff7849">선택</text>
   <rect x="510" y="185" width="220" height="60" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.4" stroke-dasharray="4,3"/>
   <text x="525" y="208" font-size="12" font-weight="700" fill="#94a3b8">Pod 3</text>
-  <text x="525" y="231" font-size="11" font-family="monospace" fill="#94a3b8">labels: </text>
-  <text x="585" y="231" font-size="11" font-family="monospace" font-weight="700" fill="#94a3b8">app: db</text>
+  <text x="525" y="231" font-size="13" font-family="monospace" fill="#94a3b8">labels: </text>
+  <text x="585" y="231" font-size="13" font-family="monospace" font-weight="700" fill="#94a3b8">app: db</text>
   <text x="722" y="208" text-anchor="end" font-size="11" font-weight="700" fill="#94a3b8">제외</text>
 </svg>
 </div>
 <div class="caption">그림 5-3. selector가 지정한 라벨(app: nginx)을 가진 Pod만 매칭하고 다른 라벨은 제외</div>
 <h3>5.1.3 Service 타입과 접근 범위</h3>
-<p>YAML을 살펴보던 중에 오픈이는 <code>type: NodePort</code> 한 줄에서 멈췄습니다.</p>
-<p class="thought">'NodePort 말고 다른 type도 있다는 거네. 어떤 차이가 있을까.'</p>
-<p>Service는 접근 범위에 따라 세 종류로 나뉩니다. 아파트 단지에 비유하면 <strong>단지 내부 인터폰</strong>처럼 안에서만 통하는 <strong>ClusterIP</strong>, <strong>각 동 1층의 특수 출입구</strong>처럼 동 위치와 번호를 알아야 들어오는 <strong>NodePort</strong>, <strong>단지 정문 총괄 경비실</strong>처럼 대표 주소 하나로 트래픽을 분산하는 <strong>LoadBalancer</strong>입니다.</p>
-<h4>① ClusterIP</h4>
-<p>서비스 타입의 <strong>기본값</strong>입니다. 외부 접근은 막혀 있고, <strong>클러스터 내부의 Pod끼리만 통신</strong>할 때 사용합니다. DB처럼 외부 노출이 필요 없는 구성에 적합합니다.</p>
+<p>YAML을 살펴보던 오픈이는 <code>type: NodePort</code>를 보고 궁금증이 생겼습니다.</p>
+<p class="thought">'NodePort 말고 다른 type도 있는 거 같은데. 어떤 역할을 하는 걸까.'</p>
+<p>Service는 접근 범위에 따라 ClusterIP, NodePort, LoadBalancer로 나뉩니다.</p>
+<h4>ClusterIP</h4>
+<p><strong>ClusterIP</strong>는 사내에서만 연결되는 <strong>내선 번호</strong>입니다. <strong>클러스터 안의 Pod끼리는 서로 연결되지만, 외부에서는 접근할 수 없습니다.</strong> DB처럼 외부에 노출할 필요가 없는 구성에 적합하며, 서비스 타입의 기본값입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ClusterIP — 외부 접근은 차단되고 클러스터 내부 Pod끼리만 통신하는 구조">
   <defs>
@@ -167,8 +165,8 @@
 </svg>
 </div>
 <div class="caption">그림 5-4. ClusterIP는 외부 요청은 닿지 못하고 내부 Pod끼리만 통신</div>
-<h4>② NodePort</h4>
-<p>이번 실습에서 사용한 방식입니다. <strong>노드(서버)에 특정 포트를 열어</strong> 외부에서 들어올 수 있게 합니다. 노드 포트로 들어온 요청이 클러스터 내부 Service로 전달됩니다.</p>
+<h4>NodePort</h4>
+<p><strong>NodePort</strong>는 외부에서도 연결할 수 있는 <strong>직통 번호</strong>입니다. Service를 NodePort로 지정하면, <strong>노드(서버)에 외부와 통하는 포트가 열립니다.</strong> 외부에서 그 노드의 IP와 포트로 접속하면, 요청이 클러스터 안의 Service를 거쳐 Pod로 전달됩니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NodePort — 노드 IP의 특정 포트(30080)를 통해 외부에서 Service로 접근하는 구조">
   <defs>
@@ -197,8 +195,8 @@
 </svg>
 </div>
 <div class="caption">그림 5-5. NodePort는 노드의 특정 포트로 외부 접근을 허용</div>
-<h4>③ LoadBalancer</h4>
-<p>실제 운영 환경에서 가장 흔히 쓰는 방식입니다. 클라우드 환경에서 <strong>공인 IP가 자동 발급</strong>되어, 사용자는 IP나 도메인 하나로 들어옵니다.</p>
+<h4>LoadBalancer</h4>
+<p><strong>LoadBalancer</strong>는 외부 요청을 하나로 묶어 연결하는 <strong>대표 번호</strong>입니다. Service를 LoadBalancer로 지정하면, AWS·GCP 같은 클라우드 플랫폼이 <strong>공인 IP</strong>를 발급합니다. <strong>그 IP로 들어온 모든 요청을 받아, 뒤에 있는 여러 노드로 나눠 보냅니다.</strong> 실제 운영에서 가장 흔히 씁니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LoadBalancer — 공인 IP가 각 노드의 NodePort로 직접 트래픽을 분산하고, Service는 Pod 집합을 라벨로 묶는 논리 리소스">
   <defs>
@@ -267,15 +265,15 @@
 </tbody>
 </table>
 <h3>5.1.4 포트 흐름</h3>
-<p>앞서 만든 Service YAML에는 <code>port</code>, <code>targetPort</code>, <code>nodePort</code> 세 포트가 한 곳에 모여 있습니다. 각 포트는 외부에서 들어온 요청을 Pod까지 단계별로 전달하기 위한 역할을 합니다.</p>
+<p>앞서 만든 Service YAML을 보면, 포트에는 <code>port</code>, <code>targetPort</code>, <code>nodePort</code> 세 종류가 있습니다. 각 포트는 외부에서 들어온 요청을 Pod까지 단계별로 전달합니다.</p>
 <p>외부 사용자가 노드의 <code>nodePort</code>로 접속하면, 서비스는 <code>port</code>로 이를 수신한 뒤, 파드 내부 컨테이너의 <code>targetPort</code>로 최종 전달합니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="노드 큰 박스 안에 NodePort, Service, Pod가 자리하고 외부 사용자가 NodePort로 진입해 Service를 거쳐 Pod 안 컨테이너에 도달하는 구조">
+<svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="노드 큰 박스 안에 NodePort, Service, Pod가 있고 외부 사용자가 NodePort로 진입해 Service를 거쳐 Pod 안 컨테이너에 도달하는 구조">
   <defs>
     <marker id="nps-d" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
     <marker id="nps-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
   </defs>
-  <text x="380" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">노드 한 채 안에 자리한 NodePort, Service, Pod</text>
+  <text x="380" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">노드 안의 NodePort, Service, Pod</text>
   <rect x="0" y="180" width="130" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
   <text x="65" y="208" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 사용자</text>
   <text x="65" y="228" text-anchor="middle" font-size="10" fill="#6b7280">브라우저</text>
@@ -301,7 +299,7 @@
   <text x="190" y="200" text-anchor="middle" font-size="12" font-family="monospace" font-weight="700" fill="#7b341e">노드IP:30080</text>
 </svg>
 </div>
-<div class="caption">그림 5-7. 노드 안에 NodePort, Service, Pod가 위치하고 외부 사용자가 NodePort로 진입해 Service를 거쳐 Pod 안 컨테이너에 도달하는 구조</div>
+<div class="caption">그림 5-7. NodePort에서 Service를 거쳐 Pod 컨테이너까지 이어지는 포트 흐름</div>
 <table>
 <thead>
 <tr>
@@ -393,7 +391,7 @@
 <div class="caption">그림 5-9. minikube service URL 생성 결과</div>
 <p>URL이 한 줄 출력되고 커서는 그대로 멈춰 있습니다. 이 명령은 연결을 유지하는 동안 터미널에서 계속 실행됩니다. 출력된 주소를 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 떴습니다.</p>
 <div class="chapter-image terminal"><img src="..\assets\CH05\terminal\01_nginx-welcome.png" alt="" /><div class="caption">그림 5-10. 브라우저에서 nginx 접속 확인</div></div>
-<p>다음으로 Pod가 사라지고 IP가 바뀌어도 Service가 새 Pod로 자동 연결되는지 직접 확인합니다. 오픈이는 Ctrl+C로 터미널을 종료하고 Pod를 전부 지웠습니다.</p>
+<p>다음으로 Pod가 사라지고 IP가 바뀌어도 Service가 새 Pod로 자동 연결되는지 직접 확인합니다. Ctrl+C로 터미널을 종료하고 Pod를 전부 지웁니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 재생성 후 같은 주소로 재접속</div>kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>--all<span class="w">                </span><span class="c1"># 모든 Pod 삭제 (Deployment가 자동 재생성)</span>
 minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<span class="w"> </span>--url<span class="w">    </span><span class="c1"># 다시 접속 URL 확인</span></div>
 <div class="terminal-log">
@@ -414,7 +412,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   </div>
 </div>
 <div class="caption">그림 5-11. Pod 삭제 후 Service 접속 확인</div>
-<p>새 URL로 접속하니 NGINX 페이지가 그대로 떴습니다. Pod IP가 모두 새로 바뀌었지만 Service는 새 Pod에 이미 연결되어 있습니다.</p>
+<p>새 URL로 접속해도 NGINX 페이지가 그대로 나옵니다. Pod IP가 모두 새로 바뀌었지만 Service는 새 Pod에 이미 연결되어 있습니다.</p>
 <p class="thought">'Pod IP가 다 바뀌었는데도 Service는 새 Pod와 연결돼 있네. Pod가 바뀌어도 Service가 자동으로 관리하는구나.'</p>
 <h2>5.2 Ingress - 도메인 라우팅</h2>
 <h3>5.2.1 Service의 한계</h3>
@@ -624,10 +622,10 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <div class="caption">그림 5-17. minikube tunnel 실행 화면</div>
 <p>이제 브라우저에서 두 경로를 차례로 접속해 보겠습니다.</p>
-<p>먼저 <code>http://localhost/order</code>를 열자 &quot;주문 접수 완료&quot;가 떴습니다.</p>
+<p>먼저 <code>http://localhost/order</code>를 열면 &quot;주문 접수 완료&quot;가 나옵니다.</p>
 <!-- [CAPTURE NEEDED: 브라우저에서 http://localhost/order 접속 시 "주문 접수 완료" 응답 확인 화면. 자산 경로: assets/CH05/mock-order-page.png] -->
 <div class="chapter-image terminal"><img src="..\assets\CH05\terminal\02_order-result.png" alt="" /><div class="caption">그림 5-18. /order 접속 결과</div></div>
-<p>이어서 <code>http://localhost/stores</code>를 열자 &quot;매장 선택&quot;이 떴습니다.</p>
+<p>이어서 <code>http://localhost/stores</code>를 열면 &quot;매장 선택&quot;이 나옵니다.</p>
 <!-- [CAPTURE NEEDED: 브라우저에서 http://localhost/stores 접속 시 "매장 선택" 응답 확인 화면. 자산 경로: assets/CH05/mock-stores-page.png] -->
 <div class="chapter-image terminal"><img src="..\assets\CH05\terminal\03_stores-result.png" alt="" /><div class="caption">그림 5-19. /stores 접속 결과</div></div>
 <p>도메인은 하나(<code>localhost</code>)인데 경로마다 다른 응답이 돌아왔습니다. Ingress가 경로를 보고 알맞은 <strong>Service</strong>로 요청을 넘기고, Service가 다시 그 뒤의 <strong>Pod</strong>로 요청을 넘겨 응답이 만들어진 결과입니다.</p>
@@ -807,7 +805,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </tbody>
 </table>
 <h2>5.3 브라우저에서 Pod까지의 경로</h2>
-<p>오픈이는 이전 챕터에서 개발자의 명령으로 Pod를 띄우고 관리하는 흐름을 익혔습니다. 이제 <strong>Service</strong>와 <strong>Ingress</strong>까지 살펴봤으니, 사용자가 요청을 보냈을 때 Pod에 도달하는 흐름을 정리해 보기로 했습니다.</p>
+<p>이전 챕터에서는 개발자의 명령으로 Pod를 띄우고 관리하는 흐름을 다뤘습니다. <strong>Service</strong>와 <strong>Ingress</strong>까지 살펴봤으니, 이제 사용자 요청이 Pod에 도달하는 흐름을 정리해 보겠습니다.</p>
 <p>사용자가 브라우저에서 요청했을 때 Pod까지 도달하는 흐름을 한 장에 그리면 다음과 같습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1200 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="요청이 Pod까지 도달하는 전체 흐름 — 1·2단계와 컨트롤 플레인이 위쪽 가로로, 3단계가 아래쪽에 두 컬럼(order/stores)으로 평행">
