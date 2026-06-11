@@ -266,7 +266,7 @@
 </table>
 <h3>5.1.4 포트 흐름</h3>
 <p>앞서 만든 Service YAML을 보면, 포트에는 <code>port</code>, <code>targetPort</code>, <code>nodePort</code> 세 종류가 있습니다. 각 포트는 외부에서 들어온 요청을 Pod까지 단계별로 전달합니다.</p>
-<p>외부 사용자가 노드의 <code>nodePort</code>로 접속하면, 서비스는 <code>port</code>로 이를 수신한 뒤, 파드 내부 컨테이너의 <code>targetPort</code>로 최종 전달합니다.</p>
+<p>외부 사용자가 노드의 <code>nodePort</code>로 접속하면, 그 요청이 <code>port</code>를 가진 Service를 거쳐 Pod의 <code>targetPort</code>로 전달됩니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="노드 큰 박스 안에 NodePort, Service, Pod가 있고 외부 사용자가 NodePort로 진입해 Service를 거쳐 Pod 안 컨테이너에 도달하는 구조">
   <defs>
@@ -332,7 +332,7 @@
 </table>
 <h3>5.1.5 외부에서 Service 접속해 보기</h3>
 <p>이제 실습을 해 보겠습니다.</p>
-<p><code>ex11/service-ex01.yml</code>을 클러스터에 적용한 뒤, 외부에서 NodePort로 접속이 되는지와 Pod가 사라져도 같은 주소로 연결되는지 차례로 확인합니다.</p>
+<p><code>ex11/service-ex01.yml</code>을 클러스터에 적용한 뒤, 외부에서 실제로 접속되는지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Service 생성</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/service-ex01.yml<span class="w">   </span><span class="c1"># Service YAML 적용</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -346,11 +346,11 @@
   </div>
 </div>
 <div class="caption">그림 5-8. Service 생성 결과</div>
-<p>오픈이는 브라우저를 열고 NodePort로 설정한 30080 포트(<code>localhost:30080</code>)로 접속했습니다. 그런데 연결할 수 없다는 화면이 떴습니다.</p>
+<p>브라우저를 열고 NodePort로 설정한 30080 포트(<code>localhost:30080</code>)로 접속합니다. 그런데 연결할 수 없다는 화면이 떴습니다.</p>
 <p class="thought">'분명 30080 포트를 열었는데 왜 안 들어가지.'</p>
 <div class="prep-note">
 <p><strong>NodePort로 접속이 안 되는 이유</strong></p>
-<p>미니큐브는 로컬 컴퓨터 내에 독립된 가상 환경을 구축하고, 그 안에서 클러스터를 구동합니다. 이 가상 환경은 컴퓨터 내부에 존재하지만, 자체 IP를 가진 별도의 독립된 PC처럼 동작합니다. 이로 인해 호스트와 가상 환경은 서로 분리된 네트워크망을 가지게 되며, 기본적으로 로컬 컴퓨터에서 보낸 요청은 가상 환경 내부까지 직접 전달되지 않습니다.</p>
+<p>미니큐브는 내 컴퓨터 안에 작은 가상 환경을 만들고, 그 안에서 클러스터를 실행합니다. 이 가상 환경은 별개의 PC처럼 동작해서, 내 컴퓨터와 다른 네트워크를 가집니다. 그래서 NodePort를 열어도 <code>localhost</code> 주소로는 접근할 수 없습니다.</p>
 </div>
 <p>이 문제를 해결하기 위해, 미니큐브에는 내 컴퓨터와 클러스터를 연결하는 별도의 명령어가 있습니다.</p>
 <table>
@@ -370,7 +370,7 @@
     <tr>
       <td style="text-align:center">터널 개방</td>
       <td style="white-space:nowrap"><code>minikube tunnel</code></td>
-      <td>LoadBalancer·Ingress에 외부 IP 부여. 클라우드 LoadBalancer 흉내</td>
+      <td>LoadBalancer·Ingress에 외부 IP 부여. LoadBalancer·Ingress 접근에 사용</td>
     </tr>
   </tbody>
 </table>
@@ -413,7 +413,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <div class="caption">그림 5-11. Pod 삭제 후 Service 접속 확인</div>
 <p>새 URL로 접속해도 NGINX 페이지가 그대로 나옵니다. Pod IP가 모두 새로 바뀌었지만 Service는 새 Pod에 이미 연결되어 있습니다.</p>
-<p class="thought">'Pod IP가 다 바뀌었는데도 Service는 새 Pod와 연결돼 있네. Pod가 바뀌어도 Service가 자동으로 관리하는구나.'</p>
+<p class="thought">'Pod IP가 다 바뀌었는데도 Service는 새 Pod와 연결돼 있네. 외부에서는 Service만 바라보고 있으면 되는구나.'</p>
 <h2>5.2 Ingress - 도메인 라우팅</h2>
 <h3>5.2.1 Service의 한계</h3>
 <p>오픈이는 Service 실험 결과를 정리해 선배에게 찾아갔습니다.</p>
