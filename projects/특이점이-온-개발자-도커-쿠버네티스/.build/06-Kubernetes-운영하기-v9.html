@@ -18,17 +18,15 @@
 <body>
 <div class="container">
 <h1>Ch.6 Kubernetes 운영하기</h1>
-<p>며칠 뒤였습니다. 진행 중인 프로젝트를 배포하기 전, 마지막으로 한 번 더 코드 리뷰를 하고 있었습니다. 리뷰 중 Dockerfile의 환경 변수 코드가 눈에 띄었습니다.</p>
+<p>며칠 뒤, 오픈이는 진행 중인 프로젝트를 배포하기 전 마지막으로 한 번 더 코드 리뷰를 하고 있었습니다. 그러던 중 Dockerfile의 환경 변수 코드가 눈에 띄었습니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><span class="k">ENV</span><span class="w"> </span><span class="nv">MYSQL_PASSWORD</span><span class="o">=</span>metacoding1234</div>
-<p class="thought">'잠깐. 이대로 빌드하면 비밀번호가 이미지에 그대로 박히는데.'</p>
+<p>데이터베이스 비밀번호가 코드에 그대로 노출되어 있었습니다.</p>
+<p class="thought">'잠깐. 이대로 빌드하면 비밀번호가 이미지에 그대로 남는데.'</p>
 <!-- [GEMINI PROMPT: Dockerfile에 적힌 평문 비밀번호가 빌드된 컨테이너 이미지에 그대로 담겨 사내 레지스트리 서버로 올라가는 모습. 좌측: Dockerfile 텍스트 박스(ENV MYSQL_PASSWORD=... 줄에 자물쇠 아이콘 부착). 중앙: 컨테이너 이미지 박스(이미지 내부에 비밀번호 라벨이 그대로 들어가 있는 모습). 우측: 사내 컨테이너 레지스트리 서버 일러스트. 좌→우 흐름 화살표.
 경로: assets/CH06/gemini/01_prologue-secret-baked-into-image.png -->
 <div class="chapter-image gemini"><img src="..\assets\CH06\gemini\01_prologue-secret-baked-into-image.png" alt="" /><div class="caption">그림 6-1. Dockerfile에 적힌 비밀번호가 이미지에 그대로 담겨 배포된다</div></div>
-<p>문제는 비밀번호만이 아니었습니다. 클러스터에서 돌고 있는 DB Pod가 떠올랐습니다. Pod가 죽으면 Deployment가 새 Pod를 띄우겠지만, 그 안에 쌓아 둔 회원 정보와 게시글 데이터는 새 Pod에 남아 있지 않습니다.</p>
-<p class="thought">'이 두 가지부터 해결해야겠다.'</p>
-<p>옆자리 선배에게 질문하자, 선배가 모니터에서 눈을 떼고 돌아봤습니다.</p>
-<div class="dialogue"><span class="speaker">선배</span>: "Dockerfile에 비밀번호를 직접 적지 마세요. 설정은 이미지 바깥에 두고, 이미지에는 순수한 코드만 담아야 해요. 쿠버네티스에는 이런 리소스를 관리하는 <strong>ConfigMap</strong>과 <strong>Secret</strong>이 따로 마련되어 있어요."</div>
-<p class="thought">'설정을 바깥으로 빼는 방법이 있구나. 이 두 가지부터 당장 알아봐야겠다.'</p>
+<p>오픈이가 옆자리 선배에게 묻자, 선배가 의자를 돌려 오픈이를 봤습니다.</p>
+<div class="dialogue"><span class="speaker">선배</span>: "테스트 환경에서는 괜찮지만, 실제 운영 환경에 배포할 때는 두 가지를 주의해야 해요. 먼저 Dockerfile에 비밀번호 같은 설정값을 직접 적지 말고, <strong>이미지 밖으로 분리</strong>해서 따로 관리해야 해요.<br>그리고 Pod는 언제든 종료될 수 있어서 안에 쌓인 데이터도 함께 날아가니, 유지해야 할 데이터는 <strong>Pod 외부의 저장소</strong>에 보관해야 해요. 설정과 데이터 모두 컨테이너 밖으로 안전하게 빼 두는 게 핵심이죠."</div>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
@@ -39,8 +37,8 @@
 </ul>
 </div>
 <h2>6.1 ConfigMap·Secret - 설정과 비밀번호를 이미지 바깥으로</h2>
-<p>컨테이너 이미지는 한 번 빌드하면 내용물을 수정할 수 없습니다. 만약 데이터베이스 주소나 비밀번호를 이미지 안에 직접 적어 두면, 개발 서버용 이미지와 운영 서버용 이미지를 매번 따로 빌드해야 하는 문제가 생깁니다.</p>
-<p>그래서 쿠버네티스는 '변하지 않는 코드(컨테이너 이미지)'와 '환경마다 변하는 설정값'을 분리합니다. 일반 설정값은 <strong>ConfigMap</strong>에, 민감한 정보는 <strong>Secret</strong>에 담아 이미지 바깥에 따로 보관하는 방식입니다.</p>
+<p>컨테이너 이미지에 데이터베이스 주소나 비밀번호를 직접 적어 두면, 설정값이 바뀔 때마다 이미지를 새로 빌드해야 합니다. 운영 환경에서 설정 하나를 바꾸기 위해 매번 이미지를 다시 빌드하고 배포하는 것은 비효율적입니다.</p>
+<p>그래서 쿠버네티스는 컨테이너 이미지와 환경 변수를 분리합니다. 일반 설정값은 <strong>ConfigMap</strong>에, 민감한 정보는 <strong>Secret</strong>에 담아 외부에 따로 보관하는 방식입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ConfigMap과 Secret이 이미지와 별개로 Pod에 주입되는 구조 — ConfigMap·Secret은 데이터 저장소(실린더), Pod는 핵심 프로세스(직사각형)">
   <defs>
@@ -617,7 +615,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frontend-ingress</span>
 <span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metacoding</span>
 <span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w">       </span><span class="c1"># 어느 Controller가 이 규칙을 집행할지 지정</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w">       </span><span class="c1"># 어느 Ingress 컨트롤러가 이 규칙을 집행할지 지정</span>
 <span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">http</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
@@ -778,8 +776,8 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 </tbody>
 </table>
 <h3>6.3.4 공통 준비</h3>
-<p>코드를 살펴봤으니 배포할 차례입니다. 본격적으로 배포하기 전에 Minikube와 Ingress Controller를 켜고, 네 가지 이미지를 빌드해 둡니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube와 Ingress Controller 시작</div>minikube<span class="w"> </span>start
+<p>코드를 살펴봤으니 배포할 차례입니다. 본격적으로 배포하기 전에 Minikube와 Ingress 컨트롤러를 켜고, 네 가지 이미지를 빌드해 둡니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube와 Ingress 컨트롤러 시작</div>minikube<span class="w"> </span>start
 minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress</div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -799,7 +797,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
     <div>* The 'ingress' addon is enabled</div>
   </div>
 </div>
-<div class="caption">그림 6-14. Nginx Ingress Controller 애드온 설치</div>
+<div class="caption">그림 6-14. Nginx Ingress 컨트롤러 애드온 설치</div>
 <p>Minikube는 독립적인 가상 환경에서 작동하는 클러스터라, 로컬 호스트에서 빌드한 이미지를 곧장 인식하지 못합니다. 그래서 별도의 레지스트리를 두지 않고 <code>minikube image build</code> 명령으로 Minikube 자체에 이미지를 직접 만들어 둡니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 네 이미지 한 번에 빌드</div>minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/db:1<span class="w"> </span>ex15/db<span class="w">              </span><span class="c1"># DB 이미지 빌드</span>
 minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>metacoding/backend:1<span class="w"> </span>ex15/backend<span class="w">    </span><span class="c1"># 백엔드 이미지 빌드</span>
