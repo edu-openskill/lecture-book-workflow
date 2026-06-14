@@ -2901,6 +2901,7 @@
   .terminal-log .tl-label { color: #8250df; font-weight: 700; } /* magenta · 섹션 라벨 */
   .terminal-log .tl-key   { color: #0969da; font-weight: 700; } /* blue · 키 */
   .terminal-log .tl-val   { color: #1a7f37; font-weight: 700; } /* green · 확장값·성공 */
+  .terminal-log .tl-hl    { background: #fff3b0; color: #1f2328; font-weight: 700; padding: 0 4px; border-radius: 3px; } /* 노랑 형광펜 · 예제로 주입한 값 강조 */
   .terminal-log .tl-num   { color: #0550ae; } /* navy · 수치 */
   .terminal-log .tl-str   { color: #953800; } /* brown · 문자열·모델명 */
   .terminal-log .tl-dim   { color: #5e6470; } /* gray · 보조 */

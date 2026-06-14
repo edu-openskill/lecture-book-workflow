@@ -5,7 +5,7 @@
 ## 속함
 
 - `.terminal-log` (컨테이너) + `.tl-chrome` · `.tl-traffic` · `.tl-title` + `.tl-body`
-- `.tl-body` 내부 하위 요소: `.tl-label` · `.tl-key` · `.tl-val` · `.tl-num` · `.tl-str` · `.tl-dim`
+- `.tl-body` 내부 하위 요소: `.tl-label` · `.tl-key` · `.tl-val` · `.tl-num` · `.tl-str` · `.tl-dim` · `.tl-hl`
 - 구조 보조: `.tl-kv` · `.tl-kv-row` · `.tl-divider` · `.tl-section` · `.tl-cursor`
 
 ## 속하지 않음
@@ -52,7 +52,7 @@
 </div>
 ```
 
-**렌더 CSS**: `styles/diagrams.css` 끝부분 `/* Terminal Log (CH11~) */` 블록 (`.terminal-log`, `.tl-chrome`, `.tl-traffic`, `.tl-title`, `.tl-spacer`, `.tl-body`, `.tl-label/.tl-key/.tl-val/.tl-num/.tl-str/.tl-dim`, `.tl-kv`, `.tl-kv-row`, `.tl-divider`, `.tl-section`, `.tl-cursor`)
+**렌더 CSS**: `styles/diagrams.css` 끝부분 `/* Terminal Log (CH11~) */` 블록 (`.terminal-log`, `.tl-chrome`, `.tl-traffic`, `.tl-title`, `.tl-spacer`, `.tl-body`, `.tl-label/.tl-key/.tl-val/.tl-num/.tl-str/.tl-dim/.tl-hl`, `.tl-kv`, `.tl-kv-row`, `.tl-divider`, `.tl-section`, `.tl-cursor`)
 
 **변형**: `.tl-title`은 창 제목이므로 "프로젝트 — 실행 명령 · 요청 경로" 포맷 권장 (예: `ex11 — python run.py · POST /api/chat`, `ex11 — python run.py`). `.tl-cursor`는 마지막 줄 끝에 선택적(대기 중 인상). 색 클래스는 의미로 쓸 것:
 - `.tl-label` = 섹션 라벨 (질문 수신, QueryExpander, TokenTracker 등)
@@ -61,6 +61,7 @@
 - `.tl-num` = 수치 (토큰, 지연, 비용)
 - `.tl-str` = 문자열·모델명
 - `.tl-dim` = 보조 회색 텍스트 (구분자 `|`, 원본/확장 레이블)
+- `.tl-hl` = 노랑 형광펜 배경 강조 (`#fff3b0`). 예제로 주입한 값 등 특정 줄을 시스템 값과 구분 (CH6 §6.1 env 출력에서 ConfigMap/Secret 값)
 
 **피해야 할 것**
 - 스크린샷으로 대체 가능한 **정적 캡처**에 과용 금지. `.terminal-log`는 **구조화된 로그 재현**(여러 key/value + 섹션) 용도. 단일 커맨드 출력은 코드블록으로 충분

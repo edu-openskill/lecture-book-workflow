@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>터미널 강조색 비교</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+
+<style>
+  .sample-label { font-weight: 700; margin: 32px 0 8px; font-size: 15px; }
+  .sample-label small { font-weight: 400; color: #6b7280; margin-left: 6px; }
+  /* 강조 후보 — 예제로 넣은 값(conn_*, password)에만 적용 */
+  .hl-a { background: #fff3b0; color: #1f2328; font-weight: 700; padding: 0 4px; border-radius: 3px; }   /* 노랑 배경 */
+  .hl-b { background: #ffedd5; color: #1f2328; font-weight: 700; padding: 0 4px; border-radius: 3px; }   /* 주황 배경 */
+  .hl-c { color: #d1242f; font-weight: 700; }                                                            /* 빨강 글자 */
+  .hl-d { color: #8250df; font-weight: 700; }                                                            /* 보라 글자 */
+</style>
+</head>
+<body>
+<div class="container">
+<h1>터미널 강조색 비교</h1>
+<p>예제로 넣은 값(<code>conn_info</code> · <code>conn_url</code> · <code>password</code>)만 강조하고, 시스템 값(PATH·HOSTNAME·KUBERNETES_*)은 무색으로 둔 비교입니다.</p>
+
+<div class="sample-label">현재 · 초록 글자<small>tl-val #1a7f37</small></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-794499d5d4-c2xmw -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-794499d5d4-c2xmw</div>
+    <div class="tl-val">conn_info=localhost:80</div>
+    <div class="tl-val">conn_url=config.test</div>
+    <div class="tl-val">password=metacoding1234</div>
+    <div>KUBERNETES_PORT_443_TCP_PORT=443</div>
+    <div>KUBERNETES_SERVICE_HOST=10.96.0.1</div>
+  </div>
+</div>
+
+<div class="sample-label">A · 노랑 배경 형광펜<small>#fff3b0</small></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-794499d5d4-c2xmw -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-794499d5d4-c2xmw</div>
+    <div><span class="hl-a">conn_info=localhost:80</span></div>
+    <div><span class="hl-a">conn_url=config.test</span></div>
+    <div><span class="hl-a">password=metacoding1234</span></div>
+    <div>KUBERNETES_PORT_443_TCP_PORT=443</div>
+    <div>KUBERNETES_SERVICE_HOST=10.96.0.1</div>
+  </div>
+</div>
+
+<div class="sample-label">B · 주황 배경<small>#ffedd5 (브랜드 톤)</small></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-794499d5d4-c2xmw -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-794499d5d4-c2xmw</div>
+    <div><span class="hl-b">conn_info=localhost:80</span></div>
+    <div><span class="hl-b">conn_url=config.test</span></div>
+    <div><span class="hl-b">password=metacoding1234</span></div>
+    <div>KUBERNETES_PORT_443_TCP_PORT=443</div>
+    <div>KUBERNETES_SERVICE_HOST=10.96.0.1</div>
+  </div>
+</div>
+
+<div class="sample-label">C · 빨강 글자<small>#d1242f</small></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-794499d5d4-c2xmw -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-794499d5d4-c2xmw</div>
+    <div class="hl-c">conn_info=localhost:80</div>
+    <div class="hl-c">conn_url=config.test</div>
+    <div class="hl-c">password=metacoding1234</div>
+    <div>KUBERNETES_PORT_443_TCP_PORT=443</div>
+    <div>KUBERNETES_SERVICE_HOST=10.96.0.1</div>
+  </div>
+</div>
+
+<div class="sample-label">D · 보라 글자<small>#8250df</small></div>
+<div class="terminal-log">
+  <div class="tl-chrome">
+    <div class="tl-traffic"><span></span><span></span><span></span></div>
+    <div class="tl-title">실행결과</div>
+    <div class="tl-spacer"></div>
+  </div>
+  <div class="tl-body">
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it nginx-config-secret-794499d5d4-c2xmw -- env</span></div>
+    <div>PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/bin</div>
+    <div>HOSTNAME=nginx-config-secret-794499d5d4-c2xmw</div>
+    <div class="hl-d">conn_info=localhost:80</div>
+    <div class="hl-d">conn_url=config.test</div>
+    <div class="hl-d">password=metacoding1234</div>
+    <div>KUBERNETES_PORT_443_TCP_PORT=443</div>
+    <div>KUBERNETES_SERVICE_HOST=10.96.0.1</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
