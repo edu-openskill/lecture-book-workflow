@@ -914,10 +914,10 @@ A, B, C 식당이 푸드코트에 입점해 있습니다. 식당끼리는 벽으
 | 푸드코트 | IT 용어 | 한 줄 설명 |
 |:-------:|:--------|:----------|
 | 입구 키오스크 | **포트포워딩** | 외부 공개 포트(8080)로 온 주문을 컨테이너 포트(80)로 넘기는 메커니즘입니다 |
-| 키오스크의 "돈까스 → B식당" 매핑 | **iptables 규칙(DNAT)** | 8080으로 온 요청의 도착지를 컨테이너 포트 80으로 바꾸는 한 줄짜리 변환 규칙입니다 |
+| 키오스크의 "돈까스 → B식당" 매핑 | **iptables 규칙(DNAT)** | 8080으로 온 요청의 목적지를 컨테이너의 IP와 포트로 바꾸는 규칙입니다 |
 | 주문이 전달되는 식당 | **컨테이너 포트** | 키오스크가 주문을 넘기는 곳으로, 컨테이너 안에서 앱이 듣고 있는 포트(`:80`)입니다 |
 
-`docker run -p 8080:80`을 실행하면 Docker는 **iptables**에 '호스트 8080 → 컨테이너 80' 규칙을 추가합니다. 이후 브라우저에서 8080 포트로 요청이 오면, iptables가 이 규칙대로 도착지를 80 포트를 가진 컨테이너로 바꿔 전달합니다.
+`docker run -p 8080:80`을 실행하면 Docker는 **iptables**에 '호스트 8080 → 컨테이너 80' 규칙을 추가합니다. 이후 브라우저에서 8080 포트로 요청이 오면, iptables가 이 규칙대로 목적지를 컨테이너의 IP와 80 포트로 바꿔 전달합니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="포트포워딩 구조 — iptables 규칙이 호스트 포트로 들어온 요청을 컨테이너 포트로 전달하는 구조">
@@ -986,7 +986,7 @@ A, B, C 식당이 푸드코트에 입점해 있습니다. 식당끼리는 벽으
 
 도커에서는 컨테이너를 IP뿐 아니라 **이름으로도 찾을 수 있습니다**. 한 컨테이너가 다른 컨테이너를 이름으로 부르면, 도커가 그 **이름을 현재 IP로 바꿔** 연결해 줍니다.
 
-푸드코트로 옮겨 보면, 손님은 식당 이름은 알지만 푸드코드 내에서 식당이 어디 있는지는 알 수 없습니다. 그럴 때 홀에 걸린 **안내 지도**에 "**B식당 = 2구역**"이라고 표시되어 있으면, 이름을 보고 위치를 쉽게 찾을 수 있습니다.
+푸드코트로 옮겨 보면, 손님은 식당 이름은 알지만 푸드코트 안에서 식당이 어디 있는지는 알 수 없습니다. 그럴 때 홀에 걸린 **안내 지도**에 "**B식당 = 2구역**"이라고 표시되어 있으면, 이름을 보고 위치를 쉽게 찾을 수 있습니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="푸드코트 비유 — 손님이 벽에 걸린 평면 안내 지도에서 B식당의 위치를 확인하는 구조">
@@ -1575,7 +1575,7 @@ docker attach d2b1      # attach로 접근
   <text x="330" y="172" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">PID 1</text>
   <rect x="500" y="120" width="180" height="70" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <text x="590" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">새 프로세스</text>
-  <text x="590" y="172" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">PID 9</text>
+  <text x="590" y="172" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">PID 12</text>
   <line x1="425" y1="155" x2="495" y2="155" stroke="#9ca3af" stroke-width="1" stroke-dasharray="3,3"/>
   <text x="460" y="148" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">독립</text>
   <text x="460" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">새 프로세스에서 exit해도 메인은 그대로</text>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>부록: 더 깊이 공부하기</title>
+
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+
+
+</head>
+<body>
+<div class="container">
+<h1>부록: 더 깊이 공부하기</h1>
+<p>이 책에서 전체 그림을 잡았다면, 이제 각 기술을 더 깊이 파고들 차례입니다. 아래 자료들은 다음 단계로 나아가는 데 도움이 됩니다.</p>
+<hr />
+<h2>Docker</h2>
+<table>
+<thead>
+<tr>
+<th>자료</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Docker 공식 문서</td>
+<td>docs.docker.com — 명령어 레퍼런스, Dockerfile 작성법, 네트워크 설정 등 가장 정확한 자료</td>
+</tr>
+<tr>
+<td>Docker Hub</td>
+<td>hub.docker.com — 공식 이미지 검색 및 사용법 확인</td>
+</tr>
+<tr>
+<td>Docker Compose 공식 문서</td>
+<td>docs.docker.com/compose — Compose 파일 문법, 멀티 컨테이너 구성 심화</td>
+</tr>
+</tbody>
+</table>
+<p><strong>이 책에서 다루지 않은 Docker 심화 주제</strong>:</p>
+<ul>
+<li>Docker 네트워크 종류 (bridge, host, overlay)</li>
+<li>멀티 스테이지 빌드 (이미지 크기 최적화)</li>
+<li>Docker 보안 (rootless 모드, 이미지 스캐닝)</li>
+<li>.dockerignore 활용</li>
+</ul>
+<hr />
+<h2>Kubernetes</h2>
+<table>
+<thead>
+<tr>
+<th>자료</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kubernetes 공식 문서</td>
+<td>kubernetes.io/docs — 개념 설명, 튜토리얼, API 레퍼런스</td>
+</tr>
+<tr>
+<td>Kubernetes 공식 튜토리얼</td>
+<td>kubernetes.io/docs/tutorials — 단계별 실습 가이드</td>
+</tr>
+<tr>
+<td>kubectl 치트시트</td>
+<td>kubernetes.io/docs/reference/kubectl/cheatsheet — 자주 쓰는 명령어 모음</td>
+</tr>
+</tbody>
+</table>
+<p><strong>이 책에서 다루지 않은 K8s 심화 주제</strong>:</p>
+<ul>
+<li>Ingress (외부 트래픽 라우팅)</li>
+<li>HPA (수평 자동 확장)</li>
+<li>Helm (패키지 매니저)</li>
+<li>RBAC (역할 기반 접근 제어)</li>
+<li>클라우드 배포 (AWS EKS, Google GKE, Azure AKS)</li>
+</ul>
+<hr />
+<h2>이 책의 예제 코드</h2>
+<p>이 책에서 사용한 모든 예제 코드는 아래 저장소에서 확인할 수 있습니다.</p>
+<ul>
+<li><strong>GitHub</strong>: 저장소 URL (추후 추가)</li>
+</ul>
+<p>각 장별 예제 폴더 구조:</p>
+<pre><code>ex01~ex03/  →  3장 NGINX 경로 라우팅 실습
+ex04/       →  3장 Redis 실습
+ex05/       →  3장 DB Server 실습
+ex06/       →  3장 Docker Compose 실습
+ex07/       →  3장 통합 웹사이트
+ex08/       →  4장 Pod YAML 첫 적용
+ex09/       →  4장 Deployment 기본
+ex10/       →  4장 Deployment 롤링 업데이트
+ex11/       →  5장 Service (NodePort)
+ex12/       →  5장 Ingress 경로 라우팅
+ex13/       →  6장 ConfigMap + Secret
+ex14/       →  6장 Volume (PV / PVC / Pod)
+ex15/       →  6장 K8s 통합 웹사이트
+</code></pre>
+<hr />
+<h2>주요 명령어 모음</h2>
+<h3>Docker 명령어</h3>
+<table>
+<thead>
+<tr>
+<th>명령어</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docker pull [이미지]</code></td>
+<td>이미지 다운로드</td>
+</tr>
+<tr>
+<td><code>docker run [옵션] [이미지]</code></td>
+<td>컨테이너 실행</td>
+</tr>
+<tr>
+<td><code>docker ps</code></td>
+<td>실행 중인 컨테이너 목록</td>
+</tr>
+<tr>
+<td><code>docker ps -a</code></td>
+<td>모든 컨테이너 목록</td>
+</tr>
+<tr>
+<td><code>docker stop [컨테이너]</code></td>
+<td>컨테이너 중지</td>
+</tr>
+<tr>
+<td><code>docker rm [컨테이너]</code></td>
+<td>컨테이너 삭제</td>
+</tr>
+<tr>
+<td><code>docker images</code></td>
+<td>이미지 목록</td>
+</tr>
+<tr>
+<td><code>docker rmi [이미지]</code></td>
+<td>이미지 삭제</td>
+</tr>
+<tr>
+<td><code>docker build -t [태그] .</code></td>
+<td>Dockerfile로 이미지 빌드</td>
+</tr>
+<tr>
+<td><code>docker commit [컨테이너] [이미지명]</code></td>
+<td>컨테이너를 이미지로 저장</td>
+</tr>
+<tr>
+<td><code>docker push [이미지]</code></td>
+<td>이미지를 레지스트리에 업로드</td>
+</tr>
+<tr>
+<td><code>docker exec -it [컨테이너] bash</code></td>
+<td>실행 중인 컨테이너에 접속</td>
+</tr>
+<tr>
+<td><code>docker compose up -d</code></td>
+<td>Compose로 서비스 실행</td>
+</tr>
+<tr>
+<td><code>docker compose down</code></td>
+<td>Compose 서비스 중지 및 삭제</td>
+</tr>
+</tbody>
+</table>
+<h3>kubectl 명령어</h3>
+<table>
+<thead>
+<tr>
+<th>명령어</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kubectl get pods</code></td>
+<td>Pod 목록 조회</td>
+</tr>
+<tr>
+<td><code>kubectl get deployments</code></td>
+<td>Deployment 목록 조회</td>
+</tr>
+<tr>
+<td><code>kubectl get services</code></td>
+<td>Service 목록 조회</td>
+</tr>
+<tr>
+<td><code>kubectl apply -f [파일]</code></td>
+<td>YAML 파일로 리소스 생성/수정</td>
+</tr>
+<tr>
+<td><code>kubectl delete -f [파일]</code></td>
+<td>YAML 파일의 리소스 삭제</td>
+</tr>
+<tr>
+<td><code>kubectl describe [리소스] [이름]</code></td>
+<td>리소스 상세 정보</td>
+</tr>
+<tr>
+<td><code>kubectl logs [Pod명]</code></td>
+<td>Pod 로그 확인</td>
+</tr>
+<tr>
+<td><code>kubectl exec -it [Pod명] -- bash</code></td>
+<td>Pod 내부 접속</td>
+</tr>
+<tr>
+<td><code>kubectl set image deployment/[이름] [컨테이너]=[이미지]</code></td>
+<td>이미지 업데이트</td>
+</tr>
+<tr>
+<td><code>kubectl rollout undo deployment/[이름]</code></td>
+<td>이전 버전으로 롤백</td>
+</tr>
+<tr>
+<td><code>kubectl rollout restart deployment/[이름]</code></td>
+<td>Deployment 재시작</td>
+</tr>
+<tr>
+<td><code>minikube start</code></td>
+<td>미니큐브 클러스터 시작</td>
+</tr>
+<tr>
+<td><code>minikube service [서비스명] --url</code></td>
+<td>서비스 접근 URL 확인</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</body>
+</html>

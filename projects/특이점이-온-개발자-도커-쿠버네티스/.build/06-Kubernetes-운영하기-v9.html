@@ -227,7 +227,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
   </div>
 </div>
 <div class="caption">그림 6-6. ConfigMap 적용 직후 기존 Pod의 환경 변수 조회 결과</div>
-<p>ConfigMap은 갱신됐지만, 이미 실행 중인 Pod의 환경 변수는 여전히 80이었습니다.</p>
+<p>ConfigMap은 갱신됐지만, 이미 실행 중인 Pod의 환경 변수는 여전히 80입니다.</p>
 <p class="thought">'어? 분명히 바꿨는데 왜 그대로지?'</p>
 <p>리눅스에서 환경 변수는 <strong>프로세스가 시작될 때 한 번 주입되는 값</strong>입니다. 그래서 ConfigMap이 갱신되어도 이미 실행 중인 Pod의 프로세스에는 처음 주입된 값이 그대로 남아 있습니다. <strong>새 값을 반영하려면 Pod를 다시 실행해야 합니다.</strong></p>
 <div class="svg-figure">
@@ -478,7 +478,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
     <div>root@volume-pod:/#</div>
   </div>
 </div>
-<div class="caption">그림 6-12. Pod가 새로 태어났는데도 c.txt가 그대로 남아 있는 모습</div>
+<div class="caption">그림 6-12. Pod가 새로 생성됐는데도 c.txt가 그대로 남아 있는 모습</div>
 <p>새 Pod에서도 <code>c.txt</code>가 그대로 보입니다. Pod는 삭제·재생성되어도 PV 안 파일은 그대로 남습니다.</p>
 <h2>6.3 통합 실습 - 쿠버네티스 위에 웹사이트 올리기</h2>
 <div class="tip">
@@ -614,7 +614,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
   <text x="560" y="215" text-anchor="middle" font-size="12" font-weight="700" fill="#1e40af">Deployment</text>
 </svg>
 </div>
-<div class="caption">그림 6-14. 같은 클러스터 안에서 Namespace가 리소스를 층처럼 분리</div>
+<div class="caption">그림 6-14. 같은 클러스터 안에서 Namespace가 리소스를 논리적으로 분리</div>
 <p>이번 실습에서는 <code>metacoding</code>이라는 전용 네임스페이스를 만들어 모든 리소스를 그 안에서 관리합니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 9</span> ex15/k8s/namespace.yml. 네임스페이스 정의</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Namespace</span>
@@ -823,7 +823,7 @@ minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex15/k8s/<span class="w"> </span>--recursive<span class="w">       </span><span class="c1"># k8s 이하 폴더의 리소스 전부 일괄 배포</span></div>
 <p>명령을 치면 모든 리소스가 한꺼번에 생성됩니다. 곧바로 상태를 조회합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 배포 결과 조회</div>kubectl<span class="w"> </span>get<span class="w"> </span>deploy,pod,service,ingress<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w">   </span><span class="c1"># 네임스페이스 리소스 상태 일괄 조회</span></div>
-<p>프론트엔드와 데이터베이스 Pod는 빠르게 Running 상태로 바뀝니다. 백엔드 Pod만 Gradle 빌드와 의존성 설치 때문에 시간이 소요됩니다.</p>
+<p>프론트엔드와 데이터베이스 Pod는 빠르게 Running 상태로 바뀝니다. 백엔드 Pod만 Gradle 빌드와 의존성 설치 때문에 시간이 더 걸립니다.</p>
 <p>모든 Pod가 Running 상태가 되면, <code>minikube tunnel</code>을 실행합니다. 그러면 Ingress 입구가 <code>127.0.0.1</code>로 열립니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 외부 터널 개방</div>minikube<span class="w"> </span>tunnel<span class="w">                       </span><span class="c1"># 새 터미널에서 실행 (관리자 권한 요구)</span></div>
 <p>브라우저에서 <code>http://127.0.0.1</code>로 접속해 결과를 확인합니다.</p>
@@ -833,25 +833,18 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <p>백엔드 두 Pod에 요청이 실제로 분산되는지는 로그로도 확인할 수 있습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> backend Pod 로그로 분산 확인</div><span class="c1"># backend Pod 최근 100줄 (Pod명 앞에 붙임)</span>
 kubectl<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>backend<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>--prefix</div>
+<p>오픈이는 화면을 새로고침했습니다. 방문 횟수가 오르고, 사이트는 문제없이 응답합니다. 여러 서비스가 하나의 클러스터 안에서 각자 제 역할을 하며 돌아갑니다.</p>
+<p>며칠 후, 오픈이는 지금까지 배운 내용을 자신의 운영 환경에도 그대로 적용했습니다. 예전에는 배포한 날이면 혹시 몰라 자리를 뜨지 못했습니다. 컨테이너가 멈추면 개발자가 직접 살려내야 했습니다.</p>
+<p>오늘은 다릅니다. 컨테이너 하나가 멈춰도 클러스터가 곧바로 새 컨테이너를 생성하고, 사이트는 멈추지 않습니다. 사이트를 지키는 일은 이제 시스템에 맡겨 두면 됩니다.</p>
+<p>오픈이는 노트북을 덮고 가벼운 마음으로 사무실을 나섰습니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
-<li><strong>설정과 비밀번호는 이미지 외부에 둡니다.</strong> ConfigMap에는 환경마다 달라지는 일반 설정값을, Secret에는 비밀번호·토큰 같은 민감 정보를 두고 <code>envFrom</code>으로 한꺼번에 주입합니다.</li>
+<li><strong>설정과 비밀번호는 이미지 외부에 둡니다.</strong> ConfigMap에는 환경마다 달라지는 일반 설정값을 두고, Secret에는 비밀번호·토큰 같은 민감 정보를 보관합니다.</li>
 <li><strong>ConfigMap을 바꾼 뒤에는 Pod를 새로 만듭니다.</strong> 환경 변수는 프로세스 시작 시점에 한 번 꽂히는 값이라 <code>apply</code>만으로는 갱신이 반영되지 않습니다. <code>kubectl rollout restart</code>로 Pod를 교체해야 새 값이 박힙니다.</li>
-<li><strong>데이터는 PV·PVC로 Pod 외부에 두어 보존합니다.</strong> Pod는 휘발성이라 안에서 만든 파일은 함께 사라지지만, PVC가 가리키는 PV에 데이터를 두면 Pod가 새로 태어나도 그대로 남습니다.</li>
-<li><strong>이름 하나로 한 시스템이 됩니다.</strong> Service 이름만 맞으면 그 뒤 Pod까지 자동으로 연결됩니다. 여러 리소스가 한꺼번에 올라가도 IP를 알 필요 없이 이름만으로 흐름이 이어집니다.</li>
+<li><strong>데이터는 PV·PVC로 Pod 외부에 두어 보존합니다.</strong> Pod는 휘발성이라 안에서 만든 파일은 함께 사라지지만, PVC가 가리키는 PV에 데이터를 두면 Pod가 새로 생성돼도 그대로 남습니다.</li>
 </ul>
 </div>
-<h3>마치며</h3>
-<p>이 책은 로컬 환경과 운영 서버의 차이에서 오는 답답함에서 출발했습니다. 코드를 실행 환경과 함께 컨테이너에 담아 어디서든 똑같이 동작하게 만들고, 늘어난 컨테이너들을 쿠버네티스 클러스터 위에 올려 스스로 유지되도록 구성하는 과정까지 차근차근 살펴보았습니다.</p>
-<p>이제 책을 덮고 현업으로 돌아가면, 여기서 다룬 예제보다 훨씬 거대하고 복잡한 시스템을 마주하게 됩니다. 수많은 Pod와 낯선 설정 파일들이 얽혀 있는 모습에 다시금 막막함이 앞설 수도 있습니다.</p>
-<p>하지만 겉보기에 규모가 커졌을 뿐, 본질은 우리가 함께 구성해 본 구조와 다르지 않습니다. 아무리 복잡한 시스템이라도 '무엇을 묶어 올렸고, 클러스터가 어떤 상태를 유지하는가'라는 기준을 잡으면 충분히 전체 그림을 짚어낼 수 있습니다.</p>
-<p>우리가 복잡한 인프라 기술을 익히는 이유는, 역설적이게도 더 이상 인프라에 얽매이지 않기 위해서입니다. 환경 설정과 배포에 쏟던 에너지를 덜어내고, 여러분이 정말 만들고자 하는 서비스 본연의 가치와 코드에 온전히 집중할 수 있기를 바랍니다.</p>
-<p>앞으로 마주할 문제들 앞에서, 이 책에서 함께 그려 본 밑그림이 단단한 기준점이 되어 주기를 기대합니다.</p>
-<h3>에필로그</h3>
-<p>오픈이는 화면을 새로고침했습니다. 방문 횟수가 오르고, 사이트는 문제없이 응답합니다. 프론트엔드와 백엔드, 데이터베이스와 Redis가 클러스터 위에서 서로 이름으로 연결되어 통신합니다. 겉보기엔 하나의 웹사이트지만, 안에서는 네 개의 서비스가 저마다 따로 돌아갑니다.</p>
-<p>처음에는 서비스 하나를 올리는 것조차 버거웠지만, 이제는 여러 서비스를 클러스터에 배포하고 전체 시스템이 어떻게 맞물려 돌아가는지 한눈에 들어옵니다.</p>
-<p>오픈이의 도커와 쿠버네티스 학습은 여기까지입니다.</p>
 
 </div>
 </body>
