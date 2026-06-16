@@ -10,3 +10,17 @@
   width: 100%;
   height: auto;
 }
+
+/* 표 칸 밸런스: 첫 칸(라벨)을 24%로 고정하고 나머지를 설명 칸에 배분.
+   base.css는 table-layout:fixed라 컬럼 폭 미지정 시 50/50으로 벌어진다.
+   첫 칸 폭을 명시해 라벨 칸과 설명 칸 비율을 잡는다.
+   base.css가 오버라이드보다 늦게 로드되므로 specificity(body table ...)로 이긴다.
+   (::::prep 안 표는 .prep-section-md 규칙이 더 구체적이라 영향 없음) */
+body table {
+  table-layout: fixed;
+}
+body table th:first-child,
+body table td:first-child {
+  width: 24%;
+  padding-left: 22px;
+}

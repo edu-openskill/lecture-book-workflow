@@ -20,9 +20,9 @@
 <body>
 <div class="container">
 <h1>챕터 2. 동기식 MSA 구현 - 서비스를 연결하다</h1>
-<div class="dialogue"><span class="speaker">오픈이</span>: "선배님, 서비스 네 개로 나누는 건 알겠는데, 어떤 방식이 가장 단순한 방식인가요?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "일단 각자 따로 만든 다음 동기적으로 연결해 봐요. 서로 전화를 거는 것처럼 직접 호출하는 거예요. 제일 단순한 방법이죠."</div>
-<p>방향이 보였습니다. 이제 만들어 보겠습니다.</p>
+<div class="dialogue"><span class="speaker">오픈이</span>: "선배님, 그럼 어떤 것부터 시작하면 될까요?"</div>
+<div class="dialogue"><span class="speaker">선배</span>: "우선 회원, 주문, 상품, 배달, 이렇게 기능별로 서비스를 나누는 거예요. 그리고 서비스끼리 전화를 거는 것처럼 직접 호출하는 거죠."</div>
+<p>방향이 정해졌으니 이제 만들어 보겠습니다.</p>
 <p>이번 챕터의 핵심은 주문 서비스입니다. 주문 서비스에서 주문 요청이 들어오면, 주문 서비스가 상품 서비스와 배달 서비스를 직접 호출하고 응답하는 흐름을 따라가 보겠습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1020 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 2 한눈에 보기: 1단계는 클라이언트가 User에 로그인하여 JWT를 받고, 2단계는 클라이언트가 Order에 주문을 요청하면 Order가 Product와 Delivery를 동기 호출하고 응답을 받은 뒤 클라이언트에 주문 완료를 응답하는 흐름. 모든 서비스는 Docker Compose로 묶여 있음">
@@ -145,7 +145,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </table>
 <h3>4. 실습 순서</h3>
 <ol>
-<li>공통 설정(JWT·표준 응답·예외 처리)을 <code>core/</code> 패키지에 두기</li>
+<li>공통 설정(JWT·표준 응답·예외 처리)이 담긴 <code>core/</code> 패키지 살펴보기</li>
 <li>회원·상품·배달 서비스의 핵심 코드 살펴보기</li>
 <li>주문 서비스에 RestClient + 보상 트랜잭션 작성하기</li>
 <li>Docker Compose로 4개 서비스를 한 번에 띄우고 시나리오 3개 검증하기</li>
@@ -173,7 +173,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tr>
 <tr>
 <td><strong>JwtUtil / JwtProvider</strong></td>
-<td>JwtUtil은 토큰을 발급하고, JwtProvider는 토큰을 검증합니다.</td>
+<td>JwtUtil은 토큰을 발급하고 검증하는 핵심 로직이고, JwtProvider는 요청 헤더에서 토큰을 꺼내 JwtUtil에 넘깁니다.</td>
 </tr>
 <tr>
 <td><strong>Resp</strong></td>
@@ -191,7 +191,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </table>
 <p>주문 서비스로 가기 전, 회원·상품·배달 서비스는 참고 코드라 클래스 단위로 간단히 살펴봅니다. 자세한 구현은 완성 레포(GitHub)를 참고하세요.</p>
 <h2>2.2 회원 서비스 - JWT로 로그인하다</h2>
-<p>회원 서비스는 <strong>로그인과 사용자 조회</strong>를 담당합니다. 사용자가 <code>POST /login</code>으로 아이디와 비밀번호를 보내면, 회원 서비스가 DB에서 조회하고 비밀번호를 검증합니다. 검증에 성공하면 <strong>JWT 토큰</strong>을 응답 바디에 담아 돌려줍니다. 이 토큰이 이후 모든 서비스 요청의 <strong>인증 수단</strong>이 됩니다.</p>
+<p>회원 서비스는 <strong>로그인과 사용자 조회</strong>를 담당합니다. 사용자가 <code>POST /login</code>으로 아이디와 비밀번호를 보내면, 회원 서비스가 DB에서 조회하고 비밀번호를 검증합니다. 검증에 성공하면 <strong>JWT 토큰</strong>을 응답 데이터에 담아 돌려줍니다. 이 토큰이 이후 모든 서비스 요청의 <strong>인증 수단</strong>이 됩니다.</p>
 <table>
 <thead>
 <tr>
@@ -214,7 +214,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tbody>
 </table>
 <h3>2.2.1 클래스 구성</h3>
-<p>회원 서비스의 로그인과 사용자 조회를 다음 네 클래스가 처리합니다.</p>
+<p>회원 서비스의 로그인과 사용자 조회를 다음 다섯 클래스가 처리합니다.</p>
 <table>
 <thead>
 <tr>
@@ -232,12 +232,16 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <td>사용자 데이터를 DB에서 조회·저장합니다.</td>
 </tr>
 <tr>
-<td><strong>UserService</strong></td>
-<td>로그인 시 비밀번호를 검증하고 JWT를 발급하며, 사용자 조회 요청을 처리합니다.</td>
+<td><strong>UserRequest / UserResponse</strong></td>
+<td>회원 API의 요청과 응답 형식을 정의합니다.</td>
 </tr>
 <tr>
 <td><strong>UserController</strong></td>
 <td>로그인과 사용자 조회 API를 제공합니다.</td>
+</tr>
+<tr>
+<td><strong>UserService</strong></td>
+<td>로그인 시 비밀번호를 검증하고 JWT를 발급하며, 사용자 조회 요청을 처리합니다.</td>
 </tr>
 </tbody>
 </table>
@@ -270,7 +274,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tbody>
 </table>
 <h3>2.3.1 클래스 구성</h3>
-<p>상품 조회와 재고 증감을 다음 네 클래스가 처리합니다.</p>
+<p>상품 조회와 재고 증감을 다음 다섯 클래스가 처리합니다.</p>
 <table>
 <thead>
 <tr>
@@ -288,17 +292,21 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <td>상품 데이터를 DB에서 조회·저장합니다.</td>
 </tr>
 <tr>
-<td><strong>ProductService</strong></td>
-<td>재고 감소 전 상품 존재·재고·가격을 검증한 뒤 재고를 줄이거나 늘립니다.</td>
+<td><strong>ProductRequest / ProductResponse</strong></td>
+<td>상품 API의 요청과 응답 형식을 정의합니다.</td>
 </tr>
 <tr>
 <td><strong>ProductController</strong></td>
 <td>상품 조회와 재고 증감 API를 제공합니다.</td>
 </tr>
+<tr>
+<td><strong>ProductService</strong></td>
+<td>재고 감소 전 상품 존재·재고·가격을 검증한 뒤 재고를 줄이거나 늘립니다.</td>
+</tr>
 </tbody>
 </table>
 <h2>2.4 배달 서비스 - 배달을 생성하고 취소하다</h2>
-<p>배달 서비스는 <strong>배달 생성과 취소</strong>를 담당합니다. 이번 챕터에서는 배달 생성과 <strong>동시에 완료 처리</strong>합니다. <code>PENDING</code> 상태로 생성한 뒤 즉시 <code>COMPLETED</code>로 전이되며, 배달 취소 요청이 들어오면 <code>CANCELLED</code>로 바뀝니다.</p>
+<p>배달 서비스는 <strong>배달 생성과 취소</strong>를 담당합니다. 회원이나 상품 서비스와 달리, 주문과 배달에는 현재 진행 상황을 나타내는 <strong>상태(<code>status</code>) 값</strong>이 있습니다. 대기 상태인 <code>PENDING</code>으로 시작해 처리가 완료되면 <code>COMPLETED</code>, 취소되면 <code>CANCELLED</code>로 바뀝니다.</p>
 <table>
 <thead>
 <tr>
@@ -326,7 +334,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tbody>
 </table>
 <h3>2.4.1 클래스 구성</h3>
-<p>배달 생성과 취소를 다음 네 클래스가 처리합니다.</p>
+<p>배달 생성과 취소를 다음 여섯 클래스가 처리합니다.</p>
 <table>
 <thead>
 <tr>
@@ -337,25 +345,32 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <tbody>
 <tr>
 <td><strong>Delivery</strong></td>
-<td>배달 정보와 상태 전이(PENDING → COMPLETED / CANCELLED)를 담는 엔티티입니다.</td>
+<td>배달 정보와 현재 상태(PENDING / COMPLETED / CANCELLED)를 담는 엔티티입니다.</td>
+</tr>
+<tr>
+<td><strong>DeliveryStatus</strong></td>
+<td>배달 상태(대기·완료·취소)를 정의하는 열거형입니다.</td>
 </tr>
 <tr>
 <td><strong>DeliveryRepository</strong></td>
 <td>배달 데이터를 DB에서 조회·저장합니다.</td>
 </tr>
 <tr>
-<td><strong>DeliveryService</strong></td>
-<td>배달을 생성하고 취소 요청을 처리합니다.</td>
+<td><strong>DeliveryRequest / DeliveryResponse</strong></td>
+<td>배달 API의 요청과 응답 형식을 정의합니다.</td>
 </tr>
 <tr>
 <td><strong>DeliveryController</strong></td>
 <td>배달 생성·조회·취소 API를 제공합니다.</td>
 </tr>
+<tr>
+<td><strong>DeliveryService</strong></td>
+<td>배달 생성 시 완료까지 처리하며, 조회와 취소도 처리합니다.</td>
+</tr>
 </tbody>
 </table>
-<div class="dialogue"><span class="speaker">선배</span>: "이제 주문 서비스예요. 어디까지 진행됐는지 기록해 뒀다가, 실패하면 역순으로 취소해요."</div>
 <h2>2.5 주문 서비스 - 보상 트랜잭션의 현장</h2>
-<p>배달 서비스까지 살펴봤으니, 이제 주문 서비스로 넘어갑니다.</p>
+<p>주문 서비스는 <strong>주문 생성·조회·취소</strong>를 담당합니다. 주문 요청 처리를 위해 상품·배달 서비스를 직접 호출하는 흐름의 중심에 있습니다.</p>
 <table>
 <thead>
 <tr>
@@ -394,7 +409,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <tbody>
 <tr>
 <td><strong>Order</strong></td>
-<td>주문 정보와 상태 전이(PENDING → COMPLETED / CANCELLED)를 담는 엔티티입니다.</td>
+<td>주문 정보와 현재 상태(PENDING / COMPLETED / CANCELLED)를 담는 엔티티입니다.</td>
 </tr>
 <tr>
 <td><strong>OrderStatus</strong></td>
@@ -419,7 +434,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tbody>
 </table>
 <h3>2.5.2 보상 트랜잭션 흐름</h3>
-<p>엔티티가 준비되었으니, 이제 주문 서비스의 진짜 역할을 살펴봅니다. 주문 서비스는 상품 서비스와 배달 서비스를 <strong>직접 호출</strong>합니다. 직접 호출했으니 실패 시 되돌리는 <strong>보상도 직접 처리</strong>합니다.</p>
+<p>서비스의 구조를 파악했으니, 이제 주문 서비스의 진짜 역할을 살펴봅니다. 주문 요청이 들어오면 주문 서비스는 상품·배달 서비스를 호출합니다. 이때 작업이 실패하면, <strong>주문 서비스가 직접 보상 트랜잭션을 실행</strong>해 원래 상태로 되돌립니다.</p>
 <p>어느 단계에서 실패하면 무엇을 되돌려야 하는지 먼저 그려 보겠습니다.</p>
 <table>
 <thead>
@@ -452,7 +467,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tr>
 </tbody>
 </table>
-<p>예를 들어 2단계 배달 생성에서 실패하면, 이미 줄어든 재고 한 단계만 되돌리면 됩니다. 3단계에서 실패하면 배달 취소와 재고 복구를 모두 되돌립니다. 진행한 만큼만 거꾸로 거슬러 올라가려면, <strong>어디까지 갔는지를 코드에서 기록</strong>해 둬야 합니다.</p>
+<p>예를 들어 2단계 배달 생성에서 실패하면, 이미 줄어든 재고 한 단계만 되돌리면 됩니다. 3단계에서 실패하면 배달 취소와 재고 복구를 모두 되돌립니다. 진행한 만큼만 역순으로 되돌리려면, <strong>어디까지 갔는지를 코드에서 기록</strong>해 둬야 합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 880 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주문 실패 시 보상 트랜잭션 시퀀스: 배달 실패 후 재고 복구와 주문 트랜잭션 롤백을 역순으로 실행">
   <defs>
@@ -484,7 +499,8 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </div>
 <div class="caption">그림 2-2. 주문 실패 시 보상 트랜잭션 흐름</div>
 <h3>2.5.3 adapter - 외부 서비스 호출 설정</h3>
-<p><code>adapter/</code> 폴더에는 외부 서비스를 호출하는 <strong>클라이언트</strong> 두 개가 있습니다. <strong>RestClientConfig</strong>가 모든 외부 호출에 <strong>JWT 토큰을 자동으로 실어</strong> 주고, <strong>ProductClient</strong>와 <strong>DeliveryClient</strong>가 각자 상품 서비스와 배달 서비스로 요청을 보냅니다.</p>
+<p><code>adapter/</code> 폴더에는 외부 서비스를 호출하는 <strong>클라이언트</strong> 두 개가 있습니다.</p>
+<p><strong>RestClientConfig</strong>가 모든 외부 호출에 <strong>JWT 토큰을 자동으로 실어</strong> 줍니다. 그리고 <strong>ProductClient</strong>와 <strong>DeliveryClient</strong>가 각자 상품 서비스와 배달 서비스로 요청을 보냅니다.</p>
 <table>
 <thead>
 <tr>
@@ -499,16 +515,16 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tr>
 <tr>
 <td><strong>ProductClient</strong></td>
-<td>상품 서비스의 <code>decreaseQuantity</code>(재고 감소)와 <code>increaseQuantity</code>(재고 복구)를 호출합니다.</td>
+<td>상품 서비스의 decreaseQuantity(재고 감소)와 increaseQuantity(재고 복구)를 호출합니다.</td>
 </tr>
 <tr>
 <td><strong>DeliveryClient</strong></td>
-<td>배달 서비스의 <code>createDelivery</code>(배달 생성)와 <code>cancelDelivery</code>(배달 취소)를 호출합니다.</td>
+<td>배달 서비스의 createDelivery(배달 생성)와 cancelDelivery(배달 취소)를 호출합니다.</td>
 </tr>
 </tbody>
 </table>
 <h3>2.5.4 OrderService - 보상 트랜잭션의 핵심</h3>
-<p>이제 이번 챕터의 핵심입니다. <strong>보상 트랜잭션 패턴</strong>을 직접 구현합니다. 코드를 읽을 때 <code>productDecreased</code>와 <code>deliveryCreated</code> <strong>두 플래그를 추적</strong>하면서 읽어보세요. 단계가 성공할 때마다 플래그를 <code>true</code>로 올려두고, catch 블록에서는 <strong>켜져 있는 플래그만 골라 역순으로 되돌립니다</strong>.</p>
+<p>이제 이번 챕터의 핵심입니다. <strong>보상 트랜잭션 패턴</strong>을 직접 구현합니다. 코드를 읽을 때 <code>productDecreased</code>와 <code>deliveryCreated</code> <strong>두 플래그를 추적</strong>하면서 읽어보세요. 단계가 성공할 때마다 플래그를 <code>true</code>로 바꾸고, 실패 시 catch 블록에서는 <strong><code>true</code>로 표시된 단계만 역순으로 되돌립니다</strong>.</p>
 <p><code>orders/OrderService.java</code>를 열고 아래 메서드를 작성합니다.</p>
 <div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> orders/OrderService.java. createOrder - 보상 트랜잭션 핵심</div><span class="nd">@Transactional</span>
 <span class="kd">public</span><span class="w"> </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span>
@@ -533,7 +549,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <span class="w">        </span><span class="n">productClient</span><span class="p">.</span><span class="na">decreaseQuantity</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ProductRequest</span><span class="p">(</span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="p">));</span>
 <span class="w">        </span><span class="n">productDecreased</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 
-<span class="w">        </span><span class="c1">// 3. 배달 생성 (어댑터)</span>
+<span class="w">        </span><span class="c1">// 3. 배달 생성</span>
 <span class="w">        </span><span class="n">deliveryClient</span><span class="p">.</span><span class="na">createDelivery</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DeliveryRequest</span><span class="p">(</span><span class="n">createdOrder</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span><span class="w"> </span><span class="n">address</span><span class="p">));</span>
 <span class="w">        </span><span class="n">deliveryCreated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
 
@@ -554,10 +570,9 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception500</span><span class="p">(</span><span class="s">&quot;주문 생성 중 오류가 발생했습니다: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
-<p>참고로 catch 마지막의 <code>throw</code>로 <code>@Transactional</code>이 주문 트랜잭션까지 함께 롤백합니다. <strong>외부 서비스는 보상 호출, 주문 데이터는 트랜잭션 롤백</strong>으로 정리됩니다.</p>
+<p>주문 데이터는 catch에서 따로 되돌리지 않아도 자동으로 롤백됩니다. 외부 서비스(상품·배달)만 직접 보상하면 됩니다.</p>
 <p class="thought">재고를 줄였으면 다시 늘리고, 배달을 만들었으면 취소하고... 그 말이 이거였구나.</p>
 <h2>2.6 Docker Compose - 네 개의 서비스를 한 번에 실행하다</h2>
-<p>코드가 완성되었습니다. 이제 직접 실행하여 <strong>보상 트랜잭션이 작동하는 것</strong>을 눈으로 확인해 보겠습니다.</p>
 <p>시나리오를 따라가기 전에, 각 서비스에 어떤 데이터가 미리 등록되어 있는지 살펴봅니다. 이번 챕터는 <strong>H2 in-memory DB</strong>를 사용합니다. 데이터 정의는 각 서비스의 <code>db/data.sql</code>에 있습니다.</p>
 <table>
 <thead>
@@ -569,7 +584,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <tbody>
 <tr>
 <td><strong>회원</strong></td>
-<td>계정 3개: <code>ssar</code>, <code>cos</code>, <code>love</code> (비밀번호는 모두 <code>1234</code>)</td>
+<td>계정 3개: ssar, cos, love (비밀번호는 모두 1234)</td>
 </tr>
 <tr>
 <td><strong>상품</strong></td>
@@ -577,7 +592,7 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tr>
 <tr>
 <td><strong>배달</strong></td>
-<td>주문 3건에 대응하는 배달 데이터, 모두 <code>COMPLETED</code> 상태</td>
+<td>주문 3건에 대응하는 배달 데이터, 모두 COMPLETED 상태</td>
 </tr>
 <tr>
 <td><strong>주문</strong></td>
@@ -586,39 +601,15 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 </tbody>
 </table>
 <h3>2.6.1 서비스 실행</h3>
-<p>각 프로젝트를 실행하기 위한 Dockerfile을 작성합니다. 각 서비스의 Dockerfile은 <strong>동일한 구조</strong>로, 스프링 프로젝트를 <strong>컨테이너 안에서 빌드하고 실행</strong>하는 4단계 흐름을 따릅니다.</p>
-<table>
-<thead>
-<tr>
-<th>단계</th>
-<th>무엇을</th>
-<th>왜</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>베이스</td>
-<td>JDK 21 이미지</td>
-<td>Spring Boot 실행 환경을 마련하기 위함입니다.</td>
-</tr>
-<tr>
-<td>소스 복사</td>
-<td>프로젝트 → /app</td>
-<td>컨테이너 안에서 빌드하기 위해 소스를 가져옵니다.</td>
-</tr>
-<tr>
-<td>JAR 빌드</td>
-<td><code>gradlew bootJar</code></td>
-<td>실행 가능한 단일 JAR 파일을 생성합니다.</td>
-</tr>
-<tr>
-<td>실행</td>
-<td><code>java -jar</code></td>
-<td>컨테이너가 시작될 때 JAR를 자동 실행합니다.</td>
-</tr>
-</tbody>
-</table>
-<p><code>ex01</code> 디렉토리의 <code>docker-compose.yml</code>이 4개 서비스를 <strong>한 번에 묶어 실행</strong>합니다. 네 서비스 모두 같은 패턴이고, 빌드 컨텍스트와 포트만 다릅니다. H2 접속 정보는 네 서비스에 <strong>환경변수로 동일하게 주입</strong>됩니다.</p>
+<p>각 서비스는 <strong>동일한 구조</strong>의 Dockerfile로 <strong>컨테이너 안에서 빌드하고 실행</strong>됩니다. 주문 서비스의 Dockerfile을 예로 살펴봅니다.</p>
+<div class="code-block highlight" data-lang="dockerfile"><div class="cb-title"><span class="badge reference">참고</span> order/Dockerfile</div><span class="k">FROM</span><span class="w"> </span><span class="s">eclipse-temurin:21-jdk</span><span class="w">              </span><span class="c"># JDK 21 베이스 이미지</span>
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app                             # 작업 디렉터리 설정</span>
+<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.<span class="w">                                 </span>#<span class="w"> </span>프로젝트<span class="w"> </span>소스<span class="w"> </span>복사
+<span class="k">RUN</span><span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>gradlew<span class="w">                     </span>#<span class="w"> </span>gradlew<span class="w"> </span>실행<span class="w"> </span>권한<span class="w"> </span>부여
+<span class="k">RUN</span><span class="w"> </span>./gradlew<span class="w"> </span>bootJar<span class="w"> </span>-x<span class="w"> </span><span class="nb">test</span><span class="w">            </span>#<span class="w"> </span>테스트<span class="w"> </span>없이<span class="w"> </span>실행<span class="w"> </span>가능한<span class="w"> </span>JAR<span class="w"> </span>빌드
+<span class="k">RUN</span><span class="w"> </span>cp<span class="w"> </span>build/libs/*.jar<span class="w"> </span>app.jar<span class="w">          </span>#<span class="w"> </span>빌드된<span class="w"> </span>JAR를<span class="w"> </span>app.jar로<span class="w"> </span>복사
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;java&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-jar&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.jar&quot;</span><span class="p">]</span><span class="w">   </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span>JAR<span class="w"> </span>실행</div>
+<p><code>ex01</code> 디렉토리의 <code>docker-compose.yml</code>은 네 서비스를 <strong>하나의 네트워크로 묶어 한 번에 실행</strong>합니다.</p>
 <table>
 <thead>
 <tr>
@@ -631,31 +622,31 @@ Dockerfile                                # [참고] Docker 이미지 빌드</di
 <tbody>
 <tr>
 <td>order-service</td>
-<td><code>./order</code></td>
-<td><code>8081:8081</code></td>
+<td>./order</td>
+<td>8081:8081</td>
 <td>msa-network</td>
 </tr>
 <tr>
 <td>user-service</td>
-<td><code>./user</code></td>
-<td><code>8083:8083</code></td>
+<td>./user</td>
+<td>8083:8083</td>
 <td>msa-network</td>
 </tr>
 <tr>
 <td>product-service</td>
-<td><code>./product</code></td>
-<td><code>8082:8082</code></td>
+<td>./product</td>
+<td>8082:8082</td>
 <td>msa-network</td>
 </tr>
 <tr>
 <td>delivery-service</td>
-<td><code>./delivery</code></td>
-<td><code>8084:8084</code></td>
+<td>./delivery</td>
+<td>8084:8084</td>
 <td>msa-network</td>
 </tr>
 </tbody>
 </table>
-<p><code>msa-network</code>로 묶여 있기 때문에, 컨테이너끼리는 <strong>서비스 이름</strong>(예: <code>http://product-service:8082</code>)으로 통신합니다.</p>
+<p><code>msa-network</code>로 묶여 있기 때문에, 컨테이너끼리는 <strong>서비스 이름</strong>(예: <code>http://product-service:8082</code>)으로 통신할 수 있습니다.</p>
 <p>프로젝트가 위치한 폴더로 이동 후, 터미널에서 Docker Compose로 4개 서비스를 한 번에 빌드하고 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Docker Compose 실행</div><span class="nb">cd</span><span class="w"> </span>ex01
 docker<span class="w"> </span>compose<span class="w"> </span>up</div>
@@ -676,9 +667,10 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 </div>
 <div class="caption">그림 2-3. Docker Compose 실행 결과</div>
 <h3>2.6.2 Hoppscotch와 인터셉터 설정</h3>
-<p>서비스가 실행되면 API를 호출하여 결과를 확인해야 합니다. 이 책에서는 Hoppscotch(https://hoppscotch.io/)를 사용합니다. localhost로 요청을 보내려면 Chrome 웹 스토어에서 <strong>Hoppscotch Browser Extension</strong>을 설치합니다. 설치 후 Hoppscotch 화면 하단의 인터셉터 설정에서 <strong>&quot;Browser Extension&quot;</strong> 을 선택하세요.</p>
+<p>서비스를 실행했으니, 이제 API를 호출해 잘 동작하는지 확인해 보겠습니다. 이 책에서는 브라우저에서 API를 호출하는 도구인 <strong>Hoppscotch</strong>(https://hoppscotch.io/)를 사용합니다.</p>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\04_hoppscotch-main.png" alt="" /><div class="caption">그림 2-4. Hoppscotch 화면</div></div>
-<div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\05_hoppscotch-extension.png" alt="" /><div class="caption">그림 2-5. Browser Extension 인터셉터 설정</div></div>
+<p>웹 브라우저는 보안 때문에 내 컴퓨터의 localhost로 바로 요청을 보내지 못합니다. 그래서 요청을 대신 전달해 주는 <strong>Hoppscotch Browser Extension</strong>을 Chrome 웹 스토어에서 설치하고, 설정 &gt; Interceptor에서 익스텐션을 선택합니다.</p>
+<div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\Screenshot_6.png" alt="" /><div class="caption">그림 2-5. Browser Extension 인터셉터 설정</div></div>
 <h3>2.6.3 시나리오 1: 정상 주문</h3>
 <p>먼저 로그인하여 JWT 토큰을 받습니다. 이때 콘텐츠 종류(Content-Type)를 <code>application/json</code>으로 설정해야 합니다. 이 헤더는 서버에게 &quot;내가 보내는 데이터는 JSON 형식이다&quot;라고 알리는 역할을 합니다.</p>
 <div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 로그인</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8083/login</span>
@@ -688,10 +680,10 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <span class="w">  </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1234&quot;</span>
 <span class="p">}</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\06_login-result.png" alt="" /><div class="caption">그림 2-6. 로그인 API 호출 결과</div></div>
-<p>응답 바디 데이터에 포함된 JWT 토큰을 확인할 수 있습니다.</p>
-<p>받은 토큰을 Hoppscotch의 인증 &gt; 인증 유형(Bearer) 항목의 토큰 필드에 넣습니다.</p>
+<p>응답 데이터에 포함된 JWT 토큰을 확인할 수 있습니다.</p>
+<p>받은 토큰을 Hoppscotch의 <strong>인증 &gt; 인증 유형(Bearer)</strong> 항목의 토큰 필드에 넣습니다.</p>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\07_bearer-token.png" alt="" /><div class="caption">그림 2-7. Bearer 토큰 설정</div></div>
-<p>MacBook Pro(상품 ID 1, 재고 10개)를 1개 주문합니다. 요청 바디는 상품 정보(<code>productId</code>, <code>quantity</code>, <code>price</code>)와 배달 주소(<code>address</code>)를 한 번에 담습니다.</p>
+<p>다음으로 상품 ID가 1인 MacBook Pro 1개를 주문합니다. 요청 데이터는 상품 정보(<code>productId</code>, <code>quantity</code>, <code>price</code>)와 배달 주소(<code>address</code>)를 한 번에 담습니다.</p>
 <div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 주문 생성</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
 
 <span class="p">{</span>
@@ -701,14 +693,14 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <span class="w">  </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Addr 4&quot;</span>
 <span class="p">}</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\08_order-create.png" alt="" /><div class="caption">그림 2-8. 주문 생성 API 호출 결과</div></div>
-<p>주문이 성공하면 상품 서비스에서 재고가 10 → 9로 줄어들고, 배달 서비스에 배달이 생성됩니다.</p>
+<p>주문이 성공하면 상품 서비스에서 재고가 10 → 9로 줄어듭니다.</p>
 <div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 재고 조회</div><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8082/api/products/1</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\09_stock-decreased.png" alt="" /><div class="caption">그림 2-9. 재고 감소 확인</div></div>
 <p>배달 서비스에도 배달이 생성됐는지 확인합니다.</p>
 <div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 배달 조회</div><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8084/api/deliveries/4   # 더미 배달 3건 다음이라 새 배달은 4번</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\10_delivery-created.png" alt="" /><div class="caption">그림 2-10. 배달 생성 확인</div></div>
 <h3>2.6.4 시나리오 2: 재고 부족</h3>
-<p>품절 상품인 iPhone 15(상품 ID 2, 재고 0)를 주문해 보겠습니다. 첫 번째 단계(재고 차감)에서 바로 실패하므로 보상할 작업이 없어 즉시 에러가 반환됩니다.</p>
+<p>이번에는 상품 ID가 2인 품절 상품 iPhone 15를 주문해 보겠습니다. 첫 번째 단계인 재고 차감에서 바로 실패하므로, 보상할 작업이 없어 즉시 에러가 반환됩니다.</p>
 <div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 주문 생성 (재고 부족)</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
 
 <span class="p">{</span>
@@ -718,8 +710,6 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <span class="w">  </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Addr 4&quot;</span>
 <span class="p">}</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\11_stockout-error.png" alt="" /><div class="caption">그림 2-11. 재고 부족 시 에러 응답</div></div>
-<div class="dialogue"><span class="speaker">오픈이</span>: "품절은 첫 단계에서 막혀서 보상이 안 도네요. 그러면 보상이 진짜 도는 건 언제죠?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "주소를 비워서 보내 봐요. 재고는 줄어든 다음 배달에서 실패할 거예요."</div>
 <h3>2.6.5 시나리오 3: 주소 누락</h3>
 <p>이번에는 주소를 빈 문자열로 보내 보겠습니다. 주문 자체는 재고 차감까지 진행되지만, 배달 서비스에서 주소가 없으므로 실패합니다. 이때 보상 트랜잭션이 작동하여 차감된 재고가 복구되고, 주문 데이터는 트랜잭션 롤백으로 처음부터 없던 일처럼 DB에서 사라집니다.</p>
 <div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 주문 생성 (주소 누락)</div><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8081/api/orders</span>
@@ -731,12 +721,11 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <span class="w">  </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
 <span class="p">}</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\12_empty-address-error.png" alt="" /><div class="caption">그림 2-12. 주소 누락 시 에러 응답</div></div>
-<p>그리고 재고가 원복되었는지 확인합니다.</p>
+<p>그리고 재고가 원복되었는지 확인합니다. 시나리오 1에서 재고가 10개에서 9개로 줄었으니, 이번에 차감된 재고가 보상으로 복구되면 다시 9개로 돌아옵니다.</p>
 <div class="code-block highlight" data-lang="json"><div class="cb-title"><span class="badge">Hoppscotch</span> 재고 조회</div><span class="err">GET</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">p</span><span class="p">:</span><span class="c1">//localhost:8082/api/products/1</span></div>
 <div class="chapter-image terminal"><img src="..\chapters\assets\CH02\terminal\13_stock-restored.png" alt="" /><div class="caption">그림 2-13. 재고 원복 확인</div></div>
 <p>테스트가 끝났으면 실행 중인 컨테이너를 정리합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 컨테이너 정리</div>docker<span class="w"> </span>compose<span class="w"> </span>down</div>
-<p>이 명령어를 실행하면 docker compose up으로 띄운 모든 컨테이너가 종료되고 제거됩니다.</p>
 <p>보상 트랜잭션 덕분에 데이터 일관성을 유지할 수 있었습니다. 하지만 이 구조에는 눈에 잘 보이지 않는 문제가 몇 가지 있습니다. 모든 서비스 호출이 동기적이라 상품 서비스가 1초 걸리면 주문 서비스도 1초를 기다립니다. 보상 트랜잭션 코드도 비즈니스 로직과 섞이면서 try-catch 중첩이 깊어집니다.</p>
 <p>실패한 주문은 트랜잭션 롤백으로 데이터 자체가 사라지므로 &quot;어떤 주문이 왜 실패했는지&quot; 이력도 남지 않습니다. 게다가 비즈니스 로직이 서비스 코드에 섞여 있어, 손볼 때마다 어디를 고쳐야 할지 막막해집니다.</p>
 <div class="remember">
