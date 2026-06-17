@@ -1,16 +1,16 @@
 # 챕터 5. 실시간 알림 - 주문 완료를 즉시 전달하다
 
-베타 테스터로 새 시스템을 써 본 동료였습니다. 표정이 떨떠름했습니다.
+며칠 뒤, 베타 테스터로 새 시스템을 써 본 동료가 떨떠름한 표정으로 오픈이를 찾아왔습니다.
 
 **동료**: "어제 물건을 주문했는데, 화면이 계속 **처리 중**이더라고요. 끝났는지 알 수가 없어서 한참 뒤에 주문 내역을 다시 열어 보고서야 **주문 완료**된 걸 알았어요."
 
-오픈이는 코드 흐름을 따라가 봤습니다. 주문이 생성되면 그대로 처리 중(**PENDING**) 상태로 응답 후, 사용자에게 완료(**COMPLETED**) 응답은 하지 않았습니다. 게다가 주문 완료는 실제 배달이 끝났는지와 무관하게, 배달이 생성되는 순간 곧바로 처리되었습니다.
+오픈이는 코드 흐름을 따라가 봤습니다. 주문이 생성되면 그대로 **PENDING** 상태로 응답 후, 사용자에게 **COMPLETED** 응답은 하지 않았습니다. 게다가 주문 완료는 실제 배달이 끝났는지와 무관하게, 배달이 생성되는 순간 곧바로 처리되었습니다.
 
 이 문제를 들고 선배에게 갔습니다.
 
-**오픈이**: "주문이 들어가자마자 시스템에서는 바로 **완료**로 처리해 버려요. 사용자 화면에는 여전히 **처리 중**으로 떠 있는데, 서버에서 작업이 진짜 끝나는 시점을 클라이언트에 제대로 전달해주지 못하고 있어요. 어디부터 손대야 하죠?"
+**오픈이**: "서버에서 주문이 완료되었는데, 사용자는 처음 **PENDING** 상태만 응답을 받아서 주문이 완료된 사실을 알 수가 없어요. 이거는 어떻게 해결해야 하죠?"
 
-**선배**: "처리가 끝난 그 순간에 바로 알려주면 돼요. 그러려면 서버에서 **처리가 완료된 시점**을 감지해서 사용자에게 실시간으로 알려줄 방법이 필요하겠죠."
+**선배**: "처리가 끝난 순간 사용자에게 알림을 줘야 해요. 서버에서 **주문 처리가 완료된 시점**을 감지해서 사용자에게 실시간으로 알려줄 방법이 필요하겠죠."
 
 <div class="svg-figure">
 <svg viewBox="0 0 1200 880" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 5 한눈에 보기: 챕터 4와 동일하게 1단계 로그인, 2단계 주문은 Client가 Ingress·Gateway를 거쳐 Order에 주문하고 즉시 PENDING을 응답받는다. Order·Product·Delivery는 가운데 Orchestrator와 event·command를 주고받고 Orchestrator가 Kafka 토픽으로 비동기 전달한다. 챕터 4와의 차이는, 비동기 처리가 끝나 주문이 완료되면 Order가 WebSocket으로 Client에게 완료를 즉시 Push(13)한다는 점이다.">
@@ -18,75 +18,75 @@
     <marker id="c5f0-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
     <marker id="c5f0-r" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#0d9488"/></marker>
   </defs>
-  <text x="600" y="26" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">챕터 5 한눈에 보기 — 주문 완료를 WebSocket으로 즉시 알린다</text>
+  <text x="600" y="26" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">챕터 5 한눈에 보기 — 주문 완료를 WebSocket으로 즉시 알린다</text>
   <rect x="200" y="58" width="980" height="760" rx="14" fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="6,4"/>
-  <text x="220" y="78" font-size="12" font-weight="700" fill="#3730a3">Kubernetes 클러스터 · metacoding</text>
-  <text x="36" y="98" font-size="13" font-weight="700" fill="#475569">1단계 — 로그인</text>
+  <text x="220" y="78" font-size="13" font-weight="700" fill="#3730a3">Kubernetes 클러스터 · metacoding</text>
+  <text x="36" y="98" font-size="15" font-weight="700" fill="#475569">1단계 — 로그인</text>
   <rect x="20" y="108" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="90" y="141" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
-  <text x="90" y="164" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
+  <text x="90" y="141" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">Client</text>
+  <text x="90" y="164" text-anchor="middle" font-size="13" fill="#6b7280">사용자</text>
   <rect x="290" y="108" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="360" y="141" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Ingress</text>
-  <text x="360" y="164" text-anchor="middle" font-size="12" fill="#6b7280">외부 진입점</text>
+  <text x="360" y="141" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Ingress</text>
+  <text x="360" y="164" text-anchor="middle" font-size="13" fill="#6b7280">외부 진입점</text>
   <rect x="510" y="108" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="580" y="141" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Gateway</text>
-  <text x="580" y="164" text-anchor="middle" font-size="12" fill="#6b7280">Nginx 라우팅</text>
+  <text x="580" y="141" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Gateway</text>
+  <text x="580" y="164" text-anchor="middle" font-size="13" fill="#6b7280">Nginx 라우팅</text>
   <rect x="720" y="108" width="170" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="805" y="141" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">User</text>
-  <text x="805" y="164" text-anchor="middle" font-size="12" fill="#6b7280">:8083 회원</text>
+  <text x="805" y="141" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">User</text>
+  <text x="805" y="164" text-anchor="middle" font-size="13" fill="#6b7280">:8083 회원</text>
   <line x1="160" y1="140" x2="288" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="225" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">1. 요청</text>
+  <text x="225" y="132" text-anchor="middle" font-size="15" font-weight="600" fill="#4f46e5">1. 요청</text>
   <line x1="430" y1="140" x2="508" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="470" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">2. 라우팅</text>
+  <text x="470" y="132" text-anchor="middle" font-size="15" font-weight="600" fill="#4f46e5">2. 라우팅</text>
   <line x1="650" y1="140" x2="718" y2="140" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="685" y="132" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">3. 로그인</text>
+  <text x="685" y="132" text-anchor="middle" font-size="15" font-weight="600" fill="#4f46e5">3. 로그인</text>
   <line x1="718" y1="168" x2="652" y2="168" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="685" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">4. 응답</text>
+  <text x="685" y="181" text-anchor="middle" font-size="15" font-weight="600" fill="#3730a3">4. 응답</text>
   <line x1="508" y1="168" x2="432" y2="168" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="470" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">5. 응답</text>
+  <text x="470" y="181" text-anchor="middle" font-size="15" font-weight="600" fill="#3730a3">5. 응답</text>
   <line x1="288" y1="168" x2="162" y2="168" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="225" y="181" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">6. JWT 응답</text>
-  <text x="36" y="258" font-size="13" font-weight="700" fill="#475569">2단계 — 주문 생성</text>
+  <text x="225" y="181" text-anchor="middle" font-size="15" font-weight="600" fill="#3730a3">6. JWT 응답</text>
+  <text x="36" y="258" font-size="15" font-weight="700" fill="#475569">2단계 — 주문 생성</text>
   <rect x="20" y="268" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="90" y="301" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
-  <text x="90" y="324" text-anchor="middle" font-size="12" fill="#6b7280">사용자</text>
+  <text x="90" y="301" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">Client</text>
+  <text x="90" y="324" text-anchor="middle" font-size="13" fill="#6b7280">사용자</text>
   <rect x="290" y="268" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="360" y="301" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Ingress</text>
-  <text x="360" y="324" text-anchor="middle" font-size="12" fill="#6b7280">외부 진입점</text>
+  <text x="360" y="301" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Ingress</text>
+  <text x="360" y="324" text-anchor="middle" font-size="13" fill="#6b7280">외부 진입점</text>
   <rect x="510" y="268" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="580" y="301" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Gateway</text>
-  <text x="580" y="324" text-anchor="middle" font-size="12" fill="#6b7280">Nginx 라우팅</text>
+  <text x="580" y="301" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Gateway</text>
+  <text x="580" y="324" text-anchor="middle" font-size="13" fill="#6b7280">Nginx 라우팅</text>
   <line x1="160" y1="300" x2="288" y2="300" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="225" y="292" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">7. 요청</text>
+  <text x="225" y="292" text-anchor="middle" font-size="15" font-weight="600" fill="#4f46e5">7. 요청</text>
   <line x1="430" y1="300" x2="508" y2="300" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="470" y="292" text-anchor="middle" font-size="13" font-weight="600" fill="#4f46e5">8. 라우팅</text>
+  <text x="470" y="292" text-anchor="middle" font-size="15" font-weight="600" fill="#4f46e5">8. 라우팅</text>
   <line x1="560" y1="348" x2="390" y2="430" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="450" y="392" text-anchor="end" font-size="13" font-weight="600" fill="#4f46e5">9. 주문 생성</text>
+  <text x="450" y="392" text-anchor="end" font-size="15" font-weight="600" fill="#4f46e5">9. 주문 생성</text>
   <line x1="430" y1="430" x2="600" y2="348" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="536" y="392" text-anchor="start" font-size="13" font-weight="600" fill="#3730a3">10. 응답</text>
+  <text x="536" y="392" text-anchor="start" font-size="15" font-weight="600" fill="#3730a3">10. 응답</text>
   <line x1="508" y1="326" x2="432" y2="326" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="470" y="342" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">11. 응답</text>
+  <text x="470" y="342" text-anchor="middle" font-size="15" font-weight="600" fill="#3730a3">11. 응답</text>
   <line x1="288" y1="326" x2="162" y2="326" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="225" y="342" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">12. PENDING 응답</text>
+  <text x="225" y="342" text-anchor="middle" font-size="13" font-weight="600" fill="#3730a3">12. PENDING 응답</text>
   <path d="M300 462 Q 90 462 90 352" fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="5,4" marker-end="url(#c5f0-a)"/>
-  <text x="132" y="420" text-anchor="start" font-size="12" font-weight="600" fill="#4f46e5">13. WebSocket 완료 알림</text>
+  <text x="132" y="420" text-anchor="start" font-size="13" font-weight="600" fill="#4f46e5">13. WebSocket 완료 알림</text>
   <rect x="300" y="430" width="170" height="80" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-  <text x="385" y="463" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
-  <text x="385" y="486" text-anchor="middle" font-size="12" fill="#3730a3">:8081 주문</text>
+  <text x="385" y="463" text-anchor="middle" font-size="19" font-weight="700" fill="#3730a3">Order</text>
+  <text x="385" y="486" text-anchor="middle" font-size="13" fill="#3730a3">:8081 주문</text>
   <rect x="560" y="430" width="170" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="645" y="463" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Product</text>
-  <text x="645" y="486" text-anchor="middle" font-size="12" fill="#6b7280">:8082 상품</text>
+  <text x="645" y="463" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">Product</text>
+  <text x="645" y="486" text-anchor="middle" font-size="13" fill="#6b7280">:8082 상품</text>
   <rect x="820" y="430" width="170" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="905" y="463" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Delivery</text>
-  <text x="905" y="486" text-anchor="middle" font-size="12" fill="#6b7280">:8084 배달</text>
+  <text x="905" y="463" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">Delivery</text>
+  <text x="905" y="486" text-anchor="middle" font-size="13" fill="#6b7280">:8084 배달</text>
   <rect x="1005" y="430" width="160" height="80" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.8"/>
-  <text x="1085" y="463" text-anchor="middle" font-size="15" font-weight="700" fill="#0f766e">배달 기사</text>
-  <text x="1085" y="486" text-anchor="middle" font-size="12" fill="#0d9488">외부 호출자</text>
-  <text x="1085" y="420" text-anchor="middle" font-size="12" font-weight="700" fill="#0f766e">PUT /complete</text>
+  <text x="1085" y="463" text-anchor="middle" font-size="18" font-weight="700" fill="#0f766e">배달 기사</text>
+  <text x="1085" y="486" text-anchor="middle" font-size="13" fill="#0d9488">외부 호출자</text>
+  <text x="1085" y="420" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">PUT /complete</text>
   <line x1="1003" y1="470" x2="992" y2="470" stroke="#0d9488" stroke-width="2.4" marker-end="url(#c5f0-r)"/>
   <rect x="360" y="588" width="580" height="68" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
   <rect x="360" y="588" width="580" height="20" fill="#ff7849"/>
-  <text x="650" y="603" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 모든 메시지가 토픽을 거쳐 비동기로 전달</text>
+  <text x="650" y="603" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Kafka — 모든 메시지가 토픽을 거쳐 비동기로 전달</text>
   <rect x="410" y="618" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M410 618 L448 631 L486 618" fill="none" stroke="#ff7849" stroke-width="1"/>
   <rect x="530" y="618" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
@@ -96,26 +96,25 @@
   <rect x="770" y="618" width="76" height="28" rx="2" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M770 618 L808 631 L846 618" fill="none" stroke="#ff7849" stroke-width="1"/>
   <rect x="320" y="716" width="620" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
-  <text x="630" y="750" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
-  <text x="630" y="774" text-anchor="middle" font-size="12" font-weight="600" fill="#312e81">흐름을 결정하는 지휘자</text>
-  <text x="630" y="792" text-anchor="middle" font-size="11" fill="#3730a3">event를 받아 다음 command를 발행 (서비스는 명령 못 냄)</text>
+  <text x="630" y="750" text-anchor="middle" font-size="24" font-weight="700" fill="#312e81">Orchestrator</text>
+  <text x="630" y="774" text-anchor="middle" font-size="13" font-weight="600" fill="#312e81">흐름을 결정하는 지휘자</text>
   <line x1="370" y1="512" x2="370" y2="586" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="356" y="552" text-anchor="end" font-size="12" font-weight="600" fill="#3730a3"><tspan font-size="17" font-weight="700">❶</tspan> 주문 생성 발행</text>
+  <text x="356" y="552" text-anchor="end" font-size="13" font-weight="600" fill="#3730a3"><tspan font-size="20" font-weight="700">❶</tspan> 주문 생성 발행</text>
   <line x1="400" y1="586" x2="400" y2="512" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="414" y="552" text-anchor="start" font-size="12" font-weight="600" fill="#4f46e5"><tspan font-size="17" font-weight="700">❻</tspan> 주문 완료 명령</text>
+  <text x="414" y="552" text-anchor="start" font-size="13" font-weight="600" fill="#4f46e5"><tspan font-size="20" font-weight="700">❻</tspan> 주문 완료 명령</text>
   <line x1="630" y1="512" x2="630" y2="586" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="616" y="552" text-anchor="end" font-size="12" font-weight="600" fill="#3730a3"><tspan font-size="17" font-weight="700">❸</tspan> 재고 차감 결과</text>
+  <text x="616" y="552" text-anchor="end" font-size="13" font-weight="600" fill="#3730a3"><tspan font-size="20" font-weight="700">❸</tspan> 재고 차감 결과</text>
   <line x1="660" y1="586" x2="660" y2="512" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="674" y="552" text-anchor="start" font-size="12" font-weight="600" fill="#4f46e5"><tspan font-size="17" font-weight="700">❷</tspan> 재고 차감 명령</text>
+  <text x="674" y="552" text-anchor="start" font-size="13" font-weight="600" fill="#4f46e5"><tspan font-size="20" font-weight="700">❷</tspan> 재고 차감 명령</text>
   <line x1="890" y1="512" x2="890" y2="586" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="876" y="552" text-anchor="end" font-size="12" font-weight="600" fill="#3730a3"><tspan font-size="17" font-weight="700">❺</tspan> 배달 생성 결과</text>
+  <text x="876" y="552" text-anchor="end" font-size="13" font-weight="600" fill="#3730a3"><tspan font-size="20" font-weight="700">❺</tspan> 배달 생성 결과</text>
   <line x1="920" y1="586" x2="920" y2="512" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c5f0-a)"/>
-  <text x="934" y="552" text-anchor="start" font-size="12" font-weight="600" fill="#4f46e5"><tspan font-size="17" font-weight="700">❹</tspan> 배달 생성 명령</text>
+  <text x="934" y="552" text-anchor="start" font-size="13" font-weight="600" fill="#4f46e5"><tspan font-size="20" font-weight="700">❹</tspan> 배달 생성 명령</text>
   <line x1="615" y1="660" x2="615" y2="714" stroke="#4f46e5" stroke-width="2.4" marker-end="url(#c5f0-a)"/>
-  <text x="603" y="690" text-anchor="end" font-size="12" font-weight="700" fill="#4f46e5">발행</text>
+  <text x="603" y="690" text-anchor="end" font-size="13" font-weight="700" fill="#4f46e5">발행</text>
   <line x1="645" y1="714" x2="645" y2="662" stroke="#4f46e5" stroke-width="2.4" stroke-dasharray="4,3" marker-end="url(#c5f0-a)"/>
-  <text x="657" y="690" text-anchor="start" font-size="12" font-weight="700" fill="#3730a3">구독</text>
-  <text x="600" y="844" text-anchor="middle" font-size="13" fill="#6b7280" font-style="italic">챕터 4와 동일한 흐름 · 차이는 비동기 처리(❶~❻)가 끝나 주문이 완료되면 Order가 WebSocket으로 Client에 완료를 즉시 Push(13). 폴링이 사라진다</text>
+  <text x="657" y="690" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">구독</text>
+  <text x="600" y="844" text-anchor="middle" font-size="21" fill="#6b7280" font-style="italic">주문이 완료되면 Order가 WebSocket으로 Client에게 즉시 알립니다.</text>
 </svg>
 </div>
 
@@ -156,13 +155,9 @@ ex04/
 
 서비스마다 패키지 구조가 조금씩 다르므로, 코드를 작성할 파일 경로는 각 실습 코드블록 바로 위에서 안내합니다.
 
-### 3. 실습 환경
+### 3. 실습 순서
 
-챕터 4까지 사용한 Docker Desktop, Minikube가 그대로 필요합니다. 별도 추가 도구는 없습니다. 프론트엔드도 Nginx 컨테이너로 Minikube 안에서 함께 띄우므로 따로 서버를 띄울 필요는 없습니다.
-
-### 4. 실습 순서
-
-1. 배달 서비스에 배달 완료 API + `delivery-completed` 이벤트 추가
+1. 배달 서비스에 배달 생성·완료 분리 + 배달 완료 API + `delivery-completed` 이벤트 추가
 2. orchestrator에 `delivery-completed` 처리 + `delivery-created` 성공 시 대기로 변경
 3. 주문 서비스에 STOMP 웹소켓 설정 + 주문 완료 시 Push
 4. SockJS 기반 index.html 프론트엔드와 Nginx 프록시 구성
@@ -175,9 +170,9 @@ ex04/
 
 서버에 생긴 변화를 알아내는 방법은 크게 두 가지입니다.
 
-택배가 왔는지 확인하려고 5분마다 현관문을 열어보는 방식이 있습니다. 도착 여부는 직접 문을 열어봐야만 알 수 있습니다. 이처럼 클라이언트가 서버에 "처리가 완료되었나요?"라고 일정 간격으로 반복해서 묻는 방식을 **폴링(Polling)** 이라고 합니다.
+택배가 왔는지 확인하려고 5분마다 현관문을 열어보는 방식이 있습니다. 도착 여부는 직접 문을 열어봐야만 알 수 있습니다. 이처럼 **클라이언트가 서버에 "처리가 완료되었나요?"라고 일정 간격으로 반복해서 묻는** 방식을 **폴링(Polling)** 이라고 합니다.
 
-반면, 택배가 도착했을 때 초인종이 울리는 방식도 있습니다. 안에 있는 사람은 문을 계속 열어볼 필요 없이, 벨이 울리는 순간 도착 사실을 알게 됩니다. 이처럼 클라이언트가 요청하지 않아도 서버에 변화가 생겼을 때 먼저 신호를 보내는 방식을 **푸시(Push)** 라고 합니다.
+반면, 택배가 도착했을 때 초인종이 울리는 방식도 있습니다. 안에 있는 사람은 문을 계속 열어볼 필요 없이, 벨이 울리는 순간 도착 사실을 알게 됩니다. 이처럼 **클라이언트가 요청하지 않아도 서버에 변화가 생겼을 때 먼저 신호를 보내는** 방식을 **푸시(Push)** 라고 합니다.
 
 <!-- image-prompt: Minimal black line drawing on white background, two side-by-side halves, no divider line, no X mark, 4:3 aspect ratio, 800x600px. Minimal text — let the drawing tell the story. Left half, title "Polling": the same scene repeated three times stacked vertically with NO frame, box, or border around each repetition (no rectangles, no panel outlines), each repetition showing the same tired, weary-looking person (drooping shoulders, exhausted face) opening their front door to an empty doorstep, with a large round analog wall clock whose hands point to a clearly DIFFERENT time in each — top about 9 o'clock, middle about 12 o'clock, bottom about 3 o'clock — the visibly different clock hands making the repeated checking over time obvious. Right half, title "Push": the same person sitting relaxed on a sofa reading while a small bell symbol by the front door rings on its own with short curved motion lines. No speech bubbles, no sound-effect text (no "RING!"), no annotation text, no checklists. Characters drawn in a clean simple cartoon textbook style consistent with the rest of the book — not stick figures, simple but with clear body proportions, hair, and clothing outlines, more detailed than stick figures but less detailed than realistic. Clean lines, no colors. -->
 ![](assets/CH05/gemini/01_polling-vs-websocket.png)
@@ -236,7 +231,7 @@ ex04/
 **웹소켓(WebSocket)이란?** 클라이언트와 서버가 한 번 연결을 맺으면 이를 끊지 않고 유지하는 통신 방식입니다. 연결이 유효한 동안에는 서버가 클라이언트의 요청을 기다리지 않고도 데이터를 보낼 수 있어, 상태 변화를 실시간으로 전달할 수 있습니다.
 :::
 
-지금은 주문이 생성됨과 동시에 완료 처리가 됩니다. 실시간 알림이 올바르게 작동하려면 실제 배달이 끝난 뒤에 주문이 완료되어야 하므로, 먼저 배달 완료 기능부터 구현해 보겠습니다.
+지금은 주문이 생성됨과 동시에 완료 처리가 됩니다. 실시간 알림이 올바르게 작동하려면 실제 배달이 끝난 뒤에 주문이 완료되어야 하므로, 배달 완료 기능을 추가해야 합니다.
 
 ## 5.2 배달 완료 - 생성과 완료를 분리한다
 
@@ -273,7 +268,7 @@ ex04/
   <text x="680" y="534" text-anchor="middle" font-size="14" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
   <text x="680" y="556" text-anchor="middle" font-size="14" font-weight="700" fill="#b91c1c">배달 완료를 기다리며 여기서 멈춤 (변경점)</text>
   <line x1="660" y1="134" x2="425" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#c53a-s)"/>
-  <text x="470" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">1. 배달 생성 이벤트 발행</text>
+  <text x="585" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">1. 배달 생성 이벤트 발행</text>
   <line x1="415" y1="370" x2="415" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#c53a-d)"/>
   <text x="437" y="429" text-anchor="start" font-size="15" font-weight="700" fill="#3730a3">2. 수신 후 대기</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
@@ -328,7 +323,7 @@ ex04/
   <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
   <text x="680" y="538" text-anchor="middle" font-size="14" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
   <line x1="660" y1="134" x2="565" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#c53b-s)"/>
-  <text x="605" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">3. 배달 완료 이벤트 발행</text>
+  <text x="649" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">3. 배달 완료 이벤트 발행</text>
   <line x1="565" y1="370" x2="565" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#c53b-d)"/>
   <text x="587" y="429" text-anchor="start" font-size="15" font-weight="700" fill="#3730a3">4. orchestrator가 수신</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
@@ -384,7 +379,7 @@ ex04/
   <line x1="715" y1="478" x2="715" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#c53c-s)"/>
   <text x="737" y="429" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">5. 주문 완료 명령 발행</text>
   <line x1="715" y1="248" x2="445" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#c53c-d)"/>
-  <text x="470" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#3730a3">6. 주문 서비스가 수신</text>
+  <text x="597" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#3730a3">6. 주문 서비스가 수신</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
   <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">3단계</text>
@@ -410,7 +405,7 @@ ex04/
 
 ### 5.3.1 브라우저와 주문 서비스의 연결 - HTTP에서 웹소켓으로
 
-전화는 한쪽이 걸고 상대가 받아야 통화가 이어집니다. 마찬가지로 브라우저가 연결을 청하고 주문 서비스가 받아들이면 **양방향 연결**이 열립니다. 이 연결은 **업그레이드 헤더**를 통해 일반 HTTP에서 **웹소켓**으로 바뀝니다.
+전화는 한쪽이 걸고 상대가 받아야 통화가 이어집니다. 마찬가지로 브라우저가 연결을 요청하고 주문 서비스가 받아들이면 **양방향 연결**이 열립니다. 이 연결은 **업그레이드 헤더**를 통해 일반 HTTP에서 **웹소켓**으로 바뀝니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 900 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 연결 핸드셰이크. 브라우저가 frontend와 gateway를 거쳐 주문 서비스로 웹소켓 업그레이드를 요청하면 응답으로 양방향 연결이 열린다.">
@@ -444,14 +439,14 @@ ex04/
 **업그레이드 헤더란?** HTTP Upgrade 헤더는 클라이언트와 서버가 현재 사용 중인 HTTP 연결을 다른 프로토콜로 전환하기 위해 사용하는 헤더입니다. 주로 웹소켓 연결을 설정할 때 사용되며, 이를 통해 동일한 연결에서 새로운 통신 방식을 사용할 수 있습니다.
 :::
 
-### 5.3.2 브라우저의 채널 구독 - 명부에 한 줄 추가
+### 5.3.2 브라우저의 채널 구독 - 명부에 등록
 
 웹소켓이 연결되더라도 서버는 누구에게 어떤 알림을 보낼지 스스로 알 수 없습니다. 따라서 브라우저가 먼저 서버에 자신이 받을 채널을 알려주며 **구독(Subscribe)** 해야 합니다.
 
-브라우저가 특정 채널을 구독하면, 주문 서비스 안의 브로커는 **구독 명부**에 그 사실을 기록해 둡니다. 즉, 브라우저가 구독하고 서버가 명부를 작성해 관리하는 구조입니다. 이제 서버는 이 명부를 보고 정확한 대상에게 알림을 발송합니다.
+브라우저가 특정 채널을 구독하면, 주문 서비스 안의 웹소켓 브로커는 **구독 명부**에 그 사실을 기록해 둡니다. 즉, 브라우저가 구독하고 서버가 명부를 작성해 관리하는 구조입니다. 이제 서버는 이 명부를 보고 정확한 대상에게 알림을 발송합니다.
 
 <div class="svg-figure">
-<svg viewBox="0 0 900 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 구독 등록. 브라우저가 채널을 SUBSCRIBE로 알리고, 이 프레임은 1단계 연결을 타고 frontend와 gateway를 그대로 통과해 주문 서비스에 닿는다. 주문 서비스 안의 내장 브로커가 구독 명부에 세션 A는 topic/orders/3이라고 한 줄 적어 둔다.">
+<svg viewBox="0 0 900 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 구독 등록. 브라우저가 채널을 SUBSCRIBE로 알리고, 이 프레임은 1단계 연결을 타고 frontend와 gateway를 그대로 통과해 주문 서비스에 닿는다. 주문 서비스 안의 웹소켓 브로커가 구독 명부에 세션 A는 topic/orders/3이라고 등록한다.">
   <defs>
     <marker id="rq2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
   </defs>
@@ -466,16 +461,16 @@ ex04/
   <line x1="326" y1="112" x2="404" y2="112" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq2)"/>
   <rect x="408" y="74" width="372" height="92" rx="12" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/>
   <text x="428" y="96" font-size="13" font-weight="700" fill="#3730a3">주문 서비스</text>
-  <text x="428" y="116" font-size="10.5" fill="#64748b">구독 명부 (내장 브로커)<tspan fill="#4f46e5" font-weight="700">&#160;&#160;· 방금 추가</tspan></text>
+  <text x="428" y="116" font-size="10.5" fill="#64748b">구독 명부 (웹소켓 브로커)<tspan fill="#4f46e5" font-weight="700">&#160;&#160;· 방금 추가</tspan></text>
   <rect x="428" y="124" width="332" height="32" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
   <text x="446" y="145" font-size="12.5" fill="#3730a3">세션 A&#160;&#160;→&#160;&#160;<tspan class="mono" fill="#ff7849" font-weight="700">/topic</tspan><tspan class="mono" fill="#0f172a">/orders/</tspan><tspan class="mono" fill="#7c3aed" font-weight="700">3</tspan></text>
 </svg>
 </div>
 
-*그림 5-8. 2단계 - 브라우저가 구독하면 브로커가 구독 명부에 한 줄 적어 둡니다*
+*그림 5-8. 2단계 - 브라우저가 구독하면 웹소켓 브로커가 구독 명부에 등록합니다*
 
 :::term-box
-**브로커란?** 메시지를 보내는 쪽과 받는 쪽 사이에서 전달을 중개하는 역할입니다. 어떤 클라이언트가 어떤 채널을 구독했는지 명부로 관리하다가, 메시지가 들어오면 같은 채널을 구독한 클라이언트에게 전달합니다.
+**웹소켓 브로커란?** 메시지를 보내는 쪽과 받는 쪽 사이에서 전달을 중개하는 역할입니다. 어떤 클라이언트가 어떤 채널을 구독했는지 명부로 관리하다가, 메시지가 들어오면 같은 채널을 구독한 클라이언트에게 전달합니다.
 :::
 
 ### 5.3.3 주문 서비스의 알림 발송 - 같은 채널 찾아 전달
@@ -496,7 +491,7 @@ ex04/
   <text x="132" y="146" text-anchor="middle" font-size="10" fill="#64748b">주문 완료 처리</text>
   <text x="230" y="120" text-anchor="middle" font-size="10.5" font-weight="700" fill="#4f46e5">발송</text>
   <line x1="204" y1="131" x2="252" y2="131" stroke="#4f46e5" stroke-width="2" marker-end="url(#rq3)"/>
-  <text x="256" y="94" font-size="10.5" fill="#64748b">구독 명부 (내장 브로커)</text>
+  <text x="256" y="94" font-size="10.5" fill="#64748b">구독 명부 (웹소켓 브로커)</text>
   <rect x="256" y="104" width="216" height="46" rx="9" fill="#fff" stroke="#4f46e5" stroke-width="1.4"/>
   <text x="272" y="132" font-size="12.5" fill="#3730a3">세션 A&#160;&#160;→&#160;&#160;<tspan class="mono" fill="#ff7849" font-weight="700">/topic</tspan><tspan class="mono" fill="#0f172a">/orders/</tspan><tspan class="mono" fill="#7c3aed" font-weight="700">3</tspan></text>
   <text x="658" y="114" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">주문 완료 알림</text>
@@ -514,7 +509,9 @@ ex04/
 
 *그림 5-9. 3단계 - 발송 주소와 같은 채널을 명부에서 찾아 구독한 브라우저에 보냅니다*
 
-세 단계가 모두 갖춰지면, 배달이 끝나는 순간 사용자 화면에 주문 완료가 표시됩니다. 이제 코드로 구현해 보겠습니다. 먼저 배달 서비스에서 배달의 생성과 완료 과정을 분리하는 작업부터 시작합니다.
+세 단계가 모두 갖춰지면, 배달이 끝나는 순간 사용자 화면에 주문 완료가 표시됩니다.
+
+이제 코드로 구현해 보겠습니다. 먼저 배달 서비스에서 배달의 생성과 완료 과정을 분리하는 작업부터 시작합니다.
 
 ## 5.4 배달 서비스 - 배달 완료 API
 
@@ -604,10 +601,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 ```
 
 :::note
-**웹소켓 위에 STOMP 프로토콜을 사용합니다.** 웹소켓은 서버와 클라이언트를 계속 연결해 주지만, 연결만으로는 메시지를 누구에게 보낼지 가려내지 못합니다. STOMP(Simple Text Oriented Messaging Protocol)를 얹으면 메시지를 채널로 나눠, **채널을 구독한 사람에게만 보내는 발행-구독 구조**를 쓸 수 있습니다. 이 예제에서 서버는 `/topic/orders/{userId}` 채널로 보내고, 같은 채널을 구독한 사용자만 자기 주문 완료 알림을 받습니다.
+**웹소켓 위에 STOMP 프로토콜을 사용합니다.** 웹소켓은 서버와 클라이언트를 계속 연결해 주지만, 연결만으로는 메시지를 누구에게 보낼지 가려내지 못합니다. 그래서 이 연결 위에 **STOMP(Simple Text Oriented Messaging Protocol)** 라는 메시징 규칙을 얹습니다. STOMP는 메시지마다 채널(주소)을 붙이고, **그 채널을 구독한 클라이언트에게만 전달하는 발행-구독 구조**를 제공합니다. 이 예제에서 서버는 `/topic/orders/{userId}` 채널로 보내고, 같은 채널을 구독한 사용자만 자기 주문 완료 알림을 받습니다.
 :::
 
-클라이언트는 연결 주소로 웹소켓을 연 뒤, `/topic` 주소를 구독해 알림을 받습니다. 이때 브로커는 구독한 주소를 명부에 등록해 둡니다.
+클라이언트는 연결 주소로 웹소켓을 연 뒤, `/topic` 주소를 구독해 알림을 받습니다. 이때 웹소켓 브로커는 구독한 주소를 명부에 등록해 둡니다.
 
 ### 5.6.2 주문 완료 시 알림 발송
 
@@ -628,14 +625,7 @@ public void completeOrder(int orderId) {
 }
 ```
 
-### 5.6.3 주문 서비스 보조 설정
-
-핵심 코드 외에 주문 서비스에 필요한 설정은 표로 정리합니다. 전체 코드는 깃헙 레포에서 확인합니다.
-
-| 파일 | 역할 |
-|------|------|
-| **order-service/build.gradle** | 웹소켓·STOMP 의존성 추가 |
-| **JwtAuthenticationFilter.java** | 웹소켓 연결 경로를 로그인 검사에서 제외 |
+핵심 코드 외에 주문 서비스에 필요한 설정은 깃헙 레포에서 확인합니다.
 
 ## 5.7 프론트엔드 연결
 
@@ -645,9 +635,9 @@ public void completeOrder(int orderId) {
 
 앞에서 본 업그레이드 헤더는 브라우저와 주문 서비스 사이의 frontend와 gateway를 거쳐야 합니다. 그런데 이 둘이 업그레이드 헤더를 넘기지 않으면 일반 요청처럼 처리돼 **연결이 끊깁니다**. 그래서 frontend와 gateway 두 곳의 nginx에 **업그레이드 헤더를 전달**하도록 설정합니다.
 
-`frontend/nginx.conf`의 `/api/ws/` 위치에 아래처럼 업그레이드 헤더를 추가합니다.
+`frontend/nginx.conf`의 `/api/ws/` 위치에 아래처럼 설정합니다.
 
-```nginx [frontend/nginx.conf] 웹소켓 업그레이드 헤더
+```nginx [참고] frontend/nginx.conf. 웹소켓 업그레이드 헤더
 location /api/ws/ {
     proxy_pass http://gateway;
     proxy_http_version 1.1;
@@ -662,7 +652,7 @@ location /api/ws/ {
 
 `frontend/index.html`은 서버 알림을 받아 화면에 주문 완료를 표시하는 STOMP 클라이언트입니다. 주문하기 버튼을 누르면, 먼저 웹소켓을 연결하고 자기 주문 완료 알림이 올 `/topic/orders/{userId}` 채널을 구독합니다. 알림 받을 준비를 마친 다음 주문 API를 호출합니다.
 
-```javascript [frontend/index.html] STOMP 연결과 구독
+```javascript [참고] frontend/index.html. STOMP 연결과 구독
 // 1. /api/ws/orders로 웹소켓 연결
 stomp = Stomp.over(new SockJS('/api/ws/orders?token=' + TOKEN));
 stomp.connect({}, function () {
@@ -715,15 +705,13 @@ stomp.connect({}, function () {
 
 *그림 5-10. 웹소켓 주소 일치 - 같은 색은 글자까지 똑같아야 동작합니다*
 
-*프록시마다 헤더를 넘기고, 서버랑 브라우저가 같은 채널을 보게 맞췄다. 이제 주문이 끝나는 순간 화면이 바로 바뀌겠지.*
-
 ## 5.8 전체 시스템 통합 테스트
 
 이제 전체 시스템을 실행해, 주문 생성부터 완료 알림까지 전체 흐름을 확인합니다.
 
 ### 5.8.1 Kubernetes 리소스 정의
 
-앞 챕터까지의 구성에서 frontend 서비스가 새로 추가됩니다. `k8s/frontend/` 폴더에 Deployment, Service, Ingress가 정의되어 있습니다.
+이전 챕터까지의 구성에서 frontend 서비스가 새로 추가됩니다. `k8s/frontend/` 폴더에 Deployment, Service, Ingress가 정의되어 있습니다.
 
 | 파일 | 역할 |
 |------|------|
@@ -916,11 +904,11 @@ GET http://127.0.0.1:80/api/orders/4
 ![](assets/CH05/terminal/12_websocket-notification.png)
 *그림 5-19. 웹소켓 알림 수신 - 클라이언트 화면에 주문 완료 표시*
 
-완성한 화면을 동료에게 보여 줬습니다. 주문하기를 누르자 잠시 뒤 '처리 중'이 '주문 완료'로 바뀌었습니다. 동료가 주문 내역을 다시 열어 보려다 멈췄습니다.
+완성한 화면을 동료에게 보여 줬습니다. 주문하기를 누르자 잠시 뒤 '처리 중'이 '주문 완료'로 바뀌었습니다.
 
 **동료**: "이제 사용자도 새로고침 없이 주문이 끝난 걸 바로 알 수 있겠네요."
 
-처리 중에 멈춰 있던 화면이, 이제 주문이 끝나는 순간 곧바로 결과를 보여 줍니다. 사용자가 끝났는지 확인하러 화면을 다시 열지 않아도 됩니다.
+하나로 구성됐던 서비스를 기능별로 분리하고, 사용자에게 실시간으로 알리는 웹소켓까지 더했습니다. 이제 한쪽 서비스에 부하가 몰려도 전체가 멈추지 않고, 주문이 끝나는 순간 사용자 화면에 완료가 바로 표시됩니다.
 
 :::remember
 **이것만은 기억하자**
