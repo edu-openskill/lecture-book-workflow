@@ -123,9 +123,9 @@
 
 
 :::goal
-이번 챕터가 끝나면
+**이번 챕터가 끝나면**
 
-- 폴링과 푸시의 차이, 실시간 통신(웹소켓)이 필요한 이유를 이해할 수 있습니다.
+- 폴링과 푸시의 차이, 실시간 통신(**웹소켓**)이 필요한 이유를 이해할 수 있습니다.
 - 비동기 완료 시점을 포착해 사용자에게 실시간으로 전달하는 흐름을 이해할 수 있습니다.
 :::
 
@@ -242,7 +242,7 @@ ex04/
 
 이제부터 배달 생성이 발생하면 배달이 **PENDING**으로 남고, 배달 기사가 배달 완료 처리를 해야 **COMPLETED**가 됩니다. 배달이 만들어진 뒤 완료되기까지를 순서대로 보겠습니다.
 
-<div class="svg-figure">
+<div class="svg-figure svg-figure--wide">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
    <marker id="c53a-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
@@ -251,31 +251,31 @@ ex04/
   <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">1단계 — 배달 생성 이벤트 발행 → orchestrator 수신 후 대기</text>
   <rect x="345" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <text x="430" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Order</text>
-  <text x="430" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8081 주문</text>
+  <text x="430" y="116" text-anchor="middle" font-size="14" fill="#cbd5e1">:8081 주문</text>
   <rect x="575" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
   <text x="660" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Delivery</text>
-  <text x="660" y="116" text-anchor="middle" font-size="12" fill="#3730a3">:8084 배달</text>
+  <text x="660" y="116" text-anchor="middle" font-size="14" fill="#3730a3">:8084 배달</text>
   <rect x="280" y="250" width="780" height="120" rx="9" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
   <rect x="280" y="250" width="780" height="22" fill="#ff7849"/>
-  <text x="670" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 토픽별로 메시지를 보관·전달</text>
+  <text x="670" y="265" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Kafka — 토픽별로 메시지를 보관·전달</text>
   <rect x="360" y="290" width="110" height="42" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.8"/>
   <path d="M360 290 L415 311 L470 290" fill="none" stroke="#ff7849" stroke-width="1.4"/>
-  <text x="415" y="350" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9a3412">배달 생성 이벤트</text>
-  <circle cx="452" cy="298" r="10" fill="#ff7849"/><text x="452" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <text x="415" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#9a3412">배달 생성 이벤트</text>
+  <circle cx="452" cy="298" r="10" fill="#ff7849"/><text x="452" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text>
   <rect x="510" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M510 290 L565 311 L620 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
-  <text x="565" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">배달 완료 이벤트</text>
+  <text x="565" y="350" text-anchor="middle" font-size="13" font-weight="400" fill="#cbd5e1">배달 완료 이벤트</text>
   <rect x="660" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M660 290 L715 311 L770 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
-  <text x="715" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">주문 완료 명령</text>
+  <text x="715" y="350" text-anchor="middle" font-size="13" font-weight="400" fill="#cbd5e1">주문 완료 명령</text>
   <rect x="300" y="480" width="760" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
   <text x="680" y="510" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
-  <text x="680" y="534" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
-  <text x="680" y="556" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">배달 완료를 기다리며 여기서 멈춤 (변경점)</text>
+  <text x="680" y="534" text-anchor="middle" font-size="14" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
+  <text x="680" y="556" text-anchor="middle" font-size="14" font-weight="700" fill="#b91c1c">배달 완료를 기다리며 여기서 멈춤 (변경점)</text>
   <line x1="660" y1="134" x2="425" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#c53a-s)"/>
-  <text x="470" y="186" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">1. 배달 생성 이벤트 발행</text>
+  <text x="470" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">1. 배달 생성 이벤트 발행</text>
   <line x1="415" y1="370" x2="415" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#c53a-d)"/>
-  <text x="437" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">2. 수신 후 대기</text>
+  <text x="437" y="429" text-anchor="start" font-size="15" font-weight="700" fill="#3730a3">2. 수신 후 대기</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
   <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">1단계</text>
@@ -292,7 +292,7 @@ ex04/
 *그림 5-4. 1단계 - 배달 생성 이벤트 발행 → orchestrator 수신 후 대기*
 
 
-<div class="svg-figure">
+<div class="svg-figure svg-figure--wide">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
    <marker id="c53b-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
@@ -302,35 +302,35 @@ ex04/
   <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">2단계 — 배달 완료 API → 배달 완료 이벤트 발행 → orchestrator 수신</text>
   <rect x="345" y="64" width="170" height="70" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <text x="430" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#94a3b8">Order</text>
-  <text x="430" y="116" text-anchor="middle" font-size="12" fill="#cbd5e1">:8081 주문</text>
+  <text x="430" y="116" text-anchor="middle" font-size="14" fill="#cbd5e1">:8081 주문</text>
   <rect x="575" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
   <text x="660" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Delivery</text>
-  <text x="660" y="116" text-anchor="middle" font-size="12" fill="#3730a3">:8084 배달</text>
+  <text x="660" y="116" text-anchor="middle" font-size="14" fill="#3730a3">:8084 배달</text>
   <rect x="805" y="64" width="170" height="70" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.8"/>
   <text x="890" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#0f766e">배달 기사</text>
-  <text x="890" y="116" text-anchor="middle" font-size="12" fill="#0d9488">외부 호출자</text>
+  <text x="890" y="116" text-anchor="middle" font-size="14" fill="#0d9488">외부 호출자</text>
   <line x1="803" y1="99" x2="747" y2="99" stroke="#0d9488" stroke-width="2.4" marker-end="url(#c53b-r)"/>
-  <text x="775" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="#0f766e">PUT /complete</text>
+  <text x="775" y="90" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">PUT /complete</text>
   <rect x="280" y="250" width="780" height="120" rx="9" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
   <rect x="280" y="250" width="780" height="22" fill="#ff7849"/>
-  <text x="670" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 토픽별로 메시지를 보관·전달</text>
+  <text x="670" y="265" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Kafka — 토픽별로 메시지를 보관·전달</text>
   <rect x="360" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M360 290 L415 311 L470 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
-  <text x="415" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">배달 생성 이벤트</text>
+  <text x="415" y="350" text-anchor="middle" font-size="13" font-weight="400" fill="#cbd5e1">배달 생성 이벤트</text>
   <rect x="510" y="290" width="110" height="42" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.8"/>
   <path d="M510 290 L565 311 L620 290" fill="none" stroke="#ff7849" stroke-width="1.4"/>
-  <text x="565" y="350" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9a3412">배달 완료 이벤트</text>
-  <circle cx="602" cy="298" r="10" fill="#ff7849"/><text x="602" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <text x="565" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#9a3412">배달 완료 이벤트</text>
+  <circle cx="602" cy="298" r="10" fill="#ff7849"/><text x="602" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text>
   <rect x="660" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M660 290 L715 311 L770 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
-  <text x="715" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">주문 완료 명령</text>
+  <text x="715" y="350" text-anchor="middle" font-size="13" font-weight="400" fill="#cbd5e1">주문 완료 명령</text>
   <rect x="300" y="480" width="760" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
   <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
-  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
+  <text x="680" y="538" text-anchor="middle" font-size="14" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
   <line x1="660" y1="134" x2="565" y2="248" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#c53b-s)"/>
-  <text x="605" y="186" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">3. 배달 완료 이벤트 발행</text>
+  <text x="605" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">3. 배달 완료 이벤트 발행</text>
   <line x1="565" y1="370" x2="565" y2="478" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#c53b-d)"/>
-  <text x="587" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">4. orchestrator가 수신</text>
+  <text x="587" y="429" text-anchor="start" font-size="15" font-weight="700" fill="#3730a3">4. orchestrator가 수신</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
   <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">2단계</text>
@@ -349,7 +349,7 @@ ex04/
 *그림 5-5. 2단계 - 배달 완료 API → 배달 완료 이벤트 발행 → orchestrator 수신*
 
 
-<div class="svg-figure">
+<div class="svg-figure svg-figure--wide">
 <svg viewBox="260 30 1320 560" xmlns="http://www.w3.org/2000/svg">
   <defs>
    <marker id="c53c-s" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
@@ -359,32 +359,32 @@ ex04/
   <text x="680" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">3단계 — 주문 완료 명령 발행 → 주문 수신 → WebSocket으로 사용자 알림</text>
   <rect x="345" y="64" width="170" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
   <text x="430" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
-  <text x="430" y="116" text-anchor="middle" font-size="12" fill="#3730a3">:8081 주문</text>
+  <text x="430" y="116" text-anchor="middle" font-size="14" fill="#3730a3">:8081 주문</text>
   <rect x="740" y="64" width="170" height="70" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.8"/>
   <text x="825" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#6d28d9">Client</text>
-  <text x="825" y="116" text-anchor="middle" font-size="12" fill="#7c3aed">사용자 화면</text>
+  <text x="825" y="116" text-anchor="middle" font-size="14" fill="#7c3aed">사용자 화면</text>
   <line x1="517" y1="92" x2="738" y2="92" stroke="#7c3aed" stroke-width="2.4" stroke-dasharray="4,3" marker-end="url(#c53c-w)"/>
-  <text x="628" y="120" text-anchor="middle" font-size="11" font-weight="700" fill="#6d28d9">WebSocket Push</text>
+  <text x="628" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#6d28d9">WebSocket Push</text>
   <rect x="280" y="250" width="780" height="120" rx="9" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
   <rect x="280" y="250" width="780" height="22" fill="#ff7849"/>
-  <text x="670" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Kafka — 토픽별로 메시지를 보관·전달</text>
+  <text x="670" y="265" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Kafka — 토픽별로 메시지를 보관·전달</text>
   <rect x="360" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M360 290 L415 311 L470 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
-  <text x="415" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">배달 생성 이벤트</text>
+  <text x="415" y="350" text-anchor="middle" font-size="13" font-weight="400" fill="#cbd5e1">배달 생성 이벤트</text>
   <rect x="510" y="290" width="110" height="42" rx="3" fill="#fff" stroke="#ff7849" stroke-width="1"/>
   <path d="M510 290 L565 311 L620 290" fill="none" stroke="#ff7849" stroke-width="0.8"/>
-  <text x="565" y="350" text-anchor="middle" font-size="9.5" font-weight="400" fill="#cbd5e1">배달 완료 이벤트</text>
+  <text x="565" y="350" text-anchor="middle" font-size="13" font-weight="400" fill="#cbd5e1">배달 완료 이벤트</text>
   <rect x="660" y="290" width="110" height="42" rx="3" fill="#ffedd5" stroke="#ff7849" stroke-width="1.8"/>
   <path d="M660 290 L715 311 L770 290" fill="none" stroke="#ff7849" stroke-width="1.4"/>
-  <text x="715" y="350" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9a3412">주문 완료 명령</text>
-  <circle cx="752" cy="298" r="10" fill="#ff7849"/><text x="752" y="302" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+  <text x="715" y="350" text-anchor="middle" font-size="13" font-weight="700" fill="#9a3412">주문 완료 명령</text>
+  <circle cx="752" cy="298" r="10" fill="#ff7849"/><text x="752" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text>
   <rect x="300" y="480" width="760" height="88" rx="10" fill="#c7d2fe" stroke="#4f46e5" stroke-width="2.4"/>
   <text x="680" y="514" text-anchor="middle" font-size="20" font-weight="700" fill="#312e81">Orchestrator</text>
-  <text x="680" y="538" text-anchor="middle" font-size="12" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
+  <text x="680" y="538" text-anchor="middle" font-size="14" fill="#312e81">흐름을 결정하는 지휘자 — event를 받아 다음 command를 발행</text>
   <line x1="715" y1="478" x2="715" y2="372" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#c53c-s)"/>
-  <text x="737" y="429" text-anchor="start" font-size="13" font-weight="700" fill="#4f46e5">5. 주문 완료 명령 발행</text>
+  <text x="737" y="429" text-anchor="start" font-size="15" font-weight="700" fill="#4f46e5">5. 주문 완료 명령 발행</text>
   <line x1="715" y1="248" x2="445" y2="136" stroke="#3730a3" stroke-width="2.6" stroke-dasharray="5,3" marker-end="url(#c53c-d)"/>
-  <text x="470" y="186" text-anchor="start" font-size="13" font-weight="700" fill="#3730a3">6. 주문 서비스가 수신</text>
+  <text x="470" y="186" text-anchor="start" font-size="15" font-weight="700" fill="#3730a3">6. 주문 서비스가 수신</text>
   <rect x="1090" y="40" width="460" height="510" rx="10" fill="#fffdf5" stroke="#e7d9a8" stroke-width="1.5"/>
   <line x1="1132" y1="40" x2="1132" y2="550" stroke="#f0e6c8" stroke-width="1.3"/>
   <text x="1146" y="84" font-size="22" font-weight="700" fill="#9a3412">3단계</text>

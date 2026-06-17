@@ -72,10 +72,10 @@
 </div>
 <div class="caption">그림 2-1. 챕터 2 한눈에 보기 - 로그인부터 주문까지</div>
 <div class="goal-box">
-<p>이번 챕터가 끝나면</p>
+<p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
-<li>여러 서비스를 REST로 직접 호출해 주문 흐름을 동기로 잇는 구조를 이해할 수 있습니다.</li>
-<li>실패 시 앞 작업을 되돌리는 보상 트랜잭션을 이해할 수 있습니다.</li>
+<li>여러 서비스를 <strong>REST</strong>로 직접 호출해 주문 흐름을 동기로 잇는 구조를 이해할 수 있습니다.</li>
+<li>실패 시 앞 작업을 되돌리는 <strong>보상 트랜잭션</strong>을 이해할 수 있습니다.</li>
 </ul>
 </div>
 <div class="prep-section-md">
@@ -734,7 +734,6 @@ docker<span class="w"> </span>compose<span class="w"> </span>up</div>
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
 <li>서비스가 분리되면 세션을 공유할 수 없어, <strong>JWT</strong>로 인증하고 호출할 때 토큰을 전달합니다.</li>
-<li>주문 서비스가 상품·배달을 <strong>직접 REST로 호출</strong>해 주문·재고·배달을 한 흐름으로 처리합니다.</li>
 <li>분산 트랜잭션은 자동으로 롤백되지 않아, 실패하면 <strong>보상 트랜잭션</strong>으로 이미 끝난 작업을 되돌립니다.</li>
 <li>동기 직접 호출은 서비스 간 <strong>결합도를 높여</strong>, 한 서비스가 멈추면 호출한 쪽도 함께 멈춥니다.</li>
 </ul>
