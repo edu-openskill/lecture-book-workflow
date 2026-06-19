@@ -465,7 +465,7 @@
 <h3>5.4.1 createDelivery 수정 - 배달 생성·완료 분리</h3>
 <p>배달 생성 시 배달 완료 호출을 지우면 배달은 <strong>PENDING</strong>으로 남습니다. 배달 완료는 배달 기사가 직접 호출할 때까지 미뤄집니다.</p>
 <p><code>usecase/DeliveryService.java</code>의 <code>createDelivery</code>를 아래처럼 고칩니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> usecase/DeliveryService.java. 생성 시 완료 호출 제거</div><span class="nd">@Transactional</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> 배달 서비스 - usecase/DeliveryService.java. 생성 시 완료 호출 제거</div><span class="nd">@Transactional</span>
 <span class="kd">public</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="w"> </span><span class="nf">createDelivery</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Delivery</span><span class="w"> </span><span class="n">createdDelivery</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deliveryRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">Delivery</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">));</span>
 <span class="w">    </span><span class="n">Delivery</span><span class="p">.</span><span class="na">validateAddress</span><span class="p">(</span><span class="n">address</span><span class="p">);</span>
@@ -474,7 +474,7 @@
 <span class="p">}</span></div>
 <h3>5.4.2 completeDelivery 추가 - 배달 완료 API</h3>
 <p>이번에는 배달 기사가 호출할 배달 완료 메서드를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/DeliveryService.java. completeDelivery 추가</div><span class="nd">@Override</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> 배달 서비스 - usecase/DeliveryService.java. completeDelivery 추가</div><span class="nd">@Override</span>
 <span class="nd">@Transactional</span>
 <span class="kd">public</span><span class="w"> </span><span class="n">DeliveryResponse</span><span class="w"> </span><span class="nf">completeDelivery</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">deliveryId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Delivery</span><span class="w"> </span><span class="n">findDelivery</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deliveryRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">deliveryId</span><span class="p">)</span>
@@ -488,7 +488,7 @@
 <h2>5.5 orchestrator - 배달 완료 이벤트 처리 추가</h2>
 <p>챕터 4에서는 배달 생성이 성공하면 orchestrator가 곧바로 주문 완료 명령을 발행했습니다. 이번에는 배달이 완료될 때 주문 완료 명령을 발행하도록 바꿉니다.</p>
 <p><code>handler/OrderOrchestrator.java</code>에 <code>deliveryCompleted</code> 리스너를 추가합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> handler/OrderOrchestrator.java. deliveryCompleted - 주문 완료 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> 오케스트레이터 서비스 - handler/OrderOrchestrator.java. 주문 완료 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;delivery-completed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deliveryCompleted</span><span class="p">(</span><span class="n">DeliveryCompletedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 배달기사가 완료 API를 호출한 시점 → 주문 완료 명령 발행</span>
 <span class="w">    </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span>
@@ -501,8 +501,8 @@
 <p>마지막으로 주문 서비스가 주문 완료 명령을 받으면, 클라이언트에게 알리기 위해 웹소켓을 추가합니다.</p>
 <h3>5.6.1 웹소켓 설정</h3>
 <p>WebSocketConfig는 두 가지 주소를 등록합니다. 하나는 <strong>클라이언트가 웹소켓으로 연결할 주소(<code>/api/ws/orders</code>)</strong> 이고, 다른 하나는 <strong>서버와 클라이언트가 알림을 주고받을 주소의 접두사(<code>/topic</code>)</strong> 입니다.</p>
-<p><code>core/config/WebSocketConfig.java</code>를 열고 아래 클래스를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> core/config/WebSocketConfig.java. STOMP 웹소켓 설정</div><span class="nd">@Configuration</span>
+<p>주문 서비스의 <code>core/config/WebSocketConfig.java</code>를 열고 아래 클래스를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> 주문 서비스 - core/config/WebSocketConfig.java. STOMP 웹소켓 설정</div><span class="nd">@Configuration</span>
 <span class="nd">@EnableWebSocketMessageBroker</span><span class="w"> </span><span class="c1">// 이 애너테이션을 붙이면 STOMP 메시징 기능이 켜집니다</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WebSocketConfig</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">WebSocketMessageBrokerConfigurer</span><span class="w"> </span><span class="p">{</span>
 
@@ -526,7 +526,7 @@
 <h3>5.6.2 주문 완료 시 알림 발송</h3>
 <p>완료 알림은 <code>/topic/orders/{userId}</code> 채널로 보냅니다. 주문 완료 후 채널을 구독한 클라이언트에게 메시지를 전달합니다.</p>
 <p><code>usecase/OrderService.java</code>의 <code>completeOrder</code> 메서드를 아래처럼 수정합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 5</span> usecase/OrderService.java. completeOrder + WebSocket Push</div><span class="nd">@Transactional</span>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 5</span> 주문 서비스 - usecase/OrderService.java. completeOrder + WebSocket Push</div><span class="nd">@Transactional</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">completeOrder</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Order</span><span class="w"> </span><span class="n">findOrder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">findById</span><span class="p">(</span><span class="n">orderId</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Exception404</span><span class="p">(</span><span class="s">&quot;주문을 찾을 수 없습니다.&quot;</span><span class="p">));</span>

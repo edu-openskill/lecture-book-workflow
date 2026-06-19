@@ -306,9 +306,9 @@ Dockerfile                                # [참고] Docker 이미지 빌드
 
 이제 이번 챕터의 핵심입니다. **보상 트랜잭션 패턴**을 직접 구현합니다. 코드를 읽을 때 `productDecreased`와 `deliveryCreated` **두 플래그를 추적**하면서 읽어보세요. 단계가 성공할 때마다 플래그를 `true`로 바꾸고, 실패 시 catch 블록에서는 **`true`로 표시된 단계만 역순으로 되돌립니다**.
 
-`orders/OrderService.java`를 열고 아래 메서드를 작성합니다.
+주문 서비스의 `orders/OrderService.java`를 열고 아래 메서드를 작성합니다.
 
-```java [실습 1] orders/OrderService.java. createOrder - 보상 트랜잭션 핵심
+```java [실습 1] 주문 서비스 - orders/OrderService.java. createOrder - 보상 트랜잭션 핵심
 @Transactional
 public OrderResponse createOrder(int userId, int productId,
         int quantity, Long price, String address) {

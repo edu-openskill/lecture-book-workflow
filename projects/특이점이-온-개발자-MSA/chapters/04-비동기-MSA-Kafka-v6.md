@@ -773,9 +773,9 @@ Saga 패턴에서 전체 흐름을 지휘자가 중앙에서 관리하는 방식
 
 프로듀서가 메시지를 발행할 때는 Spring이 제공하는 **`KafkaTemplate`** 을 사용합니다. **주문 생성 이벤트**를 발행하는 코드는 다음과 같습니다.
 
-`adapter/producer/OrderEventProducer.java`를 열고 아래 메서드를 작성합니다.
+주문 서비스의 `adapter/producer/OrderEventProducer.java`를 열고 아래 메서드를 작성합니다.
 
-```java [실습 1] adapter/producer/OrderEventProducer.java. 주문 생성 이벤트 발행
+```java [실습 1] 주문 서비스 - adapter/producer/OrderEventProducer.java. 주문 생성 이벤트 발행
 @Component
 @RequiredArgsConstructor
 public class OrderEventProducer {
@@ -792,9 +792,9 @@ public class OrderEventProducer {
 
 주문 서비스는 주문을 **PENDING** 상태로 저장하고, **주문 생성 이벤트 프로듀서**를 호출합니다.
 
-`usecase/OrderService.java`를 열고 `createOrder` 메서드를 작성합니다.
+주문 서비스의 `usecase/OrderService.java`를 열고 `createOrder` 메서드를 작성합니다.
 
-```java [실습 2] usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행
+```java [실습 2] 주문 서비스 - usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행
 @Override
 @Transactional
 public OrderResponse createOrder(int userId, int productId,
@@ -817,9 +817,9 @@ public OrderResponse createOrder(int userId, int productId,
 
 이벤트를 받아 **다음 명령을 정하는 일**은 orchestrator가 수행합니다. **주문 생성 이벤트**를 받아 **재고 차감 명령**을 발행하는 코드는 다음과 같습니다.
 
-`handler/OrderOrchestrator.java`를 열고 아래 메서드를 작성합니다.
+오케스트레이터 서비스의 `handler/OrderOrchestrator.java`를 열고 아래 메서드를 작성합니다.
 
-```java [실습 3] handler/OrderOrchestrator.java. 주문 생성 이벤트를 받아 재고 차감 명령 발행
+```java [실습 3] 오케스트레이터 서비스 - handler/OrderOrchestrator.java. 재고 차감 명령 발행
 @KafkaListener(topics = "order-created", groupId = "orchestrator")
 public void orderCreated(OrderCreatedEvent event) {
     // 1. 주문 진행 상태를 메모리에 기록
@@ -840,9 +840,9 @@ public void orderCreated(OrderCreatedEvent event) {
 
 앞에서 orchestrator가 발행한 **재고 차감 명령**을 이번에는 상품 서비스가 받습니다. 받은 명령으로 재고를 줄이고, 그 결과를 **재고 차감 이벤트**로 발행합니다.
 
-`adapter/consumer/ProductCommandConsumer.java`를 열고 아래 메서드를 작성합니다.
+상품 서비스의 `adapter/consumer/ProductCommandConsumer.java`를 열고 아래 메서드를 작성합니다.
 
-```java [실습 4] adapter/consumer/ProductCommandConsumer.java. 재고 차감 명령 구독
+```java [실습 4] 상품 서비스 - adapter/consumer/ProductCommandConsumer.java. 재고 차감 명령 구독
 @KafkaListener(topics = "decrease-product-command", groupId = "product-service")
 public void decreaseProductCommand(DecreaseProductCommand command) {
     boolean isSuccess = false;

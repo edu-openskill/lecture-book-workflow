@@ -326,9 +326,9 @@ src/main/resources/
 
 주문·상품·회원·배달 서비스의 각 기능을 인터페이스 형태로 UseCase로 정의합니다. **인터페이스 하나가 하나의 행위(Use Case)를 의미합니다.**
 
-`usecase/CreateOrderUseCase.java`를 열고 주문 생성 인터페이스를 작성합니다.
+주문 서비스의 `usecase/CreateOrderUseCase.java`를 열고 주문 생성 인터페이스를 작성합니다.
 
-```java [실습 1] usecase/CreateOrderUseCase.java. 주문 생성 인터페이스
+```java [실습 1] 주문 서비스 - usecase/CreateOrderUseCase.java. 주문 생성 인터페이스
 // 주문을 생성한다 - 행위 하나를 인터페이스로 약속
 public interface CreateOrderUseCase {
     OrderResponse createOrder(int userId, int productId, int quantity, Long price, String address);
@@ -341,9 +341,9 @@ public interface CreateOrderUseCase {
 
 **"주문 금액이 최소 기준을 넘는가?"** 같은 비즈니스 규칙은 서비스가 아닌 엔티티에 둡니다. 엔티티 메서드로 캡슐화하면 어디서 호출하든 동일한 규칙이 적용되고, 새 규칙이 들어와도 도메인 메서드만 추가하면 됩니다.
 
-`domain/Order.java`를 열고 최소 주문 금액 검증 메서드를 작성합니다.
+주문 서비스의 `domain/Order.java`를 열고 최소 주문 금액 검증 메서드를 작성합니다.
 
-```java [실습 2] domain/Order.java. 비즈니스 규칙을 도메인에 캡슐화
+```java [실습 2] 주문 서비스 - domain/Order.java. 비즈니스 규칙을 도메인에 캡슐화
 public class Order {
     // 챕터 2 Order.java 참조 — 필드·create()·complete() 동일
 
@@ -360,9 +360,9 @@ public class Order {
 
 OrderService는 주문 생성, 주문 조회, 주문 취소 인터페이스를 구현하고, 도메인 객체의 비즈니스 메서드를 호출합니다.
 
-`usecase/OrderService.java`를 열고 UseCase 인터페이스 구현을 작성합니다.
+주문 서비스의 `usecase/OrderService.java`를 열고 UseCase 인터페이스 구현을 작성합니다.
 
-```java [실습 3] usecase/OrderService.java. UseCase 인터페이스 구현
+```java [실습 3] 주문 서비스 - usecase/OrderService.java. UseCase 인터페이스 구현
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -384,11 +384,11 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase, Cancel
 
 ### 3.4.4 OrderController 수정
 
-컨트롤러는 서비스가 아닌 인터페이스에 의존하도록 수정합니다. 앞으로 `OrderService`를 다른 코드로 바꿔도 이 컨트롤러는 전혀 수정하지 않아도 됩니다.
+컨트롤러는 서비스가 아닌 인터페이스에 의존합니다. `OrderService`를 다른 코드로 바꿔도 이 컨트롤러는 전혀 수정할 필요가 없습니다.
 
-`web/OrderController.java`를 열어 아래처럼 인터페이스에 의존하도록 수정합니다.
+주문 서비스의 `web/OrderController.java`는 아래처럼 인터페이스에 의존하도록 작성되어 있습니다.
 
-```java [실습 4] web/OrderController.java. UseCase 인터페이스 주입
+```java [참고] 주문 서비스 - web/OrderController.java. UseCase 인터페이스 주입
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor

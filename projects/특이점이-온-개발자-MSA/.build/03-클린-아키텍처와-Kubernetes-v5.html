@@ -310,16 +310,16 @@ src/main/resources/
 <p>이제 실제 코드에 적용해보겠습니다.</p>
 <h3>3.4.1 UseCase 인터페이스 정의</h3>
 <p>주문·상품·회원·배달 서비스의 각 기능을 인터페이스 형태로 UseCase로 정의합니다. <strong>인터페이스 하나가 하나의 행위(Use Case)를 의미합니다.</strong></p>
-<p><code>usecase/CreateOrderUseCase.java</code>를 열고 주문 생성 인터페이스를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> usecase/CreateOrderUseCase.java. 주문 생성 인터페이스</div><span class="c1">// 주문을 생성한다 - 행위 하나를 인터페이스로 약속</span>
+<p>주문 서비스의 <code>usecase/CreateOrderUseCase.java</code>를 열고 주문 생성 인터페이스를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> 주문 서비스 - usecase/CreateOrderUseCase.java. 주문 생성 인터페이스</div><span class="c1">// 주문을 생성한다 - 행위 하나를 인터페이스로 약속</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">CreateOrderUseCase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">);</span>
 <span class="p">}</span></div>
 <p>조회는 <code>GetOrderUseCase</code>, 취소는 <code>CancelOrderUseCase</code>로 같은 방식으로 정의합니다.</p>
 <h3>3.4.2 엔티티의 비즈니스 로직 — DDD의 핵심</h3>
 <p><strong>&quot;주문 금액이 최소 기준을 넘는가?&quot;</strong> 같은 비즈니스 규칙은 서비스가 아닌 엔티티에 둡니다. 엔티티 메서드로 캡슐화하면 어디서 호출하든 동일한 규칙이 적용되고, 새 규칙이 들어와도 도메인 메서드만 추가하면 됩니다.</p>
-<p><code>domain/Order.java</code>를 열고 최소 주문 금액 검증 메서드를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> domain/Order.java. 비즈니스 규칙을 도메인에 캡슐화</div><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Order</span><span class="w"> </span><span class="p">{</span>
+<p>주문 서비스의 <code>domain/Order.java</code>를 열고 최소 주문 금액 검증 메서드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> 주문 서비스 - domain/Order.java. 비즈니스 규칙을 도메인에 캡슐화</div><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Order</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 챕터 2 Order.java 참조 — 필드·create()·complete() 동일</span>
 
 <span class="w">    </span><span class="c1">// 최소 주문 금액 검증 (챕터 2에서 서비스에 있던 검증을 도메인으로 옮김)</span>
@@ -331,8 +331,8 @@ src/main/resources/
 <span class="p">}</span></div>
 <h3>3.4.3 OrderService - 인터페이스 구현</h3>
 <p>OrderService는 주문 생성, 주문 조회, 주문 취소 인터페이스를 구현하고, 도메인 객체의 비즈니스 메서드를 호출합니다.</p>
-<p><code>usecase/OrderService.java</code>를 열고 UseCase 인터페이스 구현을 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> usecase/OrderService.java. UseCase 인터페이스 구현</div><span class="nd">@RequiredArgsConstructor</span>
+<p>주문 서비스의 <code>usecase/OrderService.java</code>를 열고 UseCase 인터페이스 구현을 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> 주문 서비스 - usecase/OrderService.java. UseCase 인터페이스 구현</div><span class="nd">@RequiredArgsConstructor</span>
 <span class="nd">@Service</span>
 <span class="nd">@Transactional</span><span class="p">(</span><span class="n">readOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">CreateOrderUseCase</span><span class="p">,</span><span class="w"> </span><span class="n">GetOrderUseCase</span><span class="p">,</span><span class="w"> </span><span class="n">CancelOrderUseCase</span><span class="w"> </span><span class="p">{</span>
@@ -350,9 +350,9 @@ src/main/resources/
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <h3>3.4.4 OrderController 수정</h3>
-<p>컨트롤러는 서비스가 아닌 인터페이스에 의존하도록 수정합니다. 앞으로 <code>OrderService</code>를 다른 코드로 바꿔도 이 컨트롤러는 전혀 수정하지 않아도 됩니다.</p>
-<p><code>web/OrderController.java</code>를 열어 아래처럼 인터페이스에 의존하도록 수정합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> web/OrderController.java. UseCase 인터페이스 주입</div><span class="nd">@RestController</span>
+<p>컨트롤러는 서비스가 아닌 인터페이스에 의존합니다. <code>OrderService</code>를 다른 코드로 바꿔도 이 컨트롤러는 전혀 수정할 필요가 없습니다.</p>
+<p>주문 서비스의 <code>web/OrderController.java</code>는 아래처럼 인터페이스에 의존하도록 작성되어 있습니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge reference">참고</span> 주문 서비스 - web/OrderController.java. UseCase 인터페이스 주입</div><span class="nd">@RestController</span>
 <span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&quot;/api/orders&quot;</span><span class="p">)</span>
 <span class="nd">@RequiredArgsConstructor</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderController</span><span class="w"> </span><span class="p">{</span>

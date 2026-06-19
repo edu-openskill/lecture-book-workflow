@@ -518,7 +518,7 @@ ex04/
 
 `usecase/DeliveryService.java`의 `createDelivery`를 아래처럼 고칩니다.
 
-```java [실습 1] usecase/DeliveryService.java. 생성 시 완료 호출 제거
+```java [실습 1] 배달 서비스 - usecase/DeliveryService.java. 생성 시 완료 호출 제거
 @Transactional
 public DeliveryResponse createDelivery(int orderId, String address) {
     Delivery createdDelivery = deliveryRepository.save(Delivery.create(orderId, address));
@@ -532,7 +532,7 @@ public DeliveryResponse createDelivery(int orderId, String address) {
 
 이번에는 배달 기사가 호출할 배달 완료 메서드를 추가합니다.
 
-```java [실습 2] usecase/DeliveryService.java. completeDelivery 추가
+```java [실습 2] 배달 서비스 - usecase/DeliveryService.java. completeDelivery 추가
 @Override
 @Transactional
 public DeliveryResponse completeDelivery(int deliveryId) {
@@ -553,7 +553,7 @@ public DeliveryResponse completeDelivery(int deliveryId) {
 
 `handler/OrderOrchestrator.java`에 `deliveryCompleted` 리스너를 추가합니다.
 
-```java [실습 3] handler/OrderOrchestrator.java. deliveryCompleted - 주문 완료 명령 발행
+```java [실습 3] 오케스트레이터 서비스 - handler/OrderOrchestrator.java. 주문 완료 명령 발행
 @KafkaListener(topics = "delivery-completed", groupId = "orchestrator")
 public void deliveryCompleted(DeliveryCompletedEvent event) {
     // 배달기사가 완료 API를 호출한 시점 → 주문 완료 명령 발행
@@ -573,9 +573,9 @@ public void deliveryCompleted(DeliveryCompletedEvent event) {
 
 WebSocketConfig는 두 가지 주소를 등록합니다. 하나는 **클라이언트가 웹소켓으로 연결할 주소(`/api/ws/orders`)** 이고, 다른 하나는 **서버와 클라이언트가 알림을 주고받을 주소의 접두사(`/topic`)** 입니다.
 
-`core/config/WebSocketConfig.java`를 열고 아래 클래스를 작성합니다.
+주문 서비스의 `core/config/WebSocketConfig.java`를 열고 아래 클래스를 작성합니다.
 
-```java [실습 4] core/config/WebSocketConfig.java. STOMP 웹소켓 설정
+```java [실습 4] 주문 서비스 - core/config/WebSocketConfig.java. STOMP 웹소켓 설정
 @Configuration
 @EnableWebSocketMessageBroker // 이 애너테이션을 붙이면 STOMP 메시징 기능이 켜집니다
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -607,7 +607,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 `usecase/OrderService.java`의 `completeOrder` 메서드를 아래처럼 수정합니다.
 
-```java [실습 5] usecase/OrderService.java. completeOrder + WebSocket Push
+```java [실습 5] 주문 서비스 - usecase/OrderService.java. completeOrder + WebSocket Push
 @Transactional
 public void completeOrder(int orderId) {
     Order findOrder = orderRepository.findById(orderId)

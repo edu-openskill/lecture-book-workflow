@@ -723,8 +723,8 @@
 <h2>4.4 Kafka로 주고받기 - 발행과 구독</h2>
 <h3>4.4.1 발행 - 토픽에 메시지를 넣는다</h3>
 <p>프로듀서가 메시지를 발행할 때는 Spring이 제공하는 <strong><code>KafkaTemplate</code></strong> 을 사용합니다. <strong>주문 생성 이벤트</strong>를 발행하는 코드는 다음과 같습니다.</p>
-<p><code>adapter/producer/OrderEventProducer.java</code>를 열고 아래 메서드를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> adapter/producer/OrderEventProducer.java. 주문 생성 이벤트 발행</div><span class="nd">@Component</span>
+<p>주문 서비스의 <code>adapter/producer/OrderEventProducer.java</code>를 열고 아래 메서드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 1</span> 주문 서비스 - adapter/producer/OrderEventProducer.java. 주문 생성 이벤트 발행</div><span class="nd">@Component</span>
 <span class="nd">@RequiredArgsConstructor</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderEventProducer</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">KafkaTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kafkaTemplate</span><span class="p">;</span>
@@ -736,8 +736,8 @@
 <span class="p">}</span></div>
 <p><code>kafkaTemplate.send</code>에 <code>order-created</code> 같은 토픽 이름과 보낼 이벤트를 넘기면 해당 토픽으로 메시지가 들어갑니다.</p>
 <p>주문 서비스는 주문을 <strong>PENDING</strong> 상태로 저장하고, <strong>주문 생성 이벤트 프로듀서</strong>를 호출합니다.</p>
-<p><code>usecase/OrderService.java</code>를 열고 <code>createOrder</code> 메서드를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행</div><span class="nd">@Override</span>
+<p>주문 서비스의 <code>usecase/OrderService.java</code>를 열고 <code>createOrder</code> 메서드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 2</span> 주문 서비스 - usecase/OrderService.java. 주문 저장 후 주문 생성 이벤트 발행</div><span class="nd">@Override</span>
 <span class="nd">@Transactional</span>
 <span class="kd">public</span><span class="w"> </span><span class="n">OrderResponse</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">userId</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">productId</span><span class="p">,</span>
 <span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">quantity</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">price</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">address</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -755,8 +755,8 @@
 <span class="p">}</span></div>
 <h3>4.4.2 orchestrator - 흐름을 조율하는 코드</h3>
 <p>이벤트를 받아 <strong>다음 명령을 정하는 일</strong>은 orchestrator가 수행합니다. <strong>주문 생성 이벤트</strong>를 받아 <strong>재고 차감 명령</strong>을 발행하는 코드는 다음과 같습니다.</p>
-<p><code>handler/OrderOrchestrator.java</code>를 열고 아래 메서드를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> handler/OrderOrchestrator.java. 주문 생성 이벤트를 받아 재고 차감 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
+<p>오케스트레이터 서비스의 <code>handler/OrderOrchestrator.java</code>를 열고 아래 메서드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 3</span> 오케스트레이터 서비스 - handler/OrderOrchestrator.java. 재고 차감 명령 발행</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;order-created&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;orchestrator&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">orderCreated</span><span class="p">(</span><span class="n">OrderCreatedEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// 1. 주문 진행 상태를 메모리에 기록</span>
 <span class="w">    </span><span class="n">states</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WorkflowState</span><span class="p">(</span>
@@ -771,8 +771,8 @@
 <p><code>@KafkaListener</code>의 <code>topics</code>는 구독할 토픽 이름, <code>groupId</code>는 컨슈머 그룹 이름입니다. 그리고 <code>WorkflowState</code>는 <strong>주문의 진행 정보를 메모리에 들고 있는 객체</strong>로, 결과 이벤트가 돌아오면 orchestrator는 이 기록을 보고 다음 명령을 정합니다.</p>
 <h3>4.4.3 구독 - 토픽의 메시지를 받는다</h3>
 <p>앞에서 orchestrator가 발행한 <strong>재고 차감 명령</strong>을 이번에는 상품 서비스가 받습니다. 받은 명령으로 재고를 줄이고, 그 결과를 <strong>재고 차감 이벤트</strong>로 발행합니다.</p>
-<p><code>adapter/consumer/ProductCommandConsumer.java</code>를 열고 아래 메서드를 작성합니다.</p>
-<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> adapter/consumer/ProductCommandConsumer.java. 재고 차감 명령 구독</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;decrease-product-command&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;product-service&quot;</span><span class="p">)</span>
+<p>상품 서비스의 <code>adapter/consumer/ProductCommandConsumer.java</code>를 열고 아래 메서드를 작성합니다.</p>
+<div class="code-block highlight" data-lang="java"><div class="cb-title"><span class="badge">실습 4</span> 상품 서비스 - adapter/consumer/ProductCommandConsumer.java. 재고 차감 명령 구독</div><span class="nd">@KafkaListener</span><span class="p">(</span><span class="n">topics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;decrease-product-command&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">groupId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;product-service&quot;</span><span class="p">)</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">decreaseProductCommand</span><span class="p">(</span><span class="n">DecreaseProductCommand</span><span class="w"> </span><span class="n">command</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">boolean</span><span class="w"> </span><span class="n">isSuccess</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
 <span class="w">    </span><span class="c1">// 1. 재고 차감 (성공하면 isSuccess = true)</span>
