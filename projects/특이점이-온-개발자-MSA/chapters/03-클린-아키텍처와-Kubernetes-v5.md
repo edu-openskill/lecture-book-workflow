@@ -91,23 +91,17 @@
 
 *그림 3-1. 챕터 3 한눈에 보기 - K8s 진입과 두 단계 흐름*
 
-:::goal
-**이번 챕터가 끝나면**
-
-- 비즈니스 규칙을 도메인에 모으는 **DDD(도메인 주도 개발)** 를 이해할 수 있습니다.
-- 구현 대신 인터페이스에 의존하는 **클린 아키텍처**를 이해할 수 있습니다.
-- 게이트웨이와 **쿠버네티스**로 서비스를 묶어 배포하는 구조를 이해할 수 있습니다.
-:::
-
 ::::prep
 **준비하기**. 실습 시작 전 한 번만 설정
 
 ### 1. 소스 코드 클론
 
 ```bash [터미널] 레포 클론
-git clone https://github.com/metacoding-12-msa/ex02.git
-cd ex02
+git clone https://github.com/metacoding-12-msa/start.git
+cd start/ex02
 ```
+
+완성 코드는 final 레포(`github.com/metacoding-12-msa/final`)의 `ex02` 폴더에서 확인할 수 있습니다.
 
 ### 2. 파일 구조
 
@@ -224,7 +218,7 @@ src/main/resources/
 
 *그림 3-3. UseCase 인터페이스 - USB 허브 비유*
 
-여기서 USB 허브의 역할을 하는 것이 바로 **UseCase 인터페이스**입니다.
+여기서 USB 허브의 역할을 하는 것이 **UseCase 인터페이스**입니다.
 
 :::term-box
 **UseCase 인터페이스란?** 시스템이 수행할 비즈니스 **행위(주문 생성·조회·취소 같은)** 를 메서드로 약속한 인터페이스입니다.

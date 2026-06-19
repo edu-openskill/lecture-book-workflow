@@ -114,24 +114,17 @@
 
 *그림 4-1. 챕터 4 한눈에 보기 - 서비스·Orchestrator·Kafka 3층 구조*
 
-:::goal
-**이번 챕터가 끝나면**
-
-- 동기 호출의 한계와 **비동기 메시지** 방식을 이해할 수 있습니다.
-- **Kafka**로 메시지를 발행하고 구독하는 방식을 이해할 수 있습니다.
-- **orchestrator**가 여러 서비스의 주문 흐름을 조율하는 방식을 이해할 수 있습니다.
-- 분산 트랜잭션을 **Saga 패턴**으로 단계별 처리하고, 실패 시 **보상 트랜잭션**으로 되돌리는 방식을 이해할 수 있습니다.
-:::
-
 ::::prep
 **준비하기**. 실습 시작 전 한 번만 설정
 
 ### 1. 소스 코드 클론
 
 ```bash [터미널] 레포 클론
-git clone https://github.com/metacoding-12-msa/ex03.git
-cd ex03
+git clone https://github.com/metacoding-12-msa/start.git
+cd start/ex03
 ```
+
+완성 코드는 final 레포(`github.com/metacoding-12-msa/final`)의 `ex03` 폴더에서 확인할 수 있습니다.
 
 ### 2. 파일 구조
 

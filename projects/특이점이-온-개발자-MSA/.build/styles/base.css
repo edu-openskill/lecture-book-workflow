@@ -45,7 +45,7 @@
     font-style: italic;
     text-align: center;
   }
-  .chapter-image.terminal img { background: #1a202c; }
+  .chapter-image.terminal img { background: #fff; }
   .chapter-image.gemini img { max-width: 70%; }
   .chapter-image.diagram img { max-width: 100%; }
 

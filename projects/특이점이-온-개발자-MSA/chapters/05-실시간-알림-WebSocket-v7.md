@@ -121,22 +121,17 @@
 *그림 5-1. 챕터 5 한눈에 보기 - 주문 완료를 웹소켓으로 즉시 알린다*
 
 
-:::goal
-**이번 챕터가 끝나면**
-
-- 폴링과 푸시의 차이, 실시간 통신(**웹소켓**)이 필요한 이유를 이해할 수 있습니다.
-- 비동기 완료 시점을 포착해 사용자에게 실시간으로 전달하는 흐름을 이해할 수 있습니다.
-:::
-
 ::::prep
 **준비하기**. 실습 시작 전 한 번만 설정
 
 ### 1. 소스 코드 클론
 
 ```bash [터미널] 레포 클론
-git clone https://github.com/metacoding-12-msa/ex04.git
-cd ex04
+git clone https://github.com/metacoding-12-msa/start.git
+cd start/ex04
 ```
+
+완성 코드는 final 레포(`github.com/metacoding-12-msa/final`)의 `ex04` 폴더에서 확인할 수 있습니다.
 
 ### 2. 파일 구조
 

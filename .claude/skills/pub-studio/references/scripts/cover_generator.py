@@ -60,7 +60,13 @@ def _font(size_mm, bold=False):
             try: return ImageFont.truetype(p, px)
             except Exception: continue
     try: return ImageFont.truetype("/System/Library/Fonts/AppleSDGothicNeo.ttc", px, index=(5 if bold else 0))
-    except Exception: return ImageFont.load_default()
+    except Exception: pass
+    # Windows 한글 폰트 fallback (맑은 고딕) — 없으면 load_default(한글 미지원)로 표지가 빈다
+    try:
+        win = r"C:\Windows\Fonts\malgunbd.ttf" if bold else r"C:\Windows\Fonts\malgun.ttf"
+        return ImageFont.truetype(win, px)
+    except Exception:
+        return ImageFont.load_default()
 
 def _tw(d, text, font):
     bb = d.textbbox((0, 0), text, font=font)

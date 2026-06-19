@@ -45,20 +45,21 @@ CONFIG = {
     ],
 
     "chapters": [
-        find_chapter("book-chap01-v7.md", "01-MSA란-무엇인가.md"),
-        find_chapter("book-chap02-v7.md", "02-동기식-MSA-구현.md"),
-        find_chapter("book-chap03-v7.md", "03-클린-아키텍처와-Kubernetes.md"),
-        find_chapter("book-chap04-v7.md", "04-비동기-MSA-Kafka.md"),
-        find_chapter("book-chap05-v7.md", "05-실시간-알림-WebSocket.md"),
+        CHAPTERS_DIR / "01-MSA란-무엇인가-v5.md",
+        CHAPTERS_DIR / "02-동기식-MSA-구현-v5.md",
+        CHAPTERS_DIR / "03-클린-아키텍처와-Kubernetes-v5.md",
+        CHAPTERS_DIR / "04-비동기-MSA-Kafka-v6.md",
+        CHAPTERS_DIR / "05-실시간-알림-WebSocket-v7.md",
     ],
 
     "back": [
+        BOOK / "back" / "epilogue.md",
         BOOK / "back" / "afterword.md",
     ],
 
     "output_md":  BOOK / "integrated.md",
     "output_typ": BOOK / "book_final.typ",
-    "output_pdf": BOOK / "처음-만나는-MSA.pdf",
+    "output_pdf": BOOK / "특이점이 온 개발자 - MSA 아키텍처.pdf",
 
     "layout_checker": str(SKILL_SCRIPTS / "pdf_layout_checker.py"),
 

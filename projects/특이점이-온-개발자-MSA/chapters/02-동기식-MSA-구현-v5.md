@@ -57,22 +57,17 @@
 
 *그림 2-1. 챕터 2 한눈에 보기 - 로그인부터 주문까지*
 
-:::goal
-**이번 챕터가 끝나면**
-
-- 여러 서비스를 **REST**로 직접 호출해 주문 흐름을 동기로 잇는 구조를 이해할 수 있습니다.
-- 실패 시 앞 작업을 되돌리는 **보상 트랜잭션**을 이해할 수 있습니다.
-:::
-
 ::::prep
 **준비하기**. 실습 시작 전 한 번만 설정
 
 ### 1. 소스 코드 클론
 
 ```bash [터미널] 레포 클론
-git clone https://github.com/metacoding-12-msa/ex01.git
-cd ex01
+git clone https://github.com/metacoding-12-msa/start.git
+cd start/ex01
 ```
+
+완성 코드는 final 레포(`github.com/metacoding-12-msa/final`)의 `ex01` 폴더에서 확인할 수 있습니다.
 
 ### 2. 파일 구조
 

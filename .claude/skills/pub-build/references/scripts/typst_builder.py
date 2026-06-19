@@ -138,7 +138,7 @@ def render_mermaid_diagrams(text: str, mermaid_out: Path) -> str:
 
         if img_path.exists():
             abs_path = img_path.resolve()
-            return f'\n![다이어그램]({abs_path})\n'
+            return f'\n![다이어그램]({_typst_img_path(abs_path)})\n'
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.mmd', delete=False, encoding='utf-8') as tmp:
             tmp.write(code)
@@ -183,7 +183,7 @@ def render_mermaid_diagrams(text: str, mermaid_out: Path) -> str:
                 if png_result.returncode == 0 and img_path.exists():
                     abs_path = img_path.resolve()
                     print(f"   Mermaid 렌더링: {img_name}")
-                    return f'\n![다이어그램]({abs_path})\n'
+                    return f'\n![다이어그램]({_typst_img_path(abs_path)})\n'
 
             # 실패 시 텍스트 대체
             labels = re.findall(r'\["([^"]+)"\]', code)
@@ -201,6 +201,18 @@ def render_mermaid_diagrams(text: str, mermaid_out: Path) -> str:
             Path(tmp_path).unlink(missing_ok=True)
 
     return re.sub(r'```mermaid\s*\n(.*?)```', replace_mermaid, text, flags=re.DOTALL)
+
+
+def _typst_img_path(p: Path) -> str:
+    """Typst는 드라이브 문자(C:)와 백슬래시를 경로로 받지 않는다.
+    컴파일 root(드라이브 루트)를 기준으로 한 루트 절대 POSIX 경로로 변환한다.
+    예) C:\\work\\a\\b.png → /work/a/b.png (root=C:\\ 기준 해석)"""
+    p = p.resolve()
+    rel = p.as_posix()                       # 'C:/work/a/b.png' 또는 '/home/a/b.png'
+    anchor = p.anchor.replace('\\', '/')     # 'C:/' (win) 또는 '/' (posix)
+    if anchor and rel.startswith(anchor):
+        rel = rel[len(anchor):]
+    return '/' + rel
 
 
 def fix_image_paths(text: str, source_file: Path) -> str:
@@ -221,16 +233,16 @@ def fix_image_paths(text: str, source_file: Path) -> str:
         # 1차: 소스 파일 기준 상대경로
         abs_path = (source_dir / rel_path).resolve()
         if abs_path.exists():
-            return f'![{alt}]({abs_path})'
+            return f'![{alt}]({_typst_img_path(abs_path)})'
         # 2차: 프로젝트 루트 기준
         abs_path2 = (project_root / rel_path).resolve()
         if abs_path2.exists():
-            return f'![{alt}]({abs_path2})'
+            return f'![{alt}]({_typst_img_path(abs_path2)})'
         # 3차: assets/ 하위에서 파일명으로 검색
         filename = Path(rel_path).name
         for found in project_root.rglob(filename):
             if found.is_file():
-                return f'![{alt}]({found})'
+                return f'![{alt}]({_typst_img_path(found)})'
         # 못 찾으면 플레이스홀더 텍스트 (Typst 컴파일 에러 방지)
         print(f"   [경고] 이미지 없음: {rel_path}")
         return f'*\\[이미지 누락: {alt}\\]*'
@@ -275,6 +287,24 @@ def fix_br_tags(text: str) -> str:
     return ''.join(parts)
 
 
+_CODE_TITLE_RE = re.compile(
+    r'^```([A-Za-z][\w+#.\-]*)[ \t]+(\S[^\n]*?)[ \t]*\n(.*?)^```[ \t]*$',
+    re.MULTILINE | re.DOTALL)
+
+
+def split_code_block_titles(text: str) -> str:
+    """```언어 [라벨] 제목 형태의 펜스 헤더를 분리한다.
+
+    pandoc은 코드펜스 info string에 공백이 있으면(예: ```bash [터미널] 제목)
+    그 블록을 코드 블록으로 인식하지 못해 줄바꿈이 전부 사라진다.
+    제목을 코드블록 위 굵은 줄로 빼고 펜스를 ```언어 단일 토큰으로 정규화한다.
+    제목 없는 일반 펜스(```bash)는 건드리지 않는다."""
+    def repl(m):
+        lang, title, body = m.group(1), m.group(2).strip(), m.group(3)
+        return f"**{title}**\n```{lang}\n{body}```"
+    return _CODE_TITLE_RE.sub(repl, text)
+
+
 # ══════════════════════════════════════
 # 통합
 # ══════════════════════════════════════
@@ -297,6 +327,7 @@ def build_integrated_md(front: list, chapters: list, back: list,
             content = convert_img_tags(content)
             content = fix_image_paths(content, f)
             content = render_mermaid_diagrams(content, mermaid_out)
+            content = split_code_block_titles(content)
             content = fix_br_tags(content)
             content = re.sub(r'\n{3,}', '\n\n', content)
             parts.append(content)
