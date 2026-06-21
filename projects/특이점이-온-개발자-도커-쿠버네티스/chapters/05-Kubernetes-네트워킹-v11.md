@@ -1,4 +1,4 @@
-# Ch.5 Kubernetes 네트워킹
+# 챕터 5. Kubernetes 네트워킹
 
 오픈이는 어제 배운 내용을 바탕으로 테스트 서버를 Pod로 재구성했습니다. Pod가 종료되더라도 Deployment가 즉시 새 Pod를 실행해 주니 마음이 든든했습니다.
 
@@ -402,7 +402,7 @@ minikube service nginx-service --url   # Service 접근 URL 생성
 
 *그림 5-9. minikube service URL 생성 결과*
 
-URL이 한 줄 출력되고 커서는 그대로 멈춰 있습니다. 이 명령은 연결을 유지하는 동안 터미널에서 계속 실행됩니다. 출력된 주소를 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 떴습니다.
+URL이 출력되고 커서는 그대로 멈춰 있습니다. 이 명령은 연결을 유지하는 동안 터미널에서 계속 실행됩니다. 출력된 주소를 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 떴습니다.
 
 ![](../assets/CH05/terminal/01_nginx-welcome.png)
 

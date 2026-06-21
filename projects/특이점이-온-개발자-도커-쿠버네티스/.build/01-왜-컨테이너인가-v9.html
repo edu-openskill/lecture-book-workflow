@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ch.1 왜 컨테이너인가</title>
+<title>챕터 1. 왜 컨테이너인가</title>
 
 <link rel="stylesheet" href="./styles/fonts.css">
 <link rel="stylesheet" href="./styles/tokens.css">
@@ -17,16 +17,16 @@
 </head>
 <body>
 <div class="container">
-<h1>Ch.1 왜 컨테이너인가</h1>
-<p>입사 3개월 차 오픈이는 기능 하나를 손보고 있었습니다. 로컬 PC에서는 테스트가 모두 통과했고, 남은 건 개발 서버에 올리는 일뿐이었습니다.</p>
-<p>빌드 산출물을 서버에 올리고 실행 명령을 입력했습니다. 그런데 터미널이 한 박자 멈춘 뒤 빨간 글씨가 화면을 채웠습니다. 첫 줄은 자바 버전이 맞지 않는다는 안내였습니다.</p>
-<p>자바 버전을 서버에 맞추자 이번엔 다른 줄에서 멈췄습니다. 라이브러리가 의존하는 시스템 파일이 서버에 없었습니다. 그 파일을 채우니 곧바로 설정 파일의 경로가 서버의 디렉터리 구조와 어긋났습니다.</p>
+<h1>챕터 1. 왜 컨테이너인가</h1>
+<p>입사 3개월 차 오픈이는 기능 하나를 손보고 있었습니다. 로컬 PC에서는 테스트가 모두 통과했고, 남은 건 운영 서버에 올리는 일뿐이었습니다.</p>
+<p>빌드한 파일을 서버에 올리고 실행 명령을 입력했습니다. 그런데 터미널이 한 박자 멈춘 뒤 빨간 글씨가 화면을 채웠습니다. 자바 버전이 맞지 않는다는 오류였습니다.</p>
+<p>자바 버전을 서버에 맞추자 이번엔 다른 오류가 떴습니다. 라이브러리가 의존하는 시스템 파일이 서버에 없었습니다. 그 파일을 설치하니 곧바로 설정 파일의 경로가 서버의 디렉터리 구조와 어긋났습니다.</p>
 <p class="thought">'내 PC에선 분명히 됐는데.'</p>
-<p>한 줄을 고치면 다음 줄에서 또 다른 에러가 터졌습니다. 코드는 그대로인데 서버의 환경만 조금씩 어긋나 있었습니다.</p>
+<p>하나를 해결하면 곧바로 또 다른 오류가 터졌습니다. 코드는 그대로인데 서버의 환경만 조금씩 어긋나 있었습니다.</p>
 <div class="chapter-image gemini"><img src="..\assets\CH01\gemini\01_prologue-stuck-friday.png" alt="환경 불일치로 머리를 감싸 쥔 오픈이" /><div class="caption">그림 1-1. 환경 불일치로 막힌 오픈이</div></div>
 <p>한참을 헤매고 있을 때, 옆자리 선배가 모니터를 잠깐 들여다봤습니다.</p>
 <div class="dialogue"><span class="speaker">선배</span>: "환경이 달라서 그래요. <strong>도커(Docker)</strong> 한번 알아봐요."</div>
-<p>오픈이는 퇴근 후 유튜브에 <strong>도커</strong>를 검색했습니다. 그중 가장 눈에 띈 영상은 도커와 컨테이너의 유래를 다룬 내용이었습니다.</p>
+<p>선배의 말을 들은 오픈이는 퇴근 후 유튜브에 <strong>도커</strong>를 검색했습니다. 그중 가장 눈에 띈 영상은 도커와 컨테이너의 유래를 다룬 내용이었습니다.</p>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
@@ -36,17 +36,18 @@
 </ul>
 </div>
 <h2>1.1 컨테이너 - 항구에서 빌려온 이름</h2>
-<h3>1.1.1 하역 인력이 배 한 척을 묶던 시절</h3>
+<h3>1.1.1 하역에 며칠씩 걸리던 시절</h3>
 <div class="chapter-image"><img src="..\assets\CH01\chap01-1.png" alt="" /><div class="caption">그림 1-2. 컨테이너가 없던 시절의 해상 물류</div></div>
 <p>1950년대 미국 동부의 한 항구. 수십 명의 인부가 화물을 일일이 어깨에 메고 부두로 옮기고 있었습니다. 자루에 담긴 곡물, 묶음으로 된 나무 상자, 무거운 드럼통, 제각각인 길이의 철근 다발까지 화물의 모양은 천차만별이었습니다.</p>
-<p>배 한 척을 다 비우는 데 며칠이 걸리던 시절이었습니다. 규격이 제각각이라 기계로는 처리할 수 없어, 분류부터 트럭 적재까지 모두 사람 손을 거쳤습니다. 그 때문에 화물을 실어 가려는 트럭 운전사들은 줄 끝에서 며칠씩 차례를 기다렸습니다.</p>
+<p>배를 다 비우는 데 며칠이 걸리던 시절이었습니다. 규격이 제각각이라 분류부터 트럭 적재까지 모두 사람 손을 거쳤습니다. 그 때문에 화물을 실어 가려는 트럭 운전사들은 줄 끝에서 며칠씩 차례를 기다렸습니다.</p>
 <p>그 줄 한가운데에 트럭 운전사 <strong>말콤 맥린</strong>이 있었습니다. 지루한 기다림 속에서 그는 한 가지 의문을 품었습니다. <strong>'왜 화물을 통째로 옮기지 않을까?'</strong></p>
-<h3>1.1.2 표준 상자가 항구를 바꾼 날</h3>
+<h3>1.1.2 규격을 통일하다</h3>
 <div class="chapter-image"><img src="..\assets\CH01\chap01-2.png" alt="" /><div class="caption">그림 1-3. 표준 컨테이너와 크레인으로 바뀐 현대 항구</div></div>
 <p>맥린이 찾은 답은 <strong>표준 규격의 상자</strong>였습니다. 화물을 낱개로 다루지 말고, 크기와 모양이 똑같은 상자에 담아 통째로 옮기자는 것이었습니다.</p>
-<p>규격이 같아지자 항구가 달라졌습니다. 크레인이 상자를 통째로 들어 배에 싣고, 도착지에서도 같은 방식으로 내렸습니다. 안에 무엇이 들었든 <strong>규격만 같으면 처리 과정은 동일</strong>했습니다.</p>
-<p>며칠씩 걸리던 하역이 몇 시간으로 줄었습니다. 맥린은 배와 트럭을 잇는 운송 시스템까지 구축했고, 그렇게 '담는 그릇'이라는 뜻의 <strong>컨테이너</strong>(Container)는 비로소 <strong>세계 물류의 표준</strong>이 되었습니다.</p>
+<p>규격이 생기자 항구가 달라졌습니다. 크레인이 상자를 통째로 들어 배에 싣고, 도착지에서도 같은 방식으로 내렸습니다. 안에 무엇이 들었든 <strong>규격만 같으면 처리 과정은 동일</strong>했습니다.</p>
+<p>덕분에 며칠씩 걸리던 하역이 몇 시간으로 줄었습니다. 맥린은 배와 트럭을 잇는 운송 시스템까지 구축했고, 그렇게 '담는 그릇'이라는 뜻의 <strong>컨테이너</strong>(Container)는 비로소 <strong>세계 물류의 표준</strong>이 되었습니다.</p>
 <h3>1.1.3 IT로 건너온 컨테이너</h3>
+<p><strong>컴퓨터마다 다른 환경</strong>은 소프트웨어를 옮길 때 늘 걸림돌이 됩니다. 운영체제나 라이브러리, 설정이 조금만 달라도 오류가 발생할 수 있기 때문입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="표준 컨테이너에 담은 소프트웨어가 Windows·macOS·Linux에서 동일한 구성으로 실행">
   <defs>
@@ -103,12 +104,10 @@
 </svg>
 </div>
 <div class="caption">그림 1-4. 소프트웨어도 똑같이 표준 컨테이너에 담아 어디서든 같은 결과로 실행</div>
-<p><strong>컴퓨터마다 다른 환경</strong>은 소프트웨어를 옮길 때 늘 걸림돌이 됩니다. 운영체제나 라이브러리, 설정이 조금만 달라도 오류가 발생할 수 있기 때문입니다.</p>
 <p>물류가 컨테이너로 표준을 세웠듯, 소프트웨어도 <strong>컨테이너</strong>라는 개념으로 이 문제를 해결했습니다. 실행에 필요한 파일과 설정을 독립된 컨테이너에 담아 통째로 옮깁니다. 그러면 인프라 환경이 어떻게 바뀌든, 만든 프로그램이 늘 <strong>같은 환경에서 안정적으로</strong> 돌아갑니다.</p>
 <div class="term-box">
 <p><strong>컨테이너(Container)</strong>: 애플리케이션과 그 애플리케이션이 필요로 하는 모든 것(라이브러리, 설정, 시스템 파일)을 하나의 상자에 담아, 어디서 실행해도 같은 결과를 내는 실행 단위입니다.</p>
 </div>
-<p>IT에서 이 컨테이너를 만들고 다루는 도구는 따로 있었습니다.</p>
 <h2>1.2 Docker와 Kubernetes - 공장과 관제 센터</h2>
 <p>컨테이너를 쓰려면 먼저 그것을 만들어낼 도구가 필요합니다. IT에서 그 역할을 하는 도구가 <strong>Docker</strong>입니다.</p>
 <p>Docker는 <strong>이미지</strong>라는 설계도를 바탕으로 작동합니다. 이미지에 실행 환경을 미리 정의해 두면, 똑같은 환경의 컨테이너를 언제 어디서든 몇 개든 만들어낼 수 있습니다.</p>
@@ -145,7 +144,7 @@
 <h2>1.3 학습 지도 - Docker에서 Kubernetes까지</h2>
 <p>이 책의 학습 여정은 다섯 챕터로 이어집니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="산 등반으로 본 학습 흐름. CH02 Docker 이해하기에서 시작해 CH06 Kubernetes 운영하기 정상까지 다섯 캠프를 차례로 오른다.">
+<svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="산 등반으로 본 학습 흐름. 챕터 2 Docker 이해하기에서 시작해 챕터 6 Kubernetes 운영하기 정상까지 다섯 캠프를 차례로 오른다.">
   <defs>
     <marker id="c14-mt" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#4f46e5"/></marker>
   </defs>
@@ -172,35 +171,35 @@
   <rect x="40" y="356" width="180" height="78" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <circle cx="58" cy="378" r="9" fill="#ff7849"/>
   <text x="58" y="382" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">1</text>
-  <text x="74" y="382" font-size="14" font-weight="700" fill="#6b7280">CH02 · Docker</text>
+  <text x="74" y="382" font-size="14" font-weight="700" fill="#6b7280">챕터 2 · Docker</text>
   <text x="74" y="403" font-size="17" font-weight="800" fill="#0f172a">이해하기</text>
   <text x="130" y="426" text-anchor="middle" font-size="13" fill="#6b7280">이미지로 격리 공간 만들기</text>
   <line x1="315" y1="284" x2="315" y2="294" stroke="#cbd5e1" stroke-width="1.2"/>
   <rect x="225" y="294" width="180" height="78" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <circle cx="243" cy="316" r="9" fill="#ff7849"/>
   <text x="243" y="320" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">2</text>
-  <text x="259" y="320" font-size="14" font-weight="700" fill="#6b7280">CH03 · Docker</text>
+  <text x="259" y="320" font-size="14" font-weight="700" fill="#6b7280">챕터 3 · Docker</text>
   <text x="259" y="341" font-size="17" font-weight="800" fill="#0f172a">다루기</text>
   <text x="315" y="364" text-anchor="middle" font-size="13" fill="#6b7280">Compose로 여러 컨테이너 묶기</text>
   <line x1="500" y1="221" x2="500" y2="231" stroke="#cbd5e1" stroke-width="1.2"/>
   <rect x="410" y="231" width="180" height="78" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <circle cx="428" cy="253" r="9" fill="#ff7849"/>
   <text x="428" y="257" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">3</text>
-  <text x="444" y="257" font-size="14" font-weight="700" fill="#6b7280">CH04 · Kubernetes</text>
+  <text x="444" y="257" font-size="14" font-weight="700" fill="#6b7280">챕터 4 · Kubernetes</text>
   <text x="444" y="278" font-size="17" font-weight="800" fill="#0f172a">시작하기</text>
   <text x="500" y="301" text-anchor="middle" font-size="13" fill="#6b7280">Pod로 자동 복구 만들기</text>
   <line x1="685" y1="161" x2="685" y2="171" stroke="#cbd5e1" stroke-width="1.2"/>
   <rect x="595" y="171" width="180" height="78" rx="8" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
   <circle cx="613" cy="193" r="9" fill="#ff7849"/>
   <text x="613" y="197" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">4</text>
-  <text x="629" y="197" font-size="14" font-weight="700" fill="#6b7280">CH05 · Kubernetes</text>
+  <text x="629" y="197" font-size="14" font-weight="700" fill="#6b7280">챕터 5 · Kubernetes</text>
   <text x="629" y="218" font-size="17" font-weight="800" fill="#0f172a">네트워킹</text>
   <text x="685" y="241" text-anchor="middle" font-size="13" fill="#6b7280">Service·Ingress로 외부 연결</text>
   <line x1="870" y1="86" x2="870" y2="96" stroke="#cbd5e1" stroke-width="1.2"/>
   <rect x="780" y="96" width="180" height="78" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
   <circle cx="798" cy="118" r="9" fill="#ff7849"/>
   <text x="798" y="122" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">5</text>
-  <text x="814" y="122" font-size="14" font-weight="700" fill="#3730a3">CH06 · Kubernetes</text>
+  <text x="814" y="122" font-size="14" font-weight="700" fill="#3730a3">챕터 6 · Kubernetes</text>
   <text x="814" y="143" font-size="17" font-weight="800" fill="#3730a3">운영하기</text>
   <text x="870" y="166" text-anchor="middle" font-size="13" fill="#475569">Secret·Volume으로 운영하기</text>
 </svg>
@@ -222,7 +221,6 @@
 <li><strong>Docker는 공장, 이미지는 설계도, 컨테이너는 찍혀 나온 결과물입니다.</strong> 이미지 하나로 같은 모양의 컨테이너를 여러 개 찍어낼 수 있습니다.</li>
 <li><strong>Kubernetes는 항만 관제 센터입니다.</strong> 여러 컨테이너를 자동으로 관리합니다. 사람이 &quot;원하는 상태&quot;만 선언하면 시스템이 그 상태를 유지합니다.</li>
 </ul>
-<p>다음 챕터에서는 컨테이너가 실제로 어떻게 만들어지는지 보겠습니다. 컨테이너를 직접 실행해 안을 들여다보고, <strong>이미지</strong>로 만들어 보는 첫 실습으로 이어집니다.</p>
 </div>
 
 </div>

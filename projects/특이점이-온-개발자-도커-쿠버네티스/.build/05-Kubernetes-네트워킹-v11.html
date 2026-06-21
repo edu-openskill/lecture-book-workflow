@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ch.5 Kubernetes 네트워킹</title>
+<title>챕터 5. Kubernetes 네트워킹</title>
 
 <link rel="stylesheet" href="./styles/fonts.css">
 <link rel="stylesheet" href="./styles/tokens.css">
@@ -17,7 +17,7 @@
 </head>
 <body>
 <div class="container">
-<h1>Ch.5 Kubernetes 네트워킹</h1>
+<h1>챕터 5. Kubernetes 네트워킹</h1>
 <p>오픈이는 어제 배운 내용을 바탕으로 테스트 서버를 Pod로 재구성했습니다. Pod가 종료되더라도 Deployment가 즉시 새 Pod를 실행해 주니 마음이 든든했습니다.</p>
 <p>다음 날 아침, 동료가 찾아왔습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "오픈 씨, 어제 테스트 서버에 올렸다는 서비스에 접속이 안 되는데, 어떻게 들어가요?"</div>
@@ -389,7 +389,7 @@
   </div>
 </div>
 <div class="caption">그림 5-9. minikube service URL 생성 결과</div>
-<p>URL이 한 줄 출력되고 커서는 그대로 멈춰 있습니다. 이 명령은 연결을 유지하는 동안 터미널에서 계속 실행됩니다. 출력된 주소를 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 떴습니다.</p>
+<p>URL이 출력되고 커서는 그대로 멈춰 있습니다. 이 명령은 연결을 유지하는 동안 터미널에서 계속 실행됩니다. 출력된 주소를 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 떴습니다.</p>
 <div class="chapter-image terminal"><img src="..\assets\CH05\terminal\01_nginx-welcome.png" alt="" /><div class="caption">그림 5-10. 브라우저에서 nginx 접속 확인</div></div>
 <p>다음으로 Pod가 사라지고 IP가 바뀌어도 Service가 새 Pod로 자동 연결되는지 직접 확인합니다. Ctrl+C로 터미널을 종료하고 Pod를 전부 지웁니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 재생성 후 같은 주소로 재접속</div>kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>--all<span class="w">                </span><span class="c1"># 모든 Pod 삭제 (Deployment가 자동 재생성)</span>

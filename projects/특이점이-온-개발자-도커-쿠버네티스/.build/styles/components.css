@@ -383,6 +383,9 @@
     display: block;
     margin: 0 auto;
   }
+  .svg-figure--wide svg {
+    max-width: 1000px;
+  }
 
   /* :::prep → .prep-section-md (v22의 .prep-section 디자인 평면화 버전) */
   .prep-section-md {
