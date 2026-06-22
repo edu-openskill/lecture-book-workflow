@@ -64,7 +64,7 @@
 ::::prep
 **준비하기**. 실습 시작 전 한 번만 설정
 
-### 1. Docker Desktop 설치
+### Docker Desktop 설치
 
 공식 사이트(https://www.docker.com/products/docker-desktop/)에서 OS에 맞는 설치 파일을 받아 설치합니다.
 
@@ -75,20 +75,6 @@
 - **macOS Apple Silicon(M1/M2/M3 등)**: 일부 AMD64 이미지 호환을 위해 **Rosetta 2** 설치를 권장합니다. 터미널에서 `softwareupdate --install-rosetta` 명령으로 설치할 수 있습니다.
 :::
 
-### 2. 예제 코드
-
-이 책의 실습 코드는 GitHub 레포 하나에 챕터별 폴더(`ex01`~`ex15`)로 담겨 있습니다. 아래 명령으로 한 번 클론해 두면, 챕터마다 해당 폴더로 이동해 진행합니다.
-
-```bash [터미널] 예제 코드 클론
-git clone https://github.com/metacoding-10-linux-docker/docker.git
-```
-
-| 챕터 | 폴더 | 주제 |
-|------|------|------|
-| 챕터 3 | `ex01`~`ex07` | Dockerfile · NGINX · Redis · Docker Compose |
-| 챕터 4 | `ex08`~`ex10` | Pod · Deployment |
-| 챕터 5 | `ex11`~`ex12` | Service · Ingress |
-| 챕터 6 | `ex13`~`ex15` | ConfigMap · Secret · PV/PVC · 통합 배포 |
 ::::
 
 ## 2.1 가상화 - 가상머신과 컨테이너
