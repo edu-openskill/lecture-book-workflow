@@ -26,7 +26,7 @@
 <p class="thought">'한 대씩은 실행해봤는데, 여러 대를 함께 구성하는 건 또 다른 이야기인데.'</p>
 <p>자리로 돌아온 오픈이가 옆자리 선배에게 물었습니다.</p>
 <div class="dialogue"><span class="speaker">오픈이</span>: "프론트엔드·백엔드·DB까지 구성해야 하는데, 어디서부터 손대야 할지 모르겠어요."</div>
-<div class="dialogue"><span class="speaker">선배</span>: "한꺼번에 다 하려니 막막한 거예요. 하나씩 하면 돼요. 먼저 매번 직접 세팅할 수는 없으니, 서비스마다 <strong>필요한 걸 다 갖춘 환경을 미리 준비</strong>해 둬요. 그리고 외부에서 요청을 받아 <strong>적절한 컨테이너로 전달</strong>하는 거죠. 마지막에 전체를 하나의 구성으로 묶어 한 번에 실행하면 돼요."</div>
+<div class="dialogue"><span class="speaker">선배</span>: "한꺼번에 다 하려니 막막한 거예요. 하나씩 하면 돼요. 먼저 매번 직접 세팅할 수는 없으니, 서비스마다 <strong>필요한 걸 다 갖춘 환경을 미리 준비</strong>해 둬요. 그리고 외부에서 요청을 받아 <strong>적절한 컨테이너로 전달</strong>하는 거죠. 마지막에 전체를 하나의 구성으로 합쳐 한 번에 실행하면 돼요."</div>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
@@ -150,31 +150,16 @@
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex00</p>
 </div>
-<p>첫 실습으로 Ubuntu 환경에 vim이 미리 깔려 있는 이미지를 만들어 보겠습니다. 클론한 레포에서 <code>ex00</code> 폴더로 이동합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ex00 폴더로 이동</div><span class="nb">cd</span><span class="w"> </span>ex00</div>
-<p><code>ex00</code> 폴더의 <code>Dockerfile</code>을 열어 다음 내용을 작성합니다.</p>
+<p>첫 실습으로 Ubuntu 환경에 vim이 미리 깔려 있는 이미지를 만들어 보겠습니다. 실습 코드는 클론한 레포의 <code>ex00</code> 폴더에 있습니다.</p>
+<p><code>Dockerfile</code>을 열어 다음 내용을 작성합니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><div class="cb-title"><span class="badge">실습 1</span> ex00/Dockerfile. ubuntu-vim 이미지 정의</div><span class="c"># Dockerfile</span>
 <span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:24.04</span><span class="w">                      </span><span class="c"># 베이스 이미지</span>
 <span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">   </span>#<span class="w"> </span>vim<span class="w"> </span>패키지<span class="w"> </span>설치
 <span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/bin/bash&quot;</span><span class="p">]</span><span class="w">                      </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span>bash<span class="w"> </span>실행</div>
-<p>파일을 저장하고, Dockerfile이 있는 폴더에서 터미널을 열어 빌드 명령을 입력합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ubuntu-vim 이미지 빌드와 실행</div>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-vim<span class="w"> </span>.<span class="w">   </span><span class="c1"># 현재 폴더의 Dockerfile로 이미지 빌드</span></div>
-<div class="terminal-log">
-  <div class="tl-chrome">
-    <div class="tl-traffic"><span></span><span></span><span></span></div>
-    <div class="tl-title">실행결과</div>
-    <div class="tl-spacer"></div>
-  </div>
-  <div class="tl-body">
-    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t ubuntu-vim .</span></div>
-    <div>#7 naming to docker.io/library/ubuntu-vim:latest done</div>
-    <div>#7 unpacking to docker.io/library/ubuntu-vim:latest</div>
-    <div>#7 unpacking to docker.io/library/ubuntu-vim:latest 2.6s done</div>
-    <div>#7 DONE 9.2s</div>
-  </div>
-</div>
-<div class="caption">그림 3-4. docker build 실행 결과</div>
-<p>빌드 로그가 한 줄씩 올라가고, 마지막 줄과 함께 이미지가 완성됩니다. 이 이미지로 컨테이너를 실행해 vim을 입력하면, 별도의 설치 과정 없이 편집기가 그대로 뜹니다.</p>
+<p>파일을 저장하고 빌드 명령을 입력합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ubuntu-vim 이미지 빌드와 컨테이너 실행</div>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-vim<span class="w"> </span>ex00<span class="w">   </span><span class="c1"># ex00 폴더의 Dockerfile로 이미지 빌드</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>ubuntu-vim<span class="w">                     </span><span class="c1"># 빌드한 이미지로 컨테이너 실행</span></div>
+<p>빌드가 끝나면 이미지가 완성됩니다. 이 이미지로 컨테이너를 실행하고 vim을 입력하면, 별도의 설치 과정 없이 편집기가 그대로 뜹니다.</p>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -190,19 +175,17 @@
     <div>:wq</div>
   </div>
 </div>
-<div class="caption">그림 3-5. 컨테이너에 들어가 vim을 실행한 결과</div>
+<div class="caption">그림 3-4. 컨테이너에 들어가 vim을 실행한 결과</div>
 <h3>3.1.4 WORKDIR와 COPY</h3>
 <p>다음으로 로컬에 있는 파일을 컨테이너 내부로 옮겨보겠습니다. 여기에 쓰는 지시어가 <strong>WORKDIR</strong>와 <strong>COPY</strong>입니다.</p>
-<p>빈 <code>index.html</code> 파일을 Dockerfile과 같은 폴더에 만듭니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-11.png" alt="" /><div class="caption">그림 3-6. 폴더 및 파일 구조</div></div>
-<p>Dockerfile에 두 줄을 추가합니다. 작업 디렉토리를 <code>/app</code>으로 정하고, 로컬의 <code>index.html</code>을 그 안에 복사하는 설정입니다.</p>
+<p>Dockerfile과 같은 폴더에 빈 <code>index.html</code>이 들어 있습니다. 작업 디렉토리를 <code>/app</code>으로 정하고 이 파일을 복사하도록 Dockerfile에 두 줄을 추가합니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><div class="cb-title"><span class="badge">실습 2</span> ex00/Dockerfile. WORKDIR과 COPY 추가</div><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:24.04</span><span class="w">                      </span><span class="c"># 베이스 이미지</span>
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app                           # 작업 디렉토리 설정</span>
 <span class="k">COPY</span><span class="w"> </span>./index.html<span class="w"> </span>./index.html<span class="w">         </span>#<span class="w"> </span>로컬의<span class="w"> </span>index.html을<span class="w"> </span>컨테이너의<span class="w"> </span>/app으로<span class="w"> </span>복사
 <span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">   </span>#<span class="w"> </span>vim<span class="w"> </span>패키지<span class="w"> </span>설치
 <span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/bin/bash&quot;</span><span class="p">]</span><span class="w">                      </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span>bash<span class="w"> </span>실행</div>
 <p>수정한 Dockerfile로 이미지를 다시 만들어 실행합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ubuntu-html 이미지 빌드와 실행</div>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-html<span class="w"> </span>.<span class="w">    </span><span class="c1"># 현재 폴더의 Dockerfile로 이미지 빌드</span>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ubuntu-html 이미지 빌드와 실행</div>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-html<span class="w"> </span>ex00<span class="w">   </span><span class="c1"># ex00 폴더의 Dockerfile로 이미지 빌드</span>
 docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>ubuntu-html<span class="w">       </span><span class="c1"># 컨테이너 실행</span>
 ls</div>
 <div class="terminal-log">
@@ -217,10 +200,10 @@ ls</div>
     <div>index.html</div>
   </div>
 </div>
-<div class="caption">그림 3-7. 실행 결과 확인</div>
+<div class="caption">그림 3-5. 실행 결과 확인</div>
 <p>터미널 프롬프트가 처음부터 <code>/app</code>을 가리키고, 그 안에 <code>index.html</code>이 들어 있습니다. 확인을 마쳤으면 <code>exit</code>으로 컨테이너를 닫습니다.</p>
 <h3>3.1.5 CMD와 ENTRYPOINT</h3>
-<p>CMD와 ENTRYPOINT는 둘 다 컨테이너가 시작될 때 무엇을 실행할지 정하는 지시어입니다. CMD는 <strong>실행할 때 바꿀 수 있는 기본 동작</strong>이고, ENTRYPOINT는 <strong>바꿀 수 없이 항상 실행되는 동작</strong>입니다.</p>
+<p>CMD와 ENTRYPOINT는 둘 다 컨테이너가 시작될 때 무엇을 실행할지 정하는 지시어입니다. CMD는 <strong>실행할 때 다른 명령으로 바꿀 수 있는 기본 프로세스</strong>이고, ENTRYPOINT는 <strong>반드시 실행되는 메인 프로세스</strong>입니다.</p>
 <p>커피 머신을 떠올리면 이해하기 쉽습니다. ENTRYPOINT는 <strong>커피를 내린다는 동작 자체</strong>라, 어떤 메뉴를 선택하든 반드시 실행됩니다. 반면 CMD는 따로 옵션을 선택하지 않으면 <strong>기본 메뉴인 아메리카노</strong>가 나오고, 라떼를 선택하면 라떼가 나옵니다. 즉 기본값이 쓰이되, 실행할 때 다른 값을 주면 그 값으로 바뀝니다.</p>
 <p>실습을 위해 Dockerfile에 ENTRYPOINT를 추가합니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><div class="cb-title"><span class="badge">실습 3</span> ex00/Dockerfile. ENTRYPOINT로 자동 실행</div><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:24.04</span><span class="w">                      </span><span class="c"># 베이스 이미지</span>
@@ -230,8 +213,8 @@ ls</div>
 <span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/bin/bash&quot;</span><span class="p">]</span><span class="w">                      </span>#<span class="w"> </span>ubuntu의<span class="w"> </span>기본<span class="w"> </span>프로세스
 <span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;echo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;컨테이너 실행&quot;</span><span class="p">]</span><span class="w">     </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>실행</div>
 <p>이미지를 다시 빌드하고 컨테이너를 실행합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ubuntu-entry 이미지 빌드와 실행</div>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-entry<span class="w"> </span>.<span class="w">         </span><span class="c1"># 현재 폴더의 Dockerfile로 이미지 빌드</span>
-docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>ubuntu-entry<span class="w">            </span><span class="c1"># 컨테이너 실행</span></div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ubuntu-entry 이미지 빌드와 실행</div>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>ubuntu-entry<span class="w"> </span>ex00<span class="w">   </span><span class="c1"># ex00 폴더의 Dockerfile로 이미지 빌드</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>ubuntu-entry<span class="w">                    </span><span class="c1"># 컨테이너 실행</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -239,15 +222,15 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
     <div class="tl-spacer"></div>
   </div>
   <div class="tl-body">
-    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t ubuntu-entry .</span></div>
+    <div><span class="tl-key">$</span> <span class="tl-str">docker build -t ubuntu-entry ex00</span></div>
     <div>#7 naming to docker.io/library/ubuntu-entry:latest done</div>
     <div>#7 DONE 0.3s</div>
     <div><span class="tl-key">$</span> <span class="tl-str">docker run -it ubuntu-entry</span></div>
     <div>컨테이너 실행 /bin/bash</div>
   </div>
 </div>
-<div class="caption">그림 3-8. ENTRYPOINT 실행 결과</div>
-<p>ENTRYPOINT의 <code>echo &quot;컨테이너 실행&quot;</code> 뒤에 CMD의 <code>/bin/bash</code>가 인자로 붙어 함께 출력됩니다. 두 지시어가 함께 있으면 ENTRYPOINT가 <strong>메인 프로세스로 실행</strong>되고, CMD의 값은 <strong>실행되지 않은 채 그 인자(Argument)로 전달</strong>되기 때문입니다.</p>
+<div class="caption">그림 3-6. ENTRYPOINT 실행 결과</div>
+<p>ENTRYPOINT의 <code>echo &quot;컨테이너 실행&quot;</code> 뒤에 CMD의 <code>/bin/bash</code>가 인자로 붙어 함께 출력됩니다. CMD만 있을 때는 <strong>CMD가 메인 프로세스</strong>가 되지만, ENTRYPOINT와 함께 쓰이면 ENTRYPOINT가 메인 프로세스로 실행되고 CMD의 값은 실행되지 않은 채 <strong>그 인자(Argument)로 전달</strong>됩니다.</p>
 <p class="thought">'이렇게 환경을 미리 설정해 두면, 매번 명령을 실행할 필요 없이 관리할 수 있구나.'</p>
 <h2>3.2 NGINX - 요청을 앞에서 받아 나눠주기</h2>
 <p>앞에서 Dockerfile로 컨테이너 하나를 만들어 실행해 봤습니다. 그런데 실제 서비스는 컨테이너 하나로 끝나지 않습니다. 여러 컨테이너가 함께 돌아가고, 들어오는 요청마다 처리해야 할 컨테이너가 다릅니다.</p>
@@ -284,12 +267,12 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   <text x="360" y="305" text-anchor="middle" font-size="10" fill="#6b7280">클라이언트는 NGINX만 마주하고, 그 뒤의 실제 서버 구성은 드러나지 않습니다</text>
 </svg>
 </div>
-<div class="caption">그림 3-9. 클라이언트에게는 NGINX 하나로 보이는 서버 영역</div>
-<p>클라이언트가 NGINX만 보는 덕분에 실제 서버의 IP나 내부 포트가 드러나지 않아 보안에 유리합니다. 또 백엔드 서버를 여러 대로 늘리면 NGINX가 요청을 골고루 나눠 주는 로드밸런싱으로 확장할 수 있습니다.</p>
+<div class="caption">그림 3-7. 클라이언트에게는 NGINX 하나로 보이는 서버 영역</div>
+<p>이렇게 NGINX가 모든 요청을 대신 받으면 실제 서버의 IP나 내부 포트가 외부로 드러나지 않아 보안에 유리합니다. 또 백엔드 서버를 여러 대로 늘리면 NGINX가 요청을 골고루 나눠 주는 로드밸런싱으로 확장할 수 있습니다.</p>
 <h3>3.2.2 NGINX 설정과 요청 흐름</h3>
 <p>NGINX는 전국의 택배가 모이는 대형 분류 센터처럼 동작합니다. 전국에서 들어온 택배가 한곳에 모였다가, 주소지에 따라 알맞은 지역 센터로 나뉘어 나갑니다. NGINX의 설정도 같은 방식으로 요청을 나눠 보냅니다.</p>
 <ul>
-<li><strong>upstream (서버 그룹 정의)</strong> : 특정 지역을 담당할 <strong>배송 센터(서버 그룹)</strong> 를 묶어 이름을 붙이는 작업입니다. 물건을 넘겨줄 목적지를 미리 등록해 둡니다.</li>
+<li><strong>upstream (서버 그룹 정의)</strong> : 특정 지역을 담당할 <strong>배송 센터(서버 그룹)</strong> 로 모아 이름을 붙이는 작업입니다. 물건을 넘겨줄 목적지를 미리 등록해 둡니다.</li>
 <li><strong>location (요청 경로 매칭)</strong> : 택배의 <strong>주소지(URL)를 확인</strong>하고 분류하는 게이트입니다. 주소를 확인해 최종 행선지를 결정합니다.</li>
 <li><strong>proxy_pass (요청 전달)</strong> : 분류된 택배를 <strong>지정된 물류 센터로 이동</strong>시키는 지시어입니다. <strong>&quot;이 물품은 서울 센터로 보내&quot;</strong> 라는 최종 명령입니다.</li>
 </ul>
@@ -335,7 +318,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   <text x="602" y="256" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">부산 센터</text>
 </svg>
 </div>
-<div class="caption">그림 3-10. 주소를 확인해(location) 지정 센터로 보내는(proxy_pass) NGINX 설정의 흐름</div>
+<div class="caption">그림 3-8. 주소를 확인해(location) 지정 센터로 보내는(proxy_pass) NGINX 설정의 흐름</div>
 <p>이 옵션을 포함한 다양한 설정을 <code>nginx.conf</code> 파일에 작성합니다. 옵션 조합에 따라 라우팅이나 로드밸런싱 같은 다양한 역할을 수행할 수 있습니다.</p>
 <h3>3.2.3 경로 기반 라우팅</h3>
 <div class="tip">
@@ -370,7 +353,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   <text x="620" y="240" text-anchor="middle" font-size="11" fill="#6b7280">app2 페이지 응답</text>
 </svg>
 </div>
-<div class="caption">그림 3-11. 경로 기반 라우팅 구조</div>
+<div class="caption">그림 3-9. 경로 기반 라우팅 구조</div>
 <p>실습 코드는 <code>ex01</code> 폴더에 있습니다. 컨테이너로 실행할 단위는 화면을 담당하는 <code>app1</code>·<code>app2</code>와 그 앞에서 경로를 분기하는 <code>lb</code>입니다. 각 폴더에는 Dockerfile이 있습니다.</p>
 <div class="code-block highlight" data-lang="text">ex01/
 ├── app1/
@@ -409,14 +392,19 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
 <span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;nginx&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-g&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;daemon off;&quot;</span><span class="p">]</span><span class="w">           </span>#<span class="w"> </span>NGINX를<span class="w"> </span>포그라운드로<span class="w"> </span>실행</div>
 <p>세 폴더가 준비되면 차례로 빌드하고 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> app1·app2·lb 빌드와 실행</div><span class="c1"># app1: 이미지 빌드 + 호스트 8000 → 컨테이너 80</span>
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app1<span class="w"> </span>ex01/app1<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:80<span class="w"> </span>app1
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app1<span class="w"> </span>ex01/app1
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:80<span class="w"> </span>app1
+
 <span class="c1"># app2: 이미지 빌드 + 호스트 9000 → 컨테이너 80</span>
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app2<span class="w"> </span>ex01/app2<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">9000</span>:80<span class="w"> </span>app2
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>app2<span class="w"> </span>ex01/app2
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">9000</span>:80<span class="w"> </span>app2
+
 <span class="c1"># lb: 이미지 빌드 + 호스트 80 → 컨테이너 80</span>
-docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>lb<span class="w"> </span>ex01/lb<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>lb<span class="w"> </span>ex01/lb
+docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
 <p>브라우저 주소창에 <code>localhost:80/app1</code>을 입력하면 1번 서버의 화면이 뜹니다. 주소를 <code>/app2</code>로 바꾸면 이번에는 2번 서버 화면이 나타납니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-21.png" alt="" /><div class="caption">그림 3-12. /app1 경로로 접속한 결과</div></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-22.png" alt="" /><div class="caption">그림 3-13. /app2 경로로 접속한 결과</div></div>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-21.png" alt="" /><div class="caption">그림 3-10. /app1 경로로 접속한 결과</div></div>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-22.png" alt="" /><div class="caption">그림 3-11. /app2 경로로 접속한 결과</div></div>
 <h3>3.2.4 컨테이너끼리 부르는 법</h3>
 <h4>host.docker.internal이 왜 필요한가</h4>
 <p><code>nginx.conf</code>에는 서버 주소가 <code>host.docker.internal:8000</code>으로 설정되어 있습니다.</p>
@@ -452,7 +440,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
   <text x="520" y="225" text-anchor="middle" font-size="11" font-weight="600" fill="#7b341e">포트 포워딩</text>
 </svg>
 </div>
-<div class="caption">그림 3-14. lb 컨테이너 → 호스트 PC → app1 컨테이너로 가는 우회 경로</div>
+<div class="caption">그림 3-12. lb 컨테이너 → 호스트 PC → app1 컨테이너로 가는 우회 경로</div>
 <p><code>docker run</code>으로 컨테이너를 하나씩 실행하면 도커는 그 컨테이너를 <strong>기본 네트워크</strong>에 자동으로 할당합니다. 그래서 두 가지 한계가 생깁니다.</p>
 <div class="prep-note">
 <p><strong>기본 네트워크의 두 가지 한계</strong></p>
@@ -487,7 +475,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex02</p>
 </div>
-<p>다음 실습은 로드밸런싱입니다. NGINX는 <code>upstream</code> 블록 안에 서버 주소를 여러 개 적어 두면, 들어오는 요청을 등록된 순서대로 한 곳씩 돌아가며 보내 줍니다. 카드 딜러가 카드를 한 장씩 차례대로 나눠 주듯, 서버 한 곳에 한 번씩 돌아가는 방식입니다. 이 방식을 <strong>라운드 로빈(Round Robin)</strong> 이라고 부릅니다.</p>
+<p>다음 실습은 로드밸런싱입니다. NGINX는 <code>upstream</code> 블록 안에 서버 주소를 여러 개 적어 두면, 들어오는 요청을 등록된 순서대로 한 곳씩 돌아가며 보내 줍니다. 카드 딜러가 카드를 한 장씩 나눠 주듯, 요청을 서버에 차례로 보내는 방식입니다. 이 방식을 <strong>라운드 로빈(Round Robin)</strong> 이라고 부릅니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="라운드 로빈 로드밸런싱 구조">
   <defs>
@@ -518,8 +506,8 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
   <text x="360" y="290" text-anchor="middle" font-size="10" fill="#6b7280">한 바퀴 돌면 다시 서버 1부터 — 모든 서버가 같은 양의 요청을 처리합니다</text>
 </svg>
 </div>
-<div class="caption">그림 3-15. 라운드 로빈 로드밸런싱 구조</div>
-<p>이번 실습은 <code>ex02</code> 폴더에 있습니다. 앞 실습과의 차이는 <code>nginx.conf</code>의 <code>upstream</code> 안에 서버 주소 두 개가 컨테이너 이름으로 적혀 있다는 점입니다.</p>
+<div class="caption">그림 3-13. 라운드 로빈 로드밸런싱 구조</div>
+<p>이번 실습은 <code>ex02</code> 폴더에 있습니다. 앞 실습과의 차이는 <code>nginx.conf</code>의 <code>upstream</code> 안에 <strong>서버 주소 두 개가 컨테이너 이름으로 적혀 있다는 점</strong>입니다.</p>
 <div class="code-block highlight" data-lang="nginx"><div class="cb-title"><span class="badge reference">참고</span> ex02/lb/nginx.conf. 로드밸런싱 설정</div><span class="k">upstream</span><span class="w"> </span><span class="s">app1</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">app1-1</span><span class="p">:</span><span class="mi">80</span><span class="p">;</span><span class="w">     </span><span class="c1"># 첫 번째 서버. 컨테이너 이름으로 호출</span>
 <span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">app1-2</span><span class="p">:</span><span class="mi">80</span><span class="p">;</span><span class="w">     </span><span class="c1"># 같은 그룹에 두 번째 서버 추가</span>
@@ -532,7 +520,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <p>그리고 같은 이미지로 컨테이너를 두 번 실행합니다. 이번 예제부터 사용자 정의 네트워크를 사용합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 사용자 정의 네트워크에 LB와 두 app 묶기</div><span class="c1"># 1. 사용자 정의 네트워크 생성 (lb·app1-1·app1-2가 모두 이 네트워크에 묶입니다)</span>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 사용자 정의 네트워크에 LB와 두 app 연결하기</div><span class="c1"># 1. 사용자 정의 네트워크 생성 (lb·app1-1·app1-2가 모두 이 네트워크에 연결됩니다)</span>
 docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>ex02-network
 
 <span class="c1"># 2. app1 이미지 빌드</span>
@@ -548,7 +536,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>lb<span class="w"> </span>ex02/lb
 docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>lb<span class="w"> </span>--network<span class="w"> </span>ex02-network<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>lb</div>
 <p>컨테이너 실행 후 <code>localhost:80/app1</code>에 여러 번 접속합니다. 화면은 매번 같습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-21.png" alt="" /><div class="caption">그림 3-16. /app1 경로로 접속한 결과 (라운드 로빈)</div></div>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-21.png" alt="" /><div class="caption">그림 3-14. /app1 경로로 접속한 결과 (라운드 로빈)</div></div>
 <p>두 컨테이너가 같은 이미지라, 화면만으로는 어느 서버가 응답한 건지 알 수 없습니다. 각 서버로 요청이 제대로 오는지 확인하기 위해 <code>docker logs</code> 명령을 실행합니다.</p>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -568,7 +556,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
     <div>172.18.0.4 - - [25/Nov/2025:15:11:43 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.18.0.4"</div>
   </div>
 </div>
-<div class="caption">그림 3-17. app1-1 컨테이너 로그에 찍힌 요청</div>
+<div class="caption">그림 3-15. app1-1 컨테이너 로그에 찍힌 요청</div>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -585,16 +573,15 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
     <div>172.18.0.4 - - [25/Nov/2025:15:11:53 +0000] "GET / HTTP/1.0" 200 273 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" "172.18.0.4"</div>
   </div>
 </div>
-<div class="caption">그림 3-18. app1-2 컨테이너 로그에 찍힌 요청</div>
+<div class="caption">그림 3-16. app1-2 컨테이너 로그에 찍힌 요청</div>
 <p>두 로그를 비교해 보면, 두 서버 모두에 요청이 전달된 것을 확인할 수 있습니다. NGINX는 upstream에 서버가 둘 이상이면 별도 설정 없이 라운드 로빈으로 분배합니다.</p>
 <h3>3.2.6 캐싱</h3>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex03</p>
 </div>
-<p>로그를 살피던 오픈이의 눈에 한 가지가 들어왔습니다. 양쪽 컨테이너 모두 똑같은 HTML을 매번 서버에서 응답하고 있었습니다.</p>
-<p class="thought">'단순한 HTML을 매번 백엔드까지 가서 만들어 주고 있다니. 사람이 늘면 이건 또 다른 부담이 되겠는데.'</p>
-<p>이 비효율을 풀어 주는 방법이 있습니다. 자주 입는 옷을 옷장 깊숙이 넣지 않고 옷걸이에 따로 걸어 두면 다음 날 그 옷걸이에서 바로 꺼낼 수 있습니다. 자주 나가는 응답을 NGINX 앞단에 저장해 두고 같은 요청이 다시 들어오면 백엔드까지 가지 않고 NGINX가 바로 돌려주는 방식을 <strong>캐싱(Caching)</strong> 이라고 부릅니다.</p>
+<p>그림 3-15와 3-16을 보면 들어온 요청이 빠짐없이 백엔드 서버까지 전달됩니다. 같은 요청이 다시 들어와도 그때마다 백엔드를 거쳐 같은 응답을 받아 와서, 사용자가 늘수록 이 왕복이 부담이 됩니다.</p>
+<p>이 비효율을 풀어 주는 방법이 <strong>캐싱(Caching)</strong> 입니다. 이미지처럼 <strong>잘 바뀌지 않는 응답을 NGINX 앞단에 저장</strong>해 두면, 같은 요청이 다시 들어와도 백엔드까지 가지 않고 저장해 둔 응답을 바로 돌려줍니다.</p>
 <p>캐싱이 켜진 응답에는 상태 정보가 함께 담깁니다. 이번 실습에서 다룰 상태는 두 가지입니다.</p>
 <table>
 <thead>
@@ -646,7 +633,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
   <text x="190" y="158" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">응답 + 캐시 저장</text>
 </svg>
 </div>
-<div class="caption">그림 3-19. 첫 번째 요청 (MISS) — 캐시가 비어있어 백엔드까지 요청 후 응답을 캐시에 저장</div>
+<div class="caption">그림 3-17. 첫 번째 요청 (MISS) — 캐시가 비어있어 백엔드까지 요청 후 응답을 캐시에 저장</div>
 <div class="svg-figure">
 <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="두 번째 요청 — 캐시 HIT">
   <defs>
@@ -679,7 +666,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
   <text x="530" y="98" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8">백엔드 가지 않음</text>
 </svg>
 </div>
-<div class="caption">그림 3-20. 두 번째 요청 (HIT) — 캐시에 저장된 응답을 바로 반환, 백엔드 접근 없음</div>
+<div class="caption">그림 3-18. 두 번째 요청 (HIT) — 캐시에 저장된 응답을 바로 반환, 백엔드 접근 없음</div>
 <p>캐싱 실습은 ex03 폴더에 들어 있습니다. 응답으로 이미지 파일을 내려주는 작은 파이썬 API 서버에 NGINX를 한 겹 씌운 구성입니다.</p>
 <div class="code-block highlight" data-lang="text">ex03/
 ├── api/                 # 백엔드. Flask 기반
@@ -690,8 +677,8 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 │   ├── Dockerfile       # nginx 이미지 + nginx.conf 복사
 │   └── nginx.conf       # proxy_cache 설정 + 프록시 라우팅
 └── README.md            # 실습 안내</div>
-<p>설정 파일에 새로 등장한 지시어는 두 가지입니다. <code>proxy_cache_path</code>는 캐시를 저장할 경로와 메모리 공간을 선언하고, <code>proxy_cache</code>는 그 공간을 어느 location에서 사용할지 지정합니다.</p>
-<div class="code-block highlight" data-lang="nginx"><div class="cb-title"><span class="badge reference">참고</span> ex03/nginx/nginx.conf. 캐싱 설정</div><span class="c1"># 캐시를 저장할 경로와 메모리 공간 이름을 선언합니다. (http{} 블록 내부에 위치)</span>
+<p>설정 파일에 새로 등장한 지시어는 두 가지입니다. <code>proxy_cache_path</code>는 캐시를 저장할 경로와 메모리 공간을 선언하고, <code>proxy_cache</code>는 그 공간을 어떤 요청 경로(location)에 적용할지 지정합니다.</p>
+<div class="code-block highlight" data-lang="nginx"><div class="cb-title"><span class="badge reference">참고</span> ex03/nginx/nginx.conf. 캐싱 설정</div><span class="c1"># 캐시를 저장할 경로와 메모리 공간 이름을 선언합니다.</span>
 <span class="k">proxy_cache_path</span><span class="w"> </span><span class="s">/var/cache/nginx</span><span class="w"> </span><span class="s">keys_zone=my_cache:10m</span><span class="p">;</span>
 
 <span class="k">server</span><span class="w"> </span><span class="p">{</span>
@@ -714,27 +701,27 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> api·nginx 컨테이너 함께 띄우기</div><span class="c1"># 1. 사용자 정의 네트워크 생성</span>
 docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>ex03-network
 
-<span class="c1"># 2. api(Flask) 이미지 빌드 + 실행 </span>
+<span class="c1"># 2. api 이미지 빌드 + 실행</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>api<span class="w"> </span>ex03/api
 docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>api<span class="w"> </span>--network<span class="w"> </span>ex03-network<span class="w"> </span>api
 
 <span class="c1"># 3. nginx 캐싱 빌드 + 실행 (-p로 외부에 80 포트만 노출)</span>
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>nginx-cache<span class="w"> </span>ex03/nginx
 docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>--name<span class="w"> </span>nginx-cache<span class="w"> </span>--network<span class="w"> </span>ex03-network<span class="w"> </span>-p<span class="w"> </span><span class="m">80</span>:80<span class="w"> </span>nginx-cache</div>
-<p>브라우저에서 <code>localhost:80/image.png</code>를 열었습니다. 화면에 이미지가 떴습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-32.png" alt="" /><div class="caption">그림 3-21. 캐싱 실습 — 이미지 응답</div></div>
+<p>브라우저에서 <code>localhost:80/image.png</code>를 엽니다. 화면에 이미지가 뜹니다.</p>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-32.png" alt="" /><div class="caption">그림 3-19. 캐싱 실습 — 이미지 응답</div></div>
 <p>이제 캐싱이 됐는지 확인해 보겠습니다. <strong>개발자 도구(F12, 브라우저 디버그 창)</strong> 의 Network 탭을 열고 <strong>Disable cache</strong>를 체크합니다. 브라우저 자체 캐시가 끼어들지 못하게 막은 뒤 <strong>응답 헤더</strong>를 확인합니다. 첫 요청의 <code>X-Cache-Status</code>는 예상대로 <strong>MISS</strong>로 찍혀 있습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-33.png" alt="" /><div class="caption">그림 3-22. X-Cache-Status: MISS 확인</div></div>
-<p>새로고침을 한 번 더 눌렀습니다. 같은 자리에 찍히는 값이 이번에는 <strong>HIT</strong>로 바뀌어 있었습니다. 두 번째 요청은 백엔드까지 가지 않고, NGINX가 캐시에 저장해 둔 응답을 돌려준 결과입니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-34.png" alt="" /><div class="caption">그림 3-23. X-Cache-Status: HIT 확인</div></div>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-33.png" alt="" /><div class="caption">그림 3-20. X-Cache-Status: MISS 확인</div></div>
+<p>새로고침을 한 번 더 하면 <strong>HIT</strong>로 바뀝니다. 두 번째 요청은 백엔드까지 가지 않고, NGINX가 캐시에 저장해 둔 응답을 돌려준 결과입니다.</p>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-34.png" alt="" /><div class="caption">그림 3-21. X-Cache-Status: HIT 확인</div></div>
 <p class="thought">'이제 컨테이너가 여러 개라도, 들어온 요청을 알맞은 곳으로 보낼 수 있겠다.'</p>
 <h2>3.3 Redis - 서버 여러 대가 함께 쓰는 공용 저장소</h2>
 <p>다음 날 점심을 먹고 자리에 돌아왔을 때 옆자리 동료가 의자를 돌려 말을 걸어 왔습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "오픈 씨, 어제 만든 거 테스트해 봤는데요. 로그인은 되는데, 새로고침할 때마다 인증이 됐다 안 됐다 해요."</div>
 <p>오픈이는 의자를 끌어당기며 화면을 같이 들여다봤습니다. 동료가 페이지를 반복해서 새로고침했습니다. 그러자 정상적인 페이지와 인증 실패 알림이 번갈아 나타났습니다.</p>
-<h3>3.3.1 서버 여러 대면 생기는 세션 문제</h3>
 <p class="thought">'분명 로그인했는데, 왜 자꾸 풀리지.'</p>
-<p>원인은 로그인 기록이 처음 요청을 처리한 서버에만 남기 때문입니다. 사용자가 로그인하면 해당 <strong>인증 정보(세션)</strong> 는 요청을 받은 특정 서버의 메모리에 저장됩니다. 서버가 한 대일 때는 문제가 없지만, 서버가 두 대 이상이 되면 <strong>라운드 로빈</strong> 방식으로 요청이 번갈아 분산됩니다. 이 과정에서 세션이 없는 서버로 요청이 전달될 때마다 <strong>로그인이 풀립니다.</strong></p>
+<h3>3.3.1 서버 여러 대면 생기는 세션 문제</h3>
+<p>원인은 로그인 기록이 처음 요청을 처리한 서버에만 남기 때문입니다. 사용자가 로그인하면 해당 <strong>인증 정보(세션)</strong> 는 요청을 받은 특정 서버의 메모리에 저장됩니다. 서버가 한 대일 때는 문제가 없지만, 서버가 두 대 이상이 되면 요청이 번갈아 처리됩니다. 이 과정에서 세션이 없는 서버로 요청이 전달될 때마다 <strong>로그인이 풀립니다.</strong></p>
 <div class="svg-figure">
 <svg viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="세션 불일치 — 서버마다 따로 보관해서 생기는 문제">
   <defs>
@@ -749,8 +736,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
   <line x1="120" y1="140" x2="145" y2="140" stroke="#475569" stroke-width="1.6" marker-end="url(#rr321ok)"/>
   <!-- NGINX -->
   <rect x="145" y="110" width="130" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <text x="210" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">NGINX (LB)</text>
-  <text x="210" y="155" text-anchor="middle" font-size="11" fill="#6b7280">라운드 로빈</text>
+  <text x="210" y="145" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">NGINX (LB)</text>
   <!-- 화살표 NGINX → 서버 1 (성공) -->
   <line x1="275" y1="125" x2="400" y2="70" stroke="#475569" stroke-width="1.8" marker-end="url(#rr321ok)"/>
   <text x="335" y="75" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">1. 로그인 (성공)</text>
@@ -767,7 +753,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
   <text x="480" y="230" text-anchor="middle" font-size="11" fill="#dc2626">세션 없음 → 인증 실패</text>
 </svg>
 </div>
-<div class="caption">그림 3-24. 세션 불일치 — 1번 서버에 저장된 세션이 2번 서버엔 없어 인증 실패</div>
+<div class="caption">그림 3-22. 세션 불일치 — 1번 서버에 저장된 세션이 2번 서버엔 없어 인증 실패</div>
 <h3>3.3.2 Redis - 공용 세션 저장소</h3>
 <p>해결법은 세션을 각 서버 메모리에 따로 두지 않고 모든 서버가 공유하는 공간에 함께 두는 방식입니다. 그 공간을 제공하는 도구가 <strong>Redis</strong> 입니다.</p>
 <div class="term-box">
@@ -788,8 +774,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
   <line x1="120" y1="155" x2="145" y2="155" stroke="#475569" stroke-width="1.6" marker-end="url(#rr322)"/>
   <!-- NGINX -->
   <rect x="145" y="125" width="120" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <text x="205" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">NGINX (LB)</text>
-  <text x="205" y="170" text-anchor="middle" font-size="11" fill="#6b7280">라운드 로빈</text>
+  <text x="205" y="160" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">NGINX (LB)</text>
   <!-- 화살표 NGINX → 서버 1 -->
   <line x1="265" y1="135" x2="345" y2="80" stroke="#475569" stroke-width="1.6" marker-end="url(#rr322)"/>
   <text x="305" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">1. 로그인</text>
@@ -816,28 +801,28 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
   <text x="595" y="170" text-anchor="middle" font-size="11" fill="#7b341e">공용 저장소</text>
 </svg>
 </div>
-<div class="caption">그림 3-25. Redis로 해결 — 세션을 공용 저장소에 보관하여 어느 서버에서든 조회 가능</div>
-<p>로그인을 처리한 1번 서버는 세션을 Redis에 저장하고, 다음 요청을 받은 2번 서버는 내부 메모리 대신 <strong>Redis에서 그 세션을 조회합니다.</strong> 두 서버가 같은 세션을 공유하므로, 사용자는 한 번만 로그인하면 인증이 끊기지 않습니다.</p>
+<div class="caption">그림 3-23. Redis로 해결 — 세션을 공용 저장소에 보관하여 어느 서버에서든 조회 가능</div>
+<p>로그인을 처리한 1번 서버는 세션을 Redis에 저장하고, 다음 요청을 받은 2번 서버는 내부 메모리 대신 <strong>Redis에서 세션을 조회합니다.</strong> 두 서버가 같은 세션을 공유하므로, 사용자는 한 번만 로그인하면 인증이 끊기지 않습니다.</p>
 <h3>3.3.3 실습: Redis로 세션 공유</h3>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
 <p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex04</p>
 </div>
-<p>ex04 폴더를 엽니다. Redis는 공식 이미지를 그대로 쓰고, 직접 만들 이미지는 API 서버 한 대뿐입니다.</p>
+<p>ex04 폴더를 엽니다. Redis는 공식 이미지를 그대로 쓰고, API 서버 이미지는 직접 만듭니다.</p>
 <div class="code-block highlight" data-lang="text">ex04/
 ├── api/
 │   ├── Dockerfile       # Python 이미지 + app.py 복사
-│   └── app.py           # Redis에 값을 저장/조회하는 간단한 API
+│   └── app.py           # name 값을 Redis에 저장/조회하는 API
 └── README.md            # 실습 안내</div>
-<p><code>app.py</code>는 두 개의 경로를 들고 있는 서버입니다. <code>/save</code>로 들어오면 값을 Redis에 적어 두고, <code>/read</code>로 들어오면 그 값을 다시 꺼내 응답합니다.</p>
-<p>이 서버를 실행할 컨테이너의 Dockerfile은 다음과 같습니다. 파이썬 이미지 위에 flask와 redis 라이브러리만 얹어 실행하는 구성입니다.</p>
+<p><code>app.py</code>는 두 개의 경로를 들고 있는 서버입니다. <code>/save</code>로 들어오면 name 값을 Redis에 저장하고, <code>/read</code>로 들어오면 저장된 값을 조회해 응답합니다.</p>
+<p>이 서버를 실행할 컨테이너의 Dockerfile은 다음과 같습니다. 파이썬 이미지 위에 flask와 redis 라이브러리만 추가해 실행하는 구성입니다.</p>
 <div class="code-block highlight" data-lang="dockerfile"><div class="cb-title"><span class="badge">실습 5</span> ex04/api/Dockerfile. Python API 이미지</div><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-alpine</span><span class="w">                       </span><span class="c"># 파이썬 이미지 사용</span>
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app                                  # 작업 디렉토리 설정</span>
 <span class="k">COPY</span><span class="w"> </span>app.py<span class="w"> </span>.<span class="w">                                 </span>#<span class="w"> </span>위의<span class="w"> </span>app.py<span class="w"> </span>복사
 <span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>flask<span class="w"> </span>redis<span class="w">                   </span>#<span class="w"> </span>Flask<span class="w"> </span>+<span class="w"> </span>Redis<span class="w"> </span>클라이언트<span class="w"> </span>설치
 <span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;python&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;app.py&quot;</span><span class="p">]</span><span class="w">                      </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span>app.py<span class="w"> </span>실행</div>
-<p>사용자 정의 네트워크를 만든 뒤 세 컨테이너를 같은 네트워크에 묶어 차례로 실행합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 세 컨테이너를 같은 네트워크에 묶어 띄우기</div><span class="c1"># 1. 사용자 정의 네트워크 생성</span>
+<p>사용자 정의 네트워크를 만든 뒤 세 컨테이너를 같은 네트워크에 연결해 차례로 실행합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 세 컨테이너를 같은 네트워크에 연결해 실행하기</div><span class="c1"># 1. 사용자 정의 네트워크 생성</span>
 docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>ex04-network
 
 <span class="c1"># 2. Redis 컨테이너 실행 (-p는 호스트에서 확인용으로 노출, 같은 네트워크 내 통신에는 불필요)</span>
@@ -847,18 +832,13 @@ docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </sp
 docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>api<span class="w"> </span>ex04/api
 docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>api1<span class="w"> </span>--network<span class="w"> </span>ex04-network<span class="w"> </span>-p<span class="w"> </span><span class="m">5001</span>:5000<span class="w"> </span>api
 docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>api2<span class="w"> </span>--network<span class="w"> </span>ex04-network<span class="w"> </span>-p<span class="w"> </span><span class="m">5002</span>:5000<span class="w"> </span>api</div>
-<p>두 서버가 같은 Redis를 공유하는지 확인합니다. <code>localhost:5001/save</code>로 값을 저장한 뒤 <code>localhost:5002/read</code>로 같은 값을 조회합니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-40.png" alt="" /><div class="caption">그림 3-26. api1에서 데이터 저장</div></div>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-41.png" alt="" /><div class="caption">그림 3-27. api2에서 같은 데이터 조회</div></div>
+<p>두 서버가 같은 Redis를 공유하는지 확인합니다. <code>localhost:5001/save</code>로 이름을 저장한 뒤, <code>localhost:5002/read</code>로 같은 이름이 나오는지 조회합니다.</p>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-40.png" alt="" /><div class="caption">그림 3-24. api1에서 데이터 저장</div></div>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-41.png" alt="" /><div class="caption">그림 3-25. api2에서 같은 데이터 조회</div></div>
 <p>한 서버에 저장한 값이 다른 서버에서 그대로 조회됩니다. 두 서버가 하나의 Redis를 공유한다는 뜻입니다.</p>
-<p>옆자리 동료를 불러 화면을 보여 줬습니다.</p>
-<div class="dialogue"><span class="speaker">오픈이</span>: "이제 아무리 새로고침해도 로그인이 풀리지 않아요. Redis라는 공용 저장소에 세션을 두니까, 어느 서버로 요청이 가도 같은 세션을 가져와요."</div>
-<div class="dialogue"><span class="speaker">동료</span>: "오, 이제 새로고침해도 계속 멀쩡하네요."</div>
-<p>각 서버가 따로 보관하던 세션을 Redis 한 곳에 모은 결과, 로그인이 더는 끊기지 않습니다.</p>
 <h2>3.4 MySQL - 영구 데이터 저장하기</h2>
-<p>그런데 Redis는 메모리 위에서 동작하기 때문에, 컨테이너를 내렸다가 다시 실행하면 그 안의 값이 모두 사라집니다.</p>
-<p class="thought">'세션처럼 잠깐 들고 있다 사라져도 되는 데이터는 괜찮은데, 회원 정보나 게시글 같은 건 어디에 두지. 컨테이너를 재시작해도 그대로 남아 있어야 할 텐데.'</p>
-<p>오래 남아야 하는 데이터는 메모리가 아니라 데이터베이스에 보관해야 합니다. 회원 정보를 저장할 데이터베이스를 컨테이너로 실행해 보겠습니다.</p>
+<p>Redis는 메모리 위에서 동작하기 때문에, 컨테이너를 내렸다가 다시 실행하면 그 안의 값이 모두 사라집니다.</p>
+<p>보관해야 할 데이터는 메모리가 아니라 데이터베이스에 둬야 합니다. 회원 정보를 저장할 데이터베이스를 컨테이너로 실행해 보겠습니다.</p>
 <h3>3.4.1 MySQL 컨테이너 실행하기</h3>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
@@ -899,7 +879,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
     <div>ad3d9b0d81fefe86d6185bb1b865545d914f2be742c7046d5c6b1d984c62ff05</div>
   </div>
 </div>
-<div class="caption">그림 3-28. MySQL 컨테이너 실행 로그</div>
+<div class="caption">그림 3-26. MySQL 컨테이너 실행 로그</div>
 <p>이제 DB 내부로 접속해보겠습니다. <code>docker ps</code>로 컨테이너 ID를 확인한 뒤, <code>docker exec</code>로 접속합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> DB 컨테이너 상태 확인</div>docker<span class="w"> </span>ps<span class="w">                    </span><span class="c1"># 실행 중인 컨테이너 확인</span>
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>ad3d<span class="w"> </span>bash<span class="w">   </span><span class="c1"># MySQL 컨테이너 내부 접속</span></div>
@@ -917,7 +897,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
     <div>bash-5.1#</div>
   </div>
 </div>
-<div class="caption">그림 3-29. MySQL 컨테이너 내부 진입</div>
+<div class="caption">그림 3-27. MySQL 컨테이너 내부 진입</div>
 <p>컨테이너 안에서 MySQL에 접속합니다. 접속 정보는 Dockerfile에 적어 둔 값 그대로 입력합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> DB 접속 확인</div>mysql<span class="w"> </span>-u<span class="w"> </span>metacoding<span class="w"> </span>-p<span class="w">      </span><span class="c1"># MySQL 접속. 비밀번호로 metacoding1234 입력</span></div>
 <div class="terminal-log">
@@ -933,11 +913,9 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
     <div>mysql&gt;</div>
   </div>
 </div>
-<div class="caption">그림 3-30. MySQL 접속 성공</div>
-<p>접속 후 DB 목록, 테이블, 그 안의 초기 데이터를 차례로 조회합니다.</p>
-<div class="code-block highlight" data-lang="sql"><div class="cb-title"><span class="badge">실습 7</span> DB 초기화 결과 확인 쿼리</div><span class="k">show</span><span class="w"> </span><span class="n">databases</span><span class="p">;</span><span class="w">            </span><span class="c1">-- MySQL 서버에 있는 DB 목록 조회</span>
-<span class="n">use</span><span class="w"> </span><span class="n">metadb</span><span class="p">;</span><span class="w">                </span><span class="c1">-- metadb를 사용할 DB로 선택</span>
-<span class="k">show</span><span class="w"> </span><span class="n">tables</span><span class="p">;</span><span class="w">               </span><span class="c1">-- metadb 안의 테이블 목록 조회</span>
+<div class="caption">그림 3-28. MySQL 접속 성공</div>
+<p>접속 후 metadb를 선택하고 user_tb의 초기 데이터를 조회합니다.</p>
+<div class="code-block highlight" data-lang="sql"><div class="cb-title"><span class="badge">실습 7</span> DB 초기화 결과 확인 쿼리</div><span class="n">use</span><span class="w"> </span><span class="n">metadb</span><span class="p">;</span><span class="w">                </span><span class="c1">-- metadb를 사용할 DB로 선택</span>
 <span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">user_tb</span><span class="p">;</span><span class="w">     </span><span class="c1">-- user_tb 테이블의 전체 행 조회</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -946,34 +924,8 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
     <div class="tl-spacer"></div>
   </div>
   <div class="tl-body">
-    <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">show databases;</span></div>
-    <div>+--------------------+</div>
-    <div>| Database           |</div>
-    <div>+--------------------+</div>
-    <div>| information_schema |</div>
-    <div>| metadb             |</div>
-    <div>| performance_schema |</div>
-    <div>+--------------------+</div>
-    <div>3 rows in set (0.01 sec)</div>
     <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">use metadb;</span></div>
     <div>Database changed</div>
-    <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">show tables;</span></div>
-    <div>+--------------------+</div>
-    <div>| Tables_in_metadb   |</div>
-    <div>+--------------------+</div>
-    <div>| user_tb            |</div>
-    <div>+--------------------+</div>
-    <div>1 row in set (0.00 sec)</div>
-  </div>
-</div>
-<div class="caption">그림 3-31. 데이터베이스 목록 확인</div>
-<div class="terminal-log">
-  <div class="tl-chrome">
-    <div class="tl-traffic"><span></span><span></span><span></span></div>
-    <div class="tl-title">실행결과</div>
-    <div class="tl-spacer"></div>
-  </div>
-  <div class="tl-body">
     <div><span class="tl-key">mysql&gt;</span> <span class="tl-str">select * from user_tb;</span></div>
     <div>+----+--------+</div>
     <div>| id | name   |</div>
@@ -984,11 +936,11 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
     <div>2 rows in set (0.00 sec)</div>
   </div>
 </div>
-<div class="caption">그림 3-32. user_tb 데이터 조회 결과</div>
+<div class="caption">그림 3-29. user_tb 데이터 조회 결과</div>
 <p><code>init.sql</code>에 적어 둔 초기 데이터가 테이블 안에 그대로 들어와 있습니다. 통합 사이트의 회원 정보 저장소가 준비됐습니다.</p>
 <h2>3.5 Docker Compose - 여러 컨테이너를 한 번에</h2>
 <h3>3.5.1 컨테이너를 하나씩 실행하는 한계</h3>
-<p>퇴근길, 통합 사이트 구축이 자꾸 마음에 걸렸습니다. 프론트엔드·백엔드·DB를 컨테이너로 함께 돌려야 하는데, 지금처럼 하나씩 빌드하고 실행하면 컨테이너 수만큼 똑같은 명령어를 반복해야 합니다. 여러 컨테이너를 하나로 관리할 방법이 필요합니다.</p>
+<p>지금까지 프로비저닝, 외부 요청 처리 등 프로젝트에 필요한 요소들을 다뤘습니다. 하지만 이 요소들을 연동해 하나의 서비스로 구동하려면, 매번 컨테이너마다 빌드와 실행 명령을 반복해야 합니다. 따라서 여러 컨테이너를 통합해서 관리할 방법이 필요합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="기존 방식 — 개별 빌드와 실행을 컨테이너 수만큼 반복">
   <defs>
@@ -1028,7 +980,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
   <text x="360" y="310" text-anchor="middle" font-size="10" fill="#6b7280">컨테이너 수만큼 명령어가 늘어나고 순서·옵션도 모두 외워야 합니다</text>
 </svg>
 </div>
-<div class="caption">그림 3-33. 기존 방식 — 개별 빌드 및 실행 반복</div>
+<div class="caption">그림 3-30. 기존 방식 — 개별 빌드 및 실행 반복</div>
 <p>이러한 번거로움을 명령어 하나로 해결해 주는 도구가 바로 <strong>Docker Compose</strong>입니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Docker Compose 방식 — 한 번에 생성 및 연결">
@@ -1055,8 +1007,8 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
   <text x="360" y="262" text-anchor="middle" font-size="10" fill="#6b7280">YAML 한 파일에 모든 컨테이너·네트워크·환경 변수를 적어두면 동시에 기동됩니다</text>
 </svg>
 </div>
-<div class="caption">그림 3-34. Docker Compose 방식 — 한 번에 생성 및 연결</div>
-<p>Docker Compose는 여러 컨테이너의 설정을 <strong>하나의 YAML 파일(.yml)</strong> 에 모아 관리합니다. 이 파일에 컨테이너 간의 네트워크 연결이나 실행 옵션을 미리 정의해 두면, <strong>단 하나의 명령으로 전체 컨테이너를 동시에 실행하거나 중지</strong>할 수 있습니다.</p>
+<div class="caption">그림 3-31. Docker Compose 방식 — 한 번에 생성 및 연결</div>
+<p>Docker Compose는 여러 컨테이너의 설정을 <strong>하나의 YAML 파일(.yml)</strong> 에 모아 관리합니다. 이 파일에 컨테이너 간의 네트워크 연결이나 실행 옵션을 미리 정의해 두면, <strong>명령어 한 번으로 전체 컨테이너를 동시에 실행하거나 중지</strong>할 수 있습니다.</p>
 <h3>3.5.2 docker-compose.yml 기본 구조</h3>
 <p>docker-compose.yml의 구조는 단순합니다. 자주 쓰이는 옵션을 정리해 보겠습니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge reference">참고</span> docker-compose.yml 기본 골격</div><span class="nt">services</span><span class="p">:</span>
@@ -1093,10 +1045,10 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 ├── lb/
 │   ├── Dockerfile       # nginx 이미지 + nginx.conf 복사
 │   └── nginx.conf       # 로드밸런싱 + 경로 라우팅 설정
-├── docker-compose.yml   # app1·app2·lb를 묶어 실행하는 Compose 설정
+├── docker-compose.yml   # app1·app2·lb를 함께 실행하는 Compose 설정
 └── README.md            # 실습 안내</div>
 <p>Compose는 네트워크를 자동으로 만들어 줍니다. 덕분에 <code>nginx.conf</code>에서 백엔드 주소로 서비스 이름을 그대로 사용할 수 있습니다.</p>
-<div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 8</span> ex06/docker-compose.yml. ex01을 Compose로 다시 짜기</div><span class="nt">services</span><span class="p">:</span><span class="w">             </span><span class="c1"># 컨테이너 단위로 실행할 서비스 묶음</span>
+<div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 8</span> ex06/docker-compose.yml. ex01을 Compose로 다시 짜기</div><span class="nt">services</span><span class="p">:</span><span class="w">             </span><span class="c1"># 컨테이너 단위로 실행할 서비스 목록</span>
 <span class="w">  </span><span class="nt">app1</span><span class="p">:</span><span class="w">               </span><span class="c1"># 첫 번째 서비스. 다른 서비스가 호스트명으로 호출</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./app1</span><span class="w"> </span><span class="c1"># ./app1 폴더의 Dockerfile로 이미지 빌드</span>
@@ -1136,9 +1088,9 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
     <div>Attaching to app1-1, app2-1, lb-1</div>
   </div>
 </div>
-<div class="caption">그림 3-35. docker compose up 실행 결과</div>
+<div class="caption">그림 3-32. docker compose up 실행 결과</div>
 <p>실행 후 <code>localhost:80/app1</code>과 <code>localhost:80/app2</code>로 접속하면 ex01과 같은 결과를 확인할 수 있습니다.</p>
-<p class="thought">'매번 따로 만들던 컨테이너들을 이제는 하나의 덩어리로 묶어 관리할 수 있겠구나.'</p>
+<p class="thought">'매번 따로 만들던 컨테이너들을 이제는 하나로 모아 관리할 수 있겠구나.'</p>
 <h2>3.6 종합 실습 - 프론트엔드·백엔드·DB 한꺼번에</h2>
 <div class="tip">
 <p>전체 실습 코드는 깃헙을 참고합니다.</p>
@@ -1146,7 +1098,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 </div>
 <p>지금까지 학습한 내용을 바탕으로 프론트엔드·백엔드·DB를 연결해 보겠습니다.</p>
 <h3>3.6.1 전체 아키텍처</h3>
-<p>브라우저의 요청을 프론트엔드의 NGINX가 받아 화면을 응답하고, <code>/api</code>로 들어오는 요청은 백엔드로 전달합니다. 요청을 넘겨받은 백엔드는 MySQL에서 회원 데이터를 조회하여 다시 브라우저로 응답합니다.</p>
+<p>브라우저의 요청은 프론트엔드의 NGINX가 받아 백엔드로 전달합니다. 백엔드는 MySQL에서 회원 데이터를 조회해 브라우저로 응답합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 720 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="세 컨테이너로 구성되는 웹 애플리케이션 아키텍처">
   <defs>
@@ -1176,7 +1128,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
   <line x1="520" y1="125" x2="493" y2="125" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#rr335-res)"/>
 </svg>
 </div>
-<div class="caption">그림 3-36. 세 컨테이너로 구성되는 웹 애플리케이션 아키텍처</div>
+<div class="caption">그림 3-33. 세 컨테이너로 구성되는 웹 애플리케이션 아키텍처</div>
 <p>ex07 폴더에는 <code>backend</code>·<code>db</code>·<code>frontend</code> 폴더와 <code>docker-compose.yml</code>이 들어 있습니다.</p>
 <div class="code-block highlight" data-lang="text">ex07/
 ├── backend/             # Spring Boot 백엔드
@@ -1192,8 +1144,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 ├── docker-compose.yml   # 세 서비스 + 네트워크 정의
 └── README.md            # 실습 안내</div>
 <h3>3.6.2 Backend - 시작 시 소스 내려받아 빌드</h3>
-<p>backend 폴더에는 자바 소스 파일이 보이지 않습니다. 대신 Dockerfile과 <code>entrypoint.sh</code> 셸 스크립트가 들어 있습니다.</p>
-<p>두 파일이 컨테이너 흐름에서 맡는 단계는 다음과 같이 다릅니다.</p>
+<p>backend 폴더에는 Dockerfile과 <code>entrypoint.sh</code> 셸 스크립트가 들어 있습니다. 각 파일은 다음과 같은 역할을 합니다.</p>
 <div class="prep-note">
 <p><strong>Dockerfile vs entrypoint.sh</strong></p>
 <ul>
@@ -1216,7 +1167,7 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 <span class="k">COPY</span><span class="w"> </span>entrypoint.sh<span class="w"> </span>/entrypoint.sh<span class="w">                 </span>#<span class="w"> </span>위의<span class="w"> </span>스크립트<span class="w"> </span>복사
 <span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git<span class="w">      </span>#<span class="w"> </span>git<span class="w"> </span>clone에<span class="w"> </span>필요한<span class="w"> </span>git<span class="w"> </span>설치
 <span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/entrypoint.sh&quot;</span><span class="p">]</span><span class="w">                     </span>#<span class="w"> </span>컨테이너<span class="w"> </span>시작<span class="w"> </span>시<span class="w"> </span>스크립트<span class="w"> </span>실행</div>
-<p>백엔드 서버 자체는 단순합니다. <code>/api/users</code> 요청이 오면 DB에서 회원 목록을 꺼내 JSON으로 돌려주는 컨트롤러 한 개입니다.</p>
+<p>백엔드는 <code>/api/users</code> 요청이 오면 DB에서 회원 목록을 꺼내 JSON으로 돌려줍니다.</p>
 <h3>3.6.3 DB - MySQL 컨테이너</h3>
 <p>DB는 챕터 3.4에서 만든 MySQL 구성과 동일합니다. Dockerfile과 <code>init.sql</code> 모두 그대로 사용합니다.</p>
 <table>
@@ -1258,7 +1209,7 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 </tbody>
 </table>
 <h3>3.6.5 docker-compose.yml</h3>
-<p>마지막으로 frontend·backend·db를 묶어 띄우는 <code>docker-compose.yml</code>을 작성합니다.</p>
+<p>마지막으로 frontend·backend·db를 함께 실행하는 <code>docker-compose.yml</code>을 작성합니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 11</span> ex07/docker-compose.yml. ex07 전체 구성</div><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w">                 </span><span class="c1"># Spring Boot 백엔드 서비스</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
@@ -1326,11 +1277,11 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
     <div> ✓ Container ex07-frontend-1   Started</div>
   </div>
 </div>
-<div class="caption">그림 3-37. docker compose up 명령으로 프론트엔드·백엔드·DB가 동시에 뜨는 모습</div>
+<div class="caption">그림 3-34. docker compose up 명령으로 프론트엔드·백엔드·DB가 동시에 뜨는 모습</div>
 <p>백엔드는 첫 실행에서 깃허브 소스를 받고 Gradle 빌드를 거치므로 시간이 더 걸립니다. 빌드가 끝나면 브라우저에서 <code>localhost:80</code>에 접속합니다.</p>
-<div class="chapter-image"><img src="..\assets\CH03\chap02-58.png" alt="" /><div class="caption">그림 3-38. 사용자 목록 조회 성공</div></div>
+<div class="chapter-image"><img src="..\assets\CH03\chap02-58.png" alt="" /><div class="caption">그림 3-35. 사용자 목록 조회 성공</div></div>
 <p>처음 빈 리스트가 뜬 후, DB에서 조회가 완료되면 회원 목록이 화면에 표시됩니다.</p>
-<p>그 주 금요일 오전 열 시. 회의실에서 노트북을 펼치고 빔 프로젝터에 연결했습니다. 팀장과 동료가 앉았습니다.</p>
+<p>금요일 오전 열 시. 완성한 프로젝트를 시연하기 위해 회의실에 모였습니다.</p>
 <div class="dialogue"><span class="speaker">오픈이</span>: "한 번에 함께 올라오는지 보시면 돼요."</div>
 <p>오픈이가 준비한 시연을 그대로 보여줬습니다.</p>
 <div class="dialogue"><span class="speaker">팀장</span>: "환경 구성은 깔끔하게 됐네요. 그런데 운영 서버에 올린 다음 새벽에 컨테이너 중 하나라도 죽으면 누가 살리죠?"</div>
@@ -1338,13 +1289,12 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
-<li><strong>Dockerfile은 필요한 설정을 담아 둔 밀키트입니다.</strong> 베이스 이미지·설치할 패키지·실행 명령을 적어두면 어디서든 동일한 환경을 자동으로 재현합니다.</li>
-<li><strong>NGINX는 서버 앞단의 리버스 프록시입니다.</strong> 경로 라우팅·로드밸런싱·캐싱이 핵심이며, 설정 파일의 뼈대는 늘 비슷합니다.</li>
-<li><strong>Redis는 여러 서버가 공유하는 메모리 저장소입니다.</strong> 서버 대수가 늘어도 세션을 외부 저장소에 두면 로그인 상태가 흩어지지 않습니다.</li>
+<li><strong>Dockerfile은 필요한 설정을 담아 둔 밀키트입니다.</strong> 베이스 이미지·설치할 패키지·실행 명령을 적어 두면 어디서든 동일한 환경을 자동으로 재현합니다.</li>
+<li><strong>NGINX는 서버 앞단의 리버스 프록시입니다.</strong> 경로 라우팅·로드밸런싱·캐싱이 핵심이며, 클라이언트에게는 NGINX 하나만 보입니다.</li>
+<li><strong>Redis는 여러 서버가 공유하는 메모리 저장소입니다.</strong> 서버가 여러 대로 늘어도 세션을 이곳에 두면 로그인 상태가 흩어지지 않습니다.</li>
 <li><strong>사용자 정의 네트워크는 컨테이너끼리 이름으로 통신할 수 있게 합니다.</strong> <code>host.docker.internal</code>처럼 호스트를 우회할 필요가 없어집니다.</li>
-<li><strong>Docker Compose는 여러 컨테이너를 한 파일로 관리하는 설계도입니다.</strong> Compose 명령으로 빌드·네트워크·의존 관계가 자동으로 묶입니다.</li>
+<li><strong>Docker Compose는 여러 컨테이너를 한 파일로 관리하는 설계도입니다.</strong> 명령 한 번으로 빌드·네트워크·실행 순서가 함께 처리됩니다.</li>
 </ul>
-<p>운영에는 자동 복구, 무중단 배포, 다중 서버 관리, 설정 분리 같은 숙제가 남아 있습니다.</p>
 </div>
 
 </div>
