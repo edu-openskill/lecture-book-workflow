@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>MSA 그림 2-1</title>
+<style>body{font-family:"Pretendard","Malgun Gothic",sans-serif;background:#f1f5f9;margin:0;padding:30px}.card{background:#fff;max-width:1080px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px}svg{width:100%;height:auto;display:block}.cap{text-align:center;font-style:italic;color:#475569;font-size:14px;margin-top:12px}</style>
+</head><body><div class="card">
+<svg viewBox="0 0 1020 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 2 한눈에 보기">
+  <defs>
+    <marker id="c2f0-i" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="510" y="26" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">챕터 2 한눈에 보기 — 로그인부터 주문까지</text>
+  <rect x="230" y="50" width="760" height="400" rx="14" fill="none" stroke="#4f46e5" stroke-width="1.6" stroke-dasharray="6,4"/>
+  <text x="250" y="70" font-size="11" font-weight="700" fill="#3730a3">Docker Compose · msa-network</text>
+  <text x="40" y="95" font-size="12" font-weight="700" fill="#475569">1단계 — 로그인</text>
+  <rect x="40" y="105" width="140" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="110" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
+  <text x="110" y="157" text-anchor="middle" font-size="11" fill="#6b7280">사용자</text>
+  <rect x="380" y="105" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="470" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">User</text>
+  <text x="470" y="157" text-anchor="middle" font-size="11" fill="#6b7280">:8083 회원</text>
+  <text x="40" y="225" font-size="12" font-weight="700" fill="#475569">2단계 — 주문 생성</text>
+  <rect x="40" y="235" width="140" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="110" y="265" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Client</text>
+  <text x="110" y="287" text-anchor="middle" font-size="11" fill="#6b7280">사용자</text>
+  <rect x="380" y="235" width="180" height="70" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="470" y="265" text-anchor="middle" font-size="16" font-weight="700" fill="#3730a3">Order</text>
+  <text x="470" y="287" text-anchor="middle" font-size="11" fill="#3730a3">:8081 주문</text>
+  <rect x="680" y="130" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="770" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Product</text>
+  <text x="770" y="182" text-anchor="middle" font-size="11" fill="#6b7280">:8082 상품</text>
+  <rect x="680" y="340" width="180" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="770" y="370" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Delivery</text>
+  <text x="770" y="392" text-anchor="middle" font-size="11" fill="#6b7280">:8084 배달</text>
+  <line x1="180" y1="125" x2="378" y2="125" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="279" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="#4f46e5">1. 로그인 (POST /login)</text>
+  <line x1="378" y1="155" x2="182" y2="155" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="280" y="170" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">2. JWT 응답</text>
+  <line x1="180" y1="255" x2="378" y2="255" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="279" y="248" text-anchor="middle" font-size="12" font-weight="600" fill="#4f46e5">3. 주문 생성 (JWT 첨부)</text>
+  <line x1="560" y1="245" x2="678" y2="165" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="190" text-anchor="middle" font-size="12" font-weight="600" fill="#4f46e5">4. 재고 차감</text>
+  <line x1="678" y1="185" x2="562" y2="265" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="240" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">5. 차감 응답</text>
+  <line x1="560" y1="285" x2="678" y2="365" stroke="#4f46e5" stroke-width="1.6" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="315" text-anchor="middle" font-size="12" font-weight="600" fill="#4f46e5">6. 배달 생성</text>
+  <line x1="678" y1="385" x2="562" y2="305" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="619" y="355" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">7. 생성 응답</text>
+  <line x1="378" y1="285" x2="182" y2="285" stroke="#3730a3" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#c2f0-i)"/>
+  <text x="280" y="305" text-anchor="middle" font-size="12" font-weight="600" fill="#3730a3">8. 주문 완료 응답</text>
+</svg>
+<p class="cap">그림 2-1. 챕터 2 한눈에 보기 - 로그인부터 주문까지</p>
+</div></body></html>

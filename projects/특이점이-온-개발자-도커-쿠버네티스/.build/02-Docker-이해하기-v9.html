@@ -23,36 +23,40 @@
 <p><strong>Docker가 무엇이고 어떻게 돌아가는지, 개념과 기본 사용법을 손에 익힌다.</strong></p>
 <p>지금부터 도커가 컨테이너를 어떻게 만들고, 도커를 어떻게 사용하는지 알아보겠습니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 1080 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 2 한눈에 보기: Docker Hub에서 docker pull로 이미지를 받고, docker run으로 호스트의 커널이 격리한 컨테이너를 실행한다. 컨테이너는 볼륨과 마운트로 데이터를 보존하고, commit으로 이미지로 저장한 뒤 docker push로 다시 Hub에 올린다.">
+<svg viewBox="0 0 1080 272" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 2 한눈에 보기: Docker Hub에서 docker pull로 이미지를 받고, docker run으로 호스트의 커널이 격리한 컨테이너를 실행한다. 컨테이너는 볼륨과 마운트로 데이터를 보존하고, commit으로 이미지로 저장한 뒤 docker push로 다시 Hub에 올린다.">
   <defs>
     <marker id="c2ov-a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
   </defs>
-  <text x="540" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">챕터 2 한눈에 보기 — 이미지를 받아 실행하고 보존하기까지</text>
-  <rect x="600" y="64" width="450" height="150" rx="12" fill="none" stroke="#ff7849" stroke-width="1.5" stroke-dasharray="6,4"/>
-  <text x="616" y="86" font-size="11" font-weight="700" fill="#7b341e">호스트 PC · 커널이 격리</text>
-  <rect x="30" y="100" width="150" height="84" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="105" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">Docker Hub</text>
-  <text x="105" y="158" text-anchor="middle" font-size="11" fill="#6b7280">이미지 저장소</text>
-  <rect x="320" y="100" width="150" height="84" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="395" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#0f172a">이미지</text>
-  <text x="395" y="158" text-anchor="middle" font-size="11" fill="#6b7280">설계도</text>
-  <rect x="620" y="100" width="160" height="84" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
-  <text x="700" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">컨테이너</text>
-  <text x="700" y="148" text-anchor="middle" font-size="10.5" fill="#7b341e">실행 중 · 안에서 작업</text>
-  <text x="700" y="165" text-anchor="middle" font-size="10.5" fill="#7b341e">2.5 · 2.6</text>
-  <rect x="880" y="100" width="150" height="84" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
-  <text x="955" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">볼륨</text>
-  <text x="955" y="158" text-anchor="middle" font-size="11" fill="#6b7280">데이터 보존 · 2.8</text>
-  <line x1="180" y1="130" x2="318" y2="130" stroke="#475569" stroke-width="1.6" marker-end="url(#c2ov-a)"/>
-  <text x="249" y="122" text-anchor="middle" font-size="11.5" fill="#0f172a"><tspan font-weight="700">1.</tspan> docker pull (2.2)</text>
-  <line x1="318" y1="158" x2="182" y2="158" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#c2ov-a)"/>
-  <text x="249" y="174" text-anchor="middle" font-size="11.5" fill="#0f172a"><tspan font-weight="700">4.</tspan> docker push (2.7)</text>
-  <line x1="470" y1="130" x2="618" y2="130" stroke="#475569" stroke-width="1.6" marker-end="url(#c2ov-a)"/>
-  <text x="544" y="122" text-anchor="middle" font-size="11.5" fill="#0f172a"><tspan font-weight="700">2.</tspan> docker run (2.3)</text>
-  <line x1="618" y1="158" x2="472" y2="158" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#c2ov-a)"/>
-  <text x="544" y="174" text-anchor="middle" font-size="11.5" fill="#0f172a"><tspan font-weight="700">3.</tspan> commit (2.7)</text>
-  <line x1="780" y1="142" x2="878" y2="142" stroke="#475569" stroke-width="1.6" marker-start="url(#c2ov-a)" marker-end="url(#c2ov-a)"/>
-  <text x="829" y="124" text-anchor="middle" font-size="11.5" fill="#0f172a"><tspan font-weight="700">5.</tspan> 마운트 (2.8)</text>
+  <text x="540" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#1f2937">챕터 2 한눈에 보기 — 이미지를 받아 실행하고 보존하기까지</text>
+  <rect x="600" y="70" width="450" height="172" rx="12" fill="none" stroke="#ff7849" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="616" y="92" font-size="13" font-weight="700" fill="#7b341e">호스트 PC · 커널이 격리</text>
+  <rect x="30" y="106" width="150" height="96" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="105" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">Docker Hub</text>
+  <text x="105" y="170" text-anchor="middle" font-size="13" fill="#6b7280">이미지 저장소</text>
+  <rect x="320" y="106" width="150" height="96" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="395" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">이미지</text>
+  <text x="395" y="170" text-anchor="middle" font-size="13" fill="#6b7280">설계도</text>
+  <rect x="620" y="106" width="160" height="96" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="700" y="148" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">컨테이너</text>
+  <text x="700" y="172" text-anchor="middle" font-size="13" fill="#6b7280">챕터 2.5 · 2.6</text>
+  <rect x="880" y="106" width="150" height="96" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="955" y="146" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">볼륨</text>
+  <text x="955" y="170" text-anchor="middle" font-size="13" fill="#6b7280">데이터 보존 · 챕터 2.8</text>
+  <line x1="180" y1="150" x2="318" y2="150" stroke="#475569" stroke-width="1.6" marker-end="url(#c2ov-a)"/>
+  <text x="249" y="128" text-anchor="middle" font-size="13" fill="#0f172a"><tspan font-weight="700">1.</tspan> docker pull</text>
+  <text x="249" y="143" text-anchor="middle" font-size="13" fill="#6b7280">챕터 2.2</text>
+  <line x1="318" y1="180" x2="182" y2="180" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#c2ov-a)"/>
+  <text x="249" y="200" text-anchor="middle" font-size="13" fill="#0f172a"><tspan font-weight="700">4.</tspan> docker push</text>
+  <text x="249" y="215" text-anchor="middle" font-size="13" fill="#6b7280">챕터 2.7</text>
+  <line x1="470" y1="150" x2="618" y2="150" stroke="#475569" stroke-width="1.6" marker-end="url(#c2ov-a)"/>
+  <text x="544" y="128" text-anchor="middle" font-size="13" fill="#0f172a"><tspan font-weight="700">2.</tspan> docker run</text>
+  <text x="544" y="143" text-anchor="middle" font-size="13" fill="#6b7280">챕터 2.3</text>
+  <line x1="618" y1="180" x2="472" y2="180" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#c2ov-a)"/>
+  <text x="544" y="200" text-anchor="middle" font-size="13" fill="#0f172a"><tspan font-weight="700">3.</tspan> commit</text>
+  <text x="544" y="215" text-anchor="middle" font-size="13" fill="#6b7280">챕터 2.7</text>
+  <line x1="780" y1="154" x2="878" y2="154" stroke="#475569" stroke-width="1.6" marker-start="url(#c2ov-a)" marker-end="url(#c2ov-a)"/>
+  <text x="829" y="132" text-anchor="middle" font-size="13" fill="#0f172a"><tspan font-weight="700">5.</tspan> 마운트</text>
+  <text x="829" y="147" text-anchor="middle" font-size="13" fill="#6b7280">챕터 2.8</text>
 </svg>
 </div>
 <div class="caption">그림 2-1. 이번 챕터 실습 흐름 - 이미지를 받아 실행하고 보존하기까지</div>
