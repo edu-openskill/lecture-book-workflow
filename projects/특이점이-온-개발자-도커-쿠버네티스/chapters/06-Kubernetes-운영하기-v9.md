@@ -86,6 +86,16 @@ https://github.com/metacoding-10-linux-docker/final
 
 **ConfigMap**은 환경에 따라 달라지는 설정값을 Pod에 환경 변수로 주입하는 리소스입니다.
 
+이번 절의 실습 파일은 `ex13` 폴더에 있습니다.
+
+```text
+ex13/
+├── configmap-conn.yml   # 설정값을 담는 ConfigMap 정의
+├── secret-password.yml   # 비밀번호를 담는 Secret 정의
+├── deploy-ex03.yml       # ConfigMap·Secret을 주입받는 Deployment
+└── README.md             # 실습 안내
+```
+
 다음은 설정값 두 개를 정의한 ConfigMap입니다.
 
 ```yaml [실습 1] ex13/configmap-conn.yml. ConfigMap 정의
@@ -443,6 +453,16 @@ Pod는 PV를 직접 참조하지 않고 PVC만 연결해 사용합니다. 덕분
 ### 6.2.3 PV 만들기
 
 PV를 먼저 만들어 보겠습니다. 이번 실습에서는 PV의 저장 위치로 Minikube 내부의 경로(`/mnt/data`)를 지정합니다.
+
+이번 절의 실습 파일은 `ex14` 폴더에 있습니다.
+
+```text
+ex14/
+├── volume-pv.yml      # 저장 공간을 제공하는 PersistentVolume 정의
+├── volume-pvc.yml     # 저장 공간을 요청하는 PersistentVolumeClaim 정의
+├── volume-pod.yml     # PVC를 마운트해 데이터를 쓰는 Pod 정의
+└── README.md          # 실습 안내
+```
 
 ```yaml [실습 6] ex14/volume-pv.yml. PersistentVolume 정의
 apiVersion: v1

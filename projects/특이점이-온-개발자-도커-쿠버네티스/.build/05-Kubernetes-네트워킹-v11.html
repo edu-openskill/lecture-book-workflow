@@ -18,7 +18,7 @@
 <body>
 <div class="container">
 <h1>챕터 5. Kubernetes 네트워킹</h1>
-<p>오픈이는 어제 배운 내용을 바탕으로 테스트 서버를 Pod로 재구성했습니다. Pod가 종료되더라도 Deployment가 즉시 새 Pod를 실행해 주니 마음이 든든했습니다.</p>
+<p>오픈이는 지금까지 학습한 내용을 바탕으로 테스트 서버를 Pod로 재구성했습니다. Pod가 종료되더라도 Deployment가 즉시 새 Pod를 실행해 주니 마음이 든든했습니다.</p>
 <p>다음 날 아침, 동료가 찾아왔습니다.</p>
 <div class="dialogue"><span class="speaker">동료</span>: "오픈 씨, 어제 테스트 서버에 올렸다는 서비스에 접속이 안 되는데, 어떻게 들어가요?"</div>
 <p>오픈이는 당황했습니다. 로그상으로는 분명 정상 실행 중이었지만, 정작 브라우저로 접속해 본 적은 없었기 때문입니다. 서둘러 Pod 목록에서 IP를 확인해 브라우저에 입력해 보았지만, 페이지는 열리지 않았습니다.</p>
@@ -81,7 +81,12 @@
 <div class="caption">그림 5-2. Service는 Pod IP가 바뀌어도 변하지 않는 고정 주소를 제공</div>
 <h3>5.1.2 Service 생성</h3>
 <p>이제 직접 만들어 보겠습니다. 먼저 Pod를 실행한 다음, 앞에 Service를 붙이는 순서로 진행합니다.</p>
-<p><code>ex11</code> 폴더를 열고 어제 적용했던 <code>deploy-ex02.yml</code>을 다시 적용합니다. Pod 네 개를 실행하는 Deployment 설정입니다.</p>
+<p>실습 코드는 <code>ex11</code> 폴더에 있습니다.</p>
+<div class="code-block highlight" data-lang="text">ex11/
+├── deploy-ex02.yml    # nginx Pod 4개를 유지하는 Deployment 정의
+├── service-ex01.yml   # Pod 앞에 붙이는 NodePort Service 정의
+└── README.md          # 실습 안내</div>
+<p><code>ex11</code> 폴더를 열고 이전 챕터에서 적용한 <code>deploy-ex02.yml</code>을 다시 적용합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 4개 생성</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/deploy-ex02.yml<span class="w">   </span><span class="c1"># Pod 4개 생성</span></div>
 <p>다음은 Service를 정의한 YAML입니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 1</span> ex11/service-ex01.yml. NodePort Service 정의</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -129,9 +134,7 @@
 </div>
 <div class="caption">그림 5-3. selector가 지정한 라벨(app: nginx)을 가진 Pod만 매칭하고 다른 라벨은 제외</div>
 <h3>5.1.3 Service 타입과 접근 범위</h3>
-<p>YAML을 살펴보던 오픈이는 <code>type: NodePort</code>를 보고 궁금증이 생겼습니다.</p>
-<p class="thought">'NodePort 말고 다른 type도 있는 거 같은데. 어떤 역할을 하는 걸까.'</p>
-<p>Service는 접근 범위에 따라 ClusterIP, NodePort, LoadBalancer로 나뉩니다.</p>
+<p>앞서 작성한 Service YAML에는 <code>type: NodePort</code> 설정이 있습니다. Service는 접근 범위에 따라 타입이 <strong>ClusterIP</strong>, <strong>NodePort</strong>, <strong>LoadBalancer</strong>로 나뉩니다.</p>
 <h4>ClusterIP</h4>
 <p><strong>ClusterIP</strong>는 사내에서만 연결되는 <strong>내선 번호</strong>입니다. <strong>클러스터 안의 Pod끼리는 서로 연결되지만, 외부에서는 접근할 수 없습니다.</strong> DB처럼 외부에 노출할 필요가 없는 구성에 적합하며, 서비스 타입의 기본값입니다.</p>
 <div class="svg-figure">
@@ -200,7 +203,7 @@
 </div>
 <div class="caption">그림 5-5. NodePort는 노드의 특정 포트로 외부 접근을 허용</div>
 <h4>LoadBalancer</h4>
-<p><strong>LoadBalancer</strong>는 외부 요청을 하나로 묶어 연결하는 <strong>대표 번호</strong>입니다. Service를 LoadBalancer로 지정하면, AWS·GCP 같은 클라우드 플랫폼이 <strong>공인 IP</strong>를 발급합니다. <strong>그 IP로 들어온 모든 요청을 받아, 뒤에 있는 여러 노드로 나눠 보냅니다.</strong> 실제 운영에서 가장 흔히 씁니다.</p>
+<p><strong>LoadBalancer</strong>는 외부 요청을 한곳에서 받아 연결하는 <strong>대표 번호</strong>입니다. Service를 LoadBalancer로 지정하면, AWS·GCP 같은 클라우드 플랫폼이 <strong>공인 IP</strong>를 발급합니다. <strong>그 IP로 들어온 모든 요청을 받아, 뒤에 있는 여러 노드로 나눠 보냅니다.</strong> 실제 운영에서 가장 흔히 사용합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LoadBalancer — 공인 IP가 각 노드의 NodePort로 직접 트래픽을 분산하고, Service는 Pod 집합을 라벨로 묶는 논리 리소스">
   <defs>
@@ -241,36 +244,9 @@
 </div>
 <div class="caption">그림 5-6. LoadBalancer는 클라우드가 공인 IP를 발급해 여러 노드에 분산</div>
 <p>LoadBalancer 타입은 ClusterIP와 NodePort를 함께 포함합니다. 그래서 Service 하나로 내부 통신과 외부 접근이 모두 처리됩니다.</p>
-<p>세 타입의 차이를 한 표로 정리하면 다음과 같습니다.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">타입</th>
-<th style="text-align:left">접근 범위</th>
-<th style="text-align:left">사용 사례</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center"><code>ClusterIP</code></td>
-<td style="text-align:left">클러스터 내부만</td>
-<td style="text-align:left">백엔드·DB 등 외부 노출이 불필요한 서비스</td>
-</tr>
-<tr>
-<td style="text-align:center"><code>NodePort</code></td>
-<td style="text-align:left">노드IP:포트로 외부 접근 가능</td>
-<td style="text-align:left">테스트 및 개발 환경</td>
-</tr>
-<tr>
-<td style="text-align:center"><code>LoadBalancer</code></td>
-<td style="text-align:left">공인 IP로 외부 접근 가능</td>
-<td style="text-align:left">실제 클라우드 운영 환경</td>
-</tr>
-</tbody>
-</table>
 <h3>5.1.4 포트 흐름</h3>
-<p>앞서 만든 Service YAML을 보면, 포트에는 <code>port</code>, <code>targetPort</code>, <code>nodePort</code> 세 종류가 있습니다. 각 포트는 외부에서 들어온 요청을 Pod까지 단계별로 전달합니다.</p>
-<p>외부 사용자가 노드의 <code>nodePort</code>로 접속하면, 그 요청이 <code>port</code>를 가진 Service를 거쳐 Pod의 <code>targetPort</code>로 전달됩니다.</p>
+<p>Service YAML의 포트 설정에는 <code>port</code>, <code>targetPort</code>, <code>nodePort</code> 세 종류가 있습니다. 각 포트는 외부에서 들어온 요청을 Pod까지 단계별로 전달합니다.</p>
+<p>외부 사용자가 노드의 <code>nodePort</code>로 접속하면, Service가 이 요청을 받아 최종 목적지인 Pod의 <code>targetPort</code>로 연결해 줍니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="노드 큰 박스 안에 NodePort, Service, Pod가 있고 외부 사용자가 NodePort로 진입해 Service를 거쳐 Pod 안 컨테이너에 도달하는 구조">
   <defs>
@@ -282,7 +258,7 @@
   <text x="65" y="208" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 사용자</text>
   <text x="65" y="228" text-anchor="middle" font-size="10" fill="#6b7280">브라우저</text>
   <rect x="220" y="60" width="520" height="340" rx="12" fill="#fff" stroke="#475569" stroke-width="2.4" stroke-dasharray="6,4"/>
-  <text x="240" y="84" font-size="13" font-weight="700" fill="#475569">Node (워커 서버)</text>
+  <text x="240" y="84" font-size="13" font-weight="700" fill="#475569">Node (워커 노드)</text>
   <rect x="240" y="158" width="120" height="104" rx="10" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
   <rect x="252" y="178" width="96" height="64" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2"/>
   <text x="300" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">NodePort</text>
@@ -308,7 +284,7 @@
 <thead>
 <tr>
 <th style="text-align:center">포트 종류</th>
-<th style="text-align:left">소유 주체</th>
+<th style="text-align:left">위치</th>
 <th style="text-align:left">역할</th>
 <th style="text-align:left">생략 시</th>
 </tr>
@@ -316,27 +292,26 @@
 <tbody>
 <tr>
 <td style="text-align:center"><code>nodePort</code></td>
-<td style="text-align:left">노드(서버)</td>
-<td style="text-align:left">외부에서 노드 IP로 접근할 때 열리는 포트</td>
-<td style="text-align:left">30000~32767 중 하나로 자동 할당. 명시 지정도 같은 범위</td>
+<td style="text-align:left">워커 노드</td>
+<td style="text-align:left">외부 사용자가 노드 IP로 클러스터 내부에 접근할 때 열리는 포트</td>
+<td style="text-align:left">30000~32767 범위에서 자동 할당. 같은 범위로 직접 지정도 가능</td>
 </tr>
 <tr>
 <td style="text-align:center"><code>port</code></td>
 <td style="text-align:left">Service</td>
-<td style="text-align:left">클러스터 내부에서 Service를 부를 때 쓰는 포트</td>
+<td style="text-align:left">클러스터 내부의 다른 Pod가 이 Service를 호출할 때 쓰는 포트</td>
 <td style="text-align:left">생략 불가 (필수)</td>
 </tr>
 <tr>
 <td style="text-align:center"><code>targetPort</code></td>
-<td style="text-align:left">Pod</td>
-<td style="text-align:left">Service가 Pod로 트래픽을 전달할 때 쓰는 포트 (컨테이너 포트와 일치 필요)</td>
+<td style="text-align:left">Pod(컨테이너)</td>
+<td style="text-align:left">Service가 받은 트래픽을 전달할 컨테이너의 수신 포트 (컨테이너 포트와 일치)</td>
 <td style="text-align:left">생략 시 <code>port</code>와 같은 값</td>
 </tr>
 </tbody>
 </table>
 <h3>5.1.5 외부에서 Service 접속해 보기</h3>
-<p>이제 실습을 해 보겠습니다.</p>
-<p><code>ex11/service-ex01.yml</code>을 클러스터에 적용한 뒤, 외부에서 실제로 접속되는지 확인합니다.</p>
+<p>이제 실습을 해 보겠습니다. <code>ex11/service-ex01.yml</code>을 클러스터에 적용한 뒤, 외부에서 실제로 접속되는지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Service 생성</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex11/service-ex01.yml<span class="w">   </span><span class="c1"># Service YAML 적용</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
@@ -350,7 +325,7 @@
   </div>
 </div>
 <div class="caption">그림 5-8. Service 생성 결과</div>
-<p>브라우저를 열고 NodePort로 설정한 30080 포트(<code>localhost:30080</code>)로 접속합니다. 그런데 연결할 수 없다는 화면이 떴습니다.</p>
+<p>브라우저를 열고 NodePort로 설정한 30080 포트(<code>localhost:30080</code>)로 접속합니다. 그런데 연결할 수 없다는 화면이 뜹니다.</p>
 <p class="thought">'분명 30080 포트를 열었는데 왜 안 들어가지.'</p>
 <div class="prep-note">
 <p><strong>NodePort로 접속이 안 되는 이유</strong></p>
@@ -369,12 +344,12 @@
     <tr>
       <td style="text-align:center">URL 생성</td>
       <td style="white-space:nowrap"><code>minikube service &lt;서비스이름&gt; --url</code></td>
-      <td>Service 한 개에 접근할 임시 URL 생성. NodePort 접근에 사용</td>
+      <td><strong>Service 한 개에 접근할 임시 URL 생성</strong>. NodePort 접근에 사용</td>
     </tr>
     <tr>
       <td style="text-align:center">터널 개방</td>
       <td style="white-space:nowrap"><code>minikube tunnel</code></td>
-      <td>LoadBalancer·Ingress에 외부 IP 부여. LoadBalancer·Ingress 접근에 사용</td>
+      <td><strong>LoadBalancer·Ingress에 외부 IP 부여</strong>. LoadBalancer·Ingress 접근에 사용</td>
     </tr>
   </tbody>
 </table>
@@ -393,9 +368,9 @@
   </div>
 </div>
 <div class="caption">그림 5-9. minikube service URL 생성 결과</div>
-<p>URL이 출력되고 커서는 그대로 멈춰 있습니다. 이 명령은 연결을 유지하는 동안 터미널에서 계속 실행됩니다. 출력된 주소를 브라우저에 붙여 넣자, 익숙한 NGINX 환영 페이지가 떴습니다.</p>
+<p>URL이 출력되고 커서는 그대로 멈춰 있습니다. 이 명령은 연결을 유지하는 동안 터미널에서 계속 실행됩니다. 출력된 주소를 브라우저에 붙여 넣으면 NGINX 환영 페이지가 나타납니다.</p>
 <div class="chapter-image terminal"><img src="..\assets\CH05\terminal\01_nginx-welcome.png" alt="" /><div class="caption">그림 5-10. 브라우저에서 nginx 접속 확인</div></div>
-<p>다음으로 Pod가 사라지고 IP가 바뀌어도 Service가 새 Pod로 자동 연결되는지 직접 확인합니다. Ctrl+C로 터미널을 종료하고 Pod를 전부 지웁니다.</p>
+<p>다음으로 Pod가 사라지고 IP가 바뀌어도 Service가 새 Pod로 자동 연결되는지 직접 확인합니다. Ctrl+C로 터미널을 빠져나온 후 Pod를 전부 지웁니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 재생성 후 같은 주소로 재접속</div>kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>--all<span class="w">                </span><span class="c1"># 모든 Pod 삭제 (Deployment가 자동 재생성)</span>
 minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<span class="w"> </span>--url<span class="w">    </span><span class="c1"># 다시 접속 URL 확인</span></div>
 <div class="terminal-log">
@@ -557,6 +532,14 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <p>실제 서비스 환경에서는 Ingress 컨트롤러를 클러스터에 직접 설치해야 합니다. 그런 다음 외부 사용자가 접속할 수 있도록 클라우드의 공인 IP와 연결하는 작업이 필요합니다. 앞서 사용한 미니큐브 애드온은 이 두 단계를 명령어 하나로 처리해 줍니다.</p>
 </div>
 <p>이제 들어온 요청을 받아 처리할 주문 Service와 매장 Service를 만들 차례입니다. 둘 다 <strong>ClusterIP</strong> 타입이라 클러스터 바깥에서는 직접 접근할 수 없어, 외부 요청을 받아 알맞은 곳으로 보낼 <strong>Ingress 규칙</strong>이 필요합니다.</p>
+<p><code>ex12</code> 폴더에는 Ingress 규칙과 두 Service, 그리고 각 Service가 가리키는 Deployment가 함께 들어 있습니다.</p>
+<div class="code-block highlight" data-lang="text">ex12/
+├── ingress-ex01.yml   # /order·/stores 경로별 라우팅 규칙
+├── order-deploy.yml    # 주문 응답 Pod Deployment
+├── order-service.yml   # 주문 Pod 앞 ClusterIP Service
+├── stores-deploy.yml   # 매장 응답 Pod Deployment
+├── stores-service.yml  # 매장 Pod 앞 ClusterIP Service
+└── README.md           # 실습 안내</div>
 <p>다음은 <code>/order</code>와 <code>/stores</code> 두 경로를 각각의 Service로 분기하는 Ingress YAML입니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 2</span> ex12/ingress-ex01.yml. 경로별 라우팅 규칙</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
@@ -600,7 +583,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </div>
 <div class="caption">그림 5-16. Ingress 리소스 등록 확인</div>
 <h3>5.2.4 외부에서 Ingress 접속해 보기</h3>
-<p>클러스터를 호스트와 연결하기 위해 별도 터미널에서 <code>minikube tunnel</code>을 실행합니다.</p>
+<p>클러스터를 호스트와 연결하기 위해, 외부 IP를 부여하는 <code>minikube tunnel</code>을 별도 터미널에서 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 외부 터널 개방</div>minikube<span class="w"> </span>tunnel<span class="w">                          </span><span class="c1"># 별도 터미널에서 실행</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
