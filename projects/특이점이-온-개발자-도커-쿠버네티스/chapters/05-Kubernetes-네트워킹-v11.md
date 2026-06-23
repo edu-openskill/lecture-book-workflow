@@ -29,6 +29,24 @@
 - 브라우저에서 Pod까지 패킷이 가는 흐름을 그려 보겠습니다
 :::
 
+::::prep
+**실습 준비**. 예제 코드
+
+이 책의 실습 코드는 GitHub 레포 하나에 챕터별 폴더로 담겨 있습니다. 아래 명령으로 레포를 한 번 git clone 합니다. 이후 챕터마다 해당 폴더로 이동해 실습합니다.
+
+```bash [터미널] 예제 코드 클론
+git clone https://github.com/metacoding-10-linux-docker/start
+```
+
+이번 챕터는 `ex11`~`ex12` 폴더를 사용합니다.
+
+완성된 코드는 아래 주소에서 확인하세요.
+
+```bash [터미널] 완성 코드
+https://github.com/metacoding-10-linux-docker/final
+```
+::::
+
 ## 5.1 Service - Pod의 고정 주소
 
 ### 5.1.1 Service가 필요한 이유
@@ -71,12 +89,6 @@ Pod의 IP는 고정된 값이 아닙니다. Pod는 종료되거나 새 버전으
 *그림 5-2. Service는 Pod IP가 바뀌어도 변하지 않는 고정 주소를 제공*
 
 ### 5.1.2 Service 생성
-
-:::tip
-전체 실습 코드는 깃헙을 참고합니다.
-
-**실습 코드 (GitHub)**: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex11
-:::
 
 이제 직접 만들어 보겠습니다. 먼저 Pod를 실행한 다음, 앞에 Service를 붙이는 순서로 진행합니다.
 
@@ -558,12 +570,6 @@ YAML로 작성한 Ingress 리소스를 등록하면 API Server를 거쳐 상태 
 :::
 
 ### 5.2.3 Ingress 적용하기
-
-:::tip
-전체 실습 코드는 깃헙을 참고합니다.
-
-**실습 코드 (GitHub)**: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex12
-:::
 
 실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다. 미니큐브는 Ingress 컨트롤러를 애드온 형태로 한 번에 배포할 수 있는 명령어를 제공합니다.
 

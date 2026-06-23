@@ -24,6 +24,31 @@
 <div class="dialogue"><span class="speaker">오픈이</span>: "도커를 공부하면 끝일 줄 알았는데, 운영에서 컨테이너가 죽거나 트래픽이 몰릴 때 어떻게 해야 할지 모르겠어요."</div>
 <div class="dialogue"><span class="speaker">선배</span>: "도커만으로는 운영까지 감당하기 어려워요. 그래서 쿠버네티스를 같이 알아야 해요. 컨테이너에 대한 관리는 쿠버네티스 담당이거든요."</div>
 <p>선배의 말을 들은 오픈이는 퇴근 후 집에서 노트북을 열었습니다. 그리고 쿠버네티스가 무엇이고, 어떤 역할을 하는지 살펴보기로 했습니다.</p>
+<p>이번 챕터에서 다룰 쿠버네티스 리소스의 전체 구조는 다음과 같습니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 680 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment 안에 ReplicaSet이 있고 ReplicaSet 안에 Pod 두 개가 가로로 들어 있는 소유 구조. Deployment는 원하는 상태를 선언하고 ReplicaSet을 만들어 관리하며, ReplicaSet은 선언한 개수만큼 Pod를 유지하고, 각 Pod는 컨테이너를 실행한다">
+  <text x="340" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#0f172a">챕터 4 한눈에 보기 — 전체 구조</text>
+  <rect x="20" y="42" width="640" height="290" rx="12" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
+  <text x="34" y="62" font-size="11" font-weight="600" fill="#0f172a">Kubernetes 클러스터 (Minikube)</text>
+  <rect x="48" y="80" width="584" height="234" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="1.8"/>
+  <text x="70" y="106" font-size="14" font-weight="700" fill="#3730a3">Deployment</text>
+  <text x="70" y="124" font-size="10" fill="#6d28d9">원하는 상태를 선언하고, ReplicaSet을 만들어 관리</text>
+  <text x="612" y="106" text-anchor="end" font-size="10" font-weight="700" fill="#4f46e5">챕터 4.4</text>
+  <rect x="80" y="142" width="520" height="160" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="102" y="168" font-size="13" font-weight="700" fill="#3730a3">ReplicaSet</text>
+  <text x="102" y="184" font-size="10" fill="#4f46e5">선언한 개수만큼 Pod 유지</text>
+  <text x="580" y="168" text-anchor="end" font-size="10" font-weight="700" fill="#4f46e5">챕터 4.4.3</text>
+  <rect x="120" y="200" width="222" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="231" y="226" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Pod 1</text>
+  <text x="231" y="244" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
+  <text x="231" y="262" text-anchor="middle" font-size="10" font-weight="700" fill="#ff7849">챕터 4.3</text>
+  <rect x="360" y="200" width="222" height="80" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="471" y="226" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Pod 2</text>
+  <text x="471" y="244" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
+  <text x="471" y="262" text-anchor="middle" font-size="10" font-weight="700" fill="#ff7849">챕터 4.3</text>
+</svg>
+</div>
+<div class="caption">그림 4-2. 챕터 4 한눈에 보기 - 전체 구조</div>
 <div class="goal-box">
 <p><strong>이번 챕터가 끝나면</strong></p>
 <ul>
@@ -34,7 +59,7 @@
 </ul>
 </div>
 <div class="prep-section-md">
-<p><strong>준비하기</strong>. 실습 시작 전 한 번만 설정</p>
+<p><strong>준비하기</strong></p>
 <h3>Minikube 설치</h3>
 <p>쿠버네티스 실습에 쓰는 로컬 클러스터 도구 Minikube를 설치합니다. OS에 맞는 명령을 터미널에서 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Minikube 설치</div><span class="c1"># macOS</span>
@@ -42,11 +67,16 @@ brew<span class="w"> </span>install<span class="w"> </span>minikube
 
 <span class="c1"># Windows</span>
 winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube</div>
-<p>예제 코드는 챕터 2에서 클론한 레포의 <code>ex08</code>~<code>ex10</code>을 사용합니다.</p>
+<h3>예제 코드</h3>
+<p>이 책의 실습 코드는 GitHub 레포 하나에 챕터별 폴더로 담겨 있습니다. 아래 명령으로 레포를 한 번 git clone 합니다. 이후 챕터마다 해당 폴더로 이동해 실습합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 예제 코드 클론</div>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-10-linux-docker/start</div>
+<p>이번 챕터는 <code>ex08</code>~<code>ex10</code> 폴더를 사용합니다.</p>
+<p>완성된 코드는 아래 주소에서 확인하세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 완성 코드</div>https://github.com/metacoding-10-linux-docker/final</div>
 </div>
 <h2>4.1 Kubernetes - 원하는 상태를 유지하기</h2>
 <h3>4.1.1 도커는 실행 명령, Kubernetes는 약속 유지</h3>
-<p>도커와 쿠버네티스는 컨테이너를 다루는 방식이 다음과 같이 다릅니다.</p>
+<p>도커와 쿠버네티스는 컨테이너를 다루는 방식이 다릅니다.</p>
 <ul>
 <li><strong>Docker(명령형)</strong>: <em>&quot;이 컨테이너를 실행해라.&quot;</em></li>
 <li><strong>Kubernetes(선언형)</strong>: <em>&quot;이 서비스를 원하는 상태로 유지해라.&quot;</em></li>
@@ -141,14 +171,14 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <path d="M 420 234 Q 560 260, 680 286" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#hq-arr)"/>
 </svg>
 </div>
-<div class="caption">그림 4-2. 본사가 &quot;가맹점 3개 유지&quot;를 선언하면 시스템이 가맹점 개수를 자동으로 맞추는 구조</div>
+<div class="caption">그림 4-3. 본사가 &quot;가맹점 3개 유지&quot;를 선언하면 시스템이 가맹점 개수를 자동으로 맞추는 구조</div>
 <p>쿠버네티스도 마찬가지입니다. 컨테이너 수나 상태 규칙 등 <strong>원하는 상태</strong>를 선언해 두면, 시스템이 자동으로 그 상태를 <strong>유지</strong>합니다.</p>
 <h3>4.1.2 컨트롤 플레인과 워커 노드</h3>
 <p>쿠버네티스는 크게 <strong>컨트롤 플레인(Control Plane)</strong> 과 <strong>워커 노드(Worker Node)</strong> 로 이루어집니다.</p>
 <div class="term-box">
-<p><strong>노드(Node)</strong>: 컨테이너가 실제로 돌아가는 컴퓨터 한 대를 말합니다. 실제 서비스 환경에서는 수십~수백 대의 노드(서버)가 모여 하나의 클러스터를 이룹니다. 컨트롤 플레인과 워커 노드 모두 이런 노드 위에서 동작합니다.</p>
+<p><strong>노드(Node)</strong>: 컨테이너가 실제로 돌아가는 컴퓨터 한 대를 말합니다. 실제 서비스 환경에서는 수십~수백 대의 노드(서버)가 모여 하나의 <strong>클러스터(Cluster)</strong> 를 이룹니다. 컨트롤 플레인과 워커 노드 모두 이런 노드 위에서 동작합니다.</p>
 </div>
-<p>컨트롤 플레인은 <strong>프랜차이즈 본사 관리팀</strong>처럼 컨테이너를 관리할 <strong>규칙을 정하고 지시를 내립니다</strong>. 지시를 받은 워커 노드가 실제로 컨테이너를 <strong>실행하고 관리합니다</strong>. 이때 쿠버네티스는 <strong>컨테이너를 Pod라는 단위로 묶어 관리합니다</strong>.</p>
+<p>컨트롤 플레인은 <strong>프랜차이즈 본사 관리팀</strong>처럼 컨테이너를 관리할 <strong>규칙을 정하고 지시를 내립니다</strong>. 지시를 받은 워커 노드가 실제로 컨테이너를 <strong>실행하고 관리합니다</strong>.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 940 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes 클러스터 구조 — 컨트롤 플레인 노드 1대와 워커 노드 2대가 각각 독립된 호스트 OS·하드웨어 위에서 동작">
   <defs>
@@ -211,11 +241,11 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <text x="785" y="342" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">하드웨어 (물리 서버 / VM)</text>
 </svg>
 </div>
-<div class="caption">그림 4-3. Kubernetes 클러스터의 구조</div>
-<p>컨트롤 플레인과 워커 노드가 합쳐져 유기적으로 돌아가는 전체 시스템을 <strong>클러스터(Cluster)</strong> 라고 부릅니다.</p>
+<div class="caption">그림 4-4. Kubernetes 클러스터의 구조</div>
+<p>쿠버네티스는 <strong>컨테이너를 Pod라는 단위로 묶어 관리합니다</strong>.</p>
 <h3>4.1.3 Kubernetes의 동작 원리</h3>
 <p>개발자가 명령을 내려 Pod 하나가 만들어지는 일은 <strong>프랜차이즈 본사가 새 가맹점을 여는 흐름</strong>과 비슷합니다. 크게 <strong>명령 → 판단 → 지시</strong> 세 단계로 일어납니다. 하나씩 들여다보겠습니다.</p>
-<p><strong>1. 명령 — 개발자가 클러스터에 명령을 보낸다</strong></p>
+<p><strong>1단계 - 개발자가 클러스터에 명령을 보낸다</strong></p>
 <p>개발자가 클러스터에 명령을 보내는 일은 <strong>프랜차이즈 본사에 가맹점을 신청하는 것</strong>과 같습니다. 외부에서 들어오는 모든 요청은 <strong>가장 먼저</strong> 컨트롤 플레인 내부의 <strong>Kube API Server</strong>를 통과합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="명령 단계 — 개발자가 클러스터에 명령을 보내 Kube API Server에 도달하는 길.">
@@ -247,8 +277,8 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <text x="201" y="128" text-anchor="middle" font-size="10" fill="#7b341e" font-style="italic">(가맹 신청서 제출)</text>
 </svg>
 </div>
-<div class="caption">그림 4-4. 명령 단계 — 개발자의 명령이 Kube API Server에 도착하는 길</div>
-<p><strong>2. 판단 — 컨트롤 플레인이 명령을 어떻게 처리할지 정한다</strong></p>
+<div class="caption">그림 4-5. 명령 단계 — 개발자의 명령이 Kube API Server에 도착하는 길</div>
+<p><strong>2단계 - 컨트롤 플레인이 명령을 어떻게 처리할지 판단한다</strong></p>
 <p>본사는 신청을 받으면 <strong>새 매장의 위치</strong>를 정하고 <strong>기존 매장들의 상태</strong>를 점검합니다. 이 과정에서 컨트롤 플레인의 구성 요소는 <strong>Kube API Server</strong>를 통해 서로 상태를 주고받으며 <strong>이 명령을 어떻게 처리할지</strong> 결정합니다.</p>
 <div class="svg-figure">
 <svg viewBox="85 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="판단 단계 — 컨트롤 플레인 안내데스크와 세 부서가 양방향으로 협의해 결론을 좁히는 모습.">
@@ -277,9 +307,9 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <line x1="580" y1="138" x2="660" y2="167" stroke="#ff7849" stroke-width="1.8" marker-start="url(#b-o-rev)" marker-end="url(#b-o)"/>
 </svg>
 </div>
-<div class="caption">그림 4-5. 판단 단계 — Kube API Server를 중심으로 구성 요소들이 협의하는 모습</div>
+<div class="caption">그림 4-6. 판단 단계 — Kube API Server를 중심으로 구성 요소들이 협의하는 모습</div>
 <p><strong>Kube API Server</strong>는 들어온 요청을 바탕으로 <strong>클러스터의 상태</strong>를 업데이트하고, 이 정보를 <strong>etcd</strong>에 보관합니다. <strong>Scheduler</strong>는 보관된 정보를 확인해 새 Pod를 <strong>어느 노드에 배치할지</strong> 정합니다. 동시에 <strong>Controller Manager</strong>는 클러스터 상태가 <strong>원래 설정된 모습대로 유지되고 있는지</strong> 감시합니다.</p>
-<p><strong>3. 지시 — 컨트롤 플레인이 워커 노드 kubelet에 지시한다</strong></p>
+<p><strong>3단계 - 컨트롤 플레인이 워커 노드 kubelet에 지시한다</strong></p>
 <p>판단이 완료되면 <strong>Kube API Server</strong>가 워커 노드의 <strong>kubelet</strong>에게 지시를 내립니다. 지시를 받은 <strong>kubelet</strong>은 노드 안에서 컨테이너를 실행하고, 그 상태가 정의된 모습에서 벗어나지 않게 <strong>계속 점검합니다</strong>.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 790 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지시 단계 — 컨트롤 플레인의 Pod 생성 지시가 워커 노드의 kubelet에 도착해 Pod가 실제로 생성되는 모습.">
@@ -318,10 +348,10 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <text x="678" y="242" text-anchor="middle" font-size="10" font-style="italic" fill="#cbd5e1">(없음)</text>
 </svg>
 </div>
-<div class="caption">그림 4-6. 지시 단계 — kubelet이 컨트롤 플레인의 지시를 받아 Pod를 띄우는 모습</div>
-<p>명령 → 판단 → 지시를 거쳐 <strong>Pod가 실제로 생성됩니다</strong>.</p>
+<div class="caption">그림 4-7. 지시 단계 — kubelet이 컨트롤 플레인의 지시를 받아 Pod를 띄우는 모습</div>
+<p>이런 명령 → 판단 → 지시를 거쳐 <strong>Pod가 생성됩니다</strong>.</p>
 <h3>4.1.4 Kubernetes 핵심 리소스 한눈에</h3>
-<p>쿠버네티스 세상에서는 모든 작업 단위를 <strong>리소스(Resource)</strong> 라고 부릅니다. 사용자의 요청은 여러 리소스를 거쳐 실제 컨테이너에 도달합니다. 전체적인 흐름은 다음과 같습니다.</p>
+<p>쿠버네티스 세상에서는 작업 단위를 <strong>리소스(Resource)</strong> 라고 부릅니다. 사용자의 요청은 여러 리소스를 거쳐 실제 컨테이너에 도달합니다. 전체적인 흐름은 다음과 같습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes 핵심 리소스의 전체 구조 — 사용자 요청은 Service에서 Pod로 직접 흐르고, Pod 오른쪽의 Deployment가 Pod 생성·관리를 담당한다">
   <defs>
@@ -367,12 +397,12 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <path d="M 545 240 Q 565 220, 580 195" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k4-p)"/>
 </svg>
 </div>
-<div class="caption">그림 4-7. Kubernetes 핵심 리소스의 전체 구조</div>
+<div class="caption">그림 4-8. Kubernetes 핵심 리소스의 전체 구조</div>
 <p>이번 챕터에서는 가장 기본이 되는 Pod와 Deployment를 먼저 다뤄 보겠습니다.</p>
 <h2>4.2 Minikube - 로컬에 만드는 작은 클러스터</h2>
 <h3>4.2.1 노트북 한 대로 클러스터 흉내 내기</h3>
 <p>컨트롤 플레인과 워커 노드를 모두 갖추려면 서버가 여러 대 필요해 보이지만, 연습 단계에서는 노트북 한 대로 충분합니다. Minikube를 쓰면 내 컴퓨터 안에 쿠버네티스 환경을 구축할 수 있습니다.</p>
-<p>다만 Minikube는 노드 하나로 동작합니다. 이 노드가 컨트롤 플레인 역할과 워커 노드 역할을 함께 맡습니다.</p>
+<p>Minikube는 <strong>노드 하나로 동작합니다</strong>. 이 노드가 컨트롤 플레인 역할과 워커 노드 역할을 함께 수행합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Minikube 단일 노드 안에 컨트롤 플레인 역할과 워커 노드 역할이 함께 들어 있고, 그 아래 가상화 환경, 호스트 OS, 하드웨어가 인프라 계층을 이룬다.">
   <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Minikube — 단일 노드 안에 컨트롤 플레인과 워커가 함께</text>
@@ -408,10 +438,9 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <text x="395" y="345" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">개인 PC 하드웨어 (랩탑 / 데스크탑)</text>
 </svg>
 </div>
-<div class="caption">그림 4-8. Minikube는 단일 노드 안에 컨트롤 플레인과 워커 노드 기능이 함께 들어간 구조</div>
+<div class="caption">그림 4-9. Minikube는 단일 노드 안에 컨트롤 플레인과 워커 노드 기능이 함께 들어간 구조</div>
 <p>이렇게 구조가 단순해 리소스도 적게 사용합니다. Minikube에서 작성한 설정 파일은 실제 운영 환경에서도 그대로 사용할 수 있습니다.</p>
 <p class="thought">'이제 Minikube를 직접 실행해 봐야겠다.'</p>
-<p>오픈이는 한 번 기지개를 켠 뒤 새 터미널 창을 열었습니다.</p>
 <h3>4.2.2 클러스터 시작</h3>
 <p>앞의 준비하기를 참고해 Minikube를 먼저 설치합니다. 그 다음 아래 명령으로 노트북 안에 클러스터를 시작합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 클러스터 시작</div>minikube<span class="w"> </span>start<span class="w">         </span><span class="c1"># 클러스터 시작</span></div>
@@ -437,7 +466,7 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
     <div>* 끝났습니다! kubectl이 "minikube" 클러스터와 "default" 네임스페이스를 기본적으로 사용하도록 구성되었습니다</div>
   </div>
 </div>
-<div class="caption">그림 4-9. minikube start 실행 결과</div>
+<div class="caption">그림 4-10. minikube start 실행 결과</div>
 <h3>4.2.3 자주 쓰는 Minikube 명령어</h3>
 <p>실습에서 자주 쓰게 될 명령어는 다음과 같습니다.</p>
 <table>
@@ -468,11 +497,11 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
 </table>
 <h2>4.3 Pod - Kubernetes의 최소 단위</h2>
 <p>Minikube 환경을 구성했으니 이제 실제 쿠버네티스의 리소스를 하나씩 생성해 볼 차례입니다. 도커만 쓸 때와 무엇이 다른지, 쿠버네티스라는 시스템이 컨테이너를 다루는 최소 단위부터 확인해 보겠습니다.</p>
-<h3>4.3.1 Pod라는 단위</h3>
-<p>도커가 컨테이너 단위로 관리한다면, 쿠버네티스는 <strong>하나 이상의 컨테이너를 한데 묶은 Pod(파드)</strong> 단위로 관리합니다.</p>
+<h3>4.3.1 Pod란?</h3>
+<p><strong>Pod(파드)는 하나 이상의 컨테이너로 구성된 단위</strong>입니다. 쿠버네티스는 컨테이너를 하나씩 직접 다루지 않고, 이 Pod를 단위로 관리합니다.</p>
 <div class="svg-figure">
-<svg viewBox="0 0 760 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pod 안에 두 컨테이너(Container A·B)가 들어 있고 localhost 네트워크를 공유하는 구조">
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Pod - 컨테이너들이 네트워크를 공유하는 단위</text>
+<svg viewBox="0 0 760 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pod 안에 두 컨테이너(Container A·B)가 들어 있는 구조">
+  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">컨테이너를 감싸는 Pod</text>
   <rect x="60" y="40" width="640" height="192" rx="10" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
   <text x="80" y="62" font-size="13" font-weight="700" fill="#3730a3">Pod</text>
   <rect x="100" y="90" width="260" height="80" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
@@ -485,13 +514,9 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
   <text x="530" y="106" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Container B</text>
   <text x="530" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">sidecar</text>
   <text x="530" y="155" text-anchor="middle" font-size="10" fill="#7b341e">port: 8080</text>
-  <line x1="230" y1="170" x2="230" y2="200" stroke="#475569" stroke-width="1.4" stroke-dasharray="3,3"/>
-  <line x1="530" y1="170" x2="530" y2="200" stroke="#475569" stroke-width="1.4" stroke-dasharray="3,3"/>
-  <line x1="230" y1="200" x2="530" y2="200" stroke="#475569" stroke-width="1.4" stroke-dasharray="3,3"/>
-  <text x="380" y="217" text-anchor="middle" font-size="11" font-weight="700" fill="#475569" font-style="italic">localhost (네트워크 공유)</text>
 </svg>
 </div>
-<div class="caption">그림 4-10. Pod - 컨테이너들이 네트워크를 공유하는 단위</div>
+<div class="caption">그림 4-11. Pod의 구조</div>
 <div class="prep-note">
 <p><strong>왜 컨테이너 대신 Pod를 쓸까요</strong></p>
 <p>컨테이너는 서로 독립적으로 동작해 네트워크·스토리지·생명주기를 함께 관리하기 어렵습니다. Pod는 이를 다음과 같이 해결합니다.</p>
@@ -517,15 +542,15 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
     <div>pod/hello-pod1 created</div>
   </div>
 </div>
-<div class="caption">그림 4-11. kubectl run으로 Pod 생성</div>
+<div class="caption">그림 4-12. kubectl run으로 Pod 생성</div>
 <p>Pod가 생성됐습니다. 이 방식은 <code>docker run</code>과 비슷한 방식입니다.</p>
 <p class="thought">'이건 명령형 방식이네. 그럼 선언형으로는 어떻게 만들까?'</p>
 <h3>4.3.3 YAML로 Pod 만들기</h3>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex08</p>
-</div>
-<p>선언형은 <strong>원하는 상태</strong>를 YAML 파일로 작성하여 클러스터에 반영하는 방식입니다. 만드는 과정을 명령어로 일일이 지시하는 대신, 쿠버네티스가 YAML을 읽어 원하는 상태로 리소스를 생성합니다.</p>
+<p>선언형은 <strong>원하는 상태</strong>를 YAML 파일로 작성하여 클러스터에 반영하는 방식입니다. 명령어로 일일이 지시하는 대신, 쿠버네티스가 YAML을 읽어 원하는 상태로 리소스를 생성합니다.</p>
+<p>실습 코드는 <code>ex08</code> 폴더에 있습니다.</p>
+<div class="code-block highlight" data-lang="text">ex08/
+├── hello-pod2.yml   # nginx Pod 정의
+└── README.md        # 실습 안내</div>
 <p>다음은 nginx 이미지로 Pod 하나를 만드는 YAML입니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 1</span> ex08/hello-pod2.yml. nginx Pod 정의</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span><span class="w">                 </span><span class="c1"># 리소스 종류</span>
@@ -548,7 +573,7 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
     <div>pod/hello-pod2 created</div>
   </div>
 </div>
-<div class="caption">그림 4-12. kubectl apply로 Pod 생성</div>
+<div class="caption">그림 4-13. kubectl apply로 Pod 생성</div>
 <p>YAML 파일을 통해 Pod가 생성되었습니다.</p>
 <h3>4.3.4 Pod 조회</h3>
 <p>Pod 두 개를 만들었으니 이제 목록을 조회해 보겠습니다.</p>
@@ -566,7 +591,7 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
     <div>hello-pod2   1/1     Running   0          23s</div>
   </div>
 </div>
-<div class="caption">그림 4-13. Pod 목록 조회 결과</div>
+<div class="caption">그림 4-14. Pod 목록 조회 결과</div>
 <p>Pod의 상태나 컨테이너, IP 같은 상세 정보를 보고 싶다면 <strong>kubectl describe</strong> 명령어를 사용합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 상세 정보 조회</div>kubectl<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>hello-pod2<span class="w">       </span><span class="c1"># Pod 상세 정보 조회</span></div>
 <div class="terminal-log">
@@ -604,7 +629,7 @@ winget<span class="w"> </span>install<span class="w"> </span>Kubernetes.minikube
     <div>&nbsp;&nbsp;Mounts:</div>
   </div>
 </div>
-<div class="caption">그림 4-14. Pod 상세 조회</div>
+<div class="caption">그림 4-15. Pod 상세 조회</div>
 <h3>4.3.5 자주 쓰는 kubectl 명령어</h3>
 <p>실습에서 자주 쓰게 될 기본 명령어는 다음과 같습니다.</p>
 <table>
@@ -663,7 +688,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
     <div>hello-pod1   1/1     Running   0          19m</div>
   </div>
 </div>
-<div class="caption">그림 4-15. Pod 삭제 후 목록을 조회하면 hello-pod2가 사라져 있습니다</div>
+<div class="caption">그림 4-16. Pod 삭제 후 목록을 조회하면 hello-pod2가 사라져 있습니다</div>
 <p>hello-pod2는 목록에서 사라졌고, 시간이 지나도 다시 나타나지 않았습니다.</p>
 <p class="thought">'아, 그냥 선언만 해서는 자동 복구가 안 되네.'</p>
 <p>Pod 자체는 사라져도 자동으로 복구되지 않습니다. 그래서 Pod를 <strong>원하는 상태로 계속 유지하는 리소스</strong>가 필요합니다. 그 리소스가 쿠버네티스의 <strong>Deployment(디플로이먼트)</strong> 입니다.</p>
@@ -671,11 +696,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
 <p><strong>Deployment</strong>: 파드(Pod)에 대한 <strong>선언적 업데이트</strong>를 제공하는 쿠버네티스 리소스입니다. 원하는 상태를 선언해 두면 시스템이 그 상태를 자동으로 유지하며, 자동 복구(Self-healing)·롤링 업데이트·롤백·스케일링까지 함께 담당합니다.</p>
 </div>
 <h3>4.4.2 Deployment - 원하는 상태를 유지하는 매뉴얼</h3>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex09</p>
-</div>
-<p>Deployment는 &quot;<strong>Pod를 몇 개 유지할지, 문제가 생기면 어떻게 교체할지</strong>&quot;를 적어 두는 <strong>매뉴얼</strong>과 같습니다. 선언한 상태와 실제 상태를 비교해, 차이가 생기면 Pod를 다시 만들어 원하는 상태로 되돌립니다.</p>
+<p>Deployment는 &quot;<strong>Pod를 몇 개 유지할지, 문제가 생기면 어떻게 교체할지</strong>&quot;를 적어 두는 <strong>매뉴얼</strong>과 같습니다. 선언한 상태와 실제 상태를 비교해, 차이가 생기면 스스로 조정해 원하는 상태로 되돌립니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment 구조: Deployment가 원하는 상태를 선언해 두고 여러 Pod를 띄워 관리한다">
   <defs>
@@ -704,7 +725,11 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
   <text x="380" y="250" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod가 사라지면 Deployment가 같은 정의의 Pod를 다시 띄워 원래대로 맞춥니다.</text>
 </svg>
 </div>
-<div class="caption">그림 4-16. Deployment의 구조 — Pod를 띄우고 원하는 상태를 계속 유지</div>
+<div class="caption">그림 4-17. Deployment의 구조 — Pod를 띄우고 원하는 상태를 계속 유지</div>
+<p>실습 코드는 <code>ex09</code> 폴더에 있습니다.</p>
+<div class="code-block highlight" data-lang="text">ex09/
+├── deploy-ex01.yml  # nginx Pod 1개를 유지하는 Deployment 정의
+└── README.md        # 실습 안내</div>
 <p>다음은 nginx Pod 한 개를 항상 유지하도록 정의한 Deployment YAML입니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 2</span> ex09/deploy-ex01.yml. Deployment 정의 (replicas 1)</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -757,7 +782,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
   <text x="722" y="238" text-anchor="end" font-size="11" font-weight="700" fill="#94a3b8">제외</text>
 </svg>
 </div>
-<div class="caption">그림 4-17. selector가 지정한 라벨(app: nginx)을 가진 Pod만 골라 관리, 다른 라벨은 건드리지 않음</div>
+<div class="caption">그림 4-18. selector가 지정한 라벨(app: nginx)을 가진 Pod만 골라 관리, 다른 라벨은 건드리지 않음</div>
 <p>작성한 파일을 적용해 보겠습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Deployment 생성</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex09/deploy-ex01.yml<span class="w">   </span><span class="c1"># Deployment 생성</span>
 kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                    </span><span class="c1"># Pod 목록</span></div>
@@ -774,7 +799,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
     <div>nginx-deploy-756b46b54c-8q8p1   1/1     Running   0          5s</div>
   </div>
 </div>
-<div class="caption">그림 4-18. Deployment가 만든 Pod가 뜬 모습</div>
+<div class="caption">그림 4-19. Deployment가 만든 Pod가 뜬 모습</div>
 <p>이제 Deployment가 정말로 원하는 상태를 유지하는지 확인하기 위해, 현재 실행 중인 Pod를 전부 지웁니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 전체 삭제 후 자동 복구 확인</div>kubectl<span class="w"> </span>delete<span class="w"> </span>pod<span class="w"> </span>--all<span class="w">           </span><span class="c1"># 모든 Pod 삭제 </span>
 kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                    </span><span class="c1"># 목록 재확인</span></div>
@@ -793,16 +818,11 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
     <div>nginx-deploy-756b46b54c-2sv8x   1/1     Running   0          3m11s</div>
   </div>
 </div>
-<div class="caption">그림 4-19. Pod를 다 지워도 Deployment가 자동으로 새 Pod를 띄웁니다</div>
-<p>hello-pod1은 그대로 사라졌지만 Deployment가 만든 Pod는 삭제된 후 <strong>새 이름으로 다시 실행되었습니다</strong>.</p>
+<div class="caption">그림 4-20. Pod를 다 지워도 Deployment가 자동으로 새 Pod를 띄웁니다</div>
+<p>hello-pod1은 그대로 사라졌지만 Deployment가 만든 Pod는 삭제된 후 새 Pod로 다시 실행되었습니다.</p>
 <p class="thought">'팀장님이 물어봤던 게 이거였구나. 원하는 상태만 정해 두면, 그다음은 Deployment가 자동으로 관리해 주네.'</p>
 <h3>4.4.3 ReplicaSet - Pod 개수 자동 관리</h3>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex10</p>
-</div>
-<p>운영 환경에서는 부하를 분산하기 위해 Pod를 여러 개 실행합니다. 이때 Pod의 개수를 일정하게 유지하는 리소스가 바로 <strong>ReplicaSet(레플리카셋)</strong> 입니다.</p>
-<p>에어컨이 설정된 온도를 자동으로 유지하는 것처럼, ReplicaSet은 사용자가 선언한 개수와 실제 작동 중인 Pod의 개수를 지속적으로 비교합니다. 만약 Pod가 모자라면 즉시 새 Pod를 생성해 개수를 맞춥니다.</p>
+<p>운영 환경에서는 부하를 분산하기 위해 Pod를 여러 개 실행합니다. 이때 Pod의 개수를 일정하게 유지하는 리소스가 바로 <strong>ReplicaSet(레플리카셋)</strong> 입니다. 사용자가 선언한 개수와 실제 작동 중인 Pod의 개수를 비교해, 모자라거나 남는 만큼 조절합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ReplicaSet 자가 복구: Pod 하나가 종료되면 새 Pod를 자동으로 띄워 개수를 맞춘다">
   <defs>
@@ -843,8 +863,15 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
   <text x="380" y="305" text-anchor="middle" font-size="11" font-style="italic" fill="#475569">Pod 2가 종료되면 ReplicaSet이 즉시 Pod 3을 띄워 다시 2개를 유지합니다.</text>
 </svg>
 </div>
-<div class="caption">그림 4-20. Pod 하나가 종료되면 새 Pod를 자동으로 띄워 개수를 맞춤</div>
-<p>ReplicaSet은 쿠버네티스에 별도로 존재하는 리소스이지만, <strong>롤링 업데이트나 롤백 같은 배포 기능이 없습니다</strong>. 그래서 실무에서는 ReplicaSet을 직접 만들지 않고 Deployment를 사용합니다. <strong>Deployment가 내부적으로 ReplicaSet을 자동으로 만들어</strong> Pod 개수를 유지하고, 그 위에 롤링 업데이트·롤백을 더합니다.</p>
+<div class="caption">그림 4-21. Pod 하나가 종료되면 새 Pod를 자동으로 띄워 개수를 맞춤</div>
+<div class="tip">
+<p><strong>ReplicaSet과 Deployment</strong></p>
+<p>ReplicaSet은 쿠버네티스에 별도로 존재하는 리소스이지만, 롤링 업데이트나 롤백 같은 배포 기능이 없습니다. 그래서 실무에서는 <strong>ReplicaSet을 직접 만들지 않고 Deployment를 사용</strong>합니다. Deployment의 <strong>replicas 속성</strong>을 통해 내부적으로 ReplicaSet을 자동으로 만들어 Pod 개수를 유지하고, 롤링 업데이트와 롤백까지 함께 제공합니다.</p>
+</div>
+<p>실습 코드는 <code>ex10</code> 폴더에 있습니다.</p>
+<div class="code-block highlight" data-lang="text">ex10/
+├── deploy-ex02.yml  # nginx Pod 4개를 유지하는 Deployment 정의
+└── README.md        # 실습 안내</div>
 <p>다음은 <code>replicas</code>를 4로 늘려 같은 Pod 4대를 동시에 띄우고 유지하는 Deployment YAML입니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 3</span> ex10/deploy-ex02.yml. replicas 4와 롤링 업데이트 전략</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -888,15 +915,15 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
     <div>nginx-replica-756b46b54c-vzv7n   1/1     Running   0          5s</div>
   </div>
 </div>
-<div class="caption">그림 4-21. replicas 설정대로 Pod 4개가 생성</div>
+<div class="caption">그림 4-22. replicas 설정대로 Pod 4개가 생성</div>
 <h3>4.4.4 롤링 업데이트 - 끊김 없는 버전 교체</h3>
-<p>운영 중에는 서비스를 멈추지 않고 새 버전으로 교체하는 작업이 자주 일어납니다. 하지만 여러 Pod를 사람이 일일이 수동으로 내리고 올리는 방식은 비효율적일 뿐만 아니라 실수의 위험도 따릅니다. 쿠버네티스는 이 과정을 자동화하는 <strong>롤링 업데이트(Rolling Update)</strong> 를 제공합니다.</p>
+<p>운영 중인 서비스를 새 버전으로 교체할 때, 여러 Pod를 수동으로 교체하면 번거로울 뿐만 아니라 그 과정에서 서비스가 중단되기 쉽습니다. 쿠버네티스의 <strong>롤링 업데이트(Rolling Update)</strong> 는 기존 버전을 한꺼번에 내리지 않고 새 버전으로 조금씩 교체하여, <strong>서비스가 멈추지 않는 무중단 배포</strong>를 제공합니다.</p>
 <p>앞서 만든 <code>deploy-ex02.yml</code>에는 이 롤링 업데이트 동작을 정하는 <code>strategy</code> 블록이 들어 있습니다. 각 속성은 다음과 같습니다.</p>
 <ul>
 <li><strong>maxSurge</strong>: 업데이트 중 replicas로 지정한 수보다 잠시 더 늘어나는 Pod의 수</li>
-<li><strong>maxUnavailable</strong>: 업데이트 중 <strong>작동 불능</strong> 상태가 되어도 허용되는 Pod의 수</li>
+<li><strong>maxUnavailable</strong>: 업데이트 중 replicas로 지정한 수보다 잠시 줄어들어도 되는 Pod의 수</li>
 </ul>
-<p>예를 들어 replicas: 4, maxSurge: 4, maxUnavailable: 0이라면, 기존 4개는 그대로 둔 상태에서 새 버전 4개를 한꺼번에 더 만듭니다. 새 Pod가 Ready 상태가 되는 대로 기존 Pod를 차례로 종료시킵니다.</p>
+<p>예를 들어 replicas: 4, maxSurge: 4, maxUnavailable: 0이라면, 기존 4개는 그대로 둔 상태에서 새 버전 4개를 추가합니다. 새 Pod가 준비되면 기존 Pod를 차례로 종료시킵니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 820 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="롤링 업데이트 4단계: 새 Pod 4개가 뜨고 기존 Pod 4개가 사라지는 과정">
   <defs><marker id="ru-arr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#94a3b8"/></marker></defs>
@@ -935,8 +962,8 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
   <text x="410" y="232" text-anchor="middle" font-size="11" fill="#475569"><tspan font-weight="700" fill="#4f46e5">maxSurge 4</tspan> → 새 Pod 4개를 먼저 띄우고, <tspan font-weight="700" fill="#7b341e">maxUnavailable 0</tspan> → 기존 4개를 그 뒤에 내려 서비스가 끊기지 않습니다</text>
 </svg>
 </div>
-<div class="caption">그림 4-22. 롤링 업데이트 진행 - 새 Pod 4개를 띄운 뒤 기존 Pod 4개를 차례로 내립니다</div>
-<p><strong>maxSurge를 줄이면</strong> 한 번에 띄울 새 Pod 수가 제한되어 천천히 교체됩니다. <strong>maxUnavailable을 늘리면</strong> 기존 Pod를 더 줄이며 빠르게 교체됩니다. 이렇게 두 값을 조정해 원하는 배포 방식을 설정합니다.</p>
+<div class="caption">그림 4-23. 롤링 업데이트 진행 - 새 Pod 4개를 띄운 뒤 기존 Pod 4개를 차례로 내립니다</div>
+<p><strong>maxSurge를 줄이면</strong> 한 번에 띄울 새 Pod 수가 제한되어 천천히 교체되고, <strong>maxUnavailable을 늘리면</strong> 기존 Pod가 한 번에 더 많이 종료되는 것을 허용해 빠르게 교체할 수 있습니다. 이렇게 두 값을 조정해 원하는 배포 방식을 설정합니다.</p>
 <p>다음 명령어로 이미지 버전을 교체해 보겠습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 이미지 버전 교체 (롤링 업데이트 트리거)</div><span class="c1"># 이미지를 nginx:1.21로 교체</span>
 kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </span>image<span class="w"> </span>deployment/nginx-replica<span class="w"> </span>nginx-container<span class="o">=</span>nginx:1.21</div>
@@ -951,7 +978,7 @@ kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </spa
     <div>deployment.apps/nginx-replica image updated</div>
   </div>
 </div>
-<div class="caption">그림 4-23. 이미지 버전 업데이트 실행</div>
+<div class="caption">그림 4-24. 이미지 버전 업데이트 실행</div>
 <p><code>kubectl get</code> 명령어에 <code>-w</code> 옵션을 추가하면 Pod 상태 변화를 실시간으로 볼 수 있습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 상태 실시간 감시</div>kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-w<span class="w">   </span><span class="c1"># Pod 상태 실시간 감시</span></div>
 <div class="terminal-log">
@@ -985,7 +1012,7 @@ kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </spa
     <div>nginx-replica-756b46b54c-l5l7f   0/1     Completed           0          9m24s</div>
   </div>
 </div>
-<div class="caption">그림 4-24. 롤링 업데이트 진행 화면</div>
+<div class="caption">그림 4-25. 롤링 업데이트 진행 화면</div>
 <p>출력에서 새 Pod는 <strong>Pending → ContainerCreating → Running</strong> 순서로 실행되고, 기존 Pod는 <strong>Running → Terminating → Completed</strong> 순서로 종료됩니다.</p>
 <p>업데이트가 끝난 뒤 Deployment의 상세 정보를 확인하면 이미지가 <code>nginx:1.21</code> 버전으로 변경된 것을 볼 수 있습니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Deployment 상세 정보 조회</div>kubectl<span class="w"> </span>describe<span class="w"> </span>deployment<span class="w"> </span>nginx-replica<span class="w">  </span><span class="c1"># Deployment 상세 정보 조회</span></div>
@@ -1003,18 +1030,18 @@ kubectl<span class="w"> </span><span class="nb">set</span><span class="w"> </spa
     <div>deployment.apps/nginx-replica rolled back</div>
   </div>
 </div>
-<div class="caption">그림 4-25. Rollback 실행 결과</div>
+<div class="caption">그림 4-26. Rollback 실행 결과</div>
 <p>이렇게 쿠버네티스로 컨테이너를 운영하는 법을 익히고 나니, 문득 회의실에서의 그 질문이 떠올랐습니다.</p>
 <p class="thought">'컨테이너가 죽거나 트래픽이 몰리면 어쩌나 막막했는데. 이제 쿠버네티스한테 맡기면 되겠다.'</p>
 <p>다음 챕터에서는 Service와 Ingress로 외부와 연결되는 진입점을 만들어 보겠습니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>
-<li><strong>Docker는 &quot;지금 띄워라&quot;, Kubernetes는 &quot;이 상태를 유지해라&quot;.</strong> 선언형 관리의 핵심입니다. 내가 원하는 상태를 YAML에 정의해 두면, 쿠버네티스가 실시간 상태를 확인하며 그 상태에 계속 맞춥니다.</li>
-<li><strong>쿠버네티스는 프랜차이즈 본사 구조입니다.</strong> 본사가 전국의 가맹점을 관리하는 모습과 같습니다. 컨트롤 플레인이 워커 노드 위의 Pod를 관리합니다.</li>
-<li><strong>Pod는 가맹점, 실행의 최소 단위입니다.</strong> 쿠버네티스에서 컨테이너는 Pod라는 상자에 담겨 움직입니다.</li>
-<li><strong>Pod를 직접 만들지 마세요.</strong> 직접 만든 Pod는 장애가 나도 복구되지 않습니다. 반드시 Deployment로 감싸서 관리 목록에 올려야 자동 복구와 스케일링이 가능해집니다.</li>
-<li><strong>롤링 업데이트로 무중단 배포를 합니다.</strong> 새 Pod를 먼저 띄운 뒤 기존 Pod를 순차적으로 교체하여, 서비스 중단 없이 버전을 올리는 방식입니다.</li>
+<li><strong>Docker는 &quot;지금 띄워라&quot;, Kubernetes는 &quot;이 상태를 유지해라&quot;.</strong> 선언형 관리의 핵심입니다. 원하는 상태를 YAML에 정의해 두면 쿠버네티스가 실제 상태를 계속 확인하며 그에 맞춥니다.</li>
+<li><strong>쿠버네티스는 컨트롤 플레인과 워커 노드로 이루어집니다.</strong> 컨트롤 플레인이 워커 노드 위의 Pod를 관리합니다.</li>
+<li><strong>Pod는 쿠버네티스가 컨테이너를 다루는 최소 단위입니다.</strong> 쿠버네티스는 컨테이너를 직접 다루지 않고 Pod 단위로 관리합니다.</li>
+<li><strong>운영에서는 Pod를 단독으로 만들지 않습니다.</strong> 직접 만든 Pod는 장애가 나도 복구되지 않습니다. Deployment로 관리해야 자동 복구와 스케일링이 가능합니다.</li>
+<li><strong>롤링 업데이트로 무중단 배포를 합니다.</strong> 새 Pod를 먼저 띄운 뒤 기존 Pod를 차례로 종료해, 서비스 중단 없이 버전을 올립니다.</li>
 </ul>
 </div>
 

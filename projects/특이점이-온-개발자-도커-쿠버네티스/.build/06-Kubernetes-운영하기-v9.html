@@ -35,6 +35,14 @@
 <li>앞서 만든 프론트엔드·백엔드·DB를 쿠버네티스 위에 한 번에 배포합니다</li>
 </ul>
 </div>
+<div class="prep-section-md">
+<p><strong>실습 준비</strong>. 예제 코드</p>
+<p>이 책의 실습 코드는 GitHub 레포 하나에 챕터별 폴더로 담겨 있습니다. 아래 명령으로 레포를 한 번 git clone 합니다. 이후 챕터마다 해당 폴더로 이동해 실습합니다.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 예제 코드 클론</div>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-10-linux-docker/start</div>
+<p>이번 챕터는 <code>ex13</code>~<code>ex15</code> 폴더를 사용합니다.</p>
+<p>완성된 코드는 아래 주소에서 확인하세요.</p>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 완성 코드</div>https://github.com/metacoding-10-linux-docker/final</div>
+</div>
 <h2>6.1 ConfigMap·Secret - 설정과 비밀번호를 이미지 외부로</h2>
 <p>컨테이너 이미지에 데이터베이스 주소나 비밀번호를 직접 적어 두면, 설정값이 바뀔 때마다 이미지를 새로 빌드해야 합니다. 운영 환경에서 설정 하나를 바꾸기 위해 매번 이미지를 다시 빌드하고 배포하는 것은 비효율적입니다.</p>
 <p>그래서 쿠버네티스에는 컨테이너 이미지와 환경 변수를 분리하기 위한 <strong>ConfigMap</strong>과 <strong>Secret</strong>이라는 리소스가 있습니다. ConfigMap에는 일반 설정값을, Secret에는 민감한 정보를 저장합니다.</p>
@@ -67,10 +75,6 @@
 </div>
 <div class="caption">그림 6-2. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</div>
 <h3>6.1.1 ConfigMap</h3>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex13</p>
-</div>
 <p><strong>ConfigMap</strong>은 환경에 따라 달라지는 설정값을 Pod에 환경 변수로 주입하는 리소스입니다.</p>
 <p>다음은 설정값 두 개를 정의한 ConfigMap입니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 1</span> ex13/configmap-conn.yml. ConfigMap 정의</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -125,10 +129,6 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <div class="caption">그림 6-3. Pod 안의 환경 변수 목록에 ConfigMap의 값이 보이는 모습</div>
 <p>ConfigMap에 적어 둔 conn_info와 conn_url이 Pod의 환경 변수로 주입됐습니다.</p>
 <h3>6.1.2 Secret</h3>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex13</p>
-</div>
 <p>앞에서 본 ConfigMap이 일반 설정값을 위한 리소스라면, <strong>Secret</strong>은 비밀번호·토큰·키처럼 민감한 정보를 위한 리소스입니다.</p>
 <p>다음은 비밀번호를 정의한 Secret YAML입니다. <code>stringData</code>에 평문을 적으면 쿠버네티스가 저장할 때 Base64로 인코딩합니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 3</span> ex13/secret-password.yml. Secret 정의</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -346,10 +346,6 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 </table>
 <p>이 중 가장 보편적으로 사용하는 <strong>PV(PersistentVolume)</strong> 와 <strong>PVC(PersistentVolumeClaim)</strong> 를 알아보겠습니다.</p>
 <h3>6.2.2 PV와 PVC</h3>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex14</p>
-</div>
 <p>쿠버네티스는 저장소(PV)와 사용 요청(PVC)을 분리합니다. <strong>PV는 용량과 권한 등 실제 저장 공간의 사양을 정의</strong>하고, <strong>PVC는 필요한 공간을 요구하는 신청서</strong>입니다. PVC로 &quot;1Gi 크기의 읽기·쓰기가 가능한 공간&quot;을 요청하면, 쿠버네티스가 조건에 맞는 PV를 찾아 자동으로 연결합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pod가 PVC를 거쳐 실제 저장소(PV)에 연결되는 구조 — Pod는 핵심 프로세스(직사각형), PV는 데이터 저장소(실린더)">
@@ -481,10 +477,6 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <div class="caption">그림 6-12. Pod가 새로 생성됐는데도 c.txt가 그대로 남아 있는 모습</div>
 <p>새 Pod에서도 <code>c.txt</code>가 그대로 보입니다. Pod는 삭제·재생성되어도 PV 안 파일은 그대로 남습니다.</p>
 <h2>6.3 통합 실습 - 쿠버네티스 위에 웹사이트 올리기</h2>
-<div class="tip">
-<p>전체 실습 코드는 깃헙을 참고합니다.</p>
-<p><strong>실습 코드 (GitHub)</strong>: https://github.com/metacoding-10-linux-docker/docker/tree/master/ex15</p>
-</div>
 <p>마지막으로 지금까지 익힌 리소스를 모아 하나의 프로젝트로 연결해 보겠습니다. 앞서 Docker Compose로 실행했던 프로젝트를 쿠버네티스 위에 다시 구축합니다.</p>
 <h3>6.3.1 전체 그림</h3>
 <p>이번 실습의 구성도에는 프론트엔드, 백엔드, DB, 그리고 방문 횟수를 기록하는 Redis까지 서비스 네 개가 들어 있습니다. 앞서 Docker Compose로 실행했던 세 서비스에 Redis가 더해진 구조입니다.</p>
