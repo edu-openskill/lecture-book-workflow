@@ -68,11 +68,32 @@ Phase 5 ── 완성
   >  3. **목차/주제로** — 완성물 없이 목차·주제만으로 (track=`concept`)"
   - 답에 따라 `track`을 `lecture`/`code`/`concept` 중 하나로 확정한다.
 - **그 다음 책 이름**(프로젝트 폴더명)을 묻는다.
-- **트랙별 디렉토리 생성** (아래 "프로젝트 폴더 구조"):
-  - 공통: `planning`, `chapters`, `book/front|body|back`, `assets`, `questions/pending|done`, `review`
-  - `code`: 추가로 `code/`, `versions/`
-  - `concept`: 추가로 `examples/` (그리고 `code/`·`versions/`는 만들지 않음)
-  - `lecture`: 추가로 `sources/` (강별 `sources/NN강/`에 판서대본·자막을 둔다)
+- **트랙별 디렉토리 생성** — `mkdir -p path/{a,b}` 형태의 brace expansion을 쓰지 않는다(쉘 호환성 문제). 한 줄에 하나씩 생성한다.
+  - 공통(세 트랙 모두):
+    ```bash
+    mkdir -p projects/[책이름]/planning
+    mkdir -p projects/[책이름]/chapters
+    mkdir -p projects/[책이름]/book/front
+    mkdir -p projects/[책이름]/book/body
+    mkdir -p projects/[책이름]/book/back
+    mkdir -p projects/[책이름]/assets
+    mkdir -p projects/[책이름]/questions/pending
+    mkdir -p projects/[책이름]/questions/done
+    mkdir -p projects/[책이름]/review
+    ```
+  - `code` 트랙은 추가로:
+    ```bash
+    mkdir -p projects/[책이름]/code
+    mkdir -p projects/[책이름]/versions
+    ```
+  - `concept` 트랙은 추가로(그리고 `code/`·`versions/`는 만들지 않는다):
+    ```bash
+    mkdir -p projects/[책이름]/examples
+    ```
+  - `lecture` 트랙은 추가로(강별 `sources/NN강/`에 판서대본·자막):
+    ```bash
+    mkdir -p projects/[책이름]/sources
+    ```
 - `.claude/progress-template.json`을 복사해 `projects/[책이름]/progress.json` 생성 후 `track`을 확정값으로 설정한다.
 - **트랙별 소스 입력 안내**:
   - `code`: `code/`에 완성 코드를 넣거나 GitHub URL을 달라.
