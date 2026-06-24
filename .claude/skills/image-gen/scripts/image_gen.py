@@ -127,3 +127,13 @@ def process_file(md_path, project_root, generate=run_codex_image,
         print(f"[ok] {ph.id} → {ph.path}")
     md_path.write_text(text, encoding='utf-8')
     return count
+
+if __name__ == "__main__":
+    import sys
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    dry = "--dry-run" in sys.argv
+    if len(args) < 2:
+        print("usage: image_gen.py <chapter.md> <project_root> [--dry-run]")
+        sys.exit(1)
+    n = process_file(args[0], args[1], dry_run=dry)
+    print(f"처리: {n}장")
