@@ -78,3 +78,52 @@ def replace_placeholder(md_text: str, ph: Placeholder, width: int = 720) -> str:
     img_tag = f'<img src="{src}" width="{width}" alt="{alt}">'
     repl = img_tag + (('\n\n' + ph.caption) if ph.caption else '')
     return md_text.replace(ph.raw_block, repl)
+
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+def _default_codex_js() -> str:
+    base = os.environ.get('APPDATA') or str(Path.home())
+    return str(Path(base) / 'npm' / 'node_modules' / '@openai' / 'codex' / 'bin' / 'codex.js')
+
+def run_codex_image(prompt: str, codex_js=None, codex_home=None) -> str | None:
+    """codex --json 헤드리스로 이미지 생성 → 생성 PNG 경로 반환. (S1 검증된 호출)
+    프롬프트는 stdin으로 전달. 평문 `codex exec "..."`는 non-TTY에서 실패하므로
+    `node codex.js exec --json --skip-git-repo-check -` 를 쓴다."""
+    codex_js = str(codex_js or _default_codex_js())
+    full = '다음 설명으로 이미지 한 장을 생성해서 PNG 파일로 저장해줘:\n' + prompt
+    res = subprocess.run(
+        ['node', codex_js, 'exec', '--json', '--skip-git-repo-check', '-'],
+        input=full, capture_output=True, text=True, encoding='utf-8',
+    )
+    tid = parse_thread_id(res.stdout)
+    if not tid:
+        return None
+    img = find_generated_image(tid, codex_home)
+    return str(img) if img else None
+
+def process_file(md_path, project_root, generate=run_codex_image,
+                 dry_run: bool = False) -> int:
+    md_path = Path(md_path); project_root = Path(project_root)
+    text = md_path.read_text(encoding='utf-8')
+    phs = scan_placeholders(text)
+    count = 0
+    for ph in phs:
+        if dry_run:
+            print(f"[dry-run] {ph.id} → {ph.path}")
+            count += 1
+            continue
+        saved = generate(ph.prompt)
+        if not saved:
+            print(f"[skip] 생성 실패: {ph.id}")
+            continue
+        target = project_root / ph.path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(saved), str(target))
+        text = replace_placeholder(text, ph)
+        count += 1
+        print(f"[ok] {ph.id} → {ph.path}")
+    md_path.write_text(text, encoding='utf-8')
+    return count

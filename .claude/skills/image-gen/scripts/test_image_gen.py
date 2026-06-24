@@ -1,5 +1,6 @@
 from pathlib import Path
 from image_gen import scan_placeholders, parse_thread_id, find_generated_image, replace_placeholder
+from image_gen import process_file
 
 SAMPLE = '''본문.
 
@@ -56,3 +57,23 @@ def test_replace_emits_img_tag():
     assert '<!--' not in out
     assert '<img src="../assets/CH03/03_rag-flow.png" width="720"' in out
     assert '*그림 3-2: RAG 파이프라인의 전체 흐름*' in out
+
+def test_process_file_moves_and_replaces(tmp_path):
+    # 프로젝트 구조
+    proj = tmp_path
+    (proj / 'chapters').mkdir()
+    md = proj / 'chapters' / '03.md'
+    md.write_text(SAMPLE, encoding='utf-8')
+    # 가짜 codex: 생성된 png를 만들어 그 절대경로를 반환
+    fake_png = tmp_path / 'gen' / 'ig_x.png'
+    fake_png.parent.mkdir()
+    fake_png.write_bytes(b'\x89PNG fake')
+    def fake_generate(prompt):
+        return str(fake_png)
+    n = process_file(md, proj, generate=fake_generate)
+    assert n == 1
+    # 타깃 위치로 이동됨
+    assert (proj / 'assets' / 'CH03' / '03_rag-flow.png').exists()
+    # 본문 교체됨
+    text = md.read_text(encoding='utf-8')
+    assert '<img src=' in text and '<!--' not in text
