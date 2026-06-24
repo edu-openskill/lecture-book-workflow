@@ -16,6 +16,8 @@
 | `visual/` | `claude-haiku-4-5-20251001` | B4, B5 | mermaid, image |
 | `screenshot/` | — | — | terminal-capture, browser-capture, capture.py |
 | `review/` | `claude-opus-4-6` | D1, D3, D4, D5 | review-rules |
+| `lecture/` ★lecture | claude-sonnet-4-6 | L1 개념 / L2 비유 / L3 선수 / L4 오개념 (강의 해부) | `references/lecture-analysis.md` |
+| `lecture-caption/` ★lecture | claude-sonnet-4-6 | Cap1~Cap4 유튜브 자막 다운로드·정제·정렬 | `scripts/fetch_captions.py`, `references/caption-cleanup.md` |
 
 ---
 
@@ -79,6 +81,9 @@
 | 5. 챕터 집필 | C1, C2, C3, C5, D1, D2, D3, D4 |
 | 6. 프롤로그 | C2 |
 | 7. 마무리 | C2, C4, D6 |
+| (사전) 자막 추출 | lecture-caption (Cap1~Cap4) — lecture 트랙 |
+| 2. 강의 해부 (lecture) | lecture (L1 개념 / L2 비유 / L3 선수 / L4 오개념) |
+| 3. 챕터 매핑 (lecture) | planning(분량) + lecture(L3 의존성) |
 
 ## 검토 모드 ↔ 참조 스킬
 
