@@ -78,6 +78,9 @@ Phase 5 ── 완성
   mkdir -p projects/[책이름]/code
   mkdir -p projects/[책이름]/review
   ```
+
+  > **개념 트랙일 때**: 위 블록에서 `mkdir -p projects/[책이름]/code` 와 `mkdir -p projects/[책이름]/versions` 두 줄은 실행하지 않고, 대신 `mkdir -p projects/[책이름]/examples` 를 실행한다. (개념 트랙은 완성 코드/버전이 없고 강별 계산 예제를 `examples/`에 둔다.)
+
 - `.claude/progress-template.json`을 복사하여 `projects/[책이름]/progress.json` 생성.
 - **완성 코드 입력 안내**: `code/` 폴더에 완성 코드를 넣거나 GitHub URL을 달라고 안내한다.
 - 코드 사전 스캔 → STEP 1(씨앗 심기) 순서로 진행한다.
