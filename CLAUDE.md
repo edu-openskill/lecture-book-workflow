@@ -61,29 +61,24 @@ Phase 5 ── 완성
 
 ### `새 책 만들기`
 - 새 책 프로젝트를 시작한다.
-- 먼저 책 이름(프로젝트 폴더명)을 물어본다.
-- **트랙 질문**: 책 이름 다음으로 트랙을 묻는다 — "완성 코드를 가지고 쓰는 책이야(코드 트랙), 아니면 목차/주제로 쓰는 개념·수학책이야(개념 트랙)?"
-- **개념 트랙이면**: `code/` 폴더 대신 `examples/`를 만들고, `progress.json`의 `track`을 `concept`로 설정한다. 코드 사전 스캔/입력 안내는 생략하고, 대신 "목차가 있으면 주거나, 없으면 주제만 알려줘"라고 안내한다.
-- `projects/[책이름]/` 디렉토리 구조를 생성한다 (아래 "프로젝트 폴더 구조" 참조).
-- **디렉토리 생성 시 주의**: `mkdir -p path/{a,b}` 형태의 brace expansion을 사용하지 않는다. 각 디렉토리를 개별적으로 생성하거나, 한 줄에 하나씩 나열한다.
-  ```bash
-  mkdir -p projects/[책이름]/planning
-  mkdir -p projects/[책이름]/chapters
-  mkdir -p projects/[책이름]/book/front
-  mkdir -p projects/[책이름]/book/body
-  mkdir -p projects/[책이름]/book/back
-  mkdir -p projects/[책이름]/versions
-  mkdir -p projects/[책이름]/questions/pending
-  mkdir -p projects/[책이름]/questions/done
-  mkdir -p projects/[책이름]/code
-  mkdir -p projects/[책이름]/review
-  ```
-
-  > **개념 트랙일 때**: 위 블록에서 `mkdir -p projects/[책이름]/code` 와 `mkdir -p projects/[책이름]/versions` 두 줄은 실행하지 않고, 대신 `mkdir -p projects/[책이름]/examples` 를 실행한다. (개념 트랙은 완성 코드/버전이 없고 강별 계산 예제를 `examples/`에 둔다.)
-
-- `.claude/progress-template.json`을 복사하여 `projects/[책이름]/progress.json` 생성.
-- **완성 코드 입력 안내**: `code/` 폴더에 완성 코드를 넣거나 GitHub URL을 달라고 안내한다.
-- 코드 사전 스캔 → STEP 1(씨앗 심기) 순서로 진행한다.
+- **STEP 0 — 트랙 선택(가장 먼저)**: 책 이름을 묻기 전에, 어떤 책을 쓸지 먼저 묻는다.
+  > "어떤 방식으로 책을 쓸까요?
+  >  1. **유튜브 강의로** — 녹화된 강의(판서대본 + 유튜브 자막)를 원고 소스로 (track=`lecture`)
+  >  2. **소스코드로** — 완성된 코드를 분석해 책으로 (track=`code`)
+  >  3. **목차/주제로** — 완성물 없이 목차·주제만으로 (track=`concept`)"
+  - 답에 따라 `track`을 `lecture`/`code`/`concept` 중 하나로 확정한다.
+- **그 다음 책 이름**(프로젝트 폴더명)을 묻는다.
+- **트랙별 디렉토리 생성** (아래 "프로젝트 폴더 구조"):
+  - 공통: `planning`, `chapters`, `book/front|body|back`, `assets`, `questions/pending|done`, `review`
+  - `code`: 추가로 `code/`, `versions/`
+  - `concept`: 추가로 `examples/` (그리고 `code/`·`versions/`는 만들지 않음)
+  - `lecture`: 추가로 `sources/` (강별 `sources/NN강/`에 판서대본·자막을 둔다)
+- `.claude/progress-template.json`을 복사해 `projects/[책이름]/progress.json` 생성 후 `track`을 확정값으로 설정한다.
+- **트랙별 소스 입력 안내**:
+  - `code`: `code/`에 완성 코드를 넣거나 GitHub URL을 달라.
+  - `concept`: 목차가 있으면 주고, 없으면 주제만 알려달라.
+  - `lecture`: 강별 `판서대본.md`를 `sources/NN강/판서대본.md`로 넣고, 유튜브 업로드가 끝났으면 영상 URL을 달라(자막은 `자막 추출` 명령으로 가져온다).
+- 소스 사전 스캔 → STEP 1(씨앗 심기) 순서로 진행한다.
 
 ### `씨앗 심기`
 - STEP 1 진행. `workflow/step1-씨앗.md` 참조.
@@ -93,13 +88,31 @@ Phase 5 ── 완성
 
 ### `코드 분석`
 - STEP 2 진행. `workflow/step2-코드해부.md` 참조.
+> **트랙 분기**: STEP 2는 `code`→코드 분석(step2-코드해부), `concept`→개념 분석(step2-코드해부 내 개념 분기), `lecture`→`강의 분석`(step2-강의해부). STEP 3은 `code`/`concept`→시나리오 설계(step3-시나리오), `lecture`→`챕터 매핑`(step3-챕터매핑).
 - 완성 코드를 의도 필터로 분석한다.
 - 산출물: `planning/code-analysis.md`
 
 ### `시나리오 설계`
 - STEP 3 진행. `workflow/step3-시나리오.md` 참조.
+> **트랙 분기**: STEP 2는 `code`→코드 분석(step2-코드해부), `concept`→개념 분석(step2-코드해부 내 개념 분기), `lecture`→`강의 분석`(step2-강의해부). STEP 3은 `code`/`concept`→시나리오 설계(step3-시나리오), `lecture`→`챕터 매핑`(step3-챕터매핑).
 - 시나리오 + 버전 분해 + 버전별 예제 코드 생성.
 - 산출물: `planning/scenario.md` + `versions/`
+
+### `자막 추출 [강번호 또는 URL]`  (lecture 트랙)
+- `lecture-caption` 스킬을 로드한다.
+- yt-dlp로 유튜브 자동자막(.vtt)을 받아 → 정제 → 판서대본과 정렬한다.
+- 산출물: `sources/NN강/caption-raw.vtt`, `caption-clean.md`, `정렬표.md`
+- 자막이 필요 없으면 건너뛴다(대본 단독 진행 가능).
+
+### `강의 분석`  (lecture 트랙 STEP 2)
+- `track`이 `lecture`일 때의 STEP 2. `workflow/step2-강의해부.md` 참조. `lecture` 스킬 로드.
+- 강의 자료(판서대본 + 자막)를 의도 필터로 분석 — 개념·비유·선수관계·오개념 추출.
+- 산출물: `planning/lecture-analysis.md`
+
+### `챕터 매핑`  (lecture 트랙 STEP 3)
+- `track`이 `lecture`일 때의 STEP 3. `workflow/step3-챕터매핑.md` 참조.
+- 강(講)을 책의 부(Part)/장(Chapter)으로 배열한다(개념 누적 구성).
+- 산출물: `planning/chapter-map.md`
 
 ### `뼈대 세우기`
 - STEP 4 진행. `workflow/step4-뼈대.md` 참조.
@@ -234,18 +247,19 @@ planning/seed-v1.md → planning/seed-v2.md → ...
 
 | 트랙 | 재료 | 적용 |
 |------|------|------|
-| `코드`(기본) | 완성 코드 | 기존 동작 그대로 |
-| `개념` | 목차/주제 | 재료 단계(STEP 2·3·4 + 기술파트)만 분기 |
+| `lecture` | 강의 자료(판서대본 + 유튜브 자막) | STEP 2=강의해부, STEP 3=챕터매핑, 입력=`sources/` |
+| `code`(기본) | 완성 코드 | STEP 2=코드해부, STEP 3=시나리오+버전, 입력=`code/`+`versions/` |
+| `concept` | 목차/주제 | STEP 2·3·4 재료 단계만 분기, 입력=`examples/` |
 
 ### 트랙 종속 상수
 
-| 상수 | 코드 트랙 | 개념 트랙 |
-|------|----------|----------|
-| 재료 | 완성 코드 | 목차/주제 |
-| 성장 방식 | 버전별 성장(챕터=한 버전) | 의존성 누적(강=선수 개념 위에 쌓기) |
-| 기술 파트 채움 | 실습/설명/참고 코드 | 수식(LaTeX)·계산예제·다이어그램·연습문제 |
-| 자료 분류 | [실습/설명/참고] | [핵심수식/계산예제/그림/연습] |
-| 코드 비중 | 낮음 | 없음(수식·그림으로 대체) |
+| 상수 | 코드 트랙 | 개념 트랙 | 강의 트랙 |
+|------|----------|----------|----------|
+| 재료 | 완성 코드 | 목차/주제 | 판서대본 + 자막 |
+| 성장 방식 | 버전별 성장(챕터=한 버전) | 의존성 누적 | 개념 누적(한 강=한 장) |
+| 기술 파트 채움 | 실습/설명/참고 코드 | 수식·계산예제·다이어그램 | 용어정의·원리근거·(필요시)교육용코드·자막인용 |
+| 자료 분류 | [실습/설명/참고] | [핵심수식/계산예제/그림/연습] | [개념/비유/선수/오개념] |
+| 코드 비중 | 낮음 | 없음 | 낮음 |
 
 > 문체 상수(아래)는 양 트랙 동일.
 
@@ -390,3 +404,5 @@ planning/seed-v1.md → planning/seed-v2.md → ...
 | `workflow/review-guide.md` | 검토 모드 체크리스트 |
 | `design/v3/워크플로우-설계-v3.md` | 전체 설계 (상수, 변수, STEP 상세) |
 | `design/v3/스킬-검토모드-구조-v3.md` | 스킬 + 검토 모드 상세 설계 |
+| `workflow/step2-강의해부.md`, `step3-챕터매핑.md` | lecture 트랙 STEP 2·3 가이드 |
+| `.claude/skills/lecture/`, `lecture-caption/` | lecture 트랙 전용 스킬 |
