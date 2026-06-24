@@ -328,8 +328,23 @@ def _detect_image_max_width(path: str) -> str:
         return '0.6'     # 최대 60% (auto-image가 페이지에 맞춰 자동 축소)
 
 
+def fix_math_typst(text: str) -> str:
+    """Pandoc Typst 출력에서 LaTeX 잔여 매크로를 Typst math로 보정."""
+    import re
+    # \begin{aligned}...\end{aligned} → 줄바꿈 + & 정렬 제거(단순화)
+    def _strip_aligned(m):
+        body = m.group(1)
+        body = body.replace('\\\\', '\\ ').replace('&', '')
+        return body
+    text = re.sub(r'\\begin\{aligned\}(.*?)\\end\{aligned\}', _strip_aligned, text, flags=re.S)
+    # \xrightarrow{f} → arrow.r (라벨 손실 허용)
+    text = re.sub(r'\\xrightarrow\{[^}]*\}', ' arrow.r ', text)
+    return text
+
+
 def fix_typst_content(text: str) -> str:
     """Pandoc 출력의 Typst 코드를 후처리"""
+    text = fix_math_typst(text)
 
     # 1. 이미지 수정: !#link("path")[alt] → #auto-image (페이지 공간 자동 조절)
     def fix_image(m):
