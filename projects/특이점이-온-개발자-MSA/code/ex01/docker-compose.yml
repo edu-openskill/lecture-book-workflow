@@ -1,0 +1,67 @@
+services:
+  # 외부에서 호출 (주문)
+  order-service:
+    build:
+      context: ./order
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_URL=jdbc:h2:mem:test
+      - DB_USERNAME=sa
+      - DB_PASSWORD=
+      - DDL_AUTO=create
+      - SPRING_SQL_INIT_DATA_LOCATIONS=classpath:db/data.sql
+      - SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION=true
+    networks:
+      - msa-network
+
+  # 내부 호출 전용 (order-service가 product-service:8082로 호출). 학습용으로 호스트에도 노출
+  product-service:
+    build:
+      context: ./product
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_URL=jdbc:h2:mem:test
+      - DB_USERNAME=sa
+      - DB_PASSWORD=
+      - DDL_AUTO=create
+      - SPRING_SQL_INIT_DATA_LOCATIONS=classpath:db/data.sql
+      - SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION=true
+    networks:
+      - msa-network
+
+  # 외부에서 호출 (로그인)
+  user-service:
+    build:
+      context: ./user
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_URL=jdbc:h2:mem:test
+      - DB_USERNAME=sa
+      - DB_PASSWORD=
+      - DDL_AUTO=create
+      - SPRING_SQL_INIT_DATA_LOCATIONS=classpath:db/data.sql
+      - SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION=true
+    networks:
+      - msa-network
+
+  # 내부 호출 전용 (order-service가 delivery-service:8084로 호출). 학습용으로 호스트에도 노출
+  delivery-service:
+    build:
+      context: ./delivery
+    ports:
+      - "8084:8084"
+    environment:
+      - DB_URL=jdbc:h2:mem:test
+      - DB_USERNAME=sa
+      - DB_PASSWORD=
+      - DDL_AUTO=create
+      - SPRING_SQL_INIT_DATA_LOCATIONS=classpath:db/data.sql
+      - SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION=true
+    networks:
+      - msa-network
+
+networks:
+  msa-network:

@@ -1,0 +1,12 @@
+# 내부 호출 전용. gateway가 /api/deliveries → delivery-service:8084로 호출. kafka-service에서 명령 메시지 수신
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-service
+  namespace: metacoding
+spec:
+  type: ClusterIP
+  selector:
+    app: delivery
+  ports:
+    - port: 8084

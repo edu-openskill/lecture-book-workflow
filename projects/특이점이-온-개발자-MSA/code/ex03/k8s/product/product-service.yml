@@ -1,0 +1,12 @@
+# 내부 호출 전용. gateway가 /api/products → product-service:8082로 호출. kafka-service에서 명령 메시지 수신
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+  namespace: metacoding
+spec:
+  type: ClusterIP
+  selector:
+    app: product
+  ports:
+    - port: 8082

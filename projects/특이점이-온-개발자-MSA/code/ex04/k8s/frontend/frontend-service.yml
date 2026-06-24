@@ -1,0 +1,12 @@
+# 외부 진입점 게이트. ingress가 이 service로 트래픽 전달
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: metacoding
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - port: 80

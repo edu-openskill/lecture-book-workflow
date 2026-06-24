@@ -1,0 +1,12 @@
+# 내부 호출 전용. frontend nginx가 /login, /api/* → gateway-service:80으로 프록시
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+  namespace: metacoding
+spec:
+  type: ClusterIP
+  selector:
+    app: gateway
+  ports:
+    - port: 80

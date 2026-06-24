@@ -35,7 +35,7 @@
   </defs>
   <text x="600" y="24" text-anchor="middle" font-size="17" font-weight="700" fill="#1f2937">전체 흐름 한눈에 — 세 단계가 일어나는 위치</text>
   <rect x="20" y="180" width="130" height="80" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="85" y="226" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">Host</text>
+  <text x="85" y="226" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">클라이언트</text>
   <rect x="200" y="70" width="980" height="460" rx="10" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="6,4"/>
   <text x="690" y="92" text-anchor="middle" font-size="14" font-style="italic" fill="#1f2937">Kubernetes 클러스터</text>
   <rect x="220" y="110" width="320" height="230" rx="8" fill="#fffaf0" stroke="#fed7aa" stroke-width="1"/>
@@ -54,7 +54,7 @@
   <text x="730" y="128" text-anchor="middle" font-size="16" font-weight="700" fill="#7b341e">2단계 정밀 분류 <tspan font-size="12" fill="#94a3b8" font-weight="600">[L7]</tspan> <tspan font-size="13" fill="#7b341e" font-weight="700">· Ingress</tspan></text>
   <rect x="600" y="155" width="260" height="60" rx="6" fill="#fff" stroke="#ff7849" stroke-width="2.4"/>
   <text x="730" y="178" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">Ingress Controller</text>
-  <text x="730" y="196" text-anchor="middle" font-size="14" fill="#7b341e">URL·Host로 Service 결정</text>
+  <text x="730" y="196" text-anchor="middle" font-size="14" fill="#7b341e">URL·도메인으로 Service 결정</text>
   <line x1="690" y1="215" x2="630" y2="266" stroke="#1f2937" stroke-width="1.4" marker-end="url(#ov-a)"/>
   <line x1="770" y1="215" x2="830" y2="266" stroke="#1f2937" stroke-width="1.4" marker-end="url(#ov-a)"/>
   <text x="565" y="265" text-anchor="middle" font-size="14" font-weight="600" fill="#7b341e">ClusterIP</text>
@@ -217,7 +217,7 @@
   </defs>
   <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">ClusterIP — 클러스터 안에서만 통신</text>
   <rect x="20" y="100" width="130" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="85" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 Host</text>
+  <text x="85" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">클라이언트</text>
   <text x="85" y="145" text-anchor="middle" font-size="10" fill="#6b7280">브라우저·외부 PC</text>
   <line x1="150" y1="130" x2="270" y2="130" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="6,4" marker-end="url(#cip-x)"/>
   <g transform="translate(210,130)">
@@ -253,7 +253,7 @@
   </defs>
   <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">NodePort — 노드 IP의 특정 포트로 외부 접근 허용</text>
   <rect x="20" y="100" width="130" height="60" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="85" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">외부 Host</text>
+  <text x="85" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">클라이언트</text>
   <text x="85" y="145" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">노드IP:30080</text>
   <rect x="195" y="50" width="555" height="160" rx="10" fill="#fff" stroke="#ff7849" stroke-width="1.6" stroke-dasharray="6,4"/>
   <text x="210" y="71" font-size="11" font-weight="700" fill="#7b341e">Kubernetes 클러스터</text>
@@ -559,10 +559,6 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </svg>
 </div>
 <div class="caption">그림 5-14. Ingress 리소스(YAML)와 Ingress 컨트롤러</div>
-<div class="prep-note">
-<p><strong>Ingress 컨트롤러는 라우팅 규칙을 어떻게 받을까</strong></p>
-<p>YAML로 작성한 Ingress 리소스를 클러스터에 등록하면 API Server를 거쳐 상태 저장소인 <strong>etcd</strong>에 보관됩니다. Ingress 컨트롤러는 API Server로부터 라우팅 규칙을 받아 적용합니다.</p>
-</div>
 <h3>5.2.3 Ingress 적용하기</h3>
 <p>실습을 위해 미니큐브에 인그레스를 활성화해 보겠습니다. 미니큐브는 Ingress 컨트롤러를 애드온 형태로 한 번에 배포할 수 있는 명령어를 제공합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 인그레스 애드온 활성화</div>minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ingress<span class="w">           </span><span class="c1"># 인그레스 애드온 활성화</span></div>
@@ -843,7 +839,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <tr>
 <td style="text-align:center"><strong>보는 정보</strong></td>
 <td style="text-align:left">패킷 겉면(헤더)의 받는 IP·포트</td>
-<td style="text-align:left">패킷 내부의 URL·Host</td>
+<td style="text-align:left">패킷 내부의 URL·도메인</td>
 </tr>
 <tr>
 <td style="text-align:center"><strong>담당 리소스</strong></td>
@@ -880,7 +876,6 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   <rect x="293" y="126" width="24" height="50" rx="2" fill="#fff4ed" stroke="#ff7849" stroke-width="2.6"/>
   <circle cx="305" cy="151" r="2.4" fill="#ff7849"/>
   <text x="305" y="194" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">NodePort</text>
-  <text x="305" y="205" text-anchor="middle" font-size="9" font-family="monospace" fill="#7b341e">:30080</text>
   <rect x="338" y="130" width="108" height="44" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="392" y="150" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">kube-proxy</text>
   <text x="392" y="165" text-anchor="middle" font-size="9" fill="#7b341e">규칙대로 IP 변환</text>
@@ -894,7 +889,7 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   <line x1="586" y1="154" x2="694" y2="154" stroke="#7b341e" stroke-width="0.8"/>
   <line x1="586" y1="168" x2="694" y2="168" stroke="#7b341e" stroke-width="0.8"/>
   <text x="640" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress 컨트롤러</text>
-  <text x="640" y="243" text-anchor="middle" font-size="10" fill="#7b341e">URL·Host로 분기</text>
+  <text x="640" y="243" text-anchor="middle" font-size="10" fill="#7b341e">URL·도메인으로 분기</text>
 </svg>
 </div>
 <div class="caption">그림 5-23. 요청이 NodePort로 들어와 Ingress 컨트롤러로 향합니다</div>
@@ -912,13 +907,13 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </tr>
 <tr>
 <td><strong>kube-proxy</strong></td>
-<td>패킷의 목적지를 Ingress 컨트롤러의 IP로 바꿈</td>
+<td>패킷의 목적지를 노드 IP에서 Ingress 컨트롤러의 IP로 바꿈</td>
 </tr>
 </tbody>
 </table>
-<h3>5.3.2 Ingress가 URL·Host로 Service 분기하기</h3>
+<h3>5.3.2 Ingress가 URL·도메인으로 Service 분기하기</h3>
 <p>우편이 <strong>물류 센터</strong>에 도착합니다. 물류 센터에서는 바코드를 스캐너로 찍어 등록된 <strong>분류 규칙</strong>에 따라 어느 지역 우체국으로 갈지 정합니다.</p>
-<p>Ingress 컨트롤러도 <strong>Ingress 리소스</strong>에 적힌 규칙으로 요청을 보낼 곳을 정합니다. 요청의 <strong>URL 경로와 Host</strong>를 그 규칙과 비교해 맞는 <strong>Service</strong>를 고릅니다.</p>
+<p>Ingress 컨트롤러도 <strong>Ingress 리소스</strong>에 적힌 규칙으로 요청을 보낼 곳을 정합니다. 요청의 <strong>URL 경로와 도메인</strong>을 그 규칙과 비교해 맞는 <strong>Service</strong>를 고릅니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2단계 손그림 — 물류 센터(Ingress 컨트롤러)가 송장을 보고 /order는 order-service, /stores는 stores-service 우체국으로 분기">
   <defs>
@@ -929,20 +924,20 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   <path d="M100 150 L140 175 L180 150" fill="none" stroke="#475569" stroke-width="1.4"/>
   <text x="140" y="216" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">요청</text>
   <text x="140" y="231" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">/order</text>
-  <line x1="180" y1="175" x2="276" y2="175" stroke="#1f2937" stroke-width="1.6" marker-end="url(#il2-a)"/>
-  <path d="M272 110 L488 110 L380 82 Z" fill="#fde4d3" stroke="#7b341e" stroke-width="1.6"/>
-  <rect x="278" y="110" width="204" height="130" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
-  <rect x="306" y="116" width="148" height="20" fill="#7b341e"/>
-  <text x="380" y="131" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">물류 센터</text>
-  <rect x="294" y="146" width="172" height="60" rx="3" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
-  <text x="380" y="163" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">Ingress 규칙</text>
-  <text x="304" y="183" font-size="11" font-family="monospace" fill="#0f172a">/order  → order</text>
-  <text x="304" y="199" font-size="11" font-family="monospace" fill="#0f172a">/stores → stores</text>
-  <text x="380" y="228" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress 컨트롤러</text>
-  <path d="M482 156 Q512 118 538 104" fill="none" stroke="#1f2937" stroke-width="1.6" marker-end="url(#il2-a)"/>
-  <text x="514" y="110" text-anchor="middle" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">/order</text>
-  <path d="M482 194 Q512 232 538 246" fill="none" stroke="#1f2937" stroke-width="1.6" marker-end="url(#il2-a)"/>
-  <text x="514" y="256" text-anchor="middle" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">/stores</text>
+  <line x1="180" y1="175" x2="246" y2="175" stroke="#1f2937" stroke-width="1.6" marker-end="url(#il2-a)"/>
+  <path d="M242 110 L470 110 L356 82 Z" fill="#fde4d3" stroke="#7b341e" stroke-width="1.6"/>
+  <rect x="248" y="110" width="222" height="130" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
+  <rect x="285" y="116" width="148" height="20" fill="#7b341e"/>
+  <text x="359" y="131" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">물류 센터</text>
+  <rect x="258" y="144" width="204" height="64" rx="3" fill="#fff4ed" stroke="#ff7849" stroke-width="1.4"/>
+  <text x="360" y="161" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">Ingress 규칙</text>
+  <text x="266" y="183" font-size="11" font-family="monospace" fill="#0f172a">/order  → order-service</text>
+  <text x="266" y="201" font-size="11" font-family="monospace" fill="#0f172a">/stores → stores-service</text>
+  <text x="359" y="228" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Ingress 컨트롤러</text>
+  <path d="M470 150 Q505 120 538 104" fill="none" stroke="#1f2937" stroke-width="1.6" marker-end="url(#il2-a)"/>
+  <text x="500" y="110" text-anchor="middle" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">/order</text>
+  <path d="M470 200 Q505 230 538 246" fill="none" stroke="#1f2937" stroke-width="1.6" marker-end="url(#il2-a)"/>
+  <text x="500" y="256" text-anchor="middle" font-size="11" font-family="monospace" font-weight="700" fill="#7b341e">/stores</text>
   <path d="M534 72 L706 72 L620 50 Z" fill="#fde4d3" stroke="#7b341e" stroke-width="1.6"/>
   <rect x="540" y="72" width="160" height="60" fill="#fff" stroke="#7b341e" stroke-width="1.8"/>
   <rect x="556" y="78" width="128" height="18" fill="#7b341e"/>
@@ -966,11 +961,11 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 <tbody>
 <tr>
 <td><strong>Ingress 컨트롤러</strong></td>
-<td>요청을 받아 URL 경로·Host에 맞는 Service로 전달</td>
+<td>요청을 받아 URL 경로·도메인에 맞는 Service로 전달</td>
 </tr>
 <tr>
 <td><strong>Ingress 규칙</strong></td>
-<td>어떤 경로·Host를 어느 Service로 보낼지 적어 둔 설정</td>
+<td>어떤 경로·도메인을 어느 Service로 보낼지 적어 둔 설정</td>
 </tr>
 </tbody>
 </table>
@@ -1000,6 +995,8 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
   <rect x="300" y="160" width="120" height="48" rx="6" fill="#fff" stroke="#ff7849" stroke-width="1.8"/>
   <text x="360" y="180" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">kube-proxy</text>
   <text x="360" y="196" text-anchor="middle" font-size="9" fill="#7b341e">명단 보고 IP 변환</text>
+  <line x1="360" y1="131" x2="360" y2="158" stroke="#7b341e" stroke-width="1.4" stroke-dasharray="3 2" marker-end="url(#il3-a)"/>
+  <text x="368" y="148" font-size="9" font-style="italic" fill="#7b341e">명단</text>
   <line x1="420" y1="184" x2="492" y2="184" stroke="#1f2937" stroke-width="1.6" marker-end="url(#il3-a)"/>
   <rect x="500" y="120" width="150" height="40" rx="3" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.4"/>
   <line x1="520" y1="132" x2="630" y2="132" stroke="#cbd5e1" stroke-width="2"/>
@@ -1035,6 +1032,10 @@ minikube<span class="w"> </span>service<span class="w"> </span>nginx-service<spa
 </tr>
 </tbody>
 </table>
+<div class="tip">
+<p><strong>Ingress 컨트롤러와 kube-proxy가 설정을 받는 방법</strong></p>
+<p>클러스터에 등록된 모든 설정은 <strong>API Server</strong>를 거쳐 상태 저장소인 <strong>etcd</strong>에 보관됩니다. 각 컴포넌트는 API Server로부터 자신에게 필요한 설정을 전달받아 적용합니다. 이때 Ingress 컨트롤러는 YAML로 작성된 <strong>Ingress 리소스</strong>를 받아 라우팅 규칙으로 사용하고, kube-proxy는 살아있는 Pod 목록인 <strong>EndpointSlice</strong>를 받아 IP 변환에 반영합니다.</p>
+</div>
 <p>이번 챕터에서는 외부에서 들어온 요청이 클러스터 안의 Pod까지 도달하는 흐름을 살펴봤습니다. 하나의 요청이 들어오면 Ingress는 도메인과 URL 경로를, Service는 IP와 포트를 확인해 목적지를 결정합니다.</p>
 <p class="thought">'이제 요청이 클러스터 안에서 Pod까지 닿는 구조를 알았으니, 내 프로젝트에도 직접 적용해 볼 수 있겠다.'</p>
 <p>다음 챕터에서는 실제 운영 환경에 필요한 환경 변수와 데이터 저장소를 다뤄 보겠습니다.</p>

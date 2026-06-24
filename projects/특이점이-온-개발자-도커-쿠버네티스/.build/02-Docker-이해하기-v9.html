@@ -595,114 +595,8 @@
 <div class="caption">그림 2-15. 컨테이너 통신 한눈에 보기 - 외부 진입과 컨테이너끼리 IP 통신</div>
 <p>여기서는 컨테이너 네트워크를 세 가지로 나눠 살펴보겠습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 방법</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>입니다.</p>
 <h3>2.4.1 컨테이너 간 통신</h3>
-<p>컨테이너끼리는 어떻게 데이터를 주고받을까요? 푸드코트를 예로 들어 보겠습니다.</p>
-<p>A, B, C 식당이 푸드코트에 입점해 있습니다. 식당끼리는 벽으로 완전히 분리되어 있어 서로의 주방을 들여다볼 수 없습니다.</p>
-<p>각 식당의 주방에는 <strong>주방 모니터</strong>가 한 대씩 있고, 푸드코트 한가운데에는 모두가 보는 <strong>주문 전광판</strong>이 걸려 있습니다. 주방 모니터와 전광판은 한 가닥의 <strong>전용 통신 케이블</strong>로 이어져 있고, 모든 식당의 케이블이 전광판 본체에 꽂혀 있습니다. 식당끼리 벽이 막혀 있어도 이 전광판으로 서로의 주문 현황을 알 수 있습니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 432" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="푸드코트 비유 — 식당 차양과 주방 모니터, 주문 전광판이 케이블로 이어진 구조">
-  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">푸드코트 — 주방 모니터와 주문 전광판</text>
-  <!-- 천장 행거 (전광판 매달림) -->
-  <line x1="280" y1="38" x2="280" y2="55" stroke="#475569" stroke-width="2"/>
-  <line x1="480" y1="38" x2="480" y2="55" stroke="#475569" stroke-width="2"/>
-  <circle cx="280" cy="38" r="2.5" fill="#475569"/>
-  <circle cx="480" cy="38" r="2.5" fill="#475569"/>
-  <!-- 주문 전광판: 외곽 베젤 + 내부 화면 -->
-  <rect x="195" y="50" width="370" height="115" rx="6" fill="#7b341e"/>
-  <rect x="205" y="60" width="350" height="80" rx="3" fill="#fff4ed"/>
-  <circle cx="216" cy="71" r="1.6" fill="#7b341e" opacity="0.5"/>
-  <circle cx="544" cy="71" r="1.6" fill="#7b341e" opacity="0.5"/>
-  <text x="380" y="95" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">주문 전광판 본체</text>
-  <text x="380" y="118" text-anchor="middle" font-size="11" fill="#9a3f1c" font-style="italic">모든 주문 현황이 모이는 곳</text>
-  <!-- 케이블 단자 (A·B·C) -->
-  <rect x="270" y="148" width="30" height="14" rx="2" fill="#fff4ed" stroke="#7b341e" stroke-width="1"/>
-  <text x="285" y="158" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">A</text>
-  <rect x="365" y="148" width="30" height="14" rx="2" fill="#fff4ed" stroke="#7b341e" stroke-width="1"/>
-  <text x="380" y="158" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">B</text>
-  <rect x="460" y="148" width="30" height="14" rx="2" fill="#fff4ed" stroke="#7b341e" stroke-width="1"/>
-  <text x="475" y="158" text-anchor="middle" font-size="9" font-weight="700" fill="#7b341e">C</text>
-  <!-- 곡선 케이블 -->
-  <path d="M 285 162 Q 285 215, 130 266" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3"/>
-  <path d="M 380 162 Q 380 215, 380 266" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3"/>
-  <path d="M 475 162 Q 475 215, 630 266" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3"/>
-  <text x="395" y="222" font-size="11" fill="#6b7280" font-style="italic">전용 통신 케이블</text>
-  <!-- A 식당: 차양(스캘롭) + 간판 + 부스 + 주방 모니터 -->
-  <path d="M 38 268 L 222 268 L 222 290 L 199 304 L 176 290 L 153 304 L 130 290 L 107 304 L 84 290 L 61 304 L 38 290 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.5"/>
-  <line x1="84" y1="268" x2="84" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <line x1="130" y1="268" x2="130" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <line x1="176" y1="268" x2="176" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <rect x="80" y="272" width="100" height="16" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
-  <text x="130" y="284" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">A 식당</text>
-  <rect x="40" y="312" width="180" height="80" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <line x1="40" y1="378" x2="220" y2="378" stroke="#475569" stroke-width="1.2"/>
-  <rect x="80" y="325" width="100" height="42" rx="4" fill="#f5faff" stroke="#1565c0" stroke-width="1.4"/>
-  <text x="130" y="350" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">주방 모니터</text>
-  <rect x="124" y="367" width="12" height="6" fill="#1565c0"/>
-  <line x1="118" y1="373" x2="142" y2="373" stroke="#1565c0" stroke-width="1.6"/>
-  <!-- B 식당 -->
-  <path d="M 288 268 L 472 268 L 472 290 L 449 304 L 426 290 L 403 304 L 380 290 L 357 304 L 334 290 L 311 304 L 288 290 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.5"/>
-  <line x1="334" y1="268" x2="334" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <line x1="380" y1="268" x2="380" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <line x1="426" y1="268" x2="426" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <rect x="330" y="272" width="100" height="16" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
-  <text x="380" y="284" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">B 식당</text>
-  <rect x="290" y="312" width="180" height="80" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <line x1="290" y1="378" x2="470" y2="378" stroke="#475569" stroke-width="1.2"/>
-  <rect x="330" y="325" width="100" height="42" rx="4" fill="#f5faff" stroke="#1565c0" stroke-width="1.4"/>
-  <text x="380" y="350" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">주방 모니터</text>
-  <rect x="374" y="367" width="12" height="6" fill="#1565c0"/>
-  <line x1="368" y1="373" x2="392" y2="373" stroke="#1565c0" stroke-width="1.6"/>
-  <!-- C 식당 -->
-  <path d="M 538 268 L 722 268 L 722 290 L 699 304 L 676 290 L 653 304 L 630 290 L 607 304 L 584 290 L 561 304 L 538 290 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.5"/>
-  <line x1="584" y1="268" x2="584" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <line x1="630" y1="268" x2="630" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <line x1="676" y1="268" x2="676" y2="290" stroke="#7b341e" stroke-width="0.8" opacity="0.4"/>
-  <rect x="580" y="272" width="100" height="16" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
-  <text x="630" y="284" text-anchor="middle" font-size="11" font-weight="700" fill="#7b341e">C 식당</text>
-  <rect x="540" y="312" width="180" height="80" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <line x1="540" y1="378" x2="720" y2="378" stroke="#475569" stroke-width="1.2"/>
-  <rect x="580" y="325" width="100" height="42" rx="4" fill="#f5faff" stroke="#1565c0" stroke-width="1.4"/>
-  <text x="630" y="350" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">주방 모니터</text>
-  <rect x="624" y="367" width="12" height="6" fill="#1565c0"/>
-  <line x1="618" y1="373" x2="642" y2="373" stroke="#1565c0" stroke-width="1.6"/>
-  <!-- 푸드코트 바닥 -->
-  <line x1="20" y1="402" x2="740" y2="402" stroke="#475569" stroke-width="1.4"/>
-  <line x1="100" y1="404" x2="100" y2="408" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="240" y1="404" x2="240" y2="408" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="380" y1="404" x2="380" y2="408" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="520" y1="404" x2="520" y2="408" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="660" y1="404" x2="660" y2="408" stroke="#9ca3af" stroke-width="0.6"/>
-</svg>
-</div>
-<div class="caption">그림 2-16. 주방 모니터·전용 통신 케이블·주문 전광판이 컨테이너 네트워크의 비유</div>
-<p>이 비유를 IT로 옮기면 다음과 같습니다.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">푸드코트</th>
-<th style="text-align:left">IT 용어</th>
-<th style="text-align:left">한 줄 설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">주방 모니터</td>
-<td style="text-align:left"><strong>네트워크 Namespace</strong></td>
-<td style="text-align:left">컨테이너마다 따로 가진, 자기 IP·포트를 쓰는 격리된 네트워크입니다</td>
-</tr>
-<tr>
-<td style="text-align:center">전용 통신 케이블</td>
-<td style="text-align:left"><strong>veth pair</strong></td>
-<td style="text-align:left">네트워크 Namespace를 docker0에 잇는 가상 케이블 한 쌍입니다</td>
-</tr>
-<tr>
-<td style="text-align:center">주문 전광판</td>
-<td style="text-align:left"><strong>docker0</strong></td>
-<td style="text-align:left">같은 브리지에 묶인 컨테이너 사이로 패킷(데이터 묶음)을 중계하는 가상 브리지입니다</td>
-</tr>
-</tbody>
-</table>
-<p>2.1.2의 컨테이너 격리에서 본 <strong>네트워크 네임스페이스는 컨테이너가 실행되는 순간 케이블(veth pair)을 통해 docker0에 연결됩니다.</strong> 그러면 Docker가 아직 아무도 쓰지 않는 IP 하나를 골라 이 네임스페이스에 부여합니다.</p>
-<p>이제 A 컨테이너가 B의 IP로 호출하면 데이터는 <strong>A → docker0 → B</strong> 순서로 흐릅니다.</p>
+<p>푸드코트에 여러 식당이 있습니다. 각 식당은 서로의 주방에 들어갈 수 없습니다. 대신 각 주방의 <strong>주방 모니터</strong>는 <strong>통신 케이블</strong>로 벽에 걸린 <strong>주문 전광판</strong>에 연결되며, 서로의 주문 현황을 확인할 수 있습니다.</p>
+<p>컨테이너 간 통신도 비슷합니다. 각 컨테이너는 자기만의 격리된 네트워크인 <strong>네트워크 Namespace</strong>를 갖고, <strong>veth pair</strong>라는 가상 케이블로 <strong>docker0</strong> 브리지에 연결됩니다. 한 컨테이너가 다른 컨테이너의 IP로 호출하면 <strong>데이터는 docker0를 통해 전달됩니다.</strong></p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너가 자기 네트워크 Namespace(격리된 IP 공간)를 갖고 veth pair로 docker0에 연결되는 구조">
   <defs>
@@ -745,99 +639,37 @@
   <text x="491" y="153" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">veth pair</text>
 </svg>
 </div>
-<div class="caption">그림 2-17. 컨테이너 네트워크 격리 구조</div>
-<p class="thought">'각 컨테이너는 격리되어 있지만 docker0를 통해 서로 통신하는구나.'</p>
-<p>오픈이가 다음으로 알아본 건 외부에서 온 요청이 컨테이너로 어떻게 들어오느냐였습니다.</p>
-<h3>2.4.2 외부에서 들어오기 - 입구 키오스크</h3>
-<p><code>docker run</code>으로 띄운 컨테이너는 docker0가 만드는 <strong>기본 네트워크</strong>에 자동으로 들어갑니다. 같은 네트워크 안의 컨테이너끼리는 IP만 알면 통신할 수 있지만, <strong>외부에서는 컨테이너의 IP로 바로 접근할 수 없습니다</strong>. 두 가지 이유가 있습니다.</p>
-<ul>
-<li>Windows·macOS에서는 컨테이너가 <strong>Docker Desktop 속 가상 리눅스 안에서 실행되기</strong> 때문에, 외부는 물론 호스트에서도 컨테이너 IP로 바로 접근하기 어렵습니다.</li>
-<li>게다가 컨테이너 IP는 <strong>새로 띄울 때마다 바뀌어서</strong>, 외부에서 늘 같은 주소로 접근할 수 없습니다.</li>
-</ul>
-<p>그래서 외부에서 컨테이너로 들어오는 <strong>별도의 통로</strong>가 필요합니다.</p>
-<p>푸드코트에 비유하면 외부 손님은 주방에 직접 들어가지 못합니다. 대신 입구의 <strong>키오스크</strong>에 주문을 넣으면 키오스크가 해당 식당으로 그 주문을 넘겨줍니다. 짜장면은 A식당으로, 돈까스는 B식당으로 주문이 전달됩니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="푸드코트 비유 — 외부 손님이 입구 키오스크에 주문하면 각 식당으로 분기되는 구조">
-  <defs>
-    <marker id="kio-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
-    </marker>
-  </defs>
-  <text x="380" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">푸드코트 — 외부 손님과 입구 키오스크</text>
-  <!-- 외부 손님: 주문 카드 + 사람 -->
-  <rect x="28" y="80" width="160" height="50" rx="8" fill="#fff4ed" stroke="#7b341e" stroke-width="1.4"/>
-  <text x="108" y="100" text-anchor="middle" font-size="11" fill="#7b341e">짜장면 / 돈까스</text>
-  <text x="108" y="118" text-anchor="middle" font-size="10" fill="#9a3f1c" font-style="italic">주문</text>
-  <path d="M 100 130 L 108 142 L 116 130 Z" fill="#fff4ed" stroke="#7b341e" stroke-width="1.4"/>
-  <circle cx="108" cy="172" r="20" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <path d="M 78 200 Q 78 232, 108 232 Q 138 232, 138 200 L 138 252 L 78 252 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <text x="108" y="278" text-anchor="middle" font-size="12" font-weight="700" fill="#475569">외부 손님</text>
-  <!-- 손님 → 키오스크 (실선 화살표 = 외부 주문) -->
-  <line x1="155" y1="200" x2="248" y2="200" stroke="#475569" stroke-width="2" marker-end="url(#kio-arrow)"/>
-  <!-- 입구 키오스크 -->
-  <rect x="260" y="100" width="190" height="200" rx="6" fill="#7b341e"/>
-  <rect x="270" y="110" width="170" height="130" rx="3" fill="#fff4ed"/>
-  <text x="355" y="138" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">입구 키오스크</text>
-  <text x="355" y="158" text-anchor="middle" font-size="10" fill="#9a3f1c" font-style="italic">주문 → 해당 식당</text>
-  <line x1="285" y1="170" x2="425" y2="170" stroke="#7b341e" stroke-width="0.6" opacity="0.4"/>
-  <text x="355" y="192" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">짜장면 → A 식당</text>
-  <text x="355" y="212" text-anchor="middle" font-size="11" font-weight="600" fill="#1565c0">돈까스 → B 식당</text>
-  <!-- 받침대 -->
-  <rect x="320" y="300" width="70" height="16" fill="#7b341e"/>
-  <!-- 키오스크 → A 식당 (점선 케이블, 위로 분기) -->
-  <path d="M 450 160 Q 480 120, 510 110" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#kio-arrow)"/>
-  <!-- 키오스크 → B 식당 (점선 케이블, 아래로 분기) -->
-  <path d="M 450 240 Q 480 280, 510 260" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#kio-arrow)"/>
-  <!-- A 식당: 차양 + 간판 + 부스 + 음식 -->
-  <path d="M 510 80 L 700 80 L 700 102 L 681 116 L 662 102 L 643 116 L 624 102 L 605 116 L 586 102 L 567 116 L 548 102 L 529 116 L 510 102 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.5"/>
-  <rect x="555" y="84" width="100" height="14" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
-  <text x="605" y="94" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">A 식당</text>
-  <rect x="510" y="118" width="190" height="58" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="605" y="155" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">짜장면</text>
-  <!-- B 식당 -->
-  <path d="M 510 220 L 700 220 L 700 242 L 681 256 L 662 242 L 643 256 L 624 242 L 605 256 L 586 242 L 567 256 L 548 242 L 529 256 L 510 242 Z" fill="#ff7849" stroke="#7b341e" stroke-width="1.5"/>
-  <rect x="555" y="224" width="100" height="14" rx="2" fill="#fff" stroke="#7b341e" stroke-width="1"/>
-  <text x="605" y="234" text-anchor="middle" font-size="10" font-weight="700" fill="#7b341e">B 식당</text>
-  <rect x="510" y="258" width="190" height="58" fill="#fff" stroke="#475569" stroke-width="1.6"/>
-  <text x="605" y="295" text-anchor="middle" font-size="15" font-weight="700" fill="#7b341e">돈까스</text>
-  <!-- 푸드코트 바닥 -->
-  <line x1="20" y1="340" x2="740" y2="340" stroke="#475569" stroke-width="1.4"/>
-  <line x1="100" y1="342" x2="100" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="240" y1="342" x2="240" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="380" y1="342" x2="380" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="520" y1="342" x2="520" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="660" y1="342" x2="660" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-</svg>
-</div>
-<div class="caption">그림 2-18. 입구 키오스크가 손님의 주문을 각 식당으로 넘겨주는 비유</div>
-<p>이 비유를 IT로 옮기면 다음과 같습니다.</p>
+<div class="caption">그림 2-16. 컨테이너 네트워크 격리 구조</div>
 <table>
 <thead>
 <tr>
-<th style="text-align:center">푸드코트</th>
-<th style="text-align:left">IT 용어</th>
-<th style="text-align:left">한 줄 설명</th>
+<th>구성 요소</th>
+<th>하는 일</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">입구 키오스크</td>
-<td style="text-align:left"><strong>포트포워딩</strong></td>
-<td style="text-align:left">외부 공개 포트로 온 주문을 컨테이너 포트로 넘기는 메커니즘입니다</td>
+<td><strong>네트워크 Namespace</strong></td>
+<td>컨테이너마다 따로 가진, 자기 IP·포트를 쓰는 격리된 네트워크</td>
 </tr>
 <tr>
-<td style="text-align:center">키오스크의 &quot;돈까스 → B식당&quot; 매핑</td>
-<td style="text-align:left"><strong>iptables 규칙(DNAT)</strong></td>
-<td style="text-align:left">외부 공개 포트로 온 요청의 목적지를 컨테이너의 IP와 포트로 바꾸는 규칙입니다</td>
+<td><strong>veth pair</strong></td>
+<td>네트워크 Namespace를 docker0에 잇는 가상 케이블 한 쌍</td>
 </tr>
 <tr>
-<td style="text-align:center">주문이 전달되는 식당</td>
-<td style="text-align:left"><strong>컨테이너 포트</strong></td>
-<td style="text-align:left">키오스크가 주문을 넘기는 곳으로, 컨테이너 안에서 앱이 듣고 있는 포트입니다</td>
+<td><strong>docker0</strong></td>
+<td>같은 브리지에 묶인 컨테이너 사이로 패킷(데이터 묶음)을 중계하는 가상 브리지</td>
 </tr>
 </tbody>
 </table>
-<p><code>docker run -p 8080:80</code>을 실행하면 Docker는 <strong>iptables</strong>에 '호스트 8080 → 컨테이너 80' 규칙을 추가합니다. 이후 브라우저에서 8080 포트로 요청이 오면, iptables가 이 규칙대로 목적지를 컨테이너의 IP와 80 포트로 바꿔 전달합니다.</p>
+<h3>2.4.2 외부에서 들어오기 - 입구 키오스크</h3>
+<p>푸드코트에서 손님은 식당으로 들어갈 수 없습니다. 대신 <strong>키오스크</strong>를 통해 식당에 주문을 요청합니다. 짜장면을 선택하면 A식당, 돈까스를 선택하면 B식당으로 키오스크의 규칙에 따라 주문이 전달됩니다.</p>
+<p>외부에서 컨테이너로의 요청도 바로 접근이 불가능합니다. 그래서 키오스크의 역할을 하는 <strong>포트포워딩</strong>을 사용해야 합니다.</p>
+<div class="tip">
+<p><strong>왜 컨테이너 IP로 바로 접근할 수 없을까</strong></p>
+<p>컨테이너 IP는 실행할 때마다 새로 할당되어, 외부에서 접속할 고정된 주소가 없습니다. 게다가 Windows·macOS에서는 컨테이너가 Docker Desktop이 실행하는 리눅스 가상 머신 안에서 동작합니다. 컨테이너 IP는 이 가상 머신 내부 네트워크에만 있는 주소라, 그 바깥에 있는 호스트는 해당 IP로 도달할 수 없습니다.</p>
+</div>
+<p>예를 들어 <code>docker run -p 8080:80</code>을 실행하면 <strong>iptables(DNAT)</strong> 에 규칙이 작성됩니다. 그리고 외부에서 8080 포트로 요청이 오면 이 규칙에 의해 80 포트를 가진 컨테이너로 연결됩니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="포트포워딩 구조 — iptables 규칙이 호스트 포트로 들어온 요청을 컨테이너 포트로 전달하는 구조">
   <defs>
@@ -885,92 +717,32 @@
   <text x="680" y="190" text-anchor="middle" font-size="9" font-family="monospace" fill="#6b7280">172.17.0.2</text>
 </svg>
 </div>
-<div class="caption">그림 2-19. 호스트 포트가 컨테이너 포트로 연결되는 구조</div>
-<p class="thought">'내 컴퓨터 포트와 컨테이너 포트를 포트포워딩으로 연결해 줘야 외부 요청이 안으로 들어올 수 있는 거네.'</p>
-<h3>2.4.3 이름으로 찾기 - 홀의 안내 지도</h3>
-<p>도커에서는 컨테이너를 IP뿐 아니라 <strong>이름으로도 찾을 수 있습니다</strong>. 한 컨테이너가 다른 컨테이너를 이름으로 부르면, 도커가 그 <strong>이름을 현재 IP로 바꿔</strong> 연결해 줍니다.</p>
-<p>푸드코트로 옮겨 보면, 손님은 식당 이름은 알지만 푸드코트 안에서 식당이 어디 있는지는 알 수 없습니다. 그럴 때 홀에 걸린 <strong>안내 지도</strong>에 &quot;<strong>B식당 = 2구역</strong>&quot;이라고 표시되어 있으면, 이름을 보고 위치를 쉽게 찾을 수 있습니다.</p>
-<div class="svg-figure">
-<svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="푸드코트 비유 — 손님이 벽에 걸린 평면 안내 지도에서 B식당의 위치를 확인하는 구조">
-  <defs>
-    <marker id="map-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
-    </marker>
-  </defs>
-  <text x="380" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">푸드코트 — 손님과 홀의 안내 지도</text>
-  <line x1="280" y1="42" x2="280" y2="62" stroke="#475569" stroke-width="2"/>
-  <line x1="660" y1="42" x2="660" y2="62" stroke="#475569" stroke-width="2"/>
-  <circle cx="280" cy="42" r="2.5" fill="#475569"/>
-  <circle cx="660" cy="42" r="2.5" fill="#475569"/>
-  <rect x="200" y="56" width="540" height="246" rx="4" fill="#7b341e"/>
-  <rect x="212" y="68" width="516" height="222" rx="2" fill="#fff8f0"/>
-  <text x="470" y="94" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">푸드코트 안내 지도</text>
-  <text x="470" y="112" text-anchor="middle" font-size="10" fill="#9a3f1c" font-style="italic">이름 → 위치</text>
-  <line x1="240" y1="124" x2="700" y2="124" stroke="#7b341e" stroke-width="0.6" opacity="0.4"/>
-  <rect x="230" y="142" width="150" height="138" rx="4" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
-  <rect x="230" y="142" width="150" height="22" rx="4" fill="#ff7849"/>
-  <text x="305" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1구역</text>
-  <rect x="245" y="174" width="120" height="22" rx="2" fill="#ff7849" stroke="#7b341e" stroke-width="1"/>
-  <text x="305" y="190" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">A 식당</text>
-  <text x="305" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">짜장면</text>
-  <circle cx="265" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <circle cx="305" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <circle cx="345" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <rect x="395" y="142" width="150" height="138" rx="4" fill="#fff4ed" stroke="#7b341e" stroke-width="2.4"/>
-  <rect x="395" y="142" width="150" height="22" rx="4" fill="#ff7849"/>
-  <text x="470" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2구역</text>
-  <rect x="410" y="174" width="120" height="22" rx="2" fill="#ff7849" stroke="#7b341e" stroke-width="1"/>
-  <text x="470" y="190" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">B 식당</text>
-  <text x="470" y="222" text-anchor="middle" font-size="14" font-weight="700" fill="#7b341e">돈까스</text>
-  <circle cx="430" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <circle cx="470" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <circle cx="510" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <circle cx="528" cy="130" r="11" fill="#7b341e" stroke="#fff" stroke-width="1.5"/>
-  <text x="528" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">★</text>
-  <rect x="560" y="142" width="150" height="138" rx="4" fill="#fff" stroke="#7b341e" stroke-width="1.4"/>
-  <rect x="560" y="142" width="150" height="22" rx="4" fill="#ff7849"/>
-  <text x="635" y="158" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3구역</text>
-  <rect x="575" y="174" width="120" height="22" rx="2" fill="#ff7849" stroke="#7b341e" stroke-width="1"/>
-  <text x="635" y="190" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">C 식당</text>
-  <text x="635" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">칼국수</text>
-  <circle cx="595" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <circle cx="635" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <circle cx="675" cy="252" r="7" fill="#fff" stroke="#475569" stroke-width="1.2"/>
-  <rect x="20" y="120" width="140" height="44" rx="8" fill="#fff4ed" stroke="#7b341e" stroke-width="1.4"/>
-  <text x="90" y="138" text-anchor="middle" font-size="11" fill="#7b341e">B식당 어디?</text>
-  <text x="90" y="154" text-anchor="middle" font-size="10" fill="#9a3f1c" font-style="italic">이름으로 찾기</text>
-  <path d="M 82 164 L 90 174 L 98 164 Z" fill="#fff4ed" stroke="#7b341e" stroke-width="1.4"/>
-  <circle cx="90" cy="200" r="20" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <path d="M 60 228 Q 60 260, 90 260 Q 120 260, 120 228 L 120 280 L 60 280 Z" fill="#fff" stroke="#475569" stroke-width="1.8"/>
-  <text x="90" y="306" text-anchor="middle" font-size="12" font-weight="700" fill="#475569">외부 손님</text>
-  <line x1="138" y1="220" x2="198" y2="220" stroke="#475569" stroke-width="2" marker-end="url(#map-arrow)"/>
-  <line x1="20" y1="340" x2="740" y2="340" stroke="#475569" stroke-width="1.4"/>
-  <line x1="100" y1="342" x2="100" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="240" y1="342" x2="240" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="380" y1="342" x2="380" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="520" y1="342" x2="520" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-  <line x1="660" y1="342" x2="660" y2="346" stroke="#9ca3af" stroke-width="0.6"/>
-</svg>
-</div>
-<div class="caption">그림 2-20. 안내 지도가 이름을 위치로 바꿔주는 비유</div>
-<p>이 비유를 IT로 옮기면 다음과 같습니다.</p>
+<div class="caption">그림 2-17. 호스트 포트가 컨테이너 포트로 연결되는 구조</div>
 <table>
 <thead>
 <tr>
-<th style="text-align:center">푸드코트</th>
-<th style="text-align:left">IT 용어</th>
-<th style="text-align:left">한 줄 설명</th>
+<th>구성 요소</th>
+<th>하는 일</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">안내 지도</td>
-<td style="text-align:left"><strong>Docker DNS</strong></td>
-<td style="text-align:left">컨테이너 이름을 IP로 자동 변환해 주는 내장 DNS(Domain Name System) 서버입니다</td>
+<td><strong>포트포워딩</strong></td>
+<td>외부 공개 포트로 온 요청을 컨테이너 포트로 넘기는 메커니즘</td>
+</tr>
+<tr>
+<td><strong>iptables 규칙(DNAT)</strong></td>
+<td>외부 공개 포트로 온 요청의 목적지를 컨테이너의 IP·포트로 바꾸는 규칙</td>
+</tr>
+<tr>
+<td><strong>컨테이너 포트</strong></td>
+<td>컨테이너 안에서 앱이 듣고 있는, 요청이 최종 도착하는 포트</td>
 </tr>
 </tbody>
 </table>
-<p>새 컨테이너가 뜰 때마다 이름과 IP가 자동으로 <strong>Docker DNS</strong>에 등록됩니다. 그 다음 app 컨테이너가 db라는 이름으로 요청을 보냅니다. 그러면 Docker DNS가 먼저 받아 <strong>db라는 이름을 실제 IP로 변환</strong>해 알려줍니다. app 컨테이너는 그 IP로 다시 요청을 보냅니다. 컨테이너가 다시 떠서 IP가 바뀌어도 <strong>같은 이름으로 통신할 수 있습니다</strong>.</p>
+<h3>2.4.3 이름으로 찾기 - 홀의 안내 지도</h3>
+<p>여러 식당 중 손님은 자신이 원하는 식당의 위치를 알 수 없습니다. 이때 <strong>안내 지도</strong>를 보면 식당의 이름을 보고 위치를 찾을 수 있습니다.</p>
+<p>도커에는 <strong>Docker DNS</strong> 기능이 있습니다. 새로운 컨테이너가 실행되면 컨테이너의 이름과 IP를 Docker DNS에 등록합니다. 그리고 <strong>한 컨테이너가 다른 컨테이너를 이름으로 호출하면, Docker DNS가 이름에 맞는 IP를 돌려줍니다.</strong> 이름으로 통신이 가능하기 때문에 IP가 바뀌어도 같은 이름으로 통신할 수 있습니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Docker DNS가 이름을 IP로 변환하는 흐름">
   <defs>
@@ -1002,7 +774,21 @@
   <text x="350" y="198" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.18.0.3 으로 요청</text>
 </svg>
 </div>
-<div class="caption">그림 2-21. Docker DNS가 이름을 IP로 변환</div>
+<div class="caption">그림 2-18. Docker DNS가 이름을 IP로 변환</div>
+<table>
+<thead>
+<tr>
+<th>구성 요소</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docker DNS</strong></td>
+<td>컨테이너 이름을 IP로 자동 변환해 주는 내장 DNS(Domain Name System) 서버</td>
+</tr>
+</tbody>
+</table>
 <p>다만 내장 DNS는 <strong>사용자 정의 네트워크(User-defined Network)</strong> 에서만 동작합니다. 기본 네트워크(docker0)에서는 이름으로 찾을 수 없기 때문에, 직접 네트워크를 만들어 컨테이너들을 연결해야 합니다. 구체적인 생성 방법은 다음 챕터에서 다룹니다.</p>
 <p>컨테이너 통신을 살펴봤으니, 이제 컨테이너 내부를 들여다볼 차례입니다. 컨테이너 안은 작은 리눅스 환경과 같아서, 가장 먼저 기본 리눅스 명령어부터 알아보겠습니다.</p>
 <h2>2.5 컨테이너 내부 - 격리된 작은 리눅스</h2>
@@ -1021,7 +807,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
     <div>root@c0b6dd5261d8:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-22. Ubuntu 컨테이너 안으로 들어간 상태</div>
+<div class="caption">그림 2-19. Ubuntu 컨테이너 안으로 들어간 상태</div>
 <p>프롬프트가 <code>root@...#</code> 모양으로 바뀌었습니다. 방금까지 호스트의 터미널이었는데 이제는 컨테이너 안의 쉘입니다.</p>
 <div class="tip">
 <p><strong>쉘(Shell)</strong>: 사용자와 커널 사이에서 명령을 주고받는 프로그램입니다. 사용자가 쉘에 명령을 내리면 쉘이 커널에 그 명령을 전달하고 커널이 프로세스를 만들어 실제 작업을 수행합니다.</p>
@@ -1092,7 +878,7 @@ nginx<span class="w">                </span><span class="c1"># nginx 실행</spa
     <div><span class="tl-key">root@c0b6dd5261d8:/#</span> <span class="tl-str">nginx</span></div>
   </div>
 </div>
-<div class="caption">그림 2-23. nginx 설치와 실행 결과</div>
+<div class="caption">그림 2-20. nginx 설치와 실행 결과</div>
 <p>설치 로그가 마무리되며 Nginx 설치가 끝났습니다.</p>
 <p>네트워크 확인 도구인 <code>net-tools</code>를 추가로 설치하고 Nginx가 어느 포트에서 대기 중인지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 컨테이너 내부 - net-tools 설치</div>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>net-tools<span class="w">   </span><span class="c1"># net-tools: 네트워크 확인 도구 모음</span>
@@ -1119,9 +905,9 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
     <div>tcp6    0      0      :::80              :::*                LISTEN   348/nginx: master p</div>
   </div>
 </div>
-<div class="caption">그림 2-24. 포트 상태 확인</div>
+<div class="caption">그림 2-21. 포트 상태 확인</div>
 <p>80 포트가 열려 있는 것을 확인합니다. 다음은 브라우저로 접속할 차례입니다. 주소창에 <code>localhost:80</code>을 칩니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-48.png" alt="" /><div class="caption">그림 2-25. nginx 환영 페이지 응답</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-48.png" alt="" /><div class="caption">그림 2-22. nginx 환영 페이지 응답</div></div>
 <p>nginx 환영 페이지가 떴습니다. 컨테이너를 실행할 때 포트포워딩으로 포트를 열어 둔 덕에, 컨테이너 안의 nginx와 브라우저가 연결됐기 때문입니다.</p>
 <h3>2.5.3 vim으로 파일 편집</h3>
 <p>서버 설치를 마쳤더라도 운영하다 보면 설정 파일을 수정해야 할 일이 생기기 마련입니다. 리눅스에서 파일을 편집하려면 텍스트 편집기가 필요한데, 여기서는 널리 쓰이는 <strong>Vim</strong>을 설치합니다.</p>
@@ -1164,7 +950,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
     <div>:wq</div>
   </div>
 </div>
-<div class="caption">그림 2-26. vim 편집 화면</div>
+<div class="caption">그림 2-23. vim 편집 화면</div>
 <p>저장이 잘 됐는지 <code>cat</code>으로 내용을 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 컨테이너 내부 - 파일 내용 확인</div>cat<span class="w"> </span>test1.txt<span class="w">   </span><span class="c1"># 파일 내용 출력</span></div>
 <div class="terminal-log">
@@ -1178,7 +964,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
     <div>hello docker</div>
   </div>
 </div>
-<div class="caption">그림 2-27. 파일 내용 출력</div>
+<div class="caption">그림 2-24. 파일 내용 출력</div>
 <p>실습을 마친 후 컨테이너 안에서 빠져나오기 위해 <code>exit</code>를 입력합니다. 그렇게 터미널로 돌아온 뒤 <code>docker ps</code>로 실행 중인 컨테이너를 확인하면, 방금까지 들어가 있던 ubuntu가 목록에 없습니다.</p>
 <p class="thought">'컨테이너를 빠져나왔는데 같이 종료가 되네.'</p>
 <p>방금처럼 컨테이너가 언제 종료되고 언제 계속 실행되는지 이해하려면, 그 중심에서 도는 <strong>메인 프로세스</strong>를 알아야 합니다.</p>
@@ -1196,7 +982,7 @@ netstat<span class="w"> </span>-nlpt<span class="w">              </span><span c
 <text x="380" y="208" text-anchor="middle" font-size="11" fill="#6b7280">컨테이너 안에서 가장 먼저 뜨는 프로세스</text>
 </svg>
 </div>
-<div class="caption">그림 2-28. 컨테이너 안에서 도는 중심 프로그램이 메인 프로세스입니다</div>
+<div class="caption">그림 2-25. 컨테이너 안에서 도는 중심 프로그램이 메인 프로세스입니다</div>
 <h3>2.6.2 메인 프로세스에서 빠져나오기</h3>
 <p><code>exit</code>를 입력했을 때 컨테이너가 종료된 상황을 한 번 더 재연해 보겠습니다. 컨테이너에 <code>dead</code>라는 이름을 붙여 실행한 뒤, 안에서 <code>exit</code>로 빠져나옵니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> exit로 빠져나오는 시나리오</div>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--name<span class="w"> </span>dead<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># 실행 후 exit로 나옴</span>
@@ -1215,7 +1001,7 @@ docker<span class="w"> </span>ps<span class="w">                            </sp
     <div>CONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES</div>
   </div>
 </div>
-<div class="caption">그림 2-29. exit로 빠져나오면 컨테이너가 종료</div>
+<div class="caption">그림 2-26. exit로 빠져나오면 컨테이너가 종료</div>
 <p>목록에 dead는 없습니다. <strong><code>exit</code>가 메인 프로세스를 종료하면서 컨테이너까지 함께 멈췄기 때문입니다.</strong> 그런데 컨테이너를 빠져나오는 방법이 <code>exit</code>만 있는 것은 아닙니다.</p>
 <p><code>CTRL+P → CTRL+Q</code>를 누르면 메인 프로세스는 그대로 둔 채 터미널 연결만 끊을 수 있습니다. <code>alive</code>라는 이름으로 컨테이너를 실행한 뒤, 이 키로 빠져나옵니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> CTRL+P → CTRL+Q로 빠져나오는 시나리오</div>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--name<span class="w"> </span>alive<span class="w"> </span>ubuntu<span class="w">   </span><span class="c1"># CTRL+P → CTRL+Q로 나옴</span>
@@ -1233,7 +1019,7 @@ docker<span class="w"> </span>ps<span class="w">                            </sp
     <div>17943f60b5cd   ubuntu   "/bin/bash"   Less than a second ago   Up Less than a second          alive</div>
   </div>
 </div>
-<div class="caption">그림 2-30. CTRL+P → CTRL+Q로는 컨테이너가 유지</div>
+<div class="caption">그림 2-27. CTRL+P → CTRL+Q로는 컨테이너가 유지</div>
 <p>이번에는 alive가 목록에 남아 있습니다. <strong><code>CTRL+P → CTRL+Q</code>는 메인 프로세스를 건드리지 않고 터미널 연결만 끊기 때문에 컨테이너는 그대로 살아 있습니다.</strong></p>
 <h3>2.6.3 메인 프로세스가 유지되는 조건</h3>
 <p>컨테이너가 내부 프로세스를 실행하는 방식은 이미지마다 다릅니다. 앞서 nginx를 <code>-d</code>로 백그라운드에서 실행했습니다. 같은 방식을 ubuntu에도 적용해 두 이미지가 어떻게 다른지 비교해 보겠습니다.</p>
@@ -1252,7 +1038,7 @@ docker<span class="w"> </span>ps<span class="w">              </span><span class
     <div>CONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES</div>
   </div>
 </div>
-<div class="caption">그림 2-31. ubuntu는 -d만으로는 바로 종료</div>
+<div class="caption">그림 2-28. ubuntu는 -d만으로는 바로 종료</div>
 <p class="thought">'nginx는 백그라운드에서 실행이 됐는데, ubuntu는 안 되는 건가?'</p>
 <p>ubuntu는 백그라운드로 실행되자마자 종료되어 실행 목록에 보이지 않습니다. 같은 -d 옵션인데 nginx와 결과가 다른 이유는 이미지마다 메인 프로세스가 다르기 때문입니다.</p>
 <div class="svg-figure">
@@ -1272,7 +1058,7 @@ docker<span class="w"> </span>ps<span class="w">              </span><span class
 <text x="555" y="228" text-anchor="middle" font-size="11" fill="#6b7280">요청을 기다리는 데몬</text>
 </svg>
 </div>
-<div class="caption">그림 2-32. 같은 PID 1 자리에 이미지마다 다른 프로그램이 메인 프로세스로 들어갑니다</div>
+<div class="caption">그림 2-29. 같은 PID 1 자리에 이미지마다 다른 프로그램이 메인 프로세스로 들어갑니다</div>
 <div class="prep-note">
 <p><strong>ubuntu가 바로 종료된 이유</strong>: ubuntu 이미지의 메인 프로세스는 사용자의 명령을 입력받는 <strong>셸(bash)</strong> 입니다. <code>-it</code> 옵션을 주어 터미널을 연결하면 입력을 기다리기 위해 컨테이너가 계속 유지되지만, <code>-d</code> 옵션만 주면 입력을 받을 터미널이 없어져 버립니다. 즉, 셸이 더 이상 할 일이 없다고 판단하여 컨테이너가 그 즉시 종료됩니다.</p>
 <p><strong>nginx와의 차이</strong>: 반면 웹 서버인 nginx의 목적은 사용자의 입력을 받는 것이 아니라 외부에서 들어오는 <strong>웹 요청</strong>을 기다리는 것입니다. 터미널이 없어도 <strong>요청 대기</strong>라는 명확한 할 일이 끊기지 않고 유지되므로 종료되지 않고 계속 떠 있습니다.</p>
@@ -1298,7 +1084,7 @@ docker<span class="w"> </span>ps<span class="w">                         </span>
     <div>46ef77d616b4   nginx    "/docker-entrypoint...."  5 seconds ago            Up 4 seconds            80/tcp   vil</div>
   </div>
 </div>
-<div class="caption">그림 2-33. CMD를 sleep으로 바꾸면 유지</div>
+<div class="caption">그림 2-30. CMD를 sleep으로 바꾸면 유지</div>
 <p>이제 ubuntu가 목록에 남아 있습니다. 메인 프로세스가 bash에서, 터미널이 없어도 1000초 동안 할 일이 있는 sleep으로 바뀌었기 때문입니다. 이렇게 <strong>기본 메인 프로세스를 바꾸는 설정을 CMD</strong>라고 합니다.</p>
 <h3>2.6.5 실행 중인 컨테이너에 들어가기 - attach와 exec</h3>
 <p>이제 백그라운드로 실행 중인 컨테이너 안으로 들어가 보겠습니다. 들어가는 명령은 <strong>attach</strong>와 <strong>exec</strong>, 두 가지입니다.</p>
@@ -1324,7 +1110,7 @@ docker<span class="w"> </span>ps<span class="w">                         </span>
   <text x="520" y="216" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c">주의: 메인 프로세스 종료 시 컨테이너도 종료</text>
 </svg>
 </div>
-<div class="caption">그림 2-34. attach는 이미 떠 있는 PID 1 프로세스에 터미널을 직접 연결하는 방식</div>
+<div class="caption">그림 2-31. attach는 이미 떠 있는 PID 1 프로세스에 터미널을 직접 연결하는 방식</div>
 <p>확인하기 위해 ubuntu를 <code>-dit</code>로 백그라운드에서 실행합니다. 실행 중인 컨테이너의 ID를 확인한 뒤 <code>docker attach &lt;컨테이너ID&gt;</code>로 접속합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> -dit 조합으로 ubuntu 살려 두기</div>docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </span>ubuntu<span class="w">  </span><span class="c1"># -d(백그라운드)와 -it(터미널)를 합쳐 bash 유지</span>
 docker<span class="w"> </span>ps<span class="w">               </span><span class="c1"># 실행중인 컨테이너 확인</span>
@@ -1345,7 +1131,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
     <div>root@d2b18acc2cf0:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-35. attach로 접근</div>
+<div class="caption">그림 2-32. attach로 접근</div>
 <p>메인 프로세스인 bash의 터미널이 그대로 나타났습니다. 메인 프로세스에 연결됐으므로, 여기서 <code>exit</code>로 나오면 그 bash가 끝나고 컨테이너도 멈춥니다. 그래서 컨테이너를 살려 둔 채 빠져나오려면 <code>CTRL+P → CTRL+Q</code>를 써야 합니다.</p>
 <p>이번에는 exec를 알아보겠습니다. exec는 <strong>컨테이너 안에 새 프로세스를 실행</strong>하는 방식입니다.</p>
 <div class="svg-figure">
@@ -1373,7 +1159,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
   <text x="460" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">새 프로세스에서 exit해도 메인은 그대로</text>
 </svg>
 </div>
-<div class="caption">그림 2-36. exec는 컨테이너 안에 새 bash 프로세스를 띄우고 내 터미널에 연결하는 방식</div>
+<div class="caption">그림 2-33. exec는 컨테이너 안에 새 bash 프로세스를 띄우고 내 터미널에 연결하는 방식</div>
 <p>새 프로세스에 연결되므로 exit해도 메인 프로세스는 그대로입니다. <strong>exec는 새 프로세스가 실행되기 때문에 프로세스를 지정해야 합니다.</strong> <code>docker exec -it &lt;컨테이너ID&gt; &lt;프로세스&gt;</code> 형태로 접근합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 실행 중 컨테이너에 새 bash 접속</div>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>d2b1<span class="w"> </span>bash<span class="w">   </span><span class="c1"># 실행 중인 컨테이너에 새 bash 접속</span></div>
 <div class="terminal-log">
@@ -1387,7 +1173,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
     <div>root@d2b18acc2cf0:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-37. exec로 접근</div>
+<div class="caption">그림 2-34. exec로 접근</div>
 <p>attach와 똑같이 bash 터미널이 나타나서, 화면만 보면 둘이 같아 보입니다. exec가 정말 새 프로세스를 실행했는지 눈으로 확인해 보겠습니다. <strong>새로운 터미널 창을 연 후</strong>, <code>ps aux</code> 명령으로 컨테이너 안에서 실행 중인 프로세스 목록을 조회합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 컨테이너 내부 프로세스 목록 확인</div>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>d2b1<span class="w"> </span>ps<span class="w"> </span>aux<span class="w">   </span><span class="c1"># 컨테이너 내부 프로세스 목록 확인</span></div>
 <div class="terminal-log">
@@ -1404,7 +1190,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
     <div>root  21   63.6  0.0   7888  4096  ?      Rs    03:34  0:00  ps aux</div>
   </div>
 </div>
-<div class="caption">그림 2-38. 프로세스 목록 확인</div>
+<div class="caption">그림 2-35. 프로세스 목록 확인</div>
 <p>목록에 bash가 둘 있습니다. <strong>PID 1</strong>은 앞서 본 메인 프로세스이고, <strong>PID 12</strong>가 방금 exec로 새로 실행한 프로세스입니다. 두 프로세스는 같은 컨테이너의 파일과 네트워크를 공유하지만, 각자 독립적으로 동작합니다.</p>
 <p class="thought">'결국 컨테이너를 제어한다는 건, 그 안에서 실행되는 메인 프로세스를 다루는 일이었구나.'</p>
 <h2>2.7 commit - 실행 중인 컨테이너를 이미지로</h2>
@@ -1415,7 +1201,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 <p>나만의 이미지를 만들어보겠습니다. 우선 Tomcat 이미지를 받아 컨테이너를 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Tomcat 컨테이너 실행</div>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>tomcat<span class="w">   </span><span class="c1"># 8080 포트로 Tomcat 백그라운드 실행</span></div>
 <p>실행 후 브라우저에서 <strong>localhost:8080</strong> 으로 접속하면 <strong>404</strong>가 뜹니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-58.png" alt="" /><div class="caption">그림 2-39. Tomcat 404 에러 화면</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-58.png" alt="" /><div class="caption">그림 2-36. Tomcat 404 에러 화면</div></div>
 <p class="thought">'연결은 된 거 같은데 왜 404 에러가 뜨지?'</p>
 <p>Tomcat은 루트 주소로 접속하면 <code>webapps/ROOT/</code> 폴더의 index.html을 기본 페이지로 응답합니다. 그런데 Docker Hub에서 받은 이미지는 <code>webapps/</code>가 비어 있어, 이 index.html이 없으니 404가 뜹니다.</p>
 <p>그래서 <code>webapps/ROOT/</code>에 index.html을 직접 만들어 브라우저에서 응답되도록 해 보겠습니다.</p>
@@ -1425,7 +1211,7 @@ mkdir<span class="w"> </span>ROOT<span class="w"> </span><span class="o">&amp;&a
 apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">       </span><span class="c1"># 패키지 목록 갱신 후 vim 편집기 설치</span>
 vim<span class="w"> </span>index.html<span class="w">                         </span><span class="c1"># index.html 파일을 만들고 간단한 HTML 작성 후 저장</span></div>
 <p>vim으로 index.html을 만들어 저장한 뒤 <strong>localhost:8080</strong> 으로 다시 접속하면 방금 만든 페이지가 응답됩니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-65.png" alt="" /><div class="caption">그림 2-40. index.html 응답 확인</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-65.png" alt="" /><div class="caption">그림 2-37. index.html 응답 확인</div></div>
 <p>이제 <code>docker commit &lt;컨테이너ID&gt; &lt;본인-dockerhub-id&gt;/&lt;이미지이름&gt;</code> 형식으로 명령어를 입력해 현재 상태를 기록합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 컨테이너 상태를 새 이미지로 저장</div>docker<span class="w"> </span>commit<span class="w"> </span>5fcd<span class="w"> </span>coderyu5523/tomcat<span class="w">   </span><span class="c1"># 현재 컨테이너 상태를 새 이미지로 저장</span></div>
 <div class="terminal-log">
@@ -1439,7 +1225,7 @@ vim<span class="w"> </span>index.html<span class="w">                         </
     <div>sha256:0f8181585ca9e7f2b68c623f0ce6d64f5fddfeb19076c7c0e82e55ca4629cfbb</div>
   </div>
 </div>
-<div class="caption">그림 2-41. 이미지 커밋 완료 화면</div>
+<div class="caption">그림 2-38. 이미지 커밋 완료 화면</div>
 <p>저장된 이미지가 목록에 잘 들어갔는지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 로컬 이미지 목록 확인</div>docker<span class="w"> </span>images<span class="w">   </span><span class="c1"># 로컬에 저장된 이미지 목록 확인</span></div>
 <div class="terminal-log">
@@ -1455,7 +1241,7 @@ vim<span class="w"> </span>index.html<span class="w">                         </
     <div>tomcat                latest  f1e6c9d4a7b8   2 weeks ago     489MB</div>
   </div>
 </div>
-<div class="caption">그림 2-42. 로컬 이미지 목록에 새 이미지 추가 확인</div>
+<div class="caption">그림 2-39. 로컬 이미지 목록에 새 이미지 추가 확인</div>
 <h3>2.7.2 Docker Hub에 올리기</h3>
 <p>지금까지 저장한 이미지는 로컬에만 있습니다. 이 이미지를 Docker Hub에 올려두면 다른 PC나 서버에서 내려받을 수 있습니다.</p>
 <p>Docker Hub에 로그인한 뒤 <code>docker push &lt;본인-dockerhub-id&gt;/&lt;이미지이름&gt;</code> 형식으로 이미지를 올립니다.</p>
@@ -1481,9 +1267,9 @@ docker<span class="w"> </span>push<span class="w"> </span>coderyu5523/tomcat<spa
     <div>cc1e0a391268: Waiting</div>
   </div>
 </div>
-<div class="caption">그림 2-43. docker push 실행 결과</div>
+<div class="caption">그림 2-40. docker push 실행 결과</div>
 <p>업로드가 완료된 뒤 Docker Hub의 Repositories 탭을 열면 방금 올린 이미지를 확인할 수 있습니다.</p>
-<div class="chapter-image"><img src="..\assets\CH02\chap01-70.png" alt="" /><div class="caption">그림 2-44. Docker Hub 저장소 확인</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\chap01-70.png" alt="" /><div class="caption">그림 2-41. Docker Hub 저장소 확인</div></div>
 <h2>2.8 마운트로 데이터 보존</h2>
 <p>방금 한 commit은 그 시점의 컨테이너를 이미지로 만들 뿐, 데이터를 계속 보관하는 저장소는 아닙니다. 컨테이너가 실행되며 저장되는 데이터는 이미지에 남지 않아, 컨테이너를 삭제하면 데이터도 통째로 날아갑니다.</p>
 <p class="thought">'컨테이너를 내려도 데이터는 남아 있어야 하는데.'</p>
@@ -1524,7 +1310,7 @@ docker<span class="w"> </span>push<span class="w"> </span>coderyu5523/tomcat<spa
   <text x="380" y="172" text-anchor="middle" font-size="10" font-style="italic" fill="#b91c1c">직접 연결</text>
 </svg>
 </div>
-<div class="caption">그림 2-45. 호스트 폴더와 컨테이너 경로가 같은 데이터를 바라보도록 묶인 상태</div>
+<div class="caption">그림 2-42. 호스트 폴더와 컨테이너 경로가 같은 데이터를 바라보도록 묶인 상태</div>
 <p>이제 터미널을 열고 직접 해보겠습니다. 호스트의 <code>/c/app/bind</code> 경로에 폴더를 하나 만들고, 컨테이너 안의 경로와 연결합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> bind mount 폴더 준비와 마운트 실행</div><span class="c1"># 호스트 PC에 공유할 폴더 생성</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/c/app/bind
@@ -1542,10 +1328,10 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
     <div>root@a3f1e2b4c5d6:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-46. 바인드 마운트로 ubuntu 실행</div>
+<div class="caption">그림 2-43. 바인드 마운트로 ubuntu 실행</div>
 <p>컨테이너 안 <code>/app/bind</code>에 <code>a.txt</code>를 만들고, 호스트 쪽 <code>/c/app/bind</code>에서 같은 파일이 보이는지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> bind mount 양방향 동기화 확인</div>touch<span class="w"> </span>/app/bind/a.txt<span class="w">   </span><span class="c1"># 컨테이너 안에서 파일 생성</span></div>
-<div class="chapter-image"><img src="..\assets\CH02\bind-mount-result.png" alt="" /><div class="caption">그림 2-47. 호스트 PC에서 같은 파일이 보이는 것을 확인</div></div>
+<div class="chapter-image"><img src="..\assets\CH02\bind-mount-result.png" alt="" /><div class="caption">그림 2-44. 호스트 PC에서 같은 파일이 보이는 것을 확인</div></div>
 <h3>2.8.2 볼륨 마운트: Docker가 관리하는 저장소</h3>
 <p>바인드 마운트는 <strong>사용자가 폴더를 직접 관리</strong>해야 합니다. 반대로 <strong>볼륨 마운트(Volume Mount)</strong> 는 <strong>Docker가 자동으로 관리</strong>합니다. <strong>사용자는 볼륨에 이름만 정하면</strong>, <strong>호스트의 실제 저장 위치는 Docker가 알아서</strong> 처리합니다.</p>
 <div class="svg-figure">
@@ -1582,7 +1368,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
   <text x="380" y="172" text-anchor="middle" font-size="10" font-style="italic" fill="#b91c1c">Docker 관리</text>
 </svg>
 </div>
-<div class="caption">그림 2-48. Docker 엔진이 관리하는 내부 저장 공간에 데이터가 저장되는 구조</div>
+<div class="caption">그림 2-45. Docker 엔진이 관리하는 내부 저장 공간에 데이터가 저장되는 구조</div>
 <p>이제 직접 해보겠습니다. 다음 명령은 <code>metacoding-volume</code>이라는 볼륨을 만들어 ubuntu 컨테이너를 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> named volume 마운트로 ubuntu 실행</div><span class="c1"># 문법: docker run -it --mount type=volume,src=&lt;볼륨 이름&gt;,dst=&lt;컨테이너 경로&gt; &lt;이미지&gt;</span>
 <span class="c1"># 볼륨 마운트로 ubuntu 실행</span>
@@ -1598,7 +1384,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </s
     <div>root@d6f096d57b3e:/#</div>
   </div>
 </div>
-<div class="caption">그림 2-49. 볼륨 마운트로 ubuntu 실행</div>
+<div class="caption">그림 2-46. 볼륨 마운트로 ubuntu 실행</div>
 <p>데이터는 Docker가 관리하는 저장소에 보관되며, 컨테이너는 <code>/app/volume</code> 경로를 통해 이 데이터를 읽고 씁니다. 따라서 해당 경로에 저장한 데이터만 유지되고, 그 외의 경로에 저장된 파일은 컨테이너 삭제 시 함께 지워집니다.</p>
 <p>이 폴더에 <code>b.txt</code>를 만들고, 컨테이너를 빠져나와 볼륨이 그대로 남아 있는지 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 볼륨에 파일 생성</div>touch<span class="w"> </span>/app/volume/b.txt<span class="w">   </span><span class="c1"># 볼륨 안에 빈 파일 생성</span>
@@ -1618,7 +1404,7 @@ docker<span class="w"> </span>volume<span class="w"> </span>ls<span class="w">  
     <div>local     metacoding-volume</div>
   </div>
 </div>
-<div class="caption">그림 2-50. 컨테이너가 사라져도 볼륨은 유지</div>
+<div class="caption">그림 2-47. 컨테이너가 사라져도 볼륨은 유지</div>
 <p>컨테이너는 사라졌지만 볼륨은 목록에 그대로 남아 있습니다. 이어서 같은 볼륨을 연결해 새 컨테이너를 다시 실행합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 같은 볼륨으로 새 컨테이너에서 데이터 확인</div><span class="c1"># 같은 볼륨으로 새 컨테이너 실행</span>
 docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--mount<span class="w"> </span><span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>metacoding-volume,dst<span class="o">=</span>/app/volume<span class="w"> </span>ubuntu
@@ -1636,7 +1422,7 @@ ls<span class="w"> </span>/app/volume</div>
     <div>b.txt</div>
   </div>
 </div>
-<div class="caption">그림 2-51. 볼륨 데이터 재사용</div>
+<div class="caption">그림 2-48. 볼륨 데이터 재사용</div>
 <p>방금 만든 <code>b.txt</code>가 새 컨테이너 안에서도 그대로 보입니다. <strong>컨테이너를 내려도 데이터는 사라지지 않습니다</strong>.</p>
 <p>오픈이는 하루 사이에 익힌 키워드를 정리했습니다. 격리, 이미지, 포트포워딩, CMD, 볼륨이 머릿속에 정리됐습니다. 어제 헤맸던 그 에러도 이제는 어디에서 막혔던 건지 짚을 수 있을 것 같았습니다.</p>
 <p>다만 지금까지 익힌 건 도커와 컨테이너의 기본입니다. 실제 현장에서 그대로 쓰기에는 한계가 있습니다.</p>

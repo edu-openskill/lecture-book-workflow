@@ -1,0 +1,12 @@
+# 내부 호출 전용. gateway가 /login, /api/users → user-service:8083으로 호출
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: metacoding
+spec:
+  type: ClusterIP
+  selector:
+    app: user
+  ports:
+    - port: 8083
