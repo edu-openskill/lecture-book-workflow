@@ -25,7 +25,7 @@
 | 개념 | 정체 | 역할 |
 |------|------|------|
 | **STEP** | 흐름 | 1~7번까지 순서대로 진행하는 워크플로우 단계 |
-| **스킬** | 도구 | 하나의 작업만 수행하고 결과를 돌려주는 원자적 도구 (22개) |
+| **스킬** | 도구 | 하나의 작업만 수행하고 결과를 돌려주는 원자적 도구 (24개) |
 | **검토 모드** | 체크리스트 | 산출물 품질을 검증하는 관점과 질문 목록 (3개) |
 
 에이전트는 없다. 하나의 AI가 STEP을 따라가며 스킬을 쓰고, 검토 모드로 점검한다.
@@ -236,6 +236,17 @@ projects/[책이름]/
 ├── chapters/ · book/ · assets/ · questions/ · review/
 ```
 
+### 강의 트랙 폴더 차이
+
+강의 트랙은 `code/`·`versions/` 대신 `sources/`(강별 `sources/NN강/`)에 판서대본·자막을 둔다.
+
+```
+projects/[책이름]/
+├── planning/   (seed · lecture-analysis · chapter-map · outline)
+├── sources/    ← code/ 대신: 강별 판서대본 + 유튜브 자막
+├── chapters/ · book/ · assets/ · questions/ · review/
+```
+
 ### 산출물 버전 관리
 
 파일명에 `-vN` 접미사를 붙인다. 절대 덮어쓰지 않는다.
@@ -282,7 +293,7 @@ planning/seed-v1.md → planning/seed-v2.md → ...
 | 자료 분류 | [실습/설명/참고] | [핵심수식/계산예제/그림/연습] | [개념/비유/선수/오개념] |
 | 코드 비중 | 낮음 | 없음 | 낮음 |
 
-> 문체 상수(아래)는 양 트랙 동일.
+> 문체 상수(아래)는 세 트랙 동일.
 
 ### 문체 상수
 
@@ -372,10 +383,10 @@ planning/seed-v1.md → planning/seed-v2.md → ...
 
 ---
 
-## 스킬 (22개)
+## 스킬 (24개)
 
 스킬은 `.claude/skills/`에서 관리한다 (v1 구조 동일):
-- `.claude/skills/CATALOG.md` — 22개 스킬 전체 카탈로그 (Tier 1~3 + STEP 매핑)
+- `.claude/skills/CATALOG.md` — 24개 스킬 전체 카탈로그 (Tier 1~3 + STEP 매핑)
 - `.claude/skills/writing/` — 스토리텔링, 문체, 박스 스타일, 버전별 성장
 - `.claude/skills/planning/` — 갭 분석, 분량 관리
 - `.claude/skills/code/` — 코드 설명 패턴 (기술 파트)
@@ -419,8 +430,8 @@ planning/seed-v1.md → planning/seed-v2.md → ...
 
 | 위치 | 내용 |
 |------|------|
-| `.claude/skills/` | 스킬 5개 카테고리 (writing, planning, code, visual, review) |
-| `.claude/skills/CATALOG.md` | 22개 스킬 카탈로그 |
+| `.claude/skills/` | 스킬 카테고리 (writing, planning, code, lecture, lecture-caption, visual, review 등) |
+| `.claude/skills/CATALOG.md` | 24개 스킬 카탈로그 |
 | `workflow/step[N]-*.md` | 각 STEP별 실행 가이드 |
 | `workflow/review-guide.md` | 검토 모드 체크리스트 |
 | `design/v3/워크플로우-설계-v3.md` | 전체 설계 (상수, 변수, STEP 상세) |
