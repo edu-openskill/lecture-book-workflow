@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 — 2.4 재구성안 (5.3 방식)</title>
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+</head>
+<body>
+<div class="container">
+
+<div style="border:1.5px solid #ff7849;background:#fff4ed;border-radius:8px;padding:14px 18px;margin-bottom:24px;color:#7b341e;font-size:14px;">
+<strong>샘플 — 2.4 재구성안 (5.3 방식)</strong><br>
+각 소절을 <strong>① 짧은 비유 → ② 그에 맞는 이론 → ③ 그림 → ④ 구성 요소 표</strong> 순으로 재구성했습니다. 푸드코트 비유 일러스트는 제거, 3열 비유매핑 표는 비유 도입 단락으로 흡수, 표는 실제 구성 요소만 설명합니다. 그림 번호는 일러스트 제거 후 기준(2-15~2-18)입니다.
+</div>
+
+<h2>2.4 컨테이너 통신</h2>
+<p>외부에서 보낸 요청이 컨테이너 안까지 어떻게 전달되는지, 또 컨테이너끼리 어떻게 데이터를 주고받는지 살펴보겠습니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너 통신 도입. 외부 브라우저가 호스트 포트로 들어와 iptables를 거쳐 docker0 위 web 컨테이너로 닿고, web과 db는 docker0 위에서 IP로 통신.">
+  <defs>
+    <marker id="n15-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="n15-s" markerWidth="10" markerHeight="10" refX="2" refY="3" orient="auto-start-reverse"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+  </defs>
+  <text x="450" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">컨테이너 통신 한눈에 보기</text>
+  <rect x="20" y="155" width="140" height="70" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="90" y="183" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">브라우저</text>
+  <text x="90" y="205" text-anchor="middle" font-size="11" font-family="monospace" fill="#4f46e5">localhost:8080</text>
+  <rect x="200" y="50" width="690" height="400" rx="10" fill="#fff" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="220" y="74" font-size="12" font-weight="700" fill="#475569">호스트 PC</text>
+  <rect x="220" y="160" width="100" height="60" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="270" y="183" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">호스트 포트</text>
+  <text x="270" y="206" text-anchor="middle" font-size="14" font-weight="700" font-family="monospace" fill="#0f172a">:8080</text>
+  <rect x="345" y="155" width="135" height="70" rx="6" fill="#f5faff" stroke="#1565c0" stroke-width="1.6"/>
+  <text x="412" y="178" text-anchor="middle" font-size="12" font-weight="700" fill="#1565c0">iptables 규칙</text>
+  <text x="412" y="194" text-anchor="middle" font-size="10" font-style="italic" fill="#1565c0">DNAT</text>
+  <text x="412" y="213" text-anchor="middle" font-size="11" font-family="monospace" fill="#1565c0">8080 → :80</text>
+  <rect x="280" y="257" width="530" height="46" rx="23" fill="#fff4ed" stroke="#ff7849" stroke-width="2"/>
+  <rect x="290" y="325" width="200" height="110" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="302" y="340" font-size="9" font-weight="600" fill="#6b7280">Namespace A</text>
+  <rect x="302" y="348" width="176" height="78" rx="4" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="390" y="372" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">web 컨테이너</text>
+  <text x="390" y="392" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">172.17.0.2</text>
+  <text x="390" y="410" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">port: 80</text>
+  <rect x="580" y="325" width="200" height="110" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="592" y="340" font-size="9" font-weight="600" fill="#6b7280">Namespace B</text>
+  <rect x="592" y="348" width="176" height="78" rx="4" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="680" y="372" text-anchor="middle" font-size="13" font-weight="800" fill="#0f172a">db 컨테이너</text>
+  <text x="680" y="392" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">172.17.0.3</text>
+  <text x="680" y="410" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">port: 3306</text>
+  <line x1="160" y1="190" x2="218" y2="190" stroke="#475569" stroke-width="1.8" marker-end="url(#n15-p)"/>
+  <line x1="320" y1="190" x2="345" y2="190" stroke="#475569" stroke-width="1.6" marker-end="url(#n15-p)"/>
+  <path d="M 412 225 L 412 255" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#n15-p)"/>
+  <line x1="390" y1="303" x2="390" y2="325" stroke="#475569" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#n15-p)"/>
+  <text x="398" y="318" font-size="9" font-style="italic" fill="#6b7280">veth</text>
+  <line x1="680" y1="303" x2="680" y2="325" stroke="#475569" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#n15-p)"/>
+  <text x="688" y="318" font-size="9" font-style="italic" fill="#6b7280">veth</text>
+  <path d="M 478 348 Q 535 245 580 348" fill="none" stroke="#475569" stroke-width="1.7" stroke-dasharray="5,3" marker-start="url(#n15-s)" marker-end="url(#n15-p)"/>
+  <text x="535" y="318" text-anchor="middle" font-size="10" font-style="italic" font-weight="700" fill="#475569">IP로 통신</text>
+  <text x="545" y="287" text-anchor="middle"><tspan font-size="13" font-weight="800" fill="#7b341e">docker0 브리지 (가상 스위치)</tspan><tspan font-size="10" font-family="monospace" fill="#7b341e">  ·  172.17.0.1</tspan></text>
+</svg>
+</div>
+<div class="caption">그림 2-15. 컨테이너 통신 한눈에 보기 - 외부 진입과 컨테이너끼리 IP 통신</div>
+<p>여기서는 컨테이너 네트워크를 세 가지로 나눠 살펴보겠습니다. <strong>컨테이너끼리 연결하는 방법</strong>, <strong>외부 요청이 컨테이너로 들어오는 방법</strong>, <strong>이름으로 컨테이너를 찾는 방법</strong>입니다.</p>
+
+<h3>2.4.1 컨테이너 간 통신</h3>
+<p>푸드코트에 여러 식당이 있습니다. 각 식당은 서로의 주방에 들어갈 수 없습니다. 대신 각 주방의 <strong>주방 모니터</strong>는 <strong>통신 케이블</strong>로 벽에 걸린 <strong>주문 전광판</strong>에 연결되며, 서로의 주문 현황을 확인할 수 있습니다.</p>
+<p>컨테이너 간 통신도 비슷합니다. 각 컨테이너는 자기만의 격리된 네트워크인 <strong>네트워크 Namespace</strong>를 갖고, <strong>veth pair</strong>라는 가상 케이블로 <strong>docker0</strong> 브리지에 연결됩니다. 한 컨테이너가 다른 컨테이너의 IP로 호출하면 <strong>데이터는 docker0를 통해 전달됩니다.</strong></p>
+<div class="svg-figure">
+<svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컨테이너가 자기 네트워크 Namespace(격리된 IP 공간)를 갖고 veth pair로 docker0에 연결되는 구조">
+  <defs>
+    <marker id="ns-ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="ns-ah-s" markerWidth="10" markerHeight="10" refX="2" refY="3" orient="auto-start-reverse">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">컨테이너 네트워크 격리 구조 - 컨테이너 · Namespace · docker0</text>
+
+  <!-- 호스트 박스 (전체 확장) -->
+  <rect x="20" y="50" width="720" height="200" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="380" y="70" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">호스트 (Host)</text>
+
+  <!-- 컨테이너 A (바깥) ⊃ 네트워크 Namespace (안) -->
+  <rect x="40" y="85" width="180" height="150" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.9"/>
+  <text x="130" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">컨테이너 A</text>
+  <rect x="57" y="116" width="146" height="102" rx="6" fill="#fff4ed" stroke="#fb923c" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="130" y="137" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7b341e">네트워크 Namespace</text>
+  <text x="130" y="153" text-anchor="middle" font-size="9" font-style="italic" fill="#9a3f1c">격리된 네트워크</text>
+  <rect x="73" y="166" width="114" height="30" rx="5" fill="#fff" stroke="#fb923c" stroke-width="1.2"/>
+  <text x="130" y="186" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">172.17.0.2</text>
+
+  <!-- docker0 브리지 (가운데) -->
+  <rect x="320" y="135" width="120" height="50" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="380" y="158" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">docker0 브리지</text>
+  <text x="380" y="173" text-anchor="middle" font-size="10" fill="#7b341e">가상 스위치</text>
+
+  <!-- 컨테이너 B (바깥) ⊃ 네트워크 Namespace (안) -->
+  <rect x="540" y="85" width="180" height="150" rx="8" fill="#fff" stroke="#ff7849" stroke-width="1.9"/>
+  <text x="630" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">컨테이너 B</text>
+  <rect x="557" y="116" width="146" height="102" rx="6" fill="#fff4ed" stroke="#fb923c" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="630" y="137" text-anchor="middle" font-size="10.5" font-weight="700" fill="#7b341e">네트워크 Namespace</text>
+  <text x="630" y="153" text-anchor="middle" font-size="9" font-style="italic" fill="#9a3f1c">격리된 네트워크</text>
+  <rect x="573" y="166" width="114" height="30" rx="5" fill="#fff" stroke="#fb923c" stroke-width="1.2"/>
+  <text x="630" y="186" text-anchor="middle" font-size="11" font-family="monospace" fill="#7b341e">172.17.0.3</text>
+
+  <!-- veth pair: 컨테이너 A ↔ docker0 -->
+  <line x1="220" y1="160" x2="318" y2="160" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-start="url(#ns-ah-s)" marker-end="url(#ns-ah)"/>
+  <text x="269" y="153" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">veth pair</text>
+
+  <!-- veth pair: docker0 ↔ 컨테이너 B -->
+  <line x1="442" y1="160" x2="540" y2="160" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-start="url(#ns-ah-s)" marker-end="url(#ns-ah)"/>
+  <text x="491" y="153" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">veth pair</text>
+</svg>
+</div>
+<div class="caption">그림 2-16. 컨테이너 네트워크 격리 구조 - 컨테이너 · Namespace · docker0</div>
+<table>
+<thead><tr><th>구성 요소</th><th>하는 일</th></tr></thead>
+<tbody>
+<tr><td><strong>네트워크 Namespace</strong></td><td>컨테이너마다 따로 가진, 자기 IP·포트를 쓰는 격리된 네트워크</td></tr>
+<tr><td><strong>veth pair</strong></td><td>네트워크 Namespace를 docker0에 잇는 가상 케이블 한 쌍</td></tr>
+<tr><td><strong>docker0</strong></td><td>같은 브리지에 묶인 컨테이너 사이로 패킷(데이터 묶음)을 중계하는 가상 브리지</td></tr>
+</tbody>
+</table>
+
+<h3>2.4.2 외부에서 들어오기 - 입구 키오스크</h3>
+<p>푸드코트에서 손님은 식당으로 들어갈 수 없습니다. 대신 <strong>키오스크</strong>를 통해 식당에 주문을 요청합니다. 짜장면을 선택하면 A식당, 돈까스를 선택하면 B식당으로 키오스크의 규칙에 따라 주문이 전달됩니다.</p>
+<p>외부에서 컨테이너로의 요청도 바로 접근이 불가능합니다. 그래서 키오스크의 역할을 하는 <strong>포트포워딩</strong>을 사용해야 합니다.</p>
+<div class="tip">
+<p><strong>왜 컨테이너 IP로 바로 접근할 수 없을까</strong></p>
+<p>컨테이너 IP는 실행할 때마다 새로 할당되어, 외부에서 접속할 고정된 주소가 없습니다. 게다가 Windows·macOS에서는 컨테이너가 Docker Desktop이 실행하는 리눅스 가상 머신 안에서 동작합니다. 컨테이너 IP는 이 가상 머신 내부 네트워크에만 있는 주소라, 그 바깥에 있는 호스트는 해당 IP로 도달할 수 없습니다.</p>
+</div>
+<p>예를 들어 <code>docker run -p 8080:80</code>을 실행하면 <strong>iptables(DNAT)</strong> 에 규칙이 작성됩니다. 그리고 외부에서 8080 포트로 요청이 오면 이 규칙에 의해 80 포트를 가진 컨테이너로 연결됩니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 760 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="포트포워딩 구조 — iptables 규칙이 호스트 포트로 들어온 요청을 컨테이너 포트로 전달하는 구조">
+  <defs>
+    <marker id="pf-ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <text x="380" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">포트포워딩 구조 — iptables · docker0 · 컨테이너 포트</text>
+
+  <!-- 왼쪽: 외부 브라우저 -->
+  <rect x="20" y="100" width="140" height="80" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="90" y="130" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">브라우저</text>
+  <text x="90" y="155" text-anchor="middle" font-size="10" font-family="monospace" fill="#6b7280">localhost:8080</text>
+
+  <!-- 가운데~오른쪽: 호스트 박스 -->
+  <rect x="200" y="50" width="540" height="220" rx="8" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="220" y="70" font-size="11" font-weight="600" fill="#0f172a">호스트 (Host)</text>
+
+  <!-- 호스트 포트 박스 -->
+  <rect x="220" y="110" width="100" height="70" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+  <text x="270" y="135" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">호스트 포트</text>
+  <text x="270" y="162" text-anchor="middle" font-size="15" font-weight="700" font-family="monospace" fill="#0f172a">:8080</text>
+
+  <!-- 브라우저 → 호스트 포트 화살표 (호스트 박스 위에 그려 가려지지 않게) -->
+  <line x1="160" y1="140" x2="218" y2="140" stroke="#475569" stroke-width="1.8" marker-end="url(#pf-ah)"/>
+  <text x="180" y="130" text-anchor="middle" font-size="10" fill="#6b7280" font-style="italic">요청</text>
+
+  <!-- 호스트포트 → iptables 화살표 -->
+  <line x1="320" y1="145" x2="350" y2="145" stroke="#475569" stroke-width="1.6" marker-end="url(#pf-ah)"/>
+
+  <!-- iptables 규칙 박스 -->
+  <rect x="350" y="100" width="120" height="90" rx="6" fill="#f5faff" stroke="#1565c0" stroke-width="1.6"/>
+  <text x="410" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#1565c0">iptables 규칙</text>
+  <text x="410" y="143" text-anchor="middle" font-size="10" font-style="italic" fill="#1565c0">DNAT</text>
+  <line x1="365" y1="152" x2="455" y2="152" stroke="#1565c0" stroke-width="0.6" opacity="0.4"/>
+  <text x="410" y="172" text-anchor="middle" font-size="11" font-family="monospace" fill="#1565c0">8080 → :80</text>
+
+  <!-- iptables → docker0 화살표 -->
+  <line x1="470" y1="145" x2="500" y2="145" stroke="#475569" stroke-width="1.6" marker-end="url(#pf-ah)"/>
+
+  <!-- docker0 브리지 박스 -->
+  <rect x="500" y="115" width="100" height="60" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="550" y="138" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">docker0</text>
+  <text x="550" y="156" text-anchor="middle" font-size="10" fill="#7b341e">브리지</text>
+
+  <!-- docker0 → 컨테이너 화살표 (점선 = veth) -->
+  <line x1="600" y1="145" x2="638" y2="145" stroke="#475569" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#pf-ah)"/>
+
+  <!-- Namespace 점선 박스 + 컨테이너 -->
+  <rect x="625" y="80" width="105" height="160" rx="8" fill="#fff" stroke="#9ca3af" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="635" y="98" font-size="10" font-weight="600" fill="#6b7280">Namespace</text>
+  <rect x="640" y="115" width="80" height="100" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="680" y="140" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">컨테이너</text>
+  <text x="680" y="166" text-anchor="middle" font-size="14" font-weight="700" font-family="monospace" fill="#0f172a">:80</text>
+  <text x="680" y="190" text-anchor="middle" font-size="9" font-family="monospace" fill="#6b7280">172.17.0.2</text>
+
+</svg>
+</div>
+<div class="caption">그림 2-17. 호스트 포트가 컨테이너 포트로 연결되는 구조</div>
+<table>
+<thead><tr><th>구성 요소</th><th>하는 일</th></tr></thead>
+<tbody>
+<tr><td><strong>포트포워딩</strong></td><td>외부 공개 포트로 온 요청을 컨테이너 포트로 넘기는 메커니즘</td></tr>
+<tr><td><strong>iptables 규칙(DNAT)</strong></td><td>외부 공개 포트로 온 요청의 목적지를 컨테이너의 IP·포트로 바꾸는 규칙</td></tr>
+<tr><td><strong>컨테이너 포트</strong></td><td>컨테이너 안에서 앱이 듣고 있는, 요청이 최종 도착하는 포트</td></tr>
+</tbody>
+</table>
+
+<h3>2.4.3 이름으로 찾기 - 홀의 안내 지도</h3>
+<p>여러 식당 중 손님은 자신이 원하는 식당의 위치를 알 수 없습니다. 이때 <strong>안내 지도</strong>를 보면 식당의 이름을 보고 위치를 찾을 수 있습니다.</p>
+<p>도커에는 <strong>Docker DNS</strong> 기능이 있습니다. 새로운 컨테이너가 실행되면 컨테이너의 이름과 IP를 Docker DNS에 등록합니다. 그리고 <strong>한 컨테이너가 다른 컨테이너를 이름으로 호출하면, Docker DNS가 이름에 맞는 IP를 돌려줍니다.</strong> 이름으로 통신이 가능하기 때문에 IP가 바뀌어도 같은 이름으로 통신할 수 있습니다.</p>
+<div class="svg-figure">
+<svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Docker DNS가 이름을 IP로 변환하는 흐름">
+  <defs>
+    <marker id="ah-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#475569"/>
+    </marker>
+    <marker id="ah-o" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/>
+    </marker>
+  </defs>
+  <text x="350" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">Docker DNS가 이름을 IP로 변환하는 흐름</text>
+  <rect x="10" y="25" width="680" height="195" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.4"/>
+  <text x="22" y="44" font-size="11" font-weight="800" fill="#3730a3">사용자 정의 네트워크(User-defined Network)</text>
+  <rect x="20" y="70" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="100" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">app 컨테이너</text>
+  <text x="100" y="120" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.2</text>
+  <rect x="270" y="70" width="160" height="70" rx="8" fill="#fff4ed" stroke="#ff7849" stroke-width="1.8"/>
+  <text x="350" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#7b341e">Docker DNS</text>
+  <text x="350" y="120" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">127.0.0.11</text>
+  <rect x="520" y="70" width="160" height="70" rx="8" fill="#fff" stroke="#475569" stroke-width="1.8"/>
+  <text x="600" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">db 컨테이너</text>
+  <text x="600" y="120" text-anchor="middle" font-size="11" font-family="monospace" fill="#6b7280">172.18.0.3</text>
+  <line x1="180" y1="92" x2="270" y2="92" stroke="#475569" stroke-width="1.8" marker-end="url(#ah-p)"/>
+  <text x="225" y="85" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">1.</tspan> db의 IP는?</text>
+  <line x1="270" y1="118" x2="180" y2="118" stroke="#ff7849" stroke-width="1.8" stroke-dasharray="5,3" marker-end="url(#ah-o)"/>
+  <text x="225" y="133" text-anchor="middle" font-size="11" fill="#7b341e"><tspan font-weight="700">2.</tspan> 172.18.0.3</text>
+  <path d="M 100 140 L 100 195 L 600 195 L 600 140" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ah-p)"/>
+  <rect x="265" y="183" width="170" height="22" rx="4" fill="#fff"/>
+  <text x="350" y="198" text-anchor="middle" font-size="11" fill="#0f172a"><tspan font-weight="700">3.</tspan> 172.18.0.3 으로 요청</text>
+</svg>
+</div>
+<div class="caption">그림 2-18. Docker DNS가 이름을 IP로 변환</div>
+<table>
+<thead><tr><th>구성 요소</th><th>하는 일</th></tr></thead>
+<tbody>
+<tr><td><strong>Docker DNS</strong></td><td>컨테이너 이름을 IP로 자동 변환해 주는 내장 DNS(Domain Name System) 서버</td></tr>
+</tbody>
+</table>
+
+<p>다만 내장 DNS는 <strong>사용자 정의 네트워크(User-defined Network)</strong> 에서만 동작합니다. 기본 네트워크(docker0)에서는 이름으로 찾을 수 없기 때문에, 직접 네트워크를 만들어 컨테이너들을 연결해야 합니다. 구체적인 생성 방법은 다음 챕터에서 다룹니다.</p>
+
+</div>
+</body>
+</html>

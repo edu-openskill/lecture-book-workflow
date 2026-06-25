@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>샘플 — 그림 6-2 챕터 6 한눈에 보기 (4-8 기반, 배치 수정)</title>
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+<link rel="stylesheet" href="./styles/base.css">
+<link rel="stylesheet" href="./styles/components.css">
+<link rel="stylesheet" href="./styles/diagrams.css">
+<link rel="stylesheet" href="./styles/print.css" media="print">
+</head>
+<body>
+<div class="container">
+
+<div style="border:1.5px solid #ff7849;background:#fff4ed;border-radius:8px;padding:14px 18px;margin-bottom:24px;color:#7b341e;font-size:14px;">
+<strong>샘플 — 그림 6-2 (배치 수정본)</strong><br>
+ConfigMap·Secret(6.1)은 왼쪽-아래에서 Pod로 주입, PVC·PV(6.2)는 <strong>Pod 바로 아래</strong>에서 수직으로 마운트. 두 그룹을 가로로 띄워 분리했습니다.
+</div>
+
+<div class="svg-figure">
+<svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="챕터 6 한눈에 보기 — 클라이언트가 Ingress·Service를 거쳐 Pod에 도달하고 Deployment가 Pod를 관리하며, ConfigMap·Secret이 설정을 주입하고, Pod 아래의 PVC·PV가 데이터를 영속시키는 구조">
+  <defs>
+    <marker id="k6-p" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#475569"/></marker>
+    <marker id="k6-g" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#9ca3af"/></marker>
+    <marker id="k6-m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+  </defs>
+  <text x="440" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">챕터 6 한눈에 보기 — 운영에 필요한 리소스의 전체 구조</text>
+
+  <rect x="20" y="115" width="80" height="50" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="1.4"/>
+  <text x="60" y="145" text-anchor="middle" font-size="12" fill="#374151">클라이언트</text>
+
+  <rect x="140" y="44" width="720" height="320" rx="10" fill="none" stroke="#475569" stroke-width="1.6" stroke-dasharray="6,4"/>
+  <text x="160" y="64" font-size="11" font-weight="600" fill="#0f172a">Kubernetes 클러스터 (namespace: metacoding)</text>
+
+  <line x1="100" y1="140" x2="170" y2="140" stroke="#9ca3af" stroke-width="1.4" marker-end="url(#k6-g)"/>
+
+  <rect x="170" y="115" width="100" height="50" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="220" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Ingress</text>
+  <text x="220" y="157" text-anchor="middle" font-size="9" fill="#6b7280">진입점</text>
+  <line x1="270" y1="140" x2="310" y2="140" stroke="#475569" stroke-width="1.6" marker-end="url(#k6-p)"/>
+
+  <rect x="310" y="115" width="100" height="50" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="360" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Service</text>
+  <text x="360" y="157" text-anchor="middle" font-size="9" fill="#6b7280">고정 주소</text>
+  <line x1="410" y1="130" x2="558" y2="112" stroke="#475569" stroke-width="1.6" marker-end="url(#k6-p)"/>
+  <line x1="410" y1="150" x2="558" y2="192" stroke="#475569" stroke-width="1.6" marker-end="url(#k6-p)"/>
+  <text x="485" y="112" text-anchor="middle" font-size="9" fill="#475569" font-style="italic">Pod 연결</text>
+
+  <rect x="560" y="92" width="120" height="48" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="620" y="114" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod 1</text>
+  <text x="620" y="130" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
+  <rect x="560" y="170" width="120" height="48" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="620" y="192" text-anchor="middle" font-size="12" font-weight="700" fill="#7b341e">Pod 2</text>
+  <text x="620" y="208" text-anchor="middle" font-size="10" fill="#7b341e">컨테이너 실행</text>
+
+  <rect x="720" y="128" width="100" height="50" rx="6" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="770" y="150" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Deployment</text>
+  <text x="770" y="166" text-anchor="middle" font-size="9" fill="#3730a3">Pod 생성·관리</text>
+  <line x1="720" y1="146" x2="690" y2="120" stroke="#4f46e5" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k6-m)"/>
+  <line x1="720" y1="166" x2="690" y2="196" stroke="#4f46e5" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k6-m)"/>
+  <text x="701" y="157" text-anchor="middle" font-size="9" fill="#4f46e5" font-style="italic">관리</text>
+
+  <rect x="320" y="276" width="100" height="46" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="370" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">ConfigMap</text>
+  <text x="370" y="311" text-anchor="middle" font-size="9" fill="#6b7280">일반 설정</text>
+  <rect x="430" y="276" width="90" height="46" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="475" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Secret</text>
+  <text x="475" y="311" text-anchor="middle" font-size="9" fill="#6b7280">민감 정보</text>
+  <path d="M 370 276 Q 455 232 558 132" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k6-p)"/>
+  <path d="M 475 276 Q 520 244 558 200" fill="none" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k6-p)"/>
+  <text x="505" y="228" text-anchor="middle" font-size="10"><tspan font-weight="700" fill="#4f46e5">챕터 6.1</tspan> <tspan fill="#6b7280" font-style="italic">설정 주입</tspan></text>
+
+  <rect x="585" y="276" width="66" height="46" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="618" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">PVC</text>
+  <text x="618" y="311" text-anchor="middle" font-size="9" fill="#6b7280">저장 공간 요청</text>
+  <rect x="661" y="276" width="74" height="46" rx="6" fill="#fff" stroke="#475569" stroke-width="1.6"/>
+  <text x="698" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">PV</text>
+  <text x="698" y="311" text-anchor="middle" font-size="9" fill="#6b7280">실제 저장 공간</text>
+  <line x1="651" y1="299" x2="661" y2="299" stroke="#475569" stroke-width="1.4"/>
+  <line x1="618" y1="276" x2="618" y2="221" stroke="#475569" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#k6-p)"/>
+  <text x="628" y="250" font-size="10"><tspan font-weight="700" fill="#4f46e5">챕터 6.2</tspan> <tspan fill="#6b7280" font-style="italic">마운트</tspan></text>
+</svg>
+</div>
+
+<div class="caption">그림 6-2. 챕터 6 한눈에 보기 - 운영에 필요한 리소스의 전체 구조</div>
+
+</div>
+</body>
+</html>

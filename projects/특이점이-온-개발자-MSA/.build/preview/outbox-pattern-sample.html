@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Outbox 패턴 샘플 (문제 + 해결)</title>
+<style>
+  body { font-family: "Pretendard","Malgun Gothic","Segoe UI",sans-serif; background:#f8fafc; margin:0; padding:40px 24px; }
+  .svg-figure { max-width:1180px; margin:0 auto 8px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px 20px 4px; }
+  .cap { text-align:center; color:#475569; font-style:italic; font-size:14px; margin:8px auto 34px; }
+  h2 { text-align:center; color:#0f172a; font-size:15px; margin:0 auto 14px; }
+</style>
+</head>
+<body>
+
+<h2>그림 1 — 문제: 직접 발행하면 이벤트가 유실될 수 있다</h2>
+<div class="svg-figure">
+<svg viewBox="0 0 1180 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="직접 발행의 문제: 주문은 DB에 저장됐는데 Kafka 발행이 실패하면 이벤트가 유실된다">
+  <defs>
+    <marker id="p-ok" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="p-bad" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/></marker>
+  </defs>
+  <text x="590" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">주문은 DB에 저장됐는데 Kafka 발행이 실패하면, 이벤트는 사라진다</text>
+
+  <!-- 주문 서비스 -->
+  <g transform="translate(70 118)">
+    <rect x="0" y="0" width="150" height="92" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <line x1="0" y1="31" x2="150" y2="31" stroke="#4f46e5" stroke-width="1.2"/>
+    <line x1="0" y1="62" x2="150" y2="62" stroke="#4f46e5" stroke-width="1.2"/>
+    <circle cx="18" cy="15" r="3.2" fill="#4f46e5"/><circle cx="18" cy="46" r="3.2" fill="#4f46e5"/><circle cx="18" cy="77" r="3.2" fill="#4f46e5"/>
+  </g>
+  <text x="145" y="232" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">주문 서비스</text>
+
+  <!-- 성공: 서비스 → 주문 DB -->
+  <line x1="220" y1="150" x2="466" y2="112" stroke="#4f46e5" stroke-width="2.4" marker-end="url(#p-ok)"/>
+  <text x="338" y="116" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f46e5">주문 저장 (성공)</text>
+  <rect x="470" y="78" width="200" height="74" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="570" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="#3730a3">주문 DB</text>
+  <text x="570" y="130" text-anchor="middle" font-size="11" fill="#64748b">order_tb · 주문 저장됨</text>
+
+  <!-- 실패: 서비스 → Kafka -->
+  <line x1="220" y1="186" x2="466" y2="232" stroke="#94a3b8" stroke-width="2.4" stroke-dasharray="6,4" marker-end="url(#p-bad)"/>
+  <text x="338" y="226" text-anchor="middle" font-size="12.5" font-weight="700" fill="#64748b">이벤트 발행 (실패하면 유실)</text>
+  <!-- X 표시 -->
+  <g stroke="#94a3b8" stroke-width="2.6"><line x1="332" y1="200" x2="348" y2="216"/><line x1="348" y1="200" x2="332" y2="216"/></g>
+  <rect x="470" y="200" width="200" height="74" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="570" y="232" text-anchor="middle" font-size="13" font-weight="700" fill="#94a3b8">Kafka</text>
+  <text x="570" y="252" text-anchor="middle" font-size="11" fill="#94a3b8">이벤트 못 받음</text>
+
+  <text x="900" y="160" text-anchor="middle" font-size="12.5" fill="#475569" font-style="italic">주문은 남았는데 이벤트만 증발 →</text>
+  <text x="900" y="182" text-anchor="middle" font-size="12.5" fill="#475569" font-style="italic">배달·상품은 그 주문을 영영 모릅니다</text>
+</svg>
+<div class="cap">그림 4-N. 직접 발행의 한계 - DB 저장과 Kafka 발행은 별개라, 발행이 실패하면 이벤트가 유실됩니다</div>
+</div>
+
+<h2>그림 2 — 해결: 같은 트랜잭션으로 outbox에 적고, 발송기가 Kafka로 옮긴다</h2>
+<div class="svg-figure">
+<svg viewBox="0 0 1180 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Outbox 패턴 해결 흐름: 주문과 이벤트를 한 트랜잭션으로 저장하고, 발송기가 outbox를 폴링해 Kafka로 발행한다">
+  <defs>
+    <marker id="s-i" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4f46e5"/></marker>
+    <marker id="s-k" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ff7849"/></marker>
+  </defs>
+  <text x="590" y="34" text-anchor="middle" font-size="18" font-weight="700" fill="#0f172a">Outbox 패턴 — DB에 먼저 안전하게 적고, 발송기가 Kafka로 옮긴다</text>
+
+  <!-- 주문 서비스 -->
+  <g transform="translate(34 160)">
+    <rect x="0" y="0" width="140" height="100" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+    <line x1="0" y1="33" x2="140" y2="33" stroke="#4f46e5" stroke-width="1.2"/>
+    <line x1="0" y1="66" x2="140" y2="66" stroke="#4f46e5" stroke-width="1.2"/>
+    <circle cx="18" cy="16" r="3.2" fill="#4f46e5"/><circle cx="18" cy="49" r="3.2" fill="#4f46e5"/><circle cx="18" cy="82" r="3.2" fill="#4f46e5"/>
+  </g>
+  <text x="104" y="282" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3730a3">주문 서비스</text>
+  <text x="104" y="301" text-anchor="middle" font-size="11" fill="#64748b" font-family="monospace">createOrder()</text>
+
+  <!-- ① 서비스 → DB -->
+  <line x1="174" y1="210" x2="282" y2="210" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#s-i)"/>
+  <text x="228" y="194" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f46e5">① 함께 저장</text>
+
+  <!-- 주문 DB -->
+  <rect x="284" y="105" width="266" height="210" rx="6" fill="#fff" stroke="#4f46e5" stroke-width="2.4"/>
+  <rect x="284" y="105" width="266" height="32" fill="#4f46e5"/>
+  <text x="417" y="127" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">주문 DB</text>
+  <rect x="298" y="150" width="238" height="150" rx="6" fill="none" stroke="#4f46e5" stroke-width="1.3" stroke-dasharray="5,3"/>
+  <rect x="338" y="142" width="120" height="19" rx="9.5" fill="#4f46e5"/>
+  <text x="398" y="156" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">한 트랜잭션</text>
+  <rect x="312" y="166" width="210" height="56" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="1.6"/>
+  <text x="417" y="190" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3730a3">order_tb</text>
+  <text x="417" y="209" text-anchor="middle" font-size="10.5" fill="#64748b">주문 데이터</text>
+  <rect x="312" y="230" width="210" height="56" rx="5" fill="#fff" stroke="#4f46e5" stroke-width="2.6"/>
+  <text x="417" y="254" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3730a3">outbox</text>
+  <text x="417" y="273" text-anchor="middle" font-size="10.5" fill="#64748b">보낼 이벤트</text>
+  <text x="417" y="335" text-anchor="middle" font-size="11.5" font-weight="700" fill="#4f46e5">둘이 같이 커밋, 같이 롤백</text>
+
+  <!-- ② DB → 발송기 -->
+  <line x1="550" y1="210" x2="664" y2="210" stroke="#4f46e5" stroke-width="2.6" marker-end="url(#s-i)"/>
+  <text x="607" y="194" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f46e5">② 폴링</text>
+  <text x="607" y="232" text-anchor="middle" font-size="10.5" fill="#64748b">미발송 조회</text>
+
+  <!-- 발송기 -->
+  <rect x="666" y="160" width="150" height="100" rx="8" fill="#fff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="741" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#3730a3">발송기</text>
+  <text x="741" y="221" text-anchor="middle" font-size="11" fill="#64748b">주기적으로 확인</text>
+  <text x="741" y="282" text-anchor="middle" font-size="11" fill="#64748b">Relay</text>
+
+  <!-- ③ 발송기 → Kafka -->
+  <line x1="816" y1="210" x2="928" y2="210" stroke="#ff7849" stroke-width="2.6" marker-end="url(#s-k)"/>
+  <text x="872" y="194" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412">③ 발행</text>
+
+  <!-- Kafka -->
+  <rect x="930" y="150" width="210" height="150" rx="6" fill="#fff4ed" stroke="#ff7849" stroke-width="2.4"/>
+  <rect x="930" y="150" width="210" height="32" fill="#ff7849"/>
+  <text x="1035" y="172" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">KAFKA</text>
+  <rect x="950" y="200" width="170" height="70" rx="5" fill="#fff" stroke="#ff7849" stroke-width="1.6"/>
+  <text x="1035" y="230" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9a3412">order-created</text>
+  <text x="1035" y="250" text-anchor="middle" font-size="10.5" fill="#c2773f">→ 배달·상품 구독</text>
+
+  <text x="590" y="350" text-anchor="middle" font-size="12.5" fill="#475569" font-style="italic">Kafka가 잠시 멈춰도 이벤트는 outbox에 남아, 발송기가 다음 차례에 다시 발행합니다 (유실 없음)</text>
+</svg>
+<div class="cap">그림 4-N. Outbox 패턴 - ① 주문과 이벤트를 한 트랜잭션으로 저장 → ② 발송기가 outbox 조회 → ③ Kafka로 발행</div>
+</div>
+
+</body>
+</html>

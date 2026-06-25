@@ -122,7 +122,7 @@ pip install -r requirements.txt
 :::
 ```
 
-**렌더 CSS**: `components.css:54-59` `.tip` (아이보리 배경 `#fffaf0` + 1px 주황 보더 `#feebc8`, 10px radius), `.tip .tip-title` (L56, 황토색 제목 + `::before`로 전구 이모지 자동 삽입), `.tip p` (L58-59, 짙은 브라운 톤 본문)
+**렌더 CSS**: `components.css:54-60` `.tip` (아이보리 배경 `#fffaf0` + 1px 주황 보더 `#feebc8`, 10px radius), `.tip .tip-title` (L56, 황토색 제목 + `::before`로 전구 이모지 자동 삽입), `.tip p` (L58-59, 짙은 브라운 톤 본문 `#744210`), `.tip li` (L60, 본문과 같은 브라운 `#744210` — 리스트 항목도 문단과 통일)
 
 **변형(Variants)**: 없음 (단일 스타일). 단, `::::prep` 내부와 본문 최상위 어디든 배치 가능.
 

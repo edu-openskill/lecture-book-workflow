@@ -57,6 +57,7 @@
   .tip .tip-title::before { content: '💡'; font-size: 14px; }
   .tip p { font-size: 14px; color: #744210; margin-bottom: 8px; }
   .tip p:last-child { margin-bottom: 0; }
+  .tip li { color: #744210; }
 
   /* 이것만은 기억하자 — 노트 북마크 스타일 */
   .remember {
