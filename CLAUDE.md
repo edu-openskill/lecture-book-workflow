@@ -161,7 +161,7 @@ Phase 5 ── 완성
 - 산출물: `book/front/preface.md`, `book/back/afterword.md`, `book/back/appendix.md`
 
 ### `이미지 생성`
-- 완성 챕터의 `[GEMINI/IMAGE PROMPT]` 플레이스홀더를 Codex로 생성·교체한다.
+- 완성 챕터의 `[IMAGE PROMPT]`(레거시 `[GEMINI PROMPT]`도 인식) 플레이스홀더를 Codex(GPT) CLI로 생성·교체한다.
 - `image-gen` 스킬 로드. 코드·개념 트랙 공용.
 - 실행: `python .claude/skills/image-gen/scripts/image_gen.py <챕터.md> <프로젝트루트>`
 

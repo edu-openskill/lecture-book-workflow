@@ -1,6 +1,6 @@
 ---
 name: image-gen
-description: [GEMINI/IMAGE PROMPT] 플레이스홀더를 Codex CLI 이미지로 자동 생성·교체. 코드·개념 트랙 공용. 챕터 완성 후 `이미지 생성` 시 로드.
+description: [IMAGE PROMPT] (레거시 [GEMINI PROMPT]도 인식) 플레이스홀더를 Codex(GPT) CLI 이미지로 자동 생성·교체. 코드·개념 트랙 공용. 챕터 완성 후 `이미지 생성` 시 로드.
 ---
 
 # 이미지 자동화 스킬

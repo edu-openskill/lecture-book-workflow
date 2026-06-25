@@ -90,7 +90,7 @@
 1. **용어 정리**: 비유 → 정식 정의(LaTeX).
 2. **수식 전개**: 핵심 수식을 LaTeX로. `$인라인$` / `$$블록$$`.
 3. **계산 예제**: examples/의 worked example을 단계별로.
-4. **다이어그램/그래프**: visual 스킬(Mermaid) 또는 [GEMINI PROMPT] 플레이스홀더.
+4. **다이어그램/그래프**: visual 스킬(Mermaid) 또는 이미지 플레이스홀더. 이미지 플레이스홀더는 **반드시** visual 스킬 `references/image.md`의 블록 형식을 따른다: `<!-- [IMAGE PROMPT: id]` / `path: assets/CH{N}/...png` / `-->` / `![](../assets/CH{N}/...png)`. 맨 `[IMAGE PROMPT]` 한 줄만 쓰면 `image_gen.py`가 감지하지 못한다. 백엔드는 Codex(GPT) CLI.
 5. **연습문제**: 2~3개. 해답은 부록(STEP 7)에 모은다.
 6. **"이게 AI 어디에 쓰이나" 한 줄**.
 
