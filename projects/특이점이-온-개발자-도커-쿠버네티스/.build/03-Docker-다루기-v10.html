@@ -20,7 +20,7 @@
 <h1>챕터 3. Docker 다루기</h1>
 <p>며칠 후, 화요일 오전 열 시. 회의실에 사람이 모였습니다. 팀장이 화이트보드 앞에 서서 이번에 만들 프로젝트를 설명했습니다. 사내에서 쓸 작은 서비스 하나를 새로 만든다는 이야기였습니다. 화면을 그릴 프론트엔드, 요청을 처리할 백엔드, 회원 정보를 보관할 DB가 함께 구성된 형태였습니다.</p>
 <p>팀장이 펜을 내려놓고 오픈이 쪽을 봤습니다.</p>
-<div class="dialogue"><span class="speaker">팀장</span>: "환경 구성은 Docker로 가요. 요즘 공부했잖아요."</div>
+<div class="dialogue"><span class="speaker">팀장</span>: "환경은 Docker로 구성해봐요. 요즘 공부했잖아요."</div>
 <div class="chapter-image gemini"><img src="..\assets\CH03\gemini\01_prologue-meeting-room-task.png" alt="화이트보드에 그려진 프론트엔드·백엔드·DB 구성" /><div class="caption">그림 3-1. 화이트보드에 그려진 프론트엔드·백엔드·DB 구성</div></div>
 <p>회의실을 나서는 발걸음이 가볍지 않았습니다. 컨테이너 하나를 실행하는 건 익혔지만, 여러 개를 한꺼번에 관리해 본 적은 없었습니다.</p>
 <p class="thought">'한 대씩은 실행해봤는데, 여러 대를 함께 구성하는 건 또 다른 이야기인데.'</p>
@@ -66,15 +66,6 @@
 </svg>
 </div>
 <div class="caption">그림 3-2. 챕터 3 한눈에 보기 - 전체 구조</div>
-<div class="goal-box">
-<p><strong>이번 챕터가 끝나면</strong></p>
-<ul>
-<li><strong>Dockerfile</strong>로 환경 구성을 자동화합니다</li>
-<li><strong>NGINX</strong>로 트래픽을 받아 넘기고 분산하는 구조를 설정해 봅니다</li>
-<li><strong>Redis</strong>로 여러 서버가 세션을 공유하는 구조를 만듭니다</li>
-<li><strong>Docker Compose</strong>로 여러 컨테이너를 한 번에 띄웁니다</li>
-</ul>
-</div>
 <div class="prep-section-md">
 <p><strong>실습 준비</strong>. 예제 코드</p>
 <p>이 책의 실습 코드는 GitHub 레포 하나에 챕터별 폴더로 담겨 있습니다. 아래 명령으로 레포를 한 번 git clone 합니다. 이후 챕터마다 해당 폴더로 이동해 실습합니다.</p>

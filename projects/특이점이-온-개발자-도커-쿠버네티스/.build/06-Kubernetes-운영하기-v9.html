@@ -83,14 +83,6 @@
 </svg>
 </div>
 <div class="caption">그림 6-2. 챕터 6 한눈에 보기 - 운영에 필요한 리소스의 전체 구조</div>
-<div class="goal-box">
-<p><strong>이번 챕터가 끝나면</strong></p>
-<ul>
-<li>설정값과 비밀번호를 이미지에 넣지 않고 따로 관리합니다</li>
-<li>Pod가 삭제돼도 데이터가 사라지지 않게 합니다</li>
-<li>앞서 만든 프론트엔드·백엔드·DB를 쿠버네티스 위에 한 번에 배포합니다</li>
-</ul>
-</div>
 <div class="prep-section-md">
 <p><strong>실습 준비</strong>. 예제 코드</p>
 <p>이 책의 실습 코드는 GitHub 레포 하나에 챕터별 폴더로 담겨 있습니다. 아래 명령으로 레포를 한 번 git clone 합니다. 이후 챕터마다 해당 폴더로 이동해 실습합니다.</p>
@@ -132,7 +124,7 @@
 <div class="caption">그림 6-3. ConfigMap과 Secret이 이미지와 별개로 Pod에 설정과 민감 정보를 주입</div>
 <h3>6.1.1 ConfigMap</h3>
 <p><strong>ConfigMap</strong>은 환경에 따라 달라지는 설정값을 Pod에 환경 변수로 주입하는 리소스입니다.</p>
-<p>이번 절의 실습 파일은 <code>ex13</code> 폴더에 있습니다.</p>
+<p>이번 예제의 실습 파일은 <code>ex13</code> 폴더에 있습니다.</p>
 <div class="code-block highlight" data-lang="text">ex13/
 ├── configmap-conn.yml   # 설정값을 담는 ConfigMap 정의
 ├── secret-password.yml   # 비밀번호를 담는 Secret 정의
@@ -163,8 +155,8 @@
 <p>두 YAML을 적용한 뒤 Pod 안의 환경 변수를 확인합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> ConfigMap·Deployment 적용과 환경 변수 확인</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/configmap-conn.yml
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/deploy-ex03.yml
-kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                           </span><span class="c1"># Pod 이름 확인</span>
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;Pod명&gt;<span class="w"> </span>--<span class="w"> </span>env<span class="w">           </span><span class="c1"># Pod 환경 변수 조회</span></div>
+kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                                               </span><span class="c1"># Pod 이름 확인</span>
+kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>nginx-config-secret-794499d5d4-c2xmw<span class="w"> </span>--<span class="w"> </span>env<span class="w">  </span><span class="c1"># Pod 환경 변수 조회</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -226,16 +218,16 @@ kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w">
 </div>
 <div class="caption">그림 6-5. Secret 내부를 보면 비밀번호가 Base64로 인코딩된 상태</div>
 <p>저장된 결과를 보니 <code>password</code> 값이 Base64로 인코딩되어 알아볼 수 없는 문자열로 바뀌어 있습니다.</p>
-<p>Pod에 주입하는 방식은 ConfigMap과 동일합니다. <code>deploy-ex03.yml</code>의 <code>envFrom</code> 아래에 <code>secretRef</code> 두 줄을 추가하면, 쿠버네티스가 실행 시점에 Base64를 디코딩해 환경 변수로 주입합니다.</p>
+<p>Pod에 주입하는 방식은 ConfigMap과 동일합니다. <code>deploy-ex03.yml</code>의 <code>envFrom</code> 아래에 <code>secretRef</code>를 추가하면, 쿠버네티스가 실행 시점에 Base64를 디코딩해 환경 변수로 주입합니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 4</span> ex13/deploy-ex03.yml. Secret 연결 (envFrom 부분)</div><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configmap-conn</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretRef</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-password</span><span class="w">   </span><span class="c1"># Secret 연결</span></div>
 <p>변경한 Deployment를 다시 적용한 뒤 환경 변수를 확인합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 변경한 Deployment 적용과 환경 변수 확인</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/deploy-ex03.yml<span class="w">   </span><span class="c1"># 변경한 Deployment 적용</span>
-kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                         </span><span class="c1"># Pod 이름 확인</span>
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;Pod명&gt;<span class="w"> </span>--<span class="w"> </span>env<span class="w">         </span><span class="c1"># Pod 환경 변수 조회</span></div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 변경한 Deployment 적용과 환경 변수 확인</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/deploy-ex03.yml<span class="w">                         </span><span class="c1"># 변경한 Deployment 적용</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                                               </span><span class="c1"># Pod 이름 확인</span>
+kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>nginx-config-secret-7fbccb65f5-zq8nz<span class="w"> </span>--<span class="w"> </span>env<span class="w">  </span><span class="c1"># Pod 환경 변수 조회</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -261,12 +253,13 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <h3>6.1.3 ConfigMap 변경</h3>
 <p>기본 동작을 확인했다면 다음은 ConfigMap을 변경해 보겠습니다. <code>configmap-conn.yml</code>의 <code>conn_info</code> 포트를 80에서 90으로 변경합니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 5</span> ex13/configmap-conn.yml. 포트 변경</div><span class="c1"># ... 생략</span>
-
-<span class="w">  </span><span class="nt">conn_info</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost:90&quot;</span><span class="w">          </span><span class="c1"># 환경변수 변경</span></div>
+<span class="nt">data</span><span class="p">:</span><span class="w">                                </span><span class="c1"># 설정값 넣는 영역</span>
+<span class="w">  </span><span class="nt">conn_info</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;localhost:90&quot;</span><span class="w">          </span><span class="c1"># 환경변수 변경</span>
+<span class="w">  </span><span class="nt">conn_url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;config.test&quot;</span></div>
 <p>변경한 ConfigMap을 클러스터에 적용합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 변경된 ConfigMap 적용 후 환경 변수 확인</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/configmap-conn.yml<span class="w">   </span><span class="c1"># 변경된 ConfigMap 적용</span>
-kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                            </span><span class="c1"># Pod 이름 확인</span>
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;Pod명&gt;<span class="w"> </span>--<span class="w"> </span>env<span class="w">            </span><span class="c1"># Pod 환경 변수 조회</span></div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 변경된 ConfigMap 적용 후 환경 변수 확인</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex13/configmap-conn.yml<span class="w">                      </span><span class="c1"># 변경된 ConfigMap 적용</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                                               </span><span class="c1"># Pod 이름 확인</span>
+kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>nginx-config-secret-7fbccb65f5-zq8nz<span class="w"> </span>--<span class="w"> </span>env<span class="w">  </span><span class="c1"># Pod 환경 변수 조회</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -346,9 +339,9 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 </div>
 <div class="caption">그림 6-9. rollout restart 로 Pod를 새로 실행하면 ConfigMap 새 값이 환경 변수로 반영됨</div>
 <p><code>kubectl rollout restart</code>는 Pod를 새로 교체해 새 값을 반영하는 명령입니다. 명령어를 실행해 Deployment를 재시작합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 재시작 후 환경 변수 확인</div>kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">   </span><span class="c1"># Pod 재시작</span>
-kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                                          </span><span class="c1"># 새 Pod 이름 확인</span>
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;Pod명&gt;<span class="w"> </span>--<span class="w"> </span>env<span class="w">                          </span><span class="c1"># Pod 환경 변수 조회</span></div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> Pod 재시작 후 환경 변수 확인</div>kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>nginx-config-secret<span class="w">       </span><span class="c1"># Pod 재시작</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">                                              </span><span class="c1"># 새 Pod 이름 확인</span>
+kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>nginx-config-secret-8c5d4f9b6-r2t4p<span class="w"> </span>--<span class="w"> </span>env<span class="w">  </span><span class="c1"># Pod 환경 변수 조회</span></div>
 <div class="terminal-log">
   <div class="tl-chrome">
     <div class="tl-traffic"><span></span><span></span><span></span></div>
@@ -372,8 +365,9 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <div class="caption">그림 6-10. Pod 재시작 후 환경 변수에 새 포트 90이 반영된 모습</div>
 <p>재시작 후 환경 변수가 적용된 것을 확인할 수 있습니다.</p>
 <div class="tip">
-<p><strong>apply했는데 반영되는 경우 vs 안 되는 경우</strong></p>
-<p>ConfigMap이나 Secret의 설정 값만 변경하면 기존 Pod에는 새 값이 반영되지 않습니다. 반면, Deployment의 Pod 템플릿(template)을 변경하면 곧바로 적용됩니다. 이때 새 값을 반영하기 위해 기존 Pod가 교체되므로, Pod의 이름이 변경됩니다.</p>
+<p><strong>설정은 Pod가 새로 만들어질 때 반영된다</strong></p>
+<p>쿠버네티스에서 Pod는 한 번 생성되면 그 설정 내용을 중간에 수정할 수 없는 불변성을 가집니다. 따라서 <strong>kubectl apply</strong>로 ConfigMap이나 Secret의 값만 변경하더라도, 이미 실행 중인 기존 Pod에는 새 값이 자동으로 반영되지 않습니다.</p>
+<p>반면, Deployment 내의 Pod 템플릿(template)을 수정하여 적용하면 쿠버네티스는 이를 새로운 배포로 인식합니다. 즉시 교체 작업이 시작되어 기존 Pod를 종료하고 바뀐 템플릿으로 새로운 Pod를 생성하므로 변경 내용이 반영됩니다.</p>
 </div>
 <h2>6.2 Volume - 데이터의 영속성 확보</h2>
 <h3>6.2.1 Pod의 휘발성 문제</h3>
@@ -438,7 +432,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <p>Pod는 PV를 직접 참조하지 않고 PVC만 연결해 사용합니다. 덕분에 실제 저장소가 무엇인지 몰라도 됩니다.</p>
 <h3>6.2.3 PV 만들기</h3>
 <p>PV를 먼저 만들어 보겠습니다. 이번 실습에서는 PV의 저장 위치로 Minikube 내부의 경로(<code>/mnt/data</code>)를 지정합니다.</p>
-<p>이번 절의 실습 파일은 <code>ex14</code> 폴더에 있습니다.</p>
+<p>이번 예제의 실습 파일은 <code>ex14</code> 폴더에 있습니다.</p>
 <div class="code-block highlight" data-lang="text">ex14/
 ├── volume-pv.yml      # 저장 공간을 제공하는 PersistentVolume 정의
 ├── volume-pvc.yml     # 저장 공간을 요청하는 PersistentVolumeClaim 정의
@@ -498,7 +492,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage</span><span class="w">                      </span><span class="c1"># volumeMounts에서 참조할 이름</span>
 <span class="w">    </span><span class="nt">persistentVolumeClaim</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">claimName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">volume-pvc</span><span class="w">            </span><span class="c1"># 연결할 PVC 이름</span></div>
-<p>컨테이너가 보는 마운트 경로는 <code>/data</code>이고, Minikube 내부의 실제 저장 경로는 <code>/mnt/data</code>입니다. 컨테이너가 <code>/data</code>에 파일을 쓰면 PVC와 PV를 거쳐 최종적으로 Minikube의 <code>/mnt/data</code>에 저장됩니다.</p>
+<p>컨테이너가 보는 마운트 경로는 <code>/data</code>이고, Minikube 내부의 실제 저장 경로는 <code>/mnt/data</code>입니다. 컨테이너가 <code>/data</code>에 파일을 생성하면 PVC와 PV를 거쳐 최종적으로 Minikube의 <code>/mnt/data</code>에 저장됩니다.</p>
 <p>아래 명령어를 실행해 클러스터에 적용합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> PV·PVC·Pod 일괄 생성과 Bound 확인</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex14/volume-pv.yml<span class="w">      </span><span class="c1"># PV(저장소) 생성</span>
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex14/volume-pvc.yml<span class="w">     </span><span class="c1"># PVC(저장소 요청) 생성</span>
@@ -682,7 +676,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">metacoding</span></div>
 <p>이후 만들어지는 모든 리소스는 metacoding이라는 독립된 영역에 들어갑니다.</p>
 <h4>Frontend - 외부 진입</h4>
-<p>frontend 폴더는 외부에서 들어오는 요청이 처음 도달하는 입구를 정의합니다. 핵심은 단일 path로 모든 요청을 잡아 frontend-service로 넘기는 <code>frontend-ingress.yml</code>입니다.</p>
+<p>frontend 폴더는 외부에서 들어오는 요청이 처음 도달하는 입구를 정의합니다. 그 입구에서 요청을 어디로 보낼지는 <code>frontend-ingress.yml</code>이 정합니다.</p>
 <div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 10</span> ex15/k8s/frontend/frontend-ingress.yml. 외부 진입 Ingress</div><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -830,7 +824,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 </tbody>
 </table>
 <h4>Redis - 인메모리 캐시</h4>
-<p>redis 폴더는 백엔드가 방문 횟수를 기록하기 위해 호출하는 인메모리 저장소이므로 다른 설정 파일 없이 두 파일이면 충분합니다.</p>
+<p>redis 폴더는 백엔드가 방문 횟수를 기록하기 위해 호출하는 인메모리 저장소이므로 다른 설정 파일 없이 두 파일로 구성됩니다.</p>
 <table>
 <thead>
 <tr>
@@ -881,7 +875,7 @@ minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w
 <p>리소스 구경을 마쳤으니 이제 <code>ex15/k8s/</code> 폴더를 한꺼번에 배포합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 전체 리소스 일괄 배포</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex15/k8s/namespace.yml<span class="w">      </span><span class="c1"># Namespace 먼저</span>
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex15/k8s/<span class="w"> </span>--recursive<span class="w">       </span><span class="c1"># k8s 이하 폴더의 리소스 전부 일괄 배포</span></div>
-<p>명령을 치면 모든 리소스가 한꺼번에 생성됩니다. 곧바로 상태를 조회합니다.</p>
+<p>명령을 치면 모든 리소스가 한꺼번에 생성됩니다. 이어서 상태를 조회합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 배포 결과 조회</div>kubectl<span class="w"> </span>get<span class="w"> </span>deploy,pod,service,ingress<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w">   </span><span class="c1"># 네임스페이스 리소스 상태 일괄 조회</span></div>
 <p>프론트엔드와 데이터베이스 Pod는 빠르게 Running 상태로 바뀝니다. 백엔드 Pod만 Gradle 빌드와 의존성 설치 때문에 시간이 더 걸립니다.</p>
 <p>모든 Pod가 Running 상태가 되면, <code>minikube tunnel</code>을 실행합니다. 그러면 Ingress 입구가 <code>127.0.0.1</code>로 열립니다.</p>
@@ -894,9 +888,7 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> <
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> backend Pod 로그로 분산 확인</div><span class="c1"># backend Pod 최근 100줄 (Pod명 앞에 붙임)</span>
 kubectl<span class="w"> </span>logs<span class="w"> </span>-l<span class="w"> </span><span class="nv">app</span><span class="o">=</span>backend<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>--prefix</div>
 <p>오픈이는 화면을 새로고침했습니다. 방문 횟수가 오르고, 사이트는 문제없이 응답합니다. 여러 서비스가 하나의 클러스터 안에서 각자 제 역할을 하며 돌아갑니다.</p>
-<p>며칠 후, 오픈이는 지금까지 배운 내용을 자신의 운영 환경에도 그대로 적용했습니다. 예전에는 배포한 날이면 혹시 몰라 자리를 뜨지 못했습니다. 컨테이너가 멈추면 개발자가 직접 살려내야 했습니다.</p>
-<p>오늘은 다릅니다. 컨테이너 하나가 멈춰도 클러스터가 곧바로 새 컨테이너를 생성하고, 사이트는 멈추지 않습니다. 사이트를 지키는 일은 이제 시스템에 맡겨 두면 됩니다.</p>
-<p>오픈이는 노트북을 덮고 가벼운 마음으로 사무실을 나섰습니다.</p>
+<p>개발과 운영 환경의 차이를 극복하기 위해 시작된 여정은 자동화된 시스템 운영으로 완성됩니다. 코드를 환경째 컨테이너에 담아 어디서든 동일하게 실행할 수 있게 되면서, 인프라를 다루는 방식 자체가 바뀝니다. 장애가 난 컨테이너를 재시작하고, 부하에 맞춰 그 수를 늘리고, 중단 없이 배포하는 일까지 이제 온전히 클러스터의 몫이 됩니다.</p>
 <div class="remember">
 <p><strong>이것만은 기억하자</strong></p>
 <ul>

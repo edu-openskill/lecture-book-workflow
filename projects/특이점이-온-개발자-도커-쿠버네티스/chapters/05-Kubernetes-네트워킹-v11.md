@@ -96,15 +96,6 @@
 
 *그림 5-2. 챕터 5 한눈에 보기 - 요청이 Pod까지 도달하는 전체 흐름*
 
-:::goal
-**이번 챕터가 끝나면**
-
-- Pod IP가 바뀌어도 변하지 않는 **Service** 주소를 만들어 접속합니다
-- 서비스를 외부에 노출하는 여러 방식의 차이를 익힙니다
-- **Ingress**로 외부 도메인 한 곳에서 URL 경로별로 요청을 분기합니다
-- 브라우저에서 Pod까지 패킷이 이동하는 경로를 이해합니다
-:::
-
 ::::prep
 **실습 준비**. 예제 코드
 
@@ -675,9 +666,9 @@ kubectl get pods -n ingress-nginx        # Ingress 컨트롤러 확인
   <div class="tl-body">
     <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pods -n ingress-nginx</span></div>
     <div>NAME                                        READY   STATUS      RESTARTS   AGE</div>
-    <div>ingress-nginx-admission-create-zg9hh        0/1     Completed   0          52m</div>
-    <div>ingress-nginx-admission-patch-bvxlw         0/1     Completed   1          52m</div>
-    <div>ingress-nginx-controller-9cc49f96f-qrpm7    1/1     Running     0          52m</div>
+    <div>ingress-nginx-admission-create-zg9hh        0/1     Completed   0          40s</div>
+    <div>ingress-nginx-admission-patch-bvxlw         0/1     Completed   1          40s</div>
+    <div>ingress-nginx-controller-9cc49f96f-qrpm7    1/1     Running     0          35s</div>
   </div>
 </div>
 
@@ -966,7 +957,7 @@ minikube tunnel                          # 별도 터미널에서 실행
 
 먼저 발신자가 **중앙 우체국** 창구에 우편을 맡깁니다. 우편을 받은 **창구 직원**은 다음 거점인 **물류 센터**로 보냅니다.
 
-브라우저가 보낸 요청도 비슷하게 흘러갑니다. 요청은 노드에 열린 **NodePort**로 클러스터에 들어오면, 같은 노드의 **kube-proxy**가 패킷의 목적지를 다음 거점인 **Ingress 컨트롤러**의 IP로 바꿉니다. 그러면 패킷은 Ingress 컨트롤러로 전달됩니다.
+브라우저가 보낸 요청도 비슷하게 흘러갑니다. 요청이 노드에 열린 **NodePort**로 클러스터에 들어오면, 같은 노드의 **kube-proxy**가 패킷의 목적지를 다음 거점인 **Ingress 컨트롤러**의 IP로 바꿉니다. 그러면 패킷은 Ingress 컨트롤러로 전달됩니다.
 
 <div class="svg-figure">
 <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1단계 손그림 — 우편이 우체국(NodePort·kube-proxy)을 거쳐 물류 센터(Ingress 컨트롤러)로">

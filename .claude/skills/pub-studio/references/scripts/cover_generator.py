@@ -187,6 +187,8 @@ def _build_cover_data(config):
         "accent_color": cd.get("accent_color", (45, 99, 235)),
         "top_descs": cd.get("top_descs", []), "main_words": mw,
         "tagline": subtitle, "title": title, "subtitle": subtitle,
+        "series_sub_bottom_mm": cd.get("series_sub_bottom_mm", 40),
+        "series_sub_size_mm": cd.get("series_sub_size_mm", 16),
     }
 
 
@@ -302,7 +304,9 @@ def _render_front_cover(d, data, shadow_map=None, color_map=None):
 
     # 하단 고정
     if data["series_sub"]:
-        fs = _font(16, True); sw = _tw(d, data["series_sub"], fs); sy = H - _mm(40)
+        fs = _font(data.get("series_sub_size_mm", 16), True)
+        sw = _tw(d, data["series_sub"], fs)
+        sy = H - _mm(data.get("series_sub_bottom_mm", 40))
         d.rectangle([(RM - _mm(40), sy - _mm(3)), (RM, sy - _mm(2.2))], fill=c1)
         d.text((RM - sw, sy), data["series_sub"], fill=c1, font=fs)
     if data["authors"]:

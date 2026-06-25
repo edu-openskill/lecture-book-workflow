@@ -49,15 +49,6 @@
 </svg>
 </div>
 <div class="caption">그림 4-2. 챕터 4 한눈에 보기 - 전체 구조</div>
-<div class="goal-box">
-<p><strong>이번 챕터가 끝나면</strong></p>
-<ul>
-<li>명령형과 선언형 방식의 차이를 이해합니다</li>
-<li>로컬에 클러스터를 띄우고 그 구조를 살펴봅니다</li>
-<li><strong>Pod</strong>를 직접 만들 때 생기는 문제를 자동 복구·스케일링으로 해결합니다</li>
-<li>무중단 배포와 되돌리기를 손에 익힙니다</li>
-</ul>
-</div>
 <div class="prep-section-md">
 <p><strong>준비하기</strong></p>
 <h3>Minikube 설치</h3>
@@ -815,7 +806,7 @@ kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w">   
     <div>pod "nginx-deploy-756b46b54c-8q8p1" deleted</div>
     <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pod</span></div>
     <div>NAME                            READY   STATUS    RESTARTS   AGE</div>
-    <div>nginx-deploy-756b46b54c-2sv8x   1/1     Running   0          3m11s</div>
+    <div>nginx-deploy-756b46b54c-2sv8x   1/1     Running   0          4s</div>
   </div>
 </div>
 <div class="caption">그림 4-20. Pod를 다 지워도 Deployment가 자동으로 새 Pod를 띄웁니다</div>

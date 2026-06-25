@@ -42,15 +42,6 @@
 
 *그림 4-2. 챕터 4 한눈에 보기 - 전체 구조*
 
-:::goal
-**이번 챕터가 끝나면**
-
-- 명령형과 선언형 방식의 차이를 이해합니다
-- 로컬에 클러스터를 띄우고 그 구조를 살펴봅니다
-- **Pod**를 직접 만들 때 생기는 문제를 자동 복구·스케일링으로 해결합니다
-- 무중단 배포와 되돌리기를 손에 익힙니다
-:::
-
 ::::prep
 **준비하기**
 
@@ -923,7 +914,7 @@ kubectl get pod                    # 목록 재확인
     <div>pod "nginx-deploy-756b46b54c-8q8p1" deleted</div>
     <div><span class="tl-key">$</span> <span class="tl-str">kubectl get pod</span></div>
     <div>NAME                            READY   STATUS    RESTARTS   AGE</div>
-    <div>nginx-deploy-756b46b54c-2sv8x   1/1     Running   0          3m11s</div>
+    <div>nginx-deploy-756b46b54c-2sv8x   1/1     Running   0          4s</div>
   </div>
 </div>
 

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="./styles/fonts.css">
+<link rel="stylesheet" href="./styles/tokens.css">
+<link rel="stylesheet" href="./tokens.css">
+<style>
+* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+html,body { margin:0; font-family:var(--font-body,"Pretendard",sans-serif); }
+.s1 { min-height:235mm; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  padding:0 16mm; box-sizing:border-box; }
+.s1 .label { letter-spacing:.34em; font-size:15px; font-weight:700;
+  color:var(--color-accent,#4f46e5); margin-bottom:6px; }
+.s1 .num { font-size:140px; font-weight:800; line-height:1;
+  color:var(--color-accent,#4f46e5); }
+.s1 .rule { width:68px; height:3px; border-radius:2px;
+  background:var(--color-accent-warm,#ff7849); margin:28px 0 32px; }
+.s1 .title { font-size:36px; font-weight:800;
+  color:var(--color-text-heading,#0f172a); }
+.s1 .sub { font-size:19px; font-weight:500;
+  color:var(--color-text-muted,#64748b); margin-top:14px; }
+.goal { margin-top:54px; width:min(30em,86%); text-align:left; box-sizing:border-box;
+  border:1px solid var(--color-accent-border,#c7d2fe); border-radius:14px; padding:22px 26px; }
+.goal .gh { font-size:14px; font-weight:700; letter-spacing:.04em;
+  color:var(--color-accent-text,#3730a3); margin-bottom:12px; text-align:center; }
+.goal ul { margin:0; padding:0; list-style:none; }
+.goal li { position:relative; padding-left:20px; margin:9px 0;
+  font-size:15px; line-height:1.7; color:#374151; }
+.goal li::before { content:""; position:absolute; left:2px; top:11px;
+  width:7px; height:7px; border-radius:50%; background:var(--color-accent,#4f46e5); }
+.goal b { color:var(--color-text-heading,#0f172a); font-weight:700; }
+</style></head><body>
+<div class="s1">
+  <div class="label">CHAPTER</div>
+  <div class="num">5</div>
+  <div class="rule"></div>
+  <div class="title">Kubernetes 네트워킹</div>
+  <div class="sub">외부에서 접속할 주소를 만들다</div>
+  <div class="goal"><div class="gh">이번 챕터가 끝나면</div><ul><li>Pod IP가 바뀌어도 변하지 않는 <b>Service</b> 주소를 만들어 접속합니다.</li><li>서비스를 외부에 노출하는 여러 방식의 차이를 익힙니다.</li><li><b>Ingress</b>로 외부 도메인 한 곳에서 URL 경로별로 요청을 분기합니다.</li><li>브라우저에서 Pod까지 패킷이 이동하는 경로를 이해합니다.</li></ul></div>
+</div>
+</body></html>
