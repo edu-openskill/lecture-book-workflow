@@ -1,0 +1,3 @@
+# PDF 빌드 산출물 (소스 아님 — 재생성 가능)
+book/_build/
+book/*-sample.pdf
