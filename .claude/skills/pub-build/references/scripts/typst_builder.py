@@ -131,7 +131,7 @@ def render_mermaid_diagrams(text: str, mermaid_out: Path) -> str:
 
         if img_path.exists():
             abs_path = img_path.resolve()
-            return f'\n![다이어그램]({abs_path})\n'
+            return f'\n![다이어그램]({_typst_root_path(abs_path)})\n'
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.mmd', delete=False, encoding='utf-8') as tmp:
             tmp.write(code)
@@ -196,9 +196,31 @@ def render_mermaid_diagrams(text: str, mermaid_out: Path) -> str:
     return re.sub(r'```mermaid\s*\n(.*?)```', replace_mermaid, text, flags=re.DOTALL)
 
 
+def _typst_root_path(p: Path) -> str:
+    """절대경로를 Typst --root(/) 기준 경로 문자열로 변환.
+    forward slash 통일 + 드라이브 문자 제거(Windows). 예: C:\\a\\b → /a/b, /a/b → /a/b."""
+    posix = p.as_posix()
+    if p.drive:                       # 'C:' 등 → 제거하여 root-상대 경로로
+        posix = posix[len(p.drive):]
+    return posix
+
+
 def fix_image_paths(text: str, source_file: Path) -> str:
     """마크다운 이미지 상대경로 → 절대경로로 변환 (file:// 없이)"""
     source_dir = source_file.parent
+
+    # HTML <img src="..."> → 마크다운 ![](src) 정규화.
+    # image-gen 스킬이 플레이스홀더를 <img> 태그로 교체하므로, 이를 마크다운
+    # 이미지 흐름(→ Pandoc → #auto-image)에 합류시킨다. alt는 비운다
+    # (캡션은 뒤따르는 *그림 N-N* 줄이 담당 → 중복 캡션 방지).
+    def html_img_to_md(m):
+        tag = m.group(0)
+        src_m = re.search(r'src\s*=\s*["\']([^"\']+)["\']', tag)
+        if not src_m:
+            return tag
+        return f'![]({src_m.group(1)})'
+
+    text = re.sub(r'<img\b[^>]*>', html_img_to_md, text, flags=re.IGNORECASE)
 
     def replace_img(m):
         alt = m.group(1)
@@ -207,7 +229,9 @@ def fix_image_paths(text: str, source_file: Path) -> str:
             return f'![{alt}]({rel_path[7:]})'
         abs_path = (source_dir / rel_path).resolve()
         if abs_path.exists():
-            return f'![{alt}]({abs_path})'
+            # Typst 경로는 --root(/) 기준 가상경로. forward slash + 드라이브 문자 제거로
+            # Windows(C:/Users/...)와 macOS(/Users/...) 모두 root-상대(/Users/...)로 통일.
+            return f'![{alt}]({_typst_root_path(abs_path)})'
         else:
             return f'*[이미지: {alt}]*'
 
