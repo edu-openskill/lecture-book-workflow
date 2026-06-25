@@ -1,0 +1,130 @@
+{
+  "project": "수학-LLM-별책",
+  "title": "수학·LLM 별책 (가제)",
+  "track": "concept",
+  "status": "in_progress",
+  "current_step": "step_5_chapters",
+  "created_at": "2026-06-24",
+  "updated_at": "2026-06-25",
+  "steps": {
+    "step_1_seed": {
+      "name": "씨앗",
+      "status": "done",
+      "artifact": "planning/seed-v2.md",
+      "artifact_version": 2,
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_2_code": {
+      "name": "개념 해부",
+      "status": "done",
+      "artifact": "planning/concept-analysis-v1.md",
+      "artifact_version": 1,
+      "review": {
+        "insight": "pass",
+        "audit": "conditional_pass"
+      },
+      "questions_pending": 0
+    },
+    "step_3_scenario": {
+      "name": "시나리오(개념: 강 구성·의존 누적)",
+      "status": "done",
+      "artifact": "planning/scenario-v1.md",
+      "artifact_version": 1,
+      "versions_created": [
+        "examples/v01",
+        "examples/v09"
+      ],
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_4_outline": {
+      "name": "뼈대(개념: 목차 확정·갭 분석)",
+      "status": "done",
+      "artifact": "planning/outline-v2.md",
+      "artifact_version": 2,
+      "gap_analysis": "done (크로스엔트로피·전치 흡수 / 코사인 정식포함 / PCA 제거-이연 / 베이즈·텐서 생략)",
+      "v2_changes": "PCA 제거(→향후 ML/DL 책), 삼각·복소 기하블록 이동(옛CH4→CH10), Part1 재번호+Part2 선수참조 갱신. discussion: docs/discussions/2026-06-25-part1-순서검증-pca.md",
+      "review": {
+        "insight": "pass",
+        "audit": "pass"
+      },
+      "questions_pending": 0
+    },
+    "step_5_chapters": {
+      "name": "챕터 집필",
+      "status": "in_progress",
+      "chapters": [
+        {
+          "id": "CH01",
+          "title": "가장 낮은 점 하나 : 2차방정식과 최솟값",
+          "version": "v0.1",
+          "status": "done",
+          "artifact": "chapters/01-가장낮은점하나.md",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        }
+      ]
+    },
+    "step_6_prologue": {
+      "name": "프롤로그+로드맵",
+      "status": "pending",
+      "artifacts": {
+        "prologue": null,
+        "roadmap": null
+      },
+      "review": {
+        "audit": null
+      }
+    },
+    "step_7_finish": {
+      "name": "마무리",
+      "status": "pending",
+      "artifacts": {
+        "preface": null,
+        "afterword": null,
+        "appendix": null
+      },
+      "final_title": null,
+      "total_pages": null,
+      "review": {
+        "audit": null
+      }
+    }
+  },
+  "_chapter_template": {
+    "id": "CH01",
+    "title": "",
+    "version": "v0.1",
+    "status": "pending",
+    "artifact": null,
+    "review": {
+      "insight": null,
+      "intent_watch": null,
+      "audit": null
+    },
+    "questions_pending": 0
+  },
+  "_status_values": [
+    "pending",
+    "in_progress",
+    "done",
+    "review"
+  ],
+  "_review_values": [
+    null,
+    "pass",
+    "conditional_pass",
+    "fail"
+  ]
+}
