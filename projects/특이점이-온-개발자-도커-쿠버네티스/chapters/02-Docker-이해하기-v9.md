@@ -1454,7 +1454,7 @@ docker exec -it 5fcd bash              # 컨테이너 안에 새 bash 터미널(
 cd /usr/local/tomcat/webapps           # Tomcat의 웹앱 기본 경로로 이동
 mkdir ROOT && cd ROOT                  # ROOT 폴더 생성 후 그 안으로 이동
 apt update && apt install -y vim       # 패키지 목록 갱신 후 vim 편집기 설치
-vim index.html                         # index.html 파일을 만들고 간단한 HTML 작성 후 저장
+vim index.html                         # 파일 만들고 HTML 작성 후 저장
 ```
 
 vim으로 index.html을 만들어 저장한 뒤 **localhost:8080** 으로 다시 접속하면 방금 만든 페이지가 응답됩니다.

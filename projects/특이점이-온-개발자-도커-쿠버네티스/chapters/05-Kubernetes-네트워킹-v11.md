@@ -182,7 +182,7 @@ spec:
   ports:
     - port: 80          # 클러스터 내부에서 Service로 진입하는 포트
       targetPort: 80    # Service가 Pod로 요청을 전달하는 포트
-      nodePort: 30080   # 외부에서 노드로 진입할 때 사용하는 포트 (기본 허용 범위 30000~32767)
+      nodePort: 30080   # 외부에서 노드로 진입 시 사용하는 포트 (기본 허용 범위 30000~32767)
 ```
 
 Service는 **Deployment**와 마찬가지로 **selector**에 지정한 라벨과 일치하는 Pod를 골라 연결합니다.

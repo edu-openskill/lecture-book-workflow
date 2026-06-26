@@ -764,7 +764,10 @@
 <span class="w">            </span><span class="n">event</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">price</span><span class="p">()));</span>
 
 <span class="w">    </span><span class="c1">// 2. 다음 단계: 재고 차감 명령 발행</span>
-<span class="w">    </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="s">&quot;decrease-product-command&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kafkaTemplate</span><span class="p">.</span><span class="na">send</span><span class="p">(</span>
+<span class="w">            </span><span class="s">&quot;decrease-product-command&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="c1">// 같은 주문은 같은 파티션으로 (순서 보장)</span>
+<span class="w">            </span><span class="n">String</span><span class="p">.</span><span class="na">valueOf</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">orderId</span><span class="p">()),</span>
 <span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">DecreaseProductCommand</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">orderId</span><span class="p">(),</span>
 <span class="w">                    </span><span class="n">event</span><span class="p">.</span><span class="na">productId</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">price</span><span class="p">()));</span>
 <span class="p">}</span></div>
@@ -958,11 +961,11 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <p>테스트가 끝났으면 이번 챕터에서 실행한 리소스를 정리합니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 리소스 정리</div>kubectl<span class="w"> </span>delete<span class="w"> </span>namespace<span class="w"> </span>metacoding</div>
 <div class="dialogue"><span class="speaker">오픈이</span>: "이제 직접 호출하지 않고 메시지로 주고받으니까, 다른 서비스가 일시적으로 멈춰도 주문은 계속 받을 수 있겠네요."</div>
-<div class="dialogue"><span class="speaker">선배</span>: "맞아요. 서비스 간의 결합이 느슨해진 덕분이죠. 게다가 주문이 한꺼번에 몰려도 Kafka가 중간에서 메시지를 받아 두니, 받는 쪽은 감당할 수 있는 속도로 처리하면 돼요. 한 서비스에 장애가 나거나 부하가 걸려도 시스템 전체가 무너지지 않습니다."</div>
-<h2>4.7 Outbox 패턴 - 이벤트가 사라지지 않게</h2>
-<div class="dialogue"><span class="speaker">오픈이</span>: "그런데 한 가지 걸려요. 주문을 저장하고 Kafka로 발행하는데, 발행이 실패하면 어떻게 되죠? 주문은 DB에 남아 있는데 이벤트만 사라지는 거 아닌가요?"</div>
-<div class="dialogue"><span class="speaker">선배</span>: "정확히 봤어요. 그냥 넘기면 안 되는 부분이에요. 그걸 막는 게 <strong>Outbox 패턴</strong>이에요."</div>
-<p>MSA에서는 보통 DB 변경과 메시지 발행을 함께 처리합니다. 문제는 이 두 작업을 하나의 트랜잭션으로 묶을 수 없다는 점입니다. DB와 Kafka가 서로 다른 시스템이기 때문입니다. 그래서 주문 생성은 성공했는데 네트워크 오류나 서버 다운으로 발행만 실패하면, 오케스트레이터가 주문 생성을 알지 못해 상품·배달 처리가 시작되지 않고, 데이터가 어긋납니다.</p>
+<div class="dialogue"><span class="speaker">선배</span>: "맞아요. 서비스 간의 결합이 느슨해진 덕분이죠. 게다가 주문이 한꺼번에 몰려도 Kafka가 중간에서 메시지를 받아 두니, 받는 쪽은 감당할 수 있는 속도로 처리하면 돼요. 한 서비스에 장애가 나거나 부하가 걸려도 시스템 전체가 무너지지 않아요."</div>
+<h2>4.7 더 알아보기 - Outbox 패턴</h2>
+<div class="dialogue"><span class="speaker">오픈이</span>: "그런데 한 가지 걸리는 게 있어요. 주문을 저장하고 Kafka로 발행하는데, 발행이 실패하면 어떻게 되죠? 주문은 DB에 남아 있는데 이벤트만 사라지는 거 아닌가요?"</div>
+<div class="dialogue"><span class="speaker">선배</span>: "정확히 봤어요. 그냥 넘기면 안 되는 부분이에요. 그걸 해결하는 방법으로 <strong>Outbox 패턴</strong>을 사용해요."</div>
+<p>MSA에서는 보통 DB 변경과 메시지 발행을 함께 처리합니다. <strong>문제는 두 작업이 서로 다른 시스템에서 일어나 하나의 트랜잭션으로 묶을 수 없다는 점입니다.</strong> 그래서 주문 생성은 성공했는데 네트워크 오류나 서버 다운으로 발행만 실패하면, 오케스트레이터가 주문 생성을 알지 못해 상품·배달 처리가 시작되지 않고, 데이터가 어긋납니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 1180 286" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="직접 발행의 문제: 주문은 DB에 저장됐는데 Kafka 발행이 실패하면 이벤트가 유실된다">
   <defs>
@@ -1043,10 +1046,10 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 </svg>
 </div>
 <div class="caption">그림 4-23. Outbox 패턴 - 주문과 이벤트를 한 트랜잭션으로 저장한 뒤, 발송기가 outbox를 읽어 Kafka로 옮깁니다</div>
-<p>그다음 <strong>발송기(Relay)</strong> 가 outbox 테이블을 주기적으로 확인합니다. 아직 발행하지 않은 메시지가 있으면 Kafka로 발행한 뒤, outbox 테이블에서 그 메시지를 보냄으로 표시합니다. 덕분에 Kafka가 잠시 멈춰도 메시지는 outbox에 남아 있다가 다음 차례에 다시 발행됩니다.</p>
+<p>그다음 <strong>발송기(Relay)</strong> 가 outbox 테이블을 주기적으로 확인합니다. 아직 발행하지 않은 메시지가 있으면 Kafka로 발행한 뒤, outbox 테이블에서 그 메시지의 상태를 보냄으로 업데이트합니다. 덕분에 발행이 실패해도 메시지가 outbox에 남아 있어, 다시 발행할 수 있습니다.</p>
 <div class="tip">
 <p><strong>Outbox만으로 충분할까?</strong></p>
-<p>Outbox 패턴은 이벤트 유실을 막아주지만, 중복 발송까지 막지는 못합니다. 발송기가 이벤트를 보낸 직후 완료 처리를 하기 전에 멈추면, 다음 차례에 같은 이벤트를 또 보내기 때문입니다. 그래서 이벤트를 받는 쪽은 똑같은 요청을 여러 번 받아도 한 번만 처리한 것과 같은 결과를 내도록 방어해야 합니다. 이러한 성질을 <strong>멱등성</strong>이라고 합니다. 실무에서는 보통 이미 처리한 이벤트 ID를 기록해 두고, 같은 ID가 다시 들어오면 가볍게 건너뛰는 방식으로 구현합니다.</p>
+<p>Outbox 패턴은 이벤트 유실을 막아주지만, 중복 발송까지 막지는 못합니다. 발송기가 이벤트를 보낸 직후 완료 처리를 하기 전에 멈추면, 다음 차례에 같은 이벤트를 또 보내기 때문입니다. 그래서 이벤트를 받는 쪽은 똑같은 요청을 여러 번 받아도 한 번만 처리한 것과 같은 결과를 내도록 방어해야 합니다. 이러한 성질을 <strong>멱등성</strong>이라고 합니다. 실무에서는 보통 이미 처리한 이벤트 ID를 기록해 두고, 같은 ID가 다시 들어오면 건너뛰는 방식으로 구현합니다.</p>
 <p>이렇게 실시간 유실과 중복을 막더라도, 예상치 못한 시스템 오류로 데이터가 어긋날 수 있습니다. 따라서 규모가 큰 서비스에서는 주기적으로 누락되거나 어긋난 부분들을 찾아 배치 작업으로 보정합니다.</p>
 </div>
 <p>이 책에서는 패턴의 개념까지만 소개합니다. 구현은 다루지 않지만, 이벤트로 주고받는 시스템에서는 거의 빠지지 않는 장치입니다.</p>
@@ -1057,6 +1060,7 @@ minikube<span class="w"> </span>addons<span class="w"> </span><span class="nb">e
 <li>서비스끼리 REST로 직접 호출하는 대신 <strong>Kafka</strong>로 메시지를 주고받습니다. 이 <strong>비동기 방식</strong>으로 서비스 간 결합이 느슨해집니다.</li>
 <li><strong>orchestrator</strong>가 <strong>명령</strong>으로 각 서비스를 조율하고, 각 서비스는 <strong>이벤트</strong>로 결과를 알립니다.</li>
 <li><strong>Saga 패턴</strong>으로 분산 트랜잭션을 단계별로 처리하고, 실패한 단계는 <strong>보상 트랜잭션</strong>으로 역순으로 되돌립니다.</li>
+<li><strong>Outbox 패턴</strong>으로 주문과 이벤트를 한 트랜잭션으로 함께 저장해, 발행 실패로 인한 <strong>이벤트 유실</strong>을 막습니다.</li>
 </ul>
 </div>
 

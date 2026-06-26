@@ -724,7 +724,7 @@ docker<span class="w"> </span>run<span class="w"> </span>-dit<span class="w"> </
 <span class="w">        </span><span class="kn">proxy_cache</span><span class="w"> </span><span class="s">my_cache</span><span class="p">;</span><span class="w">                        </span><span class="c1"># 선언한 캐시 공간을 사용합니다.</span>
 <span class="w">        </span><span class="kn">proxy_cache_valid</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="mi">1m</span><span class="p">;</span><span class="w">                    </span><span class="c1"># 정상 응답을 1분 동안 보관</span>
 <span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">X-Cache-Status</span><span class="w"> </span><span class="nv">$upstream_cache_status</span><span class="w"> </span><span class="s">always</span><span class="p">;</span><span class="w">  </span><span class="c1"># HIT/MISS 표시</span>
-<span class="w">        </span><span class="kn">proxy_ignore_headers</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">Expires</span><span class="p">;</span><span class="w">  </span><span class="c1"># 백엔드 캐시 헤더 무시. NGINX 설정 우선</span>
+<span class="w">        </span><span class="kn">proxy_ignore_headers</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">Expires</span><span class="p">;</span><span class="w">  </span><span class="c1"># 백엔드 캐시 헤더 무시</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span></div>
 <p>설정을 마쳤으니 터미널에서 컨테이너를 띄웁니다.</p>
@@ -1163,7 +1163,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> 
 <h3>3.6.2 Backend - Spring Boot 컨테이너</h3>
 <p>backend 폴더에는 Dockerfile과 <code>entrypoint.sh</code>가 있습니다. Dockerfile이 컨테이너의 실행 환경을 만드는 <strong>설계도</strong>라면, <code>entrypoint.sh</code>는 완성된 컨테이너가 시작될 때 수행할 구체적인 <strong>행동 지침서</strong>입니다.</p>
 <p>이 예제의 <code>entrypoint.sh</code>는 컨테이너가 켜지는 시점에 <strong>깃허브에서 소스 코드를 내려받아 빌드한 뒤, 서버를 실행</strong>하는 동작을 담당합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge">실습 8</span> ex07/backend/entrypoint.sh. Git clone + 빌드 스크립트</div><span class="ch">#!/bin/bash</span>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge reference">참고</span> ex07/backend/entrypoint.sh. Git clone + 빌드 스크립트</div><span class="ch">#!/bin/bash</span>
 <span class="c1"># 백엔드 소스 내려받기</span>
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/metacoding-10-linux-docker/backend-server
 <span class="nb">cd</span><span class="w"> </span>backend-server<span class="w">                       </span><span class="c1"># 클론한 폴더로 이동</span>
@@ -1172,7 +1172,7 @@ chmod<span class="w"> </span>+x<span class="w"> </span>gradlew<span class="w">  
 <span class="c1"># prod 프로필로 실행</span>
 java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active<span class="o">=</span>prod<span class="w"> </span>build/libs/*.jar</div>
 <p>이 스크립트를 Dockerfile의 <code>ENTRYPOINT</code>로 지정하면, 컨테이너가 시작될 때 실행됩니다.</p>
-<div class="code-block highlight" data-lang="dockerfile"><div class="cb-title"><span class="badge">실습 9</span> ex07/backend/Dockerfile. Spring Boot 이미지</div><span class="k">FROM</span><span class="w"> </span><span class="s">eclipse-temurin:21-jdk</span><span class="w">                       </span><span class="c"># JDK 21 공식 이미지 사용</span>
+<div class="code-block highlight" data-lang="dockerfile"><div class="cb-title"><span class="badge">실습 8</span> ex07/backend/Dockerfile. Spring Boot 이미지</div><span class="k">FROM</span><span class="w"> </span><span class="s">eclipse-temurin:21-jdk</span><span class="w">                       </span><span class="c"># JDK 21 공식 이미지 사용</span>
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/var/current/app                          # 작업 디렉토리 설정</span>
 <span class="k">COPY</span><span class="w"> </span>entrypoint.sh<span class="w"> </span>/entrypoint.sh<span class="w">                 </span>#<span class="w"> </span>위의<span class="w"> </span>스크립트<span class="w"> </span>복사
 <span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>git<span class="w">      </span>#<span class="w"> </span>git<span class="w"> </span>clone에<span class="w"> </span>필요한<span class="w"> </span>git<span class="w"> </span>설치
@@ -1220,7 +1220,7 @@ java<span class="w"> </span>-jar<span class="w"> </span>-Dspring.profiles.active
 </table>
 <h3>3.6.5 docker-compose.yml</h3>
 <p>마지막으로 frontend·backend·db를 함께 실행하는 <code>docker-compose.yml</code>을 작성합니다.</p>
-<div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 10</span> ex07/docker-compose.yml. ex07 전체 구성</div><span class="nt">services</span><span class="p">:</span>
+<div class="code-block highlight" data-lang="yaml"><div class="cb-title"><span class="badge">실습 9</span> ex07/docker-compose.yml. ex07 전체 구성</div><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w">                 </span><span class="c1"># Spring Boot 백엔드 서비스</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./backend</span><span class="w">   </span><span class="c1"># ./backend 폴더의 Dockerfile로 빌드</span>

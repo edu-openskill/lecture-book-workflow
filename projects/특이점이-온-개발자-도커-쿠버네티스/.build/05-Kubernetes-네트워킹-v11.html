@@ -163,7 +163,7 @@
 <span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w">          </span><span class="c1"># 클러스터 내부에서 Service로 진입하는 포트</span>
 <span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w">    </span><span class="c1"># Service가 Pod로 요청을 전달하는 포트</span>
-<span class="w">      </span><span class="nt">nodePort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30080</span><span class="w">   </span><span class="c1"># 외부에서 노드로 진입할 때 사용하는 포트 (기본 허용 범위 30000~32767)</span></div>
+<span class="w">      </span><span class="nt">nodePort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30080</span><span class="w">   </span><span class="c1"># 외부에서 노드로 진입 시 사용하는 포트 (기본 허용 범위 30000~32767)</span></div>
 <p>Service는 <strong>Deployment</strong>와 마찬가지로 <strong>selector</strong>에 지정한 라벨과 일치하는 Pod를 골라 연결합니다.</p>
 <div class="svg-figure">
 <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Service의 selector(app: nginx)와 같은 라벨을 가진 Pod만 골라 매칭하고, 라벨이 다른 Pod는 제외하는 구조">

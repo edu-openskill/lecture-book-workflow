@@ -144,7 +144,14 @@
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-config-secret</span><span class="w">            </span><span class="c1"># Deployment 이름 (재시작 시 이 이름으로 지목)</span>
 <span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                          </span><span class="c1"># pod 수 지정</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w">                       </span><span class="c1"># 이 라벨을 가진 Pod를 관리 대상으로</span>
 <span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span><span class="w">                     </span><span class="c1"># pod에 붙일 라벨</span>
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-container</span>
@@ -447,7 +454,7 @@ kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </sp
 <span class="w">    </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1Gi</span><span class="w">                       </span><span class="c1"># 저장 용량</span>
 <span class="w">  </span><span class="nt">accessModes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ReadWriteOnce</span><span class="w">                    </span><span class="c1"># 단일 노드 읽기·쓰기 모드</span>
-<span class="w">  </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">                 </span><span class="c1"># 자동 StorageClass 비활성, 아래 PVC에서 정적 바인딩</span>
+<span class="w">  </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w">                 </span><span class="c1"># 자동 StorageClass 비활성 (정적 바인딩)</span>
 <span class="w">  </span><span class="nt">hostPath</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/mnt/data</span><span class="w">                    </span><span class="c1"># Minikube 내부의 실제 저장 경로</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DirectoryOrCreate</span><span class="w">            </span><span class="c1"># 경로가 없으면 자동 생성</span></div>
@@ -876,7 +883,7 @@ minikube<span class="w"> </span>image<span class="w"> </span>build<span class="w
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 전체 리소스 일괄 배포</div>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex15/k8s/namespace.yml<span class="w">      </span><span class="c1"># Namespace 먼저</span>
 kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ex15/k8s/<span class="w"> </span>--recursive<span class="w">       </span><span class="c1"># k8s 이하 폴더의 리소스 전부 일괄 배포</span></div>
 <p>명령을 치면 모든 리소스가 한꺼번에 생성됩니다. 이어서 상태를 조회합니다.</p>
-<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 배포 결과 조회</div>kubectl<span class="w"> </span>get<span class="w"> </span>deploy,pod,service,ingress<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w">   </span><span class="c1"># 네임스페이스 리소스 상태 일괄 조회</span></div>
+<div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 배포 결과 조회</div>kubectl<span class="w"> </span>get<span class="w"> </span>deploy,pod,service,ingress<span class="w"> </span>-n<span class="w"> </span>metacoding<span class="w">   </span><span class="c1"># 리소스 상태 일괄 조회</span></div>
 <p>프론트엔드와 데이터베이스 Pod는 빠르게 Running 상태로 바뀝니다. 백엔드 Pod만 Gradle 빌드와 의존성 설치 때문에 시간이 더 걸립니다.</p>
 <p>모든 Pod가 Running 상태가 되면, <code>minikube tunnel</code>을 실행합니다. 그러면 Ingress 입구가 <code>127.0.0.1</code>로 열립니다.</p>
 <div class="code-block highlight" data-lang="bash"><div class="cb-title"><span class="badge bash">터미널</span> 외부 터널 개방</div>minikube<span class="w"> </span>tunnel<span class="w">                       </span><span class="c1"># 새 터미널에서 실행 (관리자 권한 요구)</span></div>

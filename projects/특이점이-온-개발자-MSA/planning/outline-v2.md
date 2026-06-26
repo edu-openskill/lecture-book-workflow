@@ -43,6 +43,7 @@
 - 4.4 Kafka로 주고받기 - 발행과 구독
 - 4.5 Kubernetes - Kafka와 orchestrator 배포
 - 4.6 실행 및 결과 확인
+- 4.7 더 알아보기 - Outbox 패턴
 
 ## 챕터 5. 실시간 알림 - 주문 완료를 즉시 전달하다
 

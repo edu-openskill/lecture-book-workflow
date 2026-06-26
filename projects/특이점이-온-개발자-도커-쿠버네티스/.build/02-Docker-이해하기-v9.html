@@ -1199,7 +1199,7 @@ docker<span class="w"> </span>attach<span class="w"> </span>d2b1<span class="w">
 <span class="nb">cd</span><span class="w"> </span>/usr/local/tomcat/webapps<span class="w">           </span><span class="c1"># Tomcat의 웹앱 기본 경로로 이동</span>
 mkdir<span class="w"> </span>ROOT<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>ROOT<span class="w">                  </span><span class="c1"># ROOT 폴더 생성 후 그 안으로 이동</span>
 apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>vim<span class="w">       </span><span class="c1"># 패키지 목록 갱신 후 vim 편집기 설치</span>
-vim<span class="w"> </span>index.html<span class="w">                         </span><span class="c1"># index.html 파일을 만들고 간단한 HTML 작성 후 저장</span></div>
+vim<span class="w"> </span>index.html<span class="w">                         </span><span class="c1"># 파일 만들고 HTML 작성 후 저장</span></div>
 <p>vim으로 index.html을 만들어 저장한 뒤 <strong>localhost:8080</strong> 으로 다시 접속하면 방금 만든 페이지가 응답됩니다.</p>
 <div class="chapter-image"><img src="..\assets\CH02\chap01-65.png" alt="" /><div class="caption">그림 2-37. index.html 응답 확인</div></div>
 <p>이제 <code>docker commit &lt;컨테이너ID&gt; &lt;본인-dockerhub-id&gt;/&lt;이미지이름&gt;</code> 형식으로 명령어를 입력해 현재 상태를 기록합니다.</p>

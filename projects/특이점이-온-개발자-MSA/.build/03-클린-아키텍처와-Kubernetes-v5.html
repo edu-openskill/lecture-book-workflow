@@ -356,7 +356,7 @@ src/main/resources/
 <span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&quot;/api/orders&quot;</span><span class="p">)</span>
 <span class="nd">@RequiredArgsConstructor</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderController</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CreateOrderUseCase</span><span class="w"> </span><span class="n">createOrderUseCase</span><span class="p">;</span><span class="w">   </span><span class="c1">// 구현체가 아닌 인터페이스 주입</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CreateOrderUseCase</span><span class="w"> </span><span class="n">createOrderUseCase</span><span class="p">;</span><span class="w">   </span><span class="c1">// 인터페이스 주입</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">GetOrderUseCase</span><span class="w"> </span><span class="n">getOrderUseCase</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CancelOrderUseCase</span><span class="w"> </span><span class="n">cancelOrderUseCase</span><span class="p">;</span>
 

@@ -393,7 +393,7 @@ public class OrderService implements CreateOrderUseCase, GetOrderUseCase, Cancel
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
-    private final CreateOrderUseCase createOrderUseCase;   // 구현체가 아닌 인터페이스 주입
+    private final CreateOrderUseCase createOrderUseCase;   // 인터페이스 주입
     private final GetOrderUseCase getOrderUseCase;
     private final CancelOrderUseCase cancelOrderUseCase;
 
