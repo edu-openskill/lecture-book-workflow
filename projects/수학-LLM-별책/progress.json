@@ -172,6 +172,20 @@
             "audit": "pass"
           },
           "questions_pending": 0
+        },
+        {
+          "id": "CH09",
+          "title": "한 번에 섞는 믹서 : 행렬",
+          "version": "v0.9",
+          "status": "done",
+          "artifact": "chapters/09-한번에섞는믹서.md",
+          "pdf": "book/chapters-pdf/09-한번에섞는믹서.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
         }
       ]
     },
