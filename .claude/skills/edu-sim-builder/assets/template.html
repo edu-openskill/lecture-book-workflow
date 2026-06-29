@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시뮬레이터 템플릿</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  :root{
+    --bg:#060814; --surface:rgba(255,255,255,0.04); --surface-2:rgba(255,255,255,0.07);
+    --border:rgba(255,255,255,0.08); --border-strong:rgba(255,255,255,0.15);
+    --text:#F8FAFC; --muted:#94A3B8; --dim:#475569;
+    --indigo:#818CF8; --indigo-deep:#4F46E5; --amber:#FBBF24; --rose:#F43F5E;
+    --emerald:#34D399; --cyan:#22D3EE; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;padding:0;}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;color:var(--text);
+    background:radial-gradient(ellipse at top left,rgba(99,102,241,0.12),transparent 50%),
+      radial-gradient(ellipse at bottom right,rgba(244,63,94,0.08),transparent 50%),var(--bg);
+    min-height:100vh;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1500px;margin:0 auto;padding:34px 36px 70px;}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;
+    background:linear-gradient(135deg,rgba(251,191,36,0.18),rgba(251,191,36,0.06));color:var(--amber);
+    font-size:0.85rem;font-weight:600;border:1px solid rgba(251,191,36,0.25);}
+  .badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;}
+  h1{font-size:2.4rem;font-weight:800;letter-spacing:-0.03em;margin:16px 0 6px;}
+  .accent{background:linear-gradient(120deg,var(--rose),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:1.02rem;margin:0;}
+  .tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:24px 0 20px;}
+  .tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:13px;
+    padding:12px 8px;cursor:pointer;transition:.18s;font-family:inherit;text-align:center;}
+  .tab:hover{transform:translateY(-2px);color:var(--text);}
+  .tab.active{background:linear-gradient(135deg,rgba(244,63,94,0.16),rgba(251,191,36,0.08));
+    border-color:rgba(244,63,94,0.4);color:var(--text);}
+  .panel{display:none;} .panel.active{display:block;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .phead h2{font-size:1.5rem;font-weight:700;margin:0;}
+  .pdesc{color:var(--muted);font-size:0.95rem;line-height:1.55;margin:6px 0 18px;max-width:820px;}
+  .pdesc b{color:var(--amber);} .pdesc i{color:var(--indigo);font-style:normal;font-weight:600;}
+  .grid2{display:grid;grid-template-columns:1fr 360px;gap:16px;}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr;}}
+  .stage{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;
+    min-height:300px;overflow:hidden;}
+  .sidecard{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;}
+  .controls{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+  .btn{border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);
+    border-radius:11px;padding:10px 16px;font-size:0.9rem;font-weight:700;cursor:pointer;
+    transition:.15s;font-family:inherit;}
+  .btn:hover{transform:translateY(-2px);border-color:var(--indigo);}
+  .btn.rose{background:linear-gradient(135deg,rgba(244,63,94,0.22),rgba(244,63,94,0.08));border-color:rgba(244,63,94,0.5);}
+  .btn.emerald{background:linear-gradient(135deg,rgba(52,211,153,0.22),rgba(52,211,153,0.08));border-color:rgba(52,211,153,0.5);}
+  .btn.ghost{background:transparent;border-color:var(--border);color:var(--muted);}
+  .verdict{margin-top:12px;border-radius:12px;padding:12px 14px;font-size:0.88rem;line-height:1.5;
+    border:1px solid var(--border);background:var(--surface-2);color:var(--muted);}
+  .verdict.ok{border-color:rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#bbf7d0;}
+  .verdict.bad{border-color:rgba(244,63,94,0.4);background:rgba(244,63,94,0.1);color:#fecdd3;}
+  .ctxbox{border:1px dashed var(--border-strong);border-radius:14px;padding:14px;min-height:120px;
+    display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;}
+  .token{padding:8px 12px;border-radius:10px;font-size:0.82rem;font-weight:600;border:1px solid var(--border);
+    animation:pop .35s ease;}
+  @keyframes pop{from{opacity:0;transform:scale(.6) translateY(10px);}to{opacity:1;transform:none;}}
+  .token.signal{background:rgba(52,211,153,0.14);border-color:rgba(52,211,153,0.45);color:#bbf7d0;}
+  .token.noise{background:rgba(71,85,105,0.18);border-color:var(--border);color:var(--dim);}
+  .flow-msg{font-size:0.88rem;line-height:1.5;color:var(--muted);min-height:22px;margin-top:12px;}
+  .flow-msg b{color:var(--text);}
+  .hint{color:var(--dim);font-size:0.82rem;margin-top:14px;line-height:1.5;}
+  .hint b{color:var(--muted);}
+  svg{display:block;width:100%;height:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge"><span class="dot"></span>인터랙티브 데모</div>
+  <h1><span class="accent">[개념]</span> 시뮬레이터</h1>
+  <p class="sub">버튼을 눌러 직접 만져보며 배우세요.</p>
+
+  <div class="tabs" id="tabbar">
+    <button class="tab active" data-tab="0">① 예시 A</button>
+    <button class="tab" data-tab="1">② 예시 B</button>
+  </div>
+
+  <!-- PANEL 0: 토큰 흐름 데모 -->
+  <section class="panel active" data-panel="0">
+    <div class="phead"><h2>① 데이터가 흘러 들어간다</h2></div>
+    <p class="pdesc">버튼을 누르면 <b>토큰</b>이 하나씩 컨텍스트로 흘러 들어갑니다.</p>
+    <div class="grid2">
+      <div class="stage">
+        <div class="ctxbox" id="box"></div>
+        <div class="flow-msg" id="msg">버튼을 눌러보세요.</div>
+      </div>
+      <div class="sidecard">
+        <div class="controls">
+          <button class="btn emerald" id="add">➕ 좋은 신호 추가</button>
+          <button class="btn ghost" id="reset">↺ 리셋</button>
+        </div>
+        <div class="verdict" id="verd">대기 중…</div>
+      </div>
+    </div>
+    <p class="hint"><b>포인트:</b> 한 화면에 한 개념. 여기선 "채워짐"만 보여준다.</p>
+  </section>
+
+  <!-- PANEL 1: 간단 SVG 데모 -->
+  <section class="panel" data-panel="1">
+    <div class="phead"><h2>② 벡터/정사영 (SVG)</h2></div>
+    <p class="pdesc">고정된 데이터(파랑)에 <b>질문선</b>을 하나만 추가해 정사영을 본다.</p>
+    <div class="grid2">
+      <div class="stage">
+        <svg viewBox="0 0 480 300" id="svg"><g id="g"></g></svg>
+        <div class="flow-msg" id="msg2">버튼을 눌러보세요.</div>
+      </div>
+      <div class="sidecard">
+        <div class="controls"><button class="btn rose" id="go">▶ 질문 던지기</button></div>
+        <div class="verdict" id="verd2">대기 중…</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* 탭 전환 */
+document.getElementById('tabbar').addEventListener('click',e=>{
+  const t=e.target.closest('.tab'); if(!t)return; const i=t.dataset.tab;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===i));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.dataset.panel===i));
+});
+
+/* 패널 0: 토큰 흐름 */
+(function(){
+  const box=document.getElementById('box'), msg=document.getElementById('msg'), verd=document.getElementById('verd');
+  let n=0; const names=['📄 논문','💡 인사이트','📊 데이터','🧩 결정'];
+  document.getElementById('add').onclick=()=>{ if(n>=names.length)return;
+    box.insertAdjacentHTML('beforeend',`<div class="token signal">${names[n]}</div>`); n++;
+    msg.innerHTML='신호가 컨텍스트에 <b>쌓입니다.</b>'; verd.className='verdict ok'; verd.textContent=n+'개 채워짐'; };
+  document.getElementById('reset').onclick=()=>{ box.innerHTML=''; n=0; msg.textContent='버튼을 눌러보세요.';
+    verd.className='verdict'; verd.textContent='대기 중…'; };
+})();
+
+/* 패널 1: 고정 데이터 + 질문선 + 정사영 (고정 좌표계 예시) */
+(function(){
+  const O={x:150,y:200}, S=150, rad=d=>d*Math.PI/180, g=document.getElementById('g');
+  const DATA={l:'데이터', a:55, m:1.0};            // 고정
+  function px(a,m){return O.x+S*m*Math.cos(rad(a));} function py(a,m){return O.y-S*m*Math.sin(rad(a));}
+  function base(){ g.innerHTML=
+    `<line x1="${O.x}" y1="${O.y}" x2="${px(DATA.a,DATA.m)}" y2="${py(DATA.a,DATA.m)}" stroke="#60A5FA" stroke-width="3.4"/>`+
+    `<circle cx="${O.x}" cy="${O.y}" r="4" fill="#94a3b8"/>`; }
+  document.getElementById('go').onclick=()=>{
+    const qa=15;                                    // 질문 방향(가로에 가깝게)
+    const sim=DATA.m*Math.cos(rad(DATA.a-qa));       // 정사영 = 내적
+    const ux=Math.cos(rad(qa)), uy=-Math.sin(rad(qa));
+    const fx=O.x+S*sim*ux, fy=O.y+S*sim*uy;          // 발
+    base();
+    g.insertAdjacentHTML('beforeend',
+      `<line x1="${O.x}" y1="${O.y}" x2="${O.x+S*0.95*ux}" y2="${O.y+S*0.95*uy}" stroke="#FBBF24" stroke-width="1.6"/>`+
+      `<line x1="${px(DATA.a,DATA.m)}" y1="${py(DATA.a,DATA.m)}" x2="${fx}" y2="${fy}" stroke="#22D3EE" stroke-width="1.3" stroke-dasharray="4 4"/>`+
+      `<line x1="${O.x}" y1="${O.y}" x2="${fx}" y2="${fy}" stroke="#A3E635" stroke-width="5" stroke-linecap="round"/>`);
+    document.getElementById('msg2').innerHTML=`정사영(유사도) = <b>${sim.toFixed(2)}</b> — 형광선 길이.`;
+    const v=document.getElementById('verd2'); v.className='verdict ok'; v.textContent='정사영 '+sim.toFixed(2);
+  };
+  base();
+})();
+</script>
+</body>
+</html>
