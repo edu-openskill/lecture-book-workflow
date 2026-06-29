@@ -494,7 +494,7 @@ minikube service nginx-service --url    # 다시 접속 URL 확인
   </div>
   <div class="tl-body">
     <div><span class="tl-key">$</span> <span class="tl-str">kubectl delete pod --all</span></div>
-    <div>pod "nginx-replica-756b46b54c-7qztnx" deleted</div>
+    <div>pod "nginx-replica-756b46b54c-7qztn" deleted</div>
     <div>pod "nginx-replica-756b46b54c-cb592" deleted</div>
     <div>pod "nginx-replica-756b46b54c-ff5dt" deleted</div>
     <div>pod "nginx-replica-756b46b54c-hpnzm" deleted</div>

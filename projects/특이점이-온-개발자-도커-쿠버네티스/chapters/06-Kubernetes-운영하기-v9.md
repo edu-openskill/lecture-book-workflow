@@ -656,10 +656,15 @@ kubectl exec -it volume-pod -- ls /data        # 새 Pod에서 c.txt가 남아 �
   </div>
   <div class="tl-body">
     <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it volume-pod -- /bin/bash</span></div>
-    <div>root@volume-pod:/#</div>
-    <div><span class="tl-key">root@volume-pod:/#</span> <span class="tl-str">ls /data</span></div>
+    <div><span class="tl-key">root@volume-pod:/#</span> <span class="tl-str">touch /data/c.txt</span></div>
+    <div><span class="tl-key">root@volume-pod:/#</span> <span class="tl-str">exit</span></div>
+    <div>exit</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl delete pod volume-pod</span></div>
+    <div>pod "volume-pod" deleted</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl apply -f ex14/volume-pod.yml</span></div>
+    <div>pod/volume-pod created</div>
+    <div><span class="tl-key">$</span> <span class="tl-str">kubectl exec -it volume-pod -- ls /data</span></div>
     <div>c.txt</div>
-    <div>root@volume-pod:/#</div>
   </div>
 </div>
 

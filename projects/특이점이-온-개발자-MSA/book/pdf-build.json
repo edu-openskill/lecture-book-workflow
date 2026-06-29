@@ -1,0 +1,13 @@
+{
+  "chapters": [
+    "preface",
+    "prologue",
+    "01-MSA란-무엇인가-v5",
+    "02-동기식-MSA-구현-v5",
+    "03-클린-아키텍처와-Kubernetes-v5",
+    "04-비동기-MSA-Kafka-v6",
+    "05-실시간-알림-WebSocket-v7",
+    "epilogue",
+    "afterword"
+  ]
+}

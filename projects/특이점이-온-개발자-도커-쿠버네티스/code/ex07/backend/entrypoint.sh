@@ -8,4 +8,4 @@ chmod +x gradlew
 
 ./gradlew build  
 
-java -jar -Dspring.profiles.active=prod build/libs/*.jar  
+java -Dspring.profiles.active=prod -jar build/libs/*.jar

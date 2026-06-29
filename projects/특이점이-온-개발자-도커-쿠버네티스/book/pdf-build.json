@@ -1,0 +1,14 @@
+{
+  "chapters": [
+    "머릿말",
+    "prologue",
+    "01-왜-컨테이너인가-v9",
+    "02-Docker-이해하기-v9",
+    "03-Docker-다루기-v10",
+    "04-Kubernetes-시작하기-v11",
+    "05-Kubernetes-네트워킹-v11",
+    "06-Kubernetes-운영하기-v9",
+    "epilogue",
+    "afterword"
+  ]
+}
