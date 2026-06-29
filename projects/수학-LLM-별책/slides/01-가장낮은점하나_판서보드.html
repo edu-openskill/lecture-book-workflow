@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>1강 · 가장 낮은 점 하나</title>
+<!--
+  판서슬라이드 엔진 (고정) — 위쪽 스타일과 아래쪽 스크립트는 건드리지 말 것.
+  강의별로 바꾸는 곳은 STEPS START ~ STEPS END 사이의 .step 섹션과 :root 강조색뿐.
+-->
+<style>
+  :root{
+    --bg:#0e131c; --board:#101722; --ink:#e8eef7; --dim:#7c8aa0;
+    --line:#1c2636; --accent:#5cc8ff; --warn:#ff5c6e; --gold:#ffd25c; --green:#54e3a0;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    color:var(--ink); touch-action:none; overscroll-behavior:none;}
+  #stage{position:fixed; inset:0;}
+
+  /* ── 콘텐츠 레이어 (판서 뒤) ── */
+  #content{position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(1200px 700px at 50% -10%, #16202e 0%, var(--board) 55%, var(--bg) 100%);}
+  #content::before{content:""; position:absolute; inset:0; opacity:.5;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:46px 46px; -webkit-mask:radial-gradient(circle at 50% 40%,#000,transparent 85%);
+            mask:radial-gradient(circle at 50% 40%,#000,transparent 85%);}
+  .step{position:absolute; inset:0; display:none; padding:6vh 7vw;
+    flex-direction:column; align-items:flex-start; justify-content:center;}
+  .step.active{display:flex; animation:fade .5s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .kicker{font-size:clamp(13px,1.8vw,20px); letter-spacing:.35em; color:var(--accent);
+    text-transform:uppercase; margin-bottom:2.2vh; font-weight:700;}
+  h1{font-size:clamp(30px,6vw,76px); line-height:1.18; margin:0; font-weight:800; letter-spacing:-.01em;}
+  .sub{margin-top:3vh; font-size:clamp(16px,2.4vw,30px); color:var(--dim); font-weight:500;}
+  .hl{color:var(--gold);} .hlb{color:var(--accent);} .hlr{color:var(--warn);} .hlg{color:var(--green);}
+
+  /* ── 재사용 컴포넌트 (reference/components.md 참고) ── */
+  /* 썸네일 피드 */
+  .feed{display:flex; gap:1.4vw; margin-top:4vh; flex-wrap:wrap;}
+  .thumb{width:clamp(150px,17vw,230px); height:clamp(86px,10vw,130px); border-radius:12px;
+    background:linear-gradient(135deg,#1d2a3d,#121a26); border:1px solid #283950;
+    position:relative; overflow:hidden; display:flex; align-items:flex-end; padding:10px;
+    font-size:clamp(11px,1.2vw,15px); font-weight:700; color:#dce6f2;}
+  .thumb b{color:var(--warn);}
+  .thumb::after{content:"▶"; position:absolute; top:8px; right:10px; color:#ff5c6e; font-size:14px;}
+  /* 가로 게이지 */
+  .gauges{margin-top:5vh; width:min(560px,80vw);}
+  .grow{display:flex; align-items:center; gap:14px; margin:14px 0;}
+  .glabel{width:120px; font-size:clamp(14px,1.7vw,20px); color:var(--dim);}
+  .gbar{flex:1; height:18px; border-radius:10px; background:#1a2433; overflow:hidden; border:1px solid #28394f;}
+  .gfill{height:100%;}
+  /* 번호 리스트(약속) */
+  .promise{margin-top:4vh; display:flex; flex-direction:column; gap:1.8vh;}
+  .promise .p{display:flex; align-items:baseline; gap:16px; font-size:clamp(17px,2.4vw,30px); font-weight:700;}
+  .promise .n{color:var(--accent); font-variant-numeric:tabular-nums;}
+  .promise .x{color:var(--dim); font-weight:500; font-size:.7em;}
+
+  /* ── 칠판 (판서모드) ── */
+  #board{position:absolute; inset:0; z-index:1; display:none;
+    background:radial-gradient(1400px 850px at 50% 0%, #1a4a40 0%, #103029 58%, #0b241f 100%);
+    box-shadow:inset 0 0 0 14px #5a3d24, inset 0 0 0 16px #3a2614, inset 0 0 120px rgba(0,0,0,.5);}
+  #board.show{display:block;}
+  #board::after{content:"판서모드"; position:absolute; top:24px; left:50%; transform:translateX(-50%);
+    font-size:13px; letter-spacing:.4em; color:rgba(255,255,255,.18); font-weight:700;}
+  /* ── 모눈종이 격자(판서모드용) ── */
+  #board.grid{
+    background:
+      linear-gradient(rgba(255,255,255,.10) 1px, transparent 1px) 0 0/46px 46px,
+      linear-gradient(90deg, rgba(255,255,255,.10) 1px, transparent 1px) 0 0/46px 46px,
+      radial-gradient(1400px 850px at 50% 0%, #1a4a40 0%, #103029 58%, #0b241f 100%);}
+
+  /* ── 판서 캔버스 ── */
+  #pad{position:absolute; inset:0; z-index:2; touch-action:none; cursor:crosshair;}
+
+  /* ── 툴바 ── */
+  #tools{position:absolute; z-index:3; left:50%; bottom:18px; transform:translateX(-50%);
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:16px;
+    flex-wrap:nowrap; max-width:96vw; overflow-x:auto;
+    background:rgba(12,18,28,.82); border:1px solid #243349; backdrop-filter:blur(8px);
+    box-shadow:0 8px 30px rgba(0,0,0,.45);}
+  .swatch{width:30px;height:30px;border-radius:50%;border:2px solid #2c3c54;cursor:pointer;}
+  .swatch.sel{border-color:#fff; transform:scale(1.12);}
+  .btn{height:34px;min-width:40px;padding:0 12px;border-radius:10px;border:1px solid #2c3c54;
+    background:#16202e;color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;display:flex;
+    align-items:center;justify-content:center;gap:6px;white-space:nowrap;flex-shrink:0;}
+  .btn:active{background:#1f2c3e;}
+  .btn.on{background:var(--accent);color:#06121d;border-color:var(--accent);}
+  .sep{width:1px;height:28px;background:#2c3c54;margin:0 2px;}
+  .sizes{display:flex;gap:6px;align-items:center;}
+  .sz{width:26px;height:26px;border-radius:50%;border:1px solid #2c3c54;background:#16202e;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;}
+  .sz i{display:block;border-radius:50%;background:var(--ink);}
+  .sz.sel{border-color:var(--accent);}
+
+  /* ── 네비게이션 ── */
+  .nav{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:54px;height:54px;
+    border-radius:50%;border:1px solid #243349;background:rgba(12,18,28,.7);color:var(--ink);
+    font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  #prev{left:14px;} #next{right:14px;}
+  #dots{position:absolute;z-index:3;top:16px;left:50%;transform:translateX(-50%);display:flex;gap:9px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:#2c3c54;}
+  .dot.on{background:var(--accent);width:24px;border-radius:5px;}
+  #idx{position:absolute;z-index:3;top:14px;right:18px;font-size:13px;color:var(--dim);font-weight:700;}
+  .hint{position:absolute;z-index:3;bottom:64px;left:50%;transform:translateX(-50%);
+    font-size:12px;color:#46566e;letter-spacing:.05em;}
+
+  /* ── 전체화면 토글 (좌상단, 태블릿용) ── */
+  #fsBtn{position:absolute;z-index:4;top:12px;left:14px;width:40px;height:40px;border-radius:10px;
+    border:1px solid #243349;background:rgba(12,18,28,.7);color:var(--ink);font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;}
+  #fsBtn:active{background:#1f2c3e;}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="content">
+
+  <!-- ===================== STEPS START ===================== -->
+  <!-- 강의별로 이 영역만 교체. 첫 섹션에 class="step active", 나머지는 class="step".
+       글자는 최소로 — 빈 공간은 판서로 채운다. 컴포넌트는 reference/components.md 참고. -->
+
+    <section class="step active">
+      <div class="kicker">1강 · 가장 낮은 점 하나</div>
+      <h1>"학습이란, 손실을<br><span class="hlb">가장 작게</span> 만드는 과정입니다."</h1>
+      <div class="sub">…그런데 <span class="hl">'가장'</span> 작은 건 어떻게 찾지?</div>
+    </section>
+
+    <section class="step">
+      <div class="kicker">걸려 넘어진 곳</div>
+      <h1>줄이고 줄이면<br><span class="hlr">더는 안 줄어드는 바닥</span>이 온다.</h1>
+      <div class="sub">그 바닥이 어디인지, <span class="hl">무슨 수로</span> 알까?</div>
+    </section>
+
+    <section class="step">
+      <div class="kicker">중심 비유</div>
+      <h1>그릇 속 구슬은<br>늘 <span class="hlg">가장 낮은 한 점</span>에서 멈춘다.</h1>
+      <div class="sub">어디서 굴려도 같은 자리 — 더 내려갈 데가 없으니까.</div>
+    </section>
+
+    <section class="step">
+      <div class="kicker">그릇의 옆모습</div>
+      <h1>그 골짜기 곡선이<br><span class="hlb">2차함수</span> — 포물선이다.</h1>
+      <div class="sub"><span class="hl">a &gt; 0</span> 이면 위로 열려 바닥(최솟값)이 생긴다.</div>
+    </section>
+
+    <section class="step">
+      <div class="kicker">바닥을 드러내기</div>
+      <h1>식을 고쳐 쓰면<br>바닥이 <span class="hlg">툭</span> 튀어나온다.</h1>
+      <div class="sub"><span class="hlb">a(x−h)² + k</span> — 제곱이 0일 때 <span class="hl">x=h, 최솟값 k</span></div>
+    </section>
+
+    <section class="step">
+      <div class="kicker">직접 짚어보기</div>
+      <h1><span class="hlb">x² − 4x + 7</span><br>바닥은 어디인가?</h1>
+      <div class="sub">(x−2)² + 3 → <span class="hl">최솟값 3, 이때 x=2</span></div>
+    </section>
+
+    <section class="step">
+      <div class="kicker">이것만은 기억하자</div>
+      <h1>배운다는 건,<br><span class="hlg">가장 낮은 점 하나</span>를 찾아가는 일.</h1>
+      <div class="sub">손실이라는 <span class="hl">그릇</span>의 바닥 — 식으로 짚을 수 있다.</div>
+    </section>
+
+    <section class="step">
+      <div class="kicker">다음 강</div>
+      <h1>곡선을 더 자유롭게<br>다루기 위한 <span class="hlb">도구</span>를 챙긴다.</h1>
+      <div class="sub"><span class="hlb">2강 — 숫자를 접었다 펴는 지수와 제곱근.</span></div>
+    </section>
+
+  <!-- ===================== STEPS END ===================== -->
+
+  </div>
+
+  <div id="board"></div>
+  <canvas id="pad"></canvas>
+
+  <!-- UI -->
+  <button id="fsBtn" title="전체화면 토글 (f)">⛶</button>
+  <div id="dots"></div>
+  <div id="idx">1 / 1</div>
+  <button class="nav" id="prev">‹</button>
+  <button class="nav" id="next">›</button>
+
+  <div id="tools">
+    <button class="btn" id="boardBtn">🪧 판서모드</button>
+    <button class="btn" id="gridBtn" title="모눈종이 격자 (g)">▦ 모눈</button>
+    <button class="btn on" id="snapBtn" title="도형 스냅 켜기/끄기 (s)">◇ 도형</button>
+    <div class="sep"></div>
+    <div class="swatch sel" style="background:#ffffff" data-c="#ffffff"></div>
+    <div class="swatch" style="background:#ffd25c" data-c="#ffd25c"></div>
+    <div class="swatch" style="background:#5cc8ff" data-c="#5cc8ff"></div>
+    <div class="swatch" style="background:#ff5c6e" data-c="#ff5c6e"></div>
+    <div class="swatch" style="background:#54e3a0" data-c="#54e3a0"></div>
+    <div class="sep"></div>
+    <div class="sizes">
+      <div class="sz" data-s="2"><i style="width:5px;height:5px"></i></div>
+      <div class="sz sel" data-s="4"><i style="width:9px;height:9px"></i></div>
+      <div class="sz" data-s="8"><i style="width:15px;height:15px"></i></div>
+    </div>
+    <div class="sep"></div>
+    <button class="btn" id="selBtn" title="선택 — 사각형으로 묶어 끌기">✂ 선택</button>
+    <button class="btn" id="moveBtn" title="이동 — 그림을 눌러 이어진 부분을 끌어 옮기기">✋ 이동</button>
+    <button class="btn" id="eraser">지우개</button>
+    <button class="btn" id="undo">되돌리기</button>
+    <button class="btn" id="clear">전체지움</button>
+  </div>
+</div>
+
+<script>
+/* ── 판서슬라이드 엔진 (고정) — 수정 금지 · v3: 도형스냅 + 큰 네모 지우개 + 선택삭제 + ◇도형/⛶전체화면 버튼 ── */
+(function(){
+  const steps = Array.from(document.querySelectorAll('.step'));
+  const total = steps.length;
+  let cur = 0;
+  const dots = document.getElementById('dots');
+  steps.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');dots.appendChild(d);});
+  const dotEls = Array.from(dots.children);
+  const idxEl = document.getElementById('idx');
+  idxEl.textContent = '1 / '+total;
+
+  const pad = document.getElementById('pad');
+  const ctx = pad.getContext('2d');
+  let dpr = Math.max(1, window.devicePixelRatio||1);
+  // 슬라이드/판서모드별 '획(stroke) 객체' 목록 — 손 안 떼고 그린 한 획 = 객체 하나
+  const slideStrokes = Array.from({length: total}, ()=>[]);
+  let boardStrokes = [];
+  let strokes = slideStrokes[0];     // 현재 활성 레이어(배열 참조)
+  const undoStack = [];               // 각 항목 = strokes 배열의 스냅샷(shallow copy)
+  function setLayer(arr){ strokes = arr; if(boardMode) boardStrokes = arr; else slideStrokes[cur] = arr; }
+  function snapshot(){ undoStack.push(strokes.slice()); if(undoStack.length>60) undoStack.shift(); }
+
+  function fit(restore){
+    dpr = Math.max(1, window.devicePixelRatio||1);
+    pad.width = Math.floor(innerWidth*dpr); pad.height = Math.floor(innerHeight*dpr);
+    pad.style.width = innerWidth+'px'; pad.style.height = innerHeight+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0); ctx.lineCap='round'; ctx.lineJoin='round';
+    if(restore) render();
+  }
+  fit(false);
+  addEventListener('resize',()=>fit(true));
+
+  function clearCanvas(){ctx.clearRect(0,0,innerWidth,innerHeight);}
+  function lineW2(s,pr){ return Math.max(1, s.size*(0.45 + pr*1.1)); }
+  function drawStroke(s,ox,oy){ ox=ox||0; oy=oy||0; const pts=s.pts; if(!pts.length) return;
+    ctx.globalCompositeOperation = s.erase?'destination-out':'source-over';
+    ctx.strokeStyle=s.color; ctx.fillStyle=s.color;
+    if(pts.length===1){ const w=lineW2(s,pts[0].p); ctx.beginPath(); ctx.arc(pts[0].x+ox,pts[0].y+oy,(s.erase?w*2.4:w)/2,0,Math.PI*2); ctx.fill(); }
+    else { for(let i=1;i<pts.length;i++){ const w=s.erase?lineW2(s,pts[i].p)*2.6:lineW2(s,pts[i].p);
+      ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(pts[i-1].x+ox,pts[i-1].y+oy); ctx.lineTo(pts[i].x+ox,pts[i].y+oy); ctx.stroke(); } }
+    ctx.globalCompositeOperation='source-over';
+  }
+  function render(){ clearCanvas(); for(const s of strokes) drawStroke(s,0,0); }
+
+  let drawing=false, color='#ffffff', size=4, erasing=false, last=null, curStroke=null;
+  let eraseGesture=false, erasePath=null;
+  const ERS=72;                                            // 큰 네모 지우개 한 변(px)
+  const ERASER_CURSOR="url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='72'%20height='72'%3E%3Crect%20x='2'%20y='2'%20width='68'%20height='68'%20fill='white'%20fill-opacity='0.12'%20stroke='white'%20stroke-width='2'/%3E%3C/svg%3E\") 36 36, crosshair";
+  function pos(e){return {x:e.clientX, y:e.clientY, p:(e.pressure&&e.pressure>0)?e.pressure:0.5};}
+  function lineW(pressure){ return Math.max(1, size * (0.45 + pressure*1.1)); }
+
+  /* ── 선택·이동: '획(stroke) 객체' 단위 (겹쳐도 따로 잡힘) ── */
+  let selMode=false, moveMode=false, selecting=false, selStart=null, selBase=null;
+  let floatStrokes=null, floatBB=null, floatDX=0, floatDY=0, floatBase=null, movingFloat=false, grab=null;
+  const DASH='#5cc8ff';
+  function getFull(){ return ctx.getImageData(0,0,pad.width,pad.height); }
+  function dashedRect(x,y,w,h){ ctx.save(); ctx.setLineDash([7,5]); ctx.lineWidth=1.5; ctx.strokeStyle=DASH; ctx.strokeRect(x,y,w,h); ctx.restore(); }
+  function bboxOf(arr){ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for(const s of arr){ const m=s.size+4; for(const q of s.pts){ if(q.x-m<x0)x0=q.x-m; if(q.y-m<y0)y0=q.y-m; if(q.x+m>x1)x1=q.x+m; if(q.y+m>y1)y1=q.y+m; } } return {x:x0,y:y0,w:x1-x0,h:y1-y0}; }
+  function distSeg(p,a,b){ const dx=b.x-a.x, dy=b.y-a.y, L=dx*dx+dy*dy; let t=L?((p.x-a.x)*dx+(p.y-a.y)*dy)/L:0; t=Math.max(0,Math.min(1,t)); return Math.hypot(p.x-(a.x+t*dx), p.y-(a.y+t*dy)); }
+  function distStroke(p,s){ const pts=s.pts; if(pts.length===1) return Math.hypot(p.x-pts[0].x,p.y-pts[0].y); let m=1e9; for(let i=1;i<pts.length;i++) m=Math.min(m,distSeg(p,pts[i-1],pts[i])); return m; }
+  function pickStroke(p){ for(let i=strokes.length-1;i>=0;i--){ const s=strokes[i]; if(s.erase) continue; if(distStroke(p,s)<=12+s.size) return i; } return -1; }
+  function strokeInRect(s,x,y,w,h){ for(const q of s.pts){ if(q.x>=x&&q.x<=x+w&&q.y>=y&&q.y<=y+h) return true; } return false; }
+  function insideFloat(p){ return floatStrokes && p.x>=floatBB.x+floatDX && p.x<=floatBB.x+floatDX+floatBB.w && p.y>=floatBB.y+floatDY && p.y<=floatBB.y+floatDY+floatBB.h; }
+  function redrawFloat(){ if(!floatStrokes) return; ctx.putImageData(floatBase,0,0); for(const s of floatStrokes) drawStroke(s,floatDX,floatDY); dashedRect(floatBB.x+floatDX,floatBB.y+floatDY,floatBB.w,floatBB.h); }
+  function liftStrokes(idxs){ idxs.sort((a,b)=>a-b); floatStrokes=idxs.map(i=>strokes[i]); for(let k=idxs.length-1;k>=0;k--) strokes.splice(idxs[k],1); render(); floatBase=getFull(); floatBB=bboxOf(floatStrokes); floatDX=0; floatDY=0; redrawFloat(); }
+  function commitFloat(){ if(!floatStrokes) return; for(const s of floatStrokes){ strokes.push({color:s.color,size:s.size,erase:s.erase,pts:s.pts.map(q=>({x:q.x+floatDX,y:q.y+floatDY,p:q.p}))}); } floatStrokes=null; floatBase=null; floatBB=null; floatDX=0; floatDY=0; render(); }
+  function discardFloat(){ if(!floatStrokes) return; floatStrokes=null; floatBase=null; floatBB=null; floatDX=0; floatDY=0; render(); }  // 선택한 획 삭제(되돌리기 가능)
+  // 지우개: 지나간 경로 근처의 점을 '실제로' 잘라내 획을 분할(영구 삭제 → 이동해도 복원 안 됨)
+  function applyErase(path){ if(!path||!path.length) return; const er=ERS/2; const out=[];
+    for(const s of strokes){ let run=[];
+      for(const q of s.pts){ let hit=false;
+        for(let j=0;j<path.length;j++){ const e=path[j]; if(Math.abs(q.x-e.x)<=er && Math.abs(q.y-e.y)<=er){ hit=true; break; } }
+        if(hit){ if(run.length){ out.push({color:s.color,size:s.size,erase:false,pts:run}); run=[]; } }
+        else run.push(q); }
+      if(run.length) out.push({color:s.color,size:s.size,erase:false,pts:run}); }
+    setLayer(out);
+  }
+
+  /* ── 도형 스냅(draw-and-hold): 한 획을 그리고 손을 뗀 자리에서 ~0.6초 멈추면 깔끔한 도형으로 ── */
+  let snapEnabled=true, holdTimer=null, holdAt=null;
+  const HOLD_MS=600, HOLD_MOVE=5, SNAP_DEG=10;
+  function holdArm(p){ holdAt={x:p.x,y:p.y}; if(holdTimer) clearTimeout(holdTimer); holdTimer=setTimeout(trySnap,HOLD_MS); }
+  function holdTrack(q){ if(!holdAt) return; if(Math.hypot(q.x-holdAt.x,q.y-holdAt.y)>HOLD_MOVE){ holdAt={x:q.x,y:q.y}; if(holdTimer) clearTimeout(holdTimer); holdTimer=setTimeout(trySnap,HOLD_MS); } }
+  function holdCancel(){ if(holdTimer) clearTimeout(holdTimer); holdTimer=null; holdAt=null; }
+  function snapSeg(p,a,b){ const dx=b.x-a.x, dy=b.y-a.y, L=dx*dx+dy*dy; let t=L?((p.x-a.x)*dx+(p.y-a.y)*dy)/L:0; t=Math.max(0,Math.min(1,t)); return Math.hypot(p.x-(a.x+t*dx), p.y-(a.y+t*dy)); }
+  function edgePts(a,b,out){ const d=Math.hypot(b.x-a.x,b.y-a.y), n=Math.max(1,Math.round(d/6)); for(let i=1;i<=n;i++){ const t=i/n; out.push({x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t, p:0.6}); } }
+  function polyPts(v,closed){ const out=[{x:v[0].x,y:v[0].y,p:0.6}]; for(let i=0;i<v.length-1;i++) edgePts(v[i],v[i+1],out); if(closed) edgePts(v[v.length-1],v[0],out); return out; }
+  function ellipsePts(cx,cy,a,b){ const out=[], N=48; for(let i=0;i<=N;i++){ const t=i/N*2*Math.PI; out.push({x:cx+a*Math.cos(t), y:cy+b*Math.sin(t), p:0.6}); } return out; }
+  function resampleClosed(pts,N){ const acc=[0]; for(let i=1;i<pts.length;i++) acc.push(acc[i-1]+Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y)); const L=acc[acc.length-1]; if(L===0) return pts.slice(0,1); const out=[]; let j=0; for(let i=0;i<N;i++){ const tg=L*i/N; while(j<acc.length-1&&acc[j+1]<tg) j++; const k=Math.min(j+1,pts.length-1), seg=acc[j+1]-acc[j]||1, t=(tg-acc[j])/seg; out.push({x:pts[j].x+(pts[k].x-pts[j].x)*t, y:pts[j].y+(pts[k].y-pts[j].y)*t}); } return out; }
+  function rdp(pts,eps){ if(pts.length<3) return pts.slice(); let dm=0, idx=0; const a=pts[0], b=pts[pts.length-1]; for(let i=1;i<pts.length-1;i++){ const d=snapSeg(pts[i],a,b); if(d>dm){ dm=d; idx=i; } } if(dm>eps){ const l=rdp(pts.slice(0,idx+1),eps), r=rdp(pts.slice(idx),eps); return l.slice(0,-1).concat(r); } return [a,b]; }
+  function turnAng(a,c,d){ const v1x=c.x-a.x,v1y=c.y-a.y,v2x=d.x-c.x,v2y=d.y-c.y; return Math.abs(Math.atan2(v1x*v2y-v1y*v2x, v1x*v2x+v1y*v2y)); }
+  function realCorners(v){ const n=v.length, keep=[]; for(let i=0;i<n;i++){ if(turnAng(v[(i-1+n)%n], v[i], v[(i+1)%n])>0.45) keep.push(v[i]); } return keep; }
+  function angDist(a,b){ let d=Math.abs(a-b)%360; return d>180?360-d:d; }
+  function recognizeShape(raw){
+    if(raw.length<8) return null;
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+    for(const q of raw){ if(q.x<mnx)mnx=q.x; if(q.y<mny)mny=q.y; if(q.x>mxx)mxx=q.x; if(q.y>mxy)mxy=q.y; }
+    const w=mxx-mnx, h=mxy-mny, diag=Math.hypot(w,h); if(diag<40) return null;
+    let len=0; for(let i=1;i<raw.length;i++) len+=Math.hypot(raw[i].x-raw[i-1].x, raw[i].y-raw[i-1].y); if(len<40) return null;
+    const s=raw[0], e=raw[raw.length-1], gap=Math.hypot(e.x-s.x, e.y-s.y);
+    if(gap > 0.25*diag){            // 열린 획 → 직선?
+      let dm=0; for(const q of raw){ const d=snapSeg(q,s,e); if(d>dm) dm=d; }
+      if(gap>30 && dm < Math.max(10, 0.08*gap)){
+        let ax=s.x, ay=s.y, bx=e.x, by=e.y;                       // 직선화 + 수평/수직 각도 교정
+        const ang=Math.atan2(by-ay, bx-ax)*180/Math.PI, mx=(ax+bx)/2, my=(ay+by)/2;
+        if(angDist(ang,0)<SNAP_DEG || angDist(ang,180)<SNAP_DEG){ ay=my; by=my; }
+        else if(angDist(ang,90)<SNAP_DEG || angDist(ang,270)<SNAP_DEG){ ax=mx; bx=mx; }
+        const out=[{x:ax,y:ay,p:0.6}]; edgePts({x:ax,y:ay},{x:bx,y:by},out); return out;
+      }
+      return null;
+    }
+    // 닫힌 획 → 삼각형 / 사각형 / 원·타원
+    const cx=(mnx+mxx)/2, cy=(mny+mxy)/2, ra=Math.max(w/2,1), rb=Math.max(h/2,1);
+    let eErr=0; for(const q of raw){ const v=((q.x-cx)/ra)**2+((q.y-cy)/rb)**2; eErr+=Math.abs(v-1); } eErr/=raw.length;
+    const rs=resampleClosed(raw,64);
+    const simp=rdp(rs.concat([{x:rs[0].x,y:rs[0].y}]), 0.045*diag);
+    const cn=realCorners(simp.slice(0,-1)), c=cn.length;
+    const rect=[{x:mnx,y:mny},{x:mxx,y:mny},{x:mxx,y:mxy},{x:mnx,y:mxy}];
+    if(c===3) return polyPts(cn,true);
+    if(c===4 && eErr>0.16) return polyPts(rect,true);
+    if(eErr<0.25) return ellipsePts(cx,cy,ra,rb);
+    if(c===4) return polyPts(rect,true);
+    return null;
+  }
+  /* ── 끊어 그린 도형: 가까이 이어진 여러 획을 한 점구름으로 합쳐 인식 ── */
+  function ptsBox(pts){ let a=1e9,b=1e9,c=-1e9,d=-1e9; for(const q of pts){ if(q.x<a)a=q.x; if(q.y<b)b=q.y; if(q.x>c)c=q.x; if(q.y>d)d=q.y; } return {a:a,b:b,c:c,d:d}; }
+  function boxNear(p,q,g){ return p.a<=q.c+g && q.a<=p.c+g && p.b<=q.d+g && q.b<=p.d+g; }
+  function clusterFrom(seed){
+    const GAP=28, idx=[]; for(let i=0;i<strokes.length;i++){ if(!strokes[i].erase) idx.push(i); }
+    const box={}; for(const i of idx) box[i]=ptsBox(strokes[i].pts);
+    const si=strokes.indexOf(seed); if(si<0) return [];
+    const inSet=new Set([si]); const m={a:box[si].a,b:box[si].b,c:box[si].c,d:box[si].d};
+    let grew=true; while(grew){ grew=false;
+      for(const i of idx){ if(inSet.has(i)) continue;
+        if(boxNear(m,box[i],GAP)){ inSet.add(i); m.a=Math.min(m.a,box[i].a); m.b=Math.min(m.b,box[i].b); m.c=Math.max(m.c,box[i].c); m.d=Math.max(m.d,box[i].d); grew=true; } } }
+    return Array.from(inSet);
+  }
+  function cloudRect(cloud){
+    if(cloud.length<12) return null;
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9; for(const q of cloud){ if(q.x<mnx)mnx=q.x; if(q.y<mny)mny=q.y; if(q.x>mxx)mxx=q.x; if(q.y>mxy)mxy=q.y; }
+    const w=mxx-mnx,h=mxy-mny,diag=Math.hypot(w,h); if(diag<40||w<15||h<15) return null;
+    const tol=Math.max(12,0.12*diag); let maxd=0;
+    const bx0=mnx+0.2*w, bx1=mxx-0.2*w, by0=mny+0.2*h, by1=mxy-0.2*h;   // 각 변의 가운데 구간
+    let cL=0,cR=0,cT=0,cB=0;
+    for(const q of cloud){ const dl=q.x-mnx, dr=mxx-q.x, dt=q.y-mny, db=mxy-q.y; const mn=Math.min(dl,dr,dt,db); if(mn>maxd)maxd=mn;
+      if(dl<tol && q.y>by0 && q.y<by1) cL++;
+      if(dr<tol && q.y>by0 && q.y<by1) cR++;
+      if(dt<tol && q.x>bx0 && q.x<bx1) cT++;
+      if(db<tol && q.x>bx0 && q.x<bx1) cB++; }
+    if(maxd > 0.14*diag) return null;                        // 외곽선이 아니면(속을 채우면) 거부
+    if(cL<2||cR<2||cT<2||cB<2) return null;                  // 네 변의 '가운데'가 모두 채워져야 (ㄱ자 거부)
+    return polyPts([{x:mnx,y:mny},{x:mxx,y:mny},{x:mxx,y:mxy},{x:mnx,y:mxy}],true);
+  }
+  function cloudEllipse(cloud){
+    if(cloud.length<16) return null;
+    let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9; for(const q of cloud){ if(q.x<mnx)mnx=q.x; if(q.y<mny)mny=q.y; if(q.x>mxx)mxx=q.x; if(q.y>mxy)mxy=q.y; }
+    const w=mxx-mnx,h=mxy-mny,diag=Math.hypot(w,h); if(diag<40) return null;
+    const cx=(mnx+mxx)/2,cy=(mny+mxy)/2,ra=Math.max(w/2,1),rb=Math.max(h/2,1);
+    let eErr=0; for(const q of cloud){ const v=((q.x-cx)/ra)**2+((q.y-cy)/rb)**2; eErr+=Math.abs(v-1); } eErr/=cloud.length;
+    return eErr<0.22 ? ellipsePts(cx,cy,ra,rb) : null;
+  }
+  function trySnap(){
+    holdTimer=null;
+    if(!snapEnabled || !drawing || !curStroke) return;
+    const single=recognizeShape(curStroke.pts);
+    if(single){ curStroke.pts=single; curStroke.snapped=true; drawing=false; curStroke=null; ctx.globalCompositeOperation='source-over'; render(); return; }
+    const idxs=clusterFrom(curStroke);                      // 한 획으로 안 되면 이어진 획들을 합쳐 본다
+    if(idxs.length>=2){
+      const cloud=[]; for(const i of idxs) for(const q of strokes[i].pts) cloud.push(q);
+      const multi=cloudEllipse(cloud)||cloudRect(cloud);
+      if(multi){ const col=curStroke.color, sz=curStroke.size; idxs.sort(function(a,b){return a-b;});
+        for(let k=idxs.length-1;k>=0;k--) strokes.splice(idxs[k],1);
+        strokes.push({color:col,size:sz,erase:false,pts:multi,snapped:true});
+        drawing=false; curStroke=null; ctx.globalCompositeOperation='source-over'; render(); return; }
+    }
+  }
+
+  pad.addEventListener('pointerdown',e=>{
+    if(e.button!==undefined && e.button>0) return;
+    pad.setPointerCapture(e.pointerId); const p=pos(e);
+    if(floatStrokes){ if(insideFloat(p)){ movingFloat=true; grab={x:p.x-floatDX,y:p.y-floatDY}; pad.style.cursor='grabbing'; return; } commitFloat(); }
+    if(moveMode){ const i=pickStroke(p); if(i<0) return; snapshot(); liftStrokes([i]); movingFloat=true; grab={x:p.x-floatDX,y:p.y-floatDY}; pad.style.cursor='grabbing'; return; }
+    if(selMode){ selecting=true; selStart=p; selBase=getFull(); return; }
+    snapshot();
+    if(erasing){ eraseGesture=true; erasePath=[{x:p.x,y:p.y}]; last=p;
+      ctx.globalCompositeOperation='destination-out'; ctx.fillStyle='#000';
+      ctx.fillRect(p.x-ERS/2, p.y-ERS/2, ERS, ERS);
+      ctx.globalCompositeOperation='source-over'; return; }
+    drawing=true; last=p;
+    curStroke={color:color,size:size,erase:false,pts:[{x:p.x,y:p.y,p:p.p}]}; strokes.push(curStroke);
+    drawStroke(curStroke,0,0); holdArm(p);
+  },{passive:false});
+  pad.addEventListener('pointermove',e=>{
+    const p=pos(e);
+    if(movingFloat){ e.preventDefault(); floatDX=p.x-grab.x; floatDY=p.y-grab.y; redrawFloat(); return; }
+    if(selecting){ e.preventDefault(); ctx.putImageData(selBase,0,0); dashedRect(Math.min(selStart.x,p.x),Math.min(selStart.y,p.y),Math.abs(p.x-selStart.x),Math.abs(p.y-selStart.y)); return; }
+    if(eraseGesture){ e.preventDefault(); const evs2=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+      ctx.globalCompositeOperation='destination-out'; ctx.fillStyle='#000';
+      for(const ev of evs2){ const q=pos(ev); erasePath.push({x:q.x,y:q.y});
+        const dx=q.x-last.x, dy=q.y-last.y, steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/12));
+        for(let i=1;i<=steps;i++){ const t=i/steps; ctx.fillRect(last.x+dx*t-ERS/2, last.y+dy*t-ERS/2, ERS, ERS); }
+        last=q; }
+      ctx.globalCompositeOperation='source-over'; return; }
+    if(!drawing) return; e.preventDefault();
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for(const ev of evs){ const q=pos(ev); curStroke.pts.push({x:q.x,y:q.y,p:q.p});
+      ctx.strokeStyle=color; ctx.lineWidth = lineW(q.p);
+      ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(q.x,q.y); ctx.stroke(); last=q; }
+    holdTrack(last);
+  },{passive:false});
+  pad.addEventListener('pointerup',e=>{
+    holdCancel();
+    if(eraseGesture){ eraseGesture=false; applyErase(erasePath); erasePath=null; render(); return; }
+    if(movingFloat){ movingFloat=false; pad.style.cursor=moveMode?'grab':'crosshair'; return; }
+    if(selecting){ selecting=false; const p=pos(e); ctx.putImageData(selBase,0,0); selBase=null;
+      const x=Math.min(selStart.x,p.x), y=Math.min(selStart.y,p.y), w=Math.abs(p.x-selStart.x), h=Math.abs(p.y-selStart.y);
+      if(w<6||h<6){ render(); return; }
+      const idxs=[]; for(let i=0;i<strokes.length;i++){ if(!strokes[i].erase && strokeInRect(strokes[i],x,y,w,h)) idxs.push(i); }
+      if(idxs.length){ snapshot(); liftStrokes(idxs); } else render();
+      return; }
+    if(drawing){ drawing=false; curStroke=null; ctx.globalCompositeOperation='source-over'; }
+  });
+  function endStroke(){
+    holdCancel();
+    if(eraseGesture){ eraseGesture=false; applyErase(erasePath); erasePath=null; render(); return; }
+    if(movingFloat){ movingFloat=false; pad.style.cursor=moveMode?'grab':'crosshair'; return; }
+    if(selecting){ selecting=false; if(selBase){ctx.putImageData(selBase,0,0);selBase=null;} render(); return; }
+    if(drawing){ drawing=false; curStroke=null; ctx.globalCompositeOperation='source-over'; }
+  }
+  pad.addEventListener('pointercancel',endStroke);
+  pad.addEventListener('pointerleave',endStroke);
+
+  const selBtn=document.getElementById('selBtn');
+  const moveBtn=document.getElementById('moveBtn');
+  function clearModes(){ selMode=false; moveMode=false; selBtn.classList.remove('on'); moveBtn.classList.remove('on'); pad.style.cursor='crosshair'; }
+  document.querySelectorAll('.swatch').forEach(s=>s.addEventListener('click',()=>{
+    commitFloat(); clearModes();
+    document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('sel'));
+    s.classList.add('sel'); color=s.dataset.c; setEraser(false);
+  }));
+  document.querySelectorAll('.sz').forEach(s=>s.addEventListener('click',()=>{
+    document.querySelectorAll('.sz').forEach(x=>x.classList.remove('sel'));
+    s.classList.add('sel'); size=+s.dataset.s;
+  }));
+  const eraserBtn=document.getElementById('eraser');
+  function setEraser(on){ erasing=on; eraserBtn.classList.toggle('on',on); if(on){ commitFloat(); clearModes(); } pad.style.cursor = on ? ERASER_CURSOR : 'crosshair'; }
+  eraserBtn.addEventListener('click',()=>{ if(floatStrokes){ discardFloat(); return; } setEraser(!erasing); });  // 선택된 게 떠 있으면 삭제, 아니면 지우개 토글
+  selBtn.addEventListener('click',()=>{ commitFloat();
+    if(selMode){ clearModes(); } else { setEraser(false); clearModes(); selMode=true; selBtn.classList.add('on'); } });
+  moveBtn.addEventListener('click',()=>{ commitFloat();
+    if(moveMode){ clearModes(); } else { setEraser(false); clearModes(); moveMode=true; moveBtn.classList.add('on'); pad.style.cursor='grab'; } });
+  function doClear(){ commitFloat(); snapshot(); setLayer([]); render(); }
+  function doUndo(){ commitFloat(); if(!undoStack.length) return; setLayer(undoStack.pop()); render(); }
+  document.getElementById('clear').addEventListener('click',doClear);
+  document.getElementById('undo').addEventListener('click',doUndo);
+
+  // 판서모드(칠판)
+  let boardMode=false;
+  const boardEl=document.getElementById('board'); const boardBtn=document.getElementById('boardBtn');
+  function setNavVisible(v){const d=v?'':'none'; dots.style.display=v?'flex':'none';
+    idxEl.style.display=d; document.getElementById('prev').style.display=d; document.getElementById('next').style.display=d;}
+  function toggleBoard(){
+    commitFloat();
+    if(!boardMode){
+      boardMode=true; boardBtn.classList.add('on');
+      boardEl.classList.add('show'); setNavVisible(false); undoStack.length=0;
+      strokes=boardStrokes; render();
+    } else {
+      boardMode=false; boardBtn.classList.remove('on');
+      boardEl.classList.remove('show'); setNavVisible(true); undoStack.length=0;
+      strokes=slideStrokes[cur]; render();
+    }
+  }
+  boardBtn.addEventListener('click',toggleBoard);
+
+  // 모눈종이 격자 토글 (판서모드 위에 표시)
+  const gridBtn=document.getElementById('gridBtn'); let gridOn=false;
+  function toggleGrid(){ gridOn=!gridOn; boardEl.classList.toggle('grid',gridOn); gridBtn.classList.toggle('on',gridOn); }
+  gridBtn.addEventListener('click',toggleGrid);
+
+  function go(n){
+    commitFloat();
+    if(boardMode||n<0||n>=total||n===cur) return;
+    steps[cur].classList.remove('active'); dotEls[cur].classList.remove('on');
+    cur=n;
+    steps[cur].classList.add('active'); dotEls[cur].classList.add('on');
+    idxEl.textContent=(cur+1)+' / '+total; undoStack.length=0;
+    strokes=slideStrokes[cur]; render();
+  }
+  document.getElementById('prev').addEventListener('click',()=>go(cur-1));
+  document.getElementById('next').addEventListener('click',()=>go(cur+1));
+  // 도형 스냅 토글 버튼
+  const snapBtn=document.getElementById('snapBtn');
+  snapBtn.addEventListener('click',()=>{ snapEnabled=!snapEnabled; snapBtn.classList.toggle('on',snapEnabled); });
+  // 전체화면 토글 (⛶) — 태블릿은 F11이 안 되고 사용자 탭에서만 허용되므로 작은 버튼에만 건다
+  const fsBtn=document.getElementById('fsBtn');
+  function toggleFs(){ const d=document.documentElement;
+    if(!document.fullscreenElement && !document.webkitFullscreenElement){
+      (d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d);
+    } else {
+      (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);
+    } }
+  fsBtn.addEventListener('click',toggleFs);
+
+  addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown') go(cur+1);
+    else if(e.key==='ArrowLeft'||e.key==='PageUp') go(cur-1);
+    else if(e.key==='b') toggleBoard();
+    else if(e.key==='g') toggleGrid();
+    else if(e.key==='e') setEraser(!erasing);
+    else if(e.key==='c'){doClear();}
+    else if(e.key==='Escape'){commitFloat();}
+    else if(e.key==='s'){ snapEnabled=!snapEnabled; snapBtn.classList.toggle('on',snapEnabled); }
+    else if(e.key==='f'){ toggleFs(); }
+    else if(e.key==='Delete'||e.key==='Backspace'){ discardFloat(); }
+    else if((e.ctrlKey||e.metaKey)&&e.key==='z'){doUndo();}
+  });
+})();
+</script>
+</body>
+</html>
+<!-- panseo-slide board engine · end -->
+

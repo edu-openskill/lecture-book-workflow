@@ -224,7 +224,7 @@
   #align(center)[
     #line(length: 40%, stroke: 2pt + rgb("#2563eb"))
     #v(24pt)
-    #text(42pt, weight: "bold", fill: rgb("#1e40af"), tracking: 2pt)[#book-title]
+    #text(32pt, weight: "bold", fill: rgb("#1e40af"), tracking: 1pt)[#book-title]
     #v(16pt)
     #line(length: 60%, stroke: 0.5pt + rgb("#93c5fd"))
     #v(16pt)

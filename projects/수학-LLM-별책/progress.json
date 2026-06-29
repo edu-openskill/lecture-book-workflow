@@ -1,11 +1,11 @@
 {
   "project": "수학-LLM-별책",
-  "title": "수학·LLM 별책 (가제)",
+  "title": "AI를 위한 가장 쉬운 수학",
   "track": "concept",
-  "status": "in_progress",
-  "current_step": "step_5_chapters",
+  "status": "done",
+  "current_step": "step_7_finish",
   "created_at": "2026-06-24",
-  "updated_at": "2026-06-29",
+  "updated_at": "2026-06-29 (STEP 6·7 완료 — 프롤로그·로드맵·서문·맺음말·부록, 전체 160p. 최종 제목만 저자 확정 대기)",
   "steps": {
     "step_1_seed": {
       "name": "씨앗",
@@ -60,7 +60,7 @@
     },
     "step_5_chapters": {
       "name": "챕터 집필",
-      "status": "in_progress",
+      "status": "done",
       "chapters": [
         {
           "id": "CH01",
@@ -187,32 +187,218 @@
             "audit": "pass"
           },
           "questions_pending": 0
+        },
+        {
+          "id": "CH10",
+          "title": "그림자와 회전 : 삼각함수 + 복소평면",
+          "version": "v0.10",
+          "status": "done",
+          "artifact": "chapters/10-그림자와회전.md",
+          "pdf": "book/chapters-pdf/10-그림자와회전.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH11",
+          "title": "손전등 그림자 : 벡터·내적·정사영·코사인 유사도",
+          "version": "v0.11",
+          "status": "done",
+          "artifact": "chapters/11-손전등그림자.md",
+          "pdf": "book/chapters-pdf/11-손전등그림자.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "COL1",
+          "title": "칼럼① 다섯 거물의 단체 사진 : 오일러 항등식",
+          "version": "v0.11.5",
+          "status": "done",
+          "type": "column",
+          "artifact": "chapters/11.5-칼럼1-오일러항등식.md",
+          "pdf": "book/chapters-pdf/11.5-칼럼1-오일러항등식.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH12",
+          "title": "종 모양의 뜻 : 확률·정규분포",
+          "version": "v0.12",
+          "status": "done",
+          "artifact": "chapters/12-종모양의뜻.md",
+          "pdf": "book/chapters-pdf/12-종모양의뜻.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH13",
+          "title": "흩어진 정도 : 평균·분산·표준편차·자유도",
+          "version": "v0.13",
+          "status": "done",
+          "artifact": "chapters/13-흩어진정도.md",
+          "pdf": "book/chapters-pdf/13-흩어진정도.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH14",
+          "title": "함께 움직이나 : 공분산·상관",
+          "version": "v0.14",
+          "status": "done",
+          "artifact": "chapters/14-함께움직이나.md",
+          "pdf": "book/chapters-pdf/14-함께움직이나.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH15",
+          "title": "얼마나 틀렸나 : MSE",
+          "version": "v0.15",
+          "status": "done",
+          "artifact": "chapters/15-얼마나틀렸나.md",
+          "pdf": "book/chapters-pdf/15-얼마나틀렸나.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "COL2",
+          "title": "칼럼② 외운 것 vs 이해한 것 : 과적합·과소적합",
+          "version": "v0.15.5",
+          "status": "done",
+          "type": "column",
+          "artifact": "chapters/15.5-칼럼2-과적합과소적합.md",
+          "pdf": "book/chapters-pdf/15.5-칼럼2-과적합과소적합.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH16",
+          "title": "뉴런 하나 : 선형결합 y=wx+b",
+          "version": "v0.16",
+          "status": "done",
+          "artifact": "chapters/16-뉴런하나.md",
+          "pdf": "book/chapters-pdf/16-뉴런하나.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH17",
+          "title": "직선을 곡선으로 : 활성화함수",
+          "version": "v0.17",
+          "status": "done",
+          "artifact": "chapters/17-직선을곡선으로.md",
+          "pdf": "book/chapters-pdf/17-직선을곡선으로.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH18",
+          "title": "층층이 쌓고 흘리기 : 층 구조와 순전파",
+          "version": "v0.18",
+          "status": "done",
+          "artifact": "chapters/18-층층이쌓고흘리기.md",
+          "pdf": "book/chapters-pdf/18-층층이쌓고흘리기.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH19",
+          "title": "오차를 거슬러 : 역전파",
+          "version": "v0.19",
+          "status": "done",
+          "artifact": "chapters/19-오차를거슬러.md",
+          "pdf": "book/chapters-pdf/19-오차를거슬러.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH20",
+          "title": "전학생 한 명에 모두의 관계 : 어텐션·트랜스포머",
+          "version": "v0.20",
+          "status": "done",
+          "artifact": "chapters/20-전학생한명에모두의관계.md",
+          "pdf": "book/chapters-pdf/20-전학생한명에모두의관계.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
         }
       ]
     },
     "step_6_prologue": {
       "name": "프롤로그+로드맵",
-      "status": "pending",
+      "status": "done",
       "artifacts": {
-        "prologue": null,
-        "roadmap": null
+        "prologue": "book/front/prologue.md",
+        "roadmap": "book/front/roadmap.md"
       },
       "review": {
-        "audit": null
+        "audit": "pass"
       }
     },
     "step_7_finish": {
       "name": "마무리",
-      "status": "pending",
+      "status": "done",
       "artifacts": {
-        "preface": null,
-        "afterword": null,
-        "appendix": null
+        "preface": "book/front/preface.md",
+        "afterword": "book/back/afterword.md",
+        "appendix": "book/back/appendix.md"
       },
-      "final_title": null,
-      "total_pages": null,
+      "final_title": "AI를 위한 가장 쉬운 수학",
+      "final_subtitle": "GPT의 속살을 여는 한 문장, 직접 풀어보기",
+      "total_pages": 160,
+      "full_pdf": "book/수학-LLM-별책-sample.pdf",
       "review": {
-        "audit": null
+        "audit": "pass"
       }
     }
   },

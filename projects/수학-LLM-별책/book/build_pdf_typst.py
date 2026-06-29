@@ -32,6 +32,20 @@ CHAPTERS = [
     CHAPTERS_DIR / "06-자기자신을미분하는수.md",
     CHAPTERS_DIR / "07-톱니바퀴연쇄.md",
     CHAPTERS_DIR / "08-안개산에서내려가기.md",
+    CHAPTERS_DIR / "09-한번에섞는믹서.md",
+    CHAPTERS_DIR / "10-그림자와회전.md",
+    CHAPTERS_DIR / "11-손전등그림자.md",
+    CHAPTERS_DIR / "11.5-칼럼1-오일러항등식.md",
+    CHAPTERS_DIR / "12-종모양의뜻.md",
+    CHAPTERS_DIR / "13-흩어진정도.md",
+    CHAPTERS_DIR / "14-함께움직이나.md",
+    CHAPTERS_DIR / "15-얼마나틀렸나.md",
+    CHAPTERS_DIR / "15.5-칼럼2-과적합과소적합.md",
+    CHAPTERS_DIR / "16-뉴런하나.md",
+    CHAPTERS_DIR / "17-직선을곡선으로.md",
+    CHAPTERS_DIR / "18-층층이쌓고흘리기.md",
+    CHAPTERS_DIR / "19-오차를거슬러.md",
+    CHAPTERS_DIR / "20-전학생한명에모두의관계.md",
 ]
 
 
@@ -49,9 +63,25 @@ def base_config() -> dict:
     }
 
 
+FRONT_DIR = PROJECT / "book" / "front"
+BACK_DIR = PROJECT / "book" / "back"
+
+FRONT = [
+    FRONT_DIR / "preface.md",
+    FRONT_DIR / "prologue.md",
+    FRONT_DIR / "roadmap.md",
+]
+BACK = [
+    BACK_DIR / "afterword.md",
+    BACK_DIR / "appendix.md",
+]
+
+
 def build_full() -> None:
     cfg = base_config()
     cfg["chapters"] = CHAPTERS
+    cfg["front"] = [p for p in FRONT if p.exists()]
+    cfg["back"] = [p for p in BACK if p.exists()]
     cfg["output_md"] = BUILD / "통합.md"
     cfg["output_typ"] = BUILD / "수학-LLM-별책.typ"
     cfg["output_pdf"] = PROJECT / "book" / "수학-LLM-별책-sample.pdf"
