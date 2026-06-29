@@ -5,7 +5,7 @@
   "status": "in_progress",
   "current_step": "step_5_chapters",
   "created_at": "2026-06-24",
-  "updated_at": "2026-06-28",
+  "updated_at": "2026-06-29",
   "steps": {
     "step_1_seed": {
       "name": "씨앗",
@@ -47,10 +47,11 @@
     "step_4_outline": {
       "name": "뼈대(개념: 목차 확정·갭 분석)",
       "status": "done",
-      "artifact": "planning/outline-v2.md",
-      "artifact_version": 2,
+      "artifact": "planning/outline-v3.md",
+      "artifact_version": 3,
       "gap_analysis": "done (크로스엔트로피·전치 흡수 / 코사인 정식포함 / PCA 제거-이연 / 베이즈·텐서 생략)",
       "v2_changes": "PCA 제거(→향후 ML/DL 책), 삼각·복소 기하블록 이동(옛CH4→CH10), Part1 재번호+Part2 선수참조 갱신. discussion: docs/discussions/2026-06-25-part1-순서검증-pca.md",
+      "v3_changes": "Ch.8↔Ch.19 경계 재설정 — 추상 갱신식 θ←θ−η∇L(③)·∇ 기호 8·9강 삭제. 8강=토이 1변수 경사하강(3·4단계)+다변수 비유만, 맛보기 worked example→비유 축소. 손실미분·wb갱신·∂·반복=19강 첫 정식 전개. deep-talk 2026-06-29. 챕터 번호 변동 없음.",
       "review": {
         "insight": "pass",
         "audit": "pass"
