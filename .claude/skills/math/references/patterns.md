@@ -17,3 +17,4 @@
 - 벡터 `\vec{v}`, 내적 `\vec{a}\cdot\vec{b}`, 행렬 `\begin{pmatrix}...\end{pmatrix}`
 - 그리스 `\theta, \pi, \sigma, \mu, \lambda`
 > `\begin{align}`/`\xrightarrow`는 Pandoc 변환에서 깨질 수 있음 → 가급적 단순 표기. (S2 후처리 보정 있음)
+> **수동 간격 금지**: `\!`(음수 간격)·`\,`·`\;` 같은 간격 조정은 쓰지 않는다. 특히 `\log_a\!\left(\frac{...}{...}\right)`처럼 아래첨자 뒤 `\!` + 키 큰 분수/괄호가 오면 첨자와 분수가 **겹친다**. 간격은 Typst 기본값에 맡기고 `\log_a\left(\frac{x}{y}\right)`로 쓴다.

@@ -132,7 +132,8 @@ HTTP는 원래 기억력이 없거든요.
 
 ## 이미지 · 스크린샷 규칙
 
-- **이미지는 플레이스홀더**: 집필 시 `[IMAGE PROMPT]`(개념도, Codex/GPT CLI 생성) / `[CAPTURE NEEDED]`(실습 캡처). **형식은 반드시 visual 스킬 `references/image.md`의 블록 형식**(`<!-- [IMAGE PROMPT: id]` + `path:` + `-->` + `![](../assets/...)`)을 따른다 — 맨 `[IMAGE PROMPT]` 한 줄만 쓰면 `image_gen.py`가 감지하지 못한다. 실제 이미지는 집필 완료 후 `이미지 생성` 명령.
+- **이미지는 플레이스홀더 3종**: 집필 시 `[IMAGE PROMPT]`(비유·정성 개념, Codex/GPT 생성) / `[PLOT SCRIPT]`(정확한 수식·좌표 그래프, matplotlib 실행) / `[CAPTURE NEEDED]`(실습 캡처). **형식은 반드시 visual 스킬 `references/image.md`의 블록 형식**을 따른다 — 맨 한 줄만 쓰면 러너가 감지하지 못한다. 실제 이미지는 집필 완료 후 `이미지 생성` 명령.
+- ⚖️ **그래프는 검산되면 `[PLOT SCRIPT]`(matplotlib), 아니면 `[IMAGE PROMPT]`(생성형)**: 축·좌표·수식·명명된 점이 있어 **독자가 검산할 수 있는 그림**(함수 곡선, 곡선 위의 점·화살표, 등고선)은 `[PLOT SCRIPT]`로 그린다. 생성형은 곡선 연속성·점 위치를 **원리적으로 보장 못 함**(프롬프트로 못 고침 — Ch.8 ex1이 깨진 이유). 정성 라벨뿐인 스케치·순수 비유 삽화만 `[IMAGE PROMPT]`. 기준표: `visual/references/image.md` §0.
 - **스크린샷과 코드 블록 중복 금지**: 스크린샷 확보 시 동일 내용의 출력 코드 블록 제거.
 - **기술은 저자가 결정**: AI가 제안, 저자가 최종 결정.
 

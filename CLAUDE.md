@@ -161,9 +161,12 @@ Phase 5 ── 완성
 - 산출물: `book/front/preface.md`, `book/back/afterword.md`, `book/back/appendix.md`
 
 ### `이미지 생성`
-- 완성 챕터의 `[IMAGE PROMPT]`(레거시 `[GEMINI PROMPT]`도 인식) 플레이스홀더를 Codex(GPT) CLI로 생성·교체한다.
-- `image-gen` 스킬 로드. 코드·개념 트랙 공용.
-- 실행: `python .claude/skills/image-gen/scripts/image_gen.py <챕터.md> <프로젝트루트>`
+- 완성 챕터의 이미지 플레이스홀더를 두 갈래로 생성·교체한다. `image-gen` 스킬 로드. 코드·개념 트랙 공용.
+  - **생성형** — `[IMAGE PROMPT]`(레거시 `[GEMINI PROMPT]`도 인식): 비유·정성 개념 이미지를 Codex(GPT) CLI로 생성.
+    `python .claude/skills/image-gen/scripts/image_gen.py <챕터.md> <프로젝트루트>`
+  - **결정론** — `[PLOT SCRIPT]`: 정확한 수식·좌표 그래프(함수 곡선, 곡선 위의 점·화살표, 등고선)를 matplotlib 코드 실행으로 생성. 생성형은 곡선 연속성·점 위치를 보장 못 하므로(Ch.8 ex1 사례), 검산되는 그림은 반드시 이 갈래.
+    `python .claude/skills/image-gen/scripts/plot_gen.py <챕터.md> <프로젝트루트>`
+- 어느 갈래로 보낼지 판정 기준: `visual/references/image.md` §0(검산 기준). 두 종류가 섞이면 두 스크립트를 모두 돌린다.
 
 ### `현재 상태`
 - `progress.json`을 읽어서 아래 형식으로 출력한다:
@@ -255,6 +258,21 @@ projects/[책이름]/
 planning/seed-v1.md → planning/seed-v2.md → ...
 ```
 
+#### ★ 산출물 자동 동기화 (저자가 시키지 않아도 — 트리거 규칙)
+
+기획 산출물(목차/세부목차 = `outline-vN.md`, `seed`, `scenario`, `code/concept/lecture-analysis`, `chapter-map`, `known.md`)은 **세부목차 위치의 단일 진실 소스(SSOT)**다. 대화 도중 이 SSOT를 바꾸는 결정이 나오면, **저자가 "갱신하라"고 말하지 않아도** AI가 그 자리에서 즉시 반영한다(되묻지 않는다). 이것이 누락되면 다음 세션이 옛 목차를 읽어 어긋난다.
+
+**트리거 — 아래가 대화에서 확정되는 순간:**
+- 목차/챕터 배치/순서/번호가 바뀜 → **`outline-vN+1.md` 새로 생성**(구버전 보존, 덮어쓰기 금지).
+- 어느 챕터에 무엇을 넣고/빼고/미루기로 함(예: "Ch.8 맛보기, 정식은 Ch.19") → 해당 강 항목에 **★집필 지침 줄**을 새 `outline`에 박고, `known.md`(독자 지식·선수/미래당김)도 갱신.
+- 선수 지식·단계 설계가 바뀜 → `known.md` 갱신.
+- 위 변화가 생기면 `progress.json`의 `artifact`/`artifact_version`도 새 버전으로 올린다.
+
+**참조 무결성 — "여기서 쓴다"고 적으면 대상도 같이 챙긴다:**
+- "이 자료를 X강에서 쓴다"는 결정을 적을 땐, 그 **원본을 프로젝트 안으로 복사**해 영구 보존하고(예: `planning/refs/…`), `outline`·`known.md` 양쪽이 그 **프로젝트 내부 경로**를 가리키게 한다. 외부 임시 경로(스크린샷 폴더 등)에만 두지 않는다 — 사라지면 참조가 깨진다.
+
+**한 결정 = 한 동기화 묶음**: 본문(`chapters/`)만 고치고 `outline`/`known.md`를 안 건드리는 일이 없게, 결정 직후 *같은 턴 안에서* (1) outline 새 버전 → (2) known.md → (3) progress.json 을 한 묶음으로 갱신하고 무엇을 갱신했는지 한 줄로 보고한다. (단순 문장 다듬기·오타 등 SSOT를 안 바꾸는 편집은 트리거 아님 — 버전을 남발하지 않는다.)
+
 ### progress.json — 상태 관리
 
 세션이 끊기거나 다시 시작할 때 현재 상태를 복구하는 파일.
@@ -299,11 +317,12 @@ planning/seed-v1.md → planning/seed-v2.md → ...
 
 | 상수 | 값 |
 |------|-----|
-| 포맷 | 짧은 쿡북 (100p 권장, 초과 허용) |
+| 포맷 | 쿡북 (150p 권장, 초과 허용) |
 | 스타일 | 스토리텔링 |
 | 톤 | 대화체 |
 | 언어 수준 | 쉽게 (비유 필수) |
 | 비유 길이 | 제한 없음 |
+| 이미지 | **필요한 곳마다** 넣는다 — 새 비유가 나오는 곳, 핵심 개념·직관이 필요한 수식/그래프. **정해진 장수를 채우지 말 것**(쿼터 아님): 글로 충분하면 생략, 도움이 되면 충분히. 원래 경계는 "그림이 너무 적어 글만 이어지는 것"을 피하는 데 있다. 이야기 파트는 코드만 금지, 그림은 권장. |
 
 ### 구조 상수
 

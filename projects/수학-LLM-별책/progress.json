@@ -5,7 +5,7 @@
   "status": "in_progress",
   "current_step": "step_5_chapters",
   "created_at": "2026-06-24",
-  "updated_at": "2026-06-25",
+  "updated_at": "2026-06-28",
   "steps": {
     "step_1_seed": {
       "name": "씨앗",
@@ -67,6 +67,105 @@
           "version": "v0.1",
           "status": "done",
           "artifact": "chapters/01-가장낮은점하나.md",
+          "pdf": "book/chapters-pdf/01-가장낮은점하나.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH02",
+          "title": "접으면 두 배 : 지수와 제곱근",
+          "version": "v0.2",
+          "status": "done",
+          "artifact": "chapters/02-접으면두배.md",
+          "pdf": "book/chapters-pdf/02-접으면두배.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH03",
+          "title": "지수의 거울 : 로그",
+          "version": "v0.3",
+          "status": "done",
+          "artifact": "chapters/03-지수의거울.md",
+          "pdf": "book/chapters-pdf/03-지수의거울.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH04",
+          "title": "언덕의 경사 : 함수·극한·기울기",
+          "version": "v0.4",
+          "status": "done",
+          "artifact": "chapters/04-언덕의경사.md",
+          "pdf": "book/chapters-pdf/04-언덕의경사.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH05",
+          "title": "골짜기 바닥 찾기 : 미분",
+          "version": "v0.5",
+          "status": "done",
+          "artifact": "chapters/05-골짜기바닥찾기.md",
+          "pdf": "book/chapters-pdf/05-골짜기바닥찾기.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH06",
+          "title": "자기 자신을 미분하는 수 : e와 ln",
+          "version": "v0.6",
+          "status": "done",
+          "artifact": "chapters/06-자기자신을미분하는수.md",
+          "pdf": "book/chapters-pdf/06-자기자신을미분하는수.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH07",
+          "title": "톱니바퀴 연쇄 : 체인룰",
+          "version": "v0.7",
+          "status": "done",
+          "artifact": "chapters/07-톱니바퀴연쇄.md",
+          "pdf": "book/chapters-pdf/07-톱니바퀴연쇄.pdf",
+          "review": {
+            "insight": "pass",
+            "intent_watch": "pass",
+            "audit": "pass"
+          },
+          "questions_pending": 0
+        },
+        {
+          "id": "CH08",
+          "title": "안개 산에서 내려가기 : 경사하강법",
+          "version": "v0.8",
+          "status": "done",
+          "artifact": "chapters/08-안개산에서내려가기.md",
+          "pdf": "book/chapters-pdf/08-안개산에서내려가기.pdf",
           "review": {
             "insight": "pass",
             "intent_watch": "pass",
